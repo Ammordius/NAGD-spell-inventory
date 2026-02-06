@@ -79,12 +79,19 @@ jobs:
         echo "File preview (first 5 lines):"
         head -5 spell_inventory.html
     
+    - name: Prepare for deployment
+      run: |
+        # Create a clean directory with just the HTML file
+        mkdir -p deploy
+        cp spell_inventory.html deploy/index.html
+        echo "✓ Prepared HTML as index.html for GitHub Pages"
+    
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: .
+        publish_dir: ./deploy
         publish_branch: gh-pages
         keep_files: false
         user_name: 'github-actions[bot]'
