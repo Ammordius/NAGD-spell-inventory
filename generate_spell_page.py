@@ -405,6 +405,86 @@ def generate_html(char_ids, inventories, spell_info):
         if spell_info[spell_id]['npcs']:
             all_classes.add(spell_info[spell_id]['npcs'][0]['class'])
     
+    # Calculate status counts per class and item type
+    class_status = defaultdict(lambda: {
+        'Ethereal Parchment': {'total': 0, 'found': 0},
+        'Spectral Parchment': {'total': 0, 'found': 0},
+        'Glyphed Rune Word': {'total': 0, 'found': 0}
+    })
+    
+    for spell_id in pok_spell_ids:
+        spell_data = spell_info[spell_id]
+        if spell_data['npcs']:
+            npc_info = spell_data['npcs'][0]
+            class_name = npc_info['class']
+            item_name = npc_info['item_name']
+            is_found = bool(spell_to_chars.get(spell_id, []))
+            
+            class_status[class_name][item_name]['total'] += 1
+            if is_found:
+                class_status[class_name][item_name]['found'] += 1
+    
+    # Add status indicator section
+    html += """
+        <div style="background-color: #fff3cd; padding: 20px; border-radius: 5px; margin: 20px 0; border: 2px solid #ffc107;">
+            <h2 style="margin-top: 0; color: #f57c00;">Collection Status by Class</h2>
+            <p style="margin-bottom: 15px;">Use this to see which spells are missing and help complete the collection!</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+"""
+    
+    for class_name in sorted(all_classes):
+        status = class_status[class_name]
+        ep_total = status['Ethereal Parchment']['total']
+        ep_found = status['Ethereal Parchment']['found']
+        ep_missing = ep_total - ep_found
+        ep_pct = int((ep_found / ep_total * 100)) if ep_total > 0 else 0
+        
+        sp_total = status['Spectral Parchment']['total']
+        sp_found = status['Spectral Parchment']['found']
+        sp_missing = sp_total - sp_found
+        sp_pct = int((sp_found / sp_total * 100)) if sp_total > 0 else 0
+        
+        rune_total = status['Glyphed Rune Word']['total']
+        rune_found = status['Glyphed Rune Word']['found']
+        rune_missing = rune_total - rune_found
+        rune_pct = int((rune_found / rune_total * 100)) if rune_total > 0 else 0
+        
+        class_anchor = class_name.lower().replace(' ', '-')
+        html += f"""
+                <div style="background-color: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+                    <h3 style="margin-top: 0; color: #1976D2;"><a href="#class-{class_anchor}" style="color: #1976D2; text-decoration: none;">{class_name}</a></h3>
+                    <div style="margin: 10px 0;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">Ethereal Parchment (EP):</div>
+                        <div style="background-color: #f0f0f0; border-radius: 3px; padding: 5px; margin-bottom: 5px;">
+                            <div style="background-color: {'#4CAF50' if ep_found == ep_total else '#ff9800' if ep_found > 0 else '#f44336'}; height: 20px; width: {ep_pct}%; border-radius: 3px; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="font-size: 0.9em; color: #666;">{ep_found}/{ep_total} found ({ep_pct}%) - <strong style="color: {'#4CAF50' if ep_missing == 0 else '#f44336'}">{ep_missing} missing</strong></div>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">Spectral Parchment (SP):</div>
+                        <div style="background-color: #f0f0f0; border-radius: 3px; padding: 5px; margin-bottom: 5px;">
+                            <div style="background-color: {'#4CAF50' if sp_found == sp_total else '#ff9800' if sp_found > 0 else '#f44336'}; height: 20px; width: {sp_pct}%; border-radius: 3px; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="font-size: 0.9em; color: #666;">{sp_found}/{sp_total} found ({sp_pct}%) - <strong style="color: {'#4CAF50' if sp_missing == 0 else '#f44336'}">{sp_missing} missing</strong></div>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <div style="font-weight: bold; margin-bottom: 5px;">Glyphed Rune Word (Rune):</div>
+                        <div style="background-color: #f0f0f0; border-radius: 3px; padding: 5px; margin-bottom: 5px;">
+                            <div style="background-color: {'#4CAF50' if rune_found == rune_total else '#ff9800' if rune_found > 0 else '#f44336'}; height: 20px; width: {rune_pct}%; border-radius: 3px; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="font-size: 0.9em; color: #666;">{rune_found}/{rune_total} found ({rune_pct}%) - <strong style="color: {'#4CAF50' if rune_missing == 0 else '#f44336'}">{rune_missing} missing</strong></div>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd; font-weight: bold; color: #333;">
+                        Total: {ep_found + sp_found + rune_found}/{ep_total + sp_total + rune_total} spells found
+                    </div>
+                </div>
+"""
+    
+    html += """
+            </div>
+        </div>
+"""
+    
     # Add class navigation
     html += '<div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;"><strong>Jump to Class:</strong> '
     class_links = []
