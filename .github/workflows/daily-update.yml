@@ -29,28 +29,54 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Download magelo dump from TAKP
+    - name: Download magelo dump from TAKP (if needed)
       run: |
         # Create directories
         mkdir -p character inventory
         
-        # Download character and inventory files from TAKP export
-        # Use the actual TAKP filenames - the script will find them automatically
-        echo "Downloading character data from TAKP..."
-        curl -L -o character/TAKP_character.txt "https://www.takproject.net/magelo/export/TAKP_character.txt" || {
-          echo "Error: Failed to download character file"
-          exit 1
-        }
+        # Get today's date in YYYY-MM-DD format
+        TODAY=$(date +%Y-%m-%d)
+        CHAR_FILE="character/TAKP_character.txt"
+        INV_FILE="inventory/TAKP_character_inventory.txt"
         
-        echo "Downloading inventory data from TAKP..."
-        curl -L -o inventory/TAKP_character_inventory.txt "https://www.takproject.net/magelo/export/TAKP_character_inventory.txt" || {
-          echo "Error: Failed to download inventory file"
-          exit 1
-        }
+        # Check if files exist and were modified today
+        NEED_DOWNLOAD=false
         
-        echo "✓ Successfully downloaded magelo dump files"
-        echo "Character file size: $(wc -l < character/TAKP_character.txt) lines"
-        echo "Inventory file size: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
+        if [ ! -f "$CHAR_FILE" ] || [ ! -f "$INV_FILE" ]; then
+          echo "Files missing, will download..."
+          NEED_DOWNLOAD=true
+        else
+          # Check if files were modified today
+          CHAR_DATE=$(date -r "$CHAR_FILE" +%Y-%m-%d 2>/dev/null || stat -f "%Sm" -t "%Y-%m-%d" "$CHAR_FILE" 2>/dev/null || echo "")
+          INV_DATE=$(date -r "$INV_FILE" +%Y-%m-%d 2>/dev/null || stat -f "%Sm" -t "%Y-%m-%d" "$INV_FILE" 2>/dev/null || echo "")
+          
+          if [ "$CHAR_DATE" != "$TODAY" ] || [ "$INV_DATE" != "$TODAY" ]; then
+            echo "Files are from a different day (Char: $CHAR_DATE, Inv: $INV_DATE, Today: $TODAY), will download..."
+            NEED_DOWNLOAD=true
+          else
+            echo "✓ Files already downloaded today ($TODAY), skipping download"
+            echo "Character file: $(wc -l < "$CHAR_FILE") lines"
+            echo "Inventory file: $(wc -l < "$INV_FILE") lines"
+          fi
+        fi
+        
+        if [ "$NEED_DOWNLOAD" = true ]; then
+          echo "Downloading character data from TAKP..."
+          curl -L -o "$CHAR_FILE" "https://www.takproject.net/magelo/export/TAKP_character.txt" || {
+            echo "Error: Failed to download character file"
+            exit 1
+          }
+          
+          echo "Downloading inventory data from TAKP..."
+          curl -L -o "$INV_FILE" "https://www.takproject.net/magelo/export/TAKP_character_inventory.txt" || {
+            echo "Error: Failed to download inventory file"
+            exit 1
+          }
+          
+          echo "✓ Successfully downloaded magelo dump files"
+          echo "Character file size: $(wc -l < "$CHAR_FILE") lines"
+          echo "Inventory file size: $(wc -l < "$INV_FILE") lines"
+        fi
     
     - name: Verify spell exchange JSON
       run: |
