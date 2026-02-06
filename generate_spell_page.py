@@ -399,6 +399,21 @@ def generate_html(char_ids, inventories, spell_info):
         <p>Spells are grouped by class and item type. Found spells are shown in green, missing spells in red. Click spell names to view on TAKProject.</p>
 """
     
+    # Get all unique classes for navigation
+    all_classes = set()
+    for spell_id in pok_spell_ids:
+        if spell_info[spell_id]['npcs']:
+            all_classes.add(spell_info[spell_id]['npcs'][0]['class'])
+    
+    # Add class navigation
+    html += '<div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0;"><strong>Jump to Class:</strong> '
+    class_links = []
+    for class_name in sorted(all_classes):
+        class_anchor = class_name.lower().replace(' ', '-')
+        class_links.append(f'<a href="#class-{class_anchor}" style="color: #1976D2; text-decoration: none; margin: 0 10px; padding: 5px 10px; background-color: white; border-radius: 3px;">{class_name}</a>')
+    html += ' '.join(class_links)
+    html += '</div>'
+    
     # Combine all spells into one list
     all_spells = []
     
@@ -437,7 +452,8 @@ def generate_html(char_ids, inventories, spell_info):
             if spell_class != current_class:
                 if current_class is not None:
                     html += '</div>'  # Close previous class group
-                html += f'<div style="grid-column: 1 / -1; margin-top: 20px;"><h3 style="color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 5px;">{spell_class}</h3></div>'
+                class_anchor = spell_class.lower().replace(' ', '-')
+                html += f'<div id="class-{class_anchor}" style="grid-column: 1 / -1; margin-top: 20px;"><h3 style="color: #1976D2; border-bottom: 2px solid #1976D2; padding-bottom: 5px;">{spell_class}</h3></div>'
                 html += '<div class="spell-grid" style="grid-column: 1 / -1;">'
                 current_class = spell_class
                 current_item_type = None  # Reset item type when class changes
@@ -458,23 +474,26 @@ def generate_html(char_ids, inventories, spell_info):
             html += '<span style="color: #c62828; font-size: 0.9em; margin-left: 10px;">(Not Found)</span>'
         html += """
                 </div>
-                <div class="spell-id">Spell ID: """ + spell['id'] + """</div>
+"""
+        # Only show "Available from" for not found spells
+        if not spell['found']:
+            html += """
                 <div class="spell-sources">
                     <strong>Available from:</strong><br>
 """
-        # Group NPCs by class
-        npcs_by_class = defaultdict(list)
-        for npc_info in spell['npcs']:
-            npcs_by_class[npc_info['class']].append(npc_info)
-        
-        for npc_class in sorted(npcs_by_class.keys()):
-            html += f"<strong>{npc_class}:</strong> "
-            npc_names = []
-            for npc_info in npcs_by_class[npc_class]:
-                npc_names.append(f"{npc_info['npc']} ({npc_info['item_name']})")
-            html += ", ".join(npc_names) + "<br>"
-        
-        html += """
+            # Group NPCs by class
+            npcs_by_class = defaultdict(list)
+            for npc_info in spell['npcs']:
+                npcs_by_class[npc_info['class']].append(npc_info)
+            
+            for npc_class in sorted(npcs_by_class.keys()):
+                html += f"<strong>{npc_class}:</strong> "
+                npc_names = []
+                for npc_info in npcs_by_class[npc_class]:
+                    npc_names.append(f"{npc_info['npc']} ({npc_info['item_name']})")
+                html += ", ".join(npc_names) + "<br>"
+            
+            html += """
                 </div>
 """
         if spell['found']:
@@ -522,26 +541,35 @@ def generate_html(char_ids, inventories, spell_info):
                 <div class="spell-item">
                     <a href="https://www.takproject.net/allaclone/item.php?id={spell_id}" target="_blank">{spell_data['name']}</a>
                     <span class="spell-count">x{count}</span>
-                    <div style="font-size: 0.8em; color: #666;">ID: {spell_id}</div>
                 </div>
 """
             html += '</div>'
         else:
             html += "<p><em>No PoK spells found.</em></p>"
         
-        # Show other items (non-PoK spells)
+        # Show other items (non-PoK spells) - grouped by item_id
         if char_name in all_items:
             other_items = [item for item in all_items[char_name] if item['item_id'] not in pok_spell_ids]
             if other_items:
+                # Group items by item_id and count
+                item_counts = defaultdict(lambda: {'name': '', 'count': 0})
+                for item in other_items:
+                    item_id = item['item_id']
+                    item_counts[item_id]['name'] = item['item_name']
+                    item_counts[item_id]['count'] += 1
+                
                 html += f"""
                 <div class="other-items">
-                    <h4>Other Items ({len(other_items)} total)</h4>
+                    <h4>Other Items ({len(other_items)} total, {len(item_counts)} unique)</h4>
                     <div class="other-items-list">
 """
-                for item in sorted(other_items, key=lambda x: x['item_name'])[:100]:  # Limit to 100 items
-                    html += f'<div class="other-item">{item["item_name"]} (ID: {item["item_id"]})</div>'
-                if len(other_items) > 100:
-                    html += f'<div class="other-item"><em>... and {len(other_items) - 100} more items</em></div>'
+                # Sort by name, then by count
+                sorted_items = sorted(item_counts.items(), key=lambda x: (x[1]['name'], -x[1]['count']))
+                for item_id, item_data in sorted_items[:200]:  # Limit to 200 unique items
+                    count_text = f" x{item_data['count']}" if item_data['count'] > 1 else ""
+                    html += f'<div class="other-item"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2196F3; text-decoration: none;">{item_data["name"]}</a>{count_text}</div>'
+                if len(sorted_items) > 200:
+                    html += f'<div class="other-item"><em>... and {len(sorted_items) - 200} more unique items</em></div>'
                 html += "</div></div>"
         
         html += "</div>"
