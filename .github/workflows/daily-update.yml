@@ -15,6 +15,10 @@ on:
 jobs:
   update-spell-inventory:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     
     steps:
     - name: Checkout repository
@@ -53,13 +57,27 @@ jobs:
         # Check if JSON file exists (should be in repo)
         if [ ! -f "spell_exchange_list.json" ]; then
           echo "Error: spell_exchange_list.json not found in repository"
+          echo "Files in current directory:"
+          ls -la
           exit 1
         fi
         echo "✓ Found spell_exchange_list.json"
+        echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
     - name: Run spell inventory generator
       run: |
         python generate_spell_page.py
+    
+    - name: Verify HTML was generated
+      run: |
+        if [ ! -f "spell_inventory.html" ]; then
+          echo "Error: spell_inventory.html was not generated"
+          exit 1
+        fi
+        echo "✓ HTML file generated successfully"
+        echo "File size: $(wc -c < spell_inventory.html) bytes"
+        echo "File preview (first 5 lines):"
+        head -5 spell_inventory.html
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
@@ -69,4 +87,5 @@ jobs:
         publish_dir: .
         publish_branch: gh-pages
         keep_files: false
-        # The HTML file will be at the root of gh-pages branch
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
