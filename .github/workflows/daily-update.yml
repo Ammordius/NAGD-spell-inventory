@@ -8,9 +8,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'generate_spell_page.py'
-      - 'spell_exchange_list.json'
+    # Run on any push to main (not just specific files) to ensure it runs
 
 jobs:
   update-spell-inventory:
