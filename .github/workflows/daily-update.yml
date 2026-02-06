@@ -125,6 +125,7 @@ jobs:
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
         force_orphan: true
+        enable_jekyll: false
     
     - name: Verify deployment
       run: |
