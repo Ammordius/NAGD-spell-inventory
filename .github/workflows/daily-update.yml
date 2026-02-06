@@ -121,3 +121,8 @@ jobs:
         keep_files: false
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
+    
+    - name: Verify deployment
+      run: |
+        echo "Deployment should have created/updated the gh-pages branch"
+        echo "Check https://github.com/${{ github.repository }}/tree/gh-pages to see the deployed files"
