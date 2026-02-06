@@ -29,53 +29,52 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Download magelo dump from TAKP (if needed)
+    - name: Get today's date
+      id: date
+      run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+    
+    - name: Cache magelo dump files
+      uses: actions/cache@v3
+      id: cache-magelo
+      with:
+        path: |
+          character/TAKP_character.txt
+          inventory/TAKP_character_inventory.txt
+        key: magelo-dump-${{ steps.date.outputs.date }}
+        restore-keys: |
+          magelo-dump-
+    
+    - name: Download magelo dump from TAKP (if not cached)
+      if: steps.cache-magelo.outputs.cache-hit != 'true'
       run: |
         # Create directories
         mkdir -p character inventory
         
-        # Get today's date in YYYY-MM-DD format
-        TODAY=$(date +%Y-%m-%d)
-        CHAR_FILE="character/TAKP_character.txt"
-        INV_FILE="inventory/TAKP_character_inventory.txt"
+        echo "Downloading character data from TAKP..."
+        curl -L -o character/TAKP_character.txt "https://www.takproject.net/magelo/export/TAKP_character.txt" || {
+          echo "Error: Failed to download character file"
+          exit 1
+        }
         
-        # Check if files exist and were modified today
-        NEED_DOWNLOAD=false
+        echo "Downloading inventory data from TAKP..."
+        curl -L -o inventory/TAKP_character_inventory.txt "https://www.takproject.net/magelo/export/TAKP_character_inventory.txt" || {
+          echo "Error: Failed to download inventory file"
+          exit 1
+        }
         
-        if [ ! -f "$CHAR_FILE" ] || [ ! -f "$INV_FILE" ]; then
-          echo "Files missing, will download..."
-          NEED_DOWNLOAD=true
+        echo "✓ Successfully downloaded magelo dump files"
+        echo "Character file size: $(wc -l < character/TAKP_character.txt) lines"
+        echo "Inventory file size: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
+    
+    - name: Verify cached/downloaded files
+      run: |
+        if [ -f "character/TAKP_character.txt" ] && [ -f "inventory/TAKP_character_inventory.txt" ]; then
+          echo "✓ Magelo dump files are available"
+          echo "Character file: $(wc -l < character/TAKP_character.txt) lines"
+          echo "Inventory file: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
         else
-          # Check if files were modified today
-          CHAR_DATE=$(date -r "$CHAR_FILE" +%Y-%m-%d 2>/dev/null || stat -f "%Sm" -t "%Y-%m-%d" "$CHAR_FILE" 2>/dev/null || echo "")
-          INV_DATE=$(date -r "$INV_FILE" +%Y-%m-%d 2>/dev/null || stat -f "%Sm" -t "%Y-%m-%d" "$INV_FILE" 2>/dev/null || echo "")
-          
-          if [ "$CHAR_DATE" != "$TODAY" ] || [ "$INV_DATE" != "$TODAY" ]; then
-            echo "Files are from a different day (Char: $CHAR_DATE, Inv: $INV_DATE, Today: $TODAY), will download..."
-            NEED_DOWNLOAD=true
-          else
-            echo "✓ Files already downloaded today ($TODAY), skipping download"
-            echo "Character file: $(wc -l < "$CHAR_FILE") lines"
-            echo "Inventory file: $(wc -l < "$INV_FILE") lines"
-          fi
-        fi
-        
-        if [ "$NEED_DOWNLOAD" = true ]; then
-          echo "Downloading character data from TAKP..."
-          curl -L -o "$CHAR_FILE" "https://www.takproject.net/magelo/export/TAKP_character.txt" || {
-            echo "Error: Failed to download character file"
-            exit 1
-          }
-          
-          echo "Downloading inventory data from TAKP..."
-          curl -L -o "$INV_FILE" "https://www.takproject.net/magelo/export/TAKP_character_inventory.txt" || {
-            echo "Error: Failed to download inventory file"
-            exit 1
-          }
-          
-          echo "✓ Successfully downloaded magelo dump files"
-          echo "Character file size: $(wc -l < "$CHAR_FILE") lines"
-          echo "Inventory file size: $(wc -l < "$INV_FILE") lines"
+          echo "Error: Magelo dump files are missing"
+          exit 1
         fi
     
     - name: Verify spell exchange JSON
