@@ -13,7 +13,7 @@ MULE_CHARACTERS = [
     "Freelootone", "Freeloottwo", "Freelootthree",
     "Miscthree", "Miscfour", "Miscfive", "Miscsix", "Miscseven",
     "Armourgirl", "Beastlordgirl", "Enchantergirl", "Magiciangirl",
-    "Necromancergirl", "Rangergirl", "Shadownightgirl", "Wizardgirl",
+    "Necromancergirl", "Rangergirl", "Shadoknightgirl", "Wizardgirl",
     "Bardboy", "Clericboy", "Druidboy", "Enchanterboy",
     "Magicianboy", "Necromancerboy", "Paladinboy", "Shamanboy"
 ]
