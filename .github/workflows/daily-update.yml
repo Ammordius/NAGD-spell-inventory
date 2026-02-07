@@ -1,5 +1,6 @@
 name: Daily Spell Inventory Update
 
+# Set workflow run retention to 30 days (GitHub default is 90 days)
 on:
   schedule:
     # Run daily at 17:00 UTC (30 minutes after Magelo update at 16:30 UTC)
@@ -273,8 +274,21 @@ jobs:
           echo "✓ Previous files found - delta page can be generated"
           echo "Previous character file: $(wc -l < character/TAKP_character_previous.txt) lines"
           echo "Previous inventory file: $(wc -l < inventory/TAKP_character_inventory_previous.txt) lines"
+          echo "Current character file: $(wc -l < character/TAKP_character.txt) lines"
+          echo "Current inventory file: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
+          
+          # Check if files are identical
+          if cmp -s character/TAKP_character_previous.txt character/TAKP_character.txt; then
+            echo "⚠ Warning: Previous and current character files are identical - no changes to show"
+          else
+            echo "✓ Character files are different - changes will be shown"
+          fi
         else
           echo "⚠ No previous files found - delta page will not be generated"
+          echo "Files in character/ directory:"
+          ls -lh character/ 2>/dev/null || echo "Directory not found"
+          echo "Files in inventory/ directory:"
+          ls -lh inventory/ 2>/dev/null || echo "Directory not found"
         fi
     
     - name: Verify spell exchange JSON

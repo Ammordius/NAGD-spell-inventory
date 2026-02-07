@@ -1330,6 +1330,8 @@ def main():
     if previous_char_file and previous_inv_file and \
        os.path.exists(previous_char_file) and os.path.exists(previous_inv_file):
         print(f"Previous: {os.path.basename(previous_char_file)}, Current: {os.path.basename(current_char_file)}")
+        print(f"Previous file exists: {os.path.exists(previous_char_file)}, size: {os.path.getsize(previous_char_file) if os.path.exists(previous_char_file) else 0} bytes")
+        print(f"Current file exists: {os.path.exists(current_char_file)}, size: {os.path.getsize(current_char_file) if os.path.exists(current_char_file) else 0} bytes")
         
         # Parse ALL character data (serverwide, not just mules)
         # Pass None to get all characters
@@ -1337,6 +1339,16 @@ def main():
         previous_char_data = parse_character_data(previous_char_file, None)
         current_char_data = parse_character_data(current_char_file, None)
         print(f"Found {len(previous_char_data)} characters in previous, {len(current_char_data)} in current")
+        
+        # Check if files are identical
+        if os.path.exists(previous_char_file) and os.path.exists(current_char_file):
+            import hashlib
+            prev_hash = hashlib.md5(open(previous_char_file, 'rb').read()).hexdigest()
+            curr_hash = hashlib.md5(open(current_char_file, 'rb').read()).hexdigest()
+            if prev_hash == curr_hash:
+                print("⚠ Warning: Previous and current files are identical (same hash) - no changes to show")
+            else:
+                print(f"Files are different (prev hash: {prev_hash[:8]}..., curr hash: {curr_hash[:8]}...)")
         
         # Parse ALL inventories (serverwide)
         previous_char_ids = {}
