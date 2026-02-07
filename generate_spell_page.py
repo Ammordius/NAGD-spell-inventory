@@ -1251,9 +1251,37 @@ def main():
     inv_dir = os.path.join(base_dir, "inventory")
     output_file = os.path.join(base_dir, "spell_inventory.html")
     
-    # Try to find the latest files, or use specific names
-    char_file = find_latest_magelo_file(char_dir, "TAKP_character") or find_latest_magelo_file(char_dir)
-    inv_file = find_latest_magelo_file(inv_dir, "TAKP_character_inventory") or find_latest_magelo_file(inv_dir)
+    # Try to find the latest files, prioritizing current files over previous files
+    # First, look for current files (not _previous)
+    all_char_files = []
+    all_inv_files = []
+    
+    if os.path.exists(char_dir):
+        for filename in os.listdir(char_dir):
+            if filename.endswith('.txt') and '_previous' not in filename:
+                filepath = os.path.join(char_dir, filename)
+                if os.path.isfile(filepath):
+                    all_char_files.append((filepath, os.path.getmtime(filepath)))
+    
+    if os.path.exists(inv_dir):
+        for filename in os.listdir(inv_dir):
+            if filename.endswith('.txt') and '_previous' not in filename:
+                filepath = os.path.join(inv_dir, filename)
+                if os.path.isfile(filepath):
+                    all_inv_files.append((filepath, os.path.getmtime(filepath)))
+    
+    # Sort by modification time and get the most recent
+    if all_char_files:
+        all_char_files.sort(key=lambda x: x[1], reverse=True)
+        char_file = all_char_files[0][0]
+    else:
+        char_file = find_latest_magelo_file(char_dir, "TAKP_character") or find_latest_magelo_file(char_dir)
+    
+    if all_inv_files:
+        all_inv_files.sort(key=lambda x: x[1], reverse=True)
+        inv_file = all_inv_files[0][0]
+    else:
+        inv_file = find_latest_magelo_file(inv_dir, "TAKP_character_inventory") or find_latest_magelo_file(inv_dir)
     
     # Fallback to specific filename if nothing found
     if char_file is None:
