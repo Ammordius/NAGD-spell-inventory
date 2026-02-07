@@ -98,53 +98,54 @@ jobs:
           echo "yesterday_date=" >> $GITHUB_OUTPUT
         fi
     
-    - name: Restore yesterday's cache to temp location
+    - name: Restore yesterday's cache (to get previous files)
       uses: actions/cache@v3
       id: cache-yesterday
       continue-on-error: true
       with:
         path: |
-          character_yesterday/TAKP_character.txt
-          inventory_yesterday/TAKP_character_inventory.txt
+          character/TAKP_character.txt
+          inventory/TAKP_character_inventory.txt
         key: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
         restore-keys: |
           magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
           magelo-dump-
     
-    - name: Copy yesterday's files to previous
+    - name: Copy yesterday's files to previous (before restoring today's cache)
       run: |
         echo "Checking for yesterday's files from cache key: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}"
         
         # Create directories if needed
         mkdir -p character inventory
         
-        if [ -f "character_yesterday/TAKP_character.txt" ]; then
-          cp character_yesterday/TAKP_character.txt character/TAKP_character_previous.txt
+        # Copy yesterday's files to previous BEFORE we restore today's cache
+        if [ -f "character/TAKP_character.txt" ]; then
+          cp character/TAKP_character.txt character/TAKP_character_previous.txt
           echo "✓ Copied yesterday's character file to previous"
           ls -lh character/TAKP_character_previous.txt
+          echo "File size: $(wc -l < character/TAKP_character_previous.txt) lines"
         else
           echo "⚠ Yesterday's character file not found in cache"
           echo "Cache key used: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}"
         fi
         
-        if [ -f "inventory_yesterday/TAKP_character_inventory.txt" ]; then
-          cp inventory_yesterday/TAKP_character_inventory.txt inventory/TAKP_character_inventory_previous.txt
+        if [ -f "inventory/TAKP_character_inventory.txt" ]; then
+          cp inventory/TAKP_character_inventory.txt inventory/TAKP_character_inventory_previous.txt
           echo "✓ Copied yesterday's inventory file to previous"
           ls -lh inventory/TAKP_character_inventory_previous.txt
+          echo "File size: $(wc -l < inventory/TAKP_character_inventory_previous.txt) lines"
         else
           echo "⚠ Yesterday's inventory file not found in cache"
         fi
         
         if [ -f "character/TAKP_character_previous.txt" ]; then
           echo "✓ Previous files ready for delta comparison"
-          echo "Previous files line counts:"
-          wc -l character/TAKP_character_previous.txt inventory/TAKP_character_inventory_previous.txt 2>/dev/null || true
         else
           echo "⚠ No previous files found - delta page will not be generated"
           echo "This is expected if yesterday's cache doesn't exist or expired"
         fi
     
-    - name: Cache magelo dump files (current)
+    - name: Cache magelo dump files (current - this will overwrite yesterday's files)
       uses: actions/cache@v3
       id: cache-magelo
       with:
