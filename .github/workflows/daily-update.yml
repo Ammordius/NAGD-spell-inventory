@@ -99,11 +99,19 @@ jobs:
     - name: Check if update is needed
       id: need-update
       run: |
+        CURRENT_DATE="${{ steps.check-update.outputs.update_date }}"
+        
+        # Force download if date extraction failed
+        if [ "$CURRENT_DATE" == "Unknown" ]; then
+          echo "⚠ Date extraction failed, forcing download to establish baseline"
+          echo "needs_update=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
         if [ "${{ steps.cache-magelo.outputs.cache-hit }}" == "true" ]; then
           # Check if cached date matches current date
           if [ -f ".magelo_update_date" ]; then
             CACHED_DATE=$(cat .magelo_update_date)
-            CURRENT_DATE="${{ steps.check-update.outputs.update_date }}"
             if [ "$CACHED_DATE" == "$CURRENT_DATE" ]; then
               echo "✓ Magelo dump is up to date (date: $CACHED_DATE)"
               echo "needs_update=false" >> $GITHUB_OUTPUT
@@ -112,7 +120,7 @@ jobs:
               echo "needs_update=true" >> $GITHUB_OUTPUT
             fi
           else
-            echo "No cached date found, will download"
+            echo "No cached date file found, will download to establish date"
             echo "needs_update=true" >> $GITHUB_OUTPUT
           fi
         else
@@ -147,8 +155,20 @@ jobs:
       run: |
         # Always save the current date from the page (even if we used cache)
         # This ensures the date is available for HTML generation
-        echo "${{ steps.check-update.outputs.update_date }}" > .magelo_update_date
-        echo "Saved update date: ${{ steps.check-update.outputs.update_date }}"
+        UPDATE_DATE="${{ steps.check-update.outputs.update_date }}"
+        echo "$UPDATE_DATE" > .magelo_update_date
+        echo "Saved update date: $UPDATE_DATE"
+        
+        # Verify the date was saved correctly
+        if [ -f ".magelo_update_date" ]; then
+          SAVED_DATE=$(cat .magelo_update_date)
+          echo "Verified saved date: $SAVED_DATE"
+          if [ "$SAVED_DATE" == "Unknown" ]; then
+            echo "⚠ Warning: Date is still Unknown, this may indicate extraction failure"
+          fi
+        else
+          echo "⚠ Error: Failed to save update date file"
+        fi
     
     - name: Verify cached/downloaded files
       run: |
@@ -178,8 +198,28 @@ jobs:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
       run: |
         # Verify the date is set
-        echo "Using magelo update date: $MAGELO_UPDATE_DATE"
+        echo "Using magelo update date from environment: $MAGELO_UPDATE_DATE"
+        
+        # Also check if date file exists and show its contents
+        if [ -f ".magelo_update_date" ]; then
+          FILE_DATE=$(cat .magelo_update_date)
+          echo "Date from file: $FILE_DATE"
+        else
+          echo "⚠ Warning: .magelo_update_date file not found"
+        fi
+        
+        # Run the generator
         python generate_spell_page.py
+        
+        # Verify the date appears in the generated HTML
+        if [ -f "spell_inventory.html" ]; then
+          if grep -q "last updated: $MAGELO_UPDATE_DATE" spell_inventory.html; then
+            echo "✓ Date successfully included in HTML"
+          else
+            echo "⚠ Warning: Date may not be in HTML, checking..."
+            grep -o "last updated: [^<]*" spell_inventory.html | head -1 || echo "Could not find date in HTML"
+          fi
+        fi
     
     - name: Verify HTML was generated
       run: |
