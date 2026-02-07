@@ -33,15 +33,28 @@ jobs:
         echo "Fetching TAKP export page to check last update date..."
         EXPORT_PAGE=$(curl -sL "https://www.takproject.net/magelo/export/")
         
+        # Debug: Show a snippet of the page to verify it's loading
+        echo "Page content preview (first 500 chars):"
+        echo "$EXPORT_PAGE" | head -c 500
+        echo ""
+        
         # Extract the date line (format: "Fri Feb 6 16:30:25 UTC 2026")
+        # Try multiple patterns to catch the date
         UPDATE_DATE=$(echo "$EXPORT_PAGE" | grep -oE '[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC [0-9]{4}' | head -1)
         
         if [ -z "$UPDATE_DATE" ]; then
           echo "Warning: Could not extract update date from export page"
-          UPDATE_DATE="Unknown"
-          DATE_NORMALIZED="unknown"
-        else
-          echo "Last update date on TAKP: $UPDATE_DATE"
+          echo "Trying alternative pattern..."
+          # Try looking for date patterns in different formats
+          UPDATE_DATE=$(echo "$EXPORT_PAGE" | grep -iE '(mon|tue|wed|thu|fri|sat|sun).*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec).*[0-9]{4}' | head -1)
+          if [ -z "$UPDATE_DATE" ]; then
+            UPDATE_DATE="Unknown"
+            DATE_NORMALIZED="unknown"
+          fi
+        fi
+        
+        if [ "$UPDATE_DATE" != "Unknown" ]; then
+          echo "✓ Extracted update date: $UPDATE_DATE"
           # Use Python to parse and normalize the date to YYYY-MM-DD
           DATE_NORMALIZED=$(python3 -c "
           import sys
@@ -49,9 +62,16 @@ jobs:
           try:
               dt = datetime.strptime('$UPDATE_DATE', '%a %b %d %H:%M:%S UTC %Y')
               print(dt.strftime('%Y-%m-%d'))
-          except:
-              print('$UPDATE_DATE')
+          except Exception as e:
+              print('error-' + str(e))
           ")
+          
+          if [[ "$DATE_NORMALIZED" == error-* ]]; then
+            echo "Warning: Could not parse date, using as-is"
+            DATE_NORMALIZED="unknown"
+          fi
+        else
+          DATE_NORMALIZED="unknown"
         fi
         
         echo "update_date=$UPDATE_DATE" >> $GITHUB_OUTPUT
@@ -112,13 +132,17 @@ jobs:
           exit 1
         }
         
-        # Save the update date
-        echo "${{ steps.check-update.outputs.update_date }}" > .magelo_update_date
-        
         echo "✓ Successfully downloaded magelo dump files"
         echo "Character file size: $(wc -l < character/TAKP_character.txt) lines"
         echo "Inventory file size: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
         echo "Update date: ${{ steps.check-update.outputs.update_date }}"
+    
+    - name: Save current update date
+      run: |
+        # Always save the current date from the page (even if we used cache)
+        # This ensures the date is available for HTML generation
+        echo "${{ steps.check-update.outputs.update_date }}" > .magelo_update_date
+        echo "Saved update date: ${{ steps.check-update.outputs.update_date }}"
     
     - name: Verify cached/downloaded files
       run: |
@@ -143,20 +167,12 @@ jobs:
         echo "✓ Found spell_exchange_list.json"
         echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
-    - name: Read magelo update date
-      id: read-date
-      run: |
-        if [ -f ".magelo_update_date" ]; then
-          UPDATE_DATE=$(cat .magelo_update_date)
-          echo "update_date=$UPDATE_DATE" >> $GITHUB_OUTPUT
-        else
-          echo "update_date=Unknown" >> $GITHUB_OUTPUT
-        fi
-    
     - name: Run spell inventory generator
       env:
-        MAGELO_UPDATE_DATE: ${{ steps.read-date.outputs.update_date }}
+        MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
       run: |
+        # Verify the date is set
+        echo "Using magelo update date: $MAGELO_UPDATE_DATE"
         python generate_spell_page.py
     
     - name: Verify HTML was generated
