@@ -1899,6 +1899,55 @@ def main():
         if previous_char_file:
             print(f"Looking for: {previous_char_file} and {previous_inv_file}")
     
+    # Generate weekly/monthly leaderboards even if no previous day's files
+    # (compare current vs baseline if available)
+    try:
+        # Get magelo update date
+        magelo_update_date = os.environ.get('MAGELO_UPDATE_DATE', 'Unknown')
+        
+        # Extract date
+        if magelo_update_date != 'Unknown':
+            try:
+                dt = datetime.strptime(magelo_update_date, '%a %b %d %H:%M:%S UTC %Y')
+                date_str = dt.strftime('%Y-%m-%d')
+            except:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+        else:
+            date_str = datetime.now().strftime('%Y-%m-%d')
+        
+        week_start = get_week_start(date_str)
+        month_start = get_month_start(date_str)
+        
+        # Parse current character data for leaderboard comparison
+        current_char_data_for_lb = parse_character_data(char_file, None)
+        
+        # Generate weekly leaderboard (compare current vs weekly baseline)
+        weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, base_dir, current_char_data_for_lb)
+        weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, base_dir, current_char_data_for_lb)
+        weekly_html = generate_leaderboard_html(
+            f"Week of {week_start}", weekly_aa, weekly_hp, 'weekly'
+        )
+        weekly_file = os.path.join(base_dir, f"leaderboard_week_{week_start}.html")
+        with open(weekly_file, 'w', encoding='utf-8') as f:
+            f.write(weekly_html)
+        print(f"Generated weekly leaderboard: {weekly_file}")
+        
+        # Generate monthly leaderboard (compare current vs monthly baseline)
+        monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, base_dir, current_char_data_for_lb)
+        monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, base_dir, current_char_data_for_lb)
+        monthly_html = generate_leaderboard_html(
+            f"Month of {month_start}", monthly_aa, monthly_hp, 'monthly'
+        )
+        monthly_file = os.path.join(base_dir, f"leaderboard_month_{month_start}.html")
+        with open(monthly_file, 'w', encoding='utf-8') as f:
+            f.write(monthly_html)
+        print(f"Generated monthly leaderboard: {monthly_file}")
+        
+    except Exception as e:
+        print(f"Warning: Could not generate leaderboards: {e}")
+        import traceback
+        traceback.print_exc()
+    
     print("Done!")
 
 if __name__ == "__main__":

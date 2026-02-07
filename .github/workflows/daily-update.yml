@@ -405,14 +405,12 @@ jobs:
           echo "No delta.html found (previous day's files may not exist)"
         fi
         # Copy weekly/monthly leaderboard pages
-        if [ -d "delta_snapshots" ]; then
-          for file in leaderboard_week_*.html leaderboard_month_*.html; do
-            if [ -f "$file" ]; then
-              cp "$file" deploy/
-              echo "✓ Copied $file to deploy directory"
-            fi
-          done
-        fi
+        for file in leaderboard_week_*.html leaderboard_month_*.html; do
+          if [ -f "$file" ]; then
+            cp "$file" deploy/
+            echo "✓ Copied $file to deploy directory"
+          fi
+        done
         # Add .nojekyll to disable Jekyll processing
         touch deploy/.nojekyll
         echo "✓ Prepared HTML files for GitHub Pages"
