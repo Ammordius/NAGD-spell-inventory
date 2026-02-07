@@ -39,36 +39,51 @@ jobs:
         echo ""
         
         # Extract the date line (format: "Fri Feb 6 16:30:25 UTC 2026")
-        # Try multiple patterns to catch the date
+        # First try the clean pattern
         UPDATE_DATE=$(echo "$EXPORT_PAGE" | grep -oE '[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC [0-9]{4}' | head -1)
         
         if [ -z "$UPDATE_DATE" ]; then
-          echo "Warning: Could not extract update date from export page"
-          echo "Trying alternative pattern..."
-          # Try looking for date patterns in different formats
-          UPDATE_DATE=$(echo "$EXPORT_PAGE" | grep -iE '(mon|tue|wed|thu|fri|sat|sun).*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec).*[0-9]{4}' | head -1)
-          if [ -z "$UPDATE_DATE" ]; then
-            UPDATE_DATE="Unknown"
-            DATE_NORMALIZED="unknown"
+          echo "Warning: Could not extract update date with clean pattern"
+          echo "Trying alternative pattern with HTML tags..."
+          # Try extracting from HTML span tag
+          UPDATE_DATE_RAW=$(echo "$EXPORT_PAGE" | grep -oE '<span[^>]*>.*[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC [0-9]{4}.*</span>' | head -1)
+          if [ -n "$UPDATE_DATE_RAW" ]; then
+            # Extract just the date part, removing HTML tags
+            UPDATE_DATE=$(echo "$UPDATE_DATE_RAW" | sed 's/<[^>]*>//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
           fi
+        fi
+        
+        if [ -z "$UPDATE_DATE" ]; then
+          echo "Warning: Could not extract update date from export page"
+          UPDATE_DATE="Unknown"
+          DATE_NORMALIZED="unknown"
         fi
         
         if [ "$UPDATE_DATE" != "Unknown" ]; then
           echo "✓ Extracted update date: $UPDATE_DATE"
+          # Clean up any extra whitespace
+          UPDATE_DATE=$(echo "$UPDATE_DATE" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/  */ /g')
+          echo "Cleaned date: $UPDATE_DATE"
+          
           # Use Python to parse and normalize the date to YYYY-MM-DD
-          DATE_NORMALIZED=$(python3 -c "
-          import sys
-          from datetime import datetime
-          try:
-              dt = datetime.strptime('$UPDATE_DATE', '%a %b %d %H:%M:%S UTC %Y')
-              print(dt.strftime('%Y-%m-%d'))
-          except Exception as e:
-              print('error-' + str(e))
-          ")
+          # Escape single quotes in the date string for Python
+          UPDATE_DATE_ESCAPED=$(echo "$UPDATE_DATE" | sed "s/'/\\\\'/g")
+          DATE_NORMALIZED=$(python3 <<EOF
+import sys
+from datetime import datetime
+try:
+    dt = datetime.strptime('$UPDATE_DATE_ESCAPED', '%a %b %d %H:%M:%S UTC %Y')
+    print(dt.strftime('%Y-%m-%d'))
+except Exception as e:
+    print('error-' + str(e))
+EOF
+)
           
           if [[ "$DATE_NORMALIZED" == error-* ]]; then
-            echo "Warning: Could not parse date, using as-is"
+            echo "Warning: Could not parse date: $DATE_NORMALIZED"
             DATE_NORMALIZED="unknown"
+          else
+            echo "Normalized date: $DATE_NORMALIZED"
           fi
         else
           DATE_NORMALIZED="unknown"
