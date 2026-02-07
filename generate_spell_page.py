@@ -1111,18 +1111,75 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         .rank-2 { background-color: #C0C0C0; color: #000; }
         .rank-3 { background-color: #CD7F32; color: #fff; }
         .rank-other { background-color: rgba(255,255,255,0.3); color: #fff; }
+        .nav-menu {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+        .nav-menu h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+        }
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .nav-links a:hover {
+            background-color: #45a049;
+        }
+        .nav-links a.hp-link {
+            background-color: #f5576c;
+        }
+        .nav-links a.hp-link:hover {
+            background-color: #e0485a;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>TAKP Mule Delta Report</h1>
         <p>Changes detected since previous magelo dump (last updated: """ + magelo_update_date + """)</p>
+        
+        <div class="nav-menu">
+            <h3>Jump to Section:</h3>
+            <div class="nav-links">
+"""
+    
+    # Build navigation links based on what sections will be shown
+    nav_links = []
+    if aa_leaderboard:
+        nav_links.append('<a href="#aa-leaderboard">🏆 AA Leaderboard</a>')
+    if hp_leaderboard:
+        nav_links.append('<a href="#hp-leaderboard" class="hp-link">❤️ HP Leaderboard</a>')
+    if char_deltas:
+        nav_links.append('<a href="#character-changes">Character Changes</a>')
+    if inv_deltas:
+        nav_links.append('<a href="#inventory-changes">Inventory Changes</a>')
+    
+    html += "".join(nav_links)
+    html += """
+            </div>
+        </div>
 """
     
     # AA Leaderboard
     if aa_leaderboard:
         html += """
-        <div class="leaderboard">
+        <div class="leaderboard" id="aa-leaderboard">
             <h2>🏆 Top AA Gainers</h2>
             <table class="leaderboard-table">
                 <thead>
@@ -1158,7 +1215,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     # HP Leaderboard
     if hp_leaderboard:
         html += """
-        <div class="leaderboard" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="leaderboard" id="hp-leaderboard" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
             <h2>❤️ Top HP Gainers</h2>
             <table class="leaderboard-table">
                 <thead>
@@ -1197,7 +1254,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     # Character level and AA changes
     if char_deltas:
         html += """
-        <h2>Character Level & AA Changes</h2>
+        <h2 id="character-changes">Character Level & AA Changes</h2>
         <table class="delta-table">
             <thead>
                 <tr>
@@ -1282,7 +1339,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     # Inventory changes
     if inv_deltas:
         html += """
-        <h2>Inventory Changes</h2>
+        <h2 id="inventory-changes">Inventory Changes</h2>
         <p><em>Showing characters with inventory changes (limited to first 500 characters for performance)</em></p>
 """
         # Limit to first 500 characters for performance
