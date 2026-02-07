@@ -813,10 +813,33 @@ def compare_character_data(current_data, previous_data, character_list=None):
     
     return deltas
 
+def load_no_rent_items():
+    """Load list of no-rent item IDs from JSON file."""
+    base_dir = os.path.dirname(__file__)
+    no_rent_file = os.path.join(base_dir, "no_rent_items.json")
+    
+    if os.path.exists(no_rent_file):
+        try:
+            with open(no_rent_file, 'r') as f:
+                item_ids = json.load(f)
+                return set(item_ids)  # Convert to set for fast lookup
+        except Exception as e:
+            print(f"Warning: Could not load no_rent_items.json: {e}")
+            return set()
+    else:
+        # File doesn't exist, return empty set (no filtering)
+        return set()
+
 def compare_inventories(current_inv, previous_inv, character_list=None):
     """Compare current and previous inventories to find item deltas.
-    If character_list is None, compares all characters (serverwide)."""
+    If character_list is None, compares all characters (serverwide).
+    No-rent items are automatically filtered out."""
     item_deltas = {}
+    
+    # Load no-rent items to filter out
+    no_rent_items = load_no_rent_items()
+    if no_rent_items:
+        print(f"Filtering out {len(no_rent_items)} no-rent items from delta comparison")
     
     # Get all characters from both inventories
     all_chars = set(list(current_inv.keys()) + list(previous_inv.keys()))
@@ -830,17 +853,19 @@ def compare_inventories(current_inv, previous_inv, character_list=None):
         current_items = defaultdict(int)
         previous_items = defaultdict(int)
         
-        # Count items in current inventory
+        # Count items in current inventory (excluding no-rent)
         if char_name in current_inv:
             for item in current_inv[char_name]:
                 item_id = item['item_id']
-                current_items[item_id] += 1
+                if item_id not in no_rent_items:  # Filter out no-rent items
+                    current_items[item_id] += 1
         
-        # Count items in previous inventory
+        # Count items in previous inventory (excluding no-rent)
         if char_name in previous_inv:
             for item in previous_inv[char_name]:
                 item_id = item['item_id']
-                previous_items[item_id] += 1
+                if item_id not in no_rent_items:  # Filter out no-rent items
+                    previous_items[item_id] += 1
         
         # Find added and removed items
         added_items = {}
