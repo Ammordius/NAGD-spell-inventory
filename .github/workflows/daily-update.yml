@@ -38,19 +38,20 @@ jobs:
         echo "$EXPORT_PAGE" | head -c 500
         echo ""
         
-        # Extract the date line (format: "Fri Feb 6 16:30:25 UTC 2026")
-        # First try the clean pattern
-        UPDATE_DATE=$(echo "$EXPORT_PAGE" | grep -oE '[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC [0-9]{4}' | head -1)
+        # Extract the date line (format: "Fri Feb 6 16:30:25 UTC 2026" or "Fri Feb  6 16:30:25 UTC 2026")
+        # The date may have variable whitespace, so we'll extract from the span tag and clean it
+        echo "Looking for date in span tag..."
+        UPDATE_DATE_RAW=$(echo "$EXPORT_PAGE" | grep -oE '<span[^>]*class="updated"[^>]*>[^<]*</span>' | head -1)
         
-        if [ -z "$UPDATE_DATE" ]; then
-          echo "Warning: Could not extract update date with clean pattern"
-          echo "Trying alternative pattern with HTML tags..."
-          # Try extracting from HTML span tag
-          UPDATE_DATE_RAW=$(echo "$EXPORT_PAGE" | grep -oE '<span[^>]*>.*[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC [0-9]{4}.*</span>' | head -1)
-          if [ -n "$UPDATE_DATE_RAW" ]; then
-            # Extract just the date part, removing HTML tags
-            UPDATE_DATE=$(echo "$UPDATE_DATE_RAW" | sed 's/<[^>]*>//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-          fi
+        if [ -n "$UPDATE_DATE_RAW" ]; then
+          echo "Found span tag: $UPDATE_DATE_RAW"
+          # Extract just the date part, removing HTML tags and normalizing whitespace
+          UPDATE_DATE=$(echo "$UPDATE_DATE_RAW" | sed 's/<[^>]*>//g' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/[[:space:]]\+/ /g')
+          echo "Extracted date: $UPDATE_DATE"
+        else
+          echo "Warning: Could not find span tag with updated class"
+          # Fallback: try pattern matching with flexible whitespace
+          UPDATE_DATE=$(echo "$EXPORT_PAGE" | grep -oE '[A-Z][a-z]{2} [A-Z][a-z]{2}\s+[0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC [0-9]{4}' | head -1 | sed 's/[[:space:]]\+/ /g')
         fi
         
         if [ -z "$UPDATE_DATE" ]; then
