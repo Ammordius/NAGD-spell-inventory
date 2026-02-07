@@ -7,6 +7,12 @@ spells from PoK turn-ins (items 29112, 29131, 29132).
 import json
 import os
 from collections import defaultdict
+from datetime import datetime
+from delta_storage import (
+    save_delta_snapshot, load_delta_snapshot,
+    get_week_start, get_month_start,
+    get_weekly_leaderboard, get_monthly_leaderboard
+)
 
 # Character names to look for
 MULE_CHARACTERS = [
@@ -1452,6 +1458,159 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     
     return html
 
+def generate_leaderboard_html(period_name, aa_leaderboard, hp_leaderboard, period_type):
+    """Generate HTML for weekly or monthly leaderboard page."""
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP {period_name.title()} Leaderboard</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }}
+        .container {{
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        h1 {{
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }}
+        .leaderboard {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }}
+        .leaderboard h2 {{
+            color: white;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }}
+        .leaderboard-table {{
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }}
+        .leaderboard-table th {{
+            background-color: rgba(255,255,255,0.2);
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }}
+        .leaderboard-table td {{
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }}
+        .rank-badge {{
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 10px;
+        }}
+        .rank-1 {{ background-color: #FFD700; color: #000; }}
+        .rank-2 {{ background-color: #C0C0C0; color: #000; }}
+        .rank-3 {{ background-color: #CD7F32; color: #fff; }}
+        .rank-other {{ background-color: rgba(255,255,255,0.3); color: #fff; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TAKP {period_name} Leaderboard</h1>
+"""
+    
+    # AA Leaderboard
+    if aa_leaderboard:
+        html += """
+        <div class="leaderboard">
+            <h2>🏆 Top AA Gainers</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Character</th>
+                        <th>Class</th>
+                        <th>Level</th>
+                        <th>AA Gained</th>
+                    </tr>
+                </thead>
+                <tbody>
+"""
+        for idx, entry in enumerate(aa_leaderboard, 1):
+            rank_class = "rank-1" if idx == 1 else "rank-2" if idx == 2 else "rank-3" if idx == 3 else "rank-other"
+            html += f"""
+                    <tr>
+                        <td><span class="rank-badge {rank_class}">{idx}</span></td>
+                        <td><strong>{entry['name']}</strong></td>
+                        <td>{entry['class']}</td>
+                        <td>{entry['level']}</td>
+                        <td style="color: #fff; font-weight: bold;">+{entry['gain']}</td>
+                    </tr>
+"""
+        html += """
+                </tbody>
+            </table>
+        </div>
+"""
+    
+    # HP Leaderboard
+    if hp_leaderboard:
+        html += """
+        <div class="leaderboard" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <h2>❤️ Top HP Gainers</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Character</th>
+                        <th>Class</th>
+                        <th>Level</th>
+                        <th>HP Gained</th>
+                    </tr>
+                </thead>
+                <tbody>
+"""
+        for idx, entry in enumerate(hp_leaderboard, 1):
+            rank_class = "rank-1" if idx == 1 else "rank-2" if idx == 2 else "rank-3" if idx == 3 else "rank-other"
+            html += f"""
+                    <tr>
+                        <td><span class="rank-badge {rank_class}">{idx}</span></td>
+                        <td><strong>{entry['name']}</strong></td>
+                        <td>{entry['class']}</td>
+                        <td>{entry['level']}</td>
+                        <td style="color: #fff; font-weight: bold;">+{entry['gain']}</td>
+                    </tr>
+"""
+        html += """
+                </tbody>
+            </table>
+        </div>
+"""
+    
+    html += """
+    </div>
+</body>
+</html>
+"""
+    return html
+
 def find_latest_magelo_file(directory, pattern=None):
     """Find the latest magelo dump file in a directory."""
     if not os.path.exists(directory):
@@ -1648,6 +1807,67 @@ def main():
         with open(delta_file, 'w', encoding='utf-8') as f:
             f.write(delta_html)
         print("Delta page generated successfully!")
+        
+        # Save delta snapshots for weekly/monthly tracking
+        try:
+            # Extract date from magelo_update_date or use today
+            if magelo_update_date != 'Unknown':
+                # Try to parse date from format like "Sat Feb 7 16:30:25 UTC 2026"
+                try:
+                    dt = datetime.strptime(magelo_update_date, '%a %b %d %H:%M:%S UTC %Y')
+                    date_str = dt.strftime('%Y-%m-%d')
+                except:
+                    date_str = datetime.now().strftime('%Y-%m-%d')
+            else:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+            
+            # Calculate deltas for snapshot (already calculated above)
+            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
+            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+            
+            delta_data = {
+                'char_deltas': char_deltas,
+                'inv_deltas': inv_deltas
+            }
+            
+            # Save weekly snapshot (overwrites if same week)
+            save_delta_snapshot(delta_data, 'weekly', date_str, base_dir)
+            print(f"Saved weekly delta snapshot for week starting {get_week_start(date_str)}")
+            
+            # Save monthly snapshot (overwrites if same month)
+            save_delta_snapshot(delta_data, 'monthly', date_str, base_dir)
+            print(f"Saved monthly delta snapshot for month starting {get_month_start(date_str)}")
+            
+            # Generate weekly/monthly leaderboard pages
+            week_start = get_week_start(date_str)
+            month_start = get_month_start(date_str)
+            
+            # Generate weekly leaderboard page (compare current vs weekly baseline)
+            weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, base_dir, current_char_data)
+            weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, base_dir, current_char_data)
+            weekly_html = generate_leaderboard_html(
+                f"Week of {week_start}", weekly_aa, weekly_hp, 'weekly'
+            )
+            weekly_file = os.path.join(base_dir, f"leaderboard_week_{week_start}.html")
+            with open(weekly_file, 'w', encoding='utf-8') as f:
+                f.write(weekly_html)
+            print(f"Generated weekly leaderboard: {weekly_file}")
+            
+            # Generate monthly leaderboard page (compare current vs monthly baseline)
+            monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, base_dir, current_char_data)
+            monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, base_dir, current_char_data)
+            monthly_html = generate_leaderboard_html(
+                f"Month of {month_start}", monthly_aa, monthly_hp, 'monthly'
+            )
+            monthly_file = os.path.join(base_dir, f"leaderboard_month_{month_start}.html")
+            with open(monthly_file, 'w', encoding='utf-8') as f:
+                f.write(monthly_html)
+            print(f"Generated monthly leaderboard: {monthly_file}")
+            
+        except Exception as e:
+            print(f"Warning: Could not save delta snapshots: {e}")
+            import traceback
+            traceback.print_exc()
     else:
         print("Previous day's files not found, skipping delta page generation.")
         if previous_char_file:
