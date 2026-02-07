@@ -110,6 +110,7 @@ def parse_character_data(char_file, character_list):
                         'level': int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else 0,
                         'aa_unspent': int(parts[10]) if len(parts) > 10 and parts[10].isdigit() else 0,
                         'aa_spent': int(parts[11]) if len(parts) > 11 and parts[11].isdigit() else 0,
+                        'hp_max_total': int(parts[28]) if len(parts) > 28 and parts[28].isdigit() else 0,  # Column 28 is hp_max_total
                         'class': parts[5] if len(parts) > 5 else '',  # Column 5 is class (0-indexed)
                         'race': parts[4] if len(parts) > 4 else ''
                     }
@@ -785,6 +786,8 @@ def compare_character_data(current_data, previous_data, character_list=None):
         previous_level = previous.get('level', 0)
         current_aa_total = current.get('aa_unspent', 0) + current.get('aa_spent', 0)
         previous_aa_total = previous.get('aa_unspent', 0) + previous.get('aa_spent', 0)
+        current_hp = current.get('hp_max_total', 0)
+        previous_hp = previous.get('hp_max_total', 0)
         
         # Detect deleted characters (not in current data, or level 0 in current but was > 0 in previous)
         is_deleted = (char_name not in current_data) or (current_level == 0 and previous_level > 0)
@@ -793,10 +796,13 @@ def compare_character_data(current_data, previous_data, character_list=None):
             'name': char_name,
             'level_change': current_level - previous_level if current_level < 65 and not is_deleted else 0,  # Don't track level changes for 65 or deleted
             'aa_total_change': current_aa_total - previous_aa_total,
+            'hp_change': current_hp - previous_hp,
             'current_level': current_level if not is_deleted else previous_level,  # Show previous level for deleted
             'previous_level': previous_level,
             'current_aa_total': current_aa_total if not is_deleted else previous_aa_total,  # Show previous AA for deleted
             'previous_aa_total': previous_aa_total,
+            'current_hp': current_hp if not is_deleted else previous_hp,  # Show previous HP for deleted
+            'previous_hp': previous_hp,
             'class': current.get('class', '') or previous.get('class', ''),
             'is_new': char_name not in previous_data,
             'is_deleted': is_deleted
@@ -957,6 +963,28 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     # Sort by AA gain (descending) and take top 20
     aa_leaderboard.sort(key=lambda x: x['aa_gain'], reverse=True)
     aa_leaderboard = aa_leaderboard[:20]
+    
+    # Calculate HP leaderboard (top gainers)
+    hp_leaderboard = []
+    for char_name, delta in char_deltas.items():
+        if delta.get('is_deleted', False) or delta.get('is_new', False):
+            continue
+        current_level = delta['current_level']
+        hp_gain = delta['hp_change']
+        
+        # Only include if gained HP (any level)
+        if hp_gain > 0:
+            hp_leaderboard.append({
+                'name': char_name,
+                'class': delta['class'],
+                'level': current_level,
+                'hp_gain': hp_gain,
+                'hp_total': delta['current_hp']
+            })
+    
+    # Sort by HP gain (descending) and take top 20
+    hp_leaderboard.sort(key=lambda x: x['hp_gain'], reverse=True)
+    hp_leaderboard = hp_leaderboard[:20]
     
     html = """<!DOCTYPE html>
 <html lang="en">
@@ -1119,6 +1147,42 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                         <td>{entry['level']}</td>
                         <td style="color: #4CAF50; font-weight: bold;">+{entry['aa_gain']}</td>
                         <td>{entry['aa_total']}</td>
+                    </tr>
+"""
+        html += """
+                </tbody>
+            </table>
+        </div>
+"""
+    
+    # HP Leaderboard
+    if hp_leaderboard:
+        html += """
+        <div class="leaderboard" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <h2>❤️ Top HP Gainers</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Character</th>
+                        <th>Class</th>
+                        <th>Level</th>
+                        <th>HP Gained</th>
+                        <th>Total HP</th>
+                    </tr>
+                </thead>
+                <tbody>
+"""
+        for idx, entry in enumerate(hp_leaderboard, 1):
+            rank_class = "rank-1" if idx == 1 else "rank-2" if idx == 2 else "rank-3" if idx == 3 else "rank-other"
+            html += f"""
+                    <tr>
+                        <td><span class="rank-badge {rank_class}">{idx}</span></td>
+                        <td><strong>{entry['name']}</strong></td>
+                        <td>{entry['class']}</td>
+                        <td>{entry['level']}</td>
+                        <td style="color: #fff; font-weight: bold;">+{entry['hp_gain']}</td>
+                        <td>{entry['hp_total']}</td>
                     </tr>
 """
         html += """
