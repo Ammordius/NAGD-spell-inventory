@@ -1104,6 +1104,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     <th>Class</th>
                     <th>Level</th>
                     <th>Level Change</th>
+                    <th>Total AA</th>
                     <th>AA Total Change</th>
                 </tr>
             </thead>
@@ -1131,6 +1132,14 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             else:
                 level_display = '<span class="neutral">—</span>'  # No level tracking for 65
             
+            # Total AA display
+            if is_deleted:
+                total_aa_display = f'<span style="color: #999;">{delta["previous_aa_total"]}</span>'
+            elif current_level >= 50 or delta['previous_level'] >= 50:
+                total_aa_display = str(delta['current_aa_total'])
+            else:
+                total_aa_display = '<span class="neutral">—</span>'  # No AA tracking for < 50
+            
             # AA change display (only for level 50+)
             if is_deleted:
                 # For deleted, show AA loss
@@ -1152,6 +1161,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     <td>{delta['class']}</td>
                     <td>{delta['previous_level'] if is_deleted else delta['current_level']}</td>
                     <td>{level_display}</td>
+                    <td>{total_aa_display}</td>
                     <td>{aa_display}</td>
                 </tr>
 """
