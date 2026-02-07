@@ -409,20 +409,20 @@ jobs:
         echo "✓ Prepared HTML files for GitHub Pages"
         echo "✓ Added .nojekyll to disable Jekyll"
     
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      if: github.ref == 'refs/heads/main'
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
       if: github.ref == 'refs/heads/main'
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./deploy
-        publish_branch: gh-pages
-        keep_files: false
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        force_orphan: true
-        enable_jekyll: false
-        # Disable artifact creation if the action supports it
-        cname: false
+        path: ./deploy
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      if: github.ref == 'refs/heads/main'
     
     - name: Verify deployment
       run: |
