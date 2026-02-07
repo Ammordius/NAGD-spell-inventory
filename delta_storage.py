@@ -168,8 +168,11 @@ def accumulate_monthly_deltas(month_start_date, current_char_data, base_dir='del
         'level': 0
     })
     
-    # Try to load monthly baseline
+    # Try to load monthly baseline (check multiple possible locations)
     baseline_file = os.path.join(base_dir, '..', 'character', f'baseline_month_{month_start_date}.txt')
+    if not os.path.exists(baseline_file):
+        # Try direct path
+        baseline_file = os.path.join('character', f'baseline_month_{month_start_date}.txt')
     if not os.path.exists(baseline_file):
         # Fall back to snapshot if baseline doesn't exist
         snapshot = load_delta_snapshot('monthly', month_start_date, base_dir)
