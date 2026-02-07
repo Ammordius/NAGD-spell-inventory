@@ -18,6 +18,14 @@ MULE_CHARACTERS = [
     "Magicianboy", "Necromancerboy", "Paladinboy", "Shamanboy"
 ]
 
+# Officer mule characters
+OFFICER_MULE_CHARACTERS = [
+    "Nagalchpoistink", "Nagbaker", "Nagbows", "Nagbrew",
+    "Nagclothes", "Nagpottery", "Nagshinystuff", "Nagsmith",
+    "Gemsdaddy", "Incharge", "Overflow", "Overflowfive",
+    "Overflowfour", "Overflowthree", "Overflowtwo", "Slushfund"
+]
+
 def load_spell_exchange_data():
     """Load the spell exchange JSON data and extract all spell IDs."""
     # Try multiple possible locations
@@ -67,8 +75,8 @@ def load_spell_exchange_data():
     
     return spell_info, data
 
-def parse_character_file(char_file):
-    """Parse character file to get character IDs."""
+def parse_character_file(char_file, character_list):
+    """Parse character file to get character IDs for specified characters."""
     char_ids = {}
     with open(char_file, 'r', encoding='utf-8') as f:
         # Skip header
@@ -78,7 +86,7 @@ def parse_character_file(char_file):
             if len(parts) < 9:
                 continue
             name = parts[0]
-            if name in MULE_CHARACTERS:
+            if name in character_list:
                 char_id = parts[8]  # 9th column (0-indexed = 8)
                 char_ids[name] = char_id
     return char_ids
@@ -137,7 +145,7 @@ def get_spell_sort_key(spell_id, spell_info):
     spell_name = spell_data['name']
     return (class_order, item_type_order, spell_name)
 
-def generate_html(char_ids, inventories, spell_info):
+def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, officer_inventories=None):
     """Generate the HTML page."""
     
     # Find PoK spells in inventories
@@ -151,6 +159,17 @@ def generate_html(char_ids, inventories, spell_info):
             all_items[char_name].append(item)
             if item_id in pok_spell_ids:
                 pok_spells[char_name][item_id] += 1
+    
+    # Process officer mules if provided
+    officer_pok_spells = defaultdict(lambda: defaultdict(int))
+    officer_all_items = defaultdict(list)
+    if officer_inventories:
+        for char_name, items in officer_inventories.items():
+            for item in items:
+                item_id = item['item_id']
+                officer_all_items[char_name].append(item)
+                if item_id in pok_spell_ids:
+                    officer_pok_spells[char_name][item_id] += 1
     
     # Create reverse mapping: spell_id -> list of characters who have it
     spell_to_chars = defaultdict(list)
@@ -603,7 +622,7 @@ def generate_html(char_ids, inventories, spell_info):
         <h2>Spells by Character</h2>
 """
     
-    for char_name in sorted(MULE_CHARACTERS):
+    for char_name in sorted([c for c in MULE_CHARACTERS if c in char_ids]):
         char_spells = pok_spells[char_name]
         has_spells = bool(char_spells)
         section_class = "has-spells" if has_spells else "no-spells"
@@ -656,6 +675,64 @@ def generate_html(char_ids, inventories, spell_info):
                 html += "</div></div>"
         
         html += "</div>"
+    
+    # Officer Mules section
+    if officer_inventories and officer_char_ids:
+        html += """
+        <h2>Officer Mules</h2>
+"""
+        for char_name in sorted([c for c in OFFICER_MULE_CHARACTERS if c in officer_char_ids]):
+            char_spells = officer_pok_spells[char_name]
+            has_spells = bool(char_spells)
+            section_class = "has-spells" if has_spells else "no-spells"
+            
+            html += f"""
+        <div class="character-section {section_class}">
+            <h3>{char_name}</h3>
+"""
+            if has_spells:
+                html += f"<p><strong>PoK Spells Found: {sum(char_spells.values())} total</strong></p>"
+                html += '<div class="spell-list">'
+                # Sort by class, item type, then name
+                sorted_spells = sorted(char_spells.items(), key=lambda x: get_spell_sort_key(x[0], spell_info))
+                for spell_id, count in sorted_spells:
+                    spell_data = spell_info[spell_id]
+                    html += f"""
+                <div class="spell-item">
+                    <a href="https://www.takproject.net/allaclone/item.php?id={spell_id}" target="_blank">{spell_data['name']}</a>
+                    <span class="spell-count">x{count}</span>
+                </div>
+"""
+                html += '</div>'
+            else:
+                html += "<p><em>No PoK spells found.</em></p>"
+            
+            # Show other items (non-PoK spells) - grouped by item_id
+            if char_name in officer_all_items:
+                other_items = [item for item in officer_all_items[char_name] if item['item_id'] not in pok_spell_ids]
+                if other_items:
+                    # Group items by item_id and count
+                    item_counts = defaultdict(lambda: {'name': '', 'count': 0})
+                    for item in other_items:
+                        item_id = item['item_id']
+                        item_counts[item_id]['name'] = item['item_name']
+                        item_counts[item_id]['count'] += 1
+                    
+                    html += f"""
+                <div class="other-items">
+                    <h4>Other Items ({len(other_items)} total, {len(item_counts)} unique)</h4>
+                    <div class="other-items-list">
+"""
+                    # Sort by name, then by count
+                    sorted_items = sorted(item_counts.items(), key=lambda x: (x[1]['name'], -x[1]['count']))
+                    for item_id, item_data in sorted_items[:200]:  # Limit to 200 unique items
+                        count_text = f" x{item_data['count']}" if item_data['count'] > 1 else ""
+                        html += f'<div class="other-item"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2196F3; text-decoration: none;">{item_data["name"]}</a>{count_text}</div>'
+                    if len(sorted_items) > 200:
+                        html += f'<div class="other-item"><em>... and {len(sorted_items) - 200} more unique items</em></div>'
+                    html += "</div></div>"
+            
+            html += "</div>"
     
     html += """
     </div>
@@ -720,15 +797,24 @@ def main():
     print(f"Loaded {len(spell_info)} unique PoK spells")
     
     print(f"Parsing character file: {os.path.basename(char_file)}...")
-    char_ids = parse_character_file(char_file)
-    print(f"Found {len(char_ids)} characters: {', '.join(sorted(char_ids.keys()))}")
+    char_ids = parse_character_file(char_file, MULE_CHARACTERS)
+    print(f"Found {len(char_ids)} mule characters: {', '.join(sorted(char_ids.keys()))}")
+    
+    # Parse officer mule characters
+    officer_char_ids = parse_character_file(char_file, OFFICER_MULE_CHARACTERS)
+    print(f"Found {len(officer_char_ids)} officer mule characters: {', '.join(sorted(officer_char_ids.keys()))}")
     
     print(f"Parsing inventory file: {os.path.basename(inv_file)}...")
     inventories = parse_inventory_file(inv_file, char_ids)
-    print(f"Found inventories for {len(inventories)} characters")
+    print(f"Found inventories for {len(inventories)} mule characters")
+    
+    # Parse officer mule inventories
+    officer_inventories = parse_inventory_file(inv_file, officer_char_ids) if officer_char_ids else None
+    if officer_inventories:
+        print(f"Found inventories for {len(officer_inventories)} officer mule characters")
     
     print("Generating HTML...")
-    html = generate_html(char_ids, inventories, spell_info)
+    html = generate_html(char_ids, inventories, spell_info, officer_char_ids, officer_inventories)
     
     print(f"Writing HTML to {output_file}...")
     with open(output_file, 'w', encoding='utf-8') as f:

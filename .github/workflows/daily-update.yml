@@ -2,8 +2,8 @@ name: Daily Spell Inventory Update
 
 on:
   schedule:
-    # Run daily at 2 AM UTC (adjust timezone as needed)
-    - cron: '0 2 * * *'
+    # Run daily at 17:00 UTC (30 minutes after Magelo update at 16:30 UTC)
+    - cron: '0 17 * * *'
   workflow_dispatch:  # Allow manual trigger
   push:
     branches:
