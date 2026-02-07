@@ -437,6 +437,55 @@ jobs:
         echo "Check https://github.com/${{ github.repository }}/tree/gh-pages to see the deployed files"
         echo "Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
     
+    - name: Calculate week and month boundaries
+      id: date-info
+      run: |
+        CURRENT_DATE="${{ steps.check-update.outputs.normalized_date }}"
+        if [ "$CURRENT_DATE" != "unknown" ]; then
+          WEEK_START=$(python3 -c "from datetime import datetime, timedelta; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); days_since_monday = dt.weekday(); monday = dt - timedelta(days=days_since_monday); print(monday.strftime('%Y-%m-%d'))")
+          MONTH_START=$(python3 -c "from datetime import datetime; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); print(dt.replace(day=1).strftime('%Y-%m-%d'))")
+          echo "week_start=$WEEK_START" >> $GITHUB_OUTPUT
+          echo "month_start=$MONTH_START" >> $GITHUB_OUTPUT
+        else
+          echo "week_start=" >> $GITHUB_OUTPUT
+          echo "month_start=" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Save weekly baseline (if new week)
+      run: |
+        WEEK_START="${{ steps.date-info.outputs.week_start }}"
+        if [ -n "$WEEK_START" ] && [ -f "character/TAKP_character.txt" ]; then
+          if [ ! -f "character/baseline_week_${WEEK_START}.txt" ]; then
+            cp character/TAKP_character.txt "character/baseline_week_${WEEK_START}.txt"
+            cp inventory/TAKP_character_inventory.txt "inventory/baseline_week_${WEEK_START}.txt"
+            echo "✓ Saved weekly baseline for week starting $WEEK_START"
+          fi
+        fi
+    
+    - name: Save monthly baseline (if new month)
+      run: |
+        MONTH_START="${{ steps.date-info.outputs.month_start }}"
+        if [ -n "$MONTH_START" ] && [ -f "character/TAKP_character.txt" ]; then
+          if [ ! -f "character/baseline_month_${MONTH_START}.txt" ]; then
+            cp character/TAKP_character.txt "character/baseline_month_${MONTH_START}.txt"
+            cp inventory/TAKP_character_inventory.txt "inventory/baseline_month_${MONTH_START}.txt"
+            echo "✓ Saved monthly baseline for month starting $MONTH_START"
+          fi
+        fi
+    
+    - name: Cache weekly/monthly baselines and delta snapshots
+      uses: actions/cache@v3
+      with:
+        path: |
+          character/baseline_week_*.txt
+          character/baseline_month_*.txt
+          inventory/baseline_week_*.txt
+          inventory/baseline_month_*.txt
+          delta_snapshots/
+        key: magelo-baselines-${{ steps.date-info.outputs.month_start }}
+        restore-keys: |
+          magelo-baselines-
+    
     - name: Cache current files for next run
       uses: actions/cache@v3
       with:
