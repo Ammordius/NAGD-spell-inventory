@@ -245,18 +245,10 @@ jobs:
           echo "⚠ Error: Failed to save update date file"
         fi
     
-    - name: Save current files as previous for next run
-      run: |
-        # Save current files as previous for next run's delta comparison
-        # This ensures tomorrow's run will have previous files available
-        if [ -f "character/TAKP_character.txt" ]; then
-          cp character/TAKP_character.txt character/TAKP_character_previous.txt
-          echo "✓ Saved current character file as previous for next run"
-        fi
-        if [ -f "inventory/TAKP_character_inventory.txt" ]; then
-          cp inventory/TAKP_character_inventory.txt inventory/TAKP_character_inventory_previous.txt
-          echo "✓ Saved current inventory file as previous for next run"
-        fi
+    # Note: We do NOT save current files as previous here because:
+    # 1. We already copied yesterday's cache to previous files (step 115-147)
+    # 2. Saving current files here would overwrite the previous files with today's data
+    # 3. Tomorrow's run will restore today's cache as "yesterday" and copy it to previous
     
     - name: Verify cached/downloaded files
       run: |
