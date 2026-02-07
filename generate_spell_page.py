@@ -1122,15 +1122,18 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             else:
                 char_display = f'<strong>{char_name}</strong>'
             
-            # Level change display (only for < 65, not for deleted)
+            # Level change display (only hide if they were already 65 in previous dump)
+            # Characters leveling 50-65 should show level changes
             if is_deleted:
                 level_display = f'<span class="negative">Deleted (was {delta["previous_level"]})</span>'
-            elif current_level < 65:
+            elif delta['previous_level'] == 65:
+                # Was already 65, can't level anymore
+                level_display = '<span class="neutral">—</span>'  # No level tracking for already-65
+            else:
+                # Show level changes for characters leveling (including those who just reached 65)
                 level_class = "positive" if delta['level_change'] > 0 else "negative" if delta['level_change'] < 0 else "neutral"
                 level_text = f"+{delta['level_change']}" if delta['level_change'] > 0 else str(delta['level_change'])
                 level_display = f'<span class="{level_class}">{level_text} ({delta["previous_level"]} → {delta["current_level"]})</span>'
-            else:
-                level_display = '<span class="neutral">—</span>'  # No level tracking for 65
             
             # Total AA display
             if is_deleted:
