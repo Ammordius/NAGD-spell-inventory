@@ -91,6 +91,32 @@ def parse_character_file(char_file, character_list):
                 char_ids[name] = char_id
     return char_ids
 
+def parse_character_data(char_file, character_list):
+    """Parse character file to get full character data (level, AA, etc.) for specified characters.
+    If character_list is None, parses all characters (serverwide)."""
+    char_data = {}
+    with open(char_file, 'r', encoding='utf-8') as f:
+        # Skip header
+        header = next(f).strip().split('\t')
+        for line in f:
+            parts = line.strip().split('\t')
+            if len(parts) < 12:
+                continue
+            name = parts[0]
+            if character_list is None or name in character_list:
+                try:
+                    char_data[name] = {
+                        'id': parts[8] if len(parts) > 8 else '',
+                        'level': int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else 0,
+                        'aa_unspent': int(parts[10]) if len(parts) > 10 and parts[10].isdigit() else 0,
+                        'aa_spent': int(parts[11]) if len(parts) > 11 and parts[11].isdigit() else 0,
+                        'class': parts[5] if len(parts) > 5 else '',  # Column 5 is class (0-indexed)
+                        'race': parts[4] if len(parts) > 4 else ''
+                    }
+                except (ValueError, IndexError):
+                    continue
+    return char_data
+
 def parse_inventory_file(inv_file, char_ids):
     """Parse inventory file to get items for each character."""
     inventories = defaultdict(list)
@@ -742,6 +768,462 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
     
     return html
 
+def compare_character_data(current_data, previous_data, character_list=None):
+    """Compare current and previous character data to find deltas.
+    If character_list is None, compares all characters (serverwide)."""
+    deltas = {}
+    all_chars = set(list(current_data.keys()) + list(previous_data.keys()))
+    
+    for char_name in all_chars:
+        if character_list is not None and char_name not in character_list:
+            continue
+            
+        current = current_data.get(char_name, {})
+        previous = previous_data.get(char_name, {})
+        
+        current_level = current.get('level', 0)
+        previous_level = previous.get('level', 0)
+        current_aa_total = current.get('aa_unspent', 0) + current.get('aa_spent', 0)
+        previous_aa_total = previous.get('aa_unspent', 0) + previous.get('aa_spent', 0)
+        
+        # Detect deleted characters (not in current data, or level 0 in current but was > 0 in previous)
+        is_deleted = (char_name not in current_data) or (current_level == 0 and previous_level > 0)
+        
+        delta = {
+            'name': char_name,
+            'level_change': current_level - previous_level if current_level < 65 and not is_deleted else 0,  # Don't track level changes for 65 or deleted
+            'aa_total_change': current_aa_total - previous_aa_total,
+            'current_level': current_level if not is_deleted else previous_level,  # Show previous level for deleted
+            'previous_level': previous_level,
+            'current_aa_total': current_aa_total if not is_deleted else previous_aa_total,  # Show previous AA for deleted
+            'previous_aa_total': previous_aa_total,
+            'class': current.get('class', '') or previous.get('class', ''),
+            'is_new': char_name not in previous_data,
+            'is_deleted': is_deleted
+        }
+        
+        # Only include if there are changes or it's new/deleted
+        # For level 65, only show if AA changed (and level 50+)
+        # For < 65, show if level or AA changed (and level 50+ for AA)
+        has_level_change = delta['level_change'] != 0 and current_level < 65 and not is_deleted
+        has_aa_change = delta['aa_total_change'] != 0 and ((current_level >= 50 or previous_level >= 50) if not is_deleted else previous_level >= 50)
+        
+        if has_level_change or has_aa_change or delta['is_new'] or delta['is_deleted']:
+            deltas[char_name] = delta
+    
+    return deltas
+
+def compare_inventories(current_inv, previous_inv, character_list=None):
+    """Compare current and previous inventories to find item deltas.
+    If character_list is None, compares all characters (serverwide)."""
+    item_deltas = {}
+    
+    # Get all characters from both inventories
+    all_chars = set(list(current_inv.keys()) + list(previous_inv.keys()))
+    if character_list is not None:
+        all_chars = all_chars.intersection(set(character_list))
+    
+    for char_name in all_chars:
+        if char_name not in current_inv and char_name not in previous_inv:
+            continue
+            
+        current_items = defaultdict(int)
+        previous_items = defaultdict(int)
+        
+        # Count items in current inventory
+        if char_name in current_inv:
+            for item in current_inv[char_name]:
+                item_id = item['item_id']
+                current_items[item_id] += 1
+        
+        # Count items in previous inventory
+        if char_name in previous_inv:
+            for item in previous_inv[char_name]:
+                item_id = item['item_id']
+                previous_items[item_id] += 1
+        
+        # Find added and removed items
+        added_items = {}
+        removed_items = {}
+        
+        for item_id, count in current_items.items():
+            prev_count = previous_items.get(item_id, 0)
+            if count > prev_count:
+                added_items[item_id] = count - prev_count
+        
+        for item_id, count in previous_items.items():
+            curr_count = current_items.get(item_id, 0)
+            if count > curr_count:
+                removed_items[item_id] = count - curr_count
+        
+        if added_items or removed_items:
+            item_deltas[char_name] = {
+                'added': added_items,
+                'removed': removed_items,
+                'item_names': {}  # Will be populated with item names
+            }
+    
+    return item_deltas
+
+def generate_delta_html(current_char_data, previous_char_data, current_inv, previous_inv, 
+                        magelo_update_date, serverwide=True):
+    """Generate HTML page showing deltas between current and previous magelo dump.
+    If serverwide is True, compares all characters, otherwise only mules."""
+    
+    # Compare character data (serverwide)
+    char_deltas = compare_character_data(current_char_data, previous_char_data, None if serverwide else None)
+    
+    # Compare inventories (serverwide)
+    inv_deltas = compare_inventories(current_inv, previous_inv, None if serverwide else None)
+    
+    # Get item names for inventory deltas
+    all_item_ids = set()
+    for char_delta in inv_deltas.values():
+        all_item_ids.update(char_delta['added'].keys())
+        all_item_ids.update(char_delta['removed'].keys())
+    
+    # Try to get item names from current inventory
+    item_names = {}
+    for char_name, items in current_inv.items():
+        for item in items:
+            if item['item_id'] in all_item_ids:
+                item_names[item['item_id']] = item['item_name']
+    
+    # Populate item names in deltas
+    for char_delta in inv_deltas.values():
+        for item_id in char_delta['added']:
+            if item_id in item_names:
+                char_delta['item_names'][item_id] = item_names[item_id]
+        for item_id in char_delta['removed']:
+            if item_id in item_names:
+                char_delta['item_names'][item_id] = item_names[item_id]
+    
+    # Calculate AA leaderboard (top gainers)
+    aa_leaderboard = []
+    for char_name, delta in char_deltas.items():
+        if delta.get('is_deleted', False) or delta.get('is_new', False):
+            continue
+        current_level = delta['current_level']
+        previous_level = delta['previous_level']
+        aa_gain = delta['aa_total_change']
+        
+        # Only include if level 50+ and gained AA
+        if (current_level >= 50 or previous_level >= 50) and aa_gain > 0:
+            aa_leaderboard.append({
+                'name': char_name,
+                'class': delta['class'],
+                'level': current_level,
+                'aa_gain': aa_gain,
+                'aa_total': delta['current_aa_total']
+            })
+    
+    # Sort by AA gain (descending) and take top 20
+    aa_leaderboard.sort(key=lambda x: x['aa_gain'], reverse=True)
+    aa_leaderboard = aa_leaderboard[:20]
+    
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Mule Delta Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #2196F3;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .delta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .delta-table th, .delta-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .delta-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .positive {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .negative {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .neutral {
+            color: #666;
+        }
+        .item-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .item-badge {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .item-added {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .item-removed {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .no-changes {
+            color: #999;
+            font-style: italic;
+        }
+        .leaderboard {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .leaderboard h2 {
+            color: white;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .leaderboard-table th {
+            background-color: rgba(255,255,255,0.2);
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .leaderboard-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .leaderboard-table tr:hover {
+            background-color: rgba(255,255,255,0.15);
+        }
+        .rank-badge {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .rank-1 { background-color: #FFD700; color: #000; }
+        .rank-2 { background-color: #C0C0C0; color: #000; }
+        .rank-3 { background-color: #CD7F32; color: #fff; }
+        .rank-other { background-color: rgba(255,255,255,0.3); color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TAKP Mule Delta Report</h1>
+        <p>Changes detected since previous magelo dump (last updated: """ + magelo_update_date + """)</p>
+"""
+    
+    # AA Leaderboard
+    if aa_leaderboard:
+        html += """
+        <div class="leaderboard">
+            <h2>🏆 Top AA Gainers</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Character</th>
+                        <th>Class</th>
+                        <th>Level</th>
+                        <th>AA Gained</th>
+                        <th>Total AA</th>
+                    </tr>
+                </thead>
+                <tbody>
+"""
+        for idx, entry in enumerate(aa_leaderboard, 1):
+            rank_class = "rank-1" if idx == 1 else "rank-2" if idx == 2 else "rank-3" if idx == 3 else "rank-other"
+            html += f"""
+                    <tr>
+                        <td><span class="rank-badge {rank_class}">{idx}</span></td>
+                        <td><strong>{entry['name']}</strong></td>
+                        <td>{entry['class']}</td>
+                        <td>{entry['level']}</td>
+                        <td style="color: #4CAF50; font-weight: bold;">+{entry['aa_gain']}</td>
+                        <td>{entry['aa_total']}</td>
+                    </tr>
+"""
+        html += """
+                </tbody>
+            </table>
+        </div>
+"""
+    
+    html += """
+"""
+    
+    # Character level and AA changes
+    if char_deltas:
+        html += """
+        <h2>Character Level & AA Changes</h2>
+        <table class="delta-table">
+            <thead>
+                <tr>
+                    <th>Character</th>
+                    <th>Class</th>
+                    <th>Level</th>
+                    <th>Level Change</th>
+                    <th>AA Total Change</th>
+                </tr>
+            </thead>
+            <tbody>
+"""
+        # Sort all deltas
+        for char_name in sorted(char_deltas.keys()):
+            delta = char_deltas[char_name]
+            current_level = delta['current_level']
+            is_deleted = delta.get('is_deleted', False)
+            
+            # Character name display - mark deleted characters
+            if is_deleted:
+                char_display = f'<strong style="color: #999; text-decoration: line-through;">{char_name}</strong> <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>'
+            else:
+                char_display = f'<strong>{char_name}</strong>'
+            
+            # Level change display (only for < 65, not for deleted)
+            if is_deleted:
+                level_display = f'<span class="negative">Deleted (was {delta["previous_level"]})</span>'
+            elif current_level < 65:
+                level_class = "positive" if delta['level_change'] > 0 else "negative" if delta['level_change'] < 0 else "neutral"
+                level_text = f"+{delta['level_change']}" if delta['level_change'] > 0 else str(delta['level_change'])
+                level_display = f'<span class="{level_class}">{level_text} ({delta["previous_level"]} → {delta["current_level"]})</span>'
+            else:
+                level_display = '<span class="neutral">—</span>'  # No level tracking for 65
+            
+            # AA change display (only for level 50+)
+            if is_deleted:
+                # For deleted, show AA loss
+                aa_total_change = delta['aa_total_change']
+                aa_class = "negative"
+                aa_text = f"{aa_total_change}" if aa_total_change < 0 else f"-{delta['previous_aa_total']}"
+                aa_display = f'<span class="{aa_class}">{aa_text} (was {delta["previous_aa_total"]})</span>'
+            elif current_level >= 50 or delta['previous_level'] >= 50:
+                aa_total_change = delta['aa_total_change']
+                aa_class = "positive" if aa_total_change > 0 else "negative" if aa_total_change < 0 else "neutral"
+                aa_text = f"+{aa_total_change}" if aa_total_change > 0 else str(aa_total_change)
+                aa_display = f'<span class="{aa_class}">{aa_text}</span>'
+            else:
+                aa_display = '<span class="neutral">—</span>'  # No AA tracking for < 50
+            
+            html += f"""
+                <tr>
+                    <td>{char_display}</td>
+                    <td>{delta['class']}</td>
+                    <td>{delta['previous_level'] if is_deleted else delta['current_level']}</td>
+                    <td>{level_display}</td>
+                    <td>{aa_display}</td>
+                </tr>
+"""
+        html += """
+            </tbody>
+        </table>
+"""
+    else:
+        html += """
+        <h2>Character Level & AA Changes</h2>
+        <p class="no-changes">No level or AA changes detected.</p>
+"""
+    
+    # Inventory changes
+    if inv_deltas:
+        html += """
+        <h2>Inventory Changes</h2>
+        <p><em>Showing characters with inventory changes (limited to first 500 characters for performance)</em></p>
+"""
+        # Limit to first 500 characters for performance
+        sorted_chars = sorted(inv_deltas.keys())[:500]
+        for char_name in sorted_chars:
+            delta = inv_deltas[char_name]
+            html += f"""
+        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+            <h3>{char_name}</h3>
+"""
+            if delta['added']:
+                html += """
+            <div style="margin: 10px 0;">
+                <strong style="color: #4CAF50;">Items Added:</strong>
+                <div class="item-list" style="margin-top: 5px;">
+"""
+                for item_id, count in sorted(delta['added'].items()):
+                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                    count_text = f" x{count}" if count > 1 else ""
+                    html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                html += """
+                </div>
+            </div>
+"""
+            if delta['removed']:
+                html += """
+            <div style="margin: 10px 0;">
+                <strong style="color: #f44336;">Items Removed:</strong>
+                <div class="item-list" style="margin-top: 5px;">
+"""
+                for item_id, count in sorted(delta['removed'].items()):
+                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                    count_text = f" x{count}" if count > 1 else ""
+                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                html += """
+                </div>
+            </div>
+"""
+            html += """
+        </div>
+"""
+    else:
+        html += """
+        <h2>Inventory Changes</h2>
+        <p class="no-changes">No inventory changes detected.</p>
+"""
+    
+    html += """
+    </div>
+</body>
+</html>
+"""
+    
+    return html
+
 def find_latest_magelo_file(directory, pattern=None):
     """Find the latest magelo dump file in a directory."""
     if not os.path.exists(directory):
@@ -819,6 +1301,89 @@ def main():
     print(f"Writing HTML to {output_file}...")
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html)
+    
+    # Try to generate delta page if previous day's files exist
+    # For prototyping, check for specific files first
+    previous_char_file = None
+    previous_inv_file = None
+    
+    # Check for prototype files first
+    proto_prev_char = os.path.join(char_dir, "1_14_24.txt")
+    proto_prev_inv = os.path.join(inv_dir, "1_14_24.txt")
+    proto_curr_char = os.path.join(char_dir, "1_17_24.txt")
+    proto_curr_inv = os.path.join(inv_dir, "1_17_24.txt")
+    
+    if os.path.exists(proto_prev_char) and os.path.exists(proto_prev_inv) and \
+       os.path.exists(proto_curr_char) and os.path.exists(proto_curr_inv):
+        print("Prototype files found (1_14_24 and 1_17_24), generating serverwide delta page...")
+        previous_char_file = proto_prev_char
+        previous_inv_file = proto_prev_inv
+        current_char_file = proto_curr_char
+        current_inv_file = proto_curr_inv
+    else:
+        # Check for previous day's files from workflow
+        previous_char_file = os.path.join(char_dir, "TAKP_character_previous.txt")
+        previous_inv_file = os.path.join(inv_dir, "TAKP_character_inventory_previous.txt")
+        current_char_file = char_file
+        current_inv_file = inv_file
+    
+    if previous_char_file and previous_inv_file and \
+       os.path.exists(previous_char_file) and os.path.exists(previous_inv_file):
+        print(f"Previous: {os.path.basename(previous_char_file)}, Current: {os.path.basename(current_char_file)}")
+        
+        # Parse ALL character data (serverwide, not just mules)
+        # Pass None to get all characters
+        print("Parsing all characters (serverwide) for delta comparison...")
+        previous_char_data = parse_character_data(previous_char_file, None)
+        current_char_data = parse_character_data(current_char_file, None)
+        print(f"Found {len(previous_char_data)} characters in previous, {len(current_char_data)} in current")
+        
+        # Parse ALL inventories (serverwide)
+        previous_char_ids = {}
+        current_char_ids = {}
+        with open(previous_char_file, 'r', encoding='utf-8') as f:
+            next(f)  # Skip header
+            for line in f:
+                parts = line.strip().split('\t')
+                if len(parts) >= 9:
+                    name = parts[0]
+                    char_id = parts[8]
+                    previous_char_ids[name] = char_id
+        
+        with open(current_char_file, 'r', encoding='utf-8') as f:
+            next(f)  # Skip header
+            for line in f:
+                parts = line.strip().split('\t')
+                if len(parts) >= 9:
+                    name = parts[0]
+                    char_id = parts[8]
+                    current_char_ids[name] = char_id
+        
+        # Parse all inventories
+        previous_inventories = parse_inventory_file(previous_inv_file, previous_char_ids) if previous_char_ids else {}
+        current_inventories = parse_inventory_file(current_inv_file, current_char_ids) if current_char_ids else {}
+        print(f"Found {len(previous_inventories)} characters with inventory in previous, {len(current_inventories)} in current")
+        
+        # Get magelo update date
+        magelo_update_date = os.environ.get('MAGELO_UPDATE_DATE', 'Unknown')
+        
+        # Generate delta HTML (serverwide)
+        delta_html = generate_delta_html(
+            current_char_data, previous_char_data,
+            current_inventories, previous_inventories,
+            magelo_update_date,
+            serverwide=True
+        )
+        
+        delta_file = os.path.join(base_dir, "delta.html")
+        print(f"Writing delta HTML to {delta_file}...")
+        with open(delta_file, 'w', encoding='utf-8') as f:
+            f.write(delta_html)
+        print("Delta page generated successfully!")
+    else:
+        print("Previous day's files not found, skipping delta page generation.")
+        if previous_char_file:
+            print(f"Looking for: {previous_char_file} and {previous_inv_file}")
     
     print("Done!")
 
