@@ -404,13 +404,23 @@ jobs:
         else
           echo "No delta.html found (previous day's files may not exist)"
         fi
-        # Copy weekly/monthly leaderboard pages
+        # Copy weekly/monthly leaderboard pages (all of them to preserve history)
+        # First copy any existing leaderboards from previous runs (if keep_files is true)
+        # Then copy newly generated ones
         for file in leaderboard_week_*.html leaderboard_month_*.html; do
           if [ -f "$file" ]; then
             cp "$file" deploy/
             echo "✓ Copied $file to deploy directory"
           fi
         done
+        # Also check deploy directory for existing leaderboards to preserve
+        if [ -d "deploy" ]; then
+          for file in deploy/leaderboard_week_*.html deploy/leaderboard_month_*.html; do
+            if [ -f "$file" ]; then
+              echo "Preserving existing leaderboard: $(basename $file)"
+            fi
+          done
+        fi
         # Add .nojekyll to disable Jekyll processing
         touch deploy/.nojekyll
         echo "✓ Prepared HTML files for GitHub Pages"
@@ -423,10 +433,10 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./deploy
         publish_branch: gh-pages
-        keep_files: false
+        keep_files: true
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
-        force_orphan: true
+        force_orphan: false
         enable_jekyll: false
     
     - name: Verify deployment
