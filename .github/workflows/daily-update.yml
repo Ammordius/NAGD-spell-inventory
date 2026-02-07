@@ -108,6 +108,7 @@ jobs:
           inventory/TAKP_character_inventory_yesterday.txt
         key: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
         restore-keys: |
+          magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
           magelo-dump-
     
     - name: Copy yesterday's files to previous
@@ -362,3 +363,5 @@ jobs:
           inventory/TAKP_character_inventory.txt
           .magelo_update_date
         key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
+        restore-keys: |
+          magelo-dump-
