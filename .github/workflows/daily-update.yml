@@ -66,18 +66,9 @@ jobs:
           echo "Cleaned date: $UPDATE_DATE"
           
           # Use Python to parse and normalize the date to YYYY-MM-DD
-          # Escape single quotes in the date string for Python
-          UPDATE_DATE_ESCAPED=$(echo "$UPDATE_DATE" | sed "s/'/\\\\'/g")
-          DATE_NORMALIZED=$(python3 <<EOF
-import sys
-from datetime import datetime
-try:
-    dt = datetime.strptime('$UPDATE_DATE_ESCAPED', '%a %b %d %H:%M:%S UTC %Y')
-    print(dt.strftime('%Y-%m-%d'))
-except Exception as e:
-    print('error-' + str(e))
-EOF
-)
+          # Use environment variable to avoid shell escaping issues
+          export UPDATE_DATE_VAR="$UPDATE_DATE"
+          DATE_NORMALIZED=$(python3 -c "import os; from datetime import datetime; dt = datetime.strptime(os.environ['UPDATE_DATE_VAR'], '%a %b %d %H:%M:%S UTC %Y'); print(dt.strftime('%Y-%m-%d'))" 2>&1 || echo "error-parse-failed")
           
           if [[ "$DATE_NORMALIZED" == error-* ]]; then
             echo "Warning: Could not parse date: $DATE_NORMALIZED"
