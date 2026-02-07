@@ -1159,6 +1159,17 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             <div class="nav-links">
 """
     
+    # Split inventory deltas by level 1 (mules/traders) vs others
+    inv_deltas_level1 = {}
+    inv_deltas_others = {}
+    for char_name, delta in inv_deltas.items():
+        # Check if character is level 1 in current data
+        char_level = current_char_data.get(char_name, {}).get('level', 0)
+        if char_level == 1:
+            inv_deltas_level1[char_name] = delta
+        else:
+            inv_deltas_others[char_name] = delta
+    
     # Build navigation links based on what sections will be shown
     nav_links = []
     if aa_leaderboard:
@@ -1167,7 +1178,9 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append('<a href="#hp-leaderboard" class="hp-link">❤️ HP Leaderboard</a>')
     if char_deltas:
         nav_links.append('<a href="#character-changes">Character Changes</a>')
-    if inv_deltas:
+    if inv_deltas_level1:
+        nav_links.append('<a href="#inventory-changes-level1">Level 1 (Mules/Traders)</a>')
+    if inv_deltas_others:
         nav_links.append('<a href="#inventory-changes">Inventory Changes</a>')
     
     html += "".join(nav_links)
@@ -1336,19 +1349,63 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         <p class="no-changes">No level or AA changes detected.</p>
 """
     
-    # Inventory changes
-    if inv_deltas:
+    # Level 1 inventory changes (mules/traders)
+    if inv_deltas_level1:
+        html += """
+        <h2 id="inventory-changes-level1">Level 1 Inventory Changes (Mules/Traders)</h2>
+        <p><em>Showing level 1 characters with inventory changes (limited to first 500 characters for performance)</em></p>
+"""
+        sorted_chars = sorted(inv_deltas_level1.keys())[:500]
+        for char_name in sorted_chars:
+            delta = inv_deltas_level1[char_name]
+            html += f"""
+        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
+            <h3><strong>{char_name}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1 - Mule/Trader)</span></h3>
+"""
+            if delta['added']:
+                html += """
+            <div style="margin: 10px 0;">
+                <strong style="color: #4CAF50;">Items Added:</strong>
+                <div class="item-list" style="margin-top: 5px;">
+"""
+                for item_id, count in sorted(delta['added'].items()):
+                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                    count_text = f" x{count}" if count > 1 else ""
+                    html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                html += """
+                </div>
+            </div>
+"""
+            if delta['removed']:
+                html += """
+            <div style="margin: 10px 0;">
+                <strong style="color: #f44336;">Items Removed:</strong>
+                <div class="item-list" style="margin-top: 5px;">
+"""
+                for item_id, count in sorted(delta['removed'].items()):
+                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                    count_text = f" x{count}" if count > 1 else ""
+                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                html += """
+                </div>
+            </div>
+"""
+            html += """
+        </div>
+"""
+    
+    # Regular inventory changes (non-level 1)
+    if inv_deltas_others:
         html += """
         <h2 id="inventory-changes">Inventory Changes</h2>
         <p><em>Showing characters with inventory changes (limited to first 500 characters for performance)</em></p>
 """
-        # Limit to first 500 characters for performance
-        sorted_chars = sorted(inv_deltas.keys())[:500]
+        sorted_chars = sorted(inv_deltas_others.keys())[:500]
         for char_name in sorted_chars:
-            delta = inv_deltas[char_name]
+            delta = inv_deltas_others[char_name]
             html += f"""
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <h3>{char_name}</h3>
+            <h3><strong>{char_name}</strong></h3>
 """
             if delta['added']:
                 html += """
