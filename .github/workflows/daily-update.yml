@@ -27,9 +27,36 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Get today's date
-      id: date
-      run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+    - name: Check TAKP export page for update date
+      id: check-update
+      run: |
+        echo "Fetching TAKP export page to check last update date..."
+        EXPORT_PAGE=$(curl -sL "https://www.takproject.net/magelo/export/")
+        
+        # Extract the date line (format: "Fri Feb 6 16:30:25 UTC 2026")
+        UPDATE_DATE=$(echo "$EXPORT_PAGE" | grep -oE '[A-Z][a-z]{2} [A-Z][a-z]{2} [0-9]{1,2} [0-9]{2}:[0-9]{2}:[0-9]{2} UTC [0-9]{4}' | head -1)
+        
+        if [ -z "$UPDATE_DATE" ]; then
+          echo "Warning: Could not extract update date from export page"
+          UPDATE_DATE="Unknown"
+          DATE_NORMALIZED="unknown"
+        else
+          echo "Last update date on TAKP: $UPDATE_DATE"
+          # Use Python to parse and normalize the date to YYYY-MM-DD
+          DATE_NORMALIZED=$(python3 -c "
+          import sys
+          from datetime import datetime
+          try:
+              dt = datetime.strptime('$UPDATE_DATE', '%a %b %d %H:%M:%S UTC %Y')
+              print(dt.strftime('%Y-%m-%d'))
+          except:
+              print('$UPDATE_DATE')
+          ")
+        fi
+        
+        echo "update_date=$UPDATE_DATE" >> $GITHUB_OUTPUT
+        echo "normalized_date=$DATE_NORMALIZED" >> $GITHUB_OUTPUT
+        echo "Using normalized date for cache: $DATE_NORMALIZED"
     
     - name: Cache magelo dump files
       uses: actions/cache@v3
@@ -38,12 +65,37 @@ jobs:
         path: |
           character/TAKP_character.txt
           inventory/TAKP_character_inventory.txt
-        key: magelo-dump-${{ steps.date.outputs.date }}
+          .magelo_update_date
+        key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
         restore-keys: |
           magelo-dump-
     
-    - name: Download magelo dump from TAKP (if not cached)
-      if: steps.cache-magelo.outputs.cache-hit != 'true'
+    - name: Check if update is needed
+      id: need-update
+      run: |
+        if [ "${{ steps.cache-magelo.outputs.cache-hit }}" == "true" ]; then
+          # Check if cached date matches current date
+          if [ -f ".magelo_update_date" ]; then
+            CACHED_DATE=$(cat .magelo_update_date)
+            CURRENT_DATE="${{ steps.check-update.outputs.update_date }}"
+            if [ "$CACHED_DATE" == "$CURRENT_DATE" ]; then
+              echo "✓ Magelo dump is up to date (date: $CACHED_DATE)"
+              echo "needs_update=false" >> $GITHUB_OUTPUT
+            else
+              echo "Magelo dump needs update (cached: $CACHED_DATE, current: $CURRENT_DATE)"
+              echo "needs_update=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "No cached date found, will download"
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "No cache hit, will download"
+          echo "needs_update=true" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Download magelo dump from TAKP (if update needed)
+      if: steps.need-update.outputs.needs_update == 'true'
       run: |
         # Create directories
         mkdir -p character inventory
@@ -60,9 +112,13 @@ jobs:
           exit 1
         }
         
+        # Save the update date
+        echo "${{ steps.check-update.outputs.update_date }}" > .magelo_update_date
+        
         echo "✓ Successfully downloaded magelo dump files"
         echo "Character file size: $(wc -l < character/TAKP_character.txt) lines"
         echo "Inventory file size: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
+        echo "Update date: ${{ steps.check-update.outputs.update_date }}"
     
     - name: Verify cached/downloaded files
       run: |
@@ -87,7 +143,19 @@ jobs:
         echo "✓ Found spell_exchange_list.json"
         echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
+    - name: Read magelo update date
+      id: read-date
+      run: |
+        if [ -f ".magelo_update_date" ]; then
+          UPDATE_DATE=$(cat .magelo_update_date)
+          echo "update_date=$UPDATE_DATE" >> $GITHUB_OUTPUT
+        else
+          echo "update_date=Unknown" >> $GITHUB_OUTPUT
+        fi
+    
     - name: Run spell inventory generator
+      env:
+        MAGELO_UPDATE_DATE: ${{ steps.read-date.outputs.update_date }}
       run: |
         python generate_spell_page.py
     

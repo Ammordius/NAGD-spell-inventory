@@ -158,6 +158,9 @@ def generate_html(char_ids, inventories, spell_info):
         for spell_id, count in spells.items():
             spell_to_chars[spell_id].append((char_name, count))
     
+    # Get magelo update date from environment variable or use default
+    magelo_update_date = os.environ.get('MAGELO_UPDATE_DATE', 'Unknown')
+    
     html = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -361,7 +364,7 @@ def generate_html(char_ids, inventories, spell_info):
 <body>
     <div class="container">
         <h1>TAKP Mule PoK Spell Inventory</h1>
-        <p>Generated from magelo dump: 2_6_26.txt</p>
+        <p>Generated from magelo dump (last updated: """ + magelo_update_date + """)</p>
         <p>This page shows spells that can be obtained from PoK turn-ins (Ethereal Parchment, Spectral Parchment, Glyphed Rune Word)</p>
         
         <div class="summary">
