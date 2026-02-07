@@ -1165,6 +1165,31 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             <div class="nav-links">
 """
     
+    # Calculate week and month for leaderboard links
+    try:
+        if magelo_update_date != 'Unknown':
+            from datetime import datetime
+            try:
+                dt = datetime.strptime(magelo_update_date, '%a %b %d %H:%M:%S UTC %Y')
+                date_str = dt.strftime('%Y-%m-%d')
+            except:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+        else:
+            from datetime import datetime
+            date_str = datetime.now().strftime('%Y-%m-%d')
+        
+        week_start = get_week_start(date_str)
+        month_start = get_month_start(date_str)
+        
+        # Add weekly/monthly leaderboard links
+        html += f"""
+            <a href="leaderboard_week_{week_start}.html" style="background-color: #2196F3;">📅 Weekly Leaderboard</a>
+            <a href="leaderboard_month_{month_start}.html" style="background-color: #9C27B0;">📆 Monthly Leaderboard</a>
+"""
+    except Exception as e:
+        print(f"Warning: Could not generate leaderboard links: {e}")
+        pass
+    
     # Split inventory deltas by level 1 (mules/traders) vs others
     inv_deltas_level1 = {}
     inv_deltas_others = {}
@@ -1175,6 +1200,26 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             inv_deltas_level1[char_name] = delta
         else:
             inv_deltas_others[char_name] = delta
+    
+    # Calculate week and month for leaderboard links
+    week_start = None
+    month_start = None
+    try:
+        if magelo_update_date != 'Unknown':
+            from datetime import datetime
+            try:
+                dt = datetime.strptime(magelo_update_date, '%a %b %d %H:%M:%S UTC %Y')
+                date_str = dt.strftime('%Y-%m-%d')
+            except:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+        else:
+            from datetime import datetime
+            date_str = datetime.now().strftime('%Y-%m-%d')
+        
+        week_start = get_week_start(date_str)
+        month_start = get_month_start(date_str)
+    except Exception as e:
+        print(f"Warning: Could not calculate week/month for leaderboard links: {e}")
     
     # Build navigation links based on what sections will be shown
     nav_links = []
@@ -1188,6 +1233,12 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append('<a href="#inventory-changes-level1">Level 1 (Mules/Traders)</a>')
     if inv_deltas_others:
         nav_links.append('<a href="#inventory-changes">Inventory Changes</a>')
+    
+    # Add weekly/monthly leaderboard links
+    if week_start:
+        nav_links.append(f'<a href="leaderboard_week_{week_start}.html" style="background-color: #2196F3;">📅 Weekly Leaderboard</a>')
+    if month_start:
+        nav_links.append(f'<a href="leaderboard_month_{month_start}.html" style="background-color: #9C27B0;">📆 Monthly Leaderboard</a>')
     
     html += "".join(nav_links)
     html += """
