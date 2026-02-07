@@ -319,35 +319,82 @@ jobs:
         fi
         
         # Run the generator
+        echo "Running Python script to generate pages..."
         python generate_spell_page.py
         
         # Verify the date appears in the generated HTML
         if [ -f "spell_inventory.html" ]; then
+          echo "✓ spell_inventory.html generated"
           if grep -q "last updated: $MAGELO_UPDATE_DATE" spell_inventory.html; then
             echo "✓ Date successfully included in HTML"
           else
             echo "⚠ Warning: Date may not be in HTML, checking..."
             grep -o "last updated: [^<]*" spell_inventory.html | head -1 || echo "Could not find date in HTML"
           fi
+        else
+          echo "⚠ Error: spell_inventory.html was not generated"
+        fi
+        
+        # Check for delta page
+        if [ -f "delta.html" ]; then
+          echo "✓ delta.html was generated"
+          echo "Delta file size: $(wc -c < delta.html) bytes"
+          echo "Delta file preview (first 10 lines):"
+          head -10 delta.html
+        else
+          echo "⚠ delta.html was NOT generated"
+          echo "Checking for previous files..."
+          if [ -f "character/TAKP_character_previous.txt" ]; then
+            echo "  - Previous character file exists: $(wc -l < character/TAKP_character_previous.txt) lines"
+          else
+            echo "  - Previous character file NOT found"
+          fi
+          if [ -f "inventory/TAKP_character_inventory_previous.txt" ]; then
+            echo "  - Previous inventory file exists: $(wc -l < inventory/TAKP_character_inventory_previous.txt) lines"
+          else
+            echo "  - Previous inventory file NOT found"
+          fi
         fi
     
     - name: Verify HTML was generated
       run: |
+        echo "=== Verifying generated files ==="
         if [ ! -f "spell_inventory.html" ]; then
           echo "Error: spell_inventory.html was not generated"
           exit 1
         fi
-        echo "✓ HTML file generated successfully"
+        echo "✓ spell_inventory.html generated successfully"
         echo "File size: $(wc -c < spell_inventory.html) bytes"
         echo "File preview (first 5 lines):"
         head -5 spell_inventory.html
         
         # Check for delta page
+        echo ""
+        echo "=== Checking for delta.html ==="
         if [ -f "delta.html" ]; then
-          echo "✓ Delta HTML file generated successfully"
+          echo "✓ delta.html generated successfully"
           echo "Delta file size: $(wc -c < delta.html) bytes"
+          echo "Delta file preview (first 10 lines):"
+          head -10 delta.html
+          echo ""
+          echo "Checking delta content..."
+          if grep -q "Character Level & AA Changes" delta.html; then
+            echo "✓ Delta page contains character changes section"
+          fi
+          if grep -q "No.*changes detected" delta.html; then
+            echo "⚠ Delta page shows 'No changes detected' - files may be identical"
+          fi
         else
-          echo "⚠ No delta.html found (previous files may not exist)"
+          echo "⚠ delta.html was NOT generated"
+          echo "Checking why..."
+          echo "Files in current directory:"
+          ls -la *.html 2>/dev/null || echo "No HTML files found"
+          echo ""
+          echo "Files in character/ directory:"
+          ls -la character/ 2>/dev/null | head -10
+          echo ""
+          echo "Files in inventory/ directory:"
+          ls -la inventory/ 2>/dev/null | head -10
         fi
     
     - name: Prepare for deployment
