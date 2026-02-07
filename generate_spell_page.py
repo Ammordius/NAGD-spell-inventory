@@ -857,14 +857,26 @@ def compare_inventories(current_inv, previous_inv, character_list=None):
         if char_name in current_inv:
             for item in current_inv[char_name]:
                 item_id = item['item_id']
-                if item_id not in no_rent_items:  # Filter out no-rent items
+                # Convert to int for comparison with no-rent items set
+                try:
+                    item_id_int = int(item_id)
+                    if item_id_int not in no_rent_items:  # Filter out no-rent items
+                        current_items[item_id] += 1
+                except (ValueError, TypeError):
+                    # If item_id can't be converted, include it (shouldn't happen)
                     current_items[item_id] += 1
         
         # Count items in previous inventory (excluding no-rent)
         if char_name in previous_inv:
             for item in previous_inv[char_name]:
                 item_id = item['item_id']
-                if item_id not in no_rent_items:  # Filter out no-rent items
+                # Convert to int for comparison with no-rent items set
+                try:
+                    item_id_int = int(item_id)
+                    if item_id_int not in no_rent_items:  # Filter out no-rent items
+                        previous_items[item_id] += 1
+                except (ValueError, TypeError):
+                    # If item_id can't be converted, include it (shouldn't happen)
                     previous_items[item_id] += 1
         
         # Find added and removed items
