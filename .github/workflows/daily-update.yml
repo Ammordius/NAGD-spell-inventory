@@ -16,6 +16,9 @@ on:
 jobs:
   update-spell-inventory:
     runs-on: ubuntu-latest
+    concurrency:
+      group: "update-spell-inventory"
+      cancel-in-progress: false
     permissions:
       contents: write
       pages: write
@@ -418,6 +421,8 @@ jobs:
         user_email: 'github-actions[bot]@users.noreply.github.com'
         force_orphan: true
         enable_jekyll: false
+        # Disable artifact creation if the action supports it
+        cname: false
     
     - name: Verify deployment
       run: |
