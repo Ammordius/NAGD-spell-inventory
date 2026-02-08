@@ -548,7 +548,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Magic': 0.5},
-            'Healing Enhancement': 1.0,
+            'Healing Enhancement': 2.0,
             'Spell Mana Efficiency': 1.0,
             'Spell Range Extension': 1.0,
             'Buff Spell Duration': 1.0,
