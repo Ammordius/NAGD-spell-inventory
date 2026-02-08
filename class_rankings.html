@@ -427,6 +427,7 @@
                     saveWeightValues();
                     applyCustomWeights();
                     recalculateScores();
+                    filterAndSort(); // Re-apply filter and sort after recalculating
                     renderTable();
                 });
             }
@@ -445,6 +446,7 @@
                         }
                         updateWeightSliders();
                         recalculateScores();
+                        filterAndSort(); // Re-apply filter and sort after recalculating
                         renderTable();
                     } else if (!selectedClass) {
                         // Reset all
@@ -453,6 +455,7 @@
                         classWeights = JSON.parse(JSON.stringify(originalClassWeights));
                         updateWeightSliders();
                         recalculateScores();
+                        filterAndSort(); // Re-apply filter and sort after recalculating
                         renderTable();
                     }
                 });
