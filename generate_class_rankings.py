@@ -612,6 +612,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 1.0,
         'focus': {
             'Spell Damage': {'Cold': 0.5},
+            'Healing Enhancement': 0.75,
             'Spell Mana Efficiency': 1.0,
             'Beneficial Spell Haste': 0.75,
         }
