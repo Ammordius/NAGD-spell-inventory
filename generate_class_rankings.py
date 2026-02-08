@@ -624,6 +624,7 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'Fire': 1.0, 'Cold': 1.0},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
+            'Beneficial Spell Haste': 1.0,
             'Detrimental Spell Duration': 0.5,  # det or all e
             'Buff Spell Duration': 1.0,  # Bene exter
         }
@@ -700,7 +701,7 @@ def normalize_class_weights(weights_config):
     else:
         return weights_config
 
-def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None):
+def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None):
     """Calculate overall score using class-specific weights with conversion rates"""
     weights_config = CLASS_WEIGHTS.get(char_class, {})
     class_max_values = class_max_values or {}
@@ -845,6 +846,37 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                                 focus_score = (char_pct / best_spell_damage * 100) if char_pct > 0 else 0
                                 total_score += focus_score * weight
                                 total_weight += weight
+            elif focus_cat in ['Beneficial Spell Haste', 'Detrimental Spell Haste']:
+                # Handle spell haste categories - look up from char_spell_haste_cats
+                if isinstance(weight_config, (int, float)) and weight_config > 0:
+                    if char_spell_haste_cats:
+                        haste_cat = 'Bene' if focus_cat == 'Beneficial Spell Haste' else 'Det'
+                        char_pct = char_spell_haste_cats.get(haste_cat, 0)
+                        best_haste = best_focii.get('Spell Haste', 33.0)  # Default to 33% if not found
+                        if best_haste > 0:
+                            focus_score = (char_pct / best_haste * 100) if char_pct > 0 else 0
+                            total_score += focus_score * weight_config
+                            total_weight += weight_config
+            elif focus_cat in ['Beneficial Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration']:
+                # Handle duration categories - look up from char_duration_cats
+                if isinstance(weight_config, (int, float)) and weight_config > 0:
+                    if char_duration_cats:
+                        if focus_cat == 'All Spell Duration':
+                            char_pct = char_duration_cats.get('All', 0)
+                        else:
+                            duration_cat = 'Bene' if focus_cat == 'Beneficial Spell Duration' else 'Det'
+                            char_pct = char_duration_cats.get(duration_cat, 0)
+                        # Use appropriate best focus - Buff for Bene, Detrimental for Det, All for All
+                        if focus_cat == 'All Spell Duration':
+                            best_duration = best_focii.get('All Spell Duration', 15.0)
+                        elif focus_cat == 'Beneficial Spell Duration':
+                            best_duration = best_focii.get('Buff Spell Duration', 25.0)
+                        else:
+                            best_duration = best_focii.get('Detrimental Spell Duration', 25.0)
+                        if best_duration > 0:
+                            focus_score = (char_pct / best_duration * 100) if char_pct > 0 else 0
+                            total_score += focus_score * weight_config
+                            total_weight += weight_config
             else:
                 # Other focus categories - use the already calculated focus_scores with specified weight
                 if isinstance(weight_config, (int, float)) and weight_config > 0:
@@ -1051,7 +1083,9 @@ def main():
             char_damage_focii, 
             scores.get('focus_scores', {}),
             best_focii,
-            class_max_values.get(char_class, {})
+            class_max_values.get(char_class, {}),
+            char_spell_haste_cats,
+            char_duration_cats
         )
         
         output_data.append({
