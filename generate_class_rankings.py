@@ -430,6 +430,16 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                     focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
                 else:
                     focus_scores[category] = 0
+        
+        # Add haste binary check for all ATK classes (mnk, rog, war, pal, shd, bst, brd, rng)
+        # Binary: 30% item haste (70% buff + 30% item = 100% total) = 100%, otherwise 0%
+        if char_class in CLASSES_NEED_ATK:
+            char_haste = char_data.get('stats', {}).get('haste', 0)
+            if isinstance(char_haste, (int, float)):
+                has_max_haste = (char_haste >= 30)
+                focus_scores['Haste'] = 100.0 if has_max_haste else 0.0
+            else:
+                focus_scores['Haste'] = 0.0
     
     scores['focus_scores'] = focus_scores
     
@@ -457,9 +467,17 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 score = focus_scores.get(cat, 0)
             total_score += score * weight
             total_weight += weight
+        
+        # For ATK classes, also include Haste in the focus score
+        if char_class in CLASSES_NEED_ATK and 'Haste' in focus_scores:
+            haste_score = focus_scores.get('Haste', 0)
+            # Add Haste with same weight as lowest priority (weight = 1)
+            total_score += haste_score * 1
+            total_weight += 1
+        
         scores['focus_overall_pct'] = (total_score / total_weight) if total_weight > 0 else 0
     else:
-        # For classes without specific priorities, average all focus scores
+        # For classes without specific priorities, average all focus scores (includes Haste for ATK classes)
         if focus_scores:
             scores['focus_overall_pct'] = sum(focus_scores.values()) / len(focus_scores)
         else:
