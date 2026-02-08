@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Class Rankings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        select {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;  /* Allow columns to resize when others are hidden */
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background: #667eea;
+            color: white;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        td {
+            padding: 12px 10px;
+            font-size: 13px;
+        }
+
+        .rank {
+            font-weight: 700;
+            color: #667eea;
+            text-align: center;
+        }
+
+        .name {
+            font-weight: 600;
+        }
+
+        .name a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .name a:hover {
+            text-decoration: underline;
+        }
+
+        .score {
+            text-align: right;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .score.high {
+            color: #28a745;
+        }
+
+        .score.medium {
+            color: #ffc107;
+        }
+
+        .score.low {
+            color: #dc3545;
+        }
+
+        .focus-badge {
+            display: inline-block;
+            background: #e7f3ff;
+            color: #667eea;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin: 2px;
+        }
+
+        .loading, .error {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 18px;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TAKP Class Rankings</h1>
+            <p>Level 65 Character Rankings with Focus Analysis</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Filter Class:</label>
+                <select id="filterClass">
+                    <option value="">All Classes</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Sort by:</label>
+                <select id="sortBy">
+                    <option value="overall">Overall Score</option>
+                    <option value="class_rank">Class Rank</option>
+                    <option value="hp">HP %</option>
+                    <option value="mana">Mana %</option>
+                    <option value="ac">AC %</option>
+                    <option value="atk">ATK %</option>
+                    <option value="focus">Focus Score</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">Loading rankings data...</div>
+            <div id="error" class="error" style="display: none;"></div>
+            <table id="rankingsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Class Rank</th>
+                        <th>Name</th>
+                        <th>Guild</th>
+                        <th>Class</th>
+                        <th>Overall</th>
+                        <th class="stat-col" data-stat="hp">HP</th>
+                        <th class="stat-col" data-stat="mana">Mana</th>
+                        <th class="stat-col" data-stat="ac">AC</th>
+                        <th class="stat-col" data-stat="atk">ATK</th>
+                        <th class="stat-col" data-stat="haste">Haste</th>
+                        <th>Focus %</th>
+                        <th class="stat-col" data-stat="spelldmg">Spell Dmg %</th>
+                        <th>Damage Types</th>
+                        <th>Other Focii</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let characters = [];
+        let filteredCharacters = [];
+        let filterClass = '';
+        let sortBy = 'overall';
+
+        let classWeights = {};
+        
+        async function loadData() {
+            try {
+                const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                const jsonPath = basePath + 'class_rankings.json';
+                
+                const response = await fetch(jsonPath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                // Handle both old format (array) and new format (object with characters)
+                if (Array.isArray(data)) {
+                    characters = data;
+                } else {
+                    characters = data.characters || [];
+                    classWeights = data.class_weights || {};
+                }
+                filteredCharacters = [...characters];
+                
+                populateFilters();
+                renderTable();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('rankingsTable').style.display = 'table';
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = `Error loading data: ${error.message}`;
+                console.error('Error:', error);
+            }
+        }
+
+        function populateFilters() {
+            const classes = new Set(characters.map(c => c.class).filter(c => c));
+            const classSelect = document.getElementById('filterClass');
+            
+            [...classes].sort().forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls;
+                option.textContent = cls;
+                classSelect.appendChild(option);
+            });
+        }
+
+        function filterAndSort() {
+            filteredCharacters = characters.filter(char => {
+                if (filterClass && char.class !== filterClass) return false;
+                return true;
+            });
+            
+            filteredCharacters.sort((a, b) => {
+                if (sortBy === 'overall') return b.overall_score - a.overall_score;
+                if (sortBy === 'class_rank') {
+                    if (a.class !== b.class) return a.class.localeCompare(b.class);
+                    return a.class_rank - b.class_rank;
+                }
+                if (sortBy === 'hp') return (b.stats.hp || 0) - (a.stats.hp || 0);
+                if (sortBy === 'mana') return (b.stats.mana || 0) - (a.stats.mana || 0);
+                if (sortBy === 'ac') return (b.stats.ac || 0) - (a.stats.ac || 0);
+                if (sortBy === 'atk') {
+                    const aAtk = parseInt(a.stats.atk_item?.split(' / ')[0] || '0');
+                    const bAtk = parseInt(b.stats.atk_item?.split(' / ')[0] || '0');
+                    return bAtk - aAtk;
+                }
+                if (sortBy === 'haste') return (b.scores.haste_value || 0) - (a.scores.haste_value || 0);
+                if (sortBy === 'focus') return (b.scores.focus_overall_pct || 0) - (a.scores.focus_overall_pct || 0);
+                return 0;
+            });
+            
+            renderTable();
+        }
+
+        function getScoreClass(score) {
+            if (score >= 90) return 'high';
+            if (score >= 70) return 'medium';
+            return 'low';
+        }
+
+        function formatScore(score) {
+            if (score === null || score === undefined) return 'N/A';
+            return score.toFixed(1) + '%';
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('rankingsBody');
+            tbody.innerHTML = '';
+            
+            filteredCharacters.forEach((char, index) => {
+                const row = document.createElement('tr');
+                const scores = char.scores;
+                const focii = char.focii || {};
+                
+                // Get spell damage score (class-specific)
+                const spellDmgScore = scores.focus_scores && scores.focus_scores['Spell Damage'] 
+                    ? scores.focus_scores['Spell Damage'] 
+                    : null;
+                
+                // Get class-specific weight configuration
+                const charClass = char.class || '';
+                const classWeightConfig = classWeights[charClass] || {};
+                const focusWeights = classWeightConfig.focus || {};
+                const spellDamageWeights = focusWeights['Spell Damage'] || {};
+                
+                // Special handling for Warriors and Pal/SK - show focus items status
+                let damageBadges = '';
+                let otherBadges = '';
+                
+                if (charClass === 'Warrior') {
+                    // For Warriors, show individual focus items in Damage Types column
+                    const focusItems = scores.focus_items || {};
+                    const badges = [];
+                    if (focusItems.has_mh) {
+                        badges.push('<span class="focus-badge" title="Darkblade of the Warlord">Darkblade</span>');
+                    }
+                    if (focusItems.has_chest) {
+                        badges.push('<span class="focus-badge" title="Raex\'s Chestplate of Destruction">Raex Chest</span>');
+                    }
+                    if (focusItems.has_haste) {
+                        badges.push('<span class="focus-badge" title="Max Haste (100%)">Haste ✓</span>');
+                    }
+                    damageBadges = badges.length > 0 ? badges.join(' ') : '<span style="color: #6c757d;">-</span>';
+                    otherBadges = '<span style="color: #6c757d;">-</span>'; // Warriors don't have other focii
+                } else if (charClass === 'Paladin' || charClass === 'Shadow Knight') {
+                    // For Pal/SK, show Shield of Strife
+                    const focusItems = scores.focus_items || {};
+                    if (focusItems.has_shield) {
+                        damageBadges = '<span class="focus-badge" title="Shield of Strife">Shield of Strife ✓</span>';
+                    } else {
+                        damageBadges = '<span class="focus-badge" style="opacity: 0.3;">No Shield</span>';
+                    }
+                    otherBadges = ''; // Pal/SK don't have other focii
+                } else {
+                    // Check if this is a pure melee class (no caster focuses)
+                    const pureMeleeClasses = ['Warrior', 'Monk', 'Rogue'];
+                    const isPureMelee = pureMeleeClasses.includes(charClass);
+                    
+                    if (isPureMelee) {
+                        // Pure melees don't have caster focuses
+                        damageBadges = '<span style="color: #6c757d;">-</span>';
+                        otherBadges = '<span style="color: #6c757d;">-</span>';
+                    } else {
+                        // Get damage-specific focii - show all damage types the character has
+                        // (even if not weighted, so users can see what they have)
+                        const damageFocii = char.damage_focii || {};
+                        const allDamageFocii = Object.entries(damageFocii)
+                            .sort((a, b) => b[1] - a[1]);
+                        
+                        // Highlight weighted damage types, show others too
+                        damageBadges = allDamageFocii
+                            .map(([type, pct]) => {
+                                const isWeighted = spellDamageWeights.hasOwnProperty(type);
+                                const weight = spellDamageWeights[type] || 0;
+                                const title = isWeighted 
+                                    ? `${type} Damage: ${pct}% (weighted: ${weight})`
+                                    : `${type} Damage: ${pct}% (not weighted for ${charClass})`;
+                                const style = isWeighted ? '' : 'opacity: 0.6;';
+                                return `<span class="focus-badge" title="${title}" style="${style}">${type} ${pct}%</span>`;
+                            }).join('');
+                        
+                        // Get other focii - show all focii the character has
+                        // Highlight weighted ones, show others with reduced opacity
+                        const relevantFocusCats = Object.keys(focusWeights).filter(cat => cat !== 'Spell Damage');
+                        
+                        // Build focus display with categories
+                        const focusDisplay = [];
+                    
+                    // Helper function to format focus with category
+                    const formatFocusWithCategory = (baseName, category, pct, isWeighted, weight) => {
+                        const catAbbrev = {
+                            'Det': 'Det',
+                            'Bene': 'Bene',
+                            'Nuke': '',
+                            'Sanguine': 'Sanguine',
+                            'All': 'All'
+                        }[category] || '';
+                        
+                        // Format: "Bene Spell Haste 30%" or "Mana Efficiency 25%" (no prefix for Nuke)
+                        let displayName = baseName;
+                        if (catAbbrev) {
+                            displayName = `${catAbbrev} ${baseName}`;
+                        }
+                        
+                        const title = isWeighted 
+                            ? `${baseName} (${category}): ${pct}% (weighted: ${weight})`
+                            : `${baseName} (${category}): ${pct}% (not weighted for ${charClass})`;
+                        const style = isWeighted ? '' : 'opacity: 0.6;';
+                        return `<span class="focus-badge" title="${title}" style="${style}">${displayName} ${pct}%</span>`;
+                    };
+                    
+                    // Handle Mana Efficiency with categories
+                    if (focii['Spell Mana Efficiency'] > 0) {
+                        const manaEffCats = char.mana_efficiency_cats || {};
+                        Object.entries(manaEffCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
+                            const isWeighted = relevantFocusCats.includes('Spell Mana Efficiency');
+                            const weight = focusWeights['Spell Mana Efficiency'] || 0;
+                            // For Nuke, show "Mana Efficiency" (no prefix), others show category prefix
+                            const baseName = 'Mana Efficiency';
+                            focusDisplay.push(formatFocusWithCategory(baseName, cat, pct, isWeighted, weight));
+                        });
+                    }
+                    
+                    // Handle Spell Haste with categories
+                    if (focii['Spell Haste'] > 0) {
+                        const hasteCats = char.spell_haste_cats || {};
+                        Object.entries(hasteCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
+                            const isWeighted = relevantFocusCats.includes('Spell Haste');
+                            const weight = focusWeights['Spell Haste'] || 0;
+                            focusDisplay.push(formatFocusWithCategory('Spell Haste', cat, pct, isWeighted, weight));
+                        });
+                    }
+                    
+                    // Handle Duration with categories
+                    ['Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'].forEach(durCat => {
+                        if (focii[durCat] > 0) {
+                            const durCats = char.duration_cats || {};
+                            Object.entries(durCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
+                                const isWeighted = relevantFocusCats.includes(durCat);
+                                const weight = focusWeights[durCat] || 0;
+                                const displayCat = cat === 'All' ? 'All' : (cat === 'Bene' ? 'Bene' : 'Det');
+                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, pct, isWeighted, weight));
+                            });
+                        }
+                    });
+                    
+                    // Handle other focii (Healing Enhancement, Range Extension, etc.)
+                    const otherFocii = Object.entries(focii)
+                        .filter(([cat]) => !['Spell Damage', 'Spell Mana Efficiency', 'Spell Haste', 
+                                             'Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'].includes(cat))
+                        .sort((a, b) => {
+                            const aWeighted = relevantFocusCats.includes(a[0]);
+                            const bWeighted = relevantFocusCats.includes(b[0]);
+                            if (aWeighted && !bWeighted) return -1;
+                            if (!aWeighted && bWeighted) return 1;
+                            return b[1] - a[1];
+                        });
+                    
+                    otherFocii.forEach(([cat, pct]) => {
+                        const isWeighted = relevantFocusCats.includes(cat);
+                        const weight = focusWeights[cat] || 0;
+                        // Shorten names: "Healing Enhancement" -> "Healing", "Range Extension" -> "Range Ext"
+                        let shortName = cat.replace('Spell ', '');
+                        if (shortName === 'Healing Enhancement') shortName = 'Healing';
+                        else if (shortName === 'Spell Range Extension') shortName = 'Range Ext';
+                        const title = isWeighted 
+                            ? `${cat}: ${pct}% (weighted: ${weight})`
+                            : `${cat}: ${pct}% (not weighted for ${charClass})`;
+                        const style = isWeighted ? '' : 'opacity: 0.6;';
+                        focusDisplay.push(`<span class="focus-badge" title="${title}" style="${style}">${shortName} ${pct}%</span>`);
+                    });
+                    
+                        // Join with commas and spaces
+                        otherBadges = focusDisplay.length > 0 ? focusDisplay.join(', ') : '<span style="color: #6c757d;">-</span>';
+                    }
+                }
+                
+                // Format actual stat values
+                const formatStat = (value, statName) => {
+                    if (value === null || value === undefined) {
+                        if (statName === 'ac') return '0';  // AC defaults to 0 if missing
+                        return 'N/A';
+                    }
+                    if (statName === 'haste') {
+                        // Haste is binary: show "100% ✓" if max (30% item = 100% total), otherwise actual item value
+                        // Get haste_value from scores, not from the value parameter
+                        const hasteValue = scores.haste_value;
+                        if (hasteValue === null || hasteValue === undefined) return 'N/A';
+                        // Check if it's actually a number, not a string like "255 / 250"
+                        if (typeof hasteValue === 'number') {
+                            return hasteValue >= 30 ? '100% ✓' : `${hasteValue}%`;
+                        }
+                        return 'N/A';
+                    }
+                    if (statName === 'atk') {
+                        // ATK shows as "current / 250"
+                        if (typeof value === 'string' && value.includes(' / ')) {
+                            return value;
+                        }
+                        return value || '0 / 250';
+                    }
+                    if (statName === 'ac') {
+                        // AC - ensure we convert to number and format properly
+                        const acValue = typeof value === 'number' ? value : parseInt(value) || 0;
+                        return acValue.toLocaleString();
+                    }
+                    // For other stats, convert to number if needed and format
+                    const numValue = typeof value === 'number' ? value : (parseInt(value) || 0);
+                    return numValue.toLocaleString();
+                };
+                
+                // Build row cells in exact order matching headers
+                const cells = [];
+                
+                // Rank, Class Rank, Name, Guild, Class, Overall (fixed columns - indices 0-5)
+                cells.push(`<td class="rank">#${char.overall_rank || index + 1}</td>`);
+                cells.push(`<td class="rank">#${char.class_rank || '-'}</td>`);
+                cells.push(`<td class="name"><a href="https://www.takproject.net/magelo/character.php?char=${encodeURIComponent(char.name)}" target="_blank">${escapeHtml(char.name)}</a></td>`);
+                cells.push(`<td>${escapeHtml(char.guild || '')}</td>`);
+                cells.push(`<td>${escapeHtml(char.class || '')}</td>`);
+                cells.push(`<td class="score ${getScoreClass(char.overall_score)}">${formatScore(char.overall_score)}</td>`);
+                
+                // Stat columns (in header order - indices 6-10)
+                // Index 6: HP
+                cells.push(`<td class="stat-col" data-stat="hp">${formatStat(char.stats.hp, 'hp')}</td>`);
+                // Index 7: Mana
+                cells.push(`<td class="stat-col" data-stat="mana">${formatStat(char.stats.mana, 'mana')}</td>`);
+                // Index 8: AC - check both stats.ac and scores.ac, ensure it's a number
+                const acValue = (char.stats.ac !== undefined && char.stats.ac !== null) 
+                    ? (typeof char.stats.ac === 'number' ? char.stats.ac : parseInt(char.stats.ac) || 0)
+                    : ((scores.ac !== undefined && scores.ac !== null) 
+                        ? (typeof scores.ac === 'number' ? scores.ac : parseInt(scores.ac) || 0)
+                        : 0);
+                cells.push(`<td class="stat-col" data-stat="ac">${acValue.toLocaleString()}</td>`);
+                // Index 9: ATK
+                cells.push(`<td class="stat-col" data-stat="atk">${formatStat(char.stats.atk_item, 'atk')}</td>`);
+                // Index 10: Haste - use scores.haste_value directly
+                const hasteDisplay = (scores.haste_value !== null && scores.haste_value !== undefined && typeof scores.haste_value === 'number')
+                    ? (scores.haste_value >= 30 ? '100% ✓' : `${scores.haste_value}%`)
+                    : 'N/A';
+                cells.push(`<td class="stat-col" data-stat="haste">${hasteDisplay}</td>`);
+                
+                // Focus %, Spell Dmg %, Damage Types, Other Focii (fixed columns - indices 11-14)
+                // IMPORTANT: Always create all 15 cells in exact header order to maintain alignment
+                cells.push(`<td class="score">${formatScore(scores.focus_overall_pct)}</td>`);  // Index 11: Focus %
+                cells.push(`<td class="stat-col score ${spellDmgScore !== null ? getScoreClass(spellDmgScore) : ''}" data-stat="spelldmg">${formatScore(spellDmgScore)}</td>`);  // Index 12: Spell Dmg %
+                // Damage Types - ensure we're using the badges, not a score
+                const damageTypesDisplay = damageBadges || '<span style="color: #6c757d;">-</span>';
+                cells.push(`<td>${damageTypesDisplay}</td>`);  // Index 13: Damage Types
+                // Other Focii - ensure we're using the badges, not a score
+                const otherFociiDisplay = otherBadges || '<span style="color: #6c757d;">-</span>';
+                cells.push(`<td>${otherFociiDisplay}</td>`);  // Index 14: Other Focii
+                
+                // Verify we have exactly 15 cells (matching 15 headers)
+                if (cells.length !== 15) {
+                    console.error(`Row for ${char.name} has ${cells.length} cells, expected 15`);
+                    console.error('Cells:', cells.map((c, i) => `${i}: ${c.substring(0, 50)}`));
+                }
+                
+                // Debug: Log first few rows to verify column alignment
+                if (index < 3) {
+                    console.log(`Row ${index} (${char.name}):`, {
+                        ac: acValue,
+                        haste: scores.haste_value,
+                        damageBadges: damageBadges.substring(0, 50),
+                        otherBadges: otherBadges.substring(0, 50),
+                        cellCount: cells.length
+                    });
+                }
+                
+                row.innerHTML = cells.join('');
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('filterClass').addEventListener('change', (e) => {
+            filterClass = e.target.value;
+            filterAndSort();
+        });
+
+        document.getElementById('sortBy').addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            filterAndSort();
+        });
+
+        loadData();
+    </script>
+</body>
+</html>
