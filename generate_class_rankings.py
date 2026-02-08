@@ -5,6 +5,7 @@ Generate class-specific character rankings with focus analysis
 
 import csv
 import json
+import os
 import sys
 from collections import defaultdict
 
@@ -896,9 +897,62 @@ def main():
     
     print("\nLoading character data...")
     
+    # Find the latest character and inventory files (similar to generate_spell_page.py)
+    base_dir = os.path.dirname(__file__) if '__file__' in globals() else '.'
+    char_dir = os.path.join(base_dir, "character")
+    inv_dir = os.path.join(base_dir, "inventory")
+    
+    # Look for TAKP_character.txt first (used by GitHub Actions), then fall back to dated files
+    char_file = None
+    inv_file = None
+    
+    if os.path.exists(os.path.join(char_dir, "TAKP_character.txt")):
+        char_file = os.path.join(char_dir, "TAKP_character.txt")
+    else:
+        # Find latest dated file
+        all_char_files = []
+        if os.path.exists(char_dir):
+            for filename in os.listdir(char_dir):
+                if filename.endswith('.txt') and '_previous' not in filename:
+                    filepath = os.path.join(char_dir, filename)
+                    if os.path.isfile(filepath):
+                        all_char_files.append((filepath, os.path.getmtime(filepath)))
+        if all_char_files:
+            all_char_files.sort(key=lambda x: x[1], reverse=True)
+            char_file = all_char_files[0][0]
+        else:
+            char_file = os.path.join(char_dir, "2_6_26.txt")  # Fallback
+    
+    if os.path.exists(os.path.join(inv_dir, "TAKP_character_inventory.txt")):
+        inv_file = os.path.join(inv_dir, "TAKP_character_inventory.txt")
+    else:
+        # Find latest dated file
+        all_inv_files = []
+        if os.path.exists(inv_dir):
+            for filename in os.listdir(inv_dir):
+                if filename.endswith('.txt') and '_previous' not in filename:
+                    filepath = os.path.join(inv_dir, filename)
+                    if os.path.isfile(filepath):
+                        all_inv_files.append((filepath, os.path.getmtime(filepath)))
+        if all_inv_files:
+            all_inv_files.sort(key=lambda x: x[1], reverse=True)
+            inv_file = all_inv_files[0][0]
+        else:
+            inv_file = os.path.join(inv_dir, "2_6_26.txt")  # Fallback
+    
+    if not os.path.exists(char_file):
+        print(f"Error: Character file not found: {char_file}")
+        return 1
+    if not os.path.exists(inv_file):
+        print(f"Error: Inventory file not found: {inv_file}")
+        return 1
+    
+    print(f"Using character file: {os.path.basename(char_file)}")
+    print(f"Using inventory file: {os.path.basename(inv_file)}")
+    
     # Load characters
     characters = {}
-    with open('character/2_6_26.txt', 'r', encoding='utf-8') as f:
+    with open(char_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f, delimiter='\t')
         for row in reader:
             if row['level'] == '65':
@@ -947,7 +1001,7 @@ def main():
     # Load inventory
     print("Loading inventory data...")
     inventory = {}
-    with open('inventory/2_6_26.txt', 'r', encoding='utf-8') as f:
+    with open(inv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f, delimiter='\t')
         for row in reader:
             char_id = row['id']
