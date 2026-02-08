@@ -358,6 +358,8 @@
         let sortBy = 'overall';
 
         let classWeights = {};
+        let customWeights = {}; // User-customized weights
+        let originalClassWeights = {}; // Backup of original weights
         
         async function loadData() {
             try {
