@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Ranking Score Explanation - TAKP</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #555;
+            margin-top: 20px;
+        }
+        .stat-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .focus-box {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .class-list {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .example {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 30px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #3498db;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Character Ranking Score Explanation</h1>
+        <p>This document explains how character rankings are calculated for the TAKP level 65 character rankings page.</p>
+
+        <h2>Overview</h2>
+        <p>Each character receives an overall score (0-100%) based on their stats, resists, and spell focuses. The scoring system is <strong>class-specific</strong>, meaning different classes are evaluated based on what matters most for their role.</p>
+
+        <h2>Stat Scoring</h2>
+
+        <div class="stat-box">
+            <h3>HP (Hit Points)</h3>
+            <ul>
+                <li><strong>All classes</strong>: HP is always weighted</li>
+                <li><strong>Tanks (Warrior, Paladin, Shadow Knight)</strong>: HP is converted to AC-equivalent (5 HP = 1 AC) for comparison</li>
+                <li><strong>Casters</strong>: HP is on the same scale as Mana (1 HP = 1 Mana)</li>
+            </ul>
+        </div>
+
+        <div class="stat-box">
+            <h3>Mana</h3>
+            <ul>
+                <li><strong>Only for classes with mana</strong>: Cleric, Druid, Shaman, Necromancer, Wizard, Enchanter, Magician, Beastlord, Ranger, Paladin, Shadow Knight</li>
+                <li><strong>Casters</strong>: Mana is on the same scale as HP (1 HP = 1 Mana)</li>
+            </ul>
+        </div>
+
+        <div class="stat-box">
+            <h3>AC (Armor Class)</h3>
+            <ul>
+                <li><strong>Only for tank/hybrid classes</strong>: Warrior, Paladin, Shadow Knight, Beastlord, Ranger</li>
+                <li><strong>Tanks</strong>: AC is converted from HP (5 HP = 1 AC) for comparison</li>
+            </ul>
+        </div>
+
+        <div class="stat-box">
+            <h3>ATK (Attack)</h3>
+            <ul>
+                <li><strong>Only for melee/hybrid classes</strong>: Warrior, Paladin, Shadow Knight, Monk, Rogue, Ranger, Beastlord, Bard</li>
+                <li><strong>Scoring</strong>: Percentage of 250 ATK cap (e.g., 250/250 = 100%)</li>
+            </ul>
+        </div>
+
+        <div class="stat-box">
+            <h3>Resists</h3>
+            <ul>
+                <li><strong>All classes</strong>: Total of all 5 resists (MR, FR, CR, DR, PR)</li>
+                <li><strong>Scoring</strong>: Percentage relative to the best in class</li>
+            </ul>
+        </div>
+
+        <div class="stat-box">
+            <h3>FT (Flowing Thought)</h3>
+            <ul>
+                <li><strong>Only for casters and bards</strong>: Cleric, Druid, Shaman, Necromancer, Wizard, Enchanter, Magician, Beastlord, Ranger, Bard</li>
+                <li><strong>Scoring</strong>: If capped (15/15), worth 2.0 weight in stat priority</li>
+            </ul>
+        </div>
+
+        <h2>Focus Scoring</h2>
+        <p>Focus scoring is <strong>class-specific</strong> and varies significantly by class. Each class has different focus priorities based on their role.</p>
+
+        <h3>Focus Weight System</h3>
+        <ol>
+            <li><strong>Total focus weight = 3x HP weight</strong>: The combined weight of all focuses equals 3 times the HP weight</li>
+            <li><strong>Individual focus weights</strong>: Each focus category has a specific weight within that total</li>
+            <li><strong>Normalization</strong>: All weights are normalized so each class's total priorities sum to 1.0</li>
+        </ol>
+
+        <h3>Class-Specific Focus Priorities</h3>
+
+        <div class="focus-box">
+            <h3>Warriors</h3>
+            <ul>
+                <li><strong>Focus Items</strong>: Darkblade of the Warlord (Main Hand) + Raex's Chestplate of Destruction (Chest)</li>
+                <li><strong>Haste</strong>: Binary check (100% if >= 30% item haste, 0% otherwise)</li>
+                <li><strong>Weight</strong>: Combined focus weight = 3x HP weight</li>
+            </ul>
+        </div>
+
+        <div class="focus-box">
+            <h3>Paladins</h3>
+            <ul>
+                <li><strong>Shield of Strife</strong>: 2.0 weight</li>
+                <li><strong>Beneficial Spell Haste</strong>: 0.75 weight</li>
+                <li><strong>Healing Enhancement</strong>: 0.5 weight</li>
+            </ul>
+        </div>
+
+        <div class="focus-box">
+            <h3>Shadow Knights</h3>
+            <ul>
+                <li><strong>Shield of Strife</strong>: Binary check (100% if present, 0% otherwise)</li>
+            </ul>
+        </div>
+
+        <div class="focus-box">
+            <h3>Casters (Cleric, Druid, Shaman, Necromancer, Wizard, Enchanter, Magician)</h3>
+            <p>Each caster class has specific focus priorities:</p>
+            <ul>
+                <li><strong>Spell Damage</strong>: Class-specific damage types (e.g., Necro wants Disease/DoT, Wizard wants Fire/Cold/Magic)</li>
+                <li><strong>Spell Mana Efficiency</strong>: Categorized as Nuke, Detrimental, Beneficial, or Sanguine (self-only, not displayed)</li>
+                <li><strong>Spell Haste</strong>: Categorized as Beneficial or Detrimental</li>
+                <li><strong>Spell Duration</strong>: Categorized as Beneficial, Detrimental, or All</li>
+                <li><strong>Healing Enhancement</strong>: For healing classes</li>
+                <li><strong>Spell Range Extension</strong>: For classes that benefit from extended range</li>
+            </ul>
+        </div>
+
+        <div class="focus-box">
+            <h3>Hybrid Classes (Ranger, Beastlord, Bard)</h3>
+            <ul>
+                <li><strong>Ranger</strong>: Mix of melee stats (ATK, AC) and spell focuses</li>
+                <li><strong>Beastlord</strong>: Mix of melee stats and spell focuses, with specific detrimental spell haste cap (27.5% effective, due to innate abilities)</li>
+                <li><strong>Bard</strong>: Mix of melee stats and spell focuses</li>
+            </ul>
+        </div>
+
+        <h3>Focus Categories</h3>
+
+        <h4>Mana Efficiency Categories</h4>
+        <table>
+            <tr>
+                <th>Category</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>Nuke</code></td>
+                <td>Direct damage spells</td>
+            </tr>
+            <tr>
+                <td><code>Detrimental</code></td>
+                <td>Harmful spells (DoTs, debuffs)</td>
+            </tr>
+            <tr>
+                <td><code>Beneficial</code></td>
+                <td>Helpful spells (buffs, heals)</td>
+            </tr>
+            <tr>
+                <td><code>Sanguine</code></td>
+                <td>Self-only (not displayed in rankings)</td>
+            </tr>
+        </table>
+
+        <h4>Spell Haste Categories</h4>
+        <table>
+            <tr>
+                <th>Category</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>Beneficial</code></td>
+                <td>Buffs, heals</td>
+            </tr>
+            <tr>
+                <td><code>Detrimental</code></td>
+                <td>DoTs, debuffs, nukes</td>
+            </tr>
+        </table>
+
+        <h4>Duration Categories</h4>
+        <table>
+            <tr>
+                <th>Category</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>Beneficial</code></td>
+                <td>Buff duration</td>
+            </tr>
+            <tr>
+                <td><code>Detrimental</code></td>
+                <td>DoT/debuff duration</td>
+            </tr>
+            <tr>
+                <td><code>All</code></td>
+                <td>Applies to both beneficial and detrimental</td>
+            </tr>
+        </table>
+
+        <h2>Overall Score Calculation</h2>
+        <ol>
+            <li><strong>Stat scores</strong> are calculated as percentages relative to the best in class</li>
+            <li><strong>Focus scores</strong> are calculated as percentages relative to the best focus in each category</li>
+            <li><strong>Weighted average</strong>: Each stat and focus is multiplied by its weight</li>
+            <li><strong>Normalization</strong>: All weights are normalized so they sum to 1.0 for fair cross-class comparison</li>
+            <li><strong>Final score</strong>: Weighted sum of all applicable stats and focuses</li>
+        </ol>
+
+        <div class="example">
+            <h3>Example: Cleric Scoring</h3>
+            <p>A Cleric's score is calculated from:</p>
+            <ul>
+                <li>HP (weight: normalized)</li>
+                <li>Mana (weight: normalized)</li>
+                <li>Resists (weight: 1.0)</li>
+                <li>Healing Enhancement (weight: 2.0, within focus total)</li>
+                <li>Beneficial Spell Haste (weight: 1.0, within focus total)</li>
+                <li>Spell Range Extension (weight: 1.0, within focus total)</li>
+                <li>Spell Mana Efficiency (weight: varies by category, within focus total)</li>
+            </ul>
+            <p>The focus weights total 3x the HP weight, then all weights are normalized to sum to 1.0.</p>
+        </div>
+
+        <div class="note">
+            <h3>Important Notes</h3>
+            <ul>
+                <li><strong>Pure melees</strong> (Warrior, Monk, Rogue) don't have spell focuses displayed</li>
+                <li><strong>Focus percentages</strong> shown are relative to the best-in-slot focus for that category</li>
+                <li><strong>Class-specific damage types</strong> are weighted differently (e.g., Necro's Disease focus is more important than Fire)</li>
+                <li><strong>Beastlord detrimental spell haste</strong> is capped at 27.5% effective (50% total cap - 22.5% innate)</li>
+            </ul>
+        </div>
+
+        <h2>Viewing Your Score Breakdown</h2>
+        <p>Click on any character in the rankings table to see a detailed breakdown of:</p>
+        <ul>
+            <li>Individual stat scores and weights</li>
+            <li>Individual focus scores and weights</li>
+            <li>Equipped items with links to TAKP item pages</li>
+        </ul>
+
+        <a href="class_rankings.html" class="back-link">← Back to Rankings</a>
+    </div>
+</body>
+</html>
