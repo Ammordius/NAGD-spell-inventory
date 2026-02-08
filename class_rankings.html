@@ -700,25 +700,41 @@
                 char.overall_score = totalWeight > 0 ? (totalScore / totalWeight) : 0;
             });
 
+            // Sort by overall score for overall ranking
             characters.sort((a, b) => (b.overall_score || 0) - (a.overall_score || 0));
             
+            // Calculate overall ranks
             let overallRank = 1;
-            const classRanks = {};
             characters.forEach((char, index) => {
                 if (index === 0 || characters[index - 1].overall_score !== char.overall_score) {
                     overallRank = index + 1;
                 }
                 char.overall_rank = overallRank;
-                
+            });
+            
+            // Calculate class ranks separately - group by class, sort each group, then assign ranks
+            const charactersByClass = {};
+            characters.forEach(char => {
                 const charClass = char.class;
-                if (!classRanks[charClass]) {
-                    classRanks[charClass] = { rank: 1, lastScore: null };
+                if (!charClass) return;
+                if (!charactersByClass[charClass]) {
+                    charactersByClass[charClass] = [];
                 }
-                if (classRanks[charClass].lastScore !== null && classRanks[charClass].lastScore !== char.overall_score) {
-                    classRanks[charClass].rank = index + 1;
-                }
-                char.class_rank = classRanks[charClass].rank;
-                classRanks[charClass].lastScore = char.overall_score;
+                charactersByClass[charClass].push(char);
+            });
+            
+            // Sort each class by overall_score and assign class ranks
+            Object.keys(charactersByClass).forEach(charClass => {
+                const classChars = charactersByClass[charClass];
+                classChars.sort((a, b) => (b.overall_score || 0) - (a.overall_score || 0));
+                
+                let classRank = 1;
+                classChars.forEach((char, index) => {
+                    if (index === 0 || classChars[index - 1].overall_score !== char.overall_score) {
+                        classRank = index + 1;
+                    }
+                    char.class_rank = classRank;
+                });
             });
         }
         
