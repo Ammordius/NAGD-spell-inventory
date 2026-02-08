@@ -1045,6 +1045,33 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                             focus_score = (char_pct / best_duration * 100) if char_pct > 0 else 0
                             total_score += focus_score * weight_config
                             total_weight += weight_config
+            elif focus_cat == 'Spell Mana Efficiency':
+                # Handle Spell Mana Efficiency - class-specific category selection
+                if isinstance(weight_config, (int, float)) and weight_config > 0:
+                    if char_mana_efficiency_cats:
+                        # For Clerics, use Beneficial (Bene) instead of Nuke
+                        if char_class == 'Cleric':
+                            char_pct = char_mana_efficiency_cats.get('Bene', 0)
+                            # If no Bene, try to get the best available (prefer Bene > Det > Nuke)
+                            if char_pct == 0:
+                                char_pct = max(
+                                    char_mana_efficiency_cats.get('Bene', 0),
+                                    char_mana_efficiency_cats.get('Det', 0),
+                                    char_mana_efficiency_cats.get('Nuke', 0)
+                                )
+                        else:
+                            # For other classes, use the best available category
+                            char_pct = max(
+                                char_mana_efficiency_cats.get('Nuke', 0),
+                                char_mana_efficiency_cats.get('Det', 0),
+                                char_mana_efficiency_cats.get('Bene', 0)
+                            )
+                        
+                        best_mana_eff = best_focii.get('Spell Mana Efficiency', 40.0)
+                        if best_mana_eff > 0:
+                            focus_score = (char_pct / best_mana_eff * 100) if char_pct > 0 else 0
+                            total_score += focus_score * weight_config
+                            total_weight += weight_config
             else:
                 # Other focus categories - use the already calculated focus_scores with specified weight
                 if isinstance(weight_config, (int, float)) and weight_config > 0:
