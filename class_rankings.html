@@ -213,7 +213,7 @@
                         <th class="stat-col" data-stat="mana">Mana</th>
                         <th class="stat-col" data-stat="ac">AC</th>
                         <th class="stat-col" data-stat="atk">ATK</th>
-                        <th class="stat-col" data-stat="haste">Haste</th>
+                        <th class="stat-col" data-stat="resists">Resists</th>
                         <th>Focus %</th>
                         <th class="stat-col" data-stat="spelldmg">Spell Dmg %</th>
                         <th>Damage Types</th>
@@ -299,7 +299,7 @@
                     const bAtk = parseInt(b.stats.atk_item?.split(' / ')[0] || '0');
                     return bAtk - aAtk;
                 }
-                if (sortBy === 'haste') return (b.scores.haste_value || 0) - (a.scores.haste_value || 0);
+                if (sortBy === 'resists') return (b.scores.resists || 0) - (a.scores.resists || 0);
                 if (sortBy === 'focus') return (b.scores.focus_overall_pct || 0) - (a.scores.focus_overall_pct || 0);
                 return 0;
             });
@@ -452,17 +452,40 @@
                     }
                     
                     // Handle Duration with categories
-                    ['Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'].forEach(durCat => {
-                        if (focii[durCat] > 0) {
-                            const durCats = char.duration_cats || {};
-                            Object.entries(durCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
-                                const isWeighted = relevantFocusCats.includes(durCat);
-                                const weight = focusWeights[durCat] || 0;
-                                const displayCat = cat === 'All' ? 'All' : (cat === 'Bene' ? 'Bene' : 'Det');
-                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, pct, isWeighted, weight));
-                            });
+                    // Only show relevant categories for each duration type to avoid duplicates
+                    if (focii['Buff Spell Duration'] > 0) {
+                        const durCats = char.duration_cats || {};
+                        // Buff Spell Duration: show 'Bene' and 'All' only
+                        ['Bene', 'All'].forEach(cat => {
+                            if (durCats[cat] !== undefined && durCats[cat] > 0) {
+                                const isWeighted = relevantFocusCats.includes('Buff Spell Duration');
+                                const weight = focusWeights['Buff Spell Duration'] || 0;
+                                const displayCat = cat === 'All' ? 'All' : 'Bene';
+                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, durCats[cat], isWeighted, weight));
+                            }
+                        });
+                    }
+                    if (focii['Detrimental Spell Duration'] > 0) {
+                        const durCats = char.duration_cats || {};
+                        // Detrimental Spell Duration: show 'Det' and 'All' only
+                        ['Det', 'All'].forEach(cat => {
+                            if (durCats[cat] !== undefined && durCats[cat] > 0) {
+                                const isWeighted = relevantFocusCats.includes('Detrimental Spell Duration');
+                                const weight = focusWeights['Detrimental Spell Duration'] || 0;
+                                const displayCat = cat === 'All' ? 'All' : 'Det';
+                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, durCats[cat], isWeighted, weight));
+                            }
+                        });
+                    }
+                    if (focii['All Spell Duration'] > 0) {
+                        const durCats = char.duration_cats || {};
+                        // All Spell Duration: show 'All' only
+                        if (durCats['All'] !== undefined && durCats['All'] > 0) {
+                            const isWeighted = relevantFocusCats.includes('All Spell Duration');
+                            const weight = focusWeights['All Spell Duration'] || 0;
+                            focusDisplay.push(formatFocusWithCategory('Duration', 'All', durCats['All'], isWeighted, weight));
                         }
-                    });
+                    }
                     
                     // Handle other focii (Healing Enhancement, Range Extension, etc.)
                     const otherFocii = Object.entries(focii)
@@ -554,11 +577,10 @@
                 cells.push(`<td class="stat-col" data-stat="ac">${acValue.toLocaleString()}</td>`);
                 // Index 9: ATK
                 cells.push(`<td class="stat-col" data-stat="atk">${formatStat(char.stats.atk_item, 'atk')}</td>`);
-                // Index 10: Haste - use scores.haste_value directly
-                const hasteDisplay = (scores.haste_value !== null && scores.haste_value !== undefined && typeof scores.haste_value === 'number')
-                    ? (scores.haste_value >= 30 ? '100% ✓' : `${scores.haste_value}%`)
-                    : 'N/A';
-                cells.push(`<td class="stat-col" data-stat="haste">${hasteDisplay}</td>`);
+                // Index 10: Resists - total resists value
+                const resistsValue = scores.resists !== null && scores.resists !== undefined ? scores.resists : 0;
+                const resistsDisplay = resistsValue > 0 ? resistsValue.toLocaleString() : 'N/A';
+                cells.push(`<td class="stat-col" data-stat="resists">${resistsDisplay}</td>`);
                 
                 // Focus %, Spell Dmg %, Damage Types, Other Focii (fixed columns - indices 11-14)
                 // IMPORTANT: Always create all 15 cells in exact header order to maintain alignment
