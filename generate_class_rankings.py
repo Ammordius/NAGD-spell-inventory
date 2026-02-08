@@ -610,7 +610,11 @@ CLASS_WEIGHTS = {
         'ac_pct': 1.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
-        'focus': {}
+        'focus': {
+            'Spell Damage': {'Cold': 0.5},
+            'Spell Mana Efficiency': 1.0,
+            'Beneficial Spell Haste': 0.75,
+        }
     },
     
     # Druid - Hybrid healer/caster
