@@ -40,6 +40,95 @@
             margin-bottom: 10px;
         }
 
+        header a {
+            color: white;
+            text-decoration: underline;
+            font-size: 0.9em;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        header a:hover {
+            color: #f0f0f0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+
+        .score-breakdown {
+            margin-top: 20px;
+        }
+
+        .score-breakdown h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .score-breakdown table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .score-breakdown th,
+        .score-breakdown td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .score-breakdown th {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .score-breakdown tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .clickable-row:hover {
+            background-color: #f0f0f0;
+        }
+
         .controls {
             padding: 20px;
             background: #f8f9fa;
@@ -174,6 +263,7 @@
         <header>
             <h1>TAKP Class Rankings</h1>
             <p>Level 65 Character Rankings with Focus Analysis</p>
+            <a href="https://github.com/Ammordius/NAGD-spell-inventory/blob/main/magelo/SCORING_EXPLANATION.md" target="_blank">How are scores calculated?</a>
         </header>
 
         <div class="controls">
@@ -223,6 +313,14 @@
                 <tbody id="rankingsBody">
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Score Breakdown Modal -->
+    <div id="scoreModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalContent"></div>
         </div>
     </div>
 
@@ -611,6 +709,13 @@
                 }
                 
                 row.innerHTML = cells.join('');
+                row.classList.add('clickable-row');
+                row.addEventListener('click', (e) => {
+                    // Don't trigger if clicking on a link
+                    if (e.target.tagName !== 'A') {
+                        showScoreBreakdown(char);
+                    }
+                });
                 
                 tbody.appendChild(row);
             });
@@ -631,6 +736,110 @@
             sortBy = e.target.value;
             filterAndSort();
         });
+
+        // Modal functionality
+        const modal = document.getElementById('scoreModal');
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        function showScoreBreakdown(char) {
+            const modalContent = document.getElementById('modalContent');
+            const scores = char.scores || {};
+            const classWeightConfig = classWeights[char.class] || {};
+            const focusWeights = classWeightConfig.focus || {};
+            
+            let html = `<h2>${escapeHtml(char.name)} (${escapeHtml(char.class)})</h2>`;
+            html += `<p><a href="https://www.takproject.net/magelo/character.php?char=${encodeURIComponent(char.name)}" target="_blank">View on Magelo</a></p>`;
+            html += `<div class="score-breakdown">`;
+            
+            // Overall Score
+            html += `<h3>Overall Score: ${formatScore(char.overall_score)}</h3>`;
+            
+            // Stat Scores
+            html += `<h3>Stat Scores</h3>`;
+            html += `<table><thead><tr><th>Stat</th><th>Value</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
+            
+            if (scores.hp !== undefined && scores.hp !== null) {
+                const weight = classWeightConfig.hp_pct || 0;
+                html += `<tr><td>HP</td><td>${(char.stats.hp || 0).toLocaleString()}</td><td>${formatScore(scores.hp_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+            }
+            if (scores.mana !== undefined && scores.mana !== null) {
+                const weight = classWeightConfig.mana_pct || 0;
+                html += `<tr><td>Mana</td><td>${(char.stats.mana || 0).toLocaleString()}</td><td>${formatScore(scores.mana_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+            }
+            if (scores.ac !== undefined && scores.ac !== null) {
+                const weight = classWeightConfig.ac_pct || 0;
+                html += `<tr><td>AC</td><td>${(scores.ac || 0).toLocaleString()}</td><td>${formatScore(scores.ac_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+            }
+            if (scores.atk_pct !== undefined && scores.atk_pct !== null) {
+                const weight = classWeightConfig.atk_pct || 0;
+                html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+            }
+            if (scores.resists !== undefined && scores.resists !== null) {
+                const weight = classWeightConfig.resists_pct || 0;
+                html += `<tr><td>Resists</td><td>${(scores.resists || 0).toLocaleString()}</td><td>${formatScore(scores.resists_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+            }
+            if (scores.ft_capped === true) {
+                html += `<tr><td>FT (Capped)</td><td>15/15</td><td>100%</td><td>2.0</td></tr>`;
+            }
+            
+            html += `</tbody></table>`;
+            
+            // Focus Scores
+            const focusScores = scores.focus_scores || {};
+            if (Object.keys(focusScores).length > 0) {
+                html += `<h3>Focus Scores</h3>`;
+                html += `<table><thead><tr><th>Focus</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
+                
+                for (const [focusCat, score] of Object.entries(focusScores)) {
+                    let weight = 0;
+                    if (focusCat === 'Spell Damage') {
+                        // Spell Damage has nested weights
+                        const damageWeights = focusWeights['Spell Damage'] || {};
+                        weight = Object.values(damageWeights).reduce((a, b) => a + b, 0);
+                    } else if (focusCat === 'Haste') {
+                        weight = 1.0; // Haste is binary, weight is 1
+                    } else {
+                        weight = focusWeights[focusCat] || 0;
+                    }
+                    html += `<tr><td>${escapeHtml(focusCat)}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                }
+                
+                html += `</tbody></table>`;
+            }
+            
+            // Gear display with item links
+            if (char.inventory && char.inventory.length > 0) {
+                html += `<h3>Equipped Gear</h3>`;
+                html += `<div style="display: flex; flex-wrap: wrap; gap: 10px;">`;
+                const slotNames = {
+                    0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck',
+                    6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist',
+                    11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand',
+                    15: 'Primary', 16: 'Secondary', 17: 'Chest', 18: 'Legs',
+                    19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo'
+                };
+                char.inventory.forEach(item => {
+                    const slotName = slotNames[item.slot_id] || `Slot ${item.slot_id}`;
+                    const itemLink = `<a href="https://www.takproject.net/allaclone/item.php?id=${item.item_id}" target="_blank">${escapeHtml(item.item_name || `Item ${item.item_id}`)}</a>`;
+                    html += `<div style="padding: 5px; background: #f0f0f0; border-radius: 3px;"><strong>${slotName}:</strong> ${itemLink}</div>`;
+                });
+                html += `</div>`;
+            }
+            
+            html += `</div>`;
+            modalContent.innerHTML = html;
+            modal.style.display = 'block';
+        }
 
         loadData();
     </script>
