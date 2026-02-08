@@ -122,15 +122,31 @@ jobs:
         # Create directories if needed
         mkdir -p character inventory
         
-        # Copy yesterday's files to previous BEFORE we restore today's cache
+        # IMPORTANT: At this point, TAKP_character.txt should contain YESTERDAY's data
+        # (from the cache restore in step 105-116). We copy it to _previous.txt BEFORE
+        # step 152-162 overwrites it with today's data.
+        
         if [ -f "character/TAKP_character.txt" ]; then
+          # Save the date from yesterday's file if it exists
+          if [ -f ".magelo_update_date" ]; then
+            YESTERDAY_DATE=$(cat .magelo_update_date)
+            echo "Yesterday's date from cache: $YESTERDAY_DATE"
+          fi
+          
           cp character/TAKP_character.txt character/TAKP_character_previous.txt
           echo "✓ Copied yesterday's character file to previous"
           ls -lh character/TAKP_character_previous.txt
           echo "File size: $(wc -l < character/TAKP_character_previous.txt) lines"
+          
+          # Verify the copy succeeded
+          if [ ! -f "character/TAKP_character_previous.txt" ]; then
+            echo "⚠ ERROR: Failed to create previous character file"
+            exit 1
+          fi
         else
           echo "⚠ Yesterday's character file not found in cache"
           echo "Cache key used: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}"
+          echo "This means yesterday's cache doesn't exist - delta page cannot be generated"
         fi
         
         if [ -f "inventory/TAKP_character_inventory.txt" ]; then
@@ -138,12 +154,19 @@ jobs:
           echo "✓ Copied yesterday's inventory file to previous"
           ls -lh inventory/TAKP_character_inventory_previous.txt
           echo "File size: $(wc -l < inventory/TAKP_character_inventory_previous.txt) lines"
+          
+          # Verify the copy succeeded
+          if [ ! -f "inventory/TAKP_character_inventory_previous.txt" ]; then
+            echo "⚠ ERROR: Failed to create previous inventory file"
+            exit 1
+          fi
         else
           echo "⚠ Yesterday's inventory file not found in cache"
         fi
         
-        if [ -f "character/TAKP_character_previous.txt" ]; then
+        if [ -f "character/TAKP_character_previous.txt" ] && [ -f "inventory/TAKP_character_inventory_previous.txt" ]; then
           echo "✓ Previous files ready for delta comparison"
+          echo "These files contain YESTERDAY's data and will be compared against TODAY's data"
         else
           echo "⚠ No previous files found - delta page will not be generated"
           echo "This is expected if yesterday's cache doesn't exist or expired"
