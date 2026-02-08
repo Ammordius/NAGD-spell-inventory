@@ -341,6 +341,9 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     else:
         scores['ac'] = None  # Not applicable
     
+    # Resists - store raw total value (MR + FR + CR + DR + PR)
+    scores['resists'] = char_data.get('stats', {}).get('resists', 0)
+    
     # FT (Flowing Thought) - mana regen for casters/bards
     # Format: "current / 15" where 15 is the cap
     if char_class in CLASSES_WITH_MANA:
@@ -474,6 +477,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 1.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {
             # No focus weights for pure melees
         }
@@ -484,6 +488,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 1.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {}
     },
     
@@ -494,6 +499,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {}
     },
     
@@ -504,6 +510,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 1.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {}
     },
     'Paladin': {
@@ -512,6 +519,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 1.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {}
     },
     
@@ -522,6 +530,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Fire': 1.0, 'Cold': 1.0, 'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
@@ -536,10 +545,12 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Magic': 0.5},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
+            'Spell Range Extension': 1.0,
             'Buff Spell Duration': 1.0,
         }
     },
@@ -551,6 +562,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Fire': 1.0, 'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
@@ -564,6 +576,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'All': 0.75, 'Disease': 1.0},
             'Spell Mana Efficiency': 1.0,  # det mana
@@ -579,6 +592,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Cold': 1.0, 'All': 0.75, 'Disease': 1.0},
             'Healing Enhancement': 1.0,
@@ -596,6 +610,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
@@ -610,11 +625,13 @@ CLASS_WEIGHTS = {
         'ac_pct': 1.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
             'Spell Mana Efficiency': 1.0,
             'Beneficial Spell Haste': 0.75,
+            'Detrimental Spell Haste': 0.75,
         }
     },
     
@@ -625,6 +642,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Damage': {'Fire': 1.0, 'Cold': 1.0},
             'Healing Enhancement': 1.0,
@@ -642,6 +660,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 1.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {}
     },
     
@@ -652,6 +671,7 @@ CLASS_WEIGHTS = {
         'ac_pct': 0.0,
         'atk_pct': 1.0,
         'haste_pct': 1.0,
+        'resists_pct': 1.0,
         'focus': {
             'Spell Haste': 1.0,
             'Spell Mana Efficiency': 1.0,
@@ -660,45 +680,57 @@ CLASS_WEIGHTS = {
 }
 
 def normalize_class_weights(weights_config):
-    """Normalize class weights so they sum to 1.0"""
-    # Calculate total weight
-    total_weight = 0.0
+    """Normalize class weights: focus weights total = 3x HP weight, then normalize all to sum to 1.0"""
+    hp_weight = weights_config.get('hp_pct', 1.0)
     
-    # Sum stat weights
-    for stat_key in ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct']:
-        total_weight += weights_config.get(stat_key, 0.0)
-    
-    # Sum focus weights
+    # Calculate total focus weight from config (relative weights)
     focus_weights = weights_config.get('focus', {})
+    total_focus_weight_config = 0.0
     if focus_weights:
         for focus_cat, focus_value in focus_weights.items():
             if isinstance(focus_value, dict):
                 # Spell Damage with damage types
-                total_weight += sum(focus_value.values())
+                total_focus_weight_config += sum(focus_value.values())
             else:
                 # Single focus weight
-                total_weight += focus_value
+                total_focus_weight_config += focus_value
+    
+    # Scale focus weights so they total 3x HP weight
+    focus_scale = (3.0 * hp_weight) / total_focus_weight_config if total_focus_weight_config > 0 else 0.0
+    
+    # Calculate total weight including scaled focuses
+    total_weight = 0.0
+    # Sum stat weights (including resists)
+    for stat_key in ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct', 'resists_pct']:
+        total_weight += weights_config.get(stat_key, 0.0)
+    
+    # Add scaled focus weights
+    if focus_weights and focus_scale > 0:
+        for focus_cat, focus_value in focus_weights.items():
+            if isinstance(focus_value, dict):
+                total_weight += sum(focus_value.values()) * focus_scale
+            else:
+                total_weight += focus_value * focus_scale
     
     # Normalize if total > 0
     if total_weight > 0:
         normalized = {}
         # Normalize stat weights
-        for stat_key in ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct']:
+        for stat_key in ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct', 'resists_pct']:
             normalized[stat_key] = weights_config.get(stat_key, 0.0) / total_weight
         
-        # Normalize focus weights
-        focus_weights = weights_config.get('focus', {})
-        if focus_weights:
+        # Normalize focus weights (with scaling applied)
+        if focus_weights and focus_scale > 0:
             normalized['focus'] = {}
             for focus_cat, focus_value in focus_weights.items():
                 if isinstance(focus_value, dict):
-                    # Spell Damage with damage types - normalize each damage type
+                    # Spell Damage with damage types - scale then normalize
                     normalized['focus'][focus_cat] = {
-                        k: v / total_weight for k, v in focus_value.items()
+                        k: (v * focus_scale) / total_weight for k, v in focus_value.items()
                     }
                 else:
-                    # Single focus weight
-                    normalized['focus'][focus_cat] = focus_value / total_weight
+                    # Single focus weight - scale then normalize
+                    normalized['focus'][focus_cat] = (focus_value * focus_scale) / total_weight
         else:
             normalized['focus'] = {}
         
@@ -762,6 +794,16 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             if weight > 0:
                 total_score += scores['haste_pct'] * weight
                 total_weight += weight
+        
+        # Resists
+        resists_weight = weights_config.get('resists_pct', 0.0)
+        if resists_weight > 0:
+            max_resists = class_max_values.get('max_resists', 1)
+            resists_value = scores.get('resists', 0)
+            if max_resists > 0:
+                resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
+                total_score += resists_score * resists_weight
+                total_weight += resists_weight
         
         # Focus score - use normalized weight from config
         focus_weights = weights_config.get('focus', {})
@@ -833,6 +875,16 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             total_score += scores['haste_pct'] * weight
             total_weight += weight
     
+    # Resists
+    resists_weight = weights_config.get('resists_pct', 0.0)
+    if resists_weight > 0:
+        max_resists = class_max_values.get('max_resists', 1)
+        resists_value = scores.get('resists', 0)
+        if max_resists > 0:
+            resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
+            total_score += resists_score * resists_weight
+            total_weight += resists_weight
+    
     # Focus weights - each focus gets the proportional weight specified
     focus_weights = weights_config.get('focus', {})
     if focus_weights:
@@ -854,12 +906,23 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             elif focus_cat in ['Beneficial Spell Haste', 'Detrimental Spell Haste']:
                 # Handle spell haste categories - look up from char_spell_haste_cats
                 if isinstance(weight_config, (int, float)) and weight_config > 0:
-                    if char_spell_haste_cats:
+                    if char_spell_haste_cats is not None:
                         haste_cat = 'Bene' if focus_cat == 'Beneficial Spell Haste' else 'Det'
                         char_pct = char_spell_haste_cats.get(haste_cat, 0)
-                        best_haste = best_focii.get('Spell Haste', 33.0)  # Default to 33% if not found
+                        
+                        # For Beastlord detrimental spell haste: they get 1.5% per level (15 levels = 22.5% innate)
+                        # Focus caps at 50% total, so focus item can only contribute 50% - 22.5% = 27.5%
+                        # But the focus item itself shows the full percentage, so we cap the effective at 27.5%
+                        if char_class == 'Beastlord' and haste_cat == 'Det':
+                            # Cap the effective focus at 27.5% (50% total - 22.5% innate)
+                            effective_pct = min(char_pct, 27.5)
+                            best_haste = 27.5  # Best possible for Beastlord det haste
+                        else:
+                            effective_pct = char_pct
+                            best_haste = best_focii.get('Spell Haste', 33.0)  # Default to 33% if not found
+                        
                         if best_haste > 0:
-                            focus_score = (char_pct / best_haste * 100) if char_pct > 0 else 0
+                            focus_score = (effective_pct / best_haste * 100) if effective_pct > 0 else 0
                             total_score += focus_score * weight_config
                             total_weight += weight_config
             elif focus_cat in ['Beneficial Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration']:
@@ -1008,6 +1071,14 @@ def main():
                     ft_cap = safe_int(row.get('mana_regen_item_cap', 15))
                     ft_str = f"{ft_current} / {ft_cap}" if ft_cap > 0 else "0 / 15"
                     
+                    # Extract resists
+                    mr = safe_int(row.get('MR_total', 0))
+                    fr = safe_int(row.get('FR_total', 0))
+                    cr = safe_int(row.get('CR_total', 0))
+                    dr = safe_int(row.get('DR_total', 0))
+                    pr = safe_int(row.get('PR_total', 0))
+                    resists_total = mr + fr + cr + dr + pr
+                    
                     characters[char_id] = {
                         'id': char_id,
                         'name': row['name'],
@@ -1020,13 +1091,15 @@ def main():
                         'atk_item': f"{safe_int(row.get('atk_item'))} / {safe_int(row.get('atk_item_cap'))}",
                         'haste': safe_int(row.get('haste_item')),
                         'mana_regen_item': ft_str,
+                        'resists': resists_total,
                         'stats': {
                             'hp': safe_int(row.get('hp_max_total')),
                             'mana': safe_int(row.get('mana_max_total')),
                             'ac': safe_int(row.get('ac_total')),
                             'atk_item': f"{safe_int(row.get('atk_item'))} / {safe_int(row.get('atk_item_cap'))}",
                             'haste': safe_int(row.get('haste_item')),
-                            'mana_regen_item': ft_str
+                            'mana_regen_item': ft_str,
+                            'resists': resists_total
                         }
                     }
                 except Exception as e:
@@ -1073,6 +1146,7 @@ def main():
                 'max_hp': max(c['stats']['hp'] for c in class_chars),
                 'max_mana': max(c.get('stats', {}).get('mana', 0) for c in class_chars) if char_class in CLASSES_WITH_MANA else 0,
                 'max_ac': max(c['stats']['ac'] for c in class_chars) if char_class in CLASSES_NEED_AC else 0,
+                'max_resists': max(c.get('stats', {}).get('resists', 0) for c in class_chars),
             }
     
     for char_id, char_data in characters.items():
