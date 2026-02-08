@@ -321,7 +321,7 @@ def check_paladin_sk_focus_items(char_inventory):
     return 100.0 if has_shield else 0.0, {'has_shield': has_shield}
 
 # Calculate class-specific scores
-def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None):
+def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None):
     """Calculate percentage scores for a character based on their class"""
     char_class = char_data['class']
     scores = {}
@@ -397,7 +397,25 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         focus_scores = {'Warrior Focus Items': warrior_focus_score}
         # Store item status for display
         scores['focus_items'] = warrior_items
-    elif char_class in ['Paladin', 'Shadow Knight']:
+    elif char_class == 'Paladin':
+        # Paladins have Shield of Strife + spell focuses
+        pal_sk_focus_score, pal_sk_items = check_paladin_sk_focus_items(char_inventory or [])
+        focus_scores = {'Shield of Strife': pal_sk_focus_score}
+        scores['focus_items'] = pal_sk_items
+        # Add other focus scores for Paladins (spell focuses)
+        for category, best_pct in best_focii.items():
+            if category == 'Spell Damage':
+                # Paladins don't need spell damage
+                focus_scores[category] = 0
+            elif category == 'Healing Enhancement':
+                # Track Healing Enhancement for Paladins
+                char_pct = char_focii.get(category, 0)
+                if best_pct > 0:
+                    focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
+                else:
+                    focus_scores[category] = 0
+            # Spell Haste (Beneficial) will be handled via spell_haste_cats in the scoring function
+    elif char_class == 'Shadow Knight':
         pal_sk_focus_score, pal_sk_items = check_paladin_sk_focus_items(char_inventory or [])
         focus_scores = {'Shield of Strife': pal_sk_focus_score}
         scores['focus_items'] = pal_sk_items
@@ -450,8 +468,28 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     if char_class == 'Warrior':
         # For Warriors, focus score is just the warrior focus items score
         scores['focus_overall_pct'] = focus_scores.get('Warrior Focus Items', 0)
-    elif char_class in ['Paladin', 'Shadow Knight']:
-        # For Pal/SK, focus score is just the Shield of Strife score
+    elif char_class == 'Paladin':
+        # For Paladins, calculate weighted average for display: Shield of Strife (2.0), Beneficial Spell Haste (0.75), Healing Enhancement (0.5)
+        # Note: The actual weighted calculation happens in calculate_overall_score_with_weights
+        total_score = 0
+        total_weight = 0
+        if 'Shield of Strife' in focus_scores:
+            total_score += focus_scores['Shield of Strife'] * 2.0
+            total_weight += 2.0
+        if 'Healing Enhancement' in focus_scores:
+            total_score += focus_scores['Healing Enhancement'] * 0.5
+            total_weight += 0.5
+        # Beneficial Spell Haste (0.75 weight) - add if available
+        if char_spell_haste_cats and 'Bene' in char_spell_haste_cats:
+            bene_haste_pct = char_spell_haste_cats.get('Bene', 0)
+            best_haste = best_focii.get('Spell Haste', 33.0)
+            if best_haste > 0:
+                bene_haste_score = (bene_haste_pct / best_haste * 100) if bene_haste_pct > 0 else 0
+                total_score += bene_haste_score * 0.75
+                total_weight += 0.75
+        scores['focus_overall_pct'] = (total_score / total_weight) if total_weight > 0 else 0
+    elif char_class == 'Shadow Knight':
+        # For SK, focus score is just the Shield of Strife score
         scores['focus_overall_pct'] = focus_scores.get('Shield of Strife', 0)
     elif char_class in CLASS_FOCUS_PRIORITIES:
         priority_cats = CLASS_FOCUS_PRIORITIES[char_class]
@@ -538,7 +576,11 @@ CLASS_WEIGHTS = {
         'atk_pct': 1.0,
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'focus': {}
+        'focus': {
+            'Beneficial Spell Haste': 0.75,
+            'Healing Enhancement': 0.5,
+            'Shield of Strife': 2.0,
+        }
     },
     
     # Wizard - Pure caster
@@ -759,7 +801,7 @@ def normalize_class_weights(weights_config):
     else:
         return weights_config
 
-def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None):
+def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None):
     """Calculate overall score using class-specific weights with conversion rates"""
     weights_config = CLASS_WEIGHTS.get(char_class, {})
     class_max_values = class_max_values or {}
@@ -832,18 +874,48 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         # Focus score - use normalized weight from config
         focus_weights = weights_config.get('focus', {})
         if focus_weights:
-            # For Warriors/Pal/SK, focus is already calculated in focus_overall_pct
-            focus_score = scores.get('focus_overall_pct', 0)
-            # Sum all focus weights to get total focus weight
-            total_focus_weight = 0.0
-            for focus_cat, weight_config in focus_weights.items():
-                if isinstance(weight_config, dict):
-                    total_focus_weight += sum(weight_config.values())
-                else:
-                    total_focus_weight += weight_config
-            if total_focus_weight > 0:
-                total_score += focus_score * total_focus_weight
-                total_weight += total_focus_weight
+            # For Warriors, focus is already calculated in focus_overall_pct
+            # For Paladins, handle focuses individually (Shield of Strife, Beneficial Spell Haste, Healing Enhancement)
+            if char_class == 'Warrior':
+                focus_score = scores.get('focus_overall_pct', 0)
+                # Sum all focus weights to get total focus weight
+                total_focus_weight = 0.0
+                for focus_cat, weight_config in focus_weights.items():
+                    if isinstance(weight_config, dict):
+                        total_focus_weight += sum(weight_config.values())
+                    else:
+                        total_focus_weight += weight_config
+                if total_focus_weight > 0:
+                    total_score += focus_score * total_focus_weight
+                    total_weight += total_focus_weight
+            elif char_class == 'Paladin':
+                # Handle Paladin focuses individually with their specific weights
+                # Shield of Strife (2.0), Beneficial Spell Haste (0.75), Healing Enhancement (0.5)
+                for focus_cat, weight_config in focus_weights.items():
+                    if focus_cat == 'Shield of Strife':
+                        if isinstance(weight_config, (int, float)) and weight_config > 0:
+                            shield_score = focus_scores.get('Shield of Strife', 0)
+                            total_score += shield_score * weight_config
+                            total_weight += weight_config
+                    elif focus_cat == 'Healing Enhancement':
+                        if isinstance(weight_config, (int, float)) and weight_config > 0:
+                            heal_score = focus_scores.get('Healing Enhancement', 0)
+                            total_score += heal_score * weight_config
+                            total_weight += weight_config
+                    # Beneficial Spell Haste is handled in the main focus loop below
+            else:
+                # For other classes, use focus_overall_pct
+                focus_score = scores.get('focus_overall_pct', 0)
+                # Sum all focus weights to get total focus weight
+                total_focus_weight = 0.0
+                for focus_cat, weight_config in focus_weights.items():
+                    if isinstance(weight_config, dict):
+                        total_focus_weight += sum(weight_config.values())
+                    else:
+                        total_focus_weight += weight_config
+                if total_focus_weight > 0:
+                    total_score += focus_score * total_focus_weight
+                    total_weight += total_focus_weight
         
         # After normalization, total_weight should be 1.0, but we divide anyway for safety
         return (total_score / total_weight) if total_weight > 0 else 0
@@ -1181,7 +1253,7 @@ def main():
         char_class = char_data['class']
         char_inventory = inventory.get(char_id, [])
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
-        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory)
+        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats)
         
         # Calculate overall score using class-specific weights with conversion rates
         overall_score = calculate_overall_score_with_weights(
