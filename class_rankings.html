@@ -285,6 +285,33 @@
                     <option value="focus">Focus Score</option>
                 </select>
             </div>
+            <div class="control-group">
+                <button id="toggleWeights" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Customize Weights
+                </button>
+            </div>
+        </div>
+
+        <div id="weightPanel" style="display: none; background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #dee2e6;">
+            <h3 style="margin-top: 0;">Custom Weight Adjustment</h3>
+            <p style="color: #6c757d; font-size: 0.9em;">Adjust stat and focus weights to customize rankings. Changes are saved locally and apply to the selected class.</p>
+            <div style="margin-bottom: 15px;">
+                <label><strong>Class:</strong></label>
+                <select id="weightClass" style="margin-left: 10px; padding: 5px;">
+                    <option value="">All Classes</option>
+                </select>
+            </div>
+            <div id="weightSliders" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <!-- Sliders will be generated here -->
+            </div>
+            <div style="margin-top: 20px;">
+                <button id="resetWeights" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                    Reset to Default
+                </button>
+                <button id="applyWeights" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Apply Weights
+                </button>
+            </div>
         </div>
 
         <div class="table-container">
