@@ -823,11 +823,27 @@
                 // For other classes, use the focus weights from config
                 let totalFocusWeight = 0;
                 if (charClass === 'Warrior' || charClass === 'Paladin' || charClass === 'Shadow Knight') {
-                    // Focus weight is 3x HP weight (normalized)
-                    const hpWeight = classWeightConfig.hp_pct || 0;
-                    totalFocusWeight = hpWeight * 3;
+                    // Calculate normalized weights first
+                    // Sum all stat weights
+                    let totalStatWeight = 0;
+                    const statKeys = ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct', 'resists_pct'];
+                    statKeys.forEach(key => {
+                        totalStatWeight += classWeightConfig[key] || 0;
+                    });
+                    
+                    // Calculate total focus weight (3x HP weight before normalization)
+                    const rawHpWeight = classWeightConfig.hp_pct || 0;
+                    const rawFocusWeight = rawHpWeight * 3;
+                    
+                    // Total weight before normalization = stat weights + focus weights
+                    const totalRawWeight = totalStatWeight + rawFocusWeight;
+                    
+                    // Normalized focus weight = (raw focus weight / total raw weight)
+                    if (totalRawWeight > 0) {
+                        totalFocusWeight = rawFocusWeight / totalRawWeight;
+                    }
                 } else {
-                    // Sum all focus weights
+                    // Sum all focus weights (these are already normalized in the JSON)
                     for (const [cat, weight] of Object.entries(focusWeights)) {
                         if (typeof weight === 'object') {
                             totalFocusWeight += Object.values(weight).reduce((a, b) => a + b, 0);
