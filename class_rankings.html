@@ -443,8 +443,10 @@
                     if (focii['Spell Haste'] > 0) {
                         const hasteCats = char.spell_haste_cats || {};
                         Object.entries(hasteCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
-                            const isWeighted = relevantFocusCats.includes('Spell Haste');
-                            const weight = focusWeights['Spell Haste'] || 0;
+                            // Check for specific haste category weight: 'Bene' -> 'Beneficial Spell Haste', 'Det' -> 'Detrimental Spell Haste'
+                            const hasteWeightKey = cat === 'Bene' ? 'Beneficial Spell Haste' : 'Detrimental Spell Haste';
+                            const isWeighted = relevantFocusCats.includes(hasteWeightKey);
+                            const weight = focusWeights[hasteWeightKey] || 0;
                             focusDisplay.push(formatFocusWithCategory('Spell Haste', cat, pct, isWeighted, weight));
                         });
                     }
