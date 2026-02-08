@@ -506,6 +506,11 @@ jobs:
           cp class_rankings.json deploy/class_rankings.json
           echo "✓ Copied class_rankings.json to deploy directory"
         fi
+        # Copy scoring explanation page
+        if [ -f "scoring_explanation.html" ]; then
+          cp scoring_explanation.html deploy/scoring_explanation.html
+          echo "✓ Copied scoring_explanation.html to deploy directory"
+        fi
         # Copy delta history page if it was generated
         if [ -f "delta-history.html" ]; then
           cp delta-history.html deploy/delta-history.html
