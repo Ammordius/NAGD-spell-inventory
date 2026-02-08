@@ -1,0 +1,2921 @@
+{
+  "focii": [
+    {
+      "name": "Focus of Mediocrity",
+      "category": "All Spell Duration",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Crown of Ambivalence",
+          "zone": "Vex Thal",
+          "mob": "Kaas Thox Xi Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Chrononostrum",
+      "category": "Buff Spell Duration",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Pulsing Onyx Ring",
+          "zone": "The Plane of Time",
+          "mob": "Bertoxxulous"
+        }
+      ]
+    },
+    {
+      "name": "Eterninostrum",
+      "category": "Buff Spell Duration",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Drape of the Unending",
+          "zone": "The Plane of Time",
+          "mob": "Ralthos Enrok"
+        },
+        {
+          "name": "Earring of Embedded Coral",
+          "zone": "The Plane of Water",
+          "mob": "Coirnav the Avatar of Water"
+        },
+        {
+          "name": "Veil of Warmth",
+          "zone": "The Plane of Time",
+          "mob": "Ralthos Enrok"
+        }
+      ]
+    },
+    {
+      "name": "Extended Enhancement",
+      "category": "Buff Spell Duration",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Bear-hide Boots",
+          "zone": "Qeynos Hills",
+          "mob": "Quest: Bear Hide Armor"
+        },
+        {
+          "name": "Damask Robe",
+          "zone": "Befallen",
+          "mob": "Lynada the exiled"
+        },
+        {
+          "name": "Lockjaw Hide Vest",
+          "zone": "Oasis of Marr",
+          "mob": "Lockjaw"
+        },
+        {
+          "name": "Shazda Turban",
+          "zone": "Kerra Isle",
+          "mob": "Shazda Asad"
+        },
+        {
+          "name": "Batfang Headband",
+          "zone": "Dragon Necropolis",
+          "mob": "The Great Oowomp"
+        },
+        {
+          "name": "Chestplate of the Constant",
+          "zone": "Temple of Sol Ro",
+          "mob": "Quest: Chestplate of the Constant"
+        },
+        {
+          "name": "Clawed Knuckle-Ring",
+          "zone": "High Keep",
+          "mob": "Tyrana Slil"
+        },
+        {
+          "name": "Drakescale Belt",
+          "zone": "Solusek's Eye",
+          "mob": "Singe"
+        },
+        {
+          "name": "Totemic Breastplate",
+          "zone": "Temple of Sol Ro",
+          "mob": "Quest: Totemic Breastplate"
+        },
+        {
+          "name": "Amulet of Insight",
+          "zone": "Icewell Keep",
+          "mob": "Royal Scribe Kaavin"
+        },
+        {
+          "name": "Dragon Scaled Mask",
+          "zone": "The Sleeper's Tomb",
+          "mob": "Nanzata the Warder"
+        },
+        {
+          "name": "Fascia Secundae",
+          "zone": "The Sleeper's Tomb",
+          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient, Zeixshi`Kar the Ancient"
+        },
+        {
+          "name": "Rokyls Channelling Crystal",
+          "zone": "Nagafen's Lair",
+          "mob": "Magus Rokyl"
+        },
+        {
+          "name": "Ceramic Shield of Valor",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Shield Of Valor"
+        },
+        {
+          "name": "Cloak of the Wrulons",
+          "zone": "The Temple of Marr",
+          "mob": "Lord Mithaniel Marr"
+        },
+        {
+          "name": "Headsmans Hoop",
+          "zone": "The Plane of Justice",
+          "mob": "The Seventh Hammer"
+        },
+        {
+          "name": "Idol of the Tempest Storm",
+          "zone": "The Plane of Storms",
+          "mob": "Gurebk, Lord of Krendic"
+        }
+      ]
+    },
+    {
+      "name": "Patience of Eternity",
+      "category": "Buff Spell Duration",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Woven Steel Sash",
+          "zone": "Plane of Air",
+          "mob": "Avatar of Smoke"
+        }
+      ]
+    },
+    {
+      "name": "Chronoburn",
+      "category": "Detrimental Spell Duration",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Romar's Robe of Visions",
+          "zone": "The Plane of Time",
+          "mob": "Cazic Thule"
+        },
+        {
+          "name": "Rosrak's Hauberk of the Primal",
+          "zone": "The Plane of Time",
+          "mob": "Innoruuk"
+        }
+      ]
+    },
+    {
+      "name": "Timeburn",
+      "category": "Detrimental Spell Duration",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Hammer of Hours",
+          "zone": "The Plane of Time",
+          "mob": "Terris Thule"
+        },
+        {
+          "name": "Kelp-lined Mantle",
+          "zone": "The Plane of Water",
+          "mob": "Coirnav the Avatar of Water"
+        },
+        {
+          "name": "Pauldrons of Purity",
+          "zone": "The Plane of Time",
+          "mob": "Supernatural Guardian"
+        },
+        {
+          "name": "Wand of Temporal Power",
+          "zone": "The Plane of Time",
+          "mob": "Vallon Zek"
+        }
+      ]
+    },
+    {
+      "name": "Improved Healing",
+      "category": "Healing Enhancement",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Medicine Totem",
+          "zone": "Frontier Mountains",
+          "mob": "Blugtigin"
+        },
+        {
+          "name": "Turtleshell Helm",
+          "zone": "The Western Plains of Karana",
+          "mob": "Chief Goonda"
+        },
+        {
+          "name": "Zaharns Coronet",
+          "zone": "The Permafrost Caverns",
+          "mob": "High Priest Zaharn"
+        },
+        {
+          "name": "Book of Obulus",
+          "zone": "Karnor's Castle",
+          "mob": "spectral turnkey"
+        },
+        {
+          "name": "Fine Antique Veil",
+          "zone": "Plane of Knowledge",
+          "mob": "Quest: Drelynn's Gem Collection"
+        },
+        {
+          "name": "Frakadar's Talisman",
+          "zone": "Dragon Necropolis",
+          "mob": "Zlandicar"
+        },
+        {
+          "name": "Meditative Blanket",
+          "zone": "Trakanon's Teeth",
+          "mob": "Titail Sinok"
+        },
+        {
+          "name": "Idol of the Underking",
+          "zone": "The Hole",
+          "mob": "Master Yael"
+        },
+        {
+          "name": "Mask of Fall",
+          "zone": "The Temple of Veeshan",
+          "mob": "Aaryonar"
+        },
+        {
+          "name": "Shroud of Veeshan",
+          "zone": "Veeshan's Peak",
+          "mob": "Phara Dar"
+        },
+        {
+          "name": "Ceramic Totem of The Rathe",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Totem Of The Rathe"
+        },
+        {
+          "name": "Knucklebone Beaded Veil",
+          "zone": "The Lair of Terris Thule",
+          "mob": "Terris Thule"
+        },
+        {
+          "name": "Mantle of Flame Wisdom",
+          "zone": "The Plane of Fire",
+          "mob": "Doomfire Warmaster"
+        },
+        {
+          "name": "Polished Smoothmetal Torque",
+          "zone": "The Plane of Innovation",
+          "mob": "Manaetic Prototype X"
+        },
+        {
+          "name": "Primal Mask of the Earthcrafter",
+          "zone": "The Plane of Earth",
+          "mob": "A Pristine Gem Golem, A Shimmering Gem Sentry"
+        },
+        {
+          "name": "Scaled Avatar's Sleeves",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Chain Ornate Tranquility Armor"
+        },
+        {
+          "name": "Trydan's Armplates of Nobility",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Plate Elemental Tranquility Armor"
+        },
+        {
+          "name": "Vambraces of Vengeful Fury",
+          "zone": "The Plane of Tranquility",
+          "mob": "Plate Ornate Tranquility Armor"
+        },
+        {
+          "name": "Veil of War Wise Eyes",
+          "zone": "Drunder, the Fortress of Zek",
+          "mob": "Tagrin Maldric"
+        },
+        {
+          "name": "Wanderer's Sylvan Sleeves",
+          "zone": "The Plane of Tranquility",
+          "mob": "Leather Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Marr's Blessing",
+      "category": "Healing Enhancement",
+      "percentage": 1.0,
+      "items": [
+        {
+          "name": "Mantle of Pure Spirit",
+          "zone": "The Plane of Time",
+          "mob": "Innoruuk"
+        },
+        {
+          "name": "Trydan's Chestplate of Nobility",
+          "zone": "BLACKSMITHING",
+          "mob": "Quest: Plate Elemental Tranquility Armor"
+        },
+        {
+          "name": "Ultor's Chestguard of Faith",
+          "zone": "BLACKSMITHING",
+          "mob": "Quest: Plate Elemental Tranquility Armor"
+        },
+        {
+          "name": "Whorl of Unnatural Forces",
+          "zone": "The Plane of Time",
+          "mob": "Quarm"
+        }
+      ]
+    },
+    {
+      "name": "Marr's Gift",
+      "category": "Healing Enhancement",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Kerasha's Sylvan Sleeves",
+          "zone": "TAILORING",
+          "mob": "Quest: Leather Elemental Tranquility Armor"
+        },
+        {
+          "name": "Raiment of the Fire Son",
+          "zone": "The Tower of Solusek Ro",
+          "mob": "Solusek Ro"
+        },
+        {
+          "name": "Rosrak's Sleeves of the Primal",
+          "zone": "BLACKSMITHING",
+          "mob": "Quest: Chain Elemental Tranquility Armor"
+        },
+        {
+          "name": "Simple Ring of Purity",
+          "zone": "The Plane of Air",
+          "mob": "Xegony the Queen of the Air"
+        },
+        {
+          "name": "Ultor's Vambraces of Faith",
+          "zone": "BLACKSMITHING",
+          "mob": "Quest: Plate Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Touch of Judgement",
+      "category": "Healing Enhancement",
+      "percentage": 23.0,
+      "items": [
+        {
+          "name": "Leggings of Judgement",
+          "zone": "Vex Thal",
+          "mob": "Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Innoruuk's Sarcasm",
+      "category": "Spell Aggro Reduction",
+      "percentage": 40.0,
+      "items": [
+        {
+          "name": "Sharp Ended Broken Lever",
+          "zone": "The Plane of Innovation",
+          "mob": "Manaetic Prototype IX"
+        },
+        {
+          "name": "Staff of Swiftness",
+          "zone": "The Halls of Honor",
+          "mob": "Halgoz Rellinic"
+        }
+      ]
+    },
+    {
+      "name": "Anger of Druzzil",
+      "category": "Spell Damage",
+      "percentage": 23.0,
+      "items": [
+        {
+          "name": "Glowing Steel Shim",
+          "zone": "The Plane of Innovation",
+          "mob": "Manaetic Behemoth"
+        },
+        {
+          "name": "Indigo Snake Bracelet",
+          "zone": "Lair of Terris Thule",
+          "mob": "Terris Thule"
+        },
+        {
+          "name": "Wand of the War Wizard",
+          "zone": "Drunder, the Fortress of Zek",
+          "mob": "Anival the Blade"
+        }
+      ]
+    },
+    {
+      "name": "Anger of E`ci",
+      "category": "Spell Damage",
+      "percentage": 23.0,
+      "items": [
+        {
+          "name": "Ceramic Rod of Storms",
+          "zone": "POTTERY",
+          "mob": "Recipe: Ceramic Rod of Storms"
+        },
+        {
+          "name": "Ornate Sceptre",
+          "zone": "The Plane of Justice",
+          "mob": "A Burning Nemesis"
+        },
+        {
+          "name": "Raintravelers Overcloak",
+          "zone": "The Plane of Storms",
+          "mob": "Jeplak, Lord of Srerendi"
+        },
+        {
+          "name": "Stormriders Signet",
+          "zone": "Torden, The Bastion of Thunder",
+          "mob": "Kuanbyr Hailstorm"
+        }
+      ]
+    },
+    {
+      "name": "Anger of Ro",
+      "category": "Spell Damage",
+      "percentage": 23.0,
+      "items": [
+        {
+          "name": "Carved Jetsam Short Staff",
+          "zone": "The Plane of Storms",
+          "mob": "Laruken the Rigid"
+        },
+        {
+          "name": "Flickering Powersource",
+          "zone": "The Plane of Innovation",
+          "mob": "Junk Beast"
+        },
+        {
+          "name": "Putrid Eye of the Possessed",
+          "zone": "Ruins of Lxanvom (Crypt of Decay)",
+          "mob": "Plague Lord Hetral"
+        }
+      ]
+    },
+    {
+      "name": "Anger of Solusek",
+      "category": "Spell Damage",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Cudgel of Glowing Clay",
+          "zone": "Ragrax, Stronghold of the Twelve",
+          "mob": "War Chieftan Birak"
+        },
+        {
+          "name": "Mail of Storms",
+          "zone": "Reef of Coirnav (The Plane of Water)",
+          "mob": "Coirnav the Avatar of Water"
+        },
+        {
+          "name": "Red Eyed Mask of Rage",
+          "zone": "Drunder, Fortress of Zek (Plane of Tactics)",
+          "mob": "Rallos Zek the Warlord"
+        }
+      ]
+    },
+    {
+      "name": "Burning Affliction",
+      "category": "Spell Damage",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Allize Volew Medicine Bag",
+          "zone": "The Feerott",
+          "mob": "lizardman mystic"
+        },
+        {
+          "name": "Aviak Charm",
+          "zone": "The Southern Plains of Karana",
+          "mob": "aviak avocet"
+        },
+        {
+          "name": "Golden Ear Stud",
+          "zone": "Lake Rathetear",
+          "mob": "gnoll embalmer"
+        },
+        {
+          "name": "Hollowed Bone Bracers",
+          "zone": "Najena",
+          "mob": "Rathyl reincarnate"
+        },
+        {
+          "name": "The Skull of Torture",
+          "zone": "Kurn's Tower",
+          "mob": "Quest: Mirgon Dower's Head"
+        },
+        {
+          "name": "Kobold-hide Boots",
+          "zone": "Solusek's Eye",
+          "mob": "kobold predator"
+        },
+        {
+          "name": "Reed Belt",
+          "zone": "Dagnor's Cauldron",
+          "mob": "Bilge Farfathom"
+        },
+        {
+          "name": "Serpentine Bracer",
+          "zone": "Ruins of Old Guk",
+          "mob": "a reanimated hand"
+        },
+        {
+          "name": "Bone-Clasped Girdle",
+          "zone": "Plane of Fear",
+          "mob": "Dread"
+        },
+        {
+          "name": "Bracelet of the Deep Sea",
+          "zone": "The Temple of Veeshan",
+          "mob": "Lord Koi`Doken"
+        },
+        {
+          "name": "Coldain Military Wristguard",
+          "zone": "The Great Divide",
+          "mob": "Quest- Coldain Military Wristguard"
+        },
+        {
+          "name": "Cryosilk Cap",
+          "zone": "Plane of Fear",
+          "mob": "a spinechiller spider"
+        },
+        {
+          "name": "Ceramic Shackles of Torment",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Shackles Of Torment"
+        },
+        {
+          "name": "Grimror's Sleeves of the Plagues",
+          "zone": "Plane of Tranquility",
+          "mob": "Plate Elemental Tranquility Armor"
+        },
+        {
+          "name": "Miserable Bauble",
+          "zone": "Torment, the Plane of Pain",
+          "mob": "Saryrn"
+        },
+        {
+          "name": "Orb of the Fearless",
+          "zone": "?",
+          "mob": "?"
+        }
+      ]
+    },
+    {
+      "name": "Chill of the Umbra",
+      "category": "Spell Damage",
+      "percentage": 26.0,
+      "items": [
+        {
+          "name": "Umbracite Hoop",
+          "zone": "Vex Thal",
+          "mob": "Va Xi Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Enchantment of Destruction",
+      "category": "Spell Damage",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Grimoire of Enchantment",
+          "zone": "Vex Thal",
+          "mob": "Diabo Xi Va"
+        }
+      ]
+    },
+    {
+      "name": "Focus of Flame",
+      "category": "Spell Damage",
+      "percentage": 26.0,
+      "items": [
+        {
+          "name": "Ring of Flamewarding",
+          "zone": "Vex Thal",
+          "mob": "Diabo Xi Xin Thall"
+        }
+      ]
+    },
+    {
+      "name": "Fury of Bertoxxulous",
+      "category": "Spell Damage",
+      "percentage": 35.0,
+      "items": [
+        {
+          "name": "Grimror's Guard of the Plagues",
+          "zone": "The Plane of Tranquility(Zone)",
+          "mob": "Quest: Plate Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Fury of Druzzil",
+      "category": "Spell Damage",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Amulet of the Rain",
+          "zone": "Torden, the Bastion of Thunder",
+          "mob": "Agnarr the Storm Lord"
+        },
+        {
+          "name": "Cloak of Ferocity",
+          "zone": "The Plane of Time: Phase 2",
+          "mob": "Ralthos Enrok"
+        },
+        {
+          "name": "Xephyrus, Wand of the Flowing Wind",
+          "zone": "The Plane of Air",
+          "mob": "Xegony the Queen of Air"
+        }
+      ]
+    },
+    {
+      "name": "Fury of E`ci",
+      "category": "Spell Damage",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Cloak of Combustion",
+          "zone": "The Plane of Fire",
+          "mob": "Quavonis Firetail"
+        },
+        {
+          "name": "Shield of the Vortex",
+          "zone": "The Plane of Time: Phase 2",
+          "mob": "Ralthos Enrok"
+        },
+        {
+          "name": "The Orb of the Sun",
+          "zone": "The Tower of Solusek Ro",
+          "mob": "Solusek Ro"
+        }
+      ]
+    },
+    {
+      "name": "Fury of Ro",
+      "category": "Spell Damage",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Intricately Etched Seashell",
+          "zone": "The Plane of Water",
+          "mob": "Ofossaa the Enlightened"
+        },
+        {
+          "name": "Mask of Conceptual Energy",
+          "zone": "The Plane of Time: Phase 1",
+          "mob": "Kazrok of Fire"
+        }
+      ]
+    },
+    {
+      "name": "Fury of Solusek",
+      "category": "Spell Damage",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Greatstaff of Power",
+          "zone": "The Plane of Time: Phase 2",
+          "mob": "Rallos Zek"
+        },
+        {
+          "name": "Spool of Woven Time",
+          "zone": "The Plane of Time: Phase 2",
+          "mob": "Quarm"
+        }
+      ]
+    },
+    {
+      "name": "Gallenite's ____",
+      "category": "Spell Damage",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Gallenites Sapphire Bracelet",
+          "zone": "Spell: Summon Sapphire Bracelet",
+          "mob": "Quest: Rallican's Bracer"
+        },
+        {
+          "name": "Gallenites Opal Bracelet",
+          "zone": "Spell: Summon Opal Bracelet",
+          "mob": "Jolum"
+        },
+        {
+          "name": "Gallenites Ruby Bracelet",
+          "zone": "Spell: Summon Ruby Bracelet",
+          "mob": "Jolum"
+        },
+        {
+          "name": "Gallenites Jade Bracelet",
+          "zone": "Spell: Summon Jade Bracelet",
+          "mob": "Jolum"
+        }
+      ]
+    },
+    {
+      "name": "Improved Damage",
+      "category": "Spell Damage",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Azure Sleeves",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a minotaur patriarch"
+        },
+        {
+          "name": "Lupine Claw Gauntlets",
+          "zone": "Everfrost Peaks",
+          "mob": "Lupine Claw Gauntlets"
+        },
+        {
+          "name": "Mammoth Hide Cloak",
+          "zone": "The Permafrost Caverns",
+          "mob": "a goblin alchemist"
+        },
+        {
+          "name": "Robe of the Oracle",
+          "zone": "Ocean of Tears",
+          "mob": "Oracle of K`Arnon"
+        },
+        {
+          "name": "Book of Tactics",
+          "zone": "Kael Drakkel",
+          "mob": "Gkrean Prophet of Tallon"
+        },
+        {
+          "name": "Imperial Wardog Collar",
+          "zone": "Chardok",
+          "mob": "Deathfang"
+        },
+        {
+          "name": "Polished Mithril Mask",
+          "zone": "Nagafen's Lair",
+          "mob": "Magus Rokyl"
+        },
+        {
+          "name": "Wurm Scale Coat",
+          "zone": "The Burning Wood",
+          "mob": "Phurzikon"
+        },
+        {
+          "name": "Fedora Secundae",
+          "zone": "The Sleeper's Tomb (sleeper)",
+          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient. Zeixshi`Kar the Ancient"
+        },
+        {
+          "name": "Harla Dar's Talisman",
+          "zone": "The Western Wastes",
+          "mob": "Harla Dar"
+        },
+        {
+          "name": "Jungle Spider Fur Cap",
+          "zone": "Cazic Thule",
+          "mob": "a toxic jungle hunter"
+        },
+        {
+          "name": "Mask of the Dragon Slayer",
+          "zone": "Skyshrine",
+          "mob": "Lord Yelinak"
+        },
+        {
+          "name": "White Dragonscale Cloak",
+          "zone": "The Rathe Mountains",
+          "mob": "Quest: White Dragonscale Cloak"
+        },
+        {
+          "name": "Askr's Thunderous Armplates",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Chain Elemental Tranquility Armor"
+        },
+        {
+          "name": "Ceramic Incense Burner of Ro",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Incense Burner Of Ro"
+        },
+        {
+          "name": "Honorary Amulet",
+          "zone": "The Plane of Valor",
+          "mob": "Aerin`Dar"
+        },
+        {
+          "name": "War Crested Ring",
+          "zone": "Drunder, the Fortress of Zek",
+          "mob": "an Enraged War Boar"
+        }
+      ]
+    },
+    {
+      "name": "Insidious Dreams",
+      "category": "Spell Damage",
+      "percentage": 26.0,
+      "items": [
+        {
+          "name": "Boots of Silent Dreams",
+          "zone": "Vex Thal",
+          "mob": "Thall Va Xakra"
+        }
+      ]
+    },
+    {
+      "name": "Vengeance of Eternity",
+      "category": "Spell Damage",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Miraguls Shroud of Risen Souls",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Elemental Tranquility Armor"
+        },
+        {
+          "name": "Symbol of the Planemasters",
+          "zone": "Plane of Time Phase 2",
+          "mob": "Saryrn"
+        }
+      ]
+    },
+    {
+      "name": "Wrath of Druzzil",
+      "category": "Spell Damage",
+      "percentage": 35.0,
+      "items": [
+        {
+          "name": "Circlet of Flowing Time",
+          "zone": "Plane of Time Phase 4",
+          "mob": "Tallon Zek"
+        },
+        {
+          "name": "Ring of Thunderous Forces",
+          "zone": "Plane of Time Phase 5",
+          "mob": "Rallos Zek"
+        }
+      ]
+    },
+    {
+      "name": "Wrath of E`ci",
+      "category": "Spell Damage",
+      "percentage": 35.0,
+      "items": [
+        {
+          "name": "Barrier of Freezing Winds",
+          "zone": "Plane of Time Phase 2",
+          "mob": "Innoruuk"
+        },
+        {
+          "name": "Bracer of Precision",
+          "zone": "Plane of Time Phase 2",
+          "mob": "Tallon Zek"
+        },
+        {
+          "name": "Dumul's Chestwraps of the Brute",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Leather Elemental Tranquility Armor"
+        },
+        {
+          "name": "Kerasha's Sylvan Tunic",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Leather Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Wrath of Ro",
+      "category": "Spell Damage",
+      "percentage": 35.0,
+      "items": [
+        {
+          "name": "Askr's Thunderous Chainmail",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Chain Elemental Tranquility Armor"
+        },
+        {
+          "name": "Cape of Endless Torment",
+          "zone": "Plane of Time Phase 2",
+          "mob": "Terris Thule"
+        },
+        {
+          "name": "Maelins Robe of Lore",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Elemental Tranquility Armor"
+        },
+        {
+          "name": "Magi`Kots Robe of Convergence",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Affliction Haste",
+      "category": "Spell Haste",
+      "percentage": 33.0,
+      "items": [
+        {
+          "name": "Crown of Below",
+          "zone": "The Echo Caverns",
+          "mob": "King Gomklin of Below"
+        },
+        {
+          "name": "Granite Bracer",
+          "zone": "The Rathe Mountains",
+          "mob": "Petrifin"
+        },
+        {
+          "name": "Polished Stone Anklet",
+          "zone": "The Field of Bone",
+          "mob": "a burynai cutter"
+        },
+        {
+          "name": "Ring of Goblin Lords",
+          "zone": "Solusek's Eye",
+          "mob": "Solusek goblin king"
+        },
+        {
+          "name": "Chrysoberyl Talisman",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a minotaur elder"
+        },
+        {
+          "name": "Green Silken Drape",
+          "zone": "Nagafen's Lair",
+          "mob": "noxious spider"
+        },
+        {
+          "name": "Iksar Hide Boots",
+          "zone": "The Ruins of Sebilis",
+          "mob": "froglok ilis wizard"
+        },
+        {
+          "name": "Silken Cat-fur Girdle",
+          "zone": "Trakanon's Teeth",
+          "mob": "Sigra"
+        },
+        {
+          "name": "Bracelet of the Sky",
+          "zone": "Temple of Veeshan",
+          "mob": "Eashen of the Sky"
+        },
+        {
+          "name": "Circlet of the Falinkan",
+          "zone": "Skyshrine",
+          "mob": "Quest: Ralgyn's Promise"
+        },
+        {
+          "name": "Girdle of Magnificence",
+          "zone": "Katta Castellum",
+          "mob": "Lcea Katta"
+        },
+        {
+          "name": "Surreptitious Broach",
+          "zone": "Kerafyrm's Lair (Sleeper's Tomb)",
+          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient, Zeixshi`Kar the Ancient"
+        },
+        {
+          "name": "Ceramic Skull of Decay",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Skull Of Decay"
+        },
+        {
+          "name": "Torch of Lxvanvom",
+          "zone": "Ruins of Lxanvom (Crypt of Decay)",
+          "mob": "Bhaly Adan"
+        }
+      ]
+    },
+    {
+      "name": "Blaze of the Lightbringer",
+      "category": "Spell Haste",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Leaf-twined Guards",
+          "zone": "Ragrax, Stronghold of the Twelve",
+          "mob": "Avatar of Earth"
+        },
+        {
+          "name": "Lightbringers Earring",
+          "zone": "Vex Thal",
+          "mob": "Diabo Xi Va Temariel"
+        },
+        {
+          "name": "Earring of Eternal Flame",
+          "zone": "Plane of Fire",
+          "mob": "Fennin Ro"
+        }
+      ]
+    },
+    {
+      "name": "Blessing of Reverence",
+      "category": "Spell Haste",
+      "percentage": 10.0,
+      "items": [
+        {
+          "name": "Breastplate of Vengeful Fury",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Plate Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Contemplative Alacrity",
+      "category": "Spell Haste",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Book of Contemplation",
+          "zone": "Vex Thal",
+          "mob": "Diabo Xi Xin Thall"
+        }
+      ]
+    },
+    {
+      "name": "Conundrum of Speed",
+      "category": "Spell Haste",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Wristband of Secrets",
+          "zone": "Vex Thal",
+          "mob": "Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Enhancement Haste",
+      "category": "Spell Haste",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Braided Ivy Cords",
+          "zone": "The Lesser Faydark",
+          "mob": "Thistle Underbrush"
+        },
+        {
+          "name": "Cape of Midnight Mist",
+          "zone": "The Castle of Mistmoore",
+          "mob": "Butler Syncall"
+        },
+        {
+          "name": "Cat Skull Cap",
+          "zone": "The Liberated Citadel of Runnyeye",
+          "mob": "a Pickclaw mindripper"
+        },
+        {
+          "name": "Etched Iron Helm",
+          "zone": "The Stonebrunt Mountains",
+          "mob": "a highland kobold"
+        },
+        {
+          "name": "Gatorscale Sleeves",
+          "zone": "The City of Guk",
+          "mob": "an ancient croc"
+        },
+        {
+          "name": "Fine Antique Amice",
+          "zone": "Plane of Knowledge",
+          "mob": "Quest: Lohie's Music Exhibit"
+        },
+        {
+          "name": "Golden Efreeti Boots",
+          "zone": "Nagafen's Lair",
+          "mob": "Efreeti Lord Djarn"
+        },
+        {
+          "name": "Platinum Tiara",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a froglok tactician"
+        },
+        {
+          "name": "Sarnak Arcane Fetish",
+          "zone": "Chardok",
+          "mob": "Most Mobs"
+        },
+        {
+          "name": "Teachers Syllabus",
+          "zone": "Tower of Frozen Shadow",
+          "mob": "an angry librarian"
+        },
+        {
+          "name": "Mosquito Hide Belt",
+          "zone": "Accursed Temple of CazicThule",
+          "mob": "a graystriped mosquito"
+        },
+        {
+          "name": "Mosquito Hide Mask",
+          "zone": "Accursed Temple of CazicThule",
+          "mob": "a virulent mosquito"
+        },
+        {
+          "name": "Ring of the Shissar",
+          "zone": "Ssraeshza Temple",
+          "mob": "Quest: http://everquest.allakhazam.com/db/quest.html?quest=1999"
+        },
+        {
+          "name": "Yunnb's Earring",
+          "zone": "Veeshan's Peak",
+          "mob": "Phara Dar"
+        },
+        {
+          "name": "Ceramic Hammer of Innovation",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Hammer Of Innovation"
+        },
+        {
+          "name": "Obsidian Plated Pauldrons",
+          "zone": "The Tower of Solusek Ro",
+          "mob": "Arlyxir"
+        },
+        {
+          "name": "Protective Dust Drape",
+          "zone": "Plane of Innovation",
+          "mob": "Quest: Destroy the Behemoth (Tactics Access)"
+        },
+        {
+          "name": "Signet of the Valorous",
+          "zone": "The Plane of Valor",
+          "mob": "The Sleep Walker"
+        }
+      ]
+    },
+    {
+      "name": "Haste of Druzzil",
+      "category": "Spell Haste",
+      "percentage": 18.0,
+      "items": [
+        {
+          "name": "Bands of Earthen Energy",
+          "zone": "Ragrax, Stronghold of the Twelve",
+          "mob": "Warlord Gintolaken"
+        },
+        {
+          "name": "Karana's Tear",
+          "zone": "Torden, The Bastion of Thunder",
+          "mob": "Agnarr the Storm Lord"
+        }
+      ]
+    },
+    {
+      "name": "Haste of Mithaniel",
+      "category": "Spell Haste",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Cog Encrusted Epaulets",
+          "zone": "The Plane of Innovation",
+          "mob": "Manaetic Prototype X"
+        },
+        {
+          "name": "First Sergeants Insignia",
+          "zone": "Halls of Honor",
+          "mob": "Halgoz Rellinic"
+        },
+        {
+          "name": "Mantle of the Rainmaker",
+          "zone": "Torden, the Bastion of Thunder",
+          "mob": "Agnarr the Storm Lord"
+        },
+        {
+          "name": "Opalescent Seascale",
+          "zone": "Reef of Coirnav",
+          "mob": "Hraquis Arch Magus"
+        },
+        {
+          "name": "Wicked Bone Atlatl",
+          "zone": "Ruins of Lxanvom (Crypt of Decay)",
+          "mob": "Firebone Archmagus"
+        }
+      ]
+    },
+    {
+      "name": "Haste of Solusek",
+      "category": "Spell Haste",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Blood Runed Battle Wand",
+          "zone": "Drunder, the Fortress of Zek (potactics)",
+          "mob": "Glykus Helmir"
+        },
+        {
+          "name": "Circular Shield of the Blaze",
+          "zone": "The Tower of Solusek Ro",
+          "mob": "Xuzl"
+        },
+        {
+          "name": "Hammer of the Wind",
+          "zone": "Bastion of Thunder",
+          "mob": "Hreidar Lynhillig"
+        },
+        {
+          "name": "Ivory Candle Skull",
+          "zone": "Doomfire, the Burning Lands",
+          "mob": "Wild Fiery Spirit Steed"
+        },
+        {
+          "name": "Oceanic Kelp Boots",
+          "zone": "Reef of Coirnav",
+          "mob": "a supreme anglerfish"
+        },
+        {
+          "name": "Symbol of the Plaguebringer",
+          "zone": "Ruins of Lxanvom (Crypt of Decay)",
+          "mob": "Bertoxxulous"
+        },
+        {
+          "name": "The Weapon's Driveshaft",
+          "zone": "Plane of Innovation",
+          "mob": "Xanamech Nezmirthafen"
+        }
+      ]
+    },
+    {
+      "name": "Naki's _______ Pernicity",
+      "category": "Spell Haste",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Nakis Tiny Ring",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Tiny Ring"
+        },
+        {
+          "name": "Nakis Twisted Ring",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Twisted Ring"
+        },
+        {
+          "name": "Nakis Studded Ring",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Studded Ring"
+        },
+        {
+          "name": "Nakis Spiked Ring",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Spiked Ring"
+        }
+      ]
+    },
+    {
+      "name": "Quickening of Druzzil",
+      "category": "Spell Haste",
+      "percentage": 23.0,
+      "items": [
+        {
+          "name": "Bracer of the Inferno",
+          "zone": "The Plane of Time",
+          "mob": "Quarm"
+        },
+        {
+          "name": "Earthen Bracer of Fortitude",
+          "zone": "The Plane of Time",
+          "mob": "Quarm"
+        },
+        {
+          "name": "Ethereal Silk Leggings",
+          "zone": "The Plane of Time",
+          "mob": "Quarm"
+        },
+        {
+          "name": "Wristband of Icy Vengeance",
+          "zone": "The Plane of Time",
+          "mob": "Quarm"
+        }
+      ]
+    },
+    {
+      "name": "Quickening of Mithaniel",
+      "category": "Spell Haste",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Amulet of Crystal Dreams",
+          "zone": "The Plane of Time",
+          "mob": "Tallon Zek"
+        },
+        {
+          "name": "Earring of Unseen Horrors",
+          "zone": "The Plane of Time",
+          "mob": "Cazic Thule"
+        },
+        {
+          "name": "Faceguard of Frenzy",
+          "zone": "The Plane of Time",
+          "mob": "Supernatural Guardian"
+        },
+        {
+          "name": "Gleaming Mesh Girdle",
+          "zone": "Doomfire, the Burning Lands",
+          "mob": "Fennin Ro, The Tyrant of Fire"
+        }
+      ]
+    },
+    {
+      "name": "Quickening of Solusek",
+      "category": "Spell Haste",
+      "percentage": 23.0,
+      "items": [
+        {
+          "name": "Bracer of Timeless Rage",
+          "zone": "Plane of Time Phase 5",
+          "mob": "Innoruuk"
+        },
+        {
+          "name": "Cord of Potential",
+          "zone": "Plane of Time Phase 4",
+          "mob": "Vallon Zek"
+        },
+        {
+          "name": "Shroud of Provocation",
+          "zone": "Plane of Time Phase 2",
+          "mob": "Saryrn"
+        }
+      ]
+    },
+    {
+      "name": "Reanimation Haste",
+      "category": "Spell Haste",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Carved Ivory Mask",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a minotaur elder"
+        },
+        {
+          "name": "Ivory Bracelet",
+          "zone": "The Estate of Unrest",
+          "mob": "a reanimated hand"
+        },
+        {
+          "name": "Nightshade Wreath",
+          "zone": "The Castle of Mistmoore",
+          "mob": "Maid Issis"
+        },
+        {
+          "name": "Engraved Bone Pauldrons",
+          "zone": "Kael Drakkel",
+          "mob": "Wenglawks Kkeak"
+        },
+        {
+          "name": "Flayed Paebala Gloves",
+          "zone": "Dragon Necropolis",
+          "mob": "a Chetari Dominator"
+        },
+        {
+          "name": "Robe of Enshroudment",
+          "zone": "Neriak - Foreign Quarter",
+          "mob": "X`Ta Timpi"
+        },
+        {
+          "name": "Fetid Flesh Belt",
+          "zone": "The Fungus Grove",
+          "mob": "a mutant dreg"
+        },
+        {
+          "name": "Grotesque Girdle",
+          "zone": "The Plane of Fear",
+          "mob": "a dracoliche"
+        },
+        {
+          "name": "Slick Leather Courier`s Cape",
+          "zone": "Chardok",
+          "mob": "Korucust`s Courier"
+        }
+      ]
+    },
+    {
+      "name": "Shade Stone Focus",
+      "category": "Spell Haste",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Shade Stone Amulet",
+          "zone": "Vex Thal",
+          "mob": "Kaas Thox Xi Ans Dyek"
+        }
+      ]
+    },
+    {
+      "name": "Speed of Mithaniel",
+      "category": "Spell Haste",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Basalt Plated Pauldrons",
+          "zone": "Tower of Solusek Ro",
+          "mob": "Rizlona"
+        },
+        {
+          "name": "Flame Idol of Ro",
+          "zone": "Doomfire, the Burning Lands",
+          "mob": "Chancellor Kirta"
+        },
+        {
+          "name": "Hooded Sanguine Mantle",
+          "zone": "The Tower of Solusek Ro",
+          "mob": "Arlyxir"
+        },
+        {
+          "name": "Orb of Thunderous Spirits",
+          "zone": "Bastion of Thunder",
+          "mob": "Agnarr the Storm Lord"
+        }
+      ]
+    },
+    {
+      "name": "Speed of Solusek",
+      "category": "Spell Haste",
+      "percentage": 18.0,
+      "items": [
+        {
+          "name": "Bone Sliver Ornament",
+          "zone": "Vegarlson, the Earthen Badlands",
+          "mob": "A Monsterous Mudwalker"
+        },
+        {
+          "name": "Bracer of Flickering Flames",
+          "zone": "Doomfire, the Burning Lands",
+          "mob": "Chancellor Kirta"
+        },
+        {
+          "name": "Bulwark of Shimmering Steel",
+          "zone": "Eryslai, the Kingdom of Wind",
+          "mob": "Avatar of Dust"
+        },
+        {
+          "name": "Gauntlets of the Burning Prince",
+          "zone": "The Tower of Solusek Ro",
+          "mob": "Solusek Ro"
+        },
+        {
+          "name": "Tethered Air Cape",
+          "zone": "Eryslai, the Kingdom of Wind",
+          "mob": "An Elemental Masterpiece"
+        }
+      ]
+    },
+    {
+      "name": "Spell Haste",
+      "category": "Spell Haste",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Beaded Slime Necklace",
+          "zone": "The Liberated Citadel of Runnyeye",
+          "mob": "a slime elemental"
+        },
+        {
+          "name": "Bracelet of Woven Grass",
+          "zone": "The City of Guk",
+          "mob": "a froglok scryer"
+        },
+        {
+          "name": "Gilded Cloth",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a froglok noble"
+        },
+        {
+          "name": "Wolf Fur Slippers",
+          "zone": "The Permafrost Caverns",
+          "mob": "a goblin scryer"
+        },
+        {
+          "name": "Djarns Amethyst Ring",
+          "zone": "Nagafen's Lair",
+          "mob": "Efreeti Lord Djarn"
+        },
+        {
+          "name": "Fine Antique Corset",
+          "zone": "The Plane of Knowledge",
+          "mob": "Quest: Randi's Floral Specimens"
+        },
+        {
+          "name": "Fine Cut, Diamond Inlaid Mask",
+          "zone": "The Plane of Knowledge",
+          "mob": "Quest: The Magic Pool"
+        },
+        {
+          "name": "Mithril-Runed Tunic",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a froglok crusader"
+        },
+        {
+          "name": "Necklace of Superiority",
+          "zone": "The Howling Stones",
+          "mob": "Drusella Sathir"
+        },
+        {
+          "name": "Shining Metallic Robes",
+          "zone": "Steamfont Mountains",
+          "mob": "Yendar Starpyre"
+        },
+        {
+          "name": "Shiny Robe of the Underfoot",
+          "zone": "The Hole",
+          "mob": "Quest: Shiny Robe of the Underfoot"
+        },
+        {
+          "name": "Essence Lens",
+          "zone": "The Western Wastes",
+          "mob": "Quest: Essence Lens"
+        },
+        {
+          "name": "Frostreavers Embroidered Cloak",
+          "zone": "Icewell Keep",
+          "mob": "Dain Frostreaver IV"
+        },
+        {
+          "name": "Hand of the Master",
+          "zone": "The Temple of Veeshan",
+          "mob": "Aaryonar"
+        },
+        {
+          "name": "Valtrons Necklace of Wonder",
+          "zone": "The Temple of Veeshan",
+          "mob": "Vulak`Aerr"
+        },
+        {
+          "name": "Arantir's Sandals of Discovery",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        },
+        {
+          "name": "Ceramic Totem of Xegony",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Totem Of Xegony"
+        },
+        {
+          "name": "Dumul's Sleeves of the Brute",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Leather Elemental Tranquility Armor"
+        },
+        {
+          "name": "Elemental Slippers of the Prime",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        },
+        {
+          "name": "Half Spiked Sprocket",
+          "zone": "The Plane of Innovation",
+          "mob": "junk beast"
+        },
+        {
+          "name": "Shimmering Sleeves of Flame",
+          "zone": "The Plane of Fire",
+          "mob": "Criare Sunmane"
+        },
+        {
+          "name": "Silken Augmenter's Shoes",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        },
+        {
+          "name": "Tallon's War Charm",
+          "zone": "Drunder, the Fortress of Zek",
+          "mob": "Tallon Zek"
+        },
+        {
+          "name": "Tormentor's Chain Collar",
+          "zone": "Torment, the Plane of Pain",
+          "mob": "The Keeper of Sorrows"
+        },
+        {
+          "name": "Vorshar's Slippers of the Blight",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Summoning Haste",
+      "category": "Spell Haste",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "A Shimmering Orb",
+          "zone": "The City of Guk",
+          "mob": "a froglok scryer"
+        },
+        {
+          "name": "Adamantite Band",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a reanimated hand"
+        },
+        {
+          "name": "Dusty Ransacker's Pack",
+          "zone": "Kaesora",
+          "mob": "spectral guardian"
+        },
+        {
+          "name": "Earring of Essence",
+          "zone": "The Temple of Droga",
+          "mob": "Soothsayer Dregzak"
+        },
+        {
+          "name": "Incandescent Mask",
+          "zone": "The Temple of Solusek Ro",
+          "mob": "Quest: Incandescent Mask"
+        },
+        {
+          "name": "Robe of the Elements",
+          "zone": "The Temple of Solusek Ro",
+          "mob": "Quest: Robe of the Elements"
+        },
+        {
+          "name": "Sarnak Hide Boots",
+          "zone": "Chardok",
+          "mob": "Watch Sergeant Riz`oul"
+        },
+        {
+          "name": "Shadel Bandit Ring",
+          "zone": "The Fungus Grove",
+          "mob": "a Shadel Bandit"
+        },
+        {
+          "name": "Brell's Girdle",
+          "zone": "The Hole",
+          "mob": "Master Yael"
+        },
+        {
+          "name": "Kobold Jester's Crown",
+          "zone": "Velketor's Labyrinth",
+          "mob": "Rowwek Icepaw"
+        },
+        {
+          "name": "Ring of Lightning",
+          "zone": "Kael Drakkel",
+          "mob": "King Tormax"
+        },
+        {
+          "name": "Decaying Bone Idol",
+          "zone": "The Plane of Nightmares",
+          "mob": "a weathered gargoyle"
+        },
+        {
+          "name": "Elemental Divining Rod",
+          "zone": "The Plane of Innovation",
+          "mob": "Quest: Endurance Testing"
+        },
+        {
+          "name": "Firebone Notebook",
+          "zone": "The Plane of Disease",
+          "mob": "Aramin the Spider Guardian"
+        },
+        {
+          "name": "Shield of the Ebon Hand",
+          "zone": "The Halls of Honor",
+          "mob": "Konid Merdrid"
+        }
+      ]
+    },
+    {
+      "name": "Wind of the Nightcrawler",
+      "category": "Spell Haste",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Nightcaller Leggings",
+          "zone": "Vex Thal",
+          "mob": "Kaas Thox Xi Aten Ha Ra"
+        },
+        {
+          "name": "Slippers of Dark Whispers",
+          "zone": "Vex Thal",
+          "mob": "Va Xi Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Affliction Efficiency",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Diamondine Earring",
+          "zone": "The Castle of Mistmoore",
+          "mob": "Lasna Cheroon"
+        },
+        {
+          "name": "Impskin Gloves",
+          "zone": "Solusek's Eye",
+          "mob": "Kindle"
+        },
+        {
+          "name": "Polished Bone Bracelet",
+          "zone": "Eastern Plains of Karana",
+          "mob": "an evil eye"
+        },
+        {
+          "name": "Chipped Bone Bracelet",
+          "zone": "The Western Plains of Karana",
+          "mob": "Chief Goonda"
+        },
+        {
+          "name": "Squallsurge Shawl",
+          "zone": "Kedge Keep",
+          "mob": "Undertow"
+        },
+        {
+          "name": "White Gold Necklace",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a froglok noble"
+        },
+        {
+          "name": "Boots of Superiority",
+          "zone": "The Temple of Veeshan",
+          "mob": "Lendiniara the Keeper"
+        },
+        {
+          "name": "Boots of the Dead Dream",
+          "zone": "The Temple of Veeshan",
+          "mob": "Lord Feshlak"
+        },
+        {
+          "name": "Talisman of Evasion",
+          "zone": "Ssraeshza Temple",
+          "mob": "Rhag`Mozdezh"
+        },
+        {
+          "name": "Ceramic Gavel of Justice",
+          "zone": "Pottery",
+          "mob": "Ceramic Gavel Of Justice Recipe"
+        },
+        {
+          "name": "Falchion of Flowing Water",
+          "zone": "The Plane of Justice",
+          "mob": "Dreamthief"
+        },
+        {
+          "name": "Pus Covered Beetle Carapace",
+          "zone": "The Plane of Disease",
+          "mob": "Grummus"
+        },
+        {
+          "name": "Sharp Claw Ahlspiess",
+          "zone": "The Plane of Nightmares",
+          "mob": "Untel`Dak"
+        }
+      ]
+    },
+    {
+      "name": "Alluring Preservation",
+      "category": "Spell Mana Efficiency",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Robe of Luring Shadow",
+          "zone": "Vex Thal",
+          "mob": "Diabo Xi Xin Thall"
+        }
+      ]
+    },
+    {
+      "name": "Chromosphere",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Elemental Gloves of the Prime",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Chromospheric",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Magi`Kots Gloves of Convergence",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Condemnation of Time",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Gauntlets of Vengeful Fury",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Plate Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Condemnation of the Ages",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Ultor's Gauntlets of Faith",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Plate Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Conservation of Bertoxxulous",
+      "category": "Spell Mana Efficiency",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Earring of Temporal Solstice",
+          "zone": "The Plane of Time",
+          "mob": "Vallon Zek"
+        }
+      ]
+    },
+    {
+      "name": "Conservation of Mithaniel",
+      "category": "Spell Mana Efficiency",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Black Collar of Boundless Might",
+          "zone": "Drunder, Fortress of Zek (Plane of Tactics)",
+          "mob": "Rallos Zek the Warlord"
+        }
+      ]
+    },
+    {
+      "name": "Conservation of Solusek",
+      "category": "Spell Mana Efficiency",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Decayed Shoes of the Plaguebringer",
+          "zone": "Ruins of Lxanvom (Crypt of Decay)",
+          "mob": "Bertoxxulous"
+        },
+        {
+          "name": "Entropy Pendant",
+          "zone": "Vegarlson, the Earthen Badlands",
+          "mob": "A Perfected Warder of Earth"
+        },
+        {
+          "name": "Gleaming Pendant of Xegony",
+          "zone": "Eryslai, the Kingdom of Wind",
+          "mob": "Sigismond Windwalker"
+        },
+        {
+          "name": "Secrets of the Planes",
+          "zone": "Plane of Knowledge",
+          "mob": "Quest: Three Manuals"
+        }
+      ]
+    },
+    {
+      "name": "Conservation of Xegony",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Gloves of the Unseen",
+          "zone": "Plane of Time Phase 2",
+          "mob": "Saryrn"
+        },
+        {
+          "name": "Talisman of the Elements",
+          "zone": "The Plane of Time",
+          "mob": "Quarm"
+        }
+      ]
+    },
+    {
+      "name": "Darkened Preservation",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Darkened Claw Amulet",
+          "zone": "Vex Thal",
+          "mob": "Kaas Thox Xi Ans Dyek"
+        }
+      ]
+    },
+    {
+      "name": "Fires of Sol",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Arantir's Gloves of Discovery",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Focus of Mithaniel",
+      "category": "Spell Mana Efficiency",
+      "percentage": 10.0,
+      "items": [
+        {
+          "name": "Valorian Insignia",
+          "zone": "The Halls of Honor",
+          "mob": "An Animated Guardian"
+        },
+        {
+          "name": "Woven Knucklebone Choker",
+          "zone": "Ruins of Lxanvom (Crypt of Decay)",
+          "mob": "High Priest Ultor Szanvon"
+        },
+        {
+          "name": "Writ of Wisdom",
+          "zone": "Plane of Knowledge",
+          "mob": "Quest: Trial of Lashing"
+        }
+      ]
+    },
+    {
+      "name": "Focus of Solusek",
+      "category": "Spell Mana Efficiency",
+      "percentage": 10.0,
+      "items": [
+        {
+          "name": "Flame Encased Earring",
+          "zone": "Tower of Solusek Ro",
+          "mob": "Rizlona"
+        },
+        {
+          "name": "Glowing Orb of the Stormwatcher",
+          "zone": "Bastion of Thunder",
+          "mob": "Brynju Thunderclap"
+        },
+        {
+          "name": "Malarian Leg Ear Stud",
+          "zone": "Plane of Disease",
+          "mob": "Grummus"
+        },
+        {
+          "name": "Tormented Stone of Souls",
+          "zone": "Torment, the Plane of Pain",
+          "mob": "Ta`Grusch the Abomination"
+        }
+      ]
+    },
+    {
+      "name": "Focus of the Orb",
+      "category": "Spell Mana Efficiency",
+      "percentage": 12.0,
+      "items": [
+        {
+          "name": "Orb of Secrets",
+          "zone": "Vex Thal",
+          "mob": "Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Inferno of Sol",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Maelin's Gloves of Lore",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Insanity Sphere",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Romar's Gloves of Visions",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Insanity Storm",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Silken Augmenter's Gloves",
+          "zone": "Plane of Tranquility",
+          "mob": "Silk Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Jolum's _______ Abatement",
+      "category": "Spell Mana Efficiency",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Jolums Tarnished Bauble",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Tarnished Bauble"
+        },
+        {
+          "name": "Jolums Shiny Bauble",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Shiny Bauble"
+        },
+        {
+          "name": "Jolums Brilliant Bauble",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Brilliant Bauble"
+        },
+        {
+          "name": "Jolums Glowing Bauble",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Glowing Bauble"
+        }
+      ]
+    },
+    {
+      "name": "Mana Preservation",
+      "category": "Spell Mana Efficiency",
+      "percentage": 10.0,
+      "items": [
+        {
+          "name": "Cougar Claw Earring",
+          "zone": "The Iceclad Ocean",
+          "mob": "a snow cougar"
+        },
+        {
+          "name": "Platinum Armband",
+          "zone": "Solusek's Eye",
+          "mob": "reckless efreeti"
+        },
+        {
+          "name": "Polished Bone Hoop",
+          "zone": "Eastern Plains of Karana",
+          "mob": "an evil eye"
+        },
+        {
+          "name": "Testament of Vanear",
+          "zone": "Erudin",
+          "mob": "Quest: Library Book"
+        },
+        {
+          "name": "Black Alloy Medallion",
+          "zone": "The Liberated Citadel of Runnyeye",
+          "mob": "a Pickclaw Slayspell"
+        },
+        {
+          "name": "Dustscryers Crystal Ball",
+          "zone": "Frontier Mountains",
+          "mob": "a goblin dustscryer"
+        },
+        {
+          "name": "Fine Antique Ring",
+          "zone": "The Plane of Knowledge",
+          "mob": "Quest: Holly Longtail's Replacement Parts"
+        },
+        {
+          "name": "Mane Attraction",
+          "zone": "Northern Felwithe",
+          "mob": "Quest: Rain Caller"
+        },
+        {
+          "name": "Orb of Draconic Energy",
+          "zone": "Skyshrine",
+          "mob": "Quest: Ancient Dragon Tome"
+        },
+        {
+          "name": "Silver Dragon Tattoo",
+          "zone": "Kael Drakkel",
+          "mob": "Nojas Blackfist"
+        },
+        {
+          "name": "Crystalline Torque",
+          "zone": "Velketor's Labyrinth",
+          "mob": "Meljemor"
+        },
+        {
+          "name": "Helm of Nocturnal Phantasms",
+          "zone": "Jewelry Making",
+          "mob": "Recipe : Helm Of Nocturnal Phantasms"
+        },
+        {
+          "name": "Nevederias Left Eye",
+          "zone": "The Temple of Veeshan",
+          "mob": "Lady Nevederia"
+        },
+        {
+          "name": "Obulus Death Shroud",
+          "zone": "The Ruins of Sebilis",
+          "mob": "froglok bok shaman"
+        },
+        {
+          "name": "Sky Watcher's Monocle",
+          "zone": "The Temple of Veeshan",
+          "mob": "Lord Feshlak"
+        },
+        {
+          "name": "Arantir's Sleeves of Discovery",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        },
+        {
+          "name": "Askr's Thunderous Boots",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Chain Elemental Tranquility Armor"
+        },
+        {
+          "name": "Boots of Vengeful Fury",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Plate Ornate Tranquility Armor"
+        },
+        {
+          "name": "Carved Bone Ring",
+          "zone": "The Lair of Terris Thule",
+          "mob": "Terris Thule"
+        },
+        {
+          "name": "Ceramic Water Sprinkler of Marr",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Water Sprinkler Of Marr"
+        },
+        {
+          "name": "Dumul's Boots of the Brute",
+          "zone": "The Plane of Tranquility",
+          "mob": "Leather Elemental Tranquility Armor"
+        },
+        {
+          "name": "Elemental Sleeves of the Prime",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        },
+        {
+          "name": "Grimror's Boots of the Plagues",
+          "zone": "The Plane of Tranquility",
+          "mob": "Plate Elemental Tranquility Armor"
+        },
+        {
+          "name": "Pendant of the Triumphant Victor",
+          "zone": "Drunder, the Fortress of Zek",
+          "mob": "Vallon Zek"
+        },
+        {
+          "name": "Scaled Avatar's Boots",
+          "zone": "The Plane of Tranquility",
+          "mob": "Chain Ornate Tranquility Armor"
+        },
+        {
+          "name": "Self Contained Force Barrier",
+          "zone": "The Plane of Innovation",
+          "mob": "Quest: Destroy the Behemoth (Tactics Access)"
+        },
+        {
+          "name": "Shining Crimson Shawl",
+          "zone": "The Plane of Fire",
+          "mob": "Criare Sunmane"
+        },
+        {
+          "name": "Silken Augmenter's Sleeves",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        },
+        {
+          "name": "Trydan's Boots of Nobility",
+          "zone": "The Plane of Tranquility",
+          "mob": "Plate Elemental Tranquility Armor"
+        },
+        {
+          "name": "Vorshar's Sleeves of the Blight",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        },
+        {
+          "name": "Wanderer's Sylvan Boots",
+          "zone": "The Plane of Tranquility",
+          "mob": "Quest: Leather Ornate Tranquility Armor"
+        },
+        {
+          "name": "Writ of Karana",
+          "zone": "The Plane of Storms",
+          "mob": "Gurebk, Lord of Krendic"
+        }
+      ]
+    },
+    {
+      "name": "Neurocism",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Miraguls Gloves of Risen Souls",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Neurocus",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Vorshars Gloves of the Blight",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Silk Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Obsidian Requiem",
+      "category": "Spell Mana Efficiency",
+      "percentage": 10.0,
+      "items": [
+        {
+          "name": "Obsidian Necklace",
+          "zone": "Vex Thall",
+          "mob": "Diabo Xi Xin Thall"
+        }
+      ]
+    },
+    {
+      "name": "Pernicious Focus",
+      "category": "Spell Mana Efficiency",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Bracelet of Darkness",
+          "zone": "Vex Thall",
+          "mob": "Kaas Thox Xi Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Preservation of Mithaniel",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Mask of Simplicity",
+          "zone": "The Plane of Time",
+          "mob": "Cazic Thule"
+        },
+        {
+          "name": "Necklace of Eternal Visions",
+          "zone": "The Plane of Time",
+          "mob": "Innoruuk"
+        }
+      ]
+    },
+    {
+      "name": "Preservation of Solusek",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Cloak of the Falling Skies",
+          "zone": "The Plane of Time",
+          "mob": "Tallon Zek"
+        },
+        {
+          "name": "Sharkbone Plated Shoulderpads",
+          "zone": "The Plane of Water",
+          "mob": "Coirnav the Avatar of Water"
+        },
+        {
+          "name": "Talisman of Tainted Energy",
+          "zone": "The Plane of Time",
+          "mob": "Terris Thule"
+        }
+      ]
+    },
+    {
+      "name": "Preservation of Xegony",
+      "category": "Spell Mana Efficiency",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Chestguard of Enchanted Marble",
+          "zone": "Ragrax, Stronghold of the Twelve",
+          "mob": "Avatar of Earth"
+        },
+        {
+          "name": "Cloak of Wishes",
+          "zone": "The Plane of Time",
+          "mob": "A Ferocious Warboar"
+        },
+        {
+          "name": "Immaculate Vest of the Fire Tyrant",
+          "zone": "The Plane of Fire",
+          "mob": "Fennin Ro, The Tyrant of Fire"
+        },
+        {
+          "name": "Kerasha's Sylvan Boots",
+          "zone": "TAILORING",
+          "mob": "Quest: Leather Elemental Tranquility Armor"
+        },
+        {
+          "name": "Maelins Sleeves of Lore",
+          "zone": "TAILORING",
+          "mob": "Silk Elemental Tranquility Armor"
+        },
+        {
+          "name": "Magi`Kot's Sleeves of Convergence",
+          "zone": "TAILORING",
+          "mob": "Silk Elemental Tranquility Armor"
+        },
+        {
+          "name": "Miragul's Sleeves of Risen Souls",
+          "zone": "TAILORING",
+          "mob": "Silk Elemental Tranquility Armor"
+        },
+        {
+          "name": "Romar's Sleeves of Visions",
+          "zone": "TAILORING",
+          "mob": "Silk Elemental Tranquility Armor"
+        },
+        {
+          "name": "Rosrak's Boots of the Primal",
+          "zone": "BLACKSMITHING",
+          "mob": "Chain Elemental Tranquility Armor"
+        },
+        {
+          "name": "Signet of the Arcane",
+          "zone": "Councilman Taldarius",
+          "mob": "Quest: Signets of the Councilman"
+        },
+        {
+          "name": "Ultor's Boots of Faith",
+          "zone": "BLACKSMITHING",
+          "mob": "Plate Elemental Tranquility Armor"
+        },
+        {
+          "name": "Vest of Phoenix Feathers",
+          "zone": "The Plane of Air",
+          "mob": "Xegony the Queen of Air"
+        }
+      ]
+    },
+    {
+      "name": "Preservation of the Akheva",
+      "category": "Spell Mana Efficiency",
+      "percentage": 18.0,
+      "items": [
+        {
+          "name": "Mask of Judgement",
+          "zone": "Vex Thal",
+          "mob": "Aten Ha Ra"
+        },
+        {
+          "name": "Mask of Secrets",
+          "zone": "Vex Thal",
+          "mob": "Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Reanimation Efficiency",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Dark Circlet",
+          "zone": "Najena",
+          "mob": "Trazdon"
+        },
+        {
+          "name": "Flowing Black Robe",
+          "zone": "Najena",
+          "mob": "Najena"
+        },
+        {
+          "name": "Lizardskin Tribal Mask",
+          "zone": "The Feerrott",
+          "mob": "a Silverflank guardian"
+        },
+        {
+          "name": "Platinum Skull Ring",
+          "zone": "The Castle of Mistmoore",
+          "mob": "Lasna Cheroon"
+        },
+        {
+          "name": "Runed Cowl",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a ghoul sage"
+        },
+        {
+          "name": "Crown of Resiliance",
+          "zone": "The Temple of Veeshan",
+          "mob": "Jorlleag"
+        },
+        {
+          "name": "Mask of Pulchritude",
+          "zone": "Grieg's End",
+          "mob": "Servitor of Luclin"
+        },
+        {
+          "name": "Onyx Gauntlets",
+          "zone": "The Temple of Veeshan",
+          "mob": "Lord Vyemm"
+        }
+      ]
+    },
+    {
+      "name": "Sanguine Enchantment",
+      "category": "Spell Mana Efficiency",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Sanguine Eyepatch",
+          "zone": "Vex Thall",
+          "mob": "Thall Va Kelun"
+        }
+      ]
+    },
+    {
+      "name": "Sanguine Preservation",
+      "category": "Spell Mana Efficiency",
+      "percentage": 40.0,
+      "items": [
+        {
+          "name": "Sanguine Robe",
+          "zone": "Vex Thal",
+          "mob": "Va Xi Aten Ha Ra"
+        },
+        {
+          "name": "Sanguine Slippers",
+          "zone": "The Tower of Solusek Ro",
+          "mob": "Galremos"
+        },
+        {
+          "name": "Smooth Onyx Torque",
+          "zone": "The Plane of Time",
+          "mob": "Rythor of the Undead"
+        }
+      ]
+    },
+    {
+      "name": "Saryrn's Torment",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Rosrak's Gauntlets of the Prima",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Chain Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Saryrn's Venom",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Scaled Avatar's Gloves",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Chain Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Secret of Power",
+      "category": "Spell Mana Efficiency",
+      "percentage": 23.0,
+      "items": [
+        {
+          "name": "Leggings of Secrets",
+          "zone": "Vex Thal",
+          "mob": "Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Summer's Anger",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Wanderer's Sylvan Gloves",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Leather Ornate Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Summer's Vengeance",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Kerasha's Sylvan Gloves",
+          "zone": "Plane of Tranquility",
+          "mob": "Quest: Leather Elemental Tranquility Armor"
+        }
+      ]
+    },
+    {
+      "name": "Summoning Efficiency",
+      "category": "Spell Mana Efficiency",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Band of Flesh",
+          "zone": "Najena",
+          "mob": "BoneCracker"
+        },
+        {
+          "name": "Dusty Bloodstained Gloves",
+          "zone": "The Estate of Unrest",
+          "mob": "reclusive ghoul magus"
+        },
+        {
+          "name": "Gossamer Robe",
+          "zone": "Befallen",
+          "mob": "Many Mobs"
+        },
+        {
+          "name": "Di`zok Begirding",
+          "zone": "Chardok",
+          "mob": "Many Mobs"
+        },
+        {
+          "name": "Embroidered Black Sleeves",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a ghoul ritualist"
+        },
+        {
+          "name": "Fine Antique Locket",
+          "zone": "The Plane of Knowledge",
+          "mob": "Quest: Alexis' Book Collection"
+        },
+        {
+          "name": "Robe of the Ishva",
+          "zone": "Dagnor's Cauldron",
+          "mob": "Jinalis Andir"
+        },
+        {
+          "name": "Circlet of Summer",
+          "zone": "The Temple of Veeshan",
+          "mob": "Aaryonar"
+        },
+        {
+          "name": "Enshrouded Veil",
+          "zone": "The Howling Stones",
+          "mob": "embalming fluid"
+        },
+        {
+          "name": "Overseer`s Signet",
+          "zone": "Chardok",
+          "mob": "Overseer Dal`guur"
+        },
+        {
+          "name": "Swirling Cloak of the Elements",
+          "zone": "The Plane of Sky?",
+          "mob": "?"
+        }
+      ]
+    },
+    {
+      "name": "Wind of Mana",
+      "category": "Spell Mana Efficiency",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Boots of the Wind",
+          "zone": "Vex Thal",
+          "mob": "Thall Xundraux Diabo"
+        }
+      ]
+    },
+    {
+      "name": "Druzzil's Distance",
+      "category": "Spell Range Extension",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Air Fetish",
+          "zone": "Eryslai, the Kingdom of Wind",
+          "mob": "Avatar of Wind"
+        },
+        {
+          "name": "Bracers of Earthen Energy",
+          "zone": "Vegarlson, the Earthen Badlands",
+          "mob": "A Monsterous Mudwalker"
+        },
+        {
+          "name": "Clay Bracers of the Golem",
+          "zone": "Vegarlson, the Earthen Badlands",
+          "mob": "Peregrin Rockskull"
+        },
+        {
+          "name": "Crystal Tipped Onyxwood Staff",
+          "zone": "Eryslai, the Kingdom of Wind",
+          "mob": "A Swirling Elemental Force"
+        },
+        {
+          "name": "Hoop of the Enlightened",
+          "zone": "The Plane of Time: Phase 2",
+          "mob": "Gutripping War Beast"
+        },
+        {
+          "name": "Mask of the Insightful",
+          "zone": "Doomfire, the Burning Lands",
+          "mob": "Babnoxis the Spider Queen"
+        },
+        {
+          "name": "War Charm of Crossed Blades",
+          "zone": "Drunder, Fortress of Zek (Plane of Tactics)",
+          "mob": "Rallos Zek the Warlord"
+        },
+        {
+          "name": "Wristband of the Rathe",
+          "zone": "Vegarlson, the Earthen Badlands",
+          "mob": "A Perfected Warder of Earth"
+        },
+        {
+          "name": "Wristguard of Keen Vision",
+          "zone": "The Plane of Time: Phase 1",
+          "mob": "Kazrok of Fire"
+        }
+      ]
+    },
+    {
+      "name": "Druzzil's Range",
+      "category": "Spell Range Extension",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Earring of Influxed Gravity",
+          "zone": "The Plane of Time",
+          "mob": "Quarm"
+        },
+        {
+          "name": "Visor of the Berserker",
+          "zone": "The Plane of Time",
+          "mob": "Rallos Zek"
+        },
+        {
+          "name": "Zealot's Spiked Bracer",
+          "zone": "The Plane of Time",
+          "mob": "Cazic Thule"
+        }
+      ]
+    },
+    {
+      "name": "Extended Range",
+      "category": "Spell Range Extension",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "An Elven Charm Necklace",
+          "zone": "Blackburrow",
+          "mob": "the gnoll high shaman"
+        },
+        {
+          "name": "Drake-hide Sleeves",
+          "zone": "Solusek's Eye",
+          "mob": "fire goblin bartender"
+        },
+        {
+          "name": "Glowing Bone Collar",
+          "zone": "The Western Plains of Karana",
+          "mob": "an ogre priestess"
+        },
+        {
+          "name": "Fancy Velvet Mantle",
+          "zone": "Chardok",
+          "mob": "Observer Aq`touz"
+        },
+        {
+          "name": "Fine Antique Velvet Rose",
+          "zone": "Plane of Knowledge",
+          "mob": "Quest: Merri's Artifact Collection"
+        },
+        {
+          "name": "Golden Bracer",
+          "zone": "The Howling Stones",
+          "mob": "a Crypt Spectre"
+        },
+        {
+          "name": "Moonstone Ring",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a frenzied ghoul"
+        },
+        {
+          "name": "Shimmering Terror Hide Boots",
+          "zone": "Velketor's Labyrinth",
+          "mob": "Venar Icepaw"
+        },
+        {
+          "name": "Cryosilk Sash",
+          "zone": "The Plane of Fear",
+          "mob": "a spinechiller spider"
+        },
+        {
+          "name": "Drachnid Thyxl",
+          "zone": "The Dreadlands",
+          "mob": "a dread widow"
+        },
+        {
+          "name": "Glowing Amber Band",
+          "zone": "Sanctus Seru",
+          "mob": "Lord Inquisitor Seru"
+        },
+        {
+          "name": "Square Helm",
+          "zone": "Skyshrine",
+          "mob": "Many Mobs"
+        },
+        {
+          "name": "Supple Scale Armband",
+          "zone": "Karnor's Castle",
+          "mob": "a Drolvarg warlord"
+        },
+        {
+          "name": "Ceramic Sword of War",
+          "zone": "Pottery",
+          "mob": "Recipe : Ceramic Sword Of War"
+        },
+        {
+          "name": "Diseased Ratskin Mask",
+          "zone": "The Plane of Disease",
+          "mob": "Grummus"
+        },
+        {
+          "name": "Ivory Claw Necklace",
+          "zone": "The Plane of Nightmares",
+          "mob": "a tar`dak hunter"
+        },
+        {
+          "name": "Prismatic Belt of the Queztocatal",
+          "zone": "The Plane of Air",
+          "mob": "Calebgrothiel"
+        },
+        {
+          "name": "Red Circlet of the Evoker",
+          "zone": "Drunder, the Fortress of Zek",
+          "mob": "The Diaku Armorer"
+        },
+        {
+          "name": "Sharkbone Earring",
+          "zone": "The Plane of Water",
+          "mob": "?"
+        },
+        {
+          "name": "Small Larvae Carapace",
+          "zone": "The Plane of Valor",
+          "mob": "A Razorfiend Subjugator"
+        },
+        {
+          "name": "Wand of the Ice Storm",
+          "zone": "Bastion of Thunder",
+          "mob": "Auliffe Chaoswind"
+        },
+        {
+          "name": "Wind Worn Luckstone",
+          "zone": "The Plane of Storms",
+          "mob": "Drornok Tok Vo`Lok"
+        }
+      ]
+    },
+    {
+      "name": "Focus of Distance",
+      "category": "Spell Range Extension",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Ring of Farsight",
+          "zone": "Plane of Knowledge",
+          "mob": "Quest: Essences of Power"
+        },
+        {
+          "name": "Wristband of Judgement",
+          "zone": "Vex Thal",
+          "mob": "Aten Ha Ra"
+        }
+      ]
+    },
+    {
+      "name": "Starfall Symbol",
+      "category": "Spell Range Extension",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Bracer of the Silent Star",
+          "zone": "Vex Thal",
+          "mob": "Thall Va Xakra"
+        }
+      ]
+    },
+    {
+      "name": "Arcane Conservation",
+      "category": "Spell Reagent Conservation",
+      "percentage": 20.0,
+      "items": [
+        {
+          "name": "Tiny Jade Ring",
+          "zone": "The Plane of Time Phase 2",
+          "mob": "Gutripping War Beast"
+        }
+      ]
+    },
+    {
+      "name": "Jedah's _______ Conservation",
+      "category": "Spell Reagent Conservation",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Jedahs Brass Choker",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Brass Choker"
+        },
+        {
+          "name": "Jedahs Silver Choker",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Silver Choker"
+        },
+        {
+          "name": "Jedahs Golden Choker",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Golden Choker"
+        },
+        {
+          "name": "Jedahs Platinum Choker",
+          "zone": "The Bazaar:",
+          "mob": "Spell: Summon Platinum Choker"
+        }
+      ]
+    },
+    {
+      "name": "Reagent Conservation",
+      "category": "Spell Reagent Conservation",
+      "percentage": 15.0,
+      "items": [
+        {
+          "name": "Batskull Earring",
+          "zone": "Dragon Necropolis",
+          "mob": "Chief Goonda"
+        },
+        {
+          "name": "Drake-hide Leggings",
+          "zone": "Solusek's Eye",
+          "mob": "fire goblin bartender"
+        },
+        {
+          "name": "Happy Love Bracers",
+          "zone": "Neriak - 3rd Gate",
+          "mob": "Ratraz"
+        },
+        {
+          "name": "Amethyst Bracelet",
+          "zone": "The Ruins of Old Guk",
+          "mob": "a froglok yun priest"
+        },
+        {
+          "name": "Crown of Leaves",
+          "zone": "The Southern Plains of Karana",
+          "mob": "Narra Tanith"
+        },
+        {
+          "name": "Fine Silk Turban",
+          "zone": "Oasis of Marr",
+          "mob": "Hatar"
+        },
+        {
+          "name": "Savants Cap",
+          "zone": "The Estate of Unrest",
+          "mob": "reclusive ghoul magus"
+        },
+        {
+          "name": "Iksar Hide Cap",
+          "zone": "Chardok",
+          "mob": "Kennel Master Al`ele"
+        },
+        {
+          "name": "Robe of the Kedge",
+          "zone": "Kedge Keep",
+          "mob": "Phinigel Autropos"
+        },
+        {
+          "name": "Runed Mithril Bracer",
+          "zone": "Nagafen's Lair",
+          "mob": "Solusek kobold king"
+        },
+        {
+          "name": "Steel Wristband of Strategy",
+          "zone": "Kael Drakkel",
+          "mob": "Semkak Prophet of Vallon"
+        }
+      ]
+    }
+  ],
+  "total_count": 98
+}

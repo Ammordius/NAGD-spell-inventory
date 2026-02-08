@@ -404,6 +404,27 @@ jobs:
           fi
         fi
     
+    - name: Generate Class Rankings
+      env:
+        MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
+      run: |
+        echo "Generating class rankings..."
+        # Check if spell focus data exists
+        if [ -f "../Server/spell_focii_level65.json" ] || [ -f "spell_focii_level65.json" ] || [ -f "../../Server/spell_focii_level65.json" ]; then
+          python generate_class_rankings.py || echo "Warning: Class rankings generation had issues, continuing..."
+        else
+          echo "⚠ Warning: spell_focii_level65.json not found, skipping class rankings"
+          echo "Class rankings require spell focus data to function properly"
+        fi
+        
+        # Verify class rankings were generated
+        if [ -f "class_rankings.html" ] && [ -f "class_rankings.json" ]; then
+          echo "✓ class_rankings.html and class_rankings.json generated successfully"
+          echo "Class rankings file size: $(wc -c < class_rankings.json) bytes"
+        else
+          echo "⚠ Warning: Class rankings files were not generated"
+        fi
+    
     - name: Verify HTML was generated
       run: |
         echo "=== Verifying generated files ==="
@@ -444,6 +465,22 @@ jobs:
           echo "Files in inventory/ directory:"
           ls -la inventory/ 2>/dev/null | head -10
         fi
+        
+        # Check for class rankings
+        echo ""
+        echo "=== Checking for class_rankings.html ==="
+        if [ -f "class_rankings.html" ]; then
+          echo "✓ class_rankings.html generated successfully"
+          echo "Class rankings file size: $(wc -c < class_rankings.html) bytes"
+        else
+          echo "⚠ class_rankings.html was NOT generated"
+        fi
+        if [ -f "class_rankings.json" ]; then
+          echo "✓ class_rankings.json generated successfully"
+          echo "Class rankings JSON size: $(wc -c < class_rankings.json) bytes"
+        else
+          echo "⚠ class_rankings.json was NOT generated"
+        fi
     
     - name: Prepare for deployment
       run: |
@@ -456,6 +493,15 @@ jobs:
           echo "✓ Copied delta.html to deploy directory"
         else
           echo "No delta.html found (previous day's files may not exist)"
+        fi
+        # Copy class rankings files if they were generated
+        if [ -f "class_rankings.html" ]; then
+          cp class_rankings.html deploy/class_rankings.html
+          echo "✓ Copied class_rankings.html to deploy directory"
+        fi
+        if [ -f "class_rankings.json" ]; then
+          cp class_rankings.json deploy/class_rankings.json
+          echo "✓ Copied class_rankings.json to deploy directory"
         fi
         # Copy delta history page if it was generated
         if [ -f "delta-history.html" ]; then
@@ -516,6 +562,7 @@ jobs:
         echo "Deployment should have created/updated the gh-pages branch"
         echo "Check https://github.com/${{ github.repository }}/tree/gh-pages to see the deployed files"
         echo "Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+        echo "Class Rankings URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/class_rankings.html"
     
     - name: Calculate week and month boundaries
       id: date-info
