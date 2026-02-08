@@ -616,6 +616,8 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
             'Buff Spell Duration': 1.0,  # Bene exter
+            'Detrimental Spell Haste': 1.0,
+            'Spell Range Extension': 0.75,
         }
     },
     

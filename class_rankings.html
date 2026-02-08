@@ -452,17 +452,40 @@
                     }
                     
                     // Handle Duration with categories
-                    ['Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'].forEach(durCat => {
-                        if (focii[durCat] > 0) {
-                            const durCats = char.duration_cats || {};
-                            Object.entries(durCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
-                                const isWeighted = relevantFocusCats.includes(durCat);
-                                const weight = focusWeights[durCat] || 0;
-                                const displayCat = cat === 'All' ? 'All' : (cat === 'Bene' ? 'Bene' : 'Det');
-                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, pct, isWeighted, weight));
-                            });
+                    // Only show relevant categories for each duration type to avoid duplicates
+                    if (focii['Buff Spell Duration'] > 0) {
+                        const durCats = char.duration_cats || {};
+                        // Buff Spell Duration: show 'Bene' and 'All' only
+                        ['Bene', 'All'].forEach(cat => {
+                            if (durCats[cat] !== undefined && durCats[cat] > 0) {
+                                const isWeighted = relevantFocusCats.includes('Buff Spell Duration');
+                                const weight = focusWeights['Buff Spell Duration'] || 0;
+                                const displayCat = cat === 'All' ? 'All' : 'Bene';
+                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, durCats[cat], isWeighted, weight));
+                            }
+                        });
+                    }
+                    if (focii['Detrimental Spell Duration'] > 0) {
+                        const durCats = char.duration_cats || {};
+                        // Detrimental Spell Duration: show 'Det' and 'All' only
+                        ['Det', 'All'].forEach(cat => {
+                            if (durCats[cat] !== undefined && durCats[cat] > 0) {
+                                const isWeighted = relevantFocusCats.includes('Detrimental Spell Duration');
+                                const weight = focusWeights['Detrimental Spell Duration'] || 0;
+                                const displayCat = cat === 'All' ? 'All' : 'Det';
+                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, durCats[cat], isWeighted, weight));
+                            }
+                        });
+                    }
+                    if (focii['All Spell Duration'] > 0) {
+                        const durCats = char.duration_cats || {};
+                        // All Spell Duration: show 'All' only
+                        if (durCats['All'] !== undefined && durCats['All'] > 0) {
+                            const isWeighted = relevantFocusCats.includes('All Spell Duration');
+                            const weight = focusWeights['All Spell Duration'] || 0;
+                            focusDisplay.push(formatFocusWithCategory('Duration', 'All', durCats['All'], isWeighted, weight));
                         }
-                    });
+                    }
                     
                     // Handle other focii (Healing Enhancement, Range Extension, etc.)
                     const otherFocii = Object.entries(focii)
