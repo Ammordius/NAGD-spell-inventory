@@ -819,6 +819,24 @@
                 html += `<h3>Focus Scores</h3>`;
                 html += `<table><thead><tr><th>Focus</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
                 
+                // For Warriors/Pal/SK, calculate focus weight as 3x HP weight (after normalization)
+                // For other classes, use the focus weights from config
+                let totalFocusWeight = 0;
+                if (charClass === 'Warrior' || charClass === 'Paladin' || charClass === 'Shadow Knight') {
+                    // Focus weight is 3x HP weight (normalized)
+                    const hpWeight = classWeightConfig.hp_pct || 0;
+                    totalFocusWeight = hpWeight * 3;
+                } else {
+                    // Sum all focus weights
+                    for (const [cat, weight] of Object.entries(focusWeights)) {
+                        if (typeof weight === 'object') {
+                            totalFocusWeight += Object.values(weight).reduce((a, b) => a + b, 0);
+                        } else {
+                            totalFocusWeight += weight;
+                        }
+                    }
+                }
+                
                 for (const [focusCat, score] of Object.entries(focusScores)) {
                     let weight = 0;
                     if (focusCat === 'Spell Damage') {
@@ -827,6 +845,9 @@
                         weight = Object.values(damageWeights).reduce((a, b) => a + b, 0);
                     } else if (focusCat === 'Haste') {
                         weight = 1.0; // Haste is binary, weight is 1
+                    } else if (focusCat === 'Warrior Focus Items' || focusCat === 'Shield of Strife') {
+                        // For Warriors/Pal/SK, use the calculated total focus weight
+                        weight = totalFocusWeight;
                     } else {
                         weight = focusWeights[focusCat] || 0;
                     }
