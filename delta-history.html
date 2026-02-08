@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Delta History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .nav-links {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .delta-list {
+            margin-top: 30px;
+        }
+        .delta-entry {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .delta-entry:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .delta-entry a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .delta-entry a:hover {
+            text-decoration: underline;
+        }
+        .delta-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .stats {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+        }
+        .stats strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📜 TAKP Delta Report History</h1>
+        <div class="nav-links">
+            <a href="delta.html">← Current Delta Report</a>
+            <a href="index.html">← Spell Inventory</a>
+        </div>
+        <div class="stats">
+            <strong>Total Historical Reports:</strong> 1
+        </div>
+        <div class="delta-list">
+            <h2>Available Delta Reports</h2>
+
+            <div class="delta-entry">
+                <a href="delta_2026-02-07.html">February 07, 2026</a>
+                <div class="delta-date">Date: 2026-02-07</div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
