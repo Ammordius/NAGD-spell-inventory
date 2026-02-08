@@ -581,7 +581,7 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'All': 0.75, 'Disease': 1.0},
             'Spell Mana Efficiency': 1.0,  # det mana
             'Detrimental Spell Duration': 1.0,  # det or all e
-            'Spell Haste': 1.0,  # det spell h
+            'Detrimental Spell Haste': 1.0,  # det spell h
         }
     },
     
