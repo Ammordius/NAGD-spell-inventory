@@ -561,7 +561,7 @@
         }
 
         function normalizeWeights(weights, focusMultiplier = 2.4) {
-            const hpWeight = weights.hp_pct || 1.0;
+            const hpWeight = weights.hp_pct || 0.0;
             const focusWeights = weights.focus || {};
             
             let totalFocusWeightConfig = 0.0;
@@ -573,7 +573,8 @@
                 }
             }
 
-            const focusScale = totalFocusWeightConfig > 0 ? (focusMultiplier * hpWeight) / totalFocusWeightConfig : 0.0;
+            // Only calculate focus scale if HP weight > 0 and we have focus weights
+            const focusScale = (hpWeight > 0 && totalFocusWeightConfig > 0) ? (focusMultiplier * hpWeight) / totalFocusWeightConfig : 0.0;
 
             let totalWeight = 0.0;
             const statKeys = ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct', 'resists_pct'];
@@ -581,7 +582,8 @@
                 totalWeight += weights[key] || 0.0;
             });
 
-            if (focusWeights && focusScale > 0) {
+            // Only add focus weights if HP > 0 (focuses are based on HP weight)
+            if (hpWeight > 0 && focusWeights && focusScale > 0) {
                 for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
                     if (typeof focusValue === 'object') {
                         totalWeight += Object.values(focusValue).reduce((a, b) => a + b, 0) * focusScale;
@@ -598,7 +600,7 @@
                 });
                 
                 normalized.focus = {};
-                if (focusWeights && focusScale > 0) {
+                if (hpWeight > 0 && focusWeights && focusScale > 0) {
                     for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
                         if (typeof focusValue === 'object') {
                             normalized.focus[focusCat] = {};
@@ -610,6 +612,12 @@
                         }
                     }
                 }
+            } else {
+                // If totalWeight is 0, return weights as-is (they're already normalized to 0)
+                statKeys.forEach(key => {
+                    normalized[key] = 0.0;
+                });
+                normalized.focus = {};
             }
 
             return normalized;
