@@ -552,6 +552,7 @@ CLASS_WEIGHTS = {
             'Spell Mana Efficiency': 1.0,
             'Spell Range Extension': 1.0,
             'Buff Spell Duration': 1.0,
+            'Beneficial Spell Haste': 1.0,
         }
     },
     
