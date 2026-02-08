@@ -1640,13 +1640,19 @@ def generate_leaderboard_html(period_name, aa_leaderboard, hp_leaderboard, perio
 """
     return html
 
-def generate_delta_history(base_dir):
+def generate_delta_history(base_dir, deploy_dir=None):
     """Generate a history page listing all available historical delta reports."""
     import glob
     import re
     
-    # Find all delta_YYYY-MM-DD.html files
-    delta_files = glob.glob(os.path.join(base_dir, "delta_*.html"))
+    # Find all delta_YYYY-MM-DD.html files in base_dir and deploy_dir
+    delta_files = []
+    delta_files.extend(glob.glob(os.path.join(base_dir, "delta_*.html")))
+    if deploy_dir and os.path.exists(deploy_dir):
+        delta_files.extend(glob.glob(os.path.join(deploy_dir, "delta_*.html")))
+    
+    # Remove duplicates (in case same file exists in both)
+    delta_files = list(set(delta_files))
     
     # Extract dates from filenames and sort
     delta_entries = []
@@ -2008,9 +2014,10 @@ def main():
         except Exception as e:
             print(f"Warning: Could not save historical delta: {e}")
         
-        # Generate/update delta history page
+        # Generate/update delta history page (check both base_dir and deploy if it exists)
         try:
-            generate_delta_history(base_dir)
+            deploy_dir = os.path.join(base_dir, "deploy")
+            generate_delta_history(base_dir, deploy_dir if os.path.exists(deploy_dir) else None)
             print("Generated delta history page")
         except Exception as e:
             print(f"Warning: Could not generate delta history: {e}")
@@ -2029,19 +2036,34 @@ def main():
                 'inv_deltas': inv_deltas
             }
             
+            week_start = get_week_start(date_str)
+            month_start = get_month_start(date_str)
+            
+            # Save weekly baseline JSON if this is a new week (check if baseline exists)
+            from delta_storage import load_baseline_json
+            delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
+            if not load_baseline_json('weekly', date_str, delta_snapshots_dir):
+                save_baseline_json(current_char_data, 'weekly', date_str, delta_snapshots_dir)
+                print(f"Saved weekly baseline JSON for week starting {week_start}")
+            
+            # Save monthly baseline JSON if this is a new month (check if baseline exists)
+            if not load_baseline_json('monthly', date_str, delta_snapshots_dir):
+                save_baseline_json(current_char_data, 'monthly', date_str, delta_snapshots_dir)
+                print(f"Saved monthly baseline JSON for month starting {month_start}")
+            
             # Save weekly snapshot (overwrites if same week)
-            save_delta_snapshot(delta_data, 'weekly', date_str, base_dir)
-            print(f"Saved weekly delta snapshot for week starting {get_week_start(date_str)}")
+            save_delta_snapshot(delta_data, 'weekly', date_str, delta_snapshots_dir)
+            print(f"Saved weekly delta snapshot for week starting {week_start}")
             
             # Save monthly snapshot (overwrites if same month)
-            save_delta_snapshot(delta_data, 'monthly', date_str, base_dir)
-            print(f"Saved monthly delta snapshot for month starting {get_month_start(date_str)}")
+            save_delta_snapshot(delta_data, 'monthly', date_str, delta_snapshots_dir)
+            print(f"Saved monthly delta snapshot for month starting {month_start}")
             
-            # Generate weekly/monthly leaderboard pages (week_start and month_start already calculated above)
+            # Generate weekly/monthly leaderboard pages
             
             # Generate weekly leaderboard page (compare current vs weekly baseline)
-            weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, base_dir, current_char_data)
-            weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, base_dir, current_char_data)
+            weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, delta_snapshots_dir, current_char_data)
+            weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, delta_snapshots_dir, current_char_data)
             weekly_html = generate_leaderboard_html(
                 f"Week of {week_start}", weekly_aa, weekly_hp, 'weekly'
             )
@@ -2051,8 +2073,8 @@ def main():
             print(f"Generated weekly leaderboard: {weekly_file}")
             
             # Generate monthly leaderboard page (compare current vs monthly baseline)
-            monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, base_dir, current_char_data)
-            monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, base_dir, current_char_data)
+            monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, delta_snapshots_dir, current_char_data)
+            monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, delta_snapshots_dir, current_char_data)
             monthly_html = generate_leaderboard_html(
                 f"Month of {month_start}", monthly_aa, monthly_hp, 'monthly'
             )
