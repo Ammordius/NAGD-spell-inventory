@@ -752,6 +752,7 @@
         };
 
         function showScoreBreakdown(char) {
+            const modal = document.getElementById('scoreModal');
             const modalContent = document.getElementById('modalContent');
             const scores = char.scores || {};
             const classWeightConfig = classWeights[char.class] || {};
@@ -822,6 +823,7 @@
                 // For Warriors/Pal/SK, calculate focus weight as 3x HP weight (after normalization)
                 // For other classes, use the focus weights from config
                 let totalFocusWeight = 0;
+                const charClass = char.class || '';
                 if (charClass === 'Warrior' || charClass === 'Paladin' || charClass === 'Shadow Knight') {
                     // Calculate normalized weights first
                     // Sum all stat weights
