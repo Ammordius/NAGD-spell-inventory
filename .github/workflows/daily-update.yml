@@ -193,17 +193,31 @@ jobs:
           echo "needs_update=true" >> $GITHUB_OUTPUT
         fi
     
-    - name: Save current files as previous (before download)
+    - name: Ensure previous files exist (before download)
       if: steps.need-update.outputs.needs_update == 'true'
       run: |
-        # Save current files as previous before downloading new ones
+        # Only save current as previous if we don't already have previous files
+        # (Previous files should already exist from step 118-150, but this is a safety check)
         if [ -f "character/TAKP_character.txt" ] && [ ! -f "character/TAKP_character_previous.txt" ]; then
           cp character/TAKP_character.txt character/TAKP_character_previous.txt
-          echo "✓ Saved current character file as previous"
+          echo "✓ Saved current character file as previous (fallback - previous should already exist)"
+        else
+          echo "Previous character file already exists or current file missing"
         fi
         if [ -f "inventory/TAKP_character_inventory.txt" ] && [ ! -f "inventory/TAKP_character_inventory_previous.txt" ]; then
           cp inventory/TAKP_character_inventory.txt inventory/TAKP_character_inventory_previous.txt
-          echo "✓ Saved current inventory file as previous"
+          echo "✓ Saved current inventory file as previous (fallback - previous should already exist)"
+        else
+          echo "Previous inventory file already exists or current file missing"
+        fi
+        
+        # Verify we have previous files before downloading
+        if [ -f "character/TAKP_character_previous.txt" ] && [ -f "inventory/TAKP_character_inventory_previous.txt" ]; then
+          echo "✓ Previous files confirmed - ready for delta comparison"
+          echo "Previous character: $(wc -l < character/TAKP_character_previous.txt) lines"
+          echo "Previous inventory: $(wc -l < inventory/TAKP_character_inventory_previous.txt) lines"
+        else
+          echo "⚠ Warning: Previous files missing - delta page may not be generated correctly"
         fi
     
     - name: Download magelo dump from TAKP (if update needed)
@@ -275,8 +289,24 @@ jobs:
           # Check if files are identical
           if cmp -s character/TAKP_character_previous.txt character/TAKP_character.txt; then
             echo "⚠ Warning: Previous and current character files are identical - no changes to show"
+            echo "This may indicate:"
+            echo "  1. No actual changes occurred between dumps"
+            echo "  2. Previous files were incorrectly set to today's data (bug)"
+            echo "  3. Cache restoration issue"
           else
             echo "✓ Character files are different - changes will be shown"
+            # Show a sample of differences to verify they're actually different
+            echo "First 3 lines of previous:"
+            head -3 character/TAKP_character_previous.txt || echo "Could not read"
+            echo "First 3 lines of current:"
+            head -3 character/TAKP_character.txt || echo "Could not read"
+          fi
+          
+          # Also check inventory files
+          if cmp -s inventory/TAKP_character_inventory_previous.txt inventory/TAKP_character_inventory.txt; then
+            echo "⚠ Warning: Previous and current inventory files are identical"
+          else
+            echo "✓ Inventory files are different - changes will be shown"
           fi
         else
           echo "⚠ No previous files found - delta page will not be generated"
