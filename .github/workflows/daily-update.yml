@@ -404,6 +404,18 @@ jobs:
         else
           echo "No delta.html found (previous day's files may not exist)"
         fi
+        # Copy delta history page if it was generated
+        if [ -f "delta-history.html" ]; then
+          cp delta-history.html deploy/delta-history.html
+          echo "✓ Copied delta-history.html to deploy directory"
+        fi
+        # Copy historical delta reports (delta_YYYY-MM-DD.html)
+        for file in delta_*.html; do
+          if [ -f "$file" ]; then
+            cp "$file" deploy/
+            echo "✓ Copied historical delta: $file"
+          fi
+        done
         # Copy weekly/monthly leaderboard pages (all of them to preserve history)
         # First copy any existing leaderboards from previous runs (if keep_files is true)
         # Then copy newly generated ones
@@ -415,9 +427,9 @@ jobs:
         done
         # Also check deploy directory for existing leaderboards to preserve
         if [ -d "deploy" ]; then
-          for file in deploy/leaderboard_week_*.html deploy/leaderboard_month_*.html; do
+          for file in deploy/leaderboard_week_*.html deploy/leaderboard_month_*.html deploy/delta_*.html; do
             if [ -f "$file" ]; then
-              echo "Preserving existing leaderboard: $(basename $file)"
+              echo "Preserving existing file: $(basename $file)"
             fi
           done
         fi

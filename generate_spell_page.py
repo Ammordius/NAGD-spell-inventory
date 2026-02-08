@@ -1214,6 +1214,8 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append(f'<a href="leaderboard_week_{week_start}.html" style="background-color: #2196F3;">📅 Weekly Leaderboard</a>')
     if month_start:
         nav_links.append(f'<a href="leaderboard_month_{month_start}.html" style="background-color: #9C27B0;">📆 Monthly Leaderboard</a>')
+    # Add delta history link
+    nav_links.append('<a href="delta-history.html" style="background-color: #607D8B;">📜 Delta History</a>')
     
     html += "".join(nav_links)
     html += """
@@ -1637,6 +1639,157 @@ def generate_leaderboard_html(period_name, aa_leaderboard, hp_leaderboard, perio
 """
     return html
 
+def generate_delta_history(base_dir):
+    """Generate a history page listing all available historical delta reports."""
+    import glob
+    import re
+    
+    # Find all delta_YYYY-MM-DD.html files
+    delta_files = glob.glob(os.path.join(base_dir, "delta_*.html"))
+    
+    # Extract dates from filenames and sort
+    delta_entries = []
+    for filepath in delta_files:
+        filename = os.path.basename(filepath)
+        match = re.match(r'delta_(\d{4}-\d{2}-\d{2})\.html', filename)
+        if match:
+            date_str = match.group(1)
+            try:
+                dt = datetime.strptime(date_str, '%Y-%m-%d')
+                delta_entries.append({
+                    'date': date_str,
+                    'date_formatted': dt.strftime('%B %d, %Y'),
+                    'filename': filename,
+                    'timestamp': os.path.getmtime(filepath)
+                })
+            except:
+                pass
+    
+    # Sort by date (newest first)
+    delta_entries.sort(key=lambda x: x['date'], reverse=True)
+    
+    # Generate HTML
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Delta History</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .nav-links {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .delta-list {
+            margin-top: 30px;
+        }
+        .delta-entry {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .delta-entry:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .delta-entry a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .delta-entry a:hover {
+            text-decoration: underline;
+        }
+        .delta-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .stats {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+        }
+        .stats strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📜 TAKP Delta Report History</h1>
+        <div class="nav-links">
+            <a href="delta.html">← Current Delta Report</a>
+            <a href="index.html">← Spell Inventory</a>
+        </div>
+        <div class="stats">
+            <strong>Total Historical Reports:</strong> """ + str(len(delta_entries)) + """
+        </div>
+        <div class="delta-list">
+"""
+    
+    if delta_entries:
+        html += "            <h2>Available Delta Reports</h2>\n"
+        for entry in delta_entries:
+            html += f"""
+            <div class="delta-entry">
+                <a href="{entry['filename']}">{entry['date_formatted']}</a>
+                <div class="delta-date">Date: {entry['date']}</div>
+            </div>
+"""
+    else:
+        html += """
+            <p>No historical delta reports found yet. Historical reports will appear here once they are generated.</p>
+"""
+    
+    html += """
+        </div>
+    </div>
+</body>
+</html>
+"""
+    
+    history_file = os.path.join(base_dir, "delta-history.html")
+    with open(history_file, 'w', encoding='utf-8') as f:
+        f.write(html)
+    return history_file
+
 def find_latest_magelo_file(directory, pattern=None):
     """Find the latest magelo dump file in a directory."""
     if not os.path.exists(directory):
@@ -1834,18 +1987,37 @@ def main():
             f.write(delta_html)
         print("Delta page generated successfully!")
         
+        # Extract date from magelo_update_date or use today
+        if magelo_update_date != 'Unknown':
+            # Try to parse date from format like "Sat Feb 7 16:30:25 UTC 2026"
+            try:
+                dt = datetime.strptime(magelo_update_date, '%a %b %d %H:%M:%S UTC %Y')
+                date_str = dt.strftime('%Y-%m-%d')
+            except:
+                date_str = datetime.now().strftime('%Y-%m-%d')
+        else:
+            date_str = datetime.now().strftime('%Y-%m-%d')
+        
+        # Save a dated copy of the delta report for history
+        try:
+            historical_delta_file = os.path.join(base_dir, f"delta_{date_str}.html")
+            with open(historical_delta_file, 'w', encoding='utf-8') as f:
+                f.write(delta_html)
+            print(f"Saved historical delta report: {historical_delta_file}")
+        except Exception as e:
+            print(f"Warning: Could not save historical delta: {e}")
+        
+        # Generate/update delta history page
+        try:
+            generate_delta_history(base_dir)
+            print("Generated delta history page")
+        except Exception as e:
+            print(f"Warning: Could not generate delta history: {e}")
+            import traceback
+            traceback.print_exc()
+        
         # Save delta snapshots for weekly/monthly tracking
         try:
-            # Extract date from magelo_update_date or use today
-            if magelo_update_date != 'Unknown':
-                # Try to parse date from format like "Sat Feb 7 16:30:25 UTC 2026"
-                try:
-                    dt = datetime.strptime(magelo_update_date, '%a %b %d %H:%M:%S UTC %Y')
-                    date_str = dt.strftime('%Y-%m-%d')
-                except:
-                    date_str = datetime.now().strftime('%Y-%m-%d')
-            else:
-                date_str = datetime.now().strftime('%Y-%m-%d')
             
             # Calculate deltas for snapshot (already calculated above)
             char_deltas = compare_character_data(current_char_data, previous_char_data, None)
