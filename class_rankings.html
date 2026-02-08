@@ -668,9 +668,17 @@
                     totalScore += scores.resists_pct * normalized.resists_pct;
                     totalWeight += normalized.resists_pct;
                 }
-                if (scores.ft_capped === true) {
-                    totalScore += 100.0 * 2.0;
-                    totalWeight += 2.0;
+                // FT is only included if HP weight > 0 (FT is tied to HP/mana for casters)
+                // Check if any stat weight is set (not just HP) to determine if FT should be included
+                const hasStatWeights = normalized.hp_pct > 0 || normalized.mana_pct > 0 || normalized.ac_pct > 0 || 
+                                      normalized.atk_pct > 0 || normalized.haste_pct > 0 || normalized.resists_pct > 0;
+                if (scores.ft_capped === true && hasStatWeights) {
+                    // FT weight is 2.0, but we need to normalize it against the total
+                    // For now, only include FT if HP or Mana has weight (FT is for casters)
+                    if (normalized.hp_pct > 0 || normalized.mana_pct > 0) {
+                        totalScore += 100.0 * 2.0;
+                        totalWeight += 2.0;
+                    }
                 }
 
                 const focusWeights = normalized.focus || {};
