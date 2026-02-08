@@ -270,6 +270,10 @@ PALADIN_SK_FOCUS_ITEMS = {
     'shield': '27298'  # Shield of Strife in Secondary (slot 14)
 }
 
+ENCHANTER_FOCUS_ITEMS = {
+    'range': '22959'  # Serpent of Vindication in Range (slot 11)
+}
+
 def check_warrior_focus_items(char_inventory, char_haste):
     """Check if Warrior has the required focus items in correct slots and max haste"""
     has_mh = False
@@ -319,6 +323,21 @@ def check_paladin_sk_focus_items(char_inventory):
     
     # Focus score: 100% if has shield, 0% otherwise
     return 100.0 if has_shield else 0.0, {'has_shield': has_shield}
+
+def check_enchanter_focus_items(char_inventory):
+    """Check if Enchanter has Serpent of Vindication"""
+    has_serpent = False
+    
+    for item in char_inventory:
+        slot_id = item.get('slot_id', 0)
+        item_id = item.get('item_id', '')
+        
+        # Check Range (slot 11) for item 22959
+        if slot_id == 11 and item_id == ENCHANTER_FOCUS_ITEMS['range']:
+            has_serpent = True
+    
+    # Focus score: 100% if has serpent, 0% otherwise
+    return 100.0 if has_serpent else 0.0, {'has_serpent': has_serpent}
 
 # Calculate class-specific scores
 def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None):
@@ -419,6 +438,26 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         pal_sk_focus_score, pal_sk_items = check_paladin_sk_focus_items(char_inventory or [])
         focus_scores = {'Shield of Strife': pal_sk_focus_score}
         scores['focus_items'] = pal_sk_items
+    elif char_class == 'Enchanter':
+        enchanter_focus_score, enchanter_items = check_enchanter_focus_items(char_inventory or [])
+        focus_scores = {'Serpent of Vindication': enchanter_focus_score}
+        scores['focus_items'] = enchanter_items
+        # Add other focus scores for Enchanters (spell focuses)
+        for category, best_pct in best_focii.items():
+            if category == 'Spell Damage':
+                # Handle spell damage separately
+                char_pct = char_damage_focii.get('Magic', 0)
+                if best_pct > 0:
+                    focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
+                else:
+                    focus_scores[category] = 0
+            elif category in ['Spell Mana Efficiency', 'Spell Haste', 'Spell Range Extension']:
+                # Track these for Enchanters
+                char_pct = char_focii.get(category, 0)
+                if best_pct > 0:
+                    focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
+                else:
+                    focus_scores[category] = 0
     else:
         focus_scores = {}
         for category, best_pct in best_focii.items():
@@ -627,6 +666,8 @@ CLASS_WEIGHTS = {
         'focus': {
             'Spell Damage': {'Fire': 1.0, 'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
+            'Detrimental Spell Haste': 1.0,
+            'Detrimental Spell Duration': 0.75,
         }
     },
     
@@ -658,6 +699,7 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'Cold': 1.0, 'All': 0.75, 'Disease': 1.0},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
+            'Detrimental Spell Haste': 0.75,
             'Buff Spell Duration': 1.0,  # Bene exter
             'Detrimental Spell Duration': 1.0,  # DoT duration focus
             'All Spell Duration': 1.0,  # All duration focus (works for both)
@@ -711,6 +753,7 @@ CLASS_WEIGHTS = {
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
             'Beneficial Spell Haste': 1.0,
+            'Detrimental Spell Haste': 0.75,
             'Detrimental Spell Duration': 0.5,  # det or all e
             'Buff Spell Duration': 1.0,  # Bene exter
         }
@@ -743,7 +786,7 @@ CLASS_WEIGHTS = {
 }
 
 def normalize_class_weights(weights_config):
-    """Normalize class weights: focus weights total = 3x HP weight, then normalize all to sum to 1.0"""
+    """Normalize class weights: focus weights total = 2.4x HP weight (40% of score for casters), then normalize all to sum to 1.0"""
     hp_weight = weights_config.get('hp_pct', 1.0)
     
     # Calculate total focus weight from config (relative weights)
@@ -758,8 +801,8 @@ def normalize_class_weights(weights_config):
                 # Single focus weight
                 total_focus_weight_config += focus_value
     
-    # Scale focus weights so they total 3x HP weight
-    focus_scale = (3.0 * hp_weight) / total_focus_weight_config if total_focus_weight_config > 0 else 0.0
+    # Scale focus weights so they total 2.4x HP weight (40% of score for casters)
+    focus_scale = (2.4 * hp_weight) / total_focus_weight_config if total_focus_weight_config > 0 else 0.0
     
     # Calculate total weight including scaled focuses
     total_weight = 0.0
@@ -903,6 +946,15 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                             total_score += heal_score * weight_config
                             total_weight += weight_config
                     # Beneficial Spell Haste is handled in the main focus loop below
+            elif char_class == 'Enchanter':
+                # Handle Enchanter focuses individually (Serpent of Vindication + spell focuses)
+                for focus_cat, weight_config in focus_weights.items():
+                    if focus_cat == 'Serpent of Vindication':
+                        if isinstance(weight_config, (int, float)) and weight_config > 0:
+                            serpent_score = focus_scores.get('Serpent of Vindication', 0)
+                            total_score += serpent_score * weight_config
+                            total_weight += weight_config
+                    # Other focuses (Spell Damage, Spell Mana Efficiency, etc.) handled in main loop below
             else:
                 # For other classes, use focus_overall_pct
                 focus_score = scores.get('focus_overall_pct', 0)
