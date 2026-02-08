@@ -794,6 +794,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         if hp_weight > 0 and max_combined > 0:
             hp_ac_equivalent = hp_value / 5.0
             hp_score = (hp_ac_equivalent / max_combined * 100) if hp_ac_equivalent > 0 else 0
+            scores['hp_pct'] = hp_score  # Store percentage for display
             total_score += hp_score * hp_weight
             total_weight += hp_weight
         
@@ -801,6 +802,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         ac_weight = weights_config.get('ac_pct', 0.0)
         if ac_weight > 0 and max_combined > 0 and ac_value > 0:
             ac_score = (ac_value / max_combined * 100) if ac_value > 0 else 0
+            scores['ac_pct'] = ac_score  # Store percentage for display
             total_score += ac_score * ac_weight
             total_weight += ac_weight
         
@@ -823,6 +825,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             resists_value = scores.get('resists', 0)
             if max_resists > 0:
                 resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
+                scores['resists_pct'] = resists_score  # Store percentage for display
                 total_score += resists_score * resists_weight
                 total_weight += resists_weight
         
@@ -859,12 +862,14 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
     hp_weight = weights_config.get('hp_pct', 0.0)
     if hp_weight > 0 and max_combined > 0:
         hp_score = (hp_value / max_combined * 100) if hp_value > 0 else 0
+        scores['hp_pct'] = hp_score  # Store percentage for display
         total_score += hp_score * hp_weight
         total_weight += hp_weight
     
     mana_weight = weights_config.get('mana_pct', 0.0)
     if mana_weight > 0 and max_combined > 0 and mana_value > 0:
         mana_score = (mana_value / max_combined * 100) if mana_value > 0 else 0
+        scores['mana_pct'] = mana_score  # Store percentage for display
         total_score += mana_score * mana_weight
         total_weight += mana_weight
     
@@ -881,6 +886,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             max_ac = class_max_values.get('max_ac', 1)
             ac_value = scores.get('ac', 0)
             ac_score = (ac_value / max_ac * 100) if max_ac > 0 and ac_value > 0 else 0
+            scores['ac_pct'] = ac_score  # Store percentage for display
             total_score += ac_score * weight
             total_weight += weight
     
@@ -903,6 +909,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         resists_value = scores.get('resists', 0)
         if max_resists > 0:
             resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
+            scores['resists_pct'] = resists_score  # Store percentage for display
             total_score += resists_score * resists_weight
             total_weight += resists_weight
     

@@ -768,26 +768,45 @@
             html += `<h3>Stat Scores</h3>`;
             html += `<table><thead><tr><th>Stat</th><th>Value</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
             
-            if (scores.hp !== undefined && scores.hp !== null) {
+            // HP - check for hp_pct first, then calculate if needed
+            if (scores.hp !== undefined && scores.hp !== null || scores.hp_pct !== undefined) {
                 const weight = classWeightConfig.hp_pct || 0;
-                html += `<tr><td>HP</td><td>${(char.stats.hp || 0).toLocaleString()}</td><td>${formatScore(scores.hp_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const hpValue = char.stats.hp || 0;
+                const hpPct = scores.hp_pct !== undefined && scores.hp_pct !== null ? scores.hp_pct : 'N/A';
+                html += `<tr><td>HP</td><td>${hpValue.toLocaleString()}</td><td>${formatScore(hpPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
             }
-            if (scores.mana !== undefined && scores.mana !== null) {
+            
+            // Mana - check for mana_pct first
+            if (scores.mana !== undefined && scores.mana !== null || scores.mana_pct !== undefined) {
                 const weight = classWeightConfig.mana_pct || 0;
-                html += `<tr><td>Mana</td><td>${(char.stats.mana || 0).toLocaleString()}</td><td>${formatScore(scores.mana_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const manaValue = char.stats.mana || 0;
+                const manaPct = scores.mana_pct !== undefined && scores.mana_pct !== null ? scores.mana_pct : 'N/A';
+                html += `<tr><td>Mana</td><td>${manaValue.toLocaleString()}</td><td>${formatScore(manaPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
             }
-            if (scores.ac !== undefined && scores.ac !== null) {
+            
+            // AC - check for ac_pct first
+            if (scores.ac !== undefined && scores.ac !== null || scores.ac_pct !== undefined) {
                 const weight = classWeightConfig.ac_pct || 0;
-                html += `<tr><td>AC</td><td>${(scores.ac || 0).toLocaleString()}</td><td>${formatScore(scores.ac_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const acValue = scores.ac !== undefined && scores.ac !== null ? scores.ac : (char.stats.ac || 0);
+                const acPct = scores.ac_pct !== undefined && scores.ac_pct !== null ? scores.ac_pct : 'N/A';
+                html += `<tr><td>AC</td><td>${acValue.toLocaleString()}</td><td>${formatScore(acPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
             }
+            
+            // ATK
             if (scores.atk_pct !== undefined && scores.atk_pct !== null) {
                 const weight = classWeightConfig.atk_pct || 0;
                 html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
             }
-            if (scores.resists !== undefined && scores.resists !== null) {
+            
+            // Resists - check for resists_pct first
+            if (scores.resists !== undefined && scores.resists !== null || scores.resists_pct !== undefined) {
                 const weight = classWeightConfig.resists_pct || 0;
-                html += `<tr><td>Resists</td><td>${(scores.resists || 0).toLocaleString()}</td><td>${formatScore(scores.resists_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const resistsValue = scores.resists !== undefined && scores.resists !== null ? scores.resists : 0;
+                const resistsPct = scores.resists_pct !== undefined && scores.resists_pct !== null ? scores.resists_pct : 'N/A';
+                html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
             }
+            
+            // FT (Flowing Thought)
             if (scores.ft_capped === true) {
                 html += `<tr><td>FT (Capped)</td><td>15/15</td><td>100%</td><td>2.0</td></tr>`;
             }
