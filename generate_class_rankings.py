@@ -1201,7 +1201,8 @@ def main():
             'spell_haste_cats': char_spell_haste_cats,  # Spell Haste by category
             'duration_cats': char_duration_cats,  # Duration by category
             'scores': scores,  # Percentage scores
-            'overall_score': round(overall_score, 2)  # Overall ranking score
+            'overall_score': round(overall_score, 2),  # Overall ranking score
+            'inventory': char_inventory  # Inventory items for item links
         })
     
     # Sort by overall score (descending)
