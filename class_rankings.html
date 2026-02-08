@@ -428,6 +428,9 @@
                     if (focii['Spell Mana Efficiency'] > 0) {
                         const manaEffCats = char.mana_efficiency_cats || {};
                         Object.entries(manaEffCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
+                            // Skip Sanguine (self-only) - don't display it
+                            if (cat === 'Sanguine') return;
+                            
                             const isWeighted = relevantFocusCats.includes('Spell Mana Efficiency');
                             const weight = focusWeights['Spell Mana Efficiency'] || 0;
                             // For Nuke, show "Mana Efficiency" (no prefix), others show category prefix
