@@ -11,7 +11,8 @@ from datetime import datetime
 from delta_storage import (
     save_delta_snapshot, load_delta_snapshot,
     get_week_start, get_month_start,
-    get_weekly_leaderboard, get_monthly_leaderboard
+    get_weekly_leaderboard, get_monthly_leaderboard,
+    save_baseline_json
 )
 
 # Character names to look for
@@ -2036,9 +2037,7 @@ def main():
             save_delta_snapshot(delta_data, 'monthly', date_str, base_dir)
             print(f"Saved monthly delta snapshot for month starting {get_month_start(date_str)}")
             
-            # Generate weekly/monthly leaderboard pages
-            week_start = get_week_start(date_str)
-            month_start = get_month_start(date_str)
+            # Generate weekly/monthly leaderboard pages (week_start and month_start already calculated above)
             
             # Generate weekly leaderboard page (compare current vs weekly baseline)
             weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, base_dir, current_char_data)

@@ -22,6 +22,86 @@ def get_month_start(date_str):
     dt = datetime.strptime(date_str, '%Y-%m-%d')
     return dt.replace(day=1).strftime('%Y-%m-%d')
 
+def save_baseline_json(char_data, baseline_type, date_str, base_dir='delta_snapshots'):
+    """Save a minimal JSON baseline containing only essential character data.
+    
+    Args:
+        char_data: Dict of character data from parse_character_data
+        baseline_type: 'weekly' or 'monthly'
+        date_str: Date string (YYYY-MM-DD)
+        base_dir: Base directory for baselines
+    
+    Returns:
+        Path to saved baseline file
+    """
+    os.makedirs(base_dir, exist_ok=True)
+    
+    # Calculate week/month start
+    if baseline_type == 'weekly':
+        period_start = get_week_start(date_str)
+        filename = f"baseline_week_{period_start}.json"
+    elif baseline_type == 'monthly':
+        period_start = get_month_start(date_str)
+        filename = f"baseline_month_{period_start}.json"
+    else:
+        raise ValueError(f"Invalid baseline_type: {baseline_type}")
+    
+    filepath = os.path.join(base_dir, filename)
+    
+    # Extract only essential data for comparisons (much smaller than full text file)
+    baseline_data = {}
+    for char_name, data in char_data.items():
+        baseline_data[char_name] = {
+            'level': data.get('level', 0),
+            'aa_unspent': data.get('aa_unspent', 0),
+            'aa_spent': data.get('aa_spent', 0),
+            'hp_max_total': data.get('hp_max_total', 0),
+            'class': data.get('class', '')
+        }
+    
+    baseline_json = {
+        'period_start': period_start,
+        'baseline_type': baseline_type,
+        'date_saved': date_str,
+        'timestamp': datetime.now().isoformat(),
+        'characters': baseline_data
+    }
+    
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(baseline_json, f, indent=2)
+    
+    return filepath
+
+def load_baseline_json(baseline_type, date_str, base_dir='delta_snapshots'):
+    """Load a JSON baseline.
+    
+    Args:
+        baseline_type: 'weekly' or 'monthly'
+        date_str: Date string (YYYY-MM-DD)
+        base_dir: Base directory for baselines
+    
+    Returns:
+        Dict with baseline character data or None if not found
+    """
+    if baseline_type == 'weekly':
+        period_start = get_week_start(date_str)
+        filename = f"baseline_week_{period_start}.json"
+    elif baseline_type == 'monthly':
+        period_start = get_month_start(date_str)
+        filename = f"baseline_month_{period_start}.json"
+    else:
+        raise ValueError(f"Invalid baseline_type: {baseline_type}")
+    
+    filepath = os.path.join(base_dir, filename)
+    
+    if not os.path.exists(filepath):
+        return None
+    
+    with open(filepath, 'r', encoding='utf-8') as f:
+        baseline_json = json.load(f)
+    
+    return baseline_json.get('characters', {})
+
 def save_delta_snapshot(delta_data, snapshot_type, date_str, base_dir='delta_snapshots'):
     """Save a minimal delta snapshot (only changes).
     
@@ -106,25 +186,28 @@ def accumulate_weekly_deltas(week_start_date, current_char_data, base_dir='delta
         'level': 0
     })
     
-    # Try to load weekly baseline
-    baseline_file = os.path.join(base_dir, '..', 'character', f'baseline_week_{week_start_date}.txt')
-    if not os.path.exists(baseline_file):
-        # Fall back to snapshot if baseline doesn't exist
-        snapshot = load_delta_snapshot('weekly', week_start_date, base_dir)
-        if snapshot:
-            char_deltas = snapshot.get('char_deltas', {})
-            for char_name, delta in char_deltas.items():
-                if delta.get('is_deleted', False) or delta.get('is_new', False):
-                    continue
-                weekly_totals[char_name]['aa_gain'] += delta.get('aa_total_change', 0)
-                weekly_totals[char_name]['hp_gain'] += delta.get('hp_change', 0)
-                weekly_totals[char_name]['class'] = delta.get('class', '')
-                weekly_totals[char_name]['level'] = delta.get('current_level', 0)
-        return weekly_totals
+    # Try to load weekly baseline JSON (much smaller than text file)
+    baseline_data = load_baseline_json('weekly', week_start_date, base_dir)
     
-    # Parse baseline and compare with current
-    from generate_spell_page import parse_character_data
-    baseline_data = parse_character_data(baseline_file, None)
+    if not baseline_data:
+        # Fall back to old text file format if JSON doesn't exist (backward compatibility)
+        baseline_file = os.path.join(base_dir, '..', 'character', f'baseline_week_{week_start_date}.txt')
+        if os.path.exists(baseline_file):
+            from generate_spell_page import parse_character_data
+            baseline_data = parse_character_data(baseline_file, None)
+        else:
+            # Fall back to snapshot if baseline doesn't exist
+            snapshot = load_delta_snapshot('weekly', week_start_date, base_dir)
+            if snapshot:
+                char_deltas = snapshot.get('char_deltas', {})
+                for char_name, delta in char_deltas.items():
+                    if delta.get('is_deleted', False) or delta.get('is_new', False):
+                        continue
+                    weekly_totals[char_name]['aa_gain'] += delta.get('aa_total_change', 0)
+                    weekly_totals[char_name]['hp_gain'] += delta.get('hp_change', 0)
+                    weekly_totals[char_name]['class'] = delta.get('class', '')
+                    weekly_totals[char_name]['level'] = delta.get('current_level', 0)
+            return weekly_totals
     
     for char_name, current in current_char_data.items():
         baseline = baseline_data.get(char_name, {})
@@ -168,28 +251,30 @@ def accumulate_monthly_deltas(month_start_date, current_char_data, base_dir='del
         'level': 0
     })
     
-    # Try to load monthly baseline (check multiple possible locations)
-    baseline_file = os.path.join(base_dir, '..', 'character', f'baseline_month_{month_start_date}.txt')
-    if not os.path.exists(baseline_file):
-        # Try direct path
-        baseline_file = os.path.join('character', f'baseline_month_{month_start_date}.txt')
-    if not os.path.exists(baseline_file):
-        # Fall back to snapshot if baseline doesn't exist
-        snapshot = load_delta_snapshot('monthly', month_start_date, base_dir)
-        if snapshot:
-            char_deltas = snapshot.get('char_deltas', {})
-            for char_name, delta in char_deltas.items():
-                if delta.get('is_deleted', False) or delta.get('is_new', False):
-                    continue
-                monthly_totals[char_name]['aa_gain'] += delta.get('aa_total_change', 0)
-                monthly_totals[char_name]['hp_gain'] += delta.get('hp_change', 0)
-                monthly_totals[char_name]['class'] = delta.get('class', '')
-                monthly_totals[char_name]['level'] = delta.get('current_level', 0)
-        return monthly_totals
+    # Try to load monthly baseline JSON (much smaller than text file)
+    baseline_data = load_baseline_json('monthly', month_start_date, base_dir)
     
-    # Parse baseline and compare with current
-    from generate_spell_page import parse_character_data
-    baseline_data = parse_character_data(baseline_file, None)
+    if not baseline_data:
+        # Fall back to old text file format if JSON doesn't exist (backward compatibility)
+        baseline_file = os.path.join(base_dir, '..', 'character', f'baseline_month_{month_start_date}.txt')
+        if not os.path.exists(baseline_file):
+            baseline_file = os.path.join('character', f'baseline_month_{month_start_date}.txt')
+        if os.path.exists(baseline_file):
+            from generate_spell_page import parse_character_data
+            baseline_data = parse_character_data(baseline_file, None)
+        else:
+            # Fall back to snapshot if baseline doesn't exist
+            snapshot = load_delta_snapshot('monthly', month_start_date, base_dir)
+            if snapshot:
+                char_deltas = snapshot.get('char_deltas', {})
+                for char_name, delta in char_deltas.items():
+                    if delta.get('is_deleted', False) or delta.get('is_new', False):
+                        continue
+                    monthly_totals[char_name]['aa_gain'] += delta.get('aa_total_change', 0)
+                    monthly_totals[char_name]['hp_gain'] += delta.get('hp_change', 0)
+                    monthly_totals[char_name]['class'] = delta.get('class', '')
+                    monthly_totals[char_name]['level'] = delta.get('current_level', 0)
+            return monthly_totals
     
     for char_name, current in current_char_data.items():
         baseline = baseline_data.get(char_name, {})

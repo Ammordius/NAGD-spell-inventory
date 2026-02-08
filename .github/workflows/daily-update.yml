@@ -471,36 +471,18 @@ jobs:
           echo "month_start=" >> $GITHUB_OUTPUT
         fi
     
-    - name: Save weekly baseline (if new week)
+    - name: Weekly/monthly baseline JSON (handled by Python script)
       run: |
-        WEEK_START="${{ steps.date-info.outputs.week_start }}"
-        if [ -n "$WEEK_START" ] && [ -f "character/TAKP_character.txt" ]; then
-          if [ ! -f "character/baseline_week_${WEEK_START}.txt" ]; then
-            cp character/TAKP_character.txt "character/baseline_week_${WEEK_START}.txt"
-            cp inventory/TAKP_character_inventory.txt "inventory/baseline_week_${WEEK_START}.txt"
-            echo "✓ Saved weekly baseline for week starting $WEEK_START"
-          fi
-        fi
-    
-    - name: Save monthly baseline (if new month)
-      run: |
-        MONTH_START="${{ steps.date-info.outputs.month_start }}"
-        if [ -n "$MONTH_START" ] && [ -f "character/TAKP_character.txt" ]; then
-          if [ ! -f "character/baseline_month_${MONTH_START}.txt" ]; then
-            cp character/TAKP_character.txt "character/baseline_month_${MONTH_START}.txt"
-            cp inventory/TAKP_character_inventory.txt "inventory/baseline_month_${MONTH_START}.txt"
-            echo "✓ Saved monthly baseline for month starting $MONTH_START"
-          fi
-        fi
+        # The Python script will automatically save compact JSON baselines
+        # when it detects a new week/month, instead of large text files
+        echo "Baseline JSON files will be saved by generate_spell_page.py if needed"
     
     - name: Cache weekly/monthly baselines and delta snapshots
       uses: actions/cache@v3
       with:
         path: |
-          character/baseline_week_*.txt
-          character/baseline_month_*.txt
-          inventory/baseline_week_*.txt
-          inventory/baseline_month_*.txt
+          delta_snapshots/baseline_week_*.json
+          delta_snapshots/baseline_month_*.json
           delta_snapshots/
         key: magelo-baselines-${{ steps.date-info.outputs.month_start }}
         restore-keys: |
