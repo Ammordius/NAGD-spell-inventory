@@ -816,11 +816,17 @@
             
             // Focus Scores
             const focusScores = scores.focus_scores || {};
+            const charFocii = char.focii || {};
+            const charDamageFocii = char.damage_focii || {};
+            const charManaEffCats = char.mana_efficiency_cats || {};
+            const charSpellHasteCats = char.spell_haste_cats || {};
+            const charDurationCats = char.duration_cats || {};
+            
             if (Object.keys(focusScores).length > 0) {
                 html += `<h3>Focus Scores</h3>`;
-                html += `<table><thead><tr><th>Focus</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
+                html += `<table><thead><tr><th>Focus</th><th>Raw Value</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
                 
-                // For Warriors/Pal/SK, calculate focus weight as 3x HP weight (after normalization)
+                // For Warriors/Pal/SK, calculate focus weight as 2.4x HP weight (after normalization)
                 // For other classes, use the focus weights from config
                 let totalFocusWeight = 0;
                 const charClass = char.class || '';
@@ -833,9 +839,9 @@
                         totalStatWeight += classWeightConfig[key] || 0;
                     });
                     
-                    // Calculate total focus weight (3x HP weight before normalization)
+                    // Calculate total focus weight (2.4x HP weight before normalization)
                     const rawHpWeight = classWeightConfig.hp_pct || 0;
-                    const rawFocusWeight = rawHpWeight * 3;
+                    const rawFocusWeight = rawHpWeight * 2.4;
                     
                     // Total weight before normalization = stat weights + focus weights
                     const totalRawWeight = totalStatWeight + rawFocusWeight;
@@ -855,21 +861,73 @@
                     }
                 }
                 
+                // Helper function to get raw value for a focus category
+                function getRawFocusValue(focusCat) {
+                    if (focusCat === 'Spell Damage') {
+                        // Get the best damage type value
+                        const damageTypes = Object.keys(charDamageFocii);
+                        if (damageTypes.length > 0) {
+                            const bestType = damageTypes.reduce((a, b) => charDamageFocii[a] > charDamageFocii[b] ? a : b);
+                            return charDamageFocii[bestType] || 0;
+                        }
+                        return 0;
+                    } else if (focusCat === 'Spell Mana Efficiency') {
+                        // Get the best mana efficiency category
+                        const cats = Object.keys(charManaEffCats);
+                        if (cats.length > 0) {
+                            const bestCat = cats.reduce((a, b) => charManaEffCats[a] > charManaEffCats[b] ? a : b);
+                            return charManaEffCats[bestCat] || 0;
+                        }
+                        return 0;
+                    } else if (focusCat === 'Beneficial Spell Haste' || focusCat === 'Detrimental Spell Haste') {
+                        const hasteCat = focusCat === 'Beneficial Spell Haste' ? 'Bene' : 'Det';
+                        return charSpellHasteCats[hasteCat] || 0;
+                    } else if (focusCat === 'Buff Spell Duration' || focusCat === 'Beneficial Spell Duration') {
+                        return charDurationCats['Bene'] || 0;
+                    } else if (focusCat === 'Detrimental Spell Duration') {
+                        return charDurationCats['Det'] || 0;
+                    } else if (focusCat === 'All Spell Duration') {
+                        return charDurationCats['All'] || 0;
+                    } else if (focusCat === 'Haste') {
+                        // Haste is binary, show the item haste value
+                        const hasteValue = char.stats?.haste || 0;
+                        return hasteValue >= 30 ? 30 : hasteValue;
+                    } else {
+                        // For other focuses, get from charFocii
+                        return charFocii[focusCat] || 0;
+                    }
+                }
+                
                 for (const [focusCat, score] of Object.entries(focusScores)) {
                     let weight = 0;
+                    let rawValue = getRawFocusValue(focusCat);
+                    
                     if (focusCat === 'Spell Damage') {
                         // Spell Damage has nested weights
                         const damageWeights = focusWeights['Spell Damage'] || {};
                         weight = Object.values(damageWeights).reduce((a, b) => a + b, 0);
                     } else if (focusCat === 'Haste') {
                         weight = 1.0; // Haste is binary, weight is 1
-                    } else if (focusCat === 'Warrior Focus Items' || focusCat === 'Shield of Strife') {
-                        // For Warriors/Pal/SK, use the calculated total focus weight
+                    } else if (focusCat === 'Warrior Focus Items' || focusCat === 'Shield of Strife' || focusCat === 'Serpent of Vindication') {
+                        // For Warriors/Pal/SK/Enchanter, use the calculated total focus weight
                         weight = totalFocusWeight;
+                        // These are binary (100 or 0), so raw value is the score
+                        rawValue = score === 100 ? 100 : 0;
                     } else {
                         weight = focusWeights[focusCat] || 0;
                     }
-                    html += `<tr><td>${escapeHtml(focusCat)}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                    
+                    // Format raw value
+                    let rawDisplay = 'N/A';
+                    if (rawValue > 0) {
+                        if (focusCat === 'Haste') {
+                            rawDisplay = `${rawValue}% (${rawValue >= 30 ? 'Capped' : 'Not Capped'})`;
+                        } else {
+                            rawDisplay = `${rawValue.toFixed(1)}%`;
+                        }
+                    }
+                    
+                    html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td></tr>`;
                 }
                 
                 html += `</tbody></table>`;
