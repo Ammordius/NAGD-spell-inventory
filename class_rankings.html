@@ -689,9 +689,31 @@
                     totalScore += scores.haste_pct * normalized.haste_pct;
                     totalWeight += normalized.haste_pct;
                 }
+                // Resists - use advanced resists if enabled
                 if (scores.resists_pct !== undefined && normalized.resists_pct > 0) {
-                    totalScore += scores.resists_pct * normalized.resists_pct;
-                    totalWeight += normalized.resists_pct;
+                    if (advancedResists && char.individual_resists) {
+                        // Calculate individual resist scores with weight curve
+                        let totalResistScore = 0.0;
+                        let totalResistWeight = 0.0;
+                        
+                        const resistTypes = ['MR', 'FR', 'CR', 'DR', 'PR'];
+                        resistTypes.forEach(resistType => {
+                            const resistValue = char.individual_resists[resistType] || 0;
+                            const { score, weight } = calculateResistScore(resistValue);
+                            totalResistScore += score * weight;
+                            totalResistWeight += weight;
+                        });
+                        
+                        if (totalResistWeight > 0) {
+                            const avgResistScore = totalResistScore / totalResistWeight;
+                            totalScore += avgResistScore * normalized.resists_pct;
+                            totalWeight += normalized.resists_pct;
+                        }
+                    } else {
+                        // Use simple total resists percentage
+                        totalScore += scores.resists_pct * normalized.resists_pct;
+                        totalWeight += normalized.resists_pct;
+                    }
                 }
                 // FT is only included if HP weight > 0 (FT is tied to HP/mana for casters)
                 // Check if any stat weight is set (not just HP) to determine if FT should be included
@@ -1235,12 +1257,29 @@
                 html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
             }
             
-            // Resists - check for resists_pct first
+            // Resists - show individual resists if available and advanced mode is on
             if (scores.resists !== undefined && scores.resists !== null || scores.resists_pct !== undefined) {
                 const weight = classWeightConfig.resists_pct || 0;
                 const resistsValue = scores.resists !== undefined && scores.resists !== null ? scores.resists : 0;
                 const resistsPct = scores.resists_pct !== undefined && scores.resists_pct !== null ? scores.resists_pct : 'N/A';
-                html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                
+                // Show individual resists if available
+                const individualResistScores = scores.individual_resist_scores;
+                if (individualResistScores && Object.keys(individualResistScores).length > 0) {
+                    html += `<tr><td colspan="4"><strong>Resists (Advanced)</strong></td></tr>`;
+                    const resistTypes = ['MR', 'FR', 'CR', 'DR', 'PR'];
+                    let totalRawValue = 0;
+                    resistTypes.forEach(resistType => {
+                        const resistData = individualResistScores[resistType];
+                        if (resistData) {
+                            totalRawValue += resistData.value;
+                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${resistData.weight.toFixed(2)}</td></tr>`;
+                        }
+                    });
+                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td></tr>`;
+                } else {
+                    html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                }
             }
             
             // FT (Flowing Thought)
