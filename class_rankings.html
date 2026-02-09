@@ -831,12 +831,14 @@
             // Normalize focus weights (with scaling applied)
             if (focusWeights && focusScale > 0) {
                 for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
-                    if (typeof focusValue === 'object') {
+                    if (typeof focusValue === 'object' && focusValue !== null) {
                         normalized.focus[focusCat] = {};
                         for (const [k, v] of Object.entries(focusValue)) {
-                            normalized.focus[focusCat][k] = v * focusScale;
+                            if (typeof v === 'number') {
+                                normalized.focus[focusCat][k] = v * focusScale;
+                            }
                         }
-                    } else {
+                    } else if (typeof focusValue === 'number') {
                         normalized.focus[focusCat] = focusValue * focusScale;
                     }
                 }
@@ -1115,10 +1117,14 @@
                 filteredCharacters = [...characters];
                 
                 // Load custom weights from localStorage
+                console.log('Loading custom weights...');
                 loadCustomWeights();
                 
+                console.log('Populating filters...');
                 populateFilters();
+                console.log('Setting up weight controls...');
                 setupWeightControls();
+                console.log('Rendering table...');
                 renderTable();
                 
                 document.getElementById('loading').style.display = 'none';
