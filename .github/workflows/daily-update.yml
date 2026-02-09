@@ -3,10 +3,8 @@ name: Daily Spell Inventory Update
 # Set workflow run retention to 30 days (GitHub default is 90 days)
 on:
   schedule:
-    # Run daily at 17:00 UTC (30 minutes after Magelo update at 16:30 UTC)
-    # Backup at 17:05 UTC in case of delays
-    - cron: '0 17 * * *'
-    - cron: '5 17 * * *'
+    # Run daily at 16:40 UTC (10 minutes after Magelo update at 16:30 UTC)
+    - cron: '40 16 * * *'
   workflow_dispatch:  # Allow manual trigger
   push:
     branches:
@@ -18,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: "update-spell-inventory"
-      cancel-in-progress: false
+      cancel-in-progress: true
     permissions:
       contents: write
       pages: write
@@ -590,6 +588,7 @@ jobs:
         echo "✓ Added .nojekyll to disable Jekyll"
     
     - name: Upload Pages artifact
+      id: upload
       uses: actions/upload-pages-artifact@v3
       if: github.ref == 'refs/heads/main'
       with:
@@ -599,8 +598,6 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
       if: github.ref == 'refs/heads/main'
-      with:
-        artifact_name: github-pages
     
     - name: Verify deployment
       run: |
