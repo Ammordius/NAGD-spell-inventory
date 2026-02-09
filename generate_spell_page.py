@@ -1920,12 +1920,7 @@ def generate_delta_history(base_dir):
                 <input type="date" id="end_date" name="end" required>
             </div>
             <div class="form-group">
-                <div id="command_output" style="background: white; padding: 10px; border-radius: 4px; font-family: monospace; margin-top: 10px; display: none;">
-                    <strong>Run this command:</strong><br>
-                    <code id="command_text"></code>
-                </div>
-                <button type="button" onclick="generateCommand()">Show Server Command</button>
-                <button type="button" onclick="generateDateRangeReport()" style="margin-left: 10px; background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Generate Report (Client-side)</button>
+                <button type="button" onclick="generateDateRangeReport()" style="background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Generate Report</button>
             </div>
             <div id="date_range_output" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; min-height: 50px;"></div>
         </div>
@@ -1940,23 +1935,6 @@ def generate_delta_history(base_dir):
 """
     
     if delta_entries:
-        # Show date range suggestions with instructions
-        if len(delta_entries) >= 2:
-            oldest_date = delta_entries[-1]['date']
-            newest_date = delta_entries[0]['date']
-            last7_start = delta_entries[-7]['date'] if len(delta_entries) >= 7 else oldest_date
-            last30_start = delta_entries[-30]['date'] if len(delta_entries) >= 30 else oldest_date
-            html += f"""
-            <div class="info-box" style="background: #d1ecf1; border-left-color: #0c5460;">
-                <strong>Quick Commands:</strong> (Run these to generate common date range reports)
-                <div style="margin-top: 10px; font-family: monospace; font-size: 0.9em;">
-                    <div>Full Range: <code>python generate_spell_page.py --date-range {oldest_date} {newest_date}</code></div>
-                    <div>Last 7 Days: <code>python generate_spell_page.py --date-range {last7_start} {newest_date}</code></div>
-                    <div>Last 30 Days: <code>python generate_spell_page.py --date-range {last30_start} {newest_date}</code></div>
-                </div>
-            </div>
-"""
-        
         html += "            <p>Click on a date to use it in the date range form above:</p>\n"
         html += "            <div style='display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;'>\n"
         for entry in delta_entries:
@@ -2037,26 +2015,30 @@ def generate_delta_history(base_dir):
                 return loadedBaselines.get(baselineKey);
             }
             
+            const currentUrl = `delta_snapshots/baseline_master.json.gz`;
+            const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
             try {
-                let response;
-                // Try archived baseline first (if baseline was reset on this date)
-                const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
-                response = await fetch(archivedUrl);
-                
-                if (!response.ok || response.status === 404) {
-                    // Fall back to current baseline (if this date is the current baseline)
-                    const currentUrl = `delta_snapshots/baseline_master.json.gz`;
+                let response = null;
+                // Try archived baseline first (baseline_master_YYYY-MM-DD.json.gz exists only after a reset)
+                try {
+                    response = await fetch(archivedUrl);
+                } catch (e) {
+                    // Network or other error on archived URL; will try current below
+                }
+                // If archived missing (404) or failed, use current baseline (baseline_master.json.gz)
+                if (!response || !response.ok) {
                     response = await fetch(currentUrl);
                 }
-                
-                if (!response.ok) {
-                    // Last resort: try uncompressed archived baseline (for backward compatibility)
+                if (!response || !response.ok) {
+                    // Last resort: try uncompressed (for backward compatibility)
                     const uncompressedUrl = `delta_snapshots/baseline_master_${baselineDate}.json`;
                     response = await fetch(uncompressedUrl);
-                    if (!response.ok || response.status === 404) {
-                        throw new Error(`Baseline not found for ${baselineDate}. Tried: ${archivedUrl}, baseline_master.json.gz, ${uncompressedUrl}`);
+                    if (!response || !response.ok) {
+                        response = await fetch('delta_snapshots/baseline_master.json');
                     }
-                    // Parse uncompressed JSON
+                    if (!response || !response.ok) {
+                        throw new Error(`Baseline not found for ${baselineDate}. Tried: ${archivedUrl}, ${currentUrl}, and uncompressed variants.`);
+                    }
                     const text = await response.text();
                     const baseline = JSON.parse(text);
                     if (!loadedBaselines) {
@@ -2065,12 +2047,10 @@ def generate_delta_history(base_dir):
                     loadedBaselines.set(baselineKey, baseline);
                     return baseline;
                 }
-                
-                // Parse compressed JSON
+                // Parse compressed JSON (from archived or current .json.gz)
                 const arrayBuffer = await response.arrayBuffer();
                 const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
                 const baseline = JSON.parse(decompressed);
-                
                 if (!loadedBaselines) {
                     loadedBaselines = new Map();
                 }
@@ -2474,21 +2454,6 @@ def generate_delta_history(base_dir):
             }
         }
         
-        function generateCommand() {
-            const start = document.getElementById('start_date').value;
-            const end = document.getElementById('end_date').value;
-            if (start && end) {
-                const cmd = `python generate_spell_page.py --date-range ${start} ${end}`;
-                document.getElementById('command_text').textContent = cmd;
-                document.getElementById('command_output').style.display = 'block';
-            } else {
-                alert('Please select both start and end dates');
-            }
-        }
-        
-        // Auto-update command when dates change
-        document.getElementById('start_date').addEventListener('change', generateCommand);
-        document.getElementById('end_date').addEventListener('change', generateCommand);
     </script>
 </body>
 </html>

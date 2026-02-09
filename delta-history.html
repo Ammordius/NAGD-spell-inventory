@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Delta History & Date Range Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .nav-links {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .nav-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .date-range-form {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .date-range-form h3 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            width: 200px;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .form-group button:hover {
+            background: #45a049;
+        }
+        .stats {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 5px;
+        }
+        .stats strong {
+            color: #667eea;
+        }
+        .delta-list {
+            margin-top: 30px;
+        }
+        .delta-entry {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delta-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .delta-date strong {
+            color: #333;
+        }
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info-box strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📜 TAKP Delta History & Date Range Generator</h1>
+        <div class="nav-links">
+            <a href="delta.html">← Current Delta Report</a>
+            <a href="spell_inventory.html">← Spell Inventory</a>
+        </div>
+        
+        <div class="info-box">
+            <strong>ℹ️ How it works:</strong> Historical deltas are stored as JSON files (much smaller than HTML). 
+            Use the form below to generate a date-to-date comparison report for any date range. 
+            The report will be reconstructed from daily delta JSONs on demand.
+        </div>
+        
+        <div class="date-range-form">
+            <h3>Generate Date-to-Date Delta Report</h3>
+            <p>Select start and end dates, then use the generated command to create a date range report:</p>
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end" required>
+            </div>
+            <div class="form-group">
+                <div id="command_output" style="background: white; padding: 10px; border-radius: 4px; font-family: monospace; margin-top: 10px; display: none;">
+                    <strong>Run this command:</strong><br>
+                    <code id="command_text"></code>
+                </div>
+                <button type="button" onclick="generateCommand()">Show Server Command</button>
+                <button type="button" onclick="generateDateRangeReport()" style="margin-left: 10px; background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Generate Report (Client-side)</button>
+            </div>
+            <div id="date_range_output" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; min-height: 50px;"></div>
+        </div>
+        
+        <div class="stats">
+            <strong>Available Daily Delta JSON Files:</strong> 9
+            <br><small>These JSON files contain daily changes and can be used to reconstruct any date range.</small>
+        </div>
+        
+        <div class="delta-list">
+            <h2>Available Dates</h2>
+
+            <div class="info-box" style="background: #d1ecf1; border-left-color: #0c5460;">
+                <strong>Quick Commands:</strong> (Run these to generate common date range reports)
+                <div style="margin-top: 10px; font-family: monospace; font-size: 0.9em;">
+                    <div>Full Range: <code>python generate_spell_page.py --date-range 2024-01-14 2026-02-09</code></div>
+                    <div>Last 7 Days: <code>python generate_spell_page.py --date-range 2024-08-23 2026-02-09</code></div>
+                    <div>Last 30 Days: <code>python generate_spell_page.py --date-range 2024-01-14 2026-02-09</code></div>
+                </div>
+            </div>
+            <p>Click on a date to use it in the date range form above:</p>
+            <div style='display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;'>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2026-02-09'; document.getElementById('end_date').value='2026-02-09';">
+                    <strong>February 09, 2026</strong>
+                    <div class="delta-date">2026-02-09</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2026-02-06'; document.getElementById('end_date').value='2026-02-06';">
+                    <strong>February 06, 2026</strong>
+                    <div class="delta-date">2026-02-06</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2024-08-23'; document.getElementById('end_date').value='2024-08-23';">
+                    <strong>August 23, 2024</strong>
+                    <div class="delta-date">2024-08-23</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2024-07-01'; document.getElementById('end_date').value='2024-07-01';">
+                    <strong>July 01, 2024</strong>
+                    <div class="delta-date">2024-07-01</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2024-05-22'; document.getElementById('end_date').value='2024-05-22';">
+                    <strong>May 22, 2024</strong>
+                    <div class="delta-date">2024-05-22</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2024-04-12'; document.getElementById('end_date').value='2024-04-12';">
+                    <strong>April 12, 2024</strong>
+                    <div class="delta-date">2024-04-12</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2024-02-04'; document.getElementById('end_date').value='2024-02-04';">
+                    <strong>February 04, 2024</strong>
+                    <div class="delta-date">2024-02-04</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2024-01-17'; document.getElementById('end_date').value='2024-01-17';">
+                    <strong>January 17, 2024</strong>
+                    <div class="delta-date">2024-01-17</div>
+                </div>
+
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='2024-01-14'; document.getElementById('end_date').value='2024-01-14';">
+                    <strong>January 14, 2024</strong>
+                    <div class="delta-date">2024-01-14</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        // Set default dates (today and 7 days ago)
+        const today = new Date().toISOString().split('T')[0];
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const weekAgoStr = weekAgo.toISOString().split('T')[0];
+        
+        document.getElementById('end_date').value = today;
+        document.getElementById('start_date').value = weekAgoStr;
+        
+        // Load JSONs on-demand (only when date range is selected)
+        let loadedDeltas = new Map(); // Cache loaded deltas
+        
+        async function loadDeltaJSON(date) {
+            if (loadedDeltas.has(date)) {
+                return loadedDeltas.get(date);
+            }
+            try {
+                const response = await fetch(`delta_snapshots/delta_daily_${date}.json.gz`);
+                if (!response.ok) {
+                    throw new Error(`Delta not found for ${date}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                // Decompress using pako (need to include pako library)
+                const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+                const delta = JSON.parse(decompressed);
+                loadedDeltas.set(date, delta);
+                return delta;
+            } catch (error) {
+                console.error(`Error loading delta for ${date}:`, error);
+                return null;
+            }
+        }
+        
+        async function generateDateRangeReport() {
+            const start = document.getElementById('start_date').value;
+            const end = document.getElementById('end_date').value;
+            if (!start || !end) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            const outputDiv = document.getElementById('date_range_output');
+            outputDiv.innerHTML = '<p>Loading deltas...</p>';
+            
+            try {
+                // Load only the two deltas we need (start and end dates)
+                const [startDelta, endDelta] = await Promise.all([
+                    loadDeltaJSON(start),
+                    loadDeltaJSON(end)
+                ]);
+                
+                if (!startDelta || !endDelta) {
+                    outputDiv.innerHTML = '<p style="color: red;">Error: Could not load delta JSONs for the selected dates.</p>';
+                    return;
+                }
+                
+                // Compare the two deltas and generate report
+                // This is a simplified comparison - full logic would be in delta_storage.compare_delta_to_delta
+                const charChanges = {};
+                const invChanges = {};
+                
+                // Compare character changes
+                const startChars = startDelta.char_deltas || {};
+                const endChars = endDelta.char_deltas || {};
+                
+                for (const [charName, endData] of Object.entries(endChars)) {
+                    const startData = startChars[charName] || {};
+                    if (endData.current_level !== startData.current_level ||
+                        endData.current_aa_total !== startData.current_aa_total ||
+                        endData.current_hp !== startData.current_hp) {
+                        charChanges[charName] = {
+                            level: endData.current_level - (startData.current_level || 0),
+                            aa: endData.current_aa_total - (startData.current_aa_total || 0),
+                            hp: endData.current_hp - (startData.current_hp || 0)
+                        };
+                    }
+                }
+                
+                // Generate HTML report
+                let reportHTML = `<h3>Date Range Report: ${start} to ${end}</h3>`;
+                reportHTML += `<p>Character Changes: ${Object.keys(charChanges).length}</p>`;
+                if (Object.keys(charChanges).length > 0) {
+                    reportHTML += '<ul>';
+                    for (const [charName, changes] of Object.entries(charChanges)) {
+                        reportHTML += `<li>${charName}: Level ${changes.level > 0 ? '+' : ''}${changes.level}, AA ${changes.aa > 0 ? '+' : ''}${changes.aa}, HP ${changes.hp > 0 ? '+' : ''}${changes.hp}</li>`;
+                    }
+                    reportHTML += '</ul>';
+                }
+                
+                outputDiv.innerHTML = reportHTML;
+            } catch (error) {
+                outputDiv.innerHTML = `<p style="color: red;">Error generating report: ${error.message}</p>`;
+            }
+        }
+        
+        function generateCommand() {
+            const start = document.getElementById('start_date').value;
+            const end = document.getElementById('end_date').value;
+            if (start && end) {
+                const cmd = `python generate_spell_page.py --date-range ${start} ${end}`;
+                document.getElementById('command_text').textContent = cmd;
+                document.getElementById('command_output').style.display = 'block';
+            } else {
+                alert('Please select both start and end dates');
+            }
+        }
+        
+        // Auto-update command when dates change
+        document.getElementById('start_date').addEventListener('change', generateCommand);
+        document.getElementById('end_date').addEventListener('change', generateCommand);
+    </script>
+</body>
+</html>
