@@ -1209,20 +1209,32 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                             total_weight += weight_config
             elif focus_cat in ['Beneficial Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration']:
                 # Handle duration categories - look up from char_duration_cats
+                # "All" categories count for both Bene and Det
                 if isinstance(weight_config, (int, float)) and weight_config > 0:
                     if char_duration_cats:
                         if focus_cat == 'All Spell Duration':
                             char_pct = char_duration_cats.get('All', 0)
-                        else:
-                            duration_cat = 'Bene' if focus_cat == 'Beneficial Spell Duration' else 'Det'
-                            char_pct = char_duration_cats.get(duration_cat, 0)
-                        # Use appropriate best focus - Buff for Bene, Detrimental for Det, All for All
-                        if focus_cat == 'All Spell Duration':
                             best_duration = best_focii.get('All Spell Duration', 15.0)
                         elif focus_cat == 'Beneficial Spell Duration':
-                            best_duration = best_focii.get('Buff Spell Duration', 25.0)
-                        else:
-                            best_duration = best_focii.get('Detrimental Spell Duration', 25.0)
+                            # Use max of Bene and All (All counts for both)
+                            char_pct = max(
+                                char_duration_cats.get('Bene', 0),
+                                char_duration_cats.get('All', 0)
+                            )
+                            best_duration = max(
+                                best_focii.get('Buff Spell Duration', 25.0),
+                                best_focii.get('All Spell Duration', 15.0)
+                            )
+                        else:  # Detrimental Spell Duration
+                            # Use max of Det and All (All counts for both)
+                            char_pct = max(
+                                char_duration_cats.get('Det', 0),
+                                char_duration_cats.get('All', 0)
+                            )
+                            best_duration = max(
+                                best_focii.get('Detrimental Spell Duration', 25.0),
+                                best_focii.get('All Spell Duration', 15.0)
+                            )
                         if best_duration > 0:
                             focus_score = (char_pct / best_duration * 100) if char_pct > 0 else 0
                             total_score += focus_score * weight_config
