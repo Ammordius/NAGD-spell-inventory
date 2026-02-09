@@ -1410,7 +1410,9 @@ def main():
             best_focii,
             class_max_values.get(char_class, {}),
             char_spell_haste_cats,
-            char_duration_cats
+            char_duration_cats,
+            None,  # char_mana_efficiency_cats (not used in this function)
+            char_data  # Pass char_data for individual_resists
         )
         
         output_data.append({
@@ -1420,6 +1422,7 @@ def main():
             'class': char_data['class'],
             'race': char_data['race'],
             'stats': char_data['stats'],
+            'individual_resists': char_data.get('individual_resists', {}),  # Individual resist values
             'focii': char_focii,  # Best focus in each category (percentage values)
             'damage_focii': char_damage_focii,  # Best focus by damage type
             'mana_efficiency_cats': char_mana_efficiency_cats,  # Mana Efficiency by category
