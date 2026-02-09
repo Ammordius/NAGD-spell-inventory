@@ -352,13 +352,20 @@ jobs:
         echo "✓ Found spell_exchange_list.json"
         echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
-    - name: Restore baseline cache (needed for historical delta generation)
+    # --- Delta JSON order of operations (do not reorder without care) ---
+    # 1. We already have: current = TODAY (from cache-magelo or download), previous = YESTERDAY (copied in "Copy yesterday's files to previous").
+    # 2. Backfill steps below OVERWRITE character/ and inventory/ with 2/7, then 2/8. Each backfill reads those files and writes delta_daily_YYYY-MM-DD.json.gz.
+    # 3. After backfill we MUST "Restore today's dump for main run" so current = TODAY again before running generate_spell_page.py.
+    # 4. Main run then produces delta.html (today vs yesterday) and delta_daily_TODAY.json.gz (today vs baseline) from correct data.
+    - name: Restore baseline cache (needed for historical delta + leaderboards)
       uses: actions/cache@v3
       id: cache-baseline-historical
       continue-on-error: true
       with:
         path: |
           delta_snapshots/baseline_master.json.gz
+          delta_snapshots/baseline_week_*.json
+          delta_snapshots/baseline_month_*.json
         key: magelo-baseline-${{ steps.date-info.outputs.month_start }}
         restore-keys: |
           magelo-baseline-
@@ -466,6 +473,18 @@ jobs:
         else
           echo "✓ Delta for 2026-02-08 already exists"
         fi
+    
+    # CRITICAL: Historical backfill (2/7, 2/8) overwrote character/ and inventory/ with past data.
+    # Restore today's dump so the main generator uses TODAY's data for delta.html and delta_daily_YYYY-MM-DD.json.gz.
+    - name: Restore today's dump for main run (after historical backfill)
+      uses: actions/cache@v3
+      with:
+        path: |
+          character/TAKP_character.txt
+          inventory/TAKP_character_inventory.txt
+        key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
+        restore-keys: |
+          magelo-dump-
     
     - name: Run spell inventory generator
       env:
@@ -788,14 +807,16 @@ jobs:
         # when it detects a new week/month, instead of large text files
         echo "Baseline JSON files will be saved by generate_spell_page.py if needed"
     
-    # Cache only baselines; deltas live in repo (committed above) to avoid duplicate storage
-    - name: Cache master baseline
+    # Cache baselines (master + weekly/monthly for leaderboards); deltas live in repo
+    - name: Cache baselines
       uses: actions/cache@v3
       id: cache-baseline
       with:
         path: |
           delta_snapshots/baseline_master.json.gz
           delta_snapshots/baseline_master_*.json.gz
+          delta_snapshots/baseline_week_*.json
+          delta_snapshots/baseline_month_*.json
         key: magelo-baseline-${{ steps.date-info.outputs.month_start }}
         restore-keys: |
           magelo-baseline-

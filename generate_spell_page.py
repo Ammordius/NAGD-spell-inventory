@@ -2108,11 +2108,15 @@ def generate_delta_history(base_dir):
         }
         
         async function generateDateRangeReport() {
-            const start = document.getElementById('start_date').value;
-            const end = document.getElementById('end_date').value;
+            let start = document.getElementById('start_date').value;
+            let end = document.getElementById('end_date').value;
             if (!start || !end) {
                 alert('Please select both start and end dates');
                 return;
+            }
+            // Ensure start is the earlier date and end is the later (forward in time = gains)
+            if (start > end) {
+                [start, end] = [end, start];
             }
             
             // Validate dates are available
@@ -2223,6 +2227,66 @@ def generate_delta_history(base_dir):
                     }
                 }
                 
+                // Compute inventory deltas from start to end (same logic as Python compare_delta_to_delta)
+                const invDeltas = {};
+                const startInv = startDelta.inv_deltas || {};
+                const endInv = endDelta.inv_deltas || {};
+                const allInvChars = new Set([...Object.keys(startInv), ...Object.keys(endInv)]);
+                for (const charName of allInvChars) {
+                    const a = startInv[charName] || { added: {}, removed: {}, item_names: {} };
+                    const b = endInv[charName] || { added: {}, removed: {}, item_names: {} };
+                    const aAdded = a.added || {};
+                    const aRemoved = a.removed || {};
+                    const bAdded = b.added || {};
+                    const bRemoved = b.removed || {};
+                    const addedItems = {};
+                    const removedItems = {};
+                    const itemNames = {};
+                    const get = (obj, k) => (typeof obj[k] !== 'undefined' ? Number(obj[k]) : 0);
+                    for (const itemId of Object.keys(bAdded)) {
+                        const count = get(bAdded, itemId);
+                        const aAdd = get(aAdded, itemId);
+                        if (count > aAdd) {
+                            addedItems[itemId] = count - aAdd;
+                            if (b.item_names && b.item_names[itemId]) itemNames[itemId] = b.item_names[itemId];
+                        }
+                    }
+                    for (const itemId of Object.keys(bRemoved)) {
+                        const count = get(bRemoved, itemId);
+                        const aRem = get(aRemoved, itemId);
+                        if (count > aRem) {
+                            removedItems[itemId] = count - aRem;
+                            if (b.item_names && b.item_names[itemId]) itemNames[itemId] = b.item_names[itemId];
+                        }
+                    }
+                    for (const itemId of Object.keys(aAdded)) {
+                        const count = get(aAdded, itemId);
+                        const bRem = get(bRemoved, itemId);
+                        if (bRem > 0) {
+                            const net = bRem - count;
+                            if (net > 0) {
+                                removedItems[itemId] = (removedItems[itemId] || 0) + net;
+                            } else if (net < 0) {
+                                addedItems[itemId] = (addedItems[itemId] || 0) + (-net);
+                            }
+                            if (a.item_names && a.item_names[itemId]) itemNames[itemId] = a.item_names[itemId];
+                        }
+                    }
+                    if (Object.keys(addedItems).length > 0 || Object.keys(removedItems).length > 0) {
+                        invDeltas[charName] = { added: addedItems, removed: removedItems, item_names: itemNames };
+                    }
+                }
+                const invDeltasLevel1 = {};
+                const invDeltasOthers = {};
+                for (const [charName, delta] of Object.entries(invDeltas)) {
+                    const level = (endState[charName] || startState[charName] || {}).level;
+                    if (level === 1) {
+                        invDeltasLevel1[charName] = delta;
+                    } else {
+                        invDeltasOthers[charName] = delta;
+                    }
+                }
+                
                 // Generate HTML report matching delta.html formatting
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
                 
@@ -2232,6 +2296,11 @@ def generate_delta_history(base_dir):
                         <br>Full character states have been reconstructed by combining baseline + delta for accurate comparison.
                     </p>`;
                 }
+                reportHTML += `<p style="margin: 10px 0;"><a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
+                    <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
+                    <a href="#character-changes" style="margin-right: 10px;">Character Changes</a>
+                    ${Object.keys(invDeltasLevel1).length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
+                    <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a></p>`;
                 
                 // Calculate leaderboards (matching delta.html format)
                 const aaLeaderboard = [];
@@ -2443,6 +2512,84 @@ def generate_delta_history(base_dir):
                     reportHTML += `
                     <h2 id="character-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Character Level & AA Changes</h2>
                     <p style="color: #999; font-style: italic;">No level or AA changes detected.</p>`;
+                }
+                
+                // Level 1 inventory changes (mules/traders)
+                if (Object.keys(invDeltasLevel1).length > 0) {
+                    reportHTML += `
+                    <h2 id="inventory-changes-level1" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Level 1 Inventory Changes (Mules/Traders)</h2>
+                    <p><em>Showing level 1 characters with inventory changes (limited to 500)</em></p>`;
+                    const sortedLevel1 = Object.keys(invDeltasLevel1).sort().slice(0, 500);
+                    for (const charName of sortedLevel1) {
+                        const delta = invDeltasLevel1[charName];
+                        reportHTML += `
+                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
+                        <h3 style="margin-top: 0;"><strong>${charName}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
+                        if (Object.keys(delta.added || {}).length > 0) {
+                            reportHTML += `
+                        <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
+                            for (const itemId of Object.keys(delta.added).sort()) {
+                                const count = delta.added[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                            }
+                            reportHTML += `</div></div>`;
+                        }
+                        if (Object.keys(delta.removed || {}).length > 0) {
+                            reportHTML += `
+                        <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
+                            for (const itemId of Object.keys(delta.removed).sort()) {
+                                const count = delta.removed[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                            }
+                            reportHTML += `</div></div>`;
+                        }
+                        reportHTML += `</div>`;
+                    }
+                }
+                
+                // Regular inventory changes (non-level 1)
+                if (Object.keys(invDeltasOthers).length > 0) {
+                    reportHTML += `
+                    <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
+                    <p><em>Showing characters with inventory changes (limited to 500)</em></p>`;
+                    const sortedOthers = Object.keys(invDeltasOthers).sort().slice(0, 500);
+                    for (const charName of sortedOthers) {
+                        const delta = invDeltasOthers[charName];
+                        reportHTML += `
+                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h3 style="margin-top: 0;"><strong>${charName}</strong></h3>`;
+                        if (Object.keys(delta.added || {}).length > 0) {
+                            reportHTML += `
+                        <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
+                            for (const itemId of Object.keys(delta.added).sort()) {
+                                const count = delta.added[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                            }
+                            reportHTML += `</div></div>`;
+                        }
+                        if (Object.keys(delta.removed || {}).length > 0) {
+                            reportHTML += `
+                        <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
+                            for (const itemId of Object.keys(delta.removed).sort()) {
+                                const count = delta.removed[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                            }
+                            reportHTML += `</div></div>`;
+                        }
+                        reportHTML += `</div>`;
+                    }
+                } else if (Object.keys(invDeltas).length === 0) {
+                    reportHTML += `
+                    <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
+                    <p style="color: #999; font-style: italic;">No inventory changes detected.</p>`;
                 }
                 
                 outputDiv.innerHTML = reportHTML;
@@ -2919,13 +3066,24 @@ def main():
         
         week_start = get_week_start(date_str)
         month_start = get_month_start(date_str)
+        delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
         
         # Parse current character data for leaderboard comparison
         current_char_data_for_lb = parse_character_data(char_file, None)
         
-        # Generate weekly leaderboard (compare current vs weekly baseline)
-        weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, base_dir, current_char_data_for_lb)
-        weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, base_dir, current_char_data_for_lb)
+        # Ensure weekly/monthly baselines exist (create from current data if first run of period)
+        from delta_storage import load_baseline_json
+        os.makedirs(delta_snapshots_dir, exist_ok=True)
+        if not load_baseline_json('weekly', date_str, delta_snapshots_dir):
+            save_baseline_json(current_char_data_for_lb, 'weekly', date_str, delta_snapshots_dir)
+            print(f"Saved weekly baseline for week starting {week_start}")
+        if not load_baseline_json('monthly', date_str, delta_snapshots_dir):
+            save_baseline_json(current_char_data_for_lb, 'monthly', date_str, delta_snapshots_dir)
+            print(f"Saved monthly baseline for month starting {month_start}")
+        
+        # Generate weekly leaderboard (compare current vs weekly baseline in delta_snapshots)
+        weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, delta_snapshots_dir, current_char_data_for_lb)
+        weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, delta_snapshots_dir, current_char_data_for_lb)
         weekly_html = generate_leaderboard_html(
             f"Week of {week_start}", weekly_aa, weekly_hp, 'weekly'
         )
@@ -2934,9 +3092,9 @@ def main():
             f.write(weekly_html)
         print(f"Generated weekly leaderboard: {weekly_file}")
         
-        # Generate monthly leaderboard (compare current vs monthly baseline)
-        monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, base_dir, current_char_data_for_lb)
-        monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, base_dir, current_char_data_for_lb)
+        # Generate monthly leaderboard (compare current vs monthly baseline in delta_snapshots)
+        monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, delta_snapshots_dir, current_char_data_for_lb)
+        monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, delta_snapshots_dir, current_char_data_for_lb)
         monthly_html = generate_leaderboard_html(
             f"Month of {month_start}", monthly_aa, monthly_hp, 'monthly'
         )
