@@ -2243,44 +2243,225 @@ def generate_delta_history(base_dir):
                     }
                 }
                 
-                // Generate HTML report
-                let reportHTML = `<h3>Date Range Report: ${start} to ${end}</h3>`;
+                // Generate HTML report matching delta.html formatting
+                let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
+                
                 if (baselineMismatch) {
                     reportHTML += `<p style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #2196F3;">
                         <strong>ℹ️ Different Baselines:</strong> These dates use different baselines (${startDelta.baseline_date} vs ${endDelta.baseline_date}).
                         <br>Full character states have been reconstructed by combining baseline + delta for accurate comparison.
                     </p>`;
                 }
-                reportHTML += `<p><strong>Character Changes Found: ${Object.keys(charChanges).length}</strong></p>`;
                 
-                if (Object.keys(charChanges).length > 0) {
-                    // Sort by total change (level + AA + HP)
-                    const sortedChanges = Object.entries(charChanges).sort((a, b) => {
-                        const totalA = Math.abs(a[1].level) + Math.abs(a[1].aa) + Math.abs(a[1].hp);
-                        const totalB = Math.abs(b[1].level) + Math.abs(b[1].aa) + Math.abs(b[1].hp);
-                        return totalB - totalA;
-                    });
+                // Calculate leaderboards (matching delta.html format)
+                const aaLeaderboard = [];
+                const hpLeaderboard = [];
+                
+                for (const [charName, changes] of Object.entries(charChanges)) {
+                    if (changes.is_deleted || changes.is_new) continue;
                     
-                    reportHTML += '<div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">';
-                    reportHTML += '<ul style="list-style: none; padding: 0;">';
-                    for (const [charName, changes] of sortedChanges.slice(0, 100)) { // Show top 100
-                        const sign = (val) => val > 0 ? '+' : '';
-                        const statusBadge = changes.is_new ? ' <span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">NEW</span>' :
-                                           changes.is_deleted ? ' <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">DELETED</span>' : '';
-                        reportHTML += `<li style="padding: 5px; border-bottom: 1px solid #eee;">
-                            <strong>${charName}</strong>${statusBadge} (${changes.class || 'Unknown'})
-                            <br>Level: ${sign(changes.level)}${changes.level} 
-                            (${changes.previous_level} → ${changes.current_level})
-                            | AA: ${sign(changes.aa)}${changes.aa} 
-                            | HP: ${sign(changes.hp)}${changes.hp}
-                        </li>`;
+                    const currentLevel = changes.current_level;
+                    const previousLevel = changes.previous_level;
+                    const aaGain = changes.aa;
+                    const hpGain = changes.hp;
+                    
+                    // AA leaderboard (level 50+)
+                    if ((currentLevel >= 50 || previousLevel >= 50) && aaGain > 0) {
+                        aaLeaderboard.push({
+                            name: charName,
+                            class: changes.class || 'Unknown',
+                            level: currentLevel,
+                            aa_gain: aaGain,
+                            aa_total: changes.current_level >= 50 ? (changes.previous_level >= 50 ? changes.aa + (endState[charName]?.aa_total - changes.aa) : endState[charName]?.aa_total) : 0
+                        });
                     }
-                    if (sortedChanges.length > 100) {
-                        reportHTML += `<li style="padding: 5px; color: #666;">... and ${sortedChanges.length - 100} more characters</li>`;
+                    
+                    // HP leaderboard (any level)
+                    if (hpGain > 0) {
+                        hpLeaderboard.push({
+                            name: charName,
+                            class: changes.class || 'Unknown',
+                            level: currentLevel,
+                            hp_gain: hpGain,
+                            hp_total: endState[charName]?.hp || 0
+                        });
                     }
-                    reportHTML += '</ul></div>';
+                }
+                
+                // Sort leaderboards
+                aaLeaderboard.sort((a, b) => b.aa_gain - a.aa_gain);
+                hpLeaderboard.sort((a, b) => b.hp_gain - a.hp_gain);
+                
+                // AA Leaderboard
+                if (aaLeaderboard.length > 0) {
+                    reportHTML += `
+                    <div class="leaderboard" id="aa-leaderboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-top: 0;">🏆 Top AA Gainers</h2>
+                        <table class="leaderboard-table" style="width: 100%; border-collapse: collapse; background-color: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
+                            <thead>
+                                <tr>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Rank</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Character</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Class</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Level</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">AA Gained</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Total AA</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                    for (let idx = 0; idx < Math.min(20, aaLeaderboard.length); idx++) {
+                        const entry = aaLeaderboard[idx];
+                        const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : 'rank-other';
+                        const rankStyle = idx === 0 ? 'background-color: #FFD700; color: #000;' : 
+                                         idx === 1 ? 'background-color: #C0C0C0; color: #000;' : 
+                                         idx === 2 ? 'background-color: #CD7F32; color: #fff;' : 
+                                         'background-color: rgba(255,255,255,0.3); color: #fff;';
+                        reportHTML += `
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
+                                    <td style="padding: 10px 12px;"><strong>${entry.name}</strong></td>
+                                    <td style="padding: 10px 12px;">${entry.class}</td>
+                                    <td style="padding: 10px 12px;">${entry.level}</td>
+                                    <td style="padding: 10px 12px; color: #4CAF50; font-weight: bold;">+${entry.aa_gain}</td>
+                                    <td style="padding: 10px 12px;">${entry.aa_total || '—'}</td>
+                                </tr>`;
+                    }
+                    reportHTML += `
+                            </tbody>
+                        </table>
+                    </div>`;
+                }
+                
+                // HP Leaderboard
+                if (hpLeaderboard.length > 0) {
+                    reportHTML += `
+                    <div class="leaderboard" id="hp-leaderboard" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-top: 0;">❤️ Top HP Gainers</h2>
+                        <table class="leaderboard-table" style="width: 100%; border-collapse: collapse; background-color: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
+                            <thead>
+                                <tr>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Rank</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Character</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Class</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Level</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">HP Gained</th>
+                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Total HP</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                    for (let idx = 0; idx < Math.min(20, hpLeaderboard.length); idx++) {
+                        const entry = hpLeaderboard[idx];
+                        const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : 'rank-other';
+                        const rankStyle = idx === 0 ? 'background-color: #FFD700; color: #000;' : 
+                                         idx === 1 ? 'background-color: #C0C0C0; color: #000;' : 
+                                         idx === 2 ? 'background-color: #CD7F32; color: #fff;' : 
+                                         'background-color: rgba(255,255,255,0.3); color: #fff;';
+                        reportHTML += `
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
+                                    <td style="padding: 10px 12px;"><strong>${entry.name}</strong></td>
+                                    <td style="padding: 10px 12px;">${entry.class}</td>
+                                    <td style="padding: 10px 12px;">${entry.level}</td>
+                                    <td style="padding: 10px 12px; color: #fff; font-weight: bold;">+${entry.hp_gain}</td>
+                                    <td style="padding: 10px 12px;">${entry.hp_total || '—'}</td>
+                                </tr>`;
+                    }
+                    reportHTML += `
+                            </tbody>
+                        </table>
+                    </div>`;
+                }
+                
+                // Character Changes Table (matching delta.html format)
+                if (Object.keys(charChanges).length > 0) {
+                    reportHTML += `
+                    <h2 id="character-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Character Level & AA Changes</h2>
+                    <table class="delta-table" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Character</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Class</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Level</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Level Change</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Total AA</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">AA Total Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                    
+                    // Sort characters alphabetically
+                    const sortedCharNames = Object.keys(charChanges).sort();
+                    for (const charName of sortedCharNames) {
+                        const changes = charChanges[charName];
+                        const isDeleted = changes.is_deleted;
+                        const isNew = changes.is_new;
+                        const currentLevel = changes.current_level;
+                        const previousLevel = changes.previous_level;
+                        
+                        // Character name display
+                        let charDisplay;
+                        if (isDeleted) {
+                            charDisplay = `<strong style="color: #999; text-decoration: line-through;">${charName}</strong> <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>`;
+                        } else if (isNew) {
+                            charDisplay = `<strong>${charName}</strong> <span style="color: #4CAF50; font-size: 0.9em;">(New)</span>`;
+                        } else {
+                            charDisplay = `<strong>${charName}</strong>`;
+                        }
+                        
+                        // Level change display
+                        let levelDisplay;
+                        if (isDeleted) {
+                            levelDisplay = `<span style="color: #f44336; font-weight: bold;">Deleted (was ${previousLevel})</span>`;
+                        } else if (previousLevel === 65) {
+                            levelDisplay = `<span style="color: #666;">—</span>`;
+                        } else {
+                            const levelClass = changes.level > 0 ? 'color: #4CAF50; font-weight: bold;' : changes.level < 0 ? 'color: #f44336; font-weight: bold;' : 'color: #666;';
+                            const levelText = changes.level > 0 ? `+${changes.level}` : String(changes.level);
+                            levelDisplay = `<span style="${levelClass}">${levelText} (${previousLevel} → ${currentLevel})</span>`;
+                        }
+                        
+                        // Total AA display
+                        let totalAADisplay;
+                        if (isDeleted) {
+                            totalAADisplay = `<span style="color: #999;">—</span>`;
+                        } else if (currentLevel >= 50 || previousLevel >= 50) {
+                            // Need to calculate total AA from end state
+                            const endChar = endState[charName];
+                            totalAADisplay = String(endChar ? endChar.aa_total : '—');
+                        } else {
+                            totalAADisplay = `<span style="color: #666;">—</span>`;
+                        }
+                        
+                        // AA change display
+                        let aaDisplay;
+                        if (isDeleted) {
+                            aaDisplay = `<span style="color: #f44336; font-weight: bold;">—</span>`;
+                        } else if (currentLevel >= 50 || previousLevel >= 50) {
+                            const aaClass = changes.aa > 0 ? 'color: #4CAF50; font-weight: bold;' : changes.aa < 0 ? 'color: #f44336; font-weight: bold;' : 'color: #666;';
+                            const aaText = changes.aa > 0 ? `+${changes.aa}` : String(changes.aa);
+                            aaDisplay = `<span style="${aaClass}">${aaText}</span>`;
+                        } else {
+                            aaDisplay = `<span style="color: #666;">—</span>`;
+                        }
+                        
+                        reportHTML += `
+                            <tr>
+                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${charDisplay}</td>
+                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${changes.class || 'Unknown'}</td>
+                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${isDeleted ? previousLevel : currentLevel}</td>
+                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${levelDisplay}</td>
+                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${totalAADisplay}</td>
+                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${aaDisplay}</td>
+                            </tr>`;
+                    }
+                    
+                    reportHTML += `
+                        </tbody>
+                    </table>`;
                 } else {
-                    reportHTML += `<p style="color: #666;">No character changes detected between these dates.</p>`;
+                    reportHTML += `
+                    <h2 id="character-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Character Level & AA Changes</h2>
+                    <p style="color: #999; font-style: italic;">No level or AA changes detected.</p>`;
                 }
                 
                 outputDiv.innerHTML = reportHTML;
