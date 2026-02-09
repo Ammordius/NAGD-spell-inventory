@@ -786,11 +786,7 @@ CLASS_WEIGHTS = {
         'atk_pct': 1.0,
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'focus': {
-            'Spell Haste': 1.0,
-            'Spell Mana Efficiency': 1.0,
-            'Spell Range Extension': 0.5,  # Lower weight for all casters
-        }
+        'focus': {}  # Bards cannot use focuses
     },
 }
 
