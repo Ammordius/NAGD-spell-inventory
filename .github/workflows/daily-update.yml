@@ -393,22 +393,7 @@ jobs:
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-08.json.gz" ]; then
           echo "Generating delta for 2026-02-08 from cached files..."
-          python -c "
-from generate_spell_page import parse_character_data, parse_inventory_file
-from delta_storage import load_master_baseline, save_daily_delta_from_baseline
-import os
-
-char_data = parse_character_data('character/TAKP_character.txt')
-inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt')
-baseline = load_master_baseline('delta_snapshots')
-if baseline:
-    save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08',
-                                   baseline['characters'], baseline['inventories'],
-                                   'delta_snapshots')
-    print('✓ Generated delta for 2026-02-08')
-else:
-    print('⚠ No baseline found, skipping')
-"
+          python -c "from generate_spell_page import parse_character_data, parse_inventory_file; from delta_storage import load_master_baseline, save_daily_delta_from_baseline; char_data = parse_character_data('character/TAKP_character.txt'); inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt'); baseline = load_master_baseline('delta_snapshots'); save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08', baseline['characters'], baseline['inventories'], 'delta_snapshots') if baseline else print('⚠ No baseline found')"
         else
           echo "✓ Delta for 2026-02-08 already exists"
         fi
