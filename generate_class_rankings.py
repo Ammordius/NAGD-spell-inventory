@@ -848,32 +848,37 @@ def calculate_resist_score(resist_value):
     """
     Calculate resist score with weight curve:
     - Full weight (1.0) up to 220
-    - Linearly decreasing from 220 to 320 (1.0 to 0.35)
+    - Linearly decreasing weight from 220 to 320 (1.0 to 0.35)
     - 0.35 weight from 320 to 500
     - 0 weight above 500
+    
+    The score percentage is normalized to show actual value (higher resists = higher score %),
+    but the weight decreases above 220 to reflect diminishing returns.
+    
     Returns: (score_percentage, effective_weight)
     """
     if resist_value <= 0:
         return (0.0, 0.0)
     
+    # Normalize score based on max value of 500 (so 500 = 100%)
+    # This shows the actual value proportionally
+    max_resist = 500.0
+    score = (resist_value / max_resist) * 100.0
+    
+    # Calculate weight based on the curve
     if resist_value <= 220:
         # Full weight up to 220
-        score = (resist_value / 220.0) * 100.0
         weight = 1.0
     elif resist_value <= 320:
         # Linear decrease from 220 to 320 (1.0 to 0.35)
-        # At 220: weight = 1.0, score = 100%
-        # At 320: weight = 0.35, score = 100% (but weighted less)
         weight = 1.0 - ((resist_value - 220) / 100.0) * 0.65  # Decreases from 1.0 to 0.35
-        score = 100.0  # Still 100% since we're at or above 220
     elif resist_value <= 500:
         # 0.35 weight from 320 to 500
         weight = 0.35
-        score = 100.0  # Still 100% since we're above 220
     else:
         # 0 weight above 500
         weight = 0.0
-        score = 0.0
+        score = 0.0  # No score above 500
     
     return (score, weight)
 

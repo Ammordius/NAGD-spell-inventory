@@ -589,29 +589,40 @@
             /**
              * Calculate resist score with weight curve:
              * - Full weight (1.0) up to 220
-             * - Linearly decreasing from 220 to 320 (1.0 to 0.35)
+             * - Linearly decreasing weight from 220 to 320 (1.0 to 0.35)
              * - 0.35 weight from 320 to 500
              * - 0 weight above 500
+             * 
+             * The score percentage is normalized to show actual value (higher resists = higher score %),
+             * but the weight decreases above 220 to reflect diminishing returns.
              */
             if (resistValue <= 0) {
                 return { score: 0.0, weight: 0.0 };
             }
             
+            // Normalize score based on max value of 500 (so 500 = 100%)
+            // This shows the actual value proportionally
+            const maxResist = 500.0;
+            let score = (resistValue / maxResist) * 100.0;
+            
+            // Calculate weight based on the curve
+            let weight;
             if (resistValue <= 220) {
                 // Full weight up to 220
-                const score = (resistValue / 220.0) * 100.0;
-                return { score: score, weight: 1.0 };
+                weight = 1.0;
             } else if (resistValue <= 320) {
                 // Linear decrease from 220 to 320 (1.0 to 0.35)
-                const weight = 1.0 - ((resistValue - 220) / 100.0) * 0.65; // Decreases from 1.0 to 0.35
-                return { score: 100.0, weight: weight }; // Still 100% since we're at or above 220
+                weight = 1.0 - ((resistValue - 220) / 100.0) * 0.65; // Decreases from 1.0 to 0.35
             } else if (resistValue <= 500) {
                 // 0.35 weight from 320 to 500
-                return { score: 100.0, weight: 0.35 };
+                weight = 0.35;
             } else {
                 // 0 weight above 500
-                return { score: 0.0, weight: 0.0 };
+                weight = 0.0;
+                score = 0.0; // No score above 500
             }
+            
+            return { score: score, weight: weight };
         }
 
         function normalizeWeights(weights, focusMultiplier = 2.4) {
