@@ -370,7 +370,10 @@ jobs:
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-07.json.gz" ]; then
           echo "Generating delta for 2026-02-07 from cached files..."
-          cat > /tmp/generate_delta_2026_02_07.py << 'ENDOFFILE'
+          cat > generate_delta_temp.py << 'ENDOFFILE'
+        import sys
+        import os
+        sys.path.insert(0, os.getcwd())
         from generate_spell_page import parse_character_data, parse_inventory_file
         from delta_storage import load_master_baseline, save_daily_delta_from_baseline
         
@@ -401,7 +404,8 @@ jobs:
         else:
             print('⚠ No baseline found')
         ENDOFFILE
-          python /tmp/generate_delta_2026_02_07.py
+          python generate_delta_temp.py
+          rm -f generate_delta_temp.py
         else
           echo "✓ Delta for 2026-02-07 already exists"
         fi
@@ -424,7 +428,10 @@ jobs:
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-08.json.gz" ]; then
           echo "Generating delta for 2026-02-08 from cached files..."
-          cat > /tmp/generate_delta_2026_02_08.py << 'ENDOFFILE'
+          cat > generate_delta_temp.py << 'ENDOFFILE'
+        import sys
+        import os
+        sys.path.insert(0, os.getcwd())
         from generate_spell_page import parse_character_data, parse_inventory_file
         from delta_storage import load_master_baseline, save_daily_delta_from_baseline
         
@@ -455,7 +462,8 @@ jobs:
         else:
             print('⚠ No baseline found')
         ENDOFFILE
-          python /tmp/generate_delta_2026_02_08.py
+          python generate_delta_temp.py
+          rm -f generate_delta_temp.py
         else
           echo "✓ Delta for 2026-02-08 already exists"
         fi
