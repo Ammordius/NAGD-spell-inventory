@@ -633,7 +633,9 @@ CLASS_WEIGHTS = {
         'focus': {
             'Spell Damage': {'Fire': 1.0, 'Cold': 1.0, 'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
-            'Spell Haste': 1.0,
+            'Detrimental Spell Haste': 1.0,  # Required
+            'Detrimental Spell Duration': 0.75,
+            'Spell Range Extension': 1.0,  # Required
         }
     },
     
