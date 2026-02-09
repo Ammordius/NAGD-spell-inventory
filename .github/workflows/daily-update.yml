@@ -370,7 +370,7 @@ jobs:
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-07.json.gz" ]; then
           echo "Generating delta for 2026-02-07 from cached files..."
-          python -c "from generate_spell_page import parse_character_data, parse_inventory_file, MULE_CHARACTERS, OFFICER_MULE_CHARACTERS; from delta_storage import load_master_baseline, save_daily_delta_from_baseline; all_chars = MULE_CHARACTERS + OFFICER_MULE_CHARACTERS; char_data = parse_character_data('character/TAKP_character.txt', all_chars); inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt'); baseline = load_master_baseline('delta_snapshots'); save_daily_delta_from_baseline(char_data, inv_data, '2026-02-07', baseline['characters'], baseline['inventories'], 'delta_snapshots') if baseline else print('⚠ No baseline found')"
+          python -c "from generate_spell_page import parse_character_data, parse_inventory_file; from delta_storage import load_master_baseline, save_daily_delta_from_baseline; char_data = parse_character_data('character/TAKP_character.txt', None); inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt'); baseline = load_master_baseline('delta_snapshots'); save_daily_delta_from_baseline(char_data, inv_data, '2026-02-07', baseline['characters'], baseline['inventories'], 'delta_snapshots') if baseline else print('⚠ No baseline found')"
         else
           echo "✓ Delta for 2026-02-07 already exists"
         fi
@@ -393,7 +393,7 @@ jobs:
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-08.json.gz" ]; then
           echo "Generating delta for 2026-02-08 from cached files..."
-          python -c "from generate_spell_page import parse_character_data, parse_inventory_file, MULE_CHARACTERS, OFFICER_MULE_CHARACTERS; from delta_storage import load_master_baseline, save_daily_delta_from_baseline; all_chars = MULE_CHARACTERS + OFFICER_MULE_CHARACTERS; char_data = parse_character_data('character/TAKP_character.txt', all_chars); inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt'); baseline = load_master_baseline('delta_snapshots'); save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08', baseline['characters'], baseline['inventories'], 'delta_snapshots') if baseline else print('⚠ No baseline found')"
+          python -c "from generate_spell_page import parse_character_data, parse_inventory_file; from delta_storage import load_master_baseline, save_daily_delta_from_baseline; char_data = parse_character_data('character/TAKP_character.txt', None); inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt'); baseline = load_master_baseline('delta_snapshots'); save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08', baseline['characters'], baseline['inventories'], 'delta_snapshots') if baseline else print('⚠ No baseline found')"
         else
           echo "✓ Delta for 2026-02-08 already exists"
         fi
