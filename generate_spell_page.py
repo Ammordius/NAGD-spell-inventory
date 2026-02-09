@@ -2095,18 +2095,38 @@ def generate_delta_history(base_dir):
                     const aaChange = bAA - aAA;
                     const hpChange = bHP - aHP;
                     
-                    // Only include if there are changes
-                    if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0 ||
-                        (endData.is_new && !startData.is_new) ||
-                        (endData.is_deleted && !startData.is_deleted)) {
-                        charChanges[charName] = {
-                            level: levelChange,
-                            aa: aaChange,
-                            hp: hpChange,
-                            current_level: bLevel,
-                            previous_level: aLevel,
-                            class: endData.class || startData.class || ''
-                        };
+                    // If baselines don't match, we can't properly compare (deltas are relative to different baselines)
+                    // But we can still show characters that exist in both deltas
+                    if (baselineMismatch) {
+                        // With different baselines, only show characters that exist in both deltas
+                        // and have different current values (this is approximate)
+                        if (startData.current_level !== undefined && endData.current_level !== undefined) {
+                            if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0) {
+                                charChanges[charName] = {
+                                    level: levelChange,
+                                    aa: aaChange,
+                                    hp: hpChange,
+                                    current_level: bLevel,
+                                    previous_level: aLevel,
+                                    class: endData.class || startData.class || '',
+                                    note: 'Approximate (different baselines)'
+                                };
+                            }
+                        }
+                    } else {
+                        // Same baseline - proper comparison
+                        if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0 ||
+                            (endData.is_new && !startData.is_new) ||
+                            (endData.is_deleted && !startData.is_deleted)) {
+                            charChanges[charName] = {
+                                level: levelChange,
+                                aa: aaChange,
+                                hp: hpChange,
+                                current_level: bLevel,
+                                previous_level: aLevel,
+                                class: endData.class || startData.class || ''
+                            };
+                        }
                     }
                 }
                 
