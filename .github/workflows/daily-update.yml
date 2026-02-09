@@ -596,6 +596,21 @@ else:
           echo "⚠ class_rankings.json was NOT generated"
         fi
     
+    - name: Commit new delta JSONs to repo
+      run: |
+        # Check if there are new delta files to commit
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Add any new delta JSON files
+        git add delta_snapshots/delta_daily_*.json.gz 2>/dev/null || true
+        if git diff --staged --quiet; then
+          echo "No new delta files to commit"
+        else
+          git commit -m "Add historical delta JSONs from cached files" || echo "Commit failed"
+          git push || echo "Push failed"
+        fi
+    
     - name: Prepare for deployment
       run: |
         # Create a clean directory with the HTML files
