@@ -423,12 +423,6 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
         <p>Generated from magelo dump (last updated: """ + magelo_update_date + """)</p>
         <p>This page shows spells that can be obtained from PoK turn-ins (Ethereal Parchment, Spectral Parchment, Glyphed Rune Word)</p>
         
-        <div style="background: linear-gradient(135deg, #FF5722 0%, #FF7043 100%); padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <h2 style="color: white; margin: 0 0 10px 0;">📊 Daily Changes Report</h2>
-            <p style="color: white; margin: 0 0 15px 0; font-size: 1.1em;">See what changed yesterday → today</p>
-            <a href="delta.html" style="display: inline-block; background: white; color: #FF5722; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 1.1em; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">View Daily Changes →</a>
-        </div>
-        
         <div class="summary">
             <h2>Summary</h2>
             <div class="summary-stats">
