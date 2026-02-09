@@ -329,12 +329,12 @@ def check_enchanter_focus_items(char_inventory):
     has_serpent = False
     
     for item in char_inventory:
-        slot_id = item.get('slot_id', 0)
         item_id = item.get('item_id', '')
         
-        # Check Range (slot 11) for item 22959
-        if slot_id == 11 and item_id == ENCHANTER_FOCUS_ITEMS['range']:
+        # Check if item 22959 (Serpent of Vindication) is in inventory (any slot)
+        if item_id == ENCHANTER_FOCUS_ITEMS['range']:
             has_serpent = True
+            break
     
     # Focus score: 100% if has serpent, 0% otherwise
     return 100.0 if has_serpent else 0.0, {'has_serpent': has_serpent}
