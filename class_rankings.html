@@ -1496,10 +1496,23 @@
                         }
                     }
                     
-                    html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                    const focusPoints = score * weight;
+                    totalFocusPoints += focusPoints;
+                    
+                    html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td></tr>`;
                 }
                 
+                // Total focus points
+                html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Focus Total</strong></td><td colspan="3"></td><td><strong>${totalFocusPoints.toFixed(2)}</strong></td></tr>`;
                 html += `</tbody></table>`;
+                
+                // Overall total
+                const overallTotal = totalStatPoints + totalFocusPoints;
+                html += `<h3 style="margin-top: 20px;">Overall Total: ${overallTotal.toFixed(2)} points</h3>`;
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Overall Score = Stat Total + Focus Total</p>`;
+            } else {
+                // No focus scores, just show stat total
+                html += `<h3 style="margin-top: 20px;">Overall Total: ${totalStatPoints.toFixed(2)} points</h3>`;
             }
             
             // Gear display with item links
