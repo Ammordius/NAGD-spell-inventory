@@ -853,35 +853,6 @@
             }
             
             return normalized;
-
-            const normalized = {};
-            if (totalWeight > 0) {
-                statKeys.forEach(key => {
-                    normalized[key] = (weights[key] || 0.0) / totalWeight;
-                });
-                
-                normalized.focus = {};
-                if (hpWeight > 0 && focusWeights && focusScale > 0) {
-                    for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
-                        if (typeof focusValue === 'object') {
-                            normalized.focus[focusCat] = {};
-                            for (const [damageType, weight] of Object.entries(focusValue)) {
-                                normalized.focus[focusCat][damageType] = (weight * focusScale) / totalWeight;
-                            }
-                        } else {
-                            normalized.focus[focusCat] = (focusValue * focusScale) / totalWeight;
-                        }
-                    }
-                }
-            } else {
-                // If totalWeight is 0, return weights as-is (they're already normalized to 0)
-                statKeys.forEach(key => {
-                    normalized[key] = 0.0;
-                });
-                normalized.focus = {};
-            }
-
-            return normalized;
         }
 
         function recalculateScores() {
