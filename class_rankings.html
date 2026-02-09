@@ -305,6 +305,15 @@
                 <!-- Sliders will be generated here -->
             </div>
             <div style="margin-top: 20px;">
+                <label style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <input type="checkbox" id="advancedResists" checked style="margin-right: 8px; width: 18px; height: 18px;">
+                    <strong>Advanced Resists</strong>
+                    <span style="color: #6c757d; font-size: 0.9em; margin-left: 8px;">
+                        (Individual resist scoring: Full weight up to 220, linear decrease to 0.35 at 320, 0.35 from 320-500, 0 above 500)
+                    </span>
+                </label>
+            </div>
+            <div style="margin-top: 20px;">
                 <button id="resetWeights" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
                     Reset to Default
                 </button>
@@ -419,6 +428,22 @@
             weightClassSelect.addEventListener('change', () => {
                 updateWeightSliders();
             });
+
+            // Advanced resists checkbox
+            const advancedResistsCheckbox = document.getElementById('advancedResists');
+            if (advancedResistsCheckbox) {
+                // Load saved preference
+                const savedAdvancedResists = localStorage.getItem('advancedResists');
+                if (savedAdvancedResists !== null) {
+                    advancedResists = savedAdvancedResists === 'true';
+                    advancedResistsCheckbox.checked = advancedResists;
+                }
+                
+                advancedResistsCheckbox.addEventListener('change', () => {
+                    advancedResists = advancedResistsCheckbox.checked;
+                    localStorage.setItem('advancedResists', advancedResists.toString());
+                });
+            }
 
             // Apply weights button
             const applyBtn = document.getElementById('applyWeights');

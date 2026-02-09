@@ -844,7 +844,7 @@ def normalize_class_weights(weights_config):
     else:
         return weights_config
 
-def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None):
+def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, char=None):
     """Calculate overall score using class-specific weights with conversion rates"""
     weights_config = CLASS_WEIGHTS.get(char_class, {})
     class_max_values = class_max_values or {}
@@ -903,16 +903,46 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 total_score += scores['haste_pct'] * weight
                 total_weight += weight
         
-        # Resists
+        # Resists - calculate individual resist scores with weight curve
         resists_weight = weights_config.get('resists_pct', 0.0)
         if resists_weight > 0:
-            max_resists = class_max_values.get('max_resists', 1)
-            resists_value = scores.get('resists', 0)
-            if max_resists > 0:
-                resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
-                scores['resists_pct'] = resists_score  # Store percentage for display
-                total_score += resists_score * resists_weight
+            individual_resists = char.get('individual_resists', {})
+            if individual_resists:
+                # Calculate individual resist scores
+                resist_scores = {}
+                total_resist_score = 0.0
+                total_resist_weight = 0.0
+                
+                for resist_type, resist_value in individual_resists.items():
+                    score, weight = calculate_resist_score(resist_value)
+                    resist_scores[resist_type] = {
+                        'value': resist_value,
+                        'score': score,
+                        'weight': weight
+                    }
+                    # Add to total (each resist contributes its weighted score)
+                    total_resist_score += score * weight
+                    total_resist_weight += weight
+                
+                # Average the weighted scores (divide by number of resists that have weight)
+                if total_resist_weight > 0:
+                    avg_resist_score = total_resist_score / total_resist_weight
+                else:
+                    avg_resist_score = 0.0
+                
+                scores['resists_pct'] = avg_resist_score
+                scores['individual_resist_scores'] = resist_scores
+                total_score += avg_resist_score * resists_weight
                 total_weight += resists_weight
+            else:
+                # Fallback to total resists if individual not available
+                max_resists = class_max_values.get('max_resists', 1)
+                resists_value = scores.get('resists', 0)
+                if max_resists > 0:
+                    resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
+                    scores['resists_pct'] = resists_score
+                    total_score += resists_score * resists_weight
+                    total_weight += resists_weight
         
         # Focus score - use normalized weight from config
         focus_weights = weights_config.get('focus', {})
@@ -1026,16 +1056,46 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             total_score += scores['haste_pct'] * weight
             total_weight += weight
     
-    # Resists
-    resists_weight = weights_config.get('resists_pct', 0.0)
-    if resists_weight > 0:
-        max_resists = class_max_values.get('max_resists', 1)
-        resists_value = scores.get('resists', 0)
-        if max_resists > 0:
-            resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
-            scores['resists_pct'] = resists_score  # Store percentage for display
-            total_score += resists_score * resists_weight
-            total_weight += resists_weight
+        # Resists - calculate individual resist scores with weight curve
+        resists_weight = weights_config.get('resists_pct', 0.0)
+        if resists_weight > 0:
+            individual_resists = char.get('individual_resists', {})
+            if individual_resists:
+                # Calculate individual resist scores
+                resist_scores = {}
+                total_resist_score = 0.0
+                total_resist_weight = 0.0
+                
+                for resist_type, resist_value in individual_resists.items():
+                    score, weight = calculate_resist_score(resist_value)
+                    resist_scores[resist_type] = {
+                        'value': resist_value,
+                        'score': score,
+                        'weight': weight
+                    }
+                    # Add to total (each resist contributes its weighted score)
+                    total_resist_score += score * weight
+                    total_resist_weight += weight
+                
+                # Average the weighted scores (divide by number of resists that have weight)
+                if total_resist_weight > 0:
+                    avg_resist_score = total_resist_score / total_resist_weight
+                else:
+                    avg_resist_score = 0.0
+                
+                scores['resists_pct'] = avg_resist_score
+                scores['individual_resist_scores'] = resist_scores
+                total_score += avg_resist_score * resists_weight
+                total_weight += resists_weight
+            else:
+                # Fallback to total resists if individual not available
+                max_resists = class_max_values.get('max_resists', 1)
+                resists_value = scores.get('resists', 0)
+                if max_resists > 0:
+                    resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
+                    scores['resists_pct'] = resists_score
+                    total_score += resists_score * resists_weight
+                    total_weight += resists_weight
     
     # Focus weights - each focus gets the proportional weight specified
     focus_weights = weights_config.get('focus', {})
@@ -1271,6 +1331,13 @@ def main():
                         'haste': safe_int(row.get('haste_item')),
                         'mana_regen_item': ft_str,
                         'resists': resists_total,
+                        'individual_resists': {
+                            'MR': mr,
+                            'FR': fr,
+                            'CR': cr,
+                            'DR': dr,
+                            'PR': pr
+                        },
                         'stats': {
                             'hp': safe_int(row.get('hp_max_total')),
                             'mana': safe_int(row.get('mana_max_total')),
