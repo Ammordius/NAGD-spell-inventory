@@ -1216,8 +1216,6 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     if inv_deltas_others:
         nav_links.append('<a href="#inventory-changes">Inventory Changes</a>')
     
-    # Add daily delta link (most popular - yesterday vs today)
-    nav_links.append('<a href="delta.html" style="background-color: #FF5722; font-weight: bold;">📊 Daily Changes (Yesterday → Today)</a>')
     # Add weekly/monthly leaderboard links
     if week_start:
         nav_links.append(f'<a href="leaderboard_week_{week_start}.html" style="background-color: #2196F3;">📅 Weekly Leaderboard</a>')
