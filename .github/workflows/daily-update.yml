@@ -663,6 +663,13 @@ jobs:
         else
           echo "No delta.html found (previous day's files may not exist)"
         fi
+        # Copy delta JSON files to deploy directory (needed for date-range queries on website)
+        mkdir -p deploy/delta_snapshots
+        if [ -d "delta_snapshots" ]; then
+          cp delta_snapshots/delta_daily_*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No delta JSON files to copy"
+          echo "✓ Copied delta JSON files to deploy/delta_snapshots/"
+          ls -lh deploy/delta_snapshots/*.json.gz 2>/dev/null | wc -l | xargs echo "  Total delta JSON files:"
+        fi
         # Copy class rankings files if they were generated
         if [ -f "class_rankings.html" ]; then
           cp class_rankings.html deploy/class_rankings.html
