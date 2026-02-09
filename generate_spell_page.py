@@ -2106,7 +2106,7 @@ def generate_delta_history(base_dir):
                 }
                 
                 if (deltaData.is_new || !fullState[charName]) {
-                    // New character
+                    // New character - use current values from delta
                     fullState[charName] = {
                         level: deltaData.current_level || 0,
                         aa_total: deltaData.current_aa_total || 0,
@@ -2114,7 +2114,7 @@ def generate_delta_history(base_dir):
                         class: deltaData.class || ''
                     };
                 } else {
-                    // Update existing character
+                    // Update existing character - delta has current values (baseline + changes)
                     fullState[charName].level = deltaData.current_level || fullState[charName].level;
                     fullState[charName].aa_total = deltaData.current_aa_total || fullState[charName].aa_total;
                     fullState[charName].hp = deltaData.current_hp || fullState[charName].hp;
@@ -2267,12 +2267,13 @@ def generate_delta_history(base_dir):
                     
                     // AA leaderboard (level 50+)
                     if ((currentLevel >= 50 || previousLevel >= 50) && aaGain > 0) {
+                        const endChar = endState[charName];
                         aaLeaderboard.push({
                             name: charName,
                             class: changes.class || 'Unknown',
                             level: currentLevel,
                             aa_gain: aaGain,
-                            aa_total: changes.current_level >= 50 ? (changes.previous_level >= 50 ? changes.aa + (endState[charName]?.aa_total - changes.aa) : endState[charName]?.aa_total) : 0
+                            aa_total: endChar ? endChar.aa_total : 0
                         });
                     }
                     
