@@ -849,16 +849,34 @@ def load_no_rent_items():
 
 def load_tracked_item_ids():
     """Load raid, elemental armor, and praesterium item IDs from the 3 JSON files.
-    Returns (set of item_id strings, dict item_id -> source_label for display)."""
+    Returns (set of item_id strings, dict item_id -> source_label for display).
+    Raid items use mob name from JSON (e.g. 'Mob Name (Zone)'); others use category label."""
     base_dir = os.path.dirname(__file__)
     tracked = set()
     source_label = {}
-    files = [
-        (os.path.join(base_dir, "raid_item_sources.json"), "raid"),
+    # Raid: use mob (and zone) from JSON instead of "raid"
+    raid_path = os.path.join(base_dir, "raid_item_sources.json")
+    if os.path.exists(raid_path):
+        try:
+            with open(raid_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for item_id, entry in data.items():
+                sid = str(item_id)
+                tracked.add(sid)
+                mob = entry.get("mob", "").strip()
+                zone = entry.get("zone", "").strip()
+                if mob and zone:
+                    source_label[sid] = f"{mob} ({zone})"
+                elif mob:
+                    source_label[sid] = mob
+                else:
+                    source_label[sid] = "Raid"
+        except Exception as e:
+            print(f"Warning: Could not load {raid_path}: {e}")
+    for path, label in [
         (os.path.join(base_dir, "elemental_armor.json"), "elemental armor"),
         (os.path.join(base_dir, "praesterium_loot.json"), "praesterium"),
-    ]
-    for path, label in files:
+    ]:
         if not os.path.exists(path):
             continue
         try:
