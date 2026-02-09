@@ -352,6 +352,52 @@ jobs:
         echo "✓ Found spell_exchange_list.json"
         echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
+    - name: Generate historical deltas from cached files
+      run: |
+        echo "=== Generating historical deltas from cached files ==="
+        # Dates we want to generate deltas for (if we have cached files)
+        CACHED_DATES="2026-02-06 2026-02-07 2026-02-08 2026-02-09"
+        
+        # Check which deltas already exist in repo
+        EXISTING_DELTAS=""
+        if [ -d "delta_snapshots" ]; then
+          EXISTING_DELTAS=$(ls delta_snapshots/delta_daily_*.json.gz 2>/dev/null | sed 's/.*delta_daily_\([0-9-]*\)\.json\.gz/\1/' | tr '\n' ' ' || echo "")
+        fi
+        
+        echo "Existing deltas in repo: $EXISTING_DELTAS"
+        
+        # For each cached date, try to generate delta if missing
+        for DATE in $CACHED_DATES; do
+          if echo "$EXISTING_DELTAS" | grep -q "$DATE"; then
+            echo "✓ Delta already exists in repo for $DATE"
+            continue
+          fi
+          
+          echo ""
+          echo "Processing $DATE..."
+          
+          # Check if we have files for this date (from cache restore)
+          # Files might be in character/ and inventory/ directories
+          if [ -f "character/TAKP_character.txt" ] && [ -f "inventory/TAKP_character_inventory.txt" ]; then
+            # Save current files with date suffix for processing
+            mkdir -p "character_historical" "inventory_historical"
+            cp character/TAKP_character.txt "character_historical/TAKP_character_${DATE}.txt"
+            cp inventory/TAKP_character_inventory.txt "inventory_historical/TAKP_character_inventory_${DATE}.txt"
+            echo "  Saved files for $DATE"
+          else
+            echo "  ⚠ No cached files found for $DATE (may need to restore specific cache)"
+          fi
+        done
+        
+        # Now generate deltas using Python script
+        if [ -f "generate_historical_deltas_from_cache.py" ]; then
+          echo ""
+          echo "Running historical delta generator..."
+          python generate_historical_deltas_from_cache.py
+        else
+          echo "⚠ generate_historical_deltas_from_cache.py not found, skipping"
+        fi
+    
     - name: Run spell inventory generator
       env:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
