@@ -2112,9 +2112,10 @@ def generate_delta_history(base_dir):
                 
                 // Generate HTML report
                 let reportHTML = `<h3>Date Range Report: ${start} to ${end}</h3>`;
+                reportHTML += baselineWarning;
                 reportHTML += `<p style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong>Note:</strong> This is a simplified client-side comparison. For accurate results, use the server-side command below.
-                    <br>Deltas only include characters that changed, so some characters may not appear if they didn't change in both dates.
+                    <br>Deltas only include characters that changed from baseline, so characters that didn't change in both dates may not appear.
                 </p>`;
                 reportHTML += `<p><strong>Character Changes Found: ${Object.keys(charChanges).length}</strong></p>`;
                 
