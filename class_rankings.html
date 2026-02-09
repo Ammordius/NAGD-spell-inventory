@@ -897,21 +897,25 @@
                 if (scores.resists_pct !== undefined && normalized.resists_pct > 0) {
                     if (advancedResists && char.individual_resists) {
                         // Calculate individual resist scores with weight curve
+                        // The curve weight multiplies the base resists_pct weight
                         let totalResistScore = 0.0;
                         let totalResistWeight = 0.0;
                         
                         const resistTypes = ['MR', 'FR', 'CR', 'DR', 'PR'];
                         resistTypes.forEach(resistType => {
                             const resistValue = char.individual_resists[resistType] || 0;
-                            const { score, weight } = calculateResistScore(resistValue);
-                            totalResistScore += score * weight;
-                            totalResistWeight += weight;
+                            const { score, weight: curveWeight } = calculateResistScore(resistValue);
+                            // The effective weight is base resists_pct weight multiplied by the curve weight
+                            const effectiveWeight = normalized.resists_pct * curveWeight;
+                            totalResistScore += score * effectiveWeight;
+                            totalResistWeight += effectiveWeight;
                         });
                         
                         if (totalResistWeight > 0) {
+                            // Average the weighted scores
                             const avgResistScore = totalResistScore / totalResistWeight;
-                            totalScore += avgResistScore * normalized.resists_pct;
-                            totalWeight += normalized.resists_pct;
+                            totalScore += avgResistScore * totalResistWeight;
+                            totalWeight += totalResistWeight;
                         }
                     } else {
                         // Use simple total resists percentage
@@ -1523,19 +1527,23 @@
                 
                 // Show individual resists if available
                 const individualResistScores = scores.individual_resist_scores;
-                if (individualResistScores && Object.keys(individualResistScores).length > 0) {
+                if (individualResistScores && Object.keys(individualResistScores).length > 0 && advancedResists) {
                     html += `<tr><td colspan="5"><strong>Resists (Advanced)</strong></td></tr>`;
                     const resistTypes = ['MR', 'FR', 'CR', 'DR', 'PR'];
                     let totalRawValue = 0;
+                    let totalAdvancedPoints = 0;
                     resistTypes.forEach(resistType => {
                         const resistData = individualResistScores[resistType];
                         if (resistData) {
                             totalRawValue += resistData.value;
-                            const resistPoints = resistData.score * resistData.weight;
-                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${resistData.weight.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
+                            // The effective weight is base resists_pct weight multiplied by the curve weight
+                            const effectiveWeight = weight * resistData.weight;
+                            const resistPoints = resistData.score * effectiveWeight;
+                            totalAdvancedPoints += resistPoints;
+                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${effectiveWeight.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
                         }
                     });
-                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td><td><strong>${resistsPoints.toFixed(2)}</strong></td></tr>`;
+                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td><td><strong>${totalAdvancedPoints.toFixed(2)}</strong></td></tr>`;
                 } else {
                     html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${weight.toFixed(2)}</td><td>${resistsPoints.toFixed(2)}</td></tr>`;
                 }
