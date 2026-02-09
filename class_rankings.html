@@ -1537,10 +1537,13 @@
                         if (resistData) {
                             totalRawValue += resistData.value;
                             // The effective weight is base resists_pct weight multiplied by the curve weight
+                            // But display the base class weight, not the effective weight
                             const effectiveWeight = weight * resistData.weight;
                             const resistPoints = resistData.score * effectiveWeight;
                             totalAdvancedPoints += resistPoints;
-                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${effectiveWeight.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
+                            // Display the base class weight, with a note about the curve multiplier
+                            const curveMultiplier = resistData.weight.toFixed(2);
+                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${weight.toFixed(2)} <span style="color: #6c757d; font-size: 0.9em;">(×${curveMultiplier})</span></td><td>${resistPoints.toFixed(2)}</td></tr>`;
                         }
                     });
                     html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td><td><strong>${totalAdvancedPoints.toFixed(2)}</strong></td></tr>`;
