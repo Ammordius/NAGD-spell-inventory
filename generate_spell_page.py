@@ -2068,24 +2068,44 @@ def generate_delta_history(base_dir):
                     return;
                 }
                 
-                // Compare the two deltas and generate report
-                // This is a simplified comparison - full logic would be in delta_storage.compare_delta_to_delta
+                // Compare the two deltas using the same logic as compare_delta_to_delta
                 const charChanges = {};
                 const invChanges = {};
                 
-                // Compare character changes
+                // Get all characters from both deltas (like compare_delta_to_delta does)
                 const startChars = startDelta.char_deltas || {};
                 const endChars = endDelta.char_deltas || {};
+                const allCharNames = new Set([...Object.keys(startChars), ...Object.keys(endChars)]);
                 
-                for (const [charName, endData] of Object.entries(endChars)) {
+                // Compare character changes (matching Python compare_delta_to_delta logic)
+                for (const charName of allCharNames) {
                     const startData = startChars[charName] || {};
-                    if (endData.current_level !== startData.current_level ||
-                        endData.current_aa_total !== startData.current_aa_total ||
-                        endData.current_hp !== startData.current_hp) {
+                    const endData = endChars[charName] || {};
+                    
+                    // Extract values (these are cumulative from baseline)
+                    const aLevel = startData.current_level || startData.previous_level || 0;
+                    const bLevel = endData.current_level || endData.previous_level || 0;
+                    const aAA = startData.current_aa_total || startData.previous_aa_total || 0;
+                    const bAA = endData.current_aa_total || endData.previous_aa_total || 0;
+                    const aHP = startData.current_hp || startData.previous_hp || 0;
+                    const bHP = endData.current_hp || endData.previous_hp || 0;
+                    
+                    // Calculate changes from Day A to Day B
+                    const levelChange = bLevel - aLevel;
+                    const aaChange = bAA - aAA;
+                    const hpChange = bHP - aHP;
+                    
+                    // Only include if there are changes
+                    if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0 ||
+                        (endData.is_new && !startData.is_new) ||
+                        (endData.is_deleted && !startData.is_deleted)) {
                         charChanges[charName] = {
-                            level: endData.current_level - (startData.current_level || 0),
-                            aa: endData.current_aa_total - (startData.current_aa_total || 0),
-                            hp: endData.current_hp - (startData.current_hp || 0)
+                            level: levelChange,
+                            aa: aaChange,
+                            hp: hpChange,
+                            current_level: bLevel,
+                            previous_level: aLevel,
+                            class: endData.class || startData.class || ''
                         };
                     }
                 }
