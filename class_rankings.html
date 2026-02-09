@@ -304,6 +304,9 @@
             <div id="weightSliders" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                 <!-- Sliders will be generated here -->
             </div>
+            <div id="focusWeightSliders" style="margin-top: 20px; display: none;">
+                <!-- Focus weight sliders will be generated here -->
+            </div>
             <div style="margin-top: 20px;">
                 <label style="display: flex; align-items: center; margin-bottom: 15px;">
                     <input type="checkbox" id="advancedResists" checked style="margin-right: 8px; width: 18px; height: 18px;">
@@ -555,6 +558,113 @@
                 </p>
             `;
             slidersDiv.appendChild(sliderDiv);
+            
+            // Add focus weight customization section
+            const focusSlidersDiv = document.getElementById('focusWeightSliders');
+            if (focusSlidersDiv) {
+                focusSlidersDiv.innerHTML = '';
+                focusSlidersDiv.style.display = 'block';
+                
+                const focusWeights = weights.focus || {};
+                const customFocusWeights = customWeights[selectedClass]?.focus || {};
+                
+                if (Object.keys(focusWeights).length === 0) {
+                    focusSlidersDiv.innerHTML = '<p style="color: #6c757d; padding: 10px;">This class has no focus weights configured.</p>';
+                } else {
+                    const headerDiv = document.createElement('div');
+                    headerDiv.style.marginBottom = '15px';
+                    headerDiv.style.padding = '10px';
+                    headerDiv.style.background = '#e7f3ff';
+                    headerDiv.style.borderRadius = '4px';
+                    headerDiv.innerHTML = `
+                        <h4 style="margin: 0;">Focus Weights</h4>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #6c757d;">
+                            Adjust individual focus category weights. These are relative weights that will be scaled by the Focus Weight Multiplier.
+                        </p>
+                    `;
+                    focusSlidersDiv.appendChild(headerDiv);
+                    
+                    const focusGrid = document.createElement('div');
+                    focusGrid.style.display = 'grid';
+                    focusGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+                    focusGrid.style.gap = '15px';
+                    focusGrid.style.marginTop = '15px';
+                    
+                    // Sort focus categories for consistent display
+                    const focusKeys = Object.keys(focusWeights).sort();
+                    
+                    focusKeys.forEach(focusKey => {
+                        const focusValue = customFocusWeights[focusKey] !== undefined ? customFocusWeights[focusKey] : focusWeights[focusKey];
+                        
+                        if (typeof focusValue === 'object' && focusValue !== null) {
+                            // Nested object (e.g., Spell Damage with damage types)
+                            const nestedDiv = document.createElement('div');
+                            nestedDiv.style.padding = '10px';
+                            nestedDiv.style.background = 'white';
+                            nestedDiv.style.borderRadius = '4px';
+                            nestedDiv.style.border = '1px solid #dee2e6';
+                            
+                            let nestedHtml = `<div style="margin-bottom: 10px;"><strong>${focusKey}:</strong></div>`;
+                            
+                            const nestedKeys = Object.keys(focusValue).sort();
+                            nestedKeys.forEach(nestedKey => {
+                                const currentValue = customFocusWeights[focusKey]?.[nestedKey] !== undefined 
+                                    ? customFocusWeights[focusKey][nestedKey] 
+                                    : focusValue[nestedKey];
+                                const sliderId = `slider_focus_${focusKey}_${nestedKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                                const valueId = `value_focus_${focusKey}_${nestedKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                                
+                                nestedHtml += `
+                                    <div style="margin-bottom: 10px;">
+                                        <label style="display: block; margin-bottom: 5px;">
+                                            <strong>${nestedKey}:</strong> 
+                                            <span id="${valueId}">${currentValue.toFixed(2)}</span>
+                                        </label>
+                                        <input type="range" 
+                                               id="${sliderId}" 
+                                               min="0" 
+                                               max="3" 
+                                               step="0.1" 
+                                               value="${currentValue}" 
+                                               style="width: 100%;"
+                                               oninput="document.getElementById('${valueId}').textContent = parseFloat(this.value).toFixed(2)">
+                                    </div>
+                                `;
+                            });
+                            
+                            nestedDiv.innerHTML = nestedHtml;
+                            focusGrid.appendChild(nestedDiv);
+                        } else {
+                            // Simple numeric value
+                            const currentValue = customFocusWeights[focusKey] !== undefined ? customFocusWeights[focusKey] : focusValue;
+                            const sliderId = `slider_focus_${focusKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                            const valueId = `value_focus_${focusKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                            
+                            const sliderDiv = document.createElement('div');
+                            sliderDiv.style.padding = '10px';
+                            sliderDiv.style.background = 'white';
+                            sliderDiv.style.borderRadius = '4px';
+                            sliderDiv.innerHTML = `
+                                <label style="display: block; margin-bottom: 5px;">
+                                    <strong>${focusKey}:</strong> 
+                                    <span id="${valueId}">${currentValue.toFixed(2)}</span>
+                                </label>
+                                <input type="range" 
+                                       id="${sliderId}" 
+                                       min="0" 
+                                       max="3" 
+                                       step="0.1" 
+                                       value="${currentValue}" 
+                                       style="width: 100%;"
+                                       oninput="document.getElementById('${valueId}').textContent = parseFloat(this.value).toFixed(2)">
+                            `;
+                            focusGrid.appendChild(sliderDiv);
+                        }
+                    });
+                    
+                    focusSlidersDiv.appendChild(focusGrid);
+                }
+            }
         }
 
         function saveWeightValues() {
@@ -581,6 +691,38 @@
                 }
                 customWeights[selectedClass]._meta.focusMultiplier = parseFloat(focusMultSlider.value);
             }
+            
+            // Save focus weights
+            const focusWeights = classWeights[selectedClass]?.focus || {};
+            if (!customWeights[selectedClass].focus) {
+                customWeights[selectedClass].focus = {};
+            }
+            
+            Object.keys(focusWeights).forEach(focusKey => {
+                const focusValue = focusWeights[focusKey];
+                
+                if (typeof focusValue === 'object' && focusValue !== null) {
+                    // Nested object (e.g., Spell Damage with damage types)
+                    if (!customWeights[selectedClass].focus[focusKey]) {
+                        customWeights[selectedClass].focus[focusKey] = {};
+                    }
+                    
+                    Object.keys(focusValue).forEach(nestedKey => {
+                        const sliderId = `slider_focus_${focusKey}_${nestedKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                        const slider = document.getElementById(sliderId);
+                        if (slider) {
+                            customWeights[selectedClass].focus[focusKey][nestedKey] = parseFloat(slider.value);
+                        }
+                    });
+                } else {
+                    // Simple numeric value
+                    const sliderId = `slider_focus_${focusKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                    const slider = document.getElementById(sliderId);
+                    if (slider) {
+                        customWeights[selectedClass].focus[focusKey] = parseFloat(slider.value);
+                    }
+                }
+            });
 
             saveCustomWeights();
         }
@@ -699,10 +841,32 @@
                 let weights = JSON.parse(JSON.stringify(originalClassWeights[charClass] || classWeights[charClass]));
                 
                 Object.keys(customWeight).forEach(key => {
-                    if (key !== '_meta' && weights.hasOwnProperty(key)) {
+                    if (key !== '_meta' && key !== 'focus' && weights.hasOwnProperty(key)) {
                         weights[key] = customWeight[key];
                     }
                 });
+                
+                // Apply custom focus weights
+                if (customWeight.focus && weights.focus) {
+                    Object.keys(customWeight.focus).forEach(focusKey => {
+                        if (weights.focus[focusKey] !== undefined) {
+                            if (typeof customWeight.focus[focusKey] === 'object' && customWeight.focus[focusKey] !== null) {
+                                // Nested object
+                                if (!weights.focus[focusKey]) {
+                                    weights.focus[focusKey] = {};
+                                }
+                                Object.keys(customWeight.focus[focusKey]).forEach(nestedKey => {
+                                    if (weights.focus[focusKey][nestedKey] !== undefined) {
+                                        weights.focus[focusKey][nestedKey] = customWeight.focus[focusKey][nestedKey];
+                                    }
+                                });
+                            } else {
+                                // Simple value
+                                weights.focus[focusKey] = customWeight.focus[focusKey];
+                            }
+                        }
+                    });
+                }
 
                 const normalized = normalizeWeights(weights, focusMultiplier);
                 const scores = char.scores || {};
