@@ -2031,24 +2031,42 @@ def generate_delta_history(base_dir):
         
         async function loadBaseline(baselineDate) {
             // Try to load baseline file (compressed .json.gz)
-            // First try current baseline_master.json.gz, then archived baseline_master_YYYY-MM-DD.json.gz
+            // First try archived baseline_master_YYYY-MM-DD.json.gz, then current baseline_master.json.gz
             const baselineKey = `baseline_${baselineDate}`;
             if (loadedBaselines && loadedBaselines.has(baselineKey)) {
                 return loadedBaselines.get(baselineKey);
             }
             
             try {
-                // Try archived baseline first (if baseline was reset)
-                let response = await fetch(`delta_snapshots/baseline_master_${baselineDate}.json.gz`);
+                let response;
+                // Try archived baseline first (if baseline was reset on this date)
+                const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
+                response = await fetch(archivedUrl);
+                
                 if (!response.ok || response.status === 404) {
-                    // Fall back to current baseline
-                    response = await fetch(`delta_snapshots/baseline_master.json.gz`);
+                    // Fall back to current baseline (if this date is the current baseline)
+                    const currentUrl = `delta_snapshots/baseline_master.json.gz`;
+                    response = await fetch(currentUrl);
                 }
                 
                 if (!response.ok) {
-                    throw new Error(`Baseline not found for ${baselineDate}`);
+                    // Last resort: try uncompressed archived baseline (for backward compatibility)
+                    const uncompressedUrl = `delta_snapshots/baseline_master_${baselineDate}.json`;
+                    response = await fetch(uncompressedUrl);
+                    if (!response.ok || response.status === 404) {
+                        throw new Error(`Baseline not found for ${baselineDate}. Tried: ${archivedUrl}, baseline_master.json.gz, ${uncompressedUrl}`);
+                    }
+                    // Parse uncompressed JSON
+                    const text = await response.text();
+                    const baseline = JSON.parse(text);
+                    if (!loadedBaselines) {
+                        loadedBaselines = new Map();
+                    }
+                    loadedBaselines.set(baselineKey, baseline);
+                    return baseline;
                 }
                 
+                // Parse compressed JSON
                 const arrayBuffer = await response.arrayBuffer();
                 const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
                 const baseline = JSON.parse(decompressed);

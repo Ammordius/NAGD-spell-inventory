@@ -675,7 +675,9 @@ jobs:
             echo "⚠ No delta JSON files found to copy"
           fi
           # Copy baseline files (needed for client-side date range comparisons across baseline resets)
-          cp delta_snapshots/baseline_master*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No baseline files to copy"
+          # Copy both compressed and uncompressed baselines (for backward compatibility)
+          cp delta_snapshots/baseline_master*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No compressed baseline files to copy"
+          cp delta_snapshots/baseline_master*.json deploy/delta_snapshots/ 2>/dev/null || echo "No uncompressed baseline files to copy"
           BASELINE_COUNT=$(ls deploy/delta_snapshots/baseline_master*.json.gz 2>/dev/null | wc -l)
           if [ "$BASELINE_COUNT" -gt 0 ]; then
             echo "✓ Copied $BASELINE_COUNT baseline files to deploy/delta_snapshots/"
