@@ -370,37 +370,38 @@ jobs:
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-07.json.gz" ]; then
           echo "Generating delta for 2026-02-07 from cached files..."
-          python << 'PYTHON_SCRIPT'
-from generate_spell_page import parse_character_data, parse_inventory_file
-from delta_storage import load_master_baseline, save_daily_delta_from_baseline
-
-# Parse character data (all characters)
-char_data = parse_character_data('character/TAKP_character.txt', None)
-
-# Extract char_ids from character file
-char_ids = {}
-with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
-    next(f)  # Skip header
-    for line in f:
-        parts = line.strip().split('\t')
-        if len(parts) >= 9:
-            name = parts[0]
-            char_id = parts[8]
-            char_ids[name] = char_id
-
-# Parse inventory data
-inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
-
-# Generate delta
-baseline = load_master_baseline('delta_snapshots')
-if baseline:
-    save_daily_delta_from_baseline(char_data, inv_data, '2026-02-07',
-                                   baseline['characters'], baseline['inventories'],
-                                   'delta_snapshots')
-    print('✓ Generated delta for 2026-02-07')
-else:
-    print('⚠ No baseline found')
-PYTHON_SCRIPT
+          cat > /tmp/generate_delta_2026_02_07.py << 'ENDOFFILE'
+        from generate_spell_page import parse_character_data, parse_inventory_file
+        from delta_storage import load_master_baseline, save_daily_delta_from_baseline
+        
+        # Parse character data (all characters)
+        char_data = parse_character_data('character/TAKP_character.txt', None)
+        
+        # Extract char_ids from character file
+        char_ids = {}
+        with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
+            next(f)  # Skip header
+            for line in f:
+                parts = line.strip().split('\t')
+                if len(parts) >= 9:
+                    name = parts[0]
+                    char_id = parts[8]
+                    char_ids[name] = char_id
+        
+        # Parse inventory data
+        inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
+        
+        # Generate delta
+        baseline = load_master_baseline('delta_snapshots')
+        if baseline:
+            save_daily_delta_from_baseline(char_data, inv_data, '2026-02-07',
+                                           baseline['characters'], baseline['inventories'],
+                                           'delta_snapshots')
+            print('✓ Generated delta for 2026-02-07')
+        else:
+            print('⚠ No baseline found')
+        ENDOFFILE
+          python /tmp/generate_delta_2026_02_07.py
         else
           echo "✓ Delta for 2026-02-07 already exists"
         fi
@@ -423,37 +424,38 @@ PYTHON_SCRIPT
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-08.json.gz" ]; then
           echo "Generating delta for 2026-02-08 from cached files..."
-          python << 'PYTHON_SCRIPT'
-from generate_spell_page import parse_character_data, parse_inventory_file
-from delta_storage import load_master_baseline, save_daily_delta_from_baseline
-
-# Parse character data (all characters)
-char_data = parse_character_data('character/TAKP_character.txt', None)
-
-# Extract char_ids from character file
-char_ids = {}
-with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
-    next(f)  # Skip header
-    for line in f:
-        parts = line.strip().split('\t')
-        if len(parts) >= 9:
-            name = parts[0]
-            char_id = parts[8]
-            char_ids[name] = char_id
-
-# Parse inventory data
-inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
-
-# Generate delta
-baseline = load_master_baseline('delta_snapshots')
-if baseline:
-    save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08',
-                                   baseline['characters'], baseline['inventories'],
-                                   'delta_snapshots')
-    print('✓ Generated delta for 2026-02-08')
-else:
-    print('⚠ No baseline found')
-PYTHON_SCRIPT
+          cat > /tmp/generate_delta_2026_02_08.py << 'ENDOFFILE'
+        from generate_spell_page import parse_character_data, parse_inventory_file
+        from delta_storage import load_master_baseline, save_daily_delta_from_baseline
+        
+        # Parse character data (all characters)
+        char_data = parse_character_data('character/TAKP_character.txt', None)
+        
+        # Extract char_ids from character file
+        char_ids = {}
+        with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
+            next(f)  # Skip header
+            for line in f:
+                parts = line.strip().split('\t')
+                if len(parts) >= 9:
+                    name = parts[0]
+                    char_id = parts[8]
+                    char_ids[name] = char_id
+        
+        # Parse inventory data
+        inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
+        
+        # Generate delta
+        baseline = load_master_baseline('delta_snapshots')
+        if baseline:
+            save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08',
+                                           baseline['characters'], baseline['inventories'],
+                                           'delta_snapshots')
+            print('✓ Generated delta for 2026-02-08')
+        else:
+            print('⚠ No baseline found')
+        ENDOFFILE
+          python /tmp/generate_delta_2026_02_08.py
         else
           echo "✓ Delta for 2026-02-08 already exists"
         fi
