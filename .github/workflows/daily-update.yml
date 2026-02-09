@@ -386,7 +386,7 @@ jobs:
         import os
         sys.path.insert(0, os.getcwd())
         from generate_spell_page import parse_character_data, parse_inventory_file
-        from delta_storage import load_master_baseline, save_daily_delta_from_baseline
+        from delta_storage import save_daily_delta_from_baseline
         
         # Parse character data (all characters)
         char_data = parse_character_data('character/TAKP_character.txt', None)
@@ -405,15 +405,9 @@ jobs:
         # Parse inventory data
         inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
         
-        # Generate delta
-        baseline = load_master_baseline('delta_snapshots')
-        if baseline:
-            save_daily_delta_from_baseline(char_data, inv_data, '2026-02-07',
-                                           baseline['characters'], baseline['inventories'],
-                                           'delta_snapshots')
-            print('✓ Generated delta for 2026-02-07')
-        else:
-            print('⚠ No baseline found')
+        # Generate delta (function loads baseline internally)
+        save_daily_delta_from_baseline(char_data, inv_data, '2026-02-07', 'delta_snapshots')
+        print('✓ Generated delta for 2026-02-07')
         ENDOFFILE
           python generate_delta_temp.py
           rm -f generate_delta_temp.py
@@ -444,7 +438,7 @@ jobs:
         import os
         sys.path.insert(0, os.getcwd())
         from generate_spell_page import parse_character_data, parse_inventory_file
-        from delta_storage import load_master_baseline, save_daily_delta_from_baseline
+        from delta_storage import save_daily_delta_from_baseline
         
         # Parse character data (all characters)
         char_data = parse_character_data('character/TAKP_character.txt', None)
@@ -463,15 +457,9 @@ jobs:
         # Parse inventory data
         inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
         
-        # Generate delta
-        baseline = load_master_baseline('delta_snapshots')
-        if baseline:
-            save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08',
-                                           baseline['characters'], baseline['inventories'],
-                                           'delta_snapshots')
-            print('✓ Generated delta for 2026-02-08')
-        else:
-            print('⚠ No baseline found')
+        # Generate delta (function loads baseline internally)
+        save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08', 'delta_snapshots')
+        print('✓ Generated delta for 2026-02-08')
         ENDOFFILE
           python generate_delta_temp.py
           rm -f generate_delta_temp.py
