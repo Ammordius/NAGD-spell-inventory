@@ -846,6 +846,33 @@ def load_no_rent_items():
         # File doesn't exist, return empty set (no filtering)
         return set()
 
+
+def load_tracked_item_ids():
+    """Load raid, elemental armor, and praesterium item IDs from the 3 JSON files.
+    Returns (set of item_id strings, dict item_id -> source_label for display)."""
+    base_dir = os.path.dirname(__file__)
+    tracked = set()
+    source_label = {}
+    files = [
+        (os.path.join(base_dir, "raid_item_sources.json"), "raid"),
+        (os.path.join(base_dir, "elemental_armor.json"), "elemental armor"),
+        (os.path.join(base_dir, "praesterium_loot.json"), "praesterium"),
+    ]
+    for path, label in files:
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            for item_id in data:
+                sid = str(item_id)
+                tracked.add(sid)
+                source_label[sid] = label
+        except Exception as e:
+            print(f"Warning: Could not load {path}: {e}")
+    return tracked, source_label
+
+
 def compare_inventories(current_inv, previous_inv, character_list=None):
     """Compare current and previous inventories to find item deltas.
     If character_list is None, compares all characters (serverwide).
@@ -953,6 +980,20 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         for item_id in char_delta['removed']:
             if item_id in item_names:
                 char_delta['item_names'][item_id] = item_names[item_id]
+    
+    # Load tracked item IDs (raid / elemental armor / praesterium) and filter deltas for that set
+    tracked_ids, tracked_source_label = load_tracked_item_ids()
+    tracked_deltas = {}
+    if tracked_ids:
+        for char_name, delta in inv_deltas.items():
+            added = {k: v for k, v in delta['added'].items() if str(k) in tracked_ids}
+            removed = {k: v for k, v in delta['removed'].items() if str(k) in tracked_ids}
+            if added or removed:
+                tracked_deltas[char_name] = {
+                    'added': added,
+                    'removed': removed,
+                    'item_names': {k: v for k, v in delta['item_names'].items() if str(k) in tracked_ids}
+                }
     
     # Calculate AA leaderboard (top gainers)
     aa_leaderboard = []
@@ -1215,6 +1256,8 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append('<a href="#inventory-changes-level1">Level 1 (Mules/Traders)</a>')
     if inv_deltas_others:
         nav_links.append('<a href="#inventory-changes">Inventory Changes</a>')
+    if tracked_deltas:
+        nav_links.append('<a href="#tracked-items" style="background-color: #FF9800;">📌 Tracked Items</a>')
     
     # Add weekly/monthly leaderboard links
     if week_start:
@@ -1485,6 +1528,55 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         <p class="no-changes">No inventory changes detected.</p>
 """
     
+    # Tracked Items section (raid / elemental armor / praesterium)
+    if tracked_deltas:
+        html += """
+        <h2 id="tracked-items">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
+        <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>
+"""
+        for char_name in sorted(tracked_deltas.keys()):
+            delta = tracked_deltas[char_name]
+            char_level = current_char_data.get(char_name, {}).get('level', '?')
+            html += f"""
+        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
+            <h3><strong>{char_name}</strong> <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
+"""
+            if delta['added']:
+                html += """
+            <div style="margin: 10px 0;">
+                <strong style="color: #4CAF50;">Acquired:</strong>
+                <div class="item-list" style="margin-top: 5px;">
+"""
+                for item_id, count in sorted(delta['added'].items()):
+                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                    source = tracked_source_label.get(str(item_id), "")
+                    count_text = f" x{count}" if count > 1 else ""
+                    label = f" ({source})" if source else ""
+                    html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                html += """
+                </div>
+            </div>
+"""
+            if delta['removed']:
+                html += """
+            <div style="margin: 10px 0;">
+                <strong style="color: #f44336;">Lost:</strong>
+                <div class="item-list" style="margin-top: 5px;">
+"""
+                for item_id, count in sorted(delta['removed'].items()):
+                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                    source = tracked_source_label.get(str(item_id), "")
+                    count_text = f" x{count}" if count > 1 else ""
+                    label = f" ({source})" if source else ""
+                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                html += """
+                </div>
+            </div>
+"""
+            html += """
+        </div>
+"""
+    
     html += """
     </div>
 </body>
@@ -1733,6 +1825,11 @@ def generate_delta_history(base_dir):
     import glob
     import re
     
+    # Load tracked item IDs so we can embed them for the client-side report (Tracked Items section)
+    tracked_ids, tracked_source_label = load_tracked_item_ids()
+    tracked_ids_json = json.dumps(list(tracked_ids))
+    tracked_source_json = json.dumps(tracked_source_label)
+    
     # Find all daily delta JSON files
     delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
     delta_files = []
@@ -1955,7 +2052,11 @@ def generate_delta_history(base_dir):
     html += """
         </div>
     </div>
+    <script type="application/json" id="tracked-item-ids">""" + tracked_ids_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="tracked-source-label">""" + tracked_source_json.replace("</", "<\\/") + """</script>
     <script>
+        const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
+        const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
         // Set default dates (today and 7 days ago)
         const today = new Date().toISOString().split('T')[0];
         const weekAgo = new Date();
@@ -2287,6 +2388,31 @@ def generate_delta_history(base_dir):
                     }
                 }
                 
+                // Filter to tracked items only (raid / elemental armor / praesterium) for Tracked Items section
+                const trackedDeltas = {};
+                if (TRACKED_ITEM_IDS && TRACKED_ITEM_IDS.size > 0) {
+                    for (const [charName, delta] of Object.entries(invDeltas)) {
+                        const added = {};
+                        const removed = {};
+                        const itemNames = {};
+                        for (const itemId of Object.keys(delta.added || {})) {
+                            if (TRACKED_ITEM_IDS.has(String(itemId))) {
+                                added[itemId] = delta.added[itemId];
+                                if (delta.item_names && delta.item_names[itemId]) itemNames[itemId] = delta.item_names[itemId];
+                            }
+                        }
+                        for (const itemId of Object.keys(delta.removed || {})) {
+                            if (TRACKED_ITEM_IDS.has(String(itemId))) {
+                                removed[itemId] = delta.removed[itemId];
+                                if (delta.item_names && delta.item_names[itemId]) itemNames[itemId] = delta.item_names[itemId];
+                            }
+                        }
+                        if (Object.keys(added).length > 0 || Object.keys(removed).length > 0) {
+                            trackedDeltas[charName] = { added, removed, item_names: itemNames };
+                        }
+                    }
+                }
+                
                 // Generate HTML report matching delta.html formatting
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
                 
@@ -2300,7 +2426,8 @@ def generate_delta_history(base_dir):
                     <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
                     <a href="#character-changes" style="margin-right: 10px;">Character Changes</a>
                     ${Object.keys(invDeltasLevel1).length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
-                    <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a></p>`;
+                    <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a>
+                    ${Object.keys(trackedDeltas).length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}</p>`;
                 
                 // Calculate leaderboards (matching delta.html format)
                 const aaLeaderboard = [];
@@ -2590,6 +2717,45 @@ def generate_delta_history(base_dir):
                     reportHTML += `
                     <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
                     <p style="color: #999; font-style: italic;">No inventory changes detected.</p>`;
+                }
+                
+                // Tracked Items section (raid / elemental armor / praesterium)
+                if (Object.keys(trackedDeltas).length > 0) {
+                    reportHTML += `
+                    <h2 id="tracked-items" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
+                    <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
+                    for (const charName of Object.keys(trackedDeltas).sort()) {
+                        const delta = trackedDeltas[charName];
+                        const level = (endState[charName] || startState[charName] || {}).level || '?';
+                        reportHTML += `
+                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
+                        <h3 style="margin-top: 0;"><strong>${charName}</strong> <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
+                        if (Object.keys(delta.added || {}).length > 0) {
+                            reportHTML += `
+                        <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Acquired:</strong><div style="margin-top: 5px;">`;
+                            for (const itemId of Object.keys(delta.added).sort()) {
+                                const count = delta.added[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                            }
+                            reportHTML += `</div></div>`;
+                        }
+                        if (Object.keys(delta.removed || {}).length > 0) {
+                            reportHTML += `
+                        <div style="margin: 10px 0;"><strong style="color: #f44336;">Lost:</strong><div style="margin-top: 5px;">`;
+                            for (const itemId of Object.keys(delta.removed).sort()) {
+                                const count = delta.removed[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                            }
+                            reportHTML += `</div></div>`;
+                        }
+                        reportHTML += `</div>`;
+                    }
                 }
                 
                 outputDiv.innerHTML = reportHTML;
