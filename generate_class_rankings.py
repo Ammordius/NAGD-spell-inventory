@@ -275,39 +275,35 @@ ENCHANTER_FOCUS_ITEMS = {
 }
 
 def check_warrior_focus_items(char_inventory, char_haste):
-    """Check if Warrior has the required focus items in correct slots and max haste"""
-    has_mh = False
-    has_chest = False
+    """Check if Warrior has the required focus items anywhere in inventory and max haste
+    Returns individual scores for each item (Darkblade, Raex Chest, Haste)"""
+    has_darkblade = False
+    has_raex_chest = False
     
     for item in char_inventory:
-        slot_id = item.get('slot_id', 0)
         item_id = item.get('item_id', '')
         
-        # Check Main Hand (slot 13) for item 22999
-        if slot_id == 13 and item_id == WARRIOR_FOCUS_ITEMS['mh']:
-            has_mh = True
-        # Check Chest (slot 17) for item 32129
-        if slot_id == 17 and item_id == WARRIOR_FOCUS_ITEMS['chest']:
-            has_chest = True
+        # Check for Darkblade (item 22999) anywhere in inventory
+        if item_id == WARRIOR_FOCUS_ITEMS['mh']:
+            has_darkblade = True
+        # Check for Raex Chest (item 32129) anywhere in inventory
+        if item_id == WARRIOR_FOCUS_ITEMS['chest']:
+            has_raex_chest = True
     
     # Check haste - binary: 30% item haste (70% buff + 30% item = 100% total) = on, otherwise off
     # char_haste is the item haste value, so >= 30 means max total haste
     has_max_haste = (char_haste >= 30)
     
-    # Calculate focus score: 100% if all three (both items + max haste), otherwise prorated
-    items_score = 0
-    if has_mh and has_chest:
-        items_score = 100.0
-    elif has_mh or has_chest:
-        items_score = 50.0
-    
+    # Return individual scores for each item (each has weight 1.0)
+    darkblade_score = 100.0 if has_darkblade else 0.0
+    raex_chest_score = 100.0 if has_raex_chest else 0.0
     haste_score = 100.0 if has_max_haste else 0.0
     
-    # Average of items (2/3 weight) and haste (1/3 weight)
-    if items_score > 0 or haste_score > 0:
-        return (items_score * 2 + haste_score) / 3, {'has_mh': has_mh, 'has_chest': has_chest, 'has_haste': has_max_haste}
-    else:
-        return 0.0, {'has_mh': has_mh, 'has_chest': has_chest, 'has_haste': has_max_haste}
+    return {
+        'Darkblade': darkblade_score,
+        'Raex Chest': raex_chest_score,
+        'Haste': haste_score
+    }, {'has_darkblade': has_darkblade, 'has_raex_chest': has_raex_chest, 'has_haste': has_max_haste}
 
 def check_paladin_sk_focus_items(char_inventory):
     """Check if Paladin/Shadow Knight has Shield of Strife"""
@@ -411,9 +407,12 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     # Special handling for Warriors - focus score is based on having specific items + haste
     if char_class == 'Warrior':
         char_haste = char_data.get('stats', {}).get('haste', 0)
-        warrior_focus_score, warrior_items = check_warrior_focus_items(char_inventory or [], char_haste)
-        # For Warriors, focus_overall_pct is just the warrior focus score
-        focus_scores = {'Warrior Focus Items': warrior_focus_score}
+        warrior_focus_scores, warrior_items = check_warrior_focus_items(char_inventory or [], char_haste)
+        # For Warriors, each focus item has its own score (ATK, Haste, Darkblade, Raex Chest)
+        focus_scores = warrior_focus_scores
+        # Add ATK to focus_scores (ATK is calculated in scores['atk_pct'])
+        if scores.get('atk_pct') is not None:
+            focus_scores['ATK'] = scores['atk_pct']
         # Store item status for display
         scores['focus_items'] = warrior_items
     elif char_class == 'Paladin':
@@ -505,8 +504,14 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     
     # Calculate overall focus score based on class priorities
     if char_class == 'Warrior':
-        # For Warriors, focus score is just the warrior focus items score
-        scores['focus_overall_pct'] = focus_scores.get('Warrior Focus Items', 0)
+        # For Warriors, calculate weighted average of Darkblade, Raex Chest, and Haste (each weight 1.0)
+        total_score = 0.0
+        total_weight = 0.0
+        for focus_name in ['Darkblade', 'Raex Chest', 'Haste']:
+            if focus_name in focus_scores:
+                total_score += focus_scores[focus_name] * 1.0
+                total_weight += 1.0
+        scores['focus_overall_pct'] = (total_score / total_weight) if total_weight > 0 else 0.0
     elif char_class == 'Paladin':
         # For Paladins, calculate weighted average for display: Shield of Strife (2.0), Beneficial Spell Haste (0.75), Healing Enhancement (0.5)
         # Note: The actual weighted calculation happens in calculate_overall_score_with_weights
@@ -570,21 +575,26 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 0.0,
         'ac_pct': 1.0,
-        'atk_pct': 1.0,
-        'haste_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus
+        'haste_pct': 0.0,  # Moved to focus
         'resists_pct': 1.0,
         'focus': {
-            # No focus weights for pure melees
+            'ATK': 1.0,  # ATK moved to focus
+            'Haste': 1.0,  # Item haste (30% item = 100% total) moved to focus
+            'Darkblade': 1.0,  # Darkblade of the Warlord
+            'Raex Chest': 1.0,  # Raex's Chestplate of Destruction
         }
     },
     'Monk': {
         'hp_pct': 1.0,
         'mana_pct': 0.0,
         'ac_pct': 1.0,
-        'atk_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'focus': {}
+        'focus': {
+            'ATK': 1.0,  # ATK moved to focus
+        }
     },
     
     # Rogue - DPS melee
@@ -592,10 +602,12 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 0.0,
         'ac_pct': 0.0,
-        'atk_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'focus': {}
+        'focus': {
+            'ATK': 1.0,  # ATK moved to focus
+        }
     },
     
     # Shadow Knight/Paladin - Tank hybrids
@@ -603,19 +615,23 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus (reduced to 0.5 weight in normalize)
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'focus': {}
+        'focus': {
+            'ATK': 0.5,  # ATK moved to focus, reduced weight for Pal/SK
+        }
     },
     'Paladin': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 1.0,
-        'haste_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus (reduced to 0.5 weight in normalize)
+        'haste_pct': 0.0,  # Moved to focus (weight 0.5)
         'resists_pct': 1.0,
         'focus': {
+            'ATK': 0.5,  # ATK moved to focus, reduced weight for Pal/SK
+            'Haste': 0.5,  # Item haste (binary: 30%+ = 100%, else 0%)
             'Beneficial Spell Haste': 0.75,
             'Healing Enhancement': 0.5,
             'Shield of Strife': 2.0,
@@ -735,10 +751,11 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
         'focus': {
+            'ATK': 1.0,  # ATK moved to focus
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
             'Spell Mana Efficiency': 1.0,
@@ -772,10 +789,12 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'focus': {}
+        'focus': {
+            'ATK': 1.0,  # ATK moved to focus
+        }
     },
     
     # Bard - Support hybrid
@@ -783,10 +802,12 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 0.0,
-        'atk_pct': 1.0,
+        'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'focus': {}  # Bards cannot use focuses
+        'focus': {
+            'ATK': 1.0,  # ATK moved to focus (Bards cannot use spell focuses)
+        }
     },
 }
 
@@ -795,16 +816,17 @@ def normalize_class_weights(weights_config):
     Normalize class weights to achieve target percentages:
     - 20% HP
     - 17.5% AC (if applicable)
-    - 17.5% Resists
+    - 17.5% Resists (TOTAL across all 5 resists)
     - 30% Focus (including ATK, FT, Haste, and spell focuses)
     - 15% Mana (if applicable)
     
     ATK, FT, and Haste are part of the 30% focus weight, not stat weights.
+    Note: Resists weight is 17.5% TOTAL, not per resist. Each of the 5 resists contributes to this total.
     """
     # Target percentages
     TARGET_HP = 0.20
     TARGET_AC = 0.175
-    TARGET_RESISTS = 0.175
+    TARGET_RESISTS = 0.175  # TOTAL across all 5 resists
     TARGET_FOCUS = 0.30  # Includes ATK, FT, Haste, and spell focuses
     TARGET_MANA = 0.15
     
@@ -836,22 +858,34 @@ def normalize_class_weights(weights_config):
     
     # Calculate focus weight components from config
     # ATK, FT, Haste are part of focus weight
-    atk_weight_raw = weights_config.get('atk_pct', 0.0)
-    haste_weight_raw = weights_config.get('haste_pct', 0.0)
-    # FT weight is 2.0 if capped (will be checked during scoring, but include in normalization)
-    ft_weight_raw = 2.0  # FT is 2.0 weight if capped
+    # ATK and Haste are now in focus dict, not stat weights
+    atk_weight_raw = 0.0  # Will be extracted from focus dict below
+    haste_weight_raw = 0.0  # Will be extracted from focus dict below (or from haste_pct for backward compatibility)
+    # FT weight is 2.0 if capped (only for classes with mana)
+    ft_weight_raw = 2.0 if has_mana else 0.0  # FT is 2.0 weight if capped, but only for classes with mana
     
-    # Calculate total focus weight from config (spell focuses)
+    # Calculate total focus weight from config (spell focuses + ATK + Haste + special items)
     focus_weights = weights_config.get('focus', {})
     total_spell_focus_weight = 0.0
     if focus_weights:
         for focus_cat, focus_value in focus_weights.items():
-            if isinstance(focus_value, dict):
+            if focus_cat == 'ATK':
+                # Extract ATK weight from focus dict
+                atk_weight_raw = focus_value if isinstance(focus_value, (int, float)) else 0.0
+            elif focus_cat == 'Haste':
+                # Extract Haste weight from focus dict (for Warriors, etc.)
+                haste_weight_raw = focus_value if isinstance(focus_value, (int, float)) else 0.0
+            elif isinstance(focus_value, dict):
                 total_spell_focus_weight += sum(focus_value.values())
             else:
+                # Include all other focus items (Darkblade, Raex Chest, Shield of Strife, etc.)
                 total_spell_focus_weight += focus_value
     
-    # Total focus weight components = ATK + Haste + FT + spell focuses
+    # If Haste is still in haste_pct (backward compatibility), use that
+    if haste_weight_raw == 0.0:
+        haste_weight_raw = weights_config.get('haste_pct', 0.0)
+    
+    # Total focus weight components = ATK + Haste + FT + spell focuses + special items
     total_focus_components = atk_weight_raw + haste_weight_raw + ft_weight_raw + total_spell_focus_weight
     
     # Scale focus components to achieve target focus percentage
@@ -884,10 +918,10 @@ def normalize_class_weights(weights_config):
             else:
                 normalized['focus'][focus_cat] = focus_value * focus_scale
     
-    # Store ATK and Haste as focus components
-    if atk_weight_raw > 0:
+    # Store ATK and Haste as focus components (if not already in normalized focus dict)
+    if atk_weight_raw > 0 and 'ATK' not in normalized['focus']:
         normalized['focus']['ATK'] = atk_weight_raw * focus_scale
-    if haste_weight_raw > 0:
+    if haste_weight_raw > 0 and 'Haste' not in normalized['focus']:
         normalized['focus']['Haste'] = haste_weight_raw * focus_scale
     
     return normalized
@@ -934,8 +968,9 @@ def calculate_resist_score(resist_value):
         S_x = S_500 + r * (x - H)
     
     # Normalize: S(500) = 318, so score percentage = (S(x) / 318) * 100
+    # But cap at 100% to match HP/AC normalization
     S_500 = L + r * (H - L)  # = 318
-    score = (S_x / S_500) * 100.0 if S_500 > 0 else 0.0
+    score = min((S_x / S_500) * 100.0, 100.0) if S_500 > 0 else 0.0
     
     # Weight is always 1.0
     weight = 1.0
@@ -944,7 +979,9 @@ def calculate_resist_score(resist_value):
 
 def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, char=None):
     """Calculate overall score using class-specific weights with conversion rates"""
-    weights_config = CLASS_WEIGHTS.get(char_class, {})
+    raw_weights = CLASS_WEIGHTS.get(char_class, {})
+    # Normalize weights to target percentages
+    weights_config = normalize_class_weights(raw_weights)
     class_max_values = class_max_values or {}
     
     if not weights_config:
@@ -1000,7 +1037,10 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             individual_resists = char.get('individual_resists', {})
             if individual_resists:
                 # Calculate individual resist scores
-                # The curve weight multiplies the base resists_weight
+                # Resists weight is TOTAL across all 5 resists, so divide by number of resists
+                num_resists = len(individual_resists)
+                resist_weight_per_resist = resists_weight / num_resists if num_resists > 0 else 0.0
+                
                 resist_scores = {}
                 total_resist_score = 0.0
                 total_resist_weight = 0.0
@@ -1008,12 +1048,12 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 for resist_type, resist_value in individual_resists.items():
                     score, weight = calculate_resist_score(resist_value)
                     # Weight is always 1.0, curve is applied to score
-                    # The effective weight is base resists_weight (curve already applied to score)
-                    effective_weight = resists_weight * weight  # weight is always 1.0
+                    # The effective weight per resist is resists_weight / num_resists
+                    effective_weight = resist_weight_per_resist * weight  # weight is always 1.0
                     resist_scores[resist_type] = {
                         'value': resist_value,
                         'score': score,  # Score already has curve applied
-                        'weight': 1.0  # Weight is always 1.0
+                        'weight': 1.0  # Weight is always 1.0 (for display)
                     }
                     # Add to total (each resist contributes its weighted score)
                     total_resist_score += score * effective_weight
@@ -1027,8 +1067,9 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 
                 scores['resists_pct'] = avg_resist_score
                 scores['individual_resist_scores'] = resist_scores
-                total_score += avg_resist_score * total_resist_weight
-                total_weight += total_resist_weight
+                # Total resists weight should equal resists_weight (17.5% total)
+                total_score += avg_resist_score * resists_weight
+                total_weight += resists_weight
             else:
                 # Fallback to total resists if individual not available
                 max_resists = class_max_values.get('max_resists', 1)
@@ -1045,19 +1086,13 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             # For Warriors, focus is already calculated in focus_overall_pct
             # For Paladins, handle focuses individually (Shield of Strife, Beneficial Spell Haste, Healing Enhancement)
             if char_class == 'Warrior':
-                focus_score = scores.get('focus_overall_pct', 0)
-                # Sum all spell focus weights (excluding ATK, Haste, FT which are handled above)
-                total_focus_weight = 0.0
+                # Handle Warrior focuses individually: ATK, Haste, Darkblade, Raex Chest (each normalized to equal weight)
                 for focus_cat, weight_config in focus_weights.items():
-                    if focus_cat in ['ATK', 'Haste']:
-                        continue  # Already handled above
-                    if isinstance(weight_config, dict):
-                        total_focus_weight += sum(weight_config.values())
-                    else:
-                        total_focus_weight += weight_config
-                if total_focus_weight > 0:
-                    total_score += focus_score * total_focus_weight
-                    total_weight += total_focus_weight
+                    if focus_cat in ['ATK', 'Haste', 'Darkblade', 'Raex Chest']:
+                        if isinstance(weight_config, (int, float)) and weight_config > 0:
+                            focus_score = focus_scores.get(focus_cat, 0)
+                            total_score += focus_score * weight_config
+                            total_weight += weight_config
             elif char_class == 'Paladin':
                 # Handle Paladin focuses individually with their specific weights
                 # Shield of Strife (2.0), Beneficial Spell Haste (0.75), Healing Enhancement (0.5)
@@ -1147,63 +1182,68 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
     
     # ATK, FT, and Haste are now part of focus weight (handled below)
     
-        # Resists - calculate individual resist scores with weight curve
-        resists_weight = weights_config.get('resists_pct', 0.0)
-        if resists_weight > 0:
-            individual_resists = char.get('individual_resists', {})
-            if individual_resists:
-                # Calculate individual resist scores
-                # The curve weight multiplies the base resists_weight
-                resist_scores = {}
-                total_resist_score = 0.0
-                total_resist_weight = 0.0
-                
-                for resist_type, resist_value in individual_resists.items():
-                    score, weight = calculate_resist_score(resist_value)
-                    # Weight is always 1.0, curve is applied to score
-                    # The effective weight is base resists_weight (curve already applied to score)
-                    effective_weight = resists_weight * weight  # weight is always 1.0
-                    resist_scores[resist_type] = {
-                        'value': resist_value,
-                        'score': score,  # Score already has curve applied
-                        'weight': 1.0  # Weight is always 1.0
-                    }
-                    # Add to total (each resist contributes its weighted score)
-                    total_resist_score += score * effective_weight
-                    total_resist_weight += effective_weight
-                
-                # Average the weighted scores
-                if total_resist_weight > 0:
-                    avg_resist_score = total_resist_score / total_resist_weight
-                else:
-                    avg_resist_score = 0.0
-                
-                scores['resists_pct'] = avg_resist_score
-                scores['individual_resist_scores'] = resist_scores
-                total_score += avg_resist_score * total_resist_weight
-                total_weight += total_resist_weight
+    # Resists - calculate individual resist scores with weight curve
+    resists_weight = weights_config.get('resists_pct', 0.0)
+    if resists_weight > 0:
+        individual_resists = char.get('individual_resists', {})
+        if individual_resists:
+            # Calculate individual resist scores
+            # Resists weight is TOTAL across all 5 resists, so divide by number of resists
+            num_resists = len(individual_resists)
+            resist_weight_per_resist = resists_weight / num_resists if num_resists > 0 else 0.0
+            
+            resist_scores = {}
+            total_resist_score = 0.0
+            total_resist_weight = 0.0
+            
+            for resist_type, resist_value in individual_resists.items():
+                score, weight = calculate_resist_score(resist_value)
+                # Weight is always 1.0, curve is applied to score
+                # The effective weight per resist is resists_weight / num_resists
+                effective_weight = resist_weight_per_resist * weight  # weight is always 1.0
+                resist_scores[resist_type] = {
+                    'value': resist_value,
+                    'score': score,  # Score already has curve applied
+                    'weight': 1.0  # Weight is always 1.0 (for display)
+                }
+                # Add to total (each resist contributes its weighted score)
+                total_resist_score += score * effective_weight
+                total_resist_weight += effective_weight
+            
+            # Average the weighted scores
+            if total_resist_weight > 0:
+                avg_resist_score = total_resist_score / total_resist_weight
             else:
-                # Fallback to total resists if individual not available
-                max_resists = class_max_values.get('max_resists', 1)
-                resists_value = scores.get('resists', 0)
-                if max_resists > 0:
-                    resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
-                    scores['resists_pct'] = resists_score
-                    total_score += resists_score * resists_weight
-                    total_weight += resists_weight
+                avg_resist_score = 0.0
+            
+            scores['resists_pct'] = avg_resist_score
+            scores['individual_resist_scores'] = resist_scores
+            # Total resists weight should equal resists_weight (17.5% total)
+            total_score += avg_resist_score * resists_weight
+            total_weight += resists_weight
+        else:
+            # Fallback to total resists if individual not available
+            max_resists = class_max_values.get('max_resists', 1)
+            resists_value = scores.get('resists', 0)
+            if max_resists > 0:
+                resists_score = (resists_value / max_resists * 100) if resists_value > 0 else 0
+                scores['resists_pct'] = resists_score
+                total_score += resists_score * resists_weight
+                total_weight += resists_weight
     
     # Focus weights - includes ATK, FT, Haste, and spell focuses
     focus_weights = weights_config.get('focus', {})
     
-    # Add ATK to focus if applicable
-    if scores.get('atk_pct') is not None:
+    # Add ATK to focus if applicable (skip for Warriors - handled in Warrior-specific section)
+    # ATK is now in focus dict, not a separate stat
+    if char_class != 'Warrior' and scores.get('atk_pct') is not None:
         atk_weight = focus_weights.get('ATK', 0.0)
         if atk_weight > 0:
             total_score += scores['atk_pct'] * atk_weight
             total_weight += atk_weight
     
-    # Add Haste to focus if applicable
-    if scores.get('haste_pct') is not None:
+    # Add Haste to focus if applicable (skip for Warriors - handled in Warrior-specific section)
+    if char_class != 'Warrior' and scores.get('haste_pct') is not None:
         haste_weight = focus_weights.get('Haste', 0.0)
         if haste_weight > 0:
             total_score += scores['haste_pct'] * haste_weight
@@ -1590,7 +1630,7 @@ def main():
             'mana_efficiency_cats': char_mana_efficiency_cats,  # Mana Efficiency by category
             'spell_haste_cats': char_spell_haste_cats,  # Spell Haste by category
             'duration_cats': char_duration_cats,  # Duration by category
-            'scores': scores,  # Percentage scores
+            'scores': scores,  # Percentage scores (includes focus_scores and focus_items)
             'overall_score': round(overall_score, 2),  # Overall ranking score
             'inventory': char_inventory  # Inventory items for item links
         })
