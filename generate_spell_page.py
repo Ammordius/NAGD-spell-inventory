@@ -1746,14 +1746,15 @@ def generate_delta_history(base_dir):
     delta_files = []
     
     if os.path.exists(delta_snapshots_dir):
-        # Find all delta_daily_YYYY-MM-DD.json files
-        delta_files.extend(glob.glob(os.path.join(delta_snapshots_dir, "delta_daily_*.json")))
+        # Find all delta_daily_YYYY-MM-DD.json.gz files (compressed)
+        delta_files.extend(glob.glob(os.path.join(delta_snapshots_dir, "delta_daily_*.json.gz")))
     
     # Extract dates from filenames and sort
     delta_entries = []
     for filepath in delta_files:
         filename = os.path.basename(filepath)
-        match = re.match(r'delta_daily_(\d{4}-\d{2}-\d{2})\.json', filename)
+        # Match both .json and .json.gz files
+        match = re.match(r'delta_daily_(\d{4}-\d{2}-\d{2})\.json(\.gz)?', filename)
         if match:
             date_str = match.group(1)
             try:
