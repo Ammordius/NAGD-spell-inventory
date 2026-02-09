@@ -561,8 +561,7 @@ jobs:
         # Generate delta history page AFTER copying all files (so it sees all historical files)
         if [ -f "delta-history.html" ]; then
           # Re-generate history page to include all files in deploy directory
-          python -c "from generate_spell_page import generate_delta_history; import os; generate_delta_history(os.getcwd(), 'deploy')"
-          cp delta-history.html deploy/delta-history.html
+          python -c "from generate_spell_page import generate_delta_history; import os; os.chdir('deploy'); generate_delta_history('.')"
           echo "✓ Regenerated delta-history.html with all files"
         fi
         # Copy weekly/monthly leaderboard pages (all of them to preserve history)
