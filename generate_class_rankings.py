@@ -851,39 +851,44 @@ def normalize_class_weights(weights_config):
 
 def calculate_resist_score(resist_value):
     """
-    Calculate resist score with weight curve:
-    - Full weight (1.0) up to 220
-    - Linearly decreasing weight from 220 to 320 (1.0 to 0.35)
-    - 0.35 weight from 320 to 500
-    - 0 weight above 500
+    Calculate resist score with diminishing returns curve applied to the score itself:
+    - Full score (100% at 500) up to 220
+    - Linearly decreasing score multiplier from 220 to 320 (1.0 to 0.35)
+    - 0.35 score multiplier from 320 to 500
+    - 0 score above 500
     
-    The score percentage is normalized to show actual value (higher resists = higher score %),
-    but the weight decreases above 220 to reflect diminishing returns.
+    The curve is applied to the score percentage, not the weight.
+    Weight is always 1.0 for all resists.
     
-    Returns: (score_percentage, effective_weight)
+    Returns: (score_percentage_with_curve, weight_always_1.0)
     """
     if resist_value <= 0:
-        return (0.0, 0.0)
+        return (0.0, 1.0)
     
-    # Normalize score based on max value of 500 (so 500 = 100%)
-    # This shows the actual value proportionally
+    # Base score normalized to 500 max (so 500 = 100%)
     max_resist = 500.0
-    score = (resist_value / max_resist) * 100.0
+    base_score = (resist_value / max_resist) * 100.0
     
-    # Calculate weight based on the curve
+    # Calculate curve multiplier based on the resist value
     if resist_value <= 220:
-        # Full weight up to 220
-        weight = 1.0
+        # Full multiplier up to 220
+        curve_multiplier = 1.0
     elif resist_value <= 320:
         # Linear decrease from 220 to 320 (1.0 to 0.35)
-        weight = 1.0 - ((resist_value - 220) / 100.0) * 0.65  # Decreases from 1.0 to 0.35
+        curve_multiplier = 1.0 - ((resist_value - 220) / 100.0) * 0.65  # Decreases from 1.0 to 0.35
     elif resist_value <= 500:
-        # 0.35 weight from 320 to 500
-        weight = 0.35
+        # 0.35 multiplier from 320 to 500
+        curve_multiplier = 0.35
     else:
-        # 0 weight above 500
-        weight = 0.0
-        score = 0.0  # No score above 500
+        # 0 multiplier above 500
+        curve_multiplier = 0.0
+        base_score = 0.0  # No score above 500
+    
+    # Apply curve to the score itself
+    score = base_score * curve_multiplier
+    
+    # Weight is always 1.0
+    weight = 1.0
     
     return (score, weight)
 
@@ -958,13 +963,14 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 total_resist_weight = 0.0
                 
                 for resist_type, resist_value in individual_resists.items():
-                    score, curve_weight = calculate_resist_score(resist_value)
-                    # The effective weight is base resists_weight multiplied by the curve weight
-                    effective_weight = resists_weight * curve_weight
+                    score, weight = calculate_resist_score(resist_value)
+                    # Weight is always 1.0, curve is applied to score
+                    # The effective weight is base resists_weight (curve already applied to score)
+                    effective_weight = resists_weight * weight  # weight is always 1.0
                     resist_scores[resist_type] = {
                         'value': resist_value,
-                        'score': score,
-                        'weight': curve_weight  # Store curve weight for display, but use effective_weight in calculation
+                        'score': score,  # Score already has curve applied
+                        'weight': 1.0  # Weight is always 1.0
                     }
                     # Add to total (each resist contributes its weighted score)
                     total_resist_score += score * effective_weight
@@ -1114,13 +1120,14 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 total_resist_weight = 0.0
                 
                 for resist_type, resist_value in individual_resists.items():
-                    score, curve_weight = calculate_resist_score(resist_value)
-                    # The effective weight is base resists_weight multiplied by the curve weight
-                    effective_weight = resists_weight * curve_weight
+                    score, weight = calculate_resist_score(resist_value)
+                    # Weight is always 1.0, curve is applied to score
+                    # The effective weight is base resists_weight (curve already applied to score)
+                    effective_weight = resists_weight * weight  # weight is always 1.0
                     resist_scores[resist_type] = {
                         'value': resist_value,
-                        'score': score,
-                        'weight': curve_weight  # Store curve weight for display, but use effective_weight in calculation
+                        'score': score,  # Score already has curve applied
+                        'weight': 1.0  # Weight is always 1.0
                     }
                     # Add to total (each resist contributes its weighted score)
                     total_resist_score += score * effective_weight

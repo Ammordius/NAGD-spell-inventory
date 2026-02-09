@@ -729,40 +729,44 @@
 
         function calculateResistScore(resistValue) {
             /**
-             * Calculate resist score with weight curve:
-             * - Full weight (1.0) up to 220
-             * - Linearly decreasing weight from 220 to 320 (1.0 to 0.35)
-             * - 0.35 weight from 320 to 500
-             * - 0 weight above 500
+             * Calculate resist score with diminishing returns curve applied to the score itself:
+             * - Full score (100% at 500) up to 220
+             * - Linearly decreasing score multiplier from 220 to 320 (1.0 to 0.35)
+             * - 0.35 score multiplier from 320 to 500
+             * - 0 score above 500
              * 
-             * The score percentage is normalized to show actual value (higher resists = higher score %),
-             * but the weight decreases above 220 to reflect diminishing returns.
+             * The curve is applied to the score percentage, not the weight.
+             * Weight is always 1.0 for all resists.
              */
             if (resistValue <= 0) {
-                return { score: 0.0, weight: 0.0 };
+                return { score: 0.0, weight: 1.0 };
             }
             
-            // Normalize score based on max value of 500 (so 500 = 100%)
-            // This shows the actual value proportionally
+            // Base score normalized to 500 max (so 500 = 100%)
             const maxResist = 500.0;
-            let score = (resistValue / maxResist) * 100.0;
+            const baseScore = (resistValue / maxResist) * 100.0;
             
-            // Calculate weight based on the curve
-            let weight;
+            // Calculate curve multiplier based on the resist value
+            let curveMultiplier;
             if (resistValue <= 220) {
-                // Full weight up to 220
-                weight = 1.0;
+                // Full multiplier up to 220
+                curveMultiplier = 1.0;
             } else if (resistValue <= 320) {
                 // Linear decrease from 220 to 320 (1.0 to 0.35)
-                weight = 1.0 - ((resistValue - 220) / 100.0) * 0.65; // Decreases from 1.0 to 0.35
+                curveMultiplier = 1.0 - ((resistValue - 220) / 100.0) * 0.65; // Decreases from 1.0 to 0.35
             } else if (resistValue <= 500) {
-                // 0.35 weight from 320 to 500
-                weight = 0.35;
+                // 0.35 multiplier from 320 to 500
+                curveMultiplier = 0.35;
             } else {
-                // 0 weight above 500
-                weight = 0.0;
-                score = 0.0; // No score above 500
+                // 0 multiplier above 500
+                curveMultiplier = 0.0;
             }
+            
+            // Apply curve to the score itself
+            const score = baseScore * curveMultiplier;
+            
+            // Weight is always 1.0
+            const weight = 1.0;
             
             return { score: score, weight: weight };
         }
@@ -1536,14 +1540,12 @@
                         const resistData = individualResistScores[resistType];
                         if (resistData) {
                             totalRawValue += resistData.value;
-                            // The effective weight is base resists_pct weight multiplied by the curve weight
-                            // But display the base class weight, not the effective weight
-                            const effectiveWeight = weight * resistData.weight;
+                            // Weight is always 1.0, curve is already applied to score
+                            const effectiveWeight = weight * resistData.weight;  // weight is always 1.0
                             const resistPoints = resistData.score * effectiveWeight;
                             totalAdvancedPoints += resistPoints;
-                            // Display the base class weight, with a note about the curve multiplier
-                            const curveMultiplier = resistData.weight.toFixed(2);
-                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${weight.toFixed(2)} <span style="color: #6c757d; font-size: 0.9em;">(×${curveMultiplier})</span></td><td>${resistPoints.toFixed(2)}</td></tr>`;
+                            // Display the base class weight (curve is already in the score)
+                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${weight.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
                         }
                     });
                     html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td><td><strong>${totalAdvancedPoints.toFixed(2)}</strong></td></tr>`;
