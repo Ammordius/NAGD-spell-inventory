@@ -1997,25 +1997,42 @@ def generate_delta_history(base_dir):
         
         // Load JSONs on-demand (only when date range is selected)
         let loadedDeltas = new Map(); // Cache loaded deltas
+        let availableDates = new Set(); // Track which dates have JSON files
+        
+        // Extract available dates from the page (from the date list)
+        document.querySelectorAll('.delta-date').forEach(el => {
+            const date = el.textContent.trim();
+            if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                availableDates.add(date);
+            }
+        });
         
         async function loadDeltaJSON(date) {
+            // Check if date is available
+            if (!availableDates.has(date)) {
+                throw new Error(`No delta JSON file available for ${date}. Please select a date from the available dates list.`);
+            }
+            
             if (loadedDeltas.has(date)) {
                 return loadedDeltas.get(date);
             }
             try {
                 const response = await fetch(`delta_snapshots/delta_daily_${date}.json.gz`);
                 if (!response.ok) {
-                    throw new Error(`Delta not found for ${date}`);
+                    if (response.status === 404) {
+                        throw new Error(`Delta JSON file not found for ${date}. This date may not have been processed yet.`);
+                    }
+                    throw new Error(`Failed to load delta for ${date}: HTTP ${response.status}`);
                 }
                 const arrayBuffer = await response.arrayBuffer();
-                // Decompress using pako (need to include pako library)
+                // Decompress using pako
                 const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
                 const delta = JSON.parse(decompressed);
                 loadedDeltas.set(date, delta);
                 return delta;
             } catch (error) {
                 console.error(`Error loading delta for ${date}:`, error);
-                return null;
+                throw error; // Re-throw so caller can handle it
             }
         }
         
@@ -2027,8 +2044,25 @@ def generate_delta_history(base_dir):
                 return;
             }
             
+            // Validate dates are available
+            const missingDates = [];
+            if (!availableDates.has(start)) {
+                missingDates.push(start);
+            }
+            if (!availableDates.has(end)) {
+                missingDates.push(end);
+            }
+            if (missingDates.length > 0) {
+                const outputDiv = document.getElementById('date_range_output');
+                outputDiv.innerHTML = `<p style="color: red; padding: 15px; background: #ffebee; border-radius: 5px;">
+                    <strong>Error:</strong> No delta JSON files available for: ${missingDates.join(', ')}<br>
+                    Please select dates from the available dates list below.
+                </p>`;
+                return;
+            }
+            
             const outputDiv = document.getElementById('date_range_output');
-            outputDiv.innerHTML = '<p>Loading deltas...</p>';
+            outputDiv.innerHTML = '<p>Loading deltas for ' + start + ' and ' + end + '...</p>';
             
             try {
                 // Load only the two deltas we need (start and end dates)
@@ -2077,7 +2111,10 @@ def generate_delta_history(base_dir):
                 
                 outputDiv.innerHTML = reportHTML;
             } catch (error) {
-                outputDiv.innerHTML = `<p style="color: red;">Error generating report: ${error.message}</p>`;
+                outputDiv.innerHTML = `<p style="color: red; padding: 15px; background: #ffebee; border-radius: 5px;">
+                    <strong>Error:</strong> ${error.message}<br>
+                    <small>Available dates are listed below. Please select dates that have delta JSON files.</small>
+                </p>`;
             }
         }
         
