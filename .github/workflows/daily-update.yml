@@ -352,50 +352,80 @@ jobs:
         echo "✓ Found spell_exchange_list.json"
         echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
-    - name: Generate historical deltas from cached files
+    - name: Restore cache for 2026-02-07 and generate delta
+      uses: actions/cache@v3
+      id: cache-2026-02-07
+      continue-on-error: true
+      with:
+        path: |
+          character/TAKP_character.txt
+          inventory/TAKP_character_inventory.txt
+        key: magelo-dump-2026-02-07
+        restore-keys: |
+          magelo-dump-2026-02-07
+          magelo-dump-
+    
+    - name: Generate delta for 2026-02-07 if cache restored
+      if: steps.cache-2026-02-07.outputs.cache-hit == 'true'
       run: |
-        echo "=== Generating historical deltas from cached files ==="
-        # Dates we want to generate deltas for (if we have cached files)
-        CACHED_DATES="2026-02-06 2026-02-07 2026-02-08 2026-02-09"
-        
-        # Check which deltas already exist in repo
-        EXISTING_DELTAS=""
-        if [ -d "delta_snapshots" ]; then
-          EXISTING_DELTAS=$(ls delta_snapshots/delta_daily_*.json.gz 2>/dev/null | sed 's/.*delta_daily_\([0-9-]*\)\.json\.gz/\1/' | tr '\n' ' ' || echo "")
-        fi
-        
-        echo "Existing deltas in repo: $EXISTING_DELTAS"
-        
-        # For each cached date, try to generate delta if missing
-        for DATE in $CACHED_DATES; do
-          if echo "$EXISTING_DELTAS" | grep -q "$DATE"; then
-            echo "✓ Delta already exists in repo for $DATE"
-            continue
-          fi
-          
-          echo ""
-          echo "Processing $DATE..."
-          
-          # Check if we have files for this date (from cache restore)
-          # Files might be in character/ and inventory/ directories
-          if [ -f "character/TAKP_character.txt" ] && [ -f "inventory/TAKP_character_inventory.txt" ]; then
-            # Save current files with date suffix for processing
-            mkdir -p "character_historical" "inventory_historical"
-            cp character/TAKP_character.txt "character_historical/TAKP_character_${DATE}.txt"
-            cp inventory/TAKP_character_inventory.txt "inventory_historical/TAKP_character_inventory_${DATE}.txt"
-            echo "  Saved files for $DATE"
-          else
-            echo "  ⚠ No cached files found for $DATE (may need to restore specific cache)"
-          fi
-        done
-        
-        # Now generate deltas using Python script
-        if [ -f "generate_historical_deltas_from_cache.py" ]; then
-          echo ""
-          echo "Running historical delta generator..."
-          python generate_historical_deltas_from_cache.py
+        if [ ! -f "delta_snapshots/delta_daily_2026-02-07.json.gz" ]; then
+          echo "Generating delta for 2026-02-07 from cached files..."
+          python -c "
+from generate_spell_page import parse_character_data, parse_inventory_file
+from delta_storage import load_master_baseline, save_daily_delta_from_baseline
+import os
+
+char_data = parse_character_data('character/TAKP_character.txt')
+inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt')
+baseline = load_master_baseline('delta_snapshots')
+if baseline:
+    save_daily_delta_from_baseline(char_data, inv_data, '2026-02-07',
+                                   baseline['characters'], baseline['inventories'],
+                                   'delta_snapshots')
+    print('✓ Generated delta for 2026-02-07')
+else:
+    print('⚠ No baseline found, skipping')
+"
         else
-          echo "⚠ generate_historical_deltas_from_cache.py not found, skipping"
+          echo "✓ Delta for 2026-02-07 already exists"
+        fi
+    
+    - name: Restore cache for 2026-02-08 and generate delta
+      uses: actions/cache@v3
+      id: cache-2026-02-08
+      continue-on-error: true
+      with:
+        path: |
+          character/TAKP_character.txt
+          inventory/TAKP_character_inventory.txt
+        key: magelo-dump-2026-02-08
+        restore-keys: |
+          magelo-dump-2026-02-08
+          magelo-dump-
+    
+    - name: Generate delta for 2026-02-08 if cache restored
+      if: steps.cache-2026-02-08.outputs.cache-hit == 'true'
+      run: |
+        if [ ! -f "delta_snapshots/delta_daily_2026-02-08.json.gz" ]; then
+          echo "Generating delta for 2026-02-08 from cached files..."
+          python -c "
+from generate_spell_page import parse_character_data, parse_inventory_file
+from delta_storage import load_master_baseline, save_daily_delta_from_baseline
+import os
+
+char_data = parse_character_data('character/TAKP_character.txt')
+inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt')
+baseline = load_master_baseline('delta_snapshots')
+if baseline:
+    save_daily_delta_from_baseline(char_data, inv_data, '2026-02-08',
+                                   baseline['characters'], baseline['inventories'],
+                                   'delta_snapshots')
+    print('✓ Generated delta for 2026-02-08')
+else:
+    print('⚠ No baseline found, skipping')
+"
+        else
+          echo "✓ Delta for 2026-02-08 already exists"
         fi
     
     - name: Run spell inventory generator
