@@ -1156,6 +1156,8 @@
 
         function formatScore(score) {
             if (score === null || score === undefined) return 'N/A';
+            if (typeof score !== 'number') return String(score);
+            if (isNaN(score)) return 'N/A';
             return score.toFixed(1) + '%';
         }
 
@@ -1566,7 +1568,7 @@
             if (scores.resists !== undefined && scores.resists !== null || scores.resists_pct !== undefined) {
                 const weight = classWeightConfig.resists_pct || 0;
                 const resistsValue = scores.resists !== undefined && scores.resists !== null ? scores.resists : 0;
-                const resistsPct = scores.resists_pct !== undefined && scores.resists_pct !== null ? scores.resists_pct : 'N/A';
+                const resistsPct = (scores.resists_pct !== undefined && scores.resists_pct !== null && typeof scores.resists_pct === 'number') ? scores.resists_pct : null;
                 
                 const resistsPoints = (typeof resistsPct === 'number' ? resistsPct : 0) * weight;
                 totalStatPoints += resistsPoints;
