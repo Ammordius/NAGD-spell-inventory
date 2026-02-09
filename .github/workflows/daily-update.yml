@@ -663,12 +663,18 @@ jobs:
         else
           echo "No delta.html found (previous day's files may not exist)"
         fi
-        # Copy delta JSON files to deploy directory (needed for date-range queries on website)
+        # Copy delta JSON files to deploy (needed for client-side date range queries)
+        # Note: We only copy the compressed JSONs, and they're loaded on-demand by JavaScript
         mkdir -p deploy/delta_snapshots
         if [ -d "delta_snapshots" ]; then
           cp delta_snapshots/delta_daily_*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No delta JSON files to copy"
-          echo "✓ Copied delta JSON files to deploy/delta_snapshots/"
-          ls -lh deploy/delta_snapshots/*.json.gz 2>/dev/null | wc -l | xargs echo "  Total delta JSON files:"
+          DELTA_COUNT=$(ls deploy/delta_snapshots/*.json.gz 2>/dev/null | wc -l)
+          if [ "$DELTA_COUNT" -gt 0 ]; then
+            echo "✓ Copied $DELTA_COUNT delta JSON files to deploy/delta_snapshots/"
+            # Calculate total size
+            TOTAL_SIZE=$(du -sh deploy/delta_snapshots/ | cut -f1)
+            echo "  Total size: $TOTAL_SIZE (compressed)"
+          fi
         fi
         # Copy class rankings files if they were generated
         if [ -f "class_rankings.html" ]; then

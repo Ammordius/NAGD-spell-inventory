@@ -1983,6 +1983,92 @@ def generate_delta_history(base_dir):
         document.getElementById('end_date').value = today;
         document.getElementById('start_date').value = weekAgoStr;
         
+        // Load JSONs on-demand (only when date range is selected)
+        let loadedDeltas = new Map(); // Cache loaded deltas
+        
+        async function loadDeltaJSON(date) {
+            if (loadedDeltas.has(date)) {
+                return loadedDeltas.get(date);
+            }
+            try {
+                const response = await fetch(`delta_snapshots/delta_daily_${date}.json.gz`);
+                if (!response.ok) {
+                    throw new Error(`Delta not found for ${date}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                // Decompress using pako (need to include pako library)
+                const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+                const delta = JSON.parse(decompressed);
+                loadedDeltas.set(date, delta);
+                return delta;
+            } catch (error) {
+                console.error(`Error loading delta for ${date}:`, error);
+                return null;
+            }
+        }
+        
+        async function generateDateRangeReport() {
+            const start = document.getElementById('start_date').value;
+            const end = document.getElementById('end_date').value;
+            if (!start || !end) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            const outputDiv = document.getElementById('date_range_output');
+            outputDiv.innerHTML = '<p>Loading deltas...</p>';
+            
+            try {
+                // Load only the two deltas we need (start and end dates)
+                const [startDelta, endDelta] = await Promise.all([
+                    loadDeltaJSON(start),
+                    loadDeltaJSON(end)
+                ]);
+                
+                if (!startDelta || !endDelta) {
+                    outputDiv.innerHTML = '<p style="color: red;">Error: Could not load delta JSONs for the selected dates.</p>';
+                    return;
+                }
+                
+                // Compare the two deltas and generate report
+                // This is a simplified comparison - full logic would be in delta_storage.compare_delta_to_delta
+                const charChanges = {};
+                const invChanges = {};
+                
+                // Compare character changes
+                const startChars = startDelta.char_deltas || {};
+                const endChars = endDelta.char_deltas || {};
+                
+                for (const [charName, endData] of Object.entries(endChars)) {
+                    const startData = startChars[charName] || {};
+                    if (endData.current_level !== startData.current_level ||
+                        endData.current_aa_total !== startData.current_aa_total ||
+                        endData.current_hp !== startData.current_hp) {
+                        charChanges[charName] = {
+                            level: endData.current_level - (startData.current_level || 0),
+                            aa: endData.current_aa_total - (startData.current_aa_total || 0),
+                            hp: endData.current_hp - (startData.current_hp || 0)
+                        };
+                    }
+                }
+                
+                // Generate HTML report
+                let reportHTML = `<h3>Date Range Report: ${start} to ${end}</h3>`;
+                reportHTML += `<p>Character Changes: ${Object.keys(charChanges).length}</p>`;
+                if (Object.keys(charChanges).length > 0) {
+                    reportHTML += '<ul>';
+                    for (const [charName, changes] of Object.entries(charChanges)) {
+                        reportHTML += `<li>${charName}: Level ${changes.level > 0 ? '+' : ''}${changes.level}, AA ${changes.aa > 0 ? '+' : ''}${changes.aa}, HP ${changes.hp > 0 ? '+' : ''}${changes.hp}</li>`;
+                    }
+                    reportHTML += '</ul>';
+                }
+                
+                outputDiv.innerHTML = reportHTML;
+            } catch (error) {
+                outputDiv.innerHTML = `<p style="color: red;">Error generating report: ${error.message}</p>`;
+            }
+        }
+        
         function generateCommand() {
             const start = document.getElementById('start_date').value;
             const end = document.getElementById('end_date').value;
