@@ -718,8 +718,10 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
             'Buff Spell Duration': 1.0,  # Bene exter
+            'Detrimental Spell Duration': 1.0,  # Det duration (required)
             'Detrimental Spell Haste': 1.0,
             'Spell Range Extension': 0.75,
+            'Serpent of Vindication': 2.0,
         }
     },
     
@@ -1143,33 +1145,63 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         for focus_cat, weight_config in focus_weights.items():
             if focus_cat == 'Spell Damage':
                 # Handle damage type specific weights
+                # "All" damage counts for all damage types
                 if isinstance(weight_config, dict):
                     for damage_type, weight in weight_config.items():
                         if weight > 0:
                             # Get the character's focus percentage for this damage type
-                            char_pct = char_damage_focii.get(damage_type, 0)
+                            # "All" counts for all damage types, so use max of specific type and "All"
+                            char_pct = max(
+                                char_damage_focii.get(damage_type, 0),
+                                char_damage_focii.get('All', 0)
+                            )
                             # Calculate score as % of best spell damage focus
-                            if best_spell_damage > 0:
-                                focus_score = (char_pct / best_spell_damage * 100) if char_pct > 0 else 0
+                            # Use max of specific type best and "All" best
+                            best_damage = max(
+                                best_spell_damage,
+                                char_damage_focii.get('All', 0)  # "All" damage best
+                            )
+                            if best_damage > 0:
+                                focus_score = (char_pct / best_damage * 100) if char_pct > 0 else 0
                                 total_score += focus_score * weight
                                 total_weight += weight
             elif focus_cat in ['Beneficial Spell Haste', 'Detrimental Spell Haste']:
                 # Handle spell haste categories - look up from char_spell_haste_cats
+                # "All" categories count for both Bene and Det
                 if isinstance(weight_config, (int, float)) and weight_config > 0:
                     if char_spell_haste_cats is not None:
-                        haste_cat = 'Bene' if focus_cat == 'Beneficial Spell Haste' else 'Det'
-                        char_pct = char_spell_haste_cats.get(haste_cat, 0)
+                        if focus_cat == 'Beneficial Spell Haste':
+                            # Use max of Bene and All (All counts for both)
+                            char_pct = max(
+                                char_spell_haste_cats.get('Bene', 0),
+                                char_spell_haste_cats.get('All', 0)
+                            )
+                            best_haste = max(
+                                best_focii.get('Spell Haste', 33.0),
+                                best_focii.get('All Spell Haste', 0)  # If "All Spell Haste" exists
+                            )
+                        else:  # Detrimental Spell Haste
+                            # Use max of Det and All (All counts for both)
+                            char_pct = max(
+                                char_spell_haste_cats.get('Det', 0),
+                                char_spell_haste_cats.get('All', 0)
+                            )
+                            best_haste = max(
+                                best_focii.get('Spell Haste', 33.0),
+                                best_focii.get('All Spell Haste', 0)  # If "All Spell Haste" exists
+                            )
                         
                         # For Beastlord detrimental spell haste: they get 1.5% per level (15 levels = 22.5% innate)
                         # Focus caps at 50% total, so focus item can only contribute 50% - 22.5% = 27.5%
                         # But the focus item itself shows the full percentage, so we cap the effective at 27.5%
-                        if char_class == 'Beastlord' and haste_cat == 'Det':
+                        if char_class == 'Beastlord' and focus_cat == 'Detrimental Spell Haste':
                             # Cap the effective focus at 27.5% (50% total - 22.5% innate)
                             effective_pct = min(char_pct, 27.5)
                             best_haste = 27.5  # Best possible for Beastlord det haste
                         else:
                             effective_pct = char_pct
-                            best_haste = best_focii.get('Spell Haste', 33.0)  # Default to 33% if not found
+                            if best_haste == 0:
+                                best_haste = best_focii.get('Spell Haste', 33.0)  # Default to 33% if not found
                         
                         if best_haste > 0:
                             focus_score = (effective_pct / best_haste * 100) if effective_pct > 0 else 0
