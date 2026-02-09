@@ -816,12 +816,44 @@
         
         async function loadData() {
             try {
-                const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-                const jsonPath = basePath + 'class_rankings.json';
+                // Try multiple possible paths for GitHub Pages
+                const possiblePaths = [
+                    'class_rankings.json',  // Same directory
+                    './class_rankings.json',  // Explicit same directory
+                    '/class_rankings.json',  // Root path
+                    window.location.pathname.replace(/\/[^/]*$/, '/') + 'class_rankings.json',  // Same directory as HTML
+                ];
                 
-                const response = await fetch(jsonPath);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                // Add repository path if on GitHub Pages
+                const repoMatch = window.location.pathname.match(/^\/[^/]+\/[^/]+/);
+                if (repoMatch) {
+                    possiblePaths.push(repoMatch[0] + '/class_rankings.json');
+                }
+                
+                let jsonPath = '';
+                let response = null;
+                let lastError = null;
+                
+                for (const path of possiblePaths) {
+                    try {
+                        console.log(`Trying to load from: ${path}`);
+                        response = await fetch(path);
+                        if (response.ok) {
+                            jsonPath = path;
+                            console.log(`✓ Successfully loaded from: ${path}`);
+                            break;
+                        } else {
+                            console.log(`✗ Failed to load from ${path}: ${response.status}`);
+                            lastError = `HTTP ${response.status} from ${path}`;
+                        }
+                    } catch (e) {
+                        console.log(`✗ Error loading from ${path}:`, e.message);
+                        lastError = e.message;
+                    }
+                }
+                
+                if (!response || !response.ok) {
+                    throw new Error(`Could not load class_rankings.json from any path. Last error: ${lastError}. Tried: ${possiblePaths.join(', ')}`);
                 }
                 
                 const data = await response.json();
