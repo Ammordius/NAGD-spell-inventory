@@ -267,6 +267,18 @@ jobs:
         echo "Inventory file size: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
         echo "Update date: ${{ steps.check-update.outputs.update_date }}"
     
+    # When we downloaded today's dump, back it up so we can restore it after historical backfill
+    # (Backfill overwrites character/ and inventory/; "Restore today's dump" then restores from cache,
+    # but on first run of the day today's cache does not exist yet, so we'd get yesterday's data and lose the download.)
+    - name: Backup today's dump for main run (when we downloaded)
+      if: steps.need-update.outputs.needs_update == 'true'
+      run: |
+        if [ -f "character/TAKP_character.txt" ] && [ -f "inventory/TAKP_character_inventory.txt" ]; then
+          cp character/TAKP_character.txt character/.today_backup_character.txt
+          cp inventory/TAKP_character_inventory.txt inventory/.today_backup_inventory.txt
+          echo "✓ Backed up today's dump for restore after backfill"
+        fi
+    
     - name: Save current update date
       run: |
         # Always save the current date from the page (even if we used cache)
@@ -485,6 +497,35 @@ jobs:
         key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
         restore-keys: |
           magelo-dump-
+    
+    # If we had downloaded today's dump earlier, use that instead of cache (cache may be yesterday on first run of day).
+    - name: Restore today's downloaded files over cache when backup exists
+      run: |
+        if [ -f "character/.today_backup_character.txt" ] && [ -f "inventory/.today_backup_inventory.txt" ]; then
+          cp character/.today_backup_character.txt character/TAKP_character.txt
+          cp inventory/.today_backup_inventory.txt inventory/TAKP_character_inventory.txt
+          rm -f character/.today_backup_character.txt inventory/.today_backup_inventory.txt
+          echo "✓ Restored today's downloaded dump for main run (cache was not today's data yet)"
+        else
+          echo "No today backup; using cache-restored files for main run"
+        fi
+    
+    - name: Verify current vs previous (delta input check)
+      run: |
+        echo "=== Delta input check: current vs previous ==="
+        if [ ! -f "character/TAKP_character_previous.txt" ] || [ ! -f "character/TAKP_character.txt" ]; then
+          echo "::warning::Missing current or previous character file - delta page may be wrong or missing."
+          exit 0
+        fi
+        if cmp -s character/TAKP_character.txt character/TAKP_character_previous.txt; then
+          echo "::error::Current and previous character files are IDENTICAL. Delta will show no real changes (or wrong data). This usually means today's data was overwritten by cache/backfill - check backup restore and cache order."
+          echo "Character file lines - current: $(wc -l < character/TAKP_character.txt) previous: $(wc -l < character/TAKP_character_previous.txt)"
+          exit 1
+        fi
+        if cmp -s inventory/TAKP_character_inventory.txt inventory/TAKP_character_inventory_previous.txt; then
+          echo "::warning::Current and previous inventory files are IDENTICAL. Inventory delta will be empty."
+        fi
+        echo "✓ Current and previous character files differ - delta comparison is valid."
     
     - name: Run spell inventory generator
       env:
