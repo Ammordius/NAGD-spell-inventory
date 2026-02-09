@@ -585,6 +585,35 @@
             saveCustomWeights();
         }
 
+        function calculateResistScore(resistValue) {
+            /**
+             * Calculate resist score with weight curve:
+             * - Full weight (1.0) up to 220
+             * - Linearly decreasing from 220 to 320 (1.0 to 0.35)
+             * - 0.35 weight from 320 to 500
+             * - 0 weight above 500
+             */
+            if (resistValue <= 0) {
+                return { score: 0.0, weight: 0.0 };
+            }
+            
+            if (resistValue <= 220) {
+                // Full weight up to 220
+                const score = (resistValue / 220.0) * 100.0;
+                return { score: score, weight: 1.0 };
+            } else if (resistValue <= 320) {
+                // Linear decrease from 220 to 320 (1.0 to 0.35)
+                const weight = 1.0 - ((resistValue - 220) / 100.0) * 0.65; // Decreases from 1.0 to 0.35
+                return { score: 100.0, weight: weight }; // Still 100% since we're at or above 220
+            } else if (resistValue <= 500) {
+                // 0.35 weight from 320 to 500
+                return { score: 100.0, weight: 0.35 };
+            } else {
+                // 0 weight above 500
+                return { score: 0.0, weight: 0.0 };
+            }
+        }
+
         function normalizeWeights(weights, focusMultiplier = 2.4) {
             const hpWeight = weights.hp_pct || 0.0;
             const focusWeights = weights.focus || {};
