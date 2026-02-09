@@ -2112,13 +2112,45 @@ def generate_delta_history(base_dir):
                 
                 // Generate HTML report
                 let reportHTML = `<h3>Date Range Report: ${start} to ${end}</h3>`;
-                reportHTML += `<p>Character Changes: ${Object.keys(charChanges).length}</p>`;
+                reportHTML += `<p style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>Note:</strong> This is a simplified client-side comparison. For accurate results, use the server-side command below.
+                    <br>Deltas only include characters that changed, so some characters may not appear if they didn't change in both dates.
+                </p>`;
+                reportHTML += `<p><strong>Character Changes Found: ${Object.keys(charChanges).length}</strong></p>`;
+                
                 if (Object.keys(charChanges).length > 0) {
-                    reportHTML += '<ul>';
-                    for (const [charName, changes] of Object.entries(charChanges)) {
-                        reportHTML += `<li>${charName}: Level ${changes.level > 0 ? '+' : ''}${changes.level}, AA ${changes.aa > 0 ? '+' : ''}${changes.aa}, HP ${changes.hp > 0 ? '+' : ''}${changes.hp}</li>`;
+                    // Sort by total change (level + AA + HP)
+                    const sortedChanges = Object.entries(charChanges).sort((a, b) => {
+                        const totalA = Math.abs(a[1].level) + Math.abs(a[1].aa) + Math.abs(a[1].hp);
+                        const totalB = Math.abs(b[1].level) + Math.abs(b[1].aa) + Math.abs(b[1].hp);
+                        return totalB - totalA;
+                    });
+                    
+                    reportHTML += '<div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px;">';
+                    reportHTML += '<ul style="list-style: none; padding: 0;">';
+                    for (const [charName, changes] of sortedChanges.slice(0, 100)) { // Show top 100
+                        const sign = (val) => val > 0 ? '+' : '';
+                        reportHTML += `<li style="padding: 5px; border-bottom: 1px solid #eee;">
+                            <strong>${charName}</strong> (${changes.class || 'Unknown'})
+                            <br>Level: ${sign(changes.level)}${changes.level} 
+                            (${changes.previous_level} → ${changes.current_level})
+                            | AA: ${sign(changes.aa)}${changes.aa} 
+                            | HP: ${sign(changes.hp)}${changes.hp}
+                        </li>`;
                     }
-                    reportHTML += '</ul>';
+                    if (sortedChanges.length > 100) {
+                        reportHTML += `<li style="padding: 5px; color: #666;">... and ${sortedChanges.length - 100} more characters</li>`;
+                    }
+                    reportHTML += '</ul></div>';
+                } else {
+                    reportHTML += `<p style="color: #666;">No character changes detected between these dates.</p>
+                    <p style="color: #666; font-size: 0.9em;">This could mean:
+                    <ul style="color: #666;">
+                        <li>No characters changed between these dates</li>
+                        <li>The dates use different baselines (baseline was reset between dates)</li>
+                        <li>Characters that changed are not in both deltas (use server-side generation for accurate results)</li>
+                    </ul>
+                    </p>`;
                 }
                 
                 outputDiv.innerHTML = reportHTML;
