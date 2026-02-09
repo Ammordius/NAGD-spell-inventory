@@ -1598,14 +1598,6 @@
                 }
             }
             
-            // FT (Flowing Thought)
-            if (scores.ft_capped === true) {
-                const ftWeight = 2.0;
-                const ftPoints = 100.0 * ftWeight;
-                totalStatPoints += ftPoints;
-                html += `<tr><td>FT (Capped)</td><td>15/15</td><td>100%</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
-            }
-            
             // Total stat points
             html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Stat Total</strong></td><td colspan="3"></td><td><strong>${totalStatPoints.toFixed(2)}</strong></td></tr>`;
             html += `</tbody></table>`;
@@ -1735,6 +1727,36 @@
                     totalFocusPoints += focusPoints;
                     
                     html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td></tr>`;
+                }
+                
+                // FT (Flowing Thought) - part of focus weight
+                if (scores.ft_capped === true) {
+                    const ftWeight = classWeightConfig.ft_weight || 0;
+                    if (ftWeight > 0) {
+                        const ftPoints = 100.0 * ftWeight;
+                        totalFocusPoints += ftPoints;
+                        html += `<tr><td>FT (Capped)</td><td>15/15</td><td>100.0%</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
+                    }
+                }
+                
+                // ATK - part of focus weight
+                if (scores.atk_pct !== undefined && scores.atk_pct !== null) {
+                    const atkWeight = focusWeights['ATK'] || 0;
+                    if (atkWeight > 0) {
+                        const atkPoints = scores.atk_pct * atkWeight;
+                        totalFocusPoints += atkPoints;
+                        html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${atkWeight.toFixed(2)}</td><td>${atkPoints.toFixed(2)}</td></tr>`;
+                    }
+                }
+                
+                // Haste - part of focus weight
+                if (scores.haste_pct !== undefined && scores.haste_pct !== null) {
+                    const hasteWeight = focusWeights['Haste'] || 0;
+                    if (hasteWeight > 0) {
+                        const hastePoints = scores.haste_pct * hasteWeight;
+                        totalFocusPoints += hastePoints;
+                        html += `<tr><td>Haste</td><td>${scores.haste_value || 'N/A'}%</td><td>${formatScore(scores.haste_pct)}</td><td>${hasteWeight.toFixed(2)}</td><td>${hastePoints.toFixed(2)}</td></tr>`;
+                    }
                 }
                 
                 // Total focus points
