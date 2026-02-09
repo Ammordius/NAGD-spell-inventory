@@ -1513,16 +1513,15 @@
             html += `<p><a href="https://www.takproject.net/magelo/character.php?char=${encodeURIComponent(char.name)}" target="_blank">View on Magelo</a></p>`;
             html += `<div class="score-breakdown">`;
             
-            // Overall Score - calculate from points to show consistency
-            const calculatedOverallTotal = totalStatPoints + totalFocusPoints;
+            // Initialize totals
+            let totalStatPoints = 0.0;
+            let totalFocusPoints = 0.0;
+            
             html += `<h3>Overall Score: ${formatScore(char.overall_score)}</h3>`;
-            html += `<p style="color: #6c757d; font-size: 0.9em;">(Calculated from points below: ${calculatedOverallTotal.toFixed(2)} points)</p>`;
             
             // Stat Scores
             html += `<h3>Stat Scores</h3>`;
             html += `<table><thead><tr><th>Stat</th><th>Value</th><th>Score %</th><th>Weight</th><th>Points</th></tr></thead><tbody>`;
-            
-            let totalStatPoints = 0.0;
             
             // HP - check for hp_pct first, then calculate if needed
             if (scores.hp !== undefined && scores.hp !== null || scores.hp_pct !== undefined) {
