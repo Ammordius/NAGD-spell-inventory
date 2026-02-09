@@ -1472,8 +1472,10 @@
             html += `<p><a href="https://www.takproject.net/magelo/character.php?char=${encodeURIComponent(char.name)}" target="_blank">View on Magelo</a></p>`;
             html += `<div class="score-breakdown">`;
             
-            // Overall Score
+            // Overall Score - calculate from points to show consistency
+            const calculatedOverallTotal = totalStatPoints + totalFocusPoints;
             html += `<h3>Overall Score: ${formatScore(char.overall_score)}</h3>`;
+            html += `<p style="color: #6c757d; font-size: 0.9em;">(Calculated from points below: ${calculatedOverallTotal.toFixed(2)} points)</p>`;
             
             // Stat Scores
             html += `<h3>Stat Scores</h3>`;
@@ -1663,8 +1665,16 @@
                     } else if (focusCat === 'Haste') {
                         weight = 1.0; // Haste is binary, weight is 1
                     } else if (focusCat === 'Warrior Focus Items' || focusCat === 'Shield of Strife' || focusCat === 'Serpent of Vindication') {
-                        // For Warriors/Pal/SK/Enchanter, use the calculated total focus weight
-                        weight = totalFocusWeight;
+                        // For Warriors/Pal/SK/Enchanter, show the RAW weight from config, not normalized
+                        // Shield of Strife should show 2.0, not the normalized 0.29
+                        if (focusCat === 'Shield of Strife') {
+                            weight = focusWeights['Shield of Strife'] || 2.0;  // Raw weight: 2.0
+                        } else if (focusCat === 'Serpent of Vindication') {
+                            weight = focusWeights['Serpent of Vindication'] || 2.0;  // Raw weight: 2.0
+                        } else {
+                            // Warrior Focus Items - use total focus weight (it's already calculated correctly)
+                            weight = totalFocusWeight;
+                        }
                         // These are binary (100 or 0), so raw value is the score
                         rawValue = score === 100 ? 100 : 0;
                     } else {
