@@ -949,22 +949,25 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             individual_resists = char.get('individual_resists', {})
             if individual_resists:
                 # Calculate individual resist scores
+                # The curve weight multiplies the base resists_weight
                 resist_scores = {}
                 total_resist_score = 0.0
                 total_resist_weight = 0.0
                 
                 for resist_type, resist_value in individual_resists.items():
-                    score, weight = calculate_resist_score(resist_value)
+                    score, curve_weight = calculate_resist_score(resist_value)
+                    # The effective weight is base resists_weight multiplied by the curve weight
+                    effective_weight = resists_weight * curve_weight
                     resist_scores[resist_type] = {
                         'value': resist_value,
                         'score': score,
-                        'weight': weight
+                        'weight': curve_weight  # Store curve weight for display, but use effective_weight in calculation
                     }
                     # Add to total (each resist contributes its weighted score)
-                    total_resist_score += score * weight
-                    total_resist_weight += weight
+                    total_resist_score += score * effective_weight
+                    total_resist_weight += effective_weight
                 
-                # Average the weighted scores (divide by number of resists that have weight)
+                # Average the weighted scores
                 if total_resist_weight > 0:
                     avg_resist_score = total_resist_score / total_resist_weight
                 else:
@@ -972,8 +975,8 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 
                 scores['resists_pct'] = avg_resist_score
                 scores['individual_resist_scores'] = resist_scores
-                total_score += avg_resist_score * resists_weight
-                total_weight += resists_weight
+                total_score += avg_resist_score * total_resist_weight
+                total_weight += total_resist_weight
             else:
                 # Fallback to total resists if individual not available
                 max_resists = class_max_values.get('max_resists', 1)
@@ -1102,22 +1105,25 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             individual_resists = char.get('individual_resists', {})
             if individual_resists:
                 # Calculate individual resist scores
+                # The curve weight multiplies the base resists_weight
                 resist_scores = {}
                 total_resist_score = 0.0
                 total_resist_weight = 0.0
                 
                 for resist_type, resist_value in individual_resists.items():
-                    score, weight = calculate_resist_score(resist_value)
+                    score, curve_weight = calculate_resist_score(resist_value)
+                    # The effective weight is base resists_weight multiplied by the curve weight
+                    effective_weight = resists_weight * curve_weight
                     resist_scores[resist_type] = {
                         'value': resist_value,
                         'score': score,
-                        'weight': weight
+                        'weight': curve_weight  # Store curve weight for display, but use effective_weight in calculation
                     }
                     # Add to total (each resist contributes its weighted score)
-                    total_resist_score += score * weight
-                    total_resist_weight += weight
+                    total_resist_score += score * effective_weight
+                    total_resist_weight += effective_weight
                 
-                # Average the weighted scores (divide by number of resists that have weight)
+                # Average the weighted scores
                 if total_resist_weight > 0:
                     avg_resist_score = total_resist_score / total_resist_weight
                 else:
@@ -1125,8 +1131,8 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 
                 scores['resists_pct'] = avg_resist_score
                 scores['individual_resist_scores'] = resist_scores
-                total_score += avg_resist_score * resists_weight
-                total_weight += resists_weight
+                total_score += avg_resist_score * total_resist_weight
+                total_weight += total_resist_weight
             else:
                 # Fallback to total resists if individual not available
                 max_resists = class_max_values.get('max_resists', 1)
