@@ -412,20 +412,57 @@ jobs:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
       run: |
         echo "Generating class rankings..."
-        # Check if spell focus data exists
-        if [ -f "../Server/spell_focii_level65.json" ] || [ -f "spell_focii_level65.json" ] || [ -f "../../Server/spell_focii_level65.json" ]; then
-          python generate_class_rankings.py || echo "Warning: Class rankings generation had issues, continuing..."
+        # Check if spell focus data exists in various locations
+        FOCUS_FILE=""
+        if [ -f "spell_focii_level65.json" ]; then
+          FOCUS_FILE="spell_focii_level65.json"
+          echo "✓ Found spell_focii_level65.json in current directory"
+        elif [ -f "../Server/spell_focii_level65.json" ]; then
+          FOCUS_FILE="../Server/spell_focii_level65.json"
+          echo "✓ Found spell_focii_level65.json in ../Server/"
+          cp "$FOCUS_FILE" spell_focii_level65.json
+        elif [ -f "../../Server/spell_focii_level65.json" ]; then
+          FOCUS_FILE="../../Server/spell_focii_level65.json"
+          echo "✓ Found spell_focii_level65.json in ../../Server/"
+          cp "$FOCUS_FILE" spell_focii_level65.json
         else
-          echo "⚠ Warning: spell_focii_level65.json not found, skipping class rankings"
+          echo "⚠ Warning: spell_focii_level65.json not found in any expected location"
+          echo "Searching for it..."
+          find . -name "spell_focii_level65.json" 2>/dev/null | head -5 || echo "Not found"
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la | head -10
+        fi
+        
+        if [ -n "$FOCUS_FILE" ] || [ -f "spell_focii_level65.json" ]; then
+          echo "Running generate_class_rankings.py..."
+          python generate_class_rankings.py
+          if [ $? -eq 0 ]; then
+            echo "✓ Class rankings generation completed successfully"
+          else
+            echo "⚠ Warning: Class rankings generation had issues (exit code: $?)"
+            echo "Continuing anyway..."
+          fi
+        else
+          echo "⚠ Error: spell_focii_level65.json not found, skipping class rankings"
           echo "Class rankings require spell focus data to function properly"
         fi
         
         # Verify class rankings were generated
         if [ -f "class_rankings.html" ] && [ -f "class_rankings.json" ]; then
           echo "✓ class_rankings.html and class_rankings.json generated successfully"
-          echo "Class rankings file size: $(wc -c < class_rankings.json) bytes"
+          echo "Class rankings HTML size: $(wc -c < class_rankings.html) bytes"
+          echo "Class rankings JSON size: $(wc -c < class_rankings.json) bytes"
+          echo "First few lines of JSON to verify structure:"
+          head -5 class_rankings.json
         else
-          echo "⚠ Warning: Class rankings files were not generated"
+          echo "⚠ Error: Class rankings files were not generated"
+          if [ ! -f "class_rankings.html" ]; then
+            echo "  - class_rankings.html is missing"
+          fi
+          if [ ! -f "class_rankings.json" ]; then
+            echo "  - class_rankings.json is missing"
+          fi
         fi
     
     - name: Verify HTML was generated
