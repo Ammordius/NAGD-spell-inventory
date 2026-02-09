@@ -635,7 +635,7 @@ CLASS_WEIGHTS = {
             'Spell Mana Efficiency': 1.0,
             'Detrimental Spell Haste': 1.0,  # Required
             'Detrimental Spell Duration': 0.75,
-            'Spell Range Extension': 1.0,  # Required
+            'Spell Range Extension': 0.5,  # Lower weight for all casters
         }
     },
     
@@ -651,7 +651,7 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'Magic': 0.5},
             'Healing Enhancement': 2.0,
             'Spell Mana Efficiency': 1.0,
-            'Spell Range Extension': 1.0,
+            'Spell Range Extension': 0.5,  # Lower weight for all casters
             'Buff Spell Duration': 1.0,
             'Beneficial Spell Haste': 1.0,
         }
@@ -670,6 +670,7 @@ CLASS_WEIGHTS = {
             'Spell Mana Efficiency': 1.0,
             'Detrimental Spell Haste': 1.0,
             'Detrimental Spell Duration': 0.75,
+            'Spell Range Extension': 0.5,  # Lower weight for all casters
         }
     },
     
@@ -686,6 +687,7 @@ CLASS_WEIGHTS = {
             'Spell Mana Efficiency': 1.0,  # det mana
             'Detrimental Spell Duration': 1.0,  # det or all e
             'Detrimental Spell Haste': 1.0,  # det spell h
+            'Spell Range Extension': 0.5,  # Lower weight for all casters
         }
     },
     
@@ -705,6 +707,7 @@ CLASS_WEIGHTS = {
             'Buff Spell Duration': 1.0,  # Bene exter
             'Detrimental Spell Duration': 1.0,  # DoT duration focus
             'All Spell Duration': 1.0,  # All duration focus (works for both)
+            'Spell Range Extension': 0.5,  # Lower weight for all casters
         }
     },
     
@@ -760,6 +763,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Haste': 0.75,
             'Detrimental Spell Duration': 0.5,  # det or all e
             'Buff Spell Duration': 1.0,  # Bene exter
+            'Spell Range Extension': 0.5,  # Lower weight for all casters
         }
     },
     
@@ -785,6 +789,7 @@ CLASS_WEIGHTS = {
         'focus': {
             'Spell Haste': 1.0,
             'Spell Mana Efficiency': 1.0,
+            'Spell Range Extension': 0.5,  # Lower weight for all casters
         }
     },
 }
