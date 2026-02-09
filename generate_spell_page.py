@@ -1223,7 +1223,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append(f'<a href="leaderboard_week_{week_start}.html" style="background-color: #2196F3;">📅 Weekly Leaderboard</a>')
     if month_start:
         nav_links.append(f'<a href="leaderboard_month_{month_start}.html" style="background-color: #9C27B0;">📆 Monthly Leaderboard</a>')
-    # Add delta history link
+    # Add delta history link (for date range queries)
     nav_links.append('<a href="delta-history.html" style="background-color: #607D8B;">📜 Delta History</a>')
     
     html += "".join(nav_links)
