@@ -626,16 +626,17 @@ jobs:
         # when it detects a new week/month, instead of large text files
         echo "Baseline JSON files will be saved by generate_spell_page.py if needed"
     
-    - name: Cache weekly/monthly baselines and delta snapshots
+    - name: Cache master baseline and delta snapshots
       uses: actions/cache@v3
+      id: cache-baseline
       with:
         path: |
-          delta_snapshots/baseline_week_*.json
-          delta_snapshots/baseline_month_*.json
-          delta_snapshots/
-        key: magelo-baselines-${{ steps.date-info.outputs.month_start }}
+          delta_snapshots/baseline_master.json.gz
+          delta_snapshots/baseline_master_*.json.gz
+          delta_snapshots/delta_daily_*.json.gz
+        key: magelo-baseline-${{ steps.date-info.outputs.month_start }}
         restore-keys: |
-          magelo-baselines-
+          magelo-baseline-
     
     - name: Cache current files for next run
       uses: actions/cache@v3
