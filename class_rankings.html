@@ -1297,14 +1297,18 @@
             
             // Stat Scores
             html += `<h3>Stat Scores</h3>`;
-            html += `<table><thead><tr><th>Stat</th><th>Value</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
+            html += `<table><thead><tr><th>Stat</th><th>Value</th><th>Score %</th><th>Weight</th><th>Points</th></tr></thead><tbody>`;
+            
+            let totalStatPoints = 0.0;
             
             // HP - check for hp_pct first, then calculate if needed
             if (scores.hp !== undefined && scores.hp !== null || scores.hp_pct !== undefined) {
                 const weight = classWeightConfig.hp_pct || 0;
                 const hpValue = char.stats.hp || 0;
                 const hpPct = scores.hp_pct !== undefined && scores.hp_pct !== null ? scores.hp_pct : 'N/A';
-                html += `<tr><td>HP</td><td>${hpValue.toLocaleString()}</td><td>${formatScore(hpPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const points = (typeof hpPct === 'number' ? hpPct : 0) * weight;
+                totalStatPoints += points;
+                html += `<tr><td>HP</td><td>${hpValue.toLocaleString()}</td><td>${formatScore(hpPct)}</td><td>${weight.toFixed(2)}</td><td>${points.toFixed(2)}</td></tr>`;
             }
             
             // Mana - check for mana_pct first
@@ -1312,7 +1316,9 @@
                 const weight = classWeightConfig.mana_pct || 0;
                 const manaValue = char.stats.mana || 0;
                 const manaPct = scores.mana_pct !== undefined && scores.mana_pct !== null ? scores.mana_pct : 'N/A';
-                html += `<tr><td>Mana</td><td>${manaValue.toLocaleString()}</td><td>${formatScore(manaPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const points = (typeof manaPct === 'number' ? manaPct : 0) * weight;
+                totalStatPoints += points;
+                html += `<tr><td>Mana</td><td>${manaValue.toLocaleString()}</td><td>${formatScore(manaPct)}</td><td>${weight.toFixed(2)}</td><td>${points.toFixed(2)}</td></tr>`;
             }
             
             // AC - check for ac_pct first
@@ -1320,13 +1326,18 @@
                 const weight = classWeightConfig.ac_pct || 0;
                 const acValue = scores.ac !== undefined && scores.ac !== null ? scores.ac : (char.stats.ac || 0);
                 const acPct = scores.ac_pct !== undefined && scores.ac_pct !== null ? scores.ac_pct : 'N/A';
-                html += `<tr><td>AC</td><td>${acValue.toLocaleString()}</td><td>${formatScore(acPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const points = (typeof acPct === 'number' ? acPct : 0) * weight;
+                totalStatPoints += points;
+                html += `<tr><td>AC</td><td>${acValue.toLocaleString()}</td><td>${formatScore(acPct)}</td><td>${weight.toFixed(2)}</td><td>${points.toFixed(2)}</td></tr>`;
             }
             
             // ATK
             if (scores.atk_pct !== undefined && scores.atk_pct !== null) {
                 const weight = classWeightConfig.atk_pct || 0;
-                html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                const atkPct = scores.atk_pct;
+                const points = atkPct * weight;
+                totalStatPoints += points;
+                html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${weight.toFixed(2)}</td><td>${points.toFixed(2)}</td></tr>`;
             }
             
             // Resists - show individual resists if available and advanced mode is on
@@ -1335,30 +1346,39 @@
                 const resistsValue = scores.resists !== undefined && scores.resists !== null ? scores.resists : 0;
                 const resistsPct = scores.resists_pct !== undefined && scores.resists_pct !== null ? scores.resists_pct : 'N/A';
                 
+                const resistsPoints = (typeof resistsPct === 'number' ? resistsPct : 0) * weight;
+                totalStatPoints += resistsPoints;
+                
                 // Show individual resists if available
                 const individualResistScores = scores.individual_resist_scores;
                 if (individualResistScores && Object.keys(individualResistScores).length > 0) {
-                    html += `<tr><td colspan="4"><strong>Resists (Advanced)</strong></td></tr>`;
+                    html += `<tr><td colspan="5"><strong>Resists (Advanced)</strong></td></tr>`;
                     const resistTypes = ['MR', 'FR', 'CR', 'DR', 'PR'];
                     let totalRawValue = 0;
                     resistTypes.forEach(resistType => {
                         const resistData = individualResistScores[resistType];
                         if (resistData) {
                             totalRawValue += resistData.value;
-                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${resistData.weight.toFixed(2)}</td></tr>`;
+                            const resistPoints = resistData.score * resistData.weight;
+                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${resistData.weight.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
                         }
                     });
-                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td></tr>`;
+                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td><td><strong>${resistsPoints.toFixed(2)}</strong></td></tr>`;
                 } else {
-                    html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${weight.toFixed(2)}</td></tr>`;
+                    html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${weight.toFixed(2)}</td><td>${resistsPoints.toFixed(2)}</td></tr>`;
                 }
             }
             
             // FT (Flowing Thought)
             if (scores.ft_capped === true) {
-                html += `<tr><td>FT (Capped)</td><td>15/15</td><td>100%</td><td>2.0</td></tr>`;
+                const ftWeight = 2.0;
+                const ftPoints = 100.0 * ftWeight;
+                totalStatPoints += ftPoints;
+                html += `<tr><td>FT (Capped)</td><td>15/15</td><td>100%</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
             }
             
+            // Total stat points
+            html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Stat Total</strong></td><td colspan="3"></td><td><strong>${totalStatPoints.toFixed(2)}</strong></td></tr>`;
             html += `</tbody></table>`;
             
             // Focus Scores
@@ -1369,9 +1389,11 @@
             const charSpellHasteCats = char.spell_haste_cats || {};
             const charDurationCats = char.duration_cats || {};
             
+            let totalFocusPoints = 0.0;
+            
             if (Object.keys(focusScores).length > 0) {
                 html += `<h3>Focus Scores</h3>`;
-                html += `<table><thead><tr><th>Focus</th><th>Raw Value</th><th>Score %</th><th>Weight</th></tr></thead><tbody>`;
+                html += `<table><thead><tr><th>Focus</th><th>Raw Value</th><th>Score %</th><th>Weight</th><th>Points</th></tr></thead><tbody>`;
                 
                 // For Warriors/Pal/SK, calculate focus weight as 2.4x HP weight (after normalization)
                 // For other classes, use the focus weights from config
