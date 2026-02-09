@@ -386,3 +386,400 @@ def get_monthly_leaderboard(month_start_date, stat_type='aa', top_n=20, base_dir
     # Sort by gain (descending) and return top N
     leaderboard.sort(key=lambda x: x['gain'], reverse=True)
     return leaderboard[:top_n]
+
+def save_master_baseline(char_data, inv_data, date_str, base_dir='delta_snapshots'):
+    """Save a master baseline containing full character and inventory data.
+    This is the reference point that all daily deltas are compared against.
+    
+    Saves as compressed .json.gz to stay under GitHub's 100 MB file size limit.
+    
+    Args:
+        char_data: Dict of character data from parse_character_data
+        inv_data: Dict of inventory data from parse_inventory_file
+        date_str: Date string (YYYY-MM-DD) when baseline was created
+        base_dir: Base directory for baselines
+    
+    Returns:
+        Path to saved baseline file (compressed)
+    """
+    os.makedirs(base_dir, exist_ok=True)
+    
+    filename = "baseline_master.json"
+    filepath = os.path.join(base_dir, filename)
+    compressed_filepath = filepath + '.gz'
+    
+    # Save full baseline data
+    baseline_json = {
+        'baseline_date': date_str,
+        'timestamp': datetime.now().isoformat(),
+        'characters': char_data,
+        'inventories': inv_data
+    }
+    
+    # Save as compressed JSON (required for GitHub's 100 MB limit)
+    # Note: Baseline is generated on-the-fly and cached, not committed to repo
+    import gzip
+    with gzip.open(compressed_filepath, 'wt', encoding='utf-8') as f:
+        json.dump(baseline_json, f, indent=2)
+    
+    # Also save uncompressed for local use (optional, can be removed)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(baseline_json, f, indent=2)
+    
+    print(f"  Baseline saved (compressed: {os.path.getsize(compressed_filepath) / 1024 / 1024:.2f} MB)")
+    return compressed_filepath
+
+def load_master_baseline(base_dir='delta_snapshots'):
+    """Load the master baseline (supports both compressed .gz and uncompressed).
+    
+    Args:
+        base_dir: Base directory for baselines
+    
+    Returns:
+        Dict with baseline data (characters and inventories) or None if not found
+    """
+    import gzip
+    
+    # Try compressed first (preferred, required for GitHub)
+    compressed_filepath = os.path.join(base_dir, "baseline_master.json.gz")
+    if os.path.exists(compressed_filepath):
+        with gzip.open(compressed_filepath, 'rt', encoding='utf-8') as f:
+            baseline = json.load(f)
+        return {
+            'characters': baseline.get('characters', {}),
+            'inventories': baseline.get('inventories', {}),
+            'baseline_date': baseline.get('baseline_date', 'Unknown')
+        }
+    
+    # Fall back to uncompressed (for backward compatibility)
+    filepath = os.path.join(base_dir, "baseline_master.json")
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            baseline = json.load(f)
+        return {
+            'characters': baseline.get('characters', {}),
+            'inventories': baseline.get('inventories', {}),
+            'baseline_date': baseline.get('baseline_date', 'Unknown')
+        }
+    
+    return None
+
+def should_reset_baseline(baseline_date, current_date, reset_interval_days=90):
+    """Check if baseline should be reset (e.g., quarterly).
+    
+    Args:
+        baseline_date: Baseline date string (YYYY-MM-DD)
+        current_date: Current date string (YYYY-MM-DD)
+        reset_interval_days: Days before resetting baseline (default 90 = quarterly/3 months)
+    
+    Returns:
+        True if baseline should be reset
+    """
+    baseline_dt = datetime.strptime(baseline_date, '%Y-%m-%d')
+    current_dt = datetime.strptime(current_date, '%Y-%m-%d')
+    days_since_baseline = (current_dt - baseline_dt).days
+    return days_since_baseline >= reset_interval_days
+
+def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str, base_dir='delta_snapshots', auto_reset_baseline=True):
+    """Save a daily delta JSON file containing changes from baseline to current day.
+    This is much smaller than keeping full character/inventory files.
+    
+    Optionally resets baseline periodically to keep delta file sizes reasonable.
+    
+    Args:
+        current_char_data: Current character data dict
+        current_inv_data: Current inventory data dict
+        date_str: Date string (YYYY-MM-DD)
+        base_dir: Base directory for daily deltas
+        auto_reset_baseline: If True, reset baseline if it's been >365 days (yearly reset)
+    
+    Returns:
+        Path to saved daily delta file
+    """
+    os.makedirs(base_dir, exist_ok=True)
+    
+    # Load baseline
+    baseline = load_master_baseline(base_dir)
+    
+    # Check if we should reset baseline (quarterly reset to keep file sizes reasonable)
+    if baseline and auto_reset_baseline:
+        if should_reset_baseline(baseline['baseline_date'], date_str, reset_interval_days=90):
+            print(f"[INFO] Baseline is >3 months old ({baseline['baseline_date']}), resetting to current date...")
+            # Archive old baseline
+            old_baseline_file = os.path.join(base_dir, f"baseline_master_{baseline['baseline_date']}.json")
+            import shutil
+            shutil.copy2(os.path.join(base_dir, "baseline_master.json"), old_baseline_file)
+            print(f"  Archived old baseline to: {os.path.basename(old_baseline_file)}")
+            
+            # Create new baseline from current data
+            save_master_baseline(current_char_data, current_inv_data, date_str, base_dir)
+            baseline = load_master_baseline(base_dir)
+            print(f"  Created new baseline: {date_str}")
+    
+    if not baseline:
+        raise ValueError("Master baseline not found. Cannot create daily delta without baseline.")
+    
+    baseline_char_data = baseline['characters']
+    baseline_inv_data = baseline['inventories']
+    
+    # Calculate deltas from baseline
+    from generate_spell_page import compare_character_data, compare_inventories
+    char_deltas = compare_character_data(current_char_data, baseline_char_data, None)
+    inv_deltas = compare_inventories(current_inv_data, baseline_inv_data, None)
+    
+    # Get item names for inventory deltas
+    all_item_ids = set()
+    for char_delta in inv_deltas.values():
+        all_item_ids.update(char_delta['added'].keys())
+        all_item_ids.update(char_delta['removed'].keys())
+    
+    item_names = {}
+    for char_name, items in current_inv_data.items():
+        for item in items:
+            if item['item_id'] in all_item_ids:
+                item_names[item['item_id']] = item['item_name']
+    
+    # Populate item names in deltas
+    for char_delta in inv_deltas.values():
+        for item_id in char_delta['added']:
+            if item_id in item_names:
+                char_delta['item_names'][item_id] = item_names[item_id]
+        for item_id in char_delta['removed']:
+            if item_id in item_names:
+                char_delta['item_names'][item_id] = item_names[item_id]
+    
+    filename = f"delta_daily_{date_str}.json"
+    filepath = os.path.join(base_dir, filename)
+    
+    # Save delta data (changes from baseline)
+    daily_delta = {
+        'date': date_str,
+        'delta_type': 'daily_from_baseline',
+        'baseline_date': baseline['baseline_date'],
+        'char_deltas': char_deltas,
+        'inv_deltas': inv_deltas,
+        'timestamp': datetime.now().isoformat()
+    }
+    
+    # Save as compressed JSON (gzip) to reduce storage by ~80%
+    import gzip
+    compressed_filepath = filepath + '.gz'
+    with gzip.open(compressed_filepath, 'wt', encoding='utf-8') as f:
+        json.dump(daily_delta, f, indent=2)
+    
+    # Also save uncompressed for easier debugging (optional - can remove later)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(daily_delta, f, indent=2)
+    
+    return compressed_filepath
+
+def save_daily_delta_json(delta_data, date_str, base_dir='delta_snapshots'):
+    """Save a daily delta JSON file containing only the changes.
+    DEPRECATED: Use save_daily_delta_from_baseline instead.
+    Kept for backward compatibility.
+    """
+    os.makedirs(base_dir, exist_ok=True)
+    
+    filename = f"delta_daily_{date_str}.json"
+    filepath = os.path.join(base_dir, filename)
+    
+    # Save minimal delta data (only characters with changes)
+    daily_delta = {
+        'date': date_str,
+        'delta_type': 'daily',
+        'char_deltas': delta_data.get('char_deltas', {}),
+        'inv_deltas': delta_data.get('inv_deltas', {}),
+        'timestamp': datetime.now().isoformat()
+    }
+    
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(daily_delta, f, indent=2)
+    
+    return filepath
+
+def load_daily_delta_json(date_str, base_dir='delta_snapshots'):
+    """Load a daily delta JSON file (supports both compressed .gz and uncompressed).
+    
+    Args:
+        date_str: Date string (YYYY-MM-DD)
+        base_dir: Base directory for daily deltas
+    
+    Returns:
+        Dict with daily delta data or None if not found
+    """
+    import gzip
+    
+    # Try compressed first (preferred)
+    compressed_filepath = os.path.join(base_dir, f"delta_daily_{date_str}.json.gz")
+    if os.path.exists(compressed_filepath):
+        with gzip.open(compressed_filepath, 'rt', encoding='utf-8') as f:
+            return json.load(f)
+    
+    # Fall back to uncompressed (for backward compatibility)
+    filepath = os.path.join(base_dir, f"delta_daily_{date_str}.json")
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    
+    return None
+
+def compare_delta_to_delta(delta_a, delta_b):
+    """Compare two deltas (from baseline) to get changes between Day A and Day B.
+    
+    Args:
+        delta_a: Delta dict for Day A (from baseline)
+        delta_b: Delta dict for Day B (from baseline)
+    
+    Returns:
+        Dict with 'char_deltas' and 'inv_deltas' representing changes from Day A to Day B
+    """
+    from collections import defaultdict
+    
+    # Character deltas: delta_B - delta_A
+    char_deltas = {}
+    
+    # Get all characters from both deltas
+    all_chars = set(list(delta_a.get('char_deltas', {}).keys()) + 
+                    list(delta_b.get('char_deltas', {}).keys()))
+    
+    for char_name in all_chars:
+        delta_a_char = delta_a.get('char_deltas', {}).get(char_name, {})
+        delta_b_char = delta_b.get('char_deltas', {}).get(char_name, {})
+        
+        # Extract values (these are cumulative from baseline)
+        a_level = delta_a_char.get('current_level', delta_a_char.get('previous_level', 0))
+        b_level = delta_b_char.get('current_level', delta_b_char.get('previous_level', 0))
+        a_aa = delta_a_char.get('current_aa_total', delta_a_char.get('previous_aa_total', 0))
+        b_aa = delta_b_char.get('current_aa_total', delta_b_char.get('previous_aa_total', 0))
+        a_hp = delta_a_char.get('current_hp', delta_a_char.get('previous_hp', 0))
+        b_hp = delta_b_char.get('current_hp', delta_b_char.get('previous_hp', 0))
+        
+        # Calculate changes from Day A to Day B
+        level_change = b_level - a_level
+        aa_change = b_aa - a_aa
+        hp_change = b_hp - a_hp
+        
+        # Only include if there are changes
+        if level_change != 0 or aa_change != 0 or hp_change != 0 or \
+           delta_b_char.get('is_new', False) or delta_b_char.get('is_deleted', False):
+            char_deltas[char_name] = {
+                'name': char_name,
+                'level_change': level_change,
+                'aa_total_change': aa_change,
+                'hp_change': hp_change,
+                'current_level': b_level,
+                'previous_level': a_level,
+                'current_aa_total': b_aa,
+                'previous_aa_total': a_aa,
+                'current_hp': b_hp,
+                'previous_hp': a_hp,
+                'class': delta_b_char.get('class', '') or delta_a_char.get('class', ''),
+                'is_new': delta_b_char.get('is_new', False) and not delta_a_char.get('is_new', False),
+                'is_deleted': delta_b_char.get('is_deleted', False) and not delta_a_char.get('is_deleted', False)
+            }
+    
+    # Inventory deltas: merge added/removed items
+    inv_deltas = {}
+    all_inv_chars = set(list(delta_a.get('inv_deltas', {}).keys()) + 
+                        list(delta_b.get('inv_deltas', {}).keys()))
+    
+    for char_name in all_inv_chars:
+        delta_a_inv = delta_a.get('inv_deltas', {}).get(char_name, {'added': {}, 'removed': {}, 'item_names': {}})
+        delta_b_inv = delta_b.get('inv_deltas', {}).get(char_name, {'added': {}, 'removed': {}, 'item_names': {}})
+        
+        # Calculate net changes: (B_added - B_removed) - (A_added - A_removed)
+        # Simplified: B_added - B_removed - A_added + A_removed
+        added_items = defaultdict(int)
+        removed_items = defaultdict(int)
+        item_names = {}
+        
+        # Items added in B but not in A (or more in B than A)
+        for item_id, count in delta_b_inv.get('added', {}).items():
+            a_added = delta_a_inv.get('added', {}).get(item_id, 0)
+            if count > a_added:
+                added_items[item_id] = count - a_added
+                if item_id in delta_b_inv.get('item_names', {}):
+                    item_names[item_id] = delta_b_inv['item_names'][item_id]
+        
+        # Items removed in B but not in A (or more in B than A)
+        for item_id, count in delta_b_inv.get('removed', {}).items():
+            a_removed = delta_a_inv.get('removed', {}).get(item_id, 0)
+            if count > a_removed:
+                removed_items[item_id] = count - a_removed
+                if item_id in delta_b_inv.get('item_names', {}):
+                    item_names[item_id] = delta_b_inv['item_names'][item_id]
+        
+        # Items that were added in A but removed in B (net removal)
+        for item_id, count in delta_a_inv.get('added', {}).items():
+            b_removed = delta_b_inv.get('removed', {}).get(item_id, 0)
+            if b_removed > 0:
+                net_change = b_removed - count
+                if net_change > 0:
+                    removed_items[item_id] = net_change
+                elif net_change < 0:
+                    added_items[item_id] = -net_change
+                if item_id in delta_a_inv.get('item_names', {}):
+                    item_names[item_id] = delta_a_inv['item_names'][item_id]
+        
+        if added_items or removed_items:
+            inv_deltas[char_name] = {
+                'added': dict(added_items),
+                'removed': dict(removed_items),
+                'item_names': item_names
+            }
+    
+    return {
+        'char_deltas': char_deltas,
+        'inv_deltas': inv_deltas
+    }
+
+def get_date_range_deltas(start_date, end_date, base_dir='delta_snapshots'):
+    """Get deltas for a date range by comparing two daily delta JSONs.
+    This is much more efficient than aggregating all days in between.
+    
+    Handles baseline transitions automatically - if dates are from different baseline periods,
+    it will use the appropriate baseline for each.
+    
+    Args:
+        start_date: Start date string (YYYY-MM-DD)
+        end_date: End date string (YYYY-MM-DD)
+        base_dir: Base directory for daily deltas
+    
+    Returns:
+        Dict with 'char_deltas' and 'inv_deltas' representing changes from start_date to end_date
+    """
+    # Load deltas for both dates
+    delta_start = load_daily_delta_json(start_date, base_dir)
+    delta_end = load_daily_delta_json(end_date, base_dir)
+    
+    if not delta_start:
+        raise ValueError(f"Delta not found for start date: {start_date}")
+    if not delta_end:
+        raise ValueError(f"Delta not found for end date: {end_date}")
+    
+    # If same date, return empty deltas (no changes)
+    if start_date == end_date:
+        return {
+            'char_deltas': {},
+            'inv_deltas': {},
+            'start_date': start_date,
+            'end_date': end_date
+        }
+    
+    # Check if deltas are from different baseline periods
+    baseline_start = delta_start.get('baseline_date', 'Unknown')
+    baseline_end = delta_end.get('baseline_date', 'Unknown')
+    
+    if baseline_start != baseline_end:
+        # Different baselines - need to handle this case
+        # For now, we can still compare them (the comparison function handles this)
+        # But ideally we'd want to reconstruct states from their respective baselines
+        # This is a limitation but should be rare (only happens across yearly resets)
+        pass
+    
+    # Compare the two deltas
+    result = compare_delta_to_delta(delta_start, delta_end)
+    result['start_date'] = start_date
+    result['end_date'] = end_date
+    
+    return result

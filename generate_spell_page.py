@@ -12,7 +12,10 @@ from delta_storage import (
     save_delta_snapshot, load_delta_snapshot,
     get_week_start, get_month_start,
     get_weekly_leaderboard, get_monthly_leaderboard,
-    save_baseline_json
+    save_baseline_json, save_daily_delta_json, get_date_range_deltas,
+    save_master_baseline, load_master_baseline,
+    save_daily_delta_from_baseline, compare_delta_to_delta,
+    load_daily_delta_json
 )
 
 # Character names to look for
@@ -916,15 +919,18 @@ def compare_inventories(current_inv, previous_inv, character_list=None):
     return item_deltas
 
 def generate_delta_html(current_char_data, previous_char_data, current_inv, previous_inv, 
-                        magelo_update_date, serverwide=True):
+                        magelo_update_date, serverwide=True, char_deltas=None, inv_deltas=None):
     """Generate HTML page showing deltas between current and previous magelo dump.
-    If serverwide is True, compares all characters, otherwise only mules."""
+    If serverwide is True, compares all characters, otherwise only mules.
+    If char_deltas and inv_deltas are provided, uses those instead of recalculating."""
     
-    # Compare character data (serverwide)
-    char_deltas = compare_character_data(current_char_data, previous_char_data, None if serverwide else None)
+    # Compare character data (serverwide) if not provided
+    if char_deltas is None:
+        char_deltas = compare_character_data(current_char_data, previous_char_data, None if serverwide else None)
     
-    # Compare inventories (serverwide)
-    inv_deltas = compare_inventories(current_inv, previous_inv, None if serverwide else None)
+    # Compare inventories (serverwide) if not provided
+    if inv_deltas is None:
+        inv_deltas = compare_inventories(current_inv, previous_inv, None if serverwide else None)
     
     # Get item names for inventory deltas
     all_item_ids = set()
@@ -1640,25 +1646,106 @@ def generate_leaderboard_html(period_name, aa_leaderboard, hp_leaderboard, perio
 """
     return html
 
-def generate_delta_history(base_dir, deploy_dir=None):
-    """Generate a history page listing all available historical delta reports."""
+def generate_date_range_delta_html(start_date, end_date, base_dir='delta_snapshots', magelo_update_date='Unknown'):
+    """Generate HTML for a date range delta by loading and aggregating daily delta JSONs.
+    
+    Args:
+        start_date: Start date string (YYYY-MM-DD)
+        end_date: End date string (YYYY-MM-DD)
+        base_dir: Base directory for daily delta JSONs
+        magelo_update_date: Magelo update date string for display
+    
+    Returns:
+        HTML string for the date range delta page
+    """
+    # Load and aggregate deltas for the date range
+    range_deltas = get_date_range_deltas(start_date, end_date, base_dir)
+    
+    if not range_deltas or (not range_deltas.get('char_deltas') and not range_deltas.get('inv_deltas')):
+        return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Date Range Delta Report</title>
+</head>
+<body>
+    <h1>TAKP Date Range Delta Report</h1>
+    <p>No delta data found for date range: {start_date} to {end_date}</p>
+    <p>This may be because daily delta JSON files are not available for this date range.</p>
+</body>
+</html>"""
+    
+    # Use the existing generate_delta_html function but we need to reconstruct
+    # the "current" and "previous" data structures from the aggregated deltas
+    # For now, we'll create a simplified version that shows the aggregated changes
+    
+    # Reconstruct character data from deltas (approximate)
+    current_char_data = {}
+    previous_char_data = {}
+    for char_name, delta in range_deltas['char_deltas'].items():
+        current_char_data[char_name] = {
+            'level': delta.get('current_level', 0),
+            'aa_unspent': 0,  # We don't track unspent/spent separately in deltas
+            'aa_spent': 0,
+            'aa_total': delta.get('current_aa_total', 0),
+            'hp_max_total': delta.get('current_hp', 0),
+            'class': delta.get('class', '')
+        }
+        previous_char_data[char_name] = {
+            'level': delta.get('previous_level', 0),
+            'aa_unspent': 0,
+            'aa_spent': 0,
+            'aa_total': delta.get('previous_aa_total', 0),
+            'hp_max_total': delta.get('previous_hp', 0),
+            'class': delta.get('class', '')
+        }
+    
+    # Generate HTML using the existing function
+    # Note: We pass empty inventories since we're focusing on character changes
+    # Inventory changes are shown separately in the aggregated deltas
+    html = generate_delta_html(
+        current_char_data, previous_char_data,
+        {}, {},  # Empty inventories - inventory deltas handled separately
+        magelo_update_date,
+        serverwide=True,
+        char_deltas=range_deltas['char_deltas'],
+        inv_deltas=range_deltas['inv_deltas']
+    )
+    
+    # Add a header note about the date range
+    header_note = f"""
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 5px solid #2196F3;">
+        <h2 style="margin-top: 0; color: #1976D2;">Date Range: {start_date} to {end_date}</h2>
+        <p>This report shows aggregated changes across {start_date} to {end_date}, reconstructed from daily delta JSON files.</p>
+        <p><strong>Note:</strong> This is a reconstructed view. For the most recent daily changes, see the <a href="delta.html">current delta report</a>.</p>
+    </div>
+"""
+    
+    # Insert the header note after the opening container div
+    html = html.replace('<div class="container">', '<div class="container">' + header_note)
+    
+    return html
+
+def generate_delta_history(base_dir):
+    """Generate a history page listing all available daily delta JSON files.
+    Allows generating date-to-date delta comparisons on demand."""
     import glob
     import re
     
-    # Find all delta_YYYY-MM-DD.html files in base_dir and deploy_dir
+    # Find all daily delta JSON files
+    delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
     delta_files = []
-    delta_files.extend(glob.glob(os.path.join(base_dir, "delta_*.html")))
-    if deploy_dir and os.path.exists(deploy_dir):
-        delta_files.extend(glob.glob(os.path.join(deploy_dir, "delta_*.html")))
     
-    # Remove duplicates (in case same file exists in both)
-    delta_files = list(set(delta_files))
+    if os.path.exists(delta_snapshots_dir):
+        # Find all delta_daily_YYYY-MM-DD.json files
+        delta_files.extend(glob.glob(os.path.join(delta_snapshots_dir, "delta_daily_*.json")))
     
     # Extract dates from filenames and sort
     delta_entries = []
     for filepath in delta_files:
         filename = os.path.basename(filepath)
-        match = re.match(r'delta_(\d{4}-\d{2}-\d{2})\.html', filename)
+        match = re.match(r'delta_daily_(\d{4}-\d{2}-\d{2})\.json', filename)
         if match:
             date_str = match.group(1)
             try:
@@ -1667,6 +1754,7 @@ def generate_delta_history(base_dir, deploy_dir=None):
                     'date': date_str,
                     'date_formatted': dt.strftime('%B %d, %Y'),
                     'filename': filename,
+                    'filepath': filepath,
                     'timestamp': os.path.getmtime(filepath)
                 })
             except:
@@ -1675,13 +1763,13 @@ def generate_delta_history(base_dir, deploy_dir=None):
     # Sort by date (newest first)
     delta_entries.sort(key=lambda x: x['date'], reverse=True)
     
-    # Generate HTML
+    # Generate HTML with date-to-date comparison interface
     html = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TAKP Delta History</title>
+    <title>TAKP Delta History & Date Range Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1703,6 +1791,12 @@ def generate_delta_history(base_dir, deploy_dir=None):
             border-bottom: 3px solid #667eea;
             padding-bottom: 10px;
         }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
         .nav-links {
             margin: 20px 0;
             padding: 15px;
@@ -1718,34 +1812,44 @@ def generate_delta_history(base_dir, deploy_dir=None):
         .nav-links a:hover {
             text-decoration: underline;
         }
-        .delta-list {
-            margin-top: 30px;
-        }
-        .delta-entry {
-            padding: 15px;
-            margin: 10px 0;
-            background: #f9f9f9;
-            border-left: 4px solid #667eea;
+        .date-range-form {
+            background: #e8f4f8;
+            padding: 20px;
             border-radius: 5px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 20px 0;
         }
-        .delta-entry:hover {
-            transform: translateX(5px);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .date-range-form h3 {
+            margin-top: 0;
+            color: #1976D2;
         }
-        .delta-entry a {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 1.1em;
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            width: 200px;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
             font-weight: bold;
         }
-        .delta-entry a:hover {
-            text-decoration: underline;
-        }
-        .delta-date {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 5px;
+        .form-group button:hover {
+            background: #45a049;
         }
         .stats {
             margin: 20px 0;
@@ -1756,38 +1860,145 @@ def generate_delta_history(base_dir, deploy_dir=None):
         .stats strong {
             color: #667eea;
         }
+        .delta-list {
+            margin-top: 30px;
+        }
+        .delta-entry {
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delta-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .delta-date strong {
+            color: #333;
+        }
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info-box strong {
+            color: #856404;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📜 TAKP Delta Report History</h1>
+        <h1>📜 TAKP Delta History & Date Range Generator</h1>
         <div class="nav-links">
             <a href="delta.html">← Current Delta Report</a>
-            <a href="index.html">← Spell Inventory</a>
+            <a href="spell_inventory.html">← Spell Inventory</a>
         </div>
+        
+        <div class="info-box">
+            <strong>ℹ️ How it works:</strong> Historical deltas are stored as JSON files (much smaller than HTML). 
+            Use the form below to generate a date-to-date comparison report for any date range. 
+            The report will be reconstructed from daily delta JSONs on demand.
+        </div>
+        
+        <div class="date-range-form">
+            <h3>Generate Date-to-Date Delta Report</h3>
+            <p>Select start and end dates, then use the generated command to create a date range report:</p>
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end" required>
+            </div>
+            <div class="form-group">
+                <div id="command_output" style="background: white; padding: 10px; border-radius: 4px; font-family: monospace; margin-top: 10px; display: none;">
+                    <strong>Run this command:</strong><br>
+                    <code id="command_text"></code>
+                </div>
+                <button type="button" onclick="generateCommand()">Generate Command</button>
+            </div>
+        </div>
+        
         <div class="stats">
-            <strong>Total Historical Reports:</strong> """ + str(len(delta_entries)) + """
+            <strong>Available Daily Delta JSON Files:</strong> """ + str(len(delta_entries)) + """
+            <br><small>These JSON files contain daily changes and can be used to reconstruct any date range.</small>
         </div>
+        
         <div class="delta-list">
+            <h2>Available Dates</h2>
 """
     
     if delta_entries:
-        html += "            <h2>Available Delta Reports</h2>\n"
-        for entry in delta_entries:
+        # Show date range suggestions with instructions
+        if len(delta_entries) >= 2:
+            oldest_date = delta_entries[-1]['date']
+            newest_date = delta_entries[0]['date']
+            last7_start = delta_entries[-7]['date'] if len(delta_entries) >= 7 else oldest_date
+            last30_start = delta_entries[-30]['date'] if len(delta_entries) >= 30 else oldest_date
             html += f"""
-            <div class="delta-entry">
-                <a href="{entry['filename']}">{entry['date_formatted']}</a>
-                <div class="delta-date">Date: {entry['date']}</div>
+            <div class="info-box" style="background: #d1ecf1; border-left-color: #0c5460;">
+                <strong>Quick Commands:</strong> (Run these to generate common date range reports)
+                <div style="margin-top: 10px; font-family: monospace; font-size: 0.9em;">
+                    <div>Full Range: <code>python generate_spell_page.py --date-range {oldest_date} {newest_date}</code></div>
+                    <div>Last 7 Days: <code>python generate_spell_page.py --date-range {last7_start} {newest_date}</code></div>
+                    <div>Last 30 Days: <code>python generate_spell_page.py --date-range {last30_start} {newest_date}</code></div>
+                </div>
             </div>
 """
+        
+        html += "            <p>Click on a date to use it in the date range form above:</p>\n"
+        html += "            <div style='display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;'>\n"
+        for entry in delta_entries:
+            html += f"""
+                <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
+                     onclick="document.getElementById('start_date').value='{entry['date']}'; document.getElementById('end_date').value='{entry['date']}';">
+                    <strong>{entry['date_formatted']}</strong>
+                    <div class="delta-date">{entry['date']}</div>
+                </div>
+"""
+        html += "            </div>\n"
     else:
         html += """
-            <p>No historical delta reports found yet. Historical reports will appear here once they are generated.</p>
+            <p>No daily delta JSON files found yet. Daily deltas will appear here once they are generated.</p>
+            <p><em>Note: Daily delta JSONs are automatically saved when the delta report is generated.</em></p>
 """
     
     html += """
         </div>
     </div>
+    <script>
+        // Set default dates (today and 7 days ago)
+        const today = new Date().toISOString().split('T')[0];
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        const weekAgoStr = weekAgo.toISOString().split('T')[0];
+        
+        document.getElementById('end_date').value = today;
+        document.getElementById('start_date').value = weekAgoStr;
+        
+        function generateCommand() {
+            const start = document.getElementById('start_date').value;
+            const end = document.getElementById('end_date').value;
+            if (start && end) {
+                const cmd = `python generate_spell_page.py --date-range ${start} ${end}`;
+                document.getElementById('command_text').textContent = cmd;
+                document.getElementById('command_output').style.display = 'block';
+            } else {
+                alert('Please select both start and end dates');
+            }
+        }
+        
+        // Auto-update command when dates change
+        document.getElementById('start_date').addEventListener('change', generateCommand);
+        document.getElementById('end_date').addEventListener('change', generateCommand);
+    </script>
 </body>
 </html>
 """
@@ -1816,6 +2027,56 @@ def find_latest_magelo_file(directory, pattern=None):
     # Return the most recently modified file
     files.sort(key=lambda x: x[1], reverse=True)
     return files[0][0]
+
+def parse_date_from_filename(filename):
+    """Parse date from filename like '2_6_26.txt' -> (month, day, year).
+    Returns (month, day, year) tuple or None if not parseable."""
+    import re
+    basename = os.path.basename(filename)
+    # Match pattern M_D_YY.txt or M_D_YYYY.txt
+    match = re.match(r'(\d+)_(\d+)_(\d+)\.txt', basename)
+    if match:
+        month = int(match.group(1))
+        day = int(match.group(2))
+        year = int(match.group(3))
+        # Handle 2-digit years (assume 2000-2099)
+        if year < 100:
+            year += 2000
+        return (month, day, year)
+    return None
+
+def get_yesterday_filename(current_filename):
+    """Given a current filename like '2_6_26.txt', return yesterday's filename.
+    Returns None if date cannot be parsed."""
+    date_tuple = parse_date_from_filename(current_filename)
+    if date_tuple is None:
+        return None
+    
+    month, day, year = date_tuple
+    try:
+        from datetime import datetime, timedelta
+        current_date = datetime(year, month, day)
+        yesterday = current_date - timedelta(days=1)
+        # Format as M_D_YY (2-digit year)
+        yesterday_filename = f"{yesterday.month}_{yesterday.day}_{yesterday.year % 100}.txt"
+        return yesterday_filename
+    except (ValueError, OverflowError):
+        return None
+
+def find_yesterday_file(current_file, directory):
+    """Find yesterday's file based on current file's date.
+    Returns filepath if found, None otherwise."""
+    if current_file is None:
+        return None
+    
+    yesterday_filename = get_yesterday_filename(current_file)
+    if yesterday_filename is None:
+        return None
+    
+    yesterday_filepath = os.path.join(directory, yesterday_filename)
+    if os.path.exists(yesterday_filepath):
+        return yesterday_filepath
+    return None
 
 def main():
     # File paths
@@ -1904,29 +2165,48 @@ def main():
         f.write(html)
     
     # Try to generate delta page if previous day's files exist
-    # For prototyping, check for specific files first
+    # Priority: 1) Yesterday's dated file, 2) _previous files, 3) prototype files
     previous_char_file = None
     previous_inv_file = None
+    current_char_file = char_file
+    current_inv_file = inv_file
     
-    # Check for prototype files first
-    proto_prev_char = os.path.join(char_dir, "1_14_24.txt")
-    proto_prev_inv = os.path.join(inv_dir, "1_14_24.txt")
-    proto_curr_char = os.path.join(char_dir, "1_17_24.txt")
-    proto_curr_inv = os.path.join(inv_dir, "1_17_24.txt")
+    # First, try to find yesterday's file based on current file's date
+    # This ensures we compare today vs yesterday for daily deltas
+    yesterday_char_file = find_yesterday_file(char_file, char_dir)
+    yesterday_inv_file = find_yesterday_file(inv_file, inv_dir)
     
-    if os.path.exists(proto_prev_char) and os.path.exists(proto_prev_inv) and \
-       os.path.exists(proto_curr_char) and os.path.exists(proto_curr_inv):
-        print("Prototype files found (1_14_24 and 1_17_24), generating serverwide delta page...")
-        previous_char_file = proto_prev_char
-        previous_inv_file = proto_prev_inv
-        current_char_file = proto_curr_char
-        current_inv_file = proto_curr_inv
+    if yesterday_char_file and yesterday_inv_file:
+        print(f"[OK] Found yesterday's files based on current file date (daily delta):")
+        print(f"  Yesterday: {os.path.basename(yesterday_char_file)}")
+        print(f"  Current: {os.path.basename(current_char_file)}")
+        previous_char_file = yesterday_char_file
+        previous_inv_file = yesterday_inv_file
     else:
-        # Check for previous day's files from workflow
+        # Fall back to _previous files from workflow (may be older than yesterday)
         previous_char_file = os.path.join(char_dir, "TAKP_character_previous.txt")
         previous_inv_file = os.path.join(inv_dir, "TAKP_character_inventory_previous.txt")
-        current_char_file = char_file
-        current_inv_file = inv_file
+        if os.path.exists(previous_char_file) and os.path.exists(previous_inv_file):
+            print(f"[WARNING] Using _previous files (yesterday's dated files not found - may not be daily delta):")
+            print(f"  Previous: {os.path.basename(previous_char_file)}")
+            print(f"  Current: {os.path.basename(current_char_file)}")
+        else:
+            # Last resort: check for prototype files (for testing)
+            proto_prev_char = os.path.join(char_dir, "1_14_24.txt")
+            proto_prev_inv = os.path.join(inv_dir, "1_14_24.txt")
+            proto_curr_char = os.path.join(char_dir, "1_17_24.txt")
+            proto_curr_inv = os.path.join(inv_dir, "1_17_24.txt")
+            
+            if os.path.exists(proto_prev_char) and os.path.exists(proto_prev_inv) and \
+               os.path.exists(proto_curr_char) and os.path.exists(proto_curr_inv):
+                print("⚠ Prototype files found (1_14_24 and 1_17_24), generating serverwide delta page...")
+                previous_char_file = proto_prev_char
+                previous_inv_file = proto_prev_inv
+                current_char_file = proto_curr_char
+                current_inv_file = proto_curr_inv
+            else:
+                previous_char_file = None
+                previous_inv_file = None
     
     if previous_char_file and previous_inv_file and \
        os.path.exists(previous_char_file) and os.path.exists(previous_inv_file):
@@ -1947,7 +2227,7 @@ def main():
             prev_hash = hashlib.md5(open(previous_char_file, 'rb').read()).hexdigest()
             curr_hash = hashlib.md5(open(current_char_file, 'rb').read()).hexdigest()
             if prev_hash == curr_hash:
-                print("⚠ Warning: Previous and current files are identical (same hash) - no changes to show")
+                print("[WARNING] Previous and current files are identical (same hash) - no changes to show")
             else:
                 print(f"Files are different (prev hash: {prev_hash[:8]}..., curr hash: {curr_hash[:8]}...)")
         
@@ -1980,20 +2260,6 @@ def main():
         # Get magelo update date
         magelo_update_date = os.environ.get('MAGELO_UPDATE_DATE', 'Unknown')
         
-        # Generate delta HTML (serverwide)
-        delta_html = generate_delta_html(
-            current_char_data, previous_char_data,
-            current_inventories, previous_inventories,
-            magelo_update_date,
-            serverwide=True
-        )
-        
-        delta_file = os.path.join(base_dir, "delta.html")
-        print(f"Writing delta HTML to {delta_file}...")
-        with open(delta_file, 'w', encoding='utf-8') as f:
-            f.write(delta_html)
-        print("Delta page generated successfully!")
-        
         # Extract date from magelo_update_date or use today
         if magelo_update_date != 'Unknown':
             # Try to parse date from format like "Sat Feb 7 16:30:25 UTC 2026"
@@ -2005,19 +2271,107 @@ def main():
         else:
             date_str = datetime.now().strftime('%Y-%m-%d')
         
-        # Save a dated copy of the delta report for history
-        try:
-            historical_delta_file = os.path.join(base_dir, f"delta_{date_str}.html")
-            with open(historical_delta_file, 'w', encoding='utf-8') as f:
-                f.write(delta_html)
-            print(f"Saved historical delta report: {historical_delta_file}")
-        except Exception as e:
-            print(f"Warning: Could not save historical delta: {e}")
+        delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
         
-        # Generate/update delta history page (check both base_dir and deploy if it exists)
+        # Step 1: Check/create master baseline
+        # Baseline is generated on-the-fly and cached (not committed to repo due to size)
+        baseline = load_master_baseline(delta_snapshots_dir)
+        if not baseline:
+            print("Master baseline not found. Creating baseline from current data...")
+            # Use current data as baseline (first run or after cache clear)
+            save_master_baseline(current_char_data, current_inventories, date_str, delta_snapshots_dir)
+            print(f"  Created master baseline from current data (date: {date_str})")
+            baseline = load_master_baseline(delta_snapshots_dir)
+        
+        # Step 2: Compare today vs baseline and save daily delta
+        print(f"Comparing today ({date_str}) vs baseline ({baseline['baseline_date']})...")
         try:
-            deploy_dir = os.path.join(base_dir, "deploy")
-            generate_delta_history(base_dir, deploy_dir if os.path.exists(deploy_dir) else None)
+            daily_delta_path = save_daily_delta_from_baseline(
+                current_char_data, current_inventories, date_str, delta_snapshots_dir
+            )
+            print(f"Saved daily delta JSON: {daily_delta_path}")
+        except Exception as e:
+            print(f"Warning: Could not save daily delta JSON: {e}")
+            import traceback
+            traceback.print_exc()
+            # Fall back to old method if baseline comparison fails
+            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
+            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+            delta_data = {'char_deltas': char_deltas, 'inv_deltas': inv_deltas}
+            daily_delta_path = save_daily_delta_json(delta_data, date_str, delta_snapshots_dir)
+        
+        # Step 3: Generate delta HTML by comparing today's delta vs yesterday's delta (default to 1 day)
+        # Load today's and yesterday's deltas
+        today_delta = load_daily_delta_json(date_str, delta_snapshots_dir)
+        
+        # Calculate yesterday's date
+        from datetime import timedelta
+        today_dt = datetime.strptime(date_str, '%Y-%m-%d')
+        yesterday_dt = today_dt - timedelta(days=1)
+        yesterday_date_str = yesterday_dt.strftime('%Y-%m-%d')
+        
+        yesterday_delta = load_daily_delta_json(yesterday_date_str, delta_snapshots_dir)
+        
+        if today_delta and yesterday_delta:
+            # Compare deltas: today's delta vs yesterday's delta
+            delta_comparison = compare_delta_to_delta(yesterday_delta, today_delta)
+            char_deltas = delta_comparison['char_deltas']
+            inv_deltas = delta_comparison['inv_deltas']
+            print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
+        elif today_delta:
+            # Only today's delta available, show changes from baseline
+            char_deltas = today_delta.get('char_deltas', {})
+            inv_deltas = today_delta.get('inv_deltas', {})
+            print(f"Showing changes from baseline to {date_str} (yesterday's delta not available)")
+        else:
+            # Fall back to comparing current vs previous files (backward compatibility)
+            print("Warning: Daily deltas not available, falling back to file comparison")
+            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
+            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+        
+        # Get item names for inventory deltas
+        all_item_ids = set()
+        for char_delta in inv_deltas.values():
+            all_item_ids.update(char_delta.get('added', {}).keys())
+            all_item_ids.update(char_delta.get('removed', {}).keys())
+        
+        item_names = {}
+        for char_name, items in current_inventories.items():
+            for item in items:
+                if item['item_id'] in all_item_ids:
+                    item_names[item['item_id']] = item['item_name']
+        
+        # Populate item names in deltas
+        for char_delta in inv_deltas.values():
+            for item_id in char_delta.get('added', {}):
+                if item_id in item_names:
+                    char_delta.setdefault('item_names', {})[item_id] = item_names[item_id]
+            for item_id in char_delta.get('removed', {}):
+                if item_id in item_names:
+                    char_delta.setdefault('item_names', {})[item_id] = item_names[item_id]
+        
+        # Generate delta HTML
+        delta_html = generate_delta_html(
+            current_char_data, previous_char_data,
+            current_inventories, previous_inventories,
+            magelo_update_date,
+            serverwide=True,
+            char_deltas=char_deltas,
+            inv_deltas=inv_deltas
+        )
+        
+        delta_file = os.path.join(base_dir, "delta.html")
+        print(f"Writing delta HTML to {delta_file}...")
+        with open(delta_file, 'w', encoding='utf-8') as f:
+            f.write(delta_html)
+        print("Delta page generated successfully!")
+        
+        # Note: We no longer save historical HTML files - all historical data is in JSON format
+        # Historical deltas can be reconstructed on-demand from daily delta JSONs using get_date_range_deltas()
+        
+        # Generate/update delta history page (shows available JSON dates and allows date-to-date generation)
+        try:
+            generate_delta_history(base_dir)
             print("Generated delta history page")
         except Exception as e:
             print(f"Warning: Could not generate delta history: {e}")
@@ -2026,11 +2380,7 @@ def main():
         
         # Save delta snapshots for weekly/monthly tracking
         try:
-            
-            # Calculate deltas for snapshot (already calculated above)
-            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
-            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
-            
+            # Use deltas already calculated above (no need to recalculate)
             delta_data = {
                 'char_deltas': char_deltas,
                 'inv_deltas': inv_deltas
@@ -2089,8 +2439,11 @@ def main():
             traceback.print_exc()
     else:
         print("Previous day's files not found, skipping delta page generation.")
+        print(f"Current file: {os.path.basename(char_file)}")
+        if yesterday_char_file:
+            print(f"  Expected yesterday's file: {os.path.basename(yesterday_char_file)} (not found)")
         if previous_char_file:
-            print(f"Looking for: {previous_char_file} and {previous_inv_file}")
+            print(f"  Also checked: {os.path.basename(previous_char_file)} and {os.path.basename(previous_inv_file) if previous_inv_file else 'N/A'}")
     
     # Generate weekly/monthly leaderboards even if no previous day's files
     # (compare current vs baseline if available)
@@ -2144,4 +2497,23 @@ def main():
     print("Done!")
 
 if __name__ == "__main__":
-    main()
+    import sys
+    
+    # Check if we're generating a date range delta
+    if len(sys.argv) >= 3 and sys.argv[1] == "--date-range":
+        start_date = sys.argv[2]
+        end_date = sys.argv[3] if len(sys.argv) > 3 else start_date
+        
+        base_dir = os.path.dirname(__file__)
+        delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
+        magelo_update_date = os.environ.get('MAGELO_UPDATE_DATE', 'Unknown')
+        
+        print(f"Generating date range delta: {start_date} to {end_date}")
+        html = generate_date_range_delta_html(start_date, end_date, delta_snapshots_dir, magelo_update_date)
+        
+        output_file = os.path.join(base_dir, "delta_range.html")
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(html)
+        print(f"Generated date range delta: {output_file}")
+    else:
+        main()
