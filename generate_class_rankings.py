@@ -791,63 +791,106 @@ CLASS_WEIGHTS = {
 }
 
 def normalize_class_weights(weights_config):
-    """Normalize class weights: focus weights total = 2.4x HP weight (40% of score for casters), then normalize all to sum to 1.0"""
-    hp_weight = weights_config.get('hp_pct', 1.0)
+    """
+    Normalize class weights to achieve target percentages:
+    - 20% HP
+    - 17.5% AC (if applicable)
+    - 17.5% Resists
+    - 30% Focus (including ATK, FT, Haste, and spell focuses)
+    - 15% Mana (if applicable)
     
-    # Calculate total focus weight from config (relative weights)
+    ATK, FT, and Haste are part of the 30% focus weight, not stat weights.
+    """
+    # Target percentages
+    TARGET_HP = 0.20
+    TARGET_AC = 0.175
+    TARGET_RESISTS = 0.175
+    TARGET_FOCUS = 0.30  # Includes ATK, FT, Haste, and spell focuses
+    TARGET_MANA = 0.15
+    
+    # Check which stats are applicable
+    has_mana = weights_config.get('mana_pct', 0) > 0
+    has_ac = weights_config.get('ac_pct', 0) > 0
+    
+    # Calculate total target percentage
+    total_target = TARGET_HP + TARGET_RESISTS + TARGET_FOCUS
+    if has_mana:
+        total_target += TARGET_MANA
+    if has_ac:
+        total_target += TARGET_AC
+    
+    # Normalize targets to sum to 1.0
+    if total_target > 0:
+        hp_target = TARGET_HP / total_target
+        resists_target = TARGET_RESISTS / total_target
+        focus_target = TARGET_FOCUS / total_target
+        mana_target = (TARGET_MANA / total_target) if has_mana else 0.0
+        ac_target = (TARGET_AC / total_target) if has_ac else 0.0
+    else:
+        # Fallback if no applicable stats
+        hp_target = 1.0
+        resists_target = 0.0
+        focus_target = 0.0
+        mana_target = 0.0
+        ac_target = 0.0
+    
+    # Calculate focus weight components from config
+    # ATK, FT, Haste are part of focus weight
+    atk_weight_raw = weights_config.get('atk_pct', 0.0)
+    haste_weight_raw = weights_config.get('haste_pct', 0.0)
+    # FT weight is 2.0 if capped (will be checked during scoring, but include in normalization)
+    ft_weight_raw = 2.0  # FT is 2.0 weight if capped
+    
+    # Calculate total focus weight from config (spell focuses)
     focus_weights = weights_config.get('focus', {})
-    total_focus_weight_config = 0.0
+    total_spell_focus_weight = 0.0
     if focus_weights:
         for focus_cat, focus_value in focus_weights.items():
             if isinstance(focus_value, dict):
-                # Spell Damage with damage types
-                total_focus_weight_config += sum(focus_value.values())
+                total_spell_focus_weight += sum(focus_value.values())
             else:
-                # Single focus weight
-                total_focus_weight_config += focus_value
+                total_spell_focus_weight += focus_value
     
-    # Scale focus weights so they total 2.4x HP weight (40% of score for casters)
-    focus_scale = (2.4 * hp_weight) / total_focus_weight_config if total_focus_weight_config > 0 else 0.0
+    # Total focus weight components = ATK + Haste + FT + spell focuses
+    total_focus_components = atk_weight_raw + haste_weight_raw + ft_weight_raw + total_spell_focus_weight
     
-    # Calculate total weight including scaled focuses
-    total_weight = 0.0
-    # Sum stat weights (including resists)
-    for stat_key in ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct', 'resists_pct']:
-        total_weight += weights_config.get(stat_key, 0.0)
+    # Scale focus components to achieve target focus percentage
+    # We need to distribute the focus_target among ATK, Haste, FT, and spell focuses
+    if total_focus_components > 0:
+        focus_scale = focus_target / total_focus_components
+    else:
+        focus_scale = 0.0
     
-    # Add scaled focus weights
+    # Build normalized weights
+    normalized = {}
+    normalized['hp_pct'] = hp_target
+    normalized['resists_pct'] = resists_target
+    normalized['mana_pct'] = mana_target
+    normalized['ac_pct'] = ac_target
+    
+    # ATK, Haste are stored as focus components (not stat weights)
+    normalized['atk_pct'] = 0.0  # Moved to focus
+    normalized['haste_pct'] = 0.0  # Moved to focus
+    normalized['ft_weight'] = ft_weight_raw * focus_scale  # FT weight (will be applied if capped)
+    
+    # Normalize focus weights (with scaling applied)
+    normalized['focus'] = {}
     if focus_weights and focus_scale > 0:
         for focus_cat, focus_value in focus_weights.items():
             if isinstance(focus_value, dict):
-                total_weight += sum(focus_value.values()) * focus_scale
+                normalized['focus'][focus_cat] = {
+                    k: v * focus_scale for k, v in focus_value.items()
+                }
             else:
-                total_weight += focus_value * focus_scale
+                normalized['focus'][focus_cat] = focus_value * focus_scale
     
-    # Normalize if total > 0
-    if total_weight > 0:
-        normalized = {}
-        # Normalize stat weights
-        for stat_key in ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct', 'resists_pct']:
-            normalized[stat_key] = weights_config.get(stat_key, 0.0) / total_weight
-        
-        # Normalize focus weights (with scaling applied)
-        if focus_weights and focus_scale > 0:
-            normalized['focus'] = {}
-            for focus_cat, focus_value in focus_weights.items():
-                if isinstance(focus_value, dict):
-                    # Spell Damage with damage types - scale then normalize
-                    normalized['focus'][focus_cat] = {
-                        k: (v * focus_scale) / total_weight for k, v in focus_value.items()
-                    }
-                else:
-                    # Single focus weight - scale then normalize
-                    normalized['focus'][focus_cat] = (focus_value * focus_scale) / total_weight
-        else:
-            normalized['focus'] = {}
-        
-        return normalized
-    else:
-        return weights_config
+    # Store ATK and Haste as focus components
+    if atk_weight_raw > 0:
+        normalized['focus']['ATK'] = atk_weight_raw * focus_scale
+    if haste_weight_raw > 0:
+        normalized['focus']['Haste'] = haste_weight_raw * focus_scale
+    
+    return normalized
 
 def calculate_resist_score(resist_value):
     """
@@ -939,17 +982,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             total_score += ac_score * ac_weight
             total_weight += ac_weight
         
-        # ATK and Haste (percentages)
-        if scores.get('atk_pct') is not None:
-            weight = weights_config.get('atk_pct', 0.0)
-            if weight > 0:
-                total_score += scores['atk_pct'] * weight
-                total_weight += weight
-        if scores.get('haste_pct') is not None:
-            weight = weights_config.get('haste_pct', 0.0)
-            if weight > 0:
-                total_score += scores['haste_pct'] * weight
-                total_weight += weight
+        # ATK and Haste are now part of focus weight (handled below)
         
         # Resists - calculate individual resist scores with weight curve
         resists_weight = weights_config.get('resists_pct', 0.0)
@@ -1003,9 +1036,11 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             # For Paladins, handle focuses individually (Shield of Strife, Beneficial Spell Haste, Healing Enhancement)
             if char_class == 'Warrior':
                 focus_score = scores.get('focus_overall_pct', 0)
-                # Sum all focus weights to get total focus weight
+                # Sum all spell focus weights (excluding ATK, Haste, FT which are handled above)
                 total_focus_weight = 0.0
                 for focus_cat, weight_config in focus_weights.items():
+                    if focus_cat in ['ATK', 'Haste']:
+                        continue  # Already handled above
                     if isinstance(weight_config, dict):
                         total_focus_weight += sum(weight_config.values())
                     else:
@@ -1017,6 +1052,8 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                 # Handle Paladin focuses individually with their specific weights
                 # Shield of Strife (2.0), Beneficial Spell Haste (0.75), Healing Enhancement (0.5)
                 for focus_cat, weight_config in focus_weights.items():
+                    if focus_cat in ['ATK', 'Haste']:
+                        continue  # Already handled above
                     if focus_cat == 'Shield of Strife':
                         if isinstance(weight_config, (int, float)) and weight_config > 0:
                             shield_score = focus_scores.get('Shield of Strife', 0)
@@ -1031,6 +1068,8 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             elif char_class == 'Enchanter':
                 # Handle Enchanter focuses individually (Serpent of Vindication + spell focuses)
                 for focus_cat, weight_config in focus_weights.items():
+                    if focus_cat in ['ATK', 'Haste']:
+                        continue  # Already handled above
                     if focus_cat == 'Serpent of Vindication':
                         if isinstance(weight_config, (int, float)) and weight_config > 0:
                             serpent_score = focus_scores.get('Serpent of Vindication', 0)
@@ -1040,9 +1079,11 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             else:
                 # For other classes, use focus_overall_pct
                 focus_score = scores.get('focus_overall_pct', 0)
-                # Sum all focus weights to get total focus weight
+                # Sum all spell focus weights (excluding ATK, Haste, FT which are handled above)
                 total_focus_weight = 0.0
                 for focus_cat, weight_config in focus_weights.items():
+                    if focus_cat in ['ATK', 'Haste']:
+                        continue  # Already handled above
                     if isinstance(weight_config, dict):
                         total_focus_weight += sum(weight_config.values())
                     else:
@@ -1079,13 +1120,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         total_score += mana_score * mana_weight
         total_weight += mana_weight
     
-    # FT (Flowing Thought) - capped (15/15) is worth 2.0 weight
-    if scores.get('ft_capped') is True:
-        ft_weight = 2.0
-        total_score += 100.0 * ft_weight  # 100% for capped
-        total_weight += ft_weight
-    
-    # AC, ATK, Haste (if applicable)
+    # AC (if applicable)
     if scores.get('ac') is not None:
         weight = weights_config.get('ac_pct', 0.0)
         if weight > 0:
@@ -1096,17 +1131,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             total_score += ac_score * weight
             total_weight += weight
     
-    if scores.get('atk_pct') is not None:
-        weight = weights_config.get('atk_pct', 0.0)
-        if weight > 0:
-            total_score += scores['atk_pct'] * weight
-            total_weight += weight
-    
-    if scores.get('haste_pct') is not None:
-        weight = weights_config.get('haste_pct', 0.0)
-        if weight > 0:
-            total_score += scores['haste_pct'] * weight
-            total_weight += weight
+    # ATK, FT, and Haste are now part of focus weight (handled below)
     
         # Resists - calculate individual resist scores with weight curve
         resists_weight = weights_config.get('resists_pct', 0.0)
@@ -1153,12 +1178,37 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                     total_score += resists_score * resists_weight
                     total_weight += resists_weight
     
-    # Focus weights - each focus gets the proportional weight specified
+    # Focus weights - includes ATK, FT, Haste, and spell focuses
     focus_weights = weights_config.get('focus', {})
+    
+    # Add ATK to focus if applicable
+    if scores.get('atk_pct') is not None:
+        atk_weight = focus_weights.get('ATK', 0.0)
+        if atk_weight > 0:
+            total_score += scores['atk_pct'] * atk_weight
+            total_weight += atk_weight
+    
+    # Add Haste to focus if applicable
+    if scores.get('haste_pct') is not None:
+        haste_weight = focus_weights.get('Haste', 0.0)
+        if haste_weight > 0:
+            total_score += scores['haste_pct'] * haste_weight
+            total_weight += haste_weight
+    
+    # Add FT to focus if capped
+    ft_weight = weights_config.get('ft_weight', 0.0)
+    if scores.get('ft_capped') is True and ft_weight > 0:
+        total_score += 100.0 * ft_weight  # 100% for capped
+        total_weight += ft_weight
+    
+    # Spell focuses
     if focus_weights:
         best_spell_damage = best_focii.get('Spell Damage', 35.0)
         
         for focus_cat, weight_config in focus_weights.items():
+            # Skip ATK and Haste - already handled above
+            if focus_cat in ['ATK', 'Haste']:
+                continue
             if focus_cat == 'Spell Damage':
                 # Handle damage type specific weights
                 # "All" damage counts for all damage types

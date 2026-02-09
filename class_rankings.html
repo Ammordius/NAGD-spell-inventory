@@ -772,37 +772,85 @@
         }
 
         function normalizeWeights(weights, focusMultiplier = 2.4) {
-            const hpWeight = weights.hp_pct || 0.0;
-            const focusWeights = weights.focus || {};
+            // Target percentages: 20% HP, 17.5% AC, 17.5% Resists, 30% Focus, 15% Mana
+            const TARGET_HP = 0.20;
+            const TARGET_AC = 0.175;
+            const TARGET_RESISTS = 0.175;
+            const TARGET_FOCUS = 0.30;  // Includes ATK, FT, Haste, and spell focuses
+            const TARGET_MANA = 0.15;
             
-            let totalFocusWeightConfig = 0.0;
+            // Check which stats are applicable
+            const hasMana = (weights.mana_pct || 0) > 0;
+            const hasAc = (weights.ac_pct || 0) > 0;
+            
+            // Calculate total target percentage
+            let totalTarget = TARGET_HP + TARGET_RESISTS + TARGET_FOCUS;
+            if (hasMana) totalTarget += TARGET_MANA;
+            if (hasAc) totalTarget += TARGET_AC;
+            
+            // Normalize targets to sum to 1.0
+            const hpTarget = TARGET_HP / totalTarget;
+            const resistsTarget = TARGET_RESISTS / totalTarget;
+            const focusTarget = TARGET_FOCUS / totalTarget;
+            const manaTarget = hasMana ? (TARGET_MANA / totalTarget) : 0.0;
+            const acTarget = hasAc ? (TARGET_AC / totalTarget) : 0.0;
+            
+            // Calculate focus weight components
+            const atkWeightRaw = weights.atk_pct || 0.0;
+            const hasteWeightRaw = weights.haste_pct || 0.0;
+            const ftWeightRaw = 2.0;  // FT is 2.0 weight if capped
+            
+            const focusWeights = weights.focus || {};
+            let totalSpellFocusWeight = 0.0;
             for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
                 if (typeof focusValue === 'object') {
-                    totalFocusWeightConfig += Object.values(focusValue).reduce((a, b) => a + b, 0);
+                    totalSpellFocusWeight += Object.values(focusValue).reduce((a, b) => a + b, 0);
                 } else {
-                    totalFocusWeightConfig += focusValue;
+                    totalSpellFocusWeight += focusValue;
                 }
             }
-
-            // Only calculate focus scale if HP weight > 0 and we have focus weights
-            const focusScale = (hpWeight > 0 && totalFocusWeightConfig > 0) ? (focusMultiplier * hpWeight) / totalFocusWeightConfig : 0.0;
-
-            let totalWeight = 0.0;
-            const statKeys = ['hp_pct', 'mana_pct', 'ac_pct', 'atk_pct', 'haste_pct', 'resists_pct'];
-            statKeys.forEach(key => {
-                totalWeight += weights[key] || 0.0;
-            });
-
-            // Only add focus weights if HP > 0 (focuses are based on HP weight)
-            if (hpWeight > 0 && focusWeights && focusScale > 0) {
+            
+            // Total focus components = ATK + Haste + FT + spell focuses
+            const totalFocusComponents = atkWeightRaw + hasteWeightRaw + ftWeightRaw + totalSpellFocusWeight;
+            
+            // Scale focus components to achieve target focus percentage
+            const focusScale = (totalFocusComponents > 0) ? (focusTarget / totalFocusComponents) : 0.0;
+            
+            // Build normalized weights
+            const normalized = {
+                hp_pct: hpTarget,
+                resists_pct: resistsTarget,
+                mana_pct: manaTarget,
+                ac_pct: acTarget,
+                atk_pct: 0.0,  // Moved to focus
+                haste_pct: 0.0,  // Moved to focus
+                ft_weight: ftWeightRaw * focusScale,
+                focus: {}
+            };
+            
+            // Normalize focus weights (with scaling applied)
+            if (focusWeights && focusScale > 0) {
                 for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
                     if (typeof focusValue === 'object') {
-                        totalWeight += Object.values(focusValue).reduce((a, b) => a + b, 0) * focusScale;
+                        normalized.focus[focusCat] = {};
+                        for (const [k, v] of Object.entries(focusValue)) {
+                            normalized.focus[focusCat][k] = v * focusScale;
+                        }
                     } else {
-                        totalWeight += focusValue * focusScale;
+                        normalized.focus[focusCat] = focusValue * focusScale;
                     }
                 }
             }
+            
+            // Store ATK and Haste as focus components
+            if (atkWeightRaw > 0) {
+                normalized.focus['ATK'] = atkWeightRaw * focusScale;
+            }
+            if (hasteWeightRaw > 0) {
+                normalized.focus['Haste'] = hasteWeightRaw * focusScale;
+            }
+            
+            return normalized;
 
             const normalized = {};
             if (totalWeight > 0) {
@@ -889,14 +937,8 @@
                     totalScore += scores.ac_pct * normalized.ac_pct;
                     totalWeight += normalized.ac_pct;
                 }
-                if (scores.atk_pct !== undefined && normalized.atk_pct > 0) {
-                    totalScore += scores.atk_pct * normalized.atk_pct;
-                    totalWeight += normalized.atk_pct;
-                }
-                if (scores.haste_pct !== undefined && normalized.haste_pct > 0) {
-                    totalScore += scores.haste_pct * normalized.haste_pct;
-                    totalWeight += normalized.haste_pct;
-                }
+                // ATK, FT, and Haste are now part of focus weight (handled below)
+                
                 // Resists - use advanced resists if enabled
                 if (scores.resists_pct !== undefined && normalized.resists_pct > 0) {
                     if (advancedResists && char.individual_resists) {
@@ -927,23 +969,41 @@
                         totalWeight += normalized.resists_pct;
                     }
                 }
-                // FT is only included if HP weight > 0 (FT is tied to HP/mana for casters)
-                // Check if any stat weight is set (not just HP) to determine if FT should be included
-                const hasStatWeights = normalized.hp_pct > 0 || normalized.mana_pct > 0 || normalized.ac_pct > 0 || 
-                                      normalized.atk_pct > 0 || normalized.haste_pct > 0 || normalized.resists_pct > 0;
-                if (scores.ft_capped === true && hasStatWeights) {
-                    // FT weight is 2.0, but we need to normalize it against the total
-                    // For now, only include FT if HP or Mana has weight (FT is for casters)
-                    if (normalized.hp_pct > 0 || normalized.mana_pct > 0) {
-                        totalScore += 100.0 * 2.0;
-                        totalWeight += 2.0;
+                
+                // Focus weights - includes ATK, FT, Haste, and spell focuses
+                const focusWeights = normalized.focus || {};
+                
+                // Add ATK to focus if applicable
+                if (scores.atk_pct !== undefined) {
+                    const atkWeight = focusWeights['ATK'] || 0.0;
+                    if (atkWeight > 0) {
+                        totalScore += scores.atk_pct * atkWeight;
+                        totalWeight += atkWeight;
                     }
                 }
-
-                const focusWeights = normalized.focus || {};
+                
+                // Add Haste to focus if applicable
+                if (scores.haste_pct !== undefined) {
+                    const hasteWeight = focusWeights['Haste'] || 0.0;
+                    if (hasteWeight > 0) {
+                        totalScore += scores.haste_pct * hasteWeight;
+                        totalWeight += hasteWeight;
+                    }
+                }
+                
+                // Add FT to focus if capped
+                const ftWeight = normalized.ft_weight || 0.0;
+                if (scores.ft_capped === true && ftWeight > 0) {
+                    totalScore += 100.0 * ftWeight;  // 100% for capped
+                    totalWeight += ftWeight;
+                }
+                
+                // Spell focuses
                 if (Object.keys(focusWeights).length > 0 && scores.focus_overall_pct !== undefined) {
                     let totalFocusWeight = 0.0;
-                    for (const weight of Object.values(focusWeights)) {
+                    for (const [focusCat, weight] of Object.entries(focusWeights)) {
+                        // Skip ATK and Haste - already handled above
+                        if (focusCat === 'ATK' || focusCat === 'Haste') continue;
                         if (typeof weight === 'object') {
                             totalFocusWeight += Object.values(weight).reduce((a, b) => a + b, 0);
                         } else {
