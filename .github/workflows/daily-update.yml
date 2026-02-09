@@ -352,6 +352,17 @@ jobs:
         echo "✓ Found spell_exchange_list.json"
         echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
+    - name: Restore baseline cache (needed for historical delta generation)
+      uses: actions/cache@v3
+      id: cache-baseline-historical
+      continue-on-error: true
+      with:
+        path: |
+          delta_snapshots/baseline_master.json.gz
+        key: magelo-baseline-${{ steps.date-info.outputs.month_start }}
+        restore-keys: |
+          magelo-baseline-
+    
     - name: Restore cache for 2026-02-07 and generate delta
       uses: actions/cache@v3
       id: cache-2026-02-07
@@ -366,7 +377,7 @@ jobs:
           magelo-dump-
     
     - name: Generate delta for 2026-02-07 if cache restored
-      if: steps.cache-2026-02-07.outputs.cache-hit == 'true'
+      if: steps.cache-2026-02-07.outputs.cache-hit == 'true' && steps.cache-baseline-historical.outputs.cache-hit == 'true'
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-07.json.gz" ]; then
           echo "Generating delta for 2026-02-07 from cached files..."
@@ -424,7 +435,7 @@ jobs:
           magelo-dump-
     
     - name: Generate delta for 2026-02-08 if cache restored
-      if: steps.cache-2026-02-08.outputs.cache-hit == 'true'
+      if: steps.cache-2026-02-08.outputs.cache-hit == 'true' && steps.cache-baseline-historical.outputs.cache-hit == 'true'
       run: |
         if [ ! -f "delta_snapshots/delta_daily_2026-02-08.json.gz" ]; then
           echo "Generating delta for 2026-02-08 from cached files..."
