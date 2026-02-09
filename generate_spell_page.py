@@ -1989,6 +1989,7 @@ def generate_delta_history(base_dir):
         
         // Load JSONs on-demand (only when date range is selected)
         let loadedDeltas = new Map(); // Cache loaded deltas
+        let loadedBaselines = new Map(); // Cache loaded baselines
         let availableDates = new Set(); // Track which dates have JSON files
         
         // Extract available dates from the page (from the date list)
@@ -2028,6 +2029,86 @@ def generate_delta_history(base_dir):
             }
         }
         
+        async function loadBaseline(baselineDate) {
+            // Try to load baseline file (compressed .json.gz)
+            // First try current baseline_master.json.gz, then archived baseline_master_YYYY-MM-DD.json.gz
+            const baselineKey = `baseline_${baselineDate}`;
+            if (loadedBaselines && loadedBaselines.has(baselineKey)) {
+                return loadedBaselines.get(baselineKey);
+            }
+            
+            try {
+                // Try archived baseline first (if baseline was reset)
+                let response = await fetch(`delta_snapshots/baseline_master_${baselineDate}.json.gz`);
+                if (!response.ok || response.status === 404) {
+                    // Fall back to current baseline
+                    response = await fetch(`delta_snapshots/baseline_master.json.gz`);
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`Baseline not found for ${baselineDate}`);
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+                const baseline = JSON.parse(decompressed);
+                
+                if (!loadedBaselines) {
+                    loadedBaselines = new Map();
+                }
+                loadedBaselines.set(baselineKey, baseline);
+                return baseline;
+            } catch (error) {
+                console.error(`Error loading baseline for ${baselineDate}:`, error);
+                throw error;
+            }
+        }
+        
+        function reconstructCharacterState(baseline, delta) {
+            // Reconstruct full character state by combining baseline + delta
+            const fullState = {};
+            
+            // Start with baseline characters
+            const baselineChars = baseline.characters || {};
+            for (const [charName, charData] of Object.entries(baselineChars)) {
+                fullState[charName] = {
+                    level: charData.level || 0,
+                    aa_total: (charData.aa_unspent || 0) + (charData.aa_spent || 0),
+                    hp: charData.hp_max_total || 0,
+                    class: charData.class || ''
+                };
+            }
+            
+            // Apply delta changes
+            const deltaChars = delta.char_deltas || {};
+            for (const [charName, deltaData] of Object.entries(deltaChars)) {
+                if (deltaData.is_deleted) {
+                    delete fullState[charName];
+                    continue;
+                }
+                
+                if (deltaData.is_new || !fullState[charName]) {
+                    // New character
+                    fullState[charName] = {
+                        level: deltaData.current_level || 0,
+                        aa_total: deltaData.current_aa_total || 0,
+                        hp: deltaData.current_hp || 0,
+                        class: deltaData.class || ''
+                    };
+                } else {
+                    // Update existing character
+                    fullState[charName].level = deltaData.current_level || fullState[charName].level;
+                    fullState[charName].aa_total = deltaData.current_aa_total || fullState[charName].aa_total;
+                    fullState[charName].hp = deltaData.current_hp || fullState[charName].hp;
+                    if (deltaData.class) {
+                        fullState[charName].class = deltaData.class;
+                    }
+                }
+            }
+            
+            return fullState;
+        }
+        
         async function generateDateRangeReport() {
             const start = document.getElementById('start_date').value;
             const end = document.getElementById('end_date').value;
@@ -2054,10 +2135,10 @@ def generate_delta_history(base_dir):
             }
             
             const outputDiv = document.getElementById('date_range_output');
-            outputDiv.innerHTML = '<p>Loading deltas for ' + start + ' and ' + end + '...</p>';
+            outputDiv.innerHTML = '<p>Loading deltas and baselines for ' + start + ' and ' + end + '...</p>';
             
             try {
-                // Load only the two deltas we need (start and end dates)
+                // Load deltas and baselines for both dates
                 const [startDelta, endDelta] = await Promise.all([
                     loadDeltaJSON(start),
                     loadDeltaJSON(end)
@@ -2068,63 +2149,77 @@ def generate_delta_history(base_dir):
                     return;
                 }
                 
-                // Compare the two deltas using the same logic as compare_delta_to_delta
+                // Check if baselines match
+                const baselineMismatch = startDelta.baseline_date !== endDelta.baseline_date;
+                
+                // Load baselines (needed to reconstruct full character states)
+                outputDiv.innerHTML = '<p>Loading baselines... (this may take a moment)</p>';
+                const [startBaseline, endBaseline] = await Promise.all([
+                    loadBaseline(startDelta.baseline_date),
+                    loadBaseline(endDelta.baseline_date)
+                ]);
+                
+                if (!startBaseline || !endBaseline) {
+                    outputDiv.innerHTML = '<p style="color: red;">Error: Could not load baseline JSONs. Baselines may not be available on GitHub Pages.</p>';
+                    return;
+                }
+                
+                // Reconstruct full character states for both dates
+                outputDiv.innerHTML = '<p>Reconstructing character states...</p>';
+                const startState = reconstructCharacterState(startBaseline, startDelta);
+                const endState = reconstructCharacterState(endBaseline, endDelta);
+                
+                // Compare the two reconstructed states
                 const charChanges = {};
-                const invChanges = {};
+                const allCharNames = new Set([...Object.keys(startState), ...Object.keys(endState)]);
                 
-                // Get all characters from both deltas (like compare_delta_to_delta does)
-                const startChars = startDelta.char_deltas || {};
-                const endChars = endDelta.char_deltas || {};
-                const allCharNames = new Set([...Object.keys(startChars), ...Object.keys(endChars)]);
-                
-                // Compare character changes (matching Python compare_delta_to_delta logic)
                 for (const charName of allCharNames) {
-                    const startData = startChars[charName] || {};
-                    const endData = endChars[charName] || {};
+                    const startChar = startState[charName];
+                    const endChar = endState[charName];
                     
-                    // Extract values (these are cumulative from baseline)
-                    const aLevel = startData.current_level || startData.previous_level || 0;
-                    const bLevel = endData.current_level || endData.previous_level || 0;
-                    const aAA = startData.current_aa_total || startData.previous_aa_total || 0;
-                    const bAA = endData.current_aa_total || endData.previous_aa_total || 0;
-                    const aHP = startData.current_hp || startData.previous_hp || 0;
-                    const bHP = endData.current_hp || endData.previous_hp || 0;
+                    // Character was deleted
+                    if (startChar && !endChar) {
+                        charChanges[charName] = {
+                            level: -startChar.level,
+                            aa: -startChar.aa_total,
+                            hp: -startChar.hp,
+                            current_level: 0,
+                            previous_level: startChar.level,
+                            class: startChar.class,
+                            is_deleted: true
+                        };
+                        continue;
+                    }
                     
-                    // Calculate changes from Day A to Day B
-                    const levelChange = bLevel - aLevel;
-                    const aaChange = bAA - aAA;
-                    const hpChange = bHP - aHP;
+                    // Character is new
+                    if (!startChar && endChar) {
+                        charChanges[charName] = {
+                            level: endChar.level,
+                            aa: endChar.aa_total,
+                            hp: endChar.hp,
+                            current_level: endChar.level,
+                            previous_level: 0,
+                            class: endChar.class,
+                            is_new: true
+                        };
+                        continue;
+                    }
                     
-                    // If baselines don't match, we can't properly compare (deltas are relative to different baselines)
-                    // But we can still show characters that exist in both deltas
-                    if (baselineMismatch) {
-                        // With different baselines, only show characters that exist in both deltas
-                        // and have different current values (this is approximate)
-                        if (startData.current_level !== undefined && endData.current_level !== undefined) {
-                            if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0) {
-                                charChanges[charName] = {
-                                    level: levelChange,
-                                    aa: aaChange,
-                                    hp: hpChange,
-                                    current_level: bLevel,
-                                    previous_level: aLevel,
-                                    class: endData.class || startData.class || '',
-                                    note: 'Approximate (different baselines)'
-                                };
-                            }
-                        }
-                    } else {
-                        // Same baseline - proper comparison
-                        if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0 ||
-                            (endData.is_new && !startData.is_new) ||
-                            (endData.is_deleted && !startData.is_deleted)) {
+                    // Character exists in both - compare values
+                    if (startChar && endChar) {
+                        const levelChange = endChar.level - startChar.level;
+                        const aaChange = endChar.aa_total - startChar.aa_total;
+                        const hpChange = endChar.hp - startChar.hp;
+                        
+                        // Only include if there are changes
+                        if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0) {
                             charChanges[charName] = {
                                 level: levelChange,
                                 aa: aaChange,
                                 hp: hpChange,
-                                current_level: bLevel,
-                                previous_level: aLevel,
-                                class: endData.class || startData.class || ''
+                                current_level: endChar.level,
+                                previous_level: startChar.level,
+                                class: endChar.class || startChar.class || ''
                             };
                         }
                     }
@@ -2132,11 +2227,12 @@ def generate_delta_history(base_dir):
                 
                 // Generate HTML report
                 let reportHTML = `<h3>Date Range Report: ${start} to ${end}</h3>`;
-                reportHTML += baselineWarning;
-                reportHTML += `<p style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                    <strong>Note:</strong> This is a simplified client-side comparison. For accurate results, use the server-side command below.
-                    <br>Deltas only include characters that changed from baseline, so characters that didn't change in both dates may not appear.
-                </p>`;
+                if (baselineMismatch) {
+                    reportHTML += `<p style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #2196F3;">
+                        <strong>ℹ️ Different Baselines:</strong> These dates use different baselines (${startDelta.baseline_date} vs ${endDelta.baseline_date}).
+                        <br>Full character states have been reconstructed by combining baseline + delta for accurate comparison.
+                    </p>`;
+                }
                 reportHTML += `<p><strong>Character Changes Found: ${Object.keys(charChanges).length}</strong></p>`;
                 
                 if (Object.keys(charChanges).length > 0) {
@@ -2151,8 +2247,10 @@ def generate_delta_history(base_dir):
                     reportHTML += '<ul style="list-style: none; padding: 0;">';
                     for (const [charName, changes] of sortedChanges.slice(0, 100)) { // Show top 100
                         const sign = (val) => val > 0 ? '+' : '';
+                        const statusBadge = changes.is_new ? ' <span style="background: #4caf50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">NEW</span>' :
+                                           changes.is_deleted ? ' <span style="background: #f44336; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">DELETED</span>' : '';
                         reportHTML += `<li style="padding: 5px; border-bottom: 1px solid #eee;">
-                            <strong>${charName}</strong> (${changes.class || 'Unknown'})
+                            <strong>${charName}</strong>${statusBadge} (${changes.class || 'Unknown'})
                             <br>Level: ${sign(changes.level)}${changes.level} 
                             (${changes.previous_level} → ${changes.current_level})
                             | AA: ${sign(changes.aa)}${changes.aa} 
@@ -2164,14 +2262,7 @@ def generate_delta_history(base_dir):
                     }
                     reportHTML += '</ul></div>';
                 } else {
-                    reportHTML += `<p style="color: #666;">No character changes detected between these dates.</p>
-                    <p style="color: #666; font-size: 0.9em;">This could mean:
-                    <ul style="color: #666;">
-                        <li>No characters changed between these dates</li>
-                        <li>The dates use different baselines (baseline was reset between dates)</li>
-                        <li>Characters that changed are not in both deltas (use server-side generation for accurate results)</li>
-                    </ul>
-                    </p>`;
+                    reportHTML += `<p style="color: #666;">No character changes detected between these dates.</p>`;
                 }
                 
                 outputDiv.innerHTML = reportHTML;
