@@ -844,6 +844,39 @@ def normalize_class_weights(weights_config):
     else:
         return weights_config
 
+def calculate_resist_score(resist_value):
+    """
+    Calculate resist score with weight curve:
+    - Full weight (1.0) up to 220
+    - Linearly decreasing from 220 to 320 (1.0 to 0.35)
+    - 0.35 weight from 320 to 500
+    - 0 weight above 500
+    Returns: (score_percentage, effective_weight)
+    """
+    if resist_value <= 0:
+        return (0.0, 0.0)
+    
+    if resist_value <= 220:
+        # Full weight up to 220
+        score = (resist_value / 220.0) * 100.0
+        weight = 1.0
+    elif resist_value <= 320:
+        # Linear decrease from 220 to 320 (1.0 to 0.35)
+        # At 220: weight = 1.0, score = 100%
+        # At 320: weight = 0.35, score = 100% (but weighted less)
+        weight = 1.0 - ((resist_value - 220) / 100.0) * 0.65  # Decreases from 1.0 to 0.35
+        score = 100.0  # Still 100% since we're at or above 220
+    elif resist_value <= 500:
+        # 0.35 weight from 320 to 500
+        weight = 0.35
+        score = 100.0  # Still 100% since we're above 220
+    else:
+        # 0 weight above 500
+        weight = 0.0
+        score = 0.0
+    
+    return (score, weight)
+
 def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, char=None):
     """Calculate overall score using class-specific weights with conversion rates"""
     weights_config = CLASS_WEIGHTS.get(char_class, {})
