@@ -505,10 +505,22 @@ def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str
     if baseline and auto_reset_baseline:
         if should_reset_baseline(baseline['baseline_date'], date_str, reset_interval_days=90):
             print(f"[INFO] Baseline is >3 months old ({baseline['baseline_date']}), resetting to current date...")
-            # Archive old baseline
-            old_baseline_file = os.path.join(base_dir, f"baseline_master_{baseline['baseline_date']}.json")
+            # Archive old baseline (save as compressed .json.gz)
             import shutil
-            shutil.copy2(os.path.join(base_dir, "baseline_master.json"), old_baseline_file)
+            import gzip
+            old_baseline_file = os.path.join(base_dir, f"baseline_master_{baseline['baseline_date']}.json.gz")
+            current_baseline_file = os.path.join(base_dir, "baseline_master.json.gz")
+            # Copy compressed baseline if it exists, otherwise compress the uncompressed one
+            if os.path.exists(current_baseline_file):
+                shutil.copy2(current_baseline_file, old_baseline_file)
+            else:
+                # Load uncompressed baseline and save as compressed
+                uncompressed_file = os.path.join(base_dir, "baseline_master.json")
+                if os.path.exists(uncompressed_file):
+                    with open(uncompressed_file, 'r', encoding='utf-8') as f_in:
+                        baseline_data = json.load(f_in)
+                    with gzip.open(old_baseline_file, 'wt', encoding='utf-8') as f_out:
+                        json.dump(baseline_data, f_out, indent=2)
             print(f"  Archived old baseline to: {os.path.basename(old_baseline_file)}")
             
             # Create new baseline from current data
