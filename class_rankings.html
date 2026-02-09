@@ -1241,9 +1241,17 @@
                 row.innerHTML = cells.join('');
                 row.classList.add('clickable-row');
                 row.addEventListener('click', (e) => {
-                    // Don't trigger if clicking on a link
-                    if (e.target.tagName !== 'A') {
-                        showScoreBreakdown(char);
+                    // Don't trigger if clicking directly on a link
+                    // But allow clicks on badges and other elements to trigger the modal
+                    const target = e.target;
+                    const isDirectLink = target.tagName === 'A';
+                    if (!isDirectLink) {
+                        // Check if we're inside a link (e.g., character name link)
+                        const linkParent = target.closest('a');
+                        if (!linkParent) {
+                            // Not clicking on a link, show the modal
+                            showScoreBreakdown(char);
+                        }
                     }
                 });
                 
