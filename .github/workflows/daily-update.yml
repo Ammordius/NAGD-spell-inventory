@@ -678,14 +678,25 @@ jobs:
         # Note: We only copy the compressed JSONs, and they're loaded on-demand by JavaScript
         mkdir -p deploy/delta_snapshots
         if [ -d "delta_snapshots" ]; then
+          # Copy delta JSON files
           cp delta_snapshots/delta_daily_*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No delta JSON files to copy"
-          DELTA_COUNT=$(ls deploy/delta_snapshots/*.json.gz 2>/dev/null | wc -l)
+          DELTA_COUNT=$(ls deploy/delta_snapshots/delta_daily_*.json.gz 2>/dev/null | wc -l)
           if [ "$DELTA_COUNT" -gt 0 ]; then
             echo "✓ Copied $DELTA_COUNT delta JSON files to deploy/delta_snapshots/"
-            # Calculate total size
-            TOTAL_SIZE=$(du -sh deploy/delta_snapshots/ | cut -f1)
-            echo "  Total size: $TOTAL_SIZE (compressed)"
+          else
+            echo "⚠ No delta JSON files found to copy"
           fi
+          # Copy baseline files (needed for client-side date range comparisons across baseline resets)
+          cp delta_snapshots/baseline_master*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No baseline files to copy"
+          BASELINE_COUNT=$(ls deploy/delta_snapshots/baseline_master*.json.gz 2>/dev/null | wc -l)
+          if [ "$BASELINE_COUNT" -gt 0 ]; then
+            echo "✓ Copied $BASELINE_COUNT baseline files to deploy/delta_snapshots/"
+          else
+            echo "⚠ No baseline files found to copy (client-side date range comparisons may not work)"
+          fi
+          # Calculate total size
+          TOTAL_SIZE=$(du -sh deploy/delta_snapshots/ | cut -f1)
+          echo "  Total size: $TOTAL_SIZE (compressed)"
         fi
         # Copy class rankings files if they were generated
         if [ -f "class_rankings.html" ]; then
