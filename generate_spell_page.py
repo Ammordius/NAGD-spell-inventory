@@ -1770,6 +1770,7 @@ def generate_delta_history(base_dir):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TAKP Delta History & Date Range Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1922,8 +1923,10 @@ def generate_delta_history(base_dir):
                     <strong>Run this command:</strong><br>
                     <code id="command_text"></code>
                 </div>
-                <button type="button" onclick="generateCommand()">Generate Command</button>
+                <button type="button" onclick="generateCommand()">Show Server Command</button>
+                <button type="button" onclick="generateDateRangeReport()" style="margin-left: 10px; background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Generate Report (Client-side)</button>
             </div>
+            <div id="date_range_output" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; min-height: 50px;"></div>
         </div>
         
         <div class="stats">
