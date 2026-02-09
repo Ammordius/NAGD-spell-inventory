@@ -1100,13 +1100,17 @@
                 }
                 
                 const data = await response.json();
+                console.log('Loaded data, parsing...', Object.keys(data));
+                
                 // Handle both old format (array) and new format (object with characters)
                 if (Array.isArray(data)) {
                     characters = data;
+                    console.log(`Loaded ${characters.length} characters (array format)`);
                 } else {
                     characters = data.characters || [];
                     classWeights = data.class_weights || {};
                     originalClassWeights = JSON.parse(JSON.stringify(classWeights)); // Deep copy
+                    console.log(`Loaded ${characters.length} characters, ${Object.keys(classWeights).length} class weights`);
                 }
                 filteredCharacters = [...characters];
                 
