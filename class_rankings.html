@@ -729,41 +729,49 @@
 
         function calculateResistScore(resistValue) {
             /**
-             * Calculate resist score with diminishing returns curve applied to the score itself:
-             * - Full score (100% at 500) up to 220
-             * - Linearly decreasing score multiplier from 220 to 320 (1.0 to 0.35)
-             * - 0.35 score multiplier from 320 to 500
-             * - 0 score above 500
+             * Calculate resist score with progressive taper curve:
+             * - L = 220 (start taper)
+             * - H = 500 (hard-cap point)
+             * - r = 0.35 (post-cap marginal credit)
+             * - p = 1.2 (controls how "progressive" the taper is)
+             * - t = (x - L) / (H - L) = (x - 220) / 280
              * 
-             * The curve is applied to the score percentage, not the weight.
-             * Weight is always 1.0 for all resists.
+             * S(x) = {
+             *     x,                                    if x <= 220
+             *     220 + (x - 220)(r + (1 - r)(1 - t)^p), if 220 < x < 500
+             *     318 + r(x - 500),                      if x >= 500
+             * }
+             * 
+             * Score percentage = (S(x) / S(500)) * 100, where S(500) = 318
              */
             if (resistValue <= 0) {
                 return { score: 0.0, weight: 1.0 };
             }
             
-            // Base score normalized to 500 max (so 500 = 100%)
-            const maxResist = 500.0;
-            const baseScore = (resistValue / maxResist) * 100.0;
+            const L = 220.0;  // Start taper
+            const H = 500.0;   // Hard-cap point
+            const r = 0.35;    // Post-cap marginal credit
+            const p = 1.2;     // Progressive taper control
             
-            // Calculate curve multiplier based on the resist value
-            let curveMultiplier;
-            if (resistValue <= 220) {
-                // Full multiplier up to 220
-                curveMultiplier = 1.0;
-            } else if (resistValue <= 320) {
-                // Linear decrease from 220 to 320 (1.0 to 0.35)
-                curveMultiplier = 1.0 - ((resistValue - 220) / 100.0) * 0.65; // Decreases from 1.0 to 0.35
-            } else if (resistValue <= 500) {
-                // 0.35 multiplier from 320 to 500
-                curveMultiplier = 0.35;
+            const x = parseFloat(resistValue);
+            let S_x;
+            
+            if (x <= L) {
+                // No taper: S(x) = x
+                S_x = x;
+            } else if (x < H) {
+                // Progressive taper: S(x) = 220 + (x - 220)(r + (1 - r)(1 - t)^p)
+                const t = (x - L) / (H - L);  // t = (x - 220) / 280
+                S_x = L + (x - L) * (r + (1 - r) * Math.pow(1 - t, p));
             } else {
-                // 0 multiplier above 500
-                curveMultiplier = 0.0;
+                // Post-cap: S(x) = 318 + r(x - 500)
+                const S_500 = L + r * (H - L);  // = 220 + 0.35 * 280 = 318
+                S_x = S_500 + r * (x - H);
             }
             
-            // Apply curve to the score itself
-            const score = baseScore * curveMultiplier;
+            // Normalize: S(500) = 318, so score percentage = (S(x) / 318) * 100
+            const S_500 = L + r * (H - L);  // = 318
+            const score = (S_500 > 0) ? (S_x / S_500) * 100.0 : 0.0;
             
             // Weight is always 1.0
             const weight = 1.0;
@@ -1585,13 +1593,13 @@
                         const resistData = individualResistScores[resistType];
                         if (resistData) {
                             totalRawValue += resistData.value;
-                            // Weight is always 1.0, curve is already applied to score
-                            const effectiveWeight = weight * resistData.weight;  // weight is always 1.0
+                            // Weight is always 1.0, curve is applied to score
+                            const effectiveWeight = weight * resistData.weight;  // weight is always 1.0, so effectiveWeight = weight
                             const resistPoints = resistData.score * effectiveWeight;
                             totalAdvancedPoints += resistPoints;
                             totalResistScore += resistData.score * effectiveWeight;
                             totalResistWeight += effectiveWeight;
-                            // Display the base class weight (curve is already in the score)
+                            // Display the base class weight (curve is applied to score, weight is 1.0)
                             html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${weight.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
                         }
                     });

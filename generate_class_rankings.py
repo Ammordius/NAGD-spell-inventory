@@ -894,41 +894,48 @@ def normalize_class_weights(weights_config):
 
 def calculate_resist_score(resist_value):
     """
-    Calculate resist score with diminishing returns curve applied to the score itself:
-    - Full score (100% at 500) up to 220
-    - Linearly decreasing score multiplier from 220 to 320 (1.0 to 0.35)
-    - 0.35 score multiplier from 320 to 500
-    - 0 score above 500
+    Calculate resist score with progressive taper curve:
+    - L = 220 (start taper)
+    - H = 500 (hard-cap point)
+    - r = 0.35 (post-cap marginal credit)
+    - p = 1.2 (controls how "progressive" the taper is)
+    - t = (x - L) / (H - L) = (x - 220) / 280
     
-    The curve is applied to the score percentage, not the weight.
-    Weight is always 1.0 for all resists.
+    S(x) = {
+        x,                                    if x <= 220
+        220 + (x - 220)(r + (1 - r)(1 - t)^p), if 220 < x < 500
+        318 + r(x - 500),                      if x >= 500
+    }
+    
+    Score percentage = (S(x) / S(500)) * 100, where S(500) = 318
     
     Returns: (score_percentage_with_curve, weight_always_1.0)
     """
     if resist_value <= 0:
         return (0.0, 1.0)
     
-    # Base score normalized to 500 max (so 500 = 100%)
-    max_resist = 500.0
-    base_score = (resist_value / max_resist) * 100.0
+    L = 220.0  # Start taper
+    H = 500.0  # Hard-cap point
+    r = 0.35   # Post-cap marginal credit
+    p = 1.2    # Progressive taper control
     
-    # Calculate curve multiplier based on the resist value
-    if resist_value <= 220:
-        # Full multiplier up to 220
-        curve_multiplier = 1.0
-    elif resist_value <= 320:
-        # Linear decrease from 220 to 320 (1.0 to 0.35)
-        curve_multiplier = 1.0 - ((resist_value - 220) / 100.0) * 0.65  # Decreases from 1.0 to 0.35
-    elif resist_value <= 500:
-        # 0.35 multiplier from 320 to 500
-        curve_multiplier = 0.35
+    x = float(resist_value)
+    
+    if x <= L:
+        # No taper: S(x) = x
+        S_x = x
+    elif x < H:
+        # Progressive taper: S(x) = 220 + (x - 220)(r + (1 - r)(1 - t)^p)
+        t = (x - L) / (H - L)  # t = (x - 220) / 280
+        S_x = L + (x - L) * (r + (1 - r) * ((1 - t) ** p))
     else:
-        # 0 multiplier above 500
-        curve_multiplier = 0.0
-        base_score = 0.0  # No score above 500
+        # Post-cap: S(x) = 318 + r(x - 500)
+        S_500 = L + r * (H - L)  # = 220 + 0.35 * 280 = 318
+        S_x = S_500 + r * (x - H)
     
-    # Apply curve to the score itself
-    score = base_score * curve_multiplier
+    # Normalize: S(500) = 318, so score percentage = (S(x) / 318) * 100
+    S_500 = L + r * (H - L)  # = 318
+    score = (S_x / S_500) * 100.0 if S_500 > 0 else 0.0
     
     # Weight is always 1.0
     weight = 1.0
@@ -965,13 +972,16 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         # Use the larger of max_ac or max_hp_ac_equivalent as the normalization base
         max_combined = max(max_ac, max_hp_ac_equivalent) if max_ac > 0 else max_hp_ac_equivalent
         
-        # Convert HP to AC-equivalent and normalize
+        # Convert HP to AC-equivalent for scoring, but display HP as % of max_hp
         hp_weight = weights_config.get('hp_pct', 0.0)
         if hp_weight > 0 and max_combined > 0:
             hp_ac_equivalent = hp_value / 5.0
-            hp_score = (hp_ac_equivalent / max_combined * 100) if hp_ac_equivalent > 0 else 0
-            scores['hp_pct'] = hp_score  # Store percentage for display
-            total_score += hp_score * hp_weight
+            # For scoring: use AC-equivalent normalized to max_combined
+            hp_score_for_calc = (hp_ac_equivalent / max_combined * 100) if hp_ac_equivalent > 0 else 0
+            # For display: use HP as % of max_hp (so max HP shows 100%)
+            hp_score_for_display = (hp_value / max_hp * 100) if max_hp > 0 and hp_value > 0 else 0
+            scores['hp_pct'] = hp_score_for_display  # Store percentage for display
+            total_score += hp_score_for_calc * hp_weight
             total_weight += hp_weight
         
         # AC normalized to same scale
@@ -1108,9 +1118,13 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
     
     hp_weight = weights_config.get('hp_pct', 0.0)
     if hp_weight > 0 and max_combined > 0:
-        hp_score = (hp_value / max_combined * 100) if hp_value > 0 else 0
-        scores['hp_pct'] = hp_score  # Store percentage for display
-        total_score += hp_score * hp_weight
+        # For scoring: use normalized to max_combined
+        hp_score_for_calc = (hp_value / max_combined * 100) if hp_value > 0 else 0
+        # For display: use HP as % of max_hp (so max HP shows 100%)
+        max_hp = class_max_values.get('max_hp', 1)
+        hp_score_for_display = (hp_value / max_hp * 100) if max_hp > 0 and hp_value > 0 else 0
+        scores['hp_pct'] = hp_score_for_display  # Store percentage for display
+        total_score += hp_score_for_calc * hp_weight
         total_weight += hp_weight
     
     mana_weight = weights_config.get('mana_pct', 0.0)
