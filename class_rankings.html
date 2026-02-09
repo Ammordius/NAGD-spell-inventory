@@ -1568,18 +1568,19 @@
             if (scores.resists !== undefined && scores.resists !== null || scores.resists_pct !== undefined) {
                 const weight = classWeightConfig.resists_pct || 0;
                 const resistsValue = scores.resists !== undefined && scores.resists !== null ? scores.resists : 0;
-                const resistsPct = (scores.resists_pct !== undefined && scores.resists_pct !== null && typeof scores.resists_pct === 'number') ? scores.resists_pct : null;
-                
-                const resistsPoints = (typeof resistsPct === 'number' ? resistsPct : 0) * weight;
-                totalStatPoints += resistsPoints;
                 
                 // Show individual resists if available
                 const individualResistScores = scores.individual_resist_scores;
+                const charIndividualResists = char.individual_resists || {};
+                
                 if (individualResistScores && Object.keys(individualResistScores).length > 0 && advancedResists) {
                     html += `<tr><td colspan="5"><strong>Resists (Advanced)</strong></td></tr>`;
                     const resistTypes = ['MR', 'FR', 'CR', 'DR', 'PR'];
                     let totalRawValue = 0;
                     let totalAdvancedPoints = 0;
+                    let totalResistScore = 0;
+                    let totalResistWeight = 0;
+                    
                     resistTypes.forEach(resistType => {
                         const resistData = individualResistScores[resistType];
                         if (resistData) {
@@ -1588,12 +1589,23 @@
                             const effectiveWeight = weight * resistData.weight;  // weight is always 1.0
                             const resistPoints = resistData.score * effectiveWeight;
                             totalAdvancedPoints += resistPoints;
+                            totalResistScore += resistData.score * effectiveWeight;
+                            totalResistWeight += effectiveWeight;
                             // Display the base class weight (curve is already in the score)
                             html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${weight.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
                         }
                     });
-                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(resistsPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td><td><strong>${totalAdvancedPoints.toFixed(2)}</strong></td></tr>`;
+                    
+                    // Calculate average resist score percentage
+                    const avgResistPct = totalResistWeight > 0 ? (totalResistScore / totalResistWeight) : (scores.resists_pct || 0);
+                    
+                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(avgResistPct)}</strong></td><td><strong>${weight.toFixed(2)}</strong></td><td><strong>${totalAdvancedPoints.toFixed(2)}</strong></td></tr>`;
+                    totalStatPoints += totalAdvancedPoints;
                 } else {
+                    // Use simple total resists
+                    const resistsPct = (scores.resists_pct !== undefined && scores.resists_pct !== null && typeof scores.resists_pct === 'number') ? scores.resists_pct : 0;
+                    const resistsPoints = resistsPct * weight;
+                    totalStatPoints += resistsPoints;
                     html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${weight.toFixed(2)}</td><td>${resistsPoints.toFixed(2)}</td></tr>`;
                 }
             }
