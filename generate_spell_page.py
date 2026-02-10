@@ -2427,7 +2427,13 @@ def generate_delta_history(base_dir):
                     if (Object.keys(addedItems).length > 0 || Object.keys(removedItems).length > 0) {
                         const inStart = charName in startInv;
                         const inEnd = charName in endInv;
-                        let isVisibilityChange = (inStart && !inEnd) || (!inStart && inEnd);
+                        // Use reconstructed state: character in one snapshot but not the other = anon/visibility change
+                        const inStartState = charName in startState;
+                        const inEndState = charName in endState;
+                        let isVisibilityChange = (inStartState && !inEndState) || (!inStartState && inEndState);
+                        if (!isVisibilityChange) {
+                            isVisibilityChange = (inStart && !inEnd) || (!inStart && inEnd);
+                        }
                         if (!isVisibilityChange) {
                             const numAdded = Object.values(addedItems).reduce((s, n) => s + n, 0);
                             const numRemoved = Object.values(removedItems).reduce((s, n) => s + n, 0);
@@ -2435,6 +2441,15 @@ def generate_delta_history(base_dir):
                         }
                         invDeltas[charName] = { added: addedItems, removed: removedItems, item_names: itemNames, is_visibility_change: isVisibilityChange };
                     }
+                }
+                // Include characters that exist in one snapshot but not the other (e.g. went anon) so we show "Visibility change" not a fake Lost list
+                for (const charName of Object.keys(startState)) {
+                    if (charName in endState || charName in invDeltas) continue;
+                    invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: true };
+                }
+                for (const charName of Object.keys(endState)) {
+                    if (charName in startState || charName in invDeltas) continue;
+                    invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: true };
                 }
                 const invDeltasLevel1 = {};
                 const invDeltasOthers = {};
@@ -2466,7 +2481,7 @@ def generate_delta_history(base_dir):
                                 if (delta.item_names && delta.item_names[itemId]) itemNames[itemId] = delta.item_names[itemId];
                             }
                         }
-                        if (Object.keys(added).length > 0 || Object.keys(removed).length > 0) {
+                        if (Object.keys(added).length > 0 || Object.keys(removed).length > 0 || delta.is_visibility_change) {
                             trackedDeltas[charName] = { added, removed, item_names: itemNames, is_visibility_change: delta.is_visibility_change || false };
                         }
                     }
