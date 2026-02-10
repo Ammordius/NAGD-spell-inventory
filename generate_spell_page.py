@@ -2232,12 +2232,14 @@ def generate_delta_history(base_dir):
             // Try to load baseline file (compressed .json.gz)
             // First try archived baseline_master_YYYY-MM-DD.json.gz, then current baseline_master.json.gz
             const baselineKey = `baseline_${baselineDate}`;
-            if (loadedBaselines && loadedBaselines.has(baselineKey)) {
-                return loadedBaselines.get(baselineKey);
+            const cacheKey = baselineKey + '_result';
+            if (loadedBaselines && loadedBaselines.has(cacheKey)) {
+                return loadedBaselines.get(cacheKey);
             }
             
             const currentUrl = `delta_snapshots/baseline_master.json.gz`;
             const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
+            let usedFallback = false;
             try {
                 let response = null;
                 // Try archived baseline first (baseline_master_YYYY-MM-DD.json.gz exists only after a reset)
@@ -2248,10 +2250,12 @@ def generate_delta_history(base_dir):
                 }
                 // If archived missing (404) or failed, use current baseline (baseline_master.json.gz)
                 if (!response || !response.ok) {
+                    usedFallback = true;
                     response = await fetch(currentUrl);
                 }
                 if (!response || !response.ok) {
                     // Last resort: try uncompressed (for backward compatibility)
+                    usedFallback = true;
                     const uncompressedUrl = `delta_snapshots/baseline_master_${baselineDate}.json`;
                     response = await fetch(uncompressedUrl);
                     if (!response || !response.ok) {
@@ -2265,8 +2269,9 @@ def generate_delta_history(base_dir):
                     if (!loadedBaselines) {
                         loadedBaselines = new Map();
                     }
-                    loadedBaselines.set(baselineKey, baseline);
-                    return baseline;
+                    const result = { baseline, usedFallback };
+                    loadedBaselines.set(cacheKey, result);
+                    return result;
                 }
                 // Parse compressed JSON (from archived or current .json.gz)
                 const arrayBuffer = await response.arrayBuffer();
@@ -2275,8 +2280,9 @@ def generate_delta_history(base_dir):
                 if (!loadedBaselines) {
                     loadedBaselines = new Map();
                 }
-                loadedBaselines.set(baselineKey, baseline);
-                return baseline;
+                const result = { baseline, usedFallback };
+                loadedBaselines.set(cacheKey, result);
+                return result;
             } catch (error) {
                 console.error(`Error loading baseline for ${baselineDate}:`, error);
                 throw error;
@@ -2382,15 +2388,18 @@ def generate_delta_history(base_dir):
                 
                 // Load baselines (needed to reconstruct full character states)
                 outputDiv.innerHTML = '<p>Loading baselines... (this may take a moment)</p>';
-                const [startBaseline, endBaseline] = await Promise.all([
+                const [startResult, endResult] = await Promise.all([
                     loadBaseline(startDelta.baseline_date),
                     loadBaseline(endDelta.baseline_date)
                 ]);
                 
-                if (!startBaseline || !endBaseline) {
+                if (!startResult || !endResult) {
                     outputDiv.innerHTML = '<p style="color: red;">Error: Could not load baseline JSONs. Baselines may not be available on GitHub Pages.</p>';
                     return;
                 }
+                const startBaseline = startResult.baseline;
+                const endBaseline = endResult.baseline;
+                const usedFallbackBaseline = startResult.usedFallback || endResult.usedFallback;
                 
                 // Reconstruct full character states for both dates
                 outputDiv.innerHTML = '<p>Reconstructing character states...</p>';
@@ -2580,6 +2589,11 @@ def generate_delta_history(base_dir):
                 // Generate HTML report matching delta.html formatting
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
                 
+                if (usedFallbackBaseline) {
+                    reportHTML += `<p style="background: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ff9800;">
+                        <strong>⚠️ Historical baseline not found.</strong> The archived baseline for this date range (e.g. baseline_master_${startDelta.baseline_date}.json.gz) was not available (404). The <em>current</em> baseline was used instead. Character levels/AAs and visibility may be inaccurate for old dates. Inventory and tracked-item <em>diffs</em> between the two dates still come from the delta files; if those sections are empty below, delta files from this period may not include inventory data.
+                    </p>`;
+                }
                 if (baselineMismatch) {
                     reportHTML += `<p style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #2196F3;">
                         <strong>ℹ️ Different Baselines:</strong> These dates use different baselines (${startDelta.baseline_date} vs ${endDelta.baseline_date}).
@@ -2601,12 +2615,16 @@ def generate_delta_history(base_dir):
                     <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
                     <a href="#character-changes" style="margin-right: 10px;">Character Changes</a>
                     ${allVisNames.length > 0 ? '<a href="#visibility-note" style="margin-right: 10px; color: #757575;">Visibility (anon)</a>' : ''}
-                    ${Object.keys(invDeltasLevel1).length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
+                    ${nonVisLevel1.length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
                     <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a>
-                    ${Object.keys(trackedDeltas).length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}
+                    ${nonVisTracked.length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}
                     ${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}</p>`;
                 if (allVisNames.length > 0) {
                     reportHTML += `<details id="visibility-note" style="color: #757575; margin: 15px 0; padding: 10px; background: #fafafa; border-radius: 5px; border-left: 4px solid #9e9e9e;"><summary style="cursor: pointer; font-style: italic;"><strong>Visibility change (anon ↔ not anon)</strong> — ${allVisNames.length} character(s); their inventory and tracked item deltas are not listed below. Click to expand names.</summary><p style="margin: 8px 0 0 0; font-size: 0.9em;">${allVisNames.join(', ')}</p></details>`;
+                }
+                const noInventoryOrTrackedBlocks = nonVisLevel1.length === 0 && nonVisOthers.length === 0 && nonVisTracked.length === 0;
+                if (noInventoryOrTrackedBlocks && (Object.keys(invDeltasLevel1).length > 0 || Object.keys(invDeltasOthers).length > 0 || Object.keys(trackedDeltas).length > 0)) {
+                    reportHTML += `<p style="color: #757575; font-style: italic; margin: 10px 0;">No inventory or tracked item changes to list for this range. For date ranges outside the current baseline period, delta files from that time may not include inventory data, or all changes in this range are visibility-only (see above).</p>`;
                 }
                 
                 // Calculate leaderboards (matching delta.html format)
@@ -2821,8 +2839,8 @@ def generate_delta_history(base_dir):
                     <p style="color: #999; font-style: italic;">No level or AA changes detected.</p>`;
                 }
                 
-                // Level 1 inventory changes (mules/traders) — only actual changes (visibility list shown once above)
-                if (Object.keys(invDeltasLevel1).length > 0) {
+                // Level 1 inventory changes (mules/traders) — only actual changes (visibility list shown once above); skip section if no blocks
+                if (nonVisLevel1.length > 0) {
                     reportHTML += `
                     <h2 id="inventory-changes-level1" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Level 1 Inventory Changes (Mules/Traders)</h2>
                     <p><em>Showing level 1 characters with inventory changes (limited to 500)</em></p>`;
@@ -2857,8 +2875,8 @@ def generate_delta_history(base_dir):
                     }
                 }
                 
-                // Regular inventory changes (non-level 1) — only actual changes (visibility list shown once above)
-                if (Object.keys(invDeltasOthers).length > 0) {
+                // Regular inventory changes (non-level 1) — only actual changes; show section with message when no blocks
+                if (nonVisOthers.length > 0) {
                     reportHTML += `
                     <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
                     <p><em>Showing characters with inventory changes (limited to 500)</em></p>`;
@@ -2891,14 +2909,14 @@ def generate_delta_history(base_dir):
                         }
                         reportHTML += `</div>`;
                     }
-                } else if (Object.keys(invDeltas).length === 0) {
+                } else {
                     reportHTML += `
                     <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
-                    <p style="color: #999; font-style: italic;">No inventory changes detected.</p>`;
+                    <p style="color: #999; font-style: italic;">${Object.keys(invDeltas).length === 0 ? 'No inventory changes detected.' : 'No inventory changes to list (only visibility changes in this range).'}</p>`;
                 }
                 
-                // Tracked Items section (raid / elemental armor / praesterium) — only actual changes (visibility list shown once above)
-                if (Object.keys(trackedDeltas).length > 0) {
+                // Tracked Items section — only actual changes; skip section if no blocks
+                if (nonVisTracked.length > 0) {
                     reportHTML += `
                     <h2 id="tracked-items" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
                     <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
