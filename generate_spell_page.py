@@ -849,11 +849,12 @@ def load_no_rent_items():
 
 def load_tracked_item_ids():
     """Load raid, elemental armor, and praesterium item IDs from the 3 JSON files.
-    Returns (set of item_id strings, dict item_id -> source_label for display).
+    Returns (set of item_id strings, dict item_id -> source_label for display, dict item_id -> zone for raid items).
     Raid items use mob name from JSON (e.g. 'Mob Name (Zone)'); others use category label."""
     base_dir = os.path.dirname(__file__)
     tracked = set()
     source_label = {}
+    item_zone = {}  # raid item_id -> zone name (for "Items by zone" grouping)
     # Raid: use mob (and zone) from JSON instead of "raid"
     raid_path = os.path.join(base_dir, "raid_item_sources.json")
     if os.path.exists(raid_path):
@@ -865,6 +866,8 @@ def load_tracked_item_ids():
                 tracked.add(sid)
                 mob = entry.get("mob", "").strip()
                 zone = entry.get("zone", "").strip()
+                if zone:
+                    item_zone[sid] = zone
                 if mob and zone:
                     source_label[sid] = f"{mob} ({zone})"
                 elif mob:
@@ -888,7 +891,7 @@ def load_tracked_item_ids():
                 source_label[sid] = label
         except Exception as e:
             print(f"Warning: Could not load {path}: {e}")
-    return tracked, source_label
+    return tracked, source_label, item_zone
 
 
 # Threshold: if a character has this many items only added or only removed (not both), treat as anon/not-anon visibility change
@@ -1018,7 +1021,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 char_delta['item_names'][item_id] = item_names[item_id]
     
     # Load tracked item IDs (raid / elemental armor / praesterium) and filter deltas for that set
-    tracked_ids, tracked_source_label = load_tracked_item_ids()
+    tracked_ids, tracked_source_label, item_zone = load_tracked_item_ids()
     tracked_deltas = {}
     if tracked_ids:
         for char_name, delta in inv_deltas.items():
@@ -1031,6 +1034,23 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     'item_names': {k: v for k, v in delta['item_names'].items() if str(k) in tracked_ids},
                     'is_visibility_change': delta.get('is_visibility_change', False),
                 }
+    
+    # Items by zone: only chars in BOTH snapshots (exclude visibility-change); only raid zones
+    chars_in_both = set(current_inv.keys()) & set(previous_inv.keys())
+    zone_entries = {}
+    for char_name in tracked_deltas:
+        if char_name not in chars_in_both or tracked_deltas[char_name].get('is_visibility_change'):
+            continue
+        delta = tracked_deltas[char_name]
+        for item_id, count in (delta.get('added') or {}).items():
+            zone = item_zone.get(str(item_id))
+            if not zone:
+                continue
+            item_name = (delta.get('item_names') or {}).get(item_id, f"Item {item_id}")
+            if zone not in zone_entries:
+                zone_entries[zone] = []
+            for _ in range(count):
+                zone_entries[zone].append((char_name, item_id, item_name))
     
     # Calculate AA leaderboard (top gainers)
     aa_leaderboard = []
@@ -1295,6 +1315,8 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append('<a href="#inventory-changes">Inventory Changes</a>')
     if tracked_deltas:
         nav_links.append('<a href="#tracked-items" style="background-color: #FF9800;">📌 Tracked Items</a>')
+        if zone_entries:
+            nav_links.append('<a href="#items-by-zone">📍 Items by Zone</a>')
     
     # Add weekly/monthly leaderboard links
     if week_start:
@@ -1583,9 +1605,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         for char_name in sorted(tracked_deltas.keys()):
             delta = tracked_deltas[char_name]
             char_level = current_char_data.get(char_name, {}).get('level', '?')
+            char_slug = char_name.lower().replace(' ', '_')
+            magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
             html += f"""
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
-            <h3><strong>{char_name}</strong> <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
+            <h3><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_name}</a> <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
 """
             if delta.get('is_visibility_change'):
                 html += """
@@ -1625,6 +1649,29 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             </div>
 """
             html += """
+        </div>
+"""
+    
+    # Items by zone (zone_entries already built above)
+    if zone_entries:
+        html += """
+        <h2 id="items-by-zone">📍 Items by Zone (raid drops — who got them)</h2>
+        <p><em>Raid items acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>
+"""
+        for zone in sorted(zone_entries.keys()):
+            entries = zone_entries[zone]
+            html += f"""
+        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
+            <h3 style="margin-top: 0;">{zone}</h3>
+            <ul style="margin: 0; padding-left: 20px;">
+"""
+            for char_name, item_id, item_name in entries:
+                char_slug = char_name.lower().replace(' ', '_')
+                item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
+                magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
+                html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_name}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
+            html += """
+            </ul>
         </div>
 """
     
@@ -1876,10 +1923,11 @@ def generate_delta_history(base_dir):
     import glob
     import re
     
-    # Load tracked item IDs so we can embed them for the client-side report (Tracked Items section)
-    tracked_ids, tracked_source_label = load_tracked_item_ids()
+    # Load tracked item IDs so we can embed them for the client-side report (Tracked Items + Items by zone)
+    tracked_ids, tracked_source_label, item_zone = load_tracked_item_ids()
     tracked_ids_json = json.dumps(list(tracked_ids))
     tracked_source_json = json.dumps(tracked_source_label)
+    tracked_item_zone_json = json.dumps(item_zone)
     
     # Find all daily delta JSON files
     delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
@@ -2105,9 +2153,11 @@ def generate_delta_history(base_dir):
     </div>
     <script type="application/json" id="tracked-item-ids">""" + tracked_ids_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="tracked-source-label">""" + tracked_source_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="tracked-item-zone">""" + tracked_item_zone_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
+        const TRACKED_ITEM_ZONE = JSON.parse((document.getElementById('tracked-item-zone') || { textContent: '{}' }).textContent);
         // Set default dates (today and 7 days ago)
         const today = new Date().toISOString().split('T')[0];
         const weekAgo = new Date();
@@ -2487,6 +2537,22 @@ def generate_delta_history(base_dir):
                     }
                 }
                 
+                // Items by zone: only chars in BOTH snapshots (exclude visibility-change); only raid zones
+                const zoneEntries = {};
+                if (TRACKED_ITEM_ZONE && typeof TRACKED_ITEM_ZONE === 'object') {
+                    for (const [charName, delta] of Object.entries(trackedDeltas)) {
+                        if (!startState[charName] || !endState[charName] || delta.is_visibility_change) continue;
+                        for (const itemId of Object.keys(delta.added || {})) {
+                            const zone = TRACKED_ITEM_ZONE[String(itemId)];
+                            if (!zone) continue;
+                            const count = delta.added[itemId];
+                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                            if (!zoneEntries[zone]) zoneEntries[zone] = [];
+                            for (let i = 0; i < count; i++) zoneEntries[zone].push({ charName, itemId, name });
+                        }
+                    }
+                }
+                
                 // Generate HTML report matching delta.html formatting
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
                 
@@ -2501,7 +2567,8 @@ def generate_delta_history(base_dir):
                     <a href="#character-changes" style="margin-right: 10px;">Character Changes</a>
                     ${Object.keys(invDeltasLevel1).length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
                     <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a>
-                    ${Object.keys(trackedDeltas).length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}</p>`;
+                    ${Object.keys(trackedDeltas).length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}
+                    ${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}</p>`;
                 
                 // Calculate leaderboards (matching delta.html format)
                 const aaLeaderboard = [];
@@ -2807,9 +2874,11 @@ def generate_delta_history(base_dir):
                     for (const charName of Object.keys(trackedDeltas).sort()) {
                         const delta = trackedDeltas[charName];
                         const level = (endState[charName] || startState[charName] || {}).level || '?';
+                        const charSlug = charName.toLowerCase().replace(/ /g, '_');
+                        const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
-                        <h3 style="margin-top: 0;"><strong>${charName}</strong> <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
+                        <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charName}</a> <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
                         if (delta.is_visibility_change) {
                             reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — tracked item delta not listed.</p>`;
                         } else if (Object.keys(delta.added || {}).length > 0) {
@@ -2837,6 +2906,29 @@ def generate_delta_history(base_dir):
                             reportHTML += `</div></div>`;
                         }
                         reportHTML += `</div>`;
+                    }
+                }
+                
+                // Items by zone (only chars in both snapshots; only zones that had activity)
+                if (Object.keys(zoneEntries).length > 0) {
+                    reportHTML += `
+                    <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone (raid drops — who got them)</h2>
+                    <p><em>Raid items acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>`;
+                    for (const zone of Object.keys(zoneEntries).sort()) {
+                        const entries = zoneEntries[zone];
+                        reportHTML += `
+                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
+                        <h3 style="margin-top: 0;">${zone}</h3>
+                        <ul style="margin: 0; padding-left: 20px;">`;
+                        for (const e of entries) {
+                            const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
+                            const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
+                            const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
+                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${e.charName}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                        }
+                        reportHTML += `
+                        </ul>
+                    </div>`;
                     }
                 }
                 
