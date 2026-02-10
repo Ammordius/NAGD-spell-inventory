@@ -891,10 +891,15 @@ def load_tracked_item_ids():
     return tracked, source_label
 
 
+# Threshold: if a character has this many items only added or only removed (not both), treat as anon/not-anon visibility change
+VISIBILITY_CHANGE_ITEM_THRESHOLD = 20
+
+
 def compare_inventories(current_inv, previous_inv, character_list=None):
     """Compare current and previous inventories to find item deltas.
     If character_list is None, compares all characters (serverwide).
-    No-rent items are automatically filtered out."""
+    No-rent items are automatically filtered out.
+    Detects anon/not-anon visibility changes (many items only added or only removed) and marks them for graceful display."""
     item_deltas = {}
     
     # Load no-rent items to filter out
@@ -955,10 +960,23 @@ def compare_inventories(current_inv, previous_inv, character_list=None):
                 removed_items[item_id] = count - curr_count
         
         if added_items or removed_items:
+            in_current = char_name in current_inv
+            in_previous = char_name in previous_inv
+            # Primary: character in one snapshot but not the other = anon toggle (went anon or came not-anon)
+            is_visibility_change = (not in_current and in_previous) or (in_current and not in_previous)
+            if not is_visibility_change:
+                # Fallback: many items only added or only removed when char in both (e.g. empty inv when anon)
+                num_added = sum(added_items.values())
+                num_removed = sum(removed_items.values())
+                is_visibility_change = (
+                    (num_added >= VISIBILITY_CHANGE_ITEM_THRESHOLD and num_removed == 0)
+                    or (num_removed >= VISIBILITY_CHANGE_ITEM_THRESHOLD and num_added == 0)
+                )
             item_deltas[char_name] = {
                 'added': added_items,
                 'removed': removed_items,
-                'item_names': {}  # Will be populated with item names
+                'item_names': {},  # Will be populated with item names
+                'is_visibility_change': is_visibility_change,
             }
     
     return item_deltas
@@ -1010,7 +1028,8 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 tracked_deltas[char_name] = {
                     'added': added,
                     'removed': removed,
-                    'item_names': {k: v for k, v in delta['item_names'].items() if str(k) in tracked_ids}
+                    'item_names': {k: v for k, v in delta['item_names'].items() if str(k) in tracked_ids},
+                    'is_visibility_change': delta.get('is_visibility_change', False),
                 }
     
     # Calculate AA leaderboard (top gainers)
@@ -1464,7 +1483,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
             <h3><strong>{char_name}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1 - Mule/Trader)</span></h3>
 """
-            if delta['added']:
+            if delta.get('is_visibility_change'):
+                html += """
+            <p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — inventory delta not listed.</p>
+"""
+            elif delta['added']:
                 html += """
             <div style="margin: 10px 0;">
                 <strong style="color: #4CAF50;">Items Added:</strong>
@@ -1478,7 +1501,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 </div>
             </div>
 """
-            if delta['removed']:
+            if not delta.get('is_visibility_change') and delta['removed']:
                 html += """
             <div style="margin: 10px 0;">
                 <strong style="color: #f44336;">Items Removed:</strong>
@@ -1509,31 +1532,36 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
             <h3><strong>{char_name}</strong></h3>
 """
-            if delta['added']:
+            if delta.get('is_visibility_change'):
                 html += """
+            <p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — inventory delta not listed.</p>
+"""
+            else:
+                if delta['added']:
+                    html += """
             <div style="margin: 10px 0;">
                 <strong style="color: #4CAF50;">Items Added:</strong>
                 <div class="item-list" style="margin-top: 5px;">
 """
-                for item_id, count in sorted(delta['added'].items()):
-                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
-                    count_text = f" x{count}" if count > 1 else ""
-                    html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}</span>'
-                html += """
+                    for item_id, count in sorted(delta['added'].items()):
+                        item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                        count_text = f" x{count}" if count > 1 else ""
+                        html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                    html += """
                 </div>
             </div>
 """
-            if delta['removed']:
-                html += """
+                if delta['removed']:
+                    html += """
             <div style="margin: 10px 0;">
                 <strong style="color: #f44336;">Items Removed:</strong>
                 <div class="item-list" style="margin-top: 5px;">
 """
-                for item_id, count in sorted(delta['removed'].items()):
-                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
-                    count_text = f" x{count}" if count > 1 else ""
-                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}</span>'
-                html += """
+                    for item_id, count in sorted(delta['removed'].items()):
+                        item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                        count_text = f" x{count}" if count > 1 else ""
+                        html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                    html += """
                 </div>
             </div>
 """
@@ -1559,35 +1587,40 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
             <h3><strong>{char_name}</strong> <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
 """
-            if delta['added']:
+            if delta.get('is_visibility_change'):
                 html += """
+            <p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — tracked item delta not listed.</p>
+"""
+            else:
+                if delta['added']:
+                    html += """
             <div style="margin: 10px 0;">
                 <strong style="color: #4CAF50;">Acquired:</strong>
                 <div class="item-list" style="margin-top: 5px;">
 """
-                for item_id, count in sorted(delta['added'].items()):
-                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
-                    source = tracked_source_label.get(str(item_id), "")
-                    count_text = f" x{count}" if count > 1 else ""
-                    label = f" ({source})" if source else ""
-                    html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
-                html += """
+                    for item_id, count in sorted(delta['added'].items()):
+                        item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                        source = tracked_source_label.get(str(item_id), "")
+                        count_text = f" x{count}" if count > 1 else ""
+                        label = f" ({source})" if source else ""
+                        html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                    html += """
                 </div>
             </div>
 """
-            if delta['removed']:
-                html += """
+                if delta['removed']:
+                    html += """
             <div style="margin: 10px 0;">
                 <strong style="color: #f44336;">Lost:</strong>
                 <div class="item-list" style="margin-top: 5px;">
 """
-                for item_id, count in sorted(delta['removed'].items()):
-                    item_name = delta['item_names'].get(item_id, f"Item {item_id}")
-                    source = tracked_source_label.get(str(item_id), "")
-                    count_text = f" x{count}" if count > 1 else ""
-                    label = f" ({source})" if source else ""
-                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
-                html += """
+                    for item_id, count in sorted(delta['removed'].items()):
+                        item_name = delta['item_names'].get(item_id, f"Item {item_id}")
+                        source = tracked_source_label.get(str(item_id), "")
+                        count_text = f" x{count}" if count > 1 else ""
+                        label = f" ({source})" if source else ""
+                        html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                    html += """
                 </div>
             </div>
 """
@@ -2392,7 +2425,15 @@ def generate_delta_history(base_dir):
                         }
                     }
                     if (Object.keys(addedItems).length > 0 || Object.keys(removedItems).length > 0) {
-                        invDeltas[charName] = { added: addedItems, removed: removedItems, item_names: itemNames };
+                        const inStart = charName in startInv;
+                        const inEnd = charName in endInv;
+                        let isVisibilityChange = (inStart && !inEnd) || (!inStart && inEnd);
+                        if (!isVisibilityChange) {
+                            const numAdded = Object.values(addedItems).reduce((s, n) => s + n, 0);
+                            const numRemoved = Object.values(removedItems).reduce((s, n) => s + n, 0);
+                            isVisibilityChange = (numAdded >= 20 && numRemoved === 0) || (numRemoved >= 20 && numAdded === 0);
+                        }
+                        invDeltas[charName] = { added: addedItems, removed: removedItems, item_names: itemNames, is_visibility_change: isVisibilityChange };
                     }
                 }
                 const invDeltasLevel1 = {};
@@ -2426,7 +2467,7 @@ def generate_delta_history(base_dir):
                             }
                         }
                         if (Object.keys(added).length > 0 || Object.keys(removed).length > 0) {
-                            trackedDeltas[charName] = { added, removed, item_names: itemNames };
+                            trackedDeltas[charName] = { added, removed, item_names: itemNames, is_visibility_change: delta.is_visibility_change || false };
                         }
                     }
                 }
@@ -2670,7 +2711,9 @@ def generate_delta_history(base_dir):
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
                         <h3 style="margin-top: 0;"><strong>${charName}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
-                        if (Object.keys(delta.added || {}).length > 0) {
+                        if (delta.is_visibility_change) {
+                            reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — inventory delta not listed.</p>`;
+                        } else if (Object.keys(delta.added || {}).length > 0) {
                             reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
                             for (const itemId of Object.keys(delta.added).sort()) {
@@ -2681,7 +2724,7 @@ def generate_delta_history(base_dir):
                             }
                             reportHTML += `</div></div>`;
                         }
-                        if (Object.keys(delta.removed || {}).length > 0) {
+                        if (!delta.is_visibility_change && Object.keys(delta.removed || {}).length > 0) {
                             reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
                             for (const itemId of Object.keys(delta.removed).sort()) {
@@ -2707,27 +2750,31 @@ def generate_delta_history(base_dir):
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
                         <h3 style="margin-top: 0;"><strong>${charName}</strong></h3>`;
-                        if (Object.keys(delta.added || {}).length > 0) {
-                            reportHTML += `
+                        if (delta.is_visibility_change) {
+                            reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — inventory delta not listed.</p>`;
+                        } else {
+                            if (Object.keys(delta.added || {}).length > 0) {
+                                reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
-                            for (const itemId of Object.keys(delta.added).sort()) {
-                                const count = delta.added[itemId];
-                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                const countText = count > 1 ? ' x' + count : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                                for (const itemId of Object.keys(delta.added).sort()) {
+                                    const count = delta.added[itemId];
+                                    const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                    const countText = count > 1 ? ' x' + count : '';
+                                    reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                                }
+                                reportHTML += `</div></div>`;
                             }
-                            reportHTML += `</div></div>`;
-                        }
-                        if (Object.keys(delta.removed || {}).length > 0) {
-                            reportHTML += `
+                            if (Object.keys(delta.removed || {}).length > 0) {
+                                reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
-                            for (const itemId of Object.keys(delta.removed).sort()) {
-                                const count = delta.removed[itemId];
-                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                const countText = count > 1 ? ' x' + count : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                                for (const itemId of Object.keys(delta.removed).sort()) {
+                                    const count = delta.removed[itemId];
+                                    const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                    const countText = count > 1 ? ' x' + count : '';
+                                    reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                                }
+                                reportHTML += `</div></div>`;
                             }
-                            reportHTML += `</div></div>`;
                         }
                         reportHTML += `</div>`;
                     }
@@ -2748,7 +2795,9 @@ def generate_delta_history(base_dir):
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
                         <h3 style="margin-top: 0;"><strong>${charName}</strong> <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
-                        if (Object.keys(delta.added || {}).length > 0) {
+                        if (delta.is_visibility_change) {
+                            reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — tracked item delta not listed.</p>`;
+                        } else if (Object.keys(delta.added || {}).length > 0) {
                             reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Acquired:</strong><div style="margin-top: 5px;">`;
                             for (const itemId of Object.keys(delta.added).sort()) {
@@ -2760,7 +2809,7 @@ def generate_delta_history(base_dir):
                             }
                             reportHTML += `</div></div>`;
                         }
-                        if (Object.keys(delta.removed || {}).length > 0) {
+                        if (!delta.is_visibility_change && Object.keys(delta.removed || {}).length > 0) {
                             reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #f44336;">Lost:</strong><div style="margin-top: 5px;">`;
                             for (const itemId of Object.keys(delta.removed).sort()) {
