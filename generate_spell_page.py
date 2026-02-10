@@ -2804,13 +2804,13 @@ def generate_delta_history(base_dir):
                     <h2 id="inventory-changes-level1" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Level 1 Inventory Changes (Mules/Traders)</h2>
                     <p><em>Showing level 1 characters with inventory changes (limited to 500)</em></p>`;
                     const sortedLevel1 = Object.keys(invDeltasLevel1).sort().slice(0, 500);
-                    const visLevel1 = sortedLevel1.filter(c => invDeltasLevel1[c].is_visibility_change);
+                    const visLevel1 = sortedLevel1.filter(c => invDeltasLevel1[c] && invDeltasLevel1[c].is_visibility_change === true);
+                    const nonVisLevel1 = sortedLevel1.filter(c => !invDeltasLevel1[c] || invDeltasLevel1[c].is_visibility_change !== true);
                     if (visLevel1.length > 0) {
                         reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — inventory delta not listed: ${visLevel1.join(', ')}</p>`;
                     }
-                    for (const charName of sortedLevel1) {
+                    for (const charName of nonVisLevel1) {
                         const delta = invDeltasLevel1[charName];
-                        if (delta.is_visibility_change) continue;
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
                         <h3 style="margin-top: 0;"><strong>${charName}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
@@ -2846,13 +2846,13 @@ def generate_delta_history(base_dir):
                     <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
                     <p><em>Showing characters with inventory changes (limited to 500)</em></p>`;
                     const sortedOthers = Object.keys(invDeltasOthers).sort().slice(0, 500);
-                    const visOthers = sortedOthers.filter(c => invDeltasOthers[c].is_visibility_change);
+                    const visOthers = sortedOthers.filter(c => invDeltasOthers[c] && invDeltasOthers[c].is_visibility_change === true);
+                    const nonVisOthers = sortedOthers.filter(c => !invDeltasOthers[c] || invDeltasOthers[c].is_visibility_change !== true);
                     if (visOthers.length > 0) {
                         reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — inventory delta not listed: ${visOthers.join(', ')}</p>`;
                     }
-                    for (const charName of sortedOthers) {
+                    for (const charName of nonVisOthers) {
                         const delta = invDeltasOthers[charName];
-                        if (delta.is_visibility_change) continue;
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
                         <h3 style="margin-top: 0;"><strong>${charName}</strong></h3>`;
@@ -2892,13 +2892,13 @@ def generate_delta_history(base_dir):
                     <h2 id="tracked-items" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
                     <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
                     const sortedTracked = Object.keys(trackedDeltas).sort();
-                    const visTracked = sortedTracked.filter(c => trackedDeltas[c].is_visibility_change);
+                    const visTracked = sortedTracked.filter(c => trackedDeltas[c] && trackedDeltas[c].is_visibility_change === true);
+                    const nonVisTracked = sortedTracked.filter(c => !trackedDeltas[c] || trackedDeltas[c].is_visibility_change !== true);
                     if (visTracked.length > 0) {
                         reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — tracked item delta not listed: ${visTracked.join(', ')}</p>`;
                     }
-                    for (const charName of sortedTracked) {
+                    for (const charName of nonVisTracked) {
                         const delta = trackedDeltas[charName];
-                        if (delta.is_visibility_change) continue;
                         const state = endState[charName] || startState[charName] || {};
                         const level = state.level || '?';
                         const guild = state.guild || '';
