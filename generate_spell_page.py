@@ -122,7 +122,8 @@ def parse_character_data(char_file, character_list):
                         'aa_spent': int(parts[11]) if len(parts) > 11 and parts[11].isdigit() else 0,
                         'hp_max_total': int(parts[28]) if len(parts) > 28 and parts[28].isdigit() else 0,  # Column 28 is hp_max_total
                         'class': parts[5] if len(parts) > 5 else '',  # Column 5 is class (0-indexed)
-                        'race': parts[4] if len(parts) > 4 else ''
+                        'race': parts[4] if len(parts) > 4 else '',
+                        'guild': parts[2].strip() if len(parts) > 2 else '',  # Column 2 is guild (TAKP export)
                     }
                 except (ValueError, IndexError):
                     continue
@@ -814,6 +815,7 @@ def compare_character_data(current_data, previous_data, character_list=None):
             'current_hp': current_hp if not is_deleted else previous_hp,  # Show previous HP for deleted
             'previous_hp': previous_hp,
             'class': current.get('class', '') or previous.get('class', ''),
+            'guild': current.get('guild', '') or previous.get('guild', ''),
             'is_new': char_name not in previous_data,
             'is_deleted': is_deleted
         }
@@ -1605,11 +1607,13 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         for char_name in sorted(tracked_deltas.keys()):
             delta = tracked_deltas[char_name]
             char_level = current_char_data.get(char_name, {}).get('level', '?')
+            guild = (current_char_data.get(char_name, {}) or {}).get('guild', '')
+            char_display = f"{char_name} &lt;{guild}&gt;" if guild else char_name
             char_slug = char_name.lower().replace(' ', '_')
             magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
             html += f"""
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
-            <h3><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_name}</a> <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
+            <h3><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
 """
             if delta.get('is_visibility_change'):
                 html += """
@@ -1666,10 +1670,12 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             <ul style="margin: 0; padding-left: 20px;">
 """
             for char_name, item_id, item_name in entries:
+                guild = (current_char_data.get(char_name, {}) or {}).get('guild', '')
+                char_display = f"{char_name} &lt;{guild}&gt;" if guild else char_name
                 char_slug = char_name.lower().replace(' ', '_')
                 item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
                 magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
-                html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_name}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
+                html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
             html += """
             </ul>
         </div>
@@ -2275,7 +2281,8 @@ def generate_delta_history(base_dir):
                     level: charData.level || 0,
                     aa_total: (charData.aa_unspent || 0) + (charData.aa_spent || 0),
                     hp: charData.hp_max_total || 0,
-                    class: charData.class || ''
+                    class: charData.class || '',
+                    guild: charData.guild || ''
                 };
             }
             
@@ -2293,7 +2300,8 @@ def generate_delta_history(base_dir):
                         level: deltaData.current_level || 0,
                         aa_total: deltaData.current_aa_total || 0,
                         hp: deltaData.current_hp || 0,
-                        class: deltaData.class || ''
+                        class: deltaData.class || '',
+                        guild: deltaData.guild || ''
                     };
                 } else {
                     // Update existing character - delta has current values (baseline + changes)
@@ -2302,6 +2310,9 @@ def generate_delta_history(base_dir):
                     fullState[charName].hp = deltaData.current_hp || fullState[charName].hp;
                     if (deltaData.class) {
                         fullState[charName].class = deltaData.class;
+                    }
+                    if (deltaData.hasOwnProperty('guild')) {
+                        fullState[charName].guild = deltaData.guild || '';
                     }
                 }
             }
@@ -2873,12 +2884,15 @@ def generate_delta_history(base_dir):
                     <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
                     for (const charName of Object.keys(trackedDeltas).sort()) {
                         const delta = trackedDeltas[charName];
-                        const level = (endState[charName] || startState[charName] || {}).level || '?';
+                        const state = endState[charName] || startState[charName] || {};
+                        const level = state.level || '?';
+                        const guild = state.guild || '';
+                        const charDisplay = guild ? (charName + ' &lt;' + guild + '&gt;') : charName;
                         const charSlug = charName.toLowerCase().replace(/ /g, '_');
                         const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
-                        <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charName}</a> <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
+                        <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
                         if (delta.is_visibility_change) {
                             reportHTML += `<p style="color: #757575; font-style: italic;">Visibility change (anon ↔ not anon) — tracked item delta not listed.</p>`;
                         } else if (Object.keys(delta.added || {}).length > 0) {
@@ -2921,10 +2935,13 @@ def generate_delta_history(base_dir):
                         <h3 style="margin-top: 0;">${zone}</h3>
                         <ul style="margin: 0; padding-left: 20px;">`;
                         for (const e of entries) {
+                            const state = endState[e.charName] || startState[e.charName] || {};
+                            const guild = state.guild || '';
+                            const charDisplay = guild ? (e.charName + ' &lt;' + guild + '&gt;') : e.charName;
                             const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
                             const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                             const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
-                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${e.charName}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
                         }
                         reportHTML += `
                         </ul>
