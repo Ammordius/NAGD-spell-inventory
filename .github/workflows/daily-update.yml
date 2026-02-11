@@ -21,10 +21,6 @@ jobs:
       contents: write
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -816,18 +812,6 @@ jobs:
       with:
         path: ./deploy
     
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
-      if: github.ref == 'refs/heads/main'
-    
-    - name: Verify deployment
-      run: |
-        echo "Deployment should have created/updated the gh-pages branch"
-        echo "Check https://github.com/${{ github.repository }}/tree/gh-pages to see the deployed files"
-        echo "Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-        echo "Class Rankings URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/class_rankings.html"
-    
     - name: Calculate week and month boundaries
       id: date-info
       run: |
@@ -872,3 +856,26 @@ jobs:
         key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
         restore-keys: |
           magelo-dump-
+
+  deploy:
+    needs: update-spell-inventory
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify deployment
+        run: |
+          echo "Deployment should have created/updated the gh-pages branch"
+          echo "Check https://github.com/${{ github.repository }}/tree/gh-pages to see the deployed files"
+          echo "Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "Class Rankings URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/class_rankings.html"
