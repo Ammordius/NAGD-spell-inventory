@@ -421,6 +421,11 @@
                     if (panel) {
                         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
                         if (panel.style.display === 'block') {
+                            // Default to currently filtered class when opening Customize Weights
+                            const weightClassSelect = document.getElementById('weightClass');
+                            if (weightClassSelect && filterClass && weightClassSelect.querySelector(`option[value="${filterClass}"]`)) {
+                                weightClassSelect.value = filterClass;
+                            }
                             updateWeightSliders();
                         }
                     }
@@ -614,11 +619,11 @@
                     focusGrid.style.gap = '15px';
                     focusGrid.style.marginTop = '15px';
                     
-                    // Sort focus categories for consistent display
-                    const focusKeys = Object.keys(focusWeights).sort();
+                    // Sort focus categories for consistent display; include keys from custom so 0-weight can be adjusted
+                    const focusKeys = [...new Set([...Object.keys(focusWeights || {}), ...Object.keys(customFocusWeights || {})])].sort();
                     
                     focusKeys.forEach(focusKey => {
-                        const focusValue = customFocusWeights[focusKey] !== undefined ? customFocusWeights[focusKey] : focusWeights[focusKey];
+                        const focusValue = customFocusWeights[focusKey] !== undefined ? customFocusWeights[focusKey] : (focusWeights[focusKey] !== undefined ? focusWeights[focusKey] : 0);
                         
                         if (typeof focusValue === 'object' && focusValue !== null) {
                             // Nested object (e.g., Spell Damage with damage types)
@@ -785,22 +790,24 @@
                 customWeights[selectedClass]._meta.focusMultiplier = parseFloat(focusMultSlider.value);
             }
             
-            // Save focus weights
+            // Save focus weights (use union of class + custom keys so 0-weight and custom keys are saved)
             const focusWeights = classWeights[selectedClass]?.focus || {};
+            const customFocus = customWeights[selectedClass]?.focus || {};
+            const allFocusKeys = [...new Set([...Object.keys(focusWeights), ...Object.keys(customFocus)])];
             if (!customWeights[selectedClass].focus) {
                 customWeights[selectedClass].focus = {};
             }
             
-            Object.keys(focusWeights).forEach(focusKey => {
-                const focusValue = focusWeights[focusKey];
+            allFocusKeys.forEach(focusKey => {
+                const focusValue = focusWeights[focusKey] ?? customFocus[focusKey];
                 
                 if (typeof focusValue === 'object' && focusValue !== null) {
                     // Nested object (e.g., Spell Damage with damage types)
                     if (!customWeights[selectedClass].focus[focusKey]) {
                         customWeights[selectedClass].focus[focusKey] = {};
                     }
-                    
-                    Object.keys(focusValue).forEach(nestedKey => {
+                    const nestedKeys = [...new Set([...Object.keys(focusValue || {}), ...Object.keys(customWeights[selectedClass].focus[focusKey] || {})])];
+                    nestedKeys.forEach(nestedKey => {
                         const sliderId = `slider_focus_${focusKey}_${nestedKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
                         const slider = document.getElementById(sliderId);
                         if (slider) {
@@ -808,7 +815,7 @@
                         }
                     });
                 } else {
-                    // Simple numeric value
+                    // Simple numeric value (including 0 so user can adjust up from zero)
                     const sliderId = `slider_focus_${focusKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
                     const slider = document.getElementById(sliderId);
                     if (slider) {

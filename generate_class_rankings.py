@@ -146,7 +146,7 @@ SPELL_DAMAGE_TYPE_MAP = {
     'Anger of Ro': 'Fire',
     'Anger of Solusek': 'Fire',
     'Fury of Ro': 'Fire',
-    'Fury of Solusek': 'Fire',
+    'Fury of Solusek': 'All',  # All damage 30% on item 20496 (not fire)
     'Wrath of Ro': 'Fire',
     'Burning Affliction': 'Fire',
     'Focus of Flame': 'Fire',
@@ -170,10 +170,12 @@ SPELL_DAMAGE_TYPE_MAP = {
     'Saryrn\'s Torment': 'Disease',
     'Saryrn\'s Venom': 'Disease',
     
-    # Vengeance of Eternity - works for all damage types (including DoT)
-    'Vengeance of Eternity': 'All',
+    # DoT-only spell damage (not instant); tracked for Necro/Shaman. "All" is instant-only and does not apply.
+    'Vengeance of Eternity': 'DoT',   # 30% DoT, items 32142, 20898
+    'Vengeance of Time': 'DoT',       # 25% DoT, item 26748
+    'Cursed Extension': 'DoT',        # 20% DoT, item 28980
     
-    # All damage types (generic damage focii)
+    # All damage types (instant/nuke only; does not apply to DoT)
     'Improved Damage': 'All',
     "Gallenite's ____": 'All',
 }
@@ -239,8 +241,8 @@ SPELL_DURATION_CATEGORY_MAP = {
 
 # Class-specific damage type priorities
 CLASS_DAMAGE_TYPES = {
-    'Necromancer': ['All', 'Disease'],  # All damage + DoT focus
-    'Shaman': ['Cold', 'Disease'],  # Cold + DoT
+    'Necromancer': ['All', 'DoT', 'Disease'],  # Instant + DoT-only focus + Disease
+    'Shaman': ['Cold', 'DoT', 'Disease'],  # Cold + DoT-only focus + Disease
     'Wizard': ['Fire', 'Cold', 'Magic'],
     'Magician': ['Fire', 'Magic'],
     'Druid': ['Fire', 'Cold'],
@@ -250,8 +252,8 @@ CLASS_DAMAGE_TYPES = {
 
 # Class-specific focus priorities (updated with damage types)
 CLASS_FOCUS_PRIORITIES = {
-    'Necromancer': ['Spell Damage (All)', 'Spell Damage (Disease)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration'],
-    'Shaman': ['Spell Damage (Cold)', 'Spell Damage (Disease)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration'],
+    'Necromancer': ['Spell Damage (All)', 'Spell Damage (DoT)', 'Spell Damage (Disease)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration'],
+    'Shaman': ['Spell Damage (Cold)', 'Spell Damage (DoT)', 'Spell Damage (Disease)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration'],
     'Druid': ['Healing Enhancement', 'Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Mana Efficiency', 'Buff Spell Duration'],
     'Cleric': ['Healing Enhancement', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Buff Spell Duration'],
     'Wizard': ['Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
@@ -272,6 +274,11 @@ PALADIN_SK_FOCUS_ITEMS = {
 
 ENCHANTER_FOCUS_ITEMS = {
     'range': '22959'  # Serpent of Vindication in Range (slot 11)
+}
+
+# Time's Antithesis (item 24699) - same weight as Serpent of Vindication for Enchanters
+SHAMAN_FOCUS_ITEMS = {
+    'range': '24699'  # Time's Antithesis in Range (slot 11)
 }
 
 def check_warrior_focus_items(char_inventory, char_haste):
@@ -335,6 +342,16 @@ def check_enchanter_focus_items(char_inventory):
     # Focus score: 100% if has serpent, 0% otherwise
     return 100.0 if has_serpent else 0.0, {'has_serpent': has_serpent}
 
+def check_shaman_focus_items(char_inventory):
+    """Check if Shaman has Time's Antithesis (same weight as Serpent of Vindication for Enchanters)"""
+    has_times_antithesis = False
+    for item in char_inventory:
+        item_id = item.get('item_id', '')
+        if item_id == SHAMAN_FOCUS_ITEMS['range']:
+            has_times_antithesis = True
+            break
+    return 100.0 if has_times_antithesis else 0.0, {'has_times_antithesis': has_times_antithesis}
+
 # Calculate class-specific scores
 def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None):
     """Calculate percentage scores for a character based on their class"""
@@ -350,11 +367,8 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     else:
         scores['mana'] = None  # Not applicable
     
-    # AC - only for tank/hybrid classes, store raw value
-    if char_class in CLASSES_NEED_AC:
-        scores['ac'] = char_data['stats']['ac']
-    else:
-        scores['ac'] = None  # Not applicable
+    # AC - store for all classes (all classes get a small weight by default; tanks get full weight)
+    scores['ac'] = char_data.get('stats', {}).get('ac', 0)
     
     # Resists - store raw total value (MR + FR + CR + DR + PR)
     scores['resists'] = char_data.get('stats', {}).get('resists', 0)
@@ -496,6 +510,15 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 focus_scores['Haste'] = 100.0 if has_max_haste else 0.0
             else:
                 focus_scores['Haste'] = 0.0
+        # Shaman: Time's Antithesis (item 24699), same weight as Serpent of Vindication for Enchanter
+        if char_class == 'Shaman':
+            shaman_focus_score, shaman_items = check_shaman_focus_items(char_inventory or [])
+            focus_scores["Time's Antithesis"] = shaman_focus_score
+            scores['focus_items'] = shaman_items
+    
+    # FT (Flowing Thought) - tracked focus for all classes with mana, cap 15
+    if char_class in CLASSES_WITH_MANA and scores.get('ft_capped') is not None:
+        focus_scores['FT'] = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
     
     scores['focus_scores'] = focus_scores
     
@@ -556,6 +579,10 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
             # Add Haste with same weight as lowest priority (weight = 1)
             total_score += haste_score * 1
             total_weight += 1
+        # Shaman: include Time's Antithesis (weight 2.0, same as Serpent for Enchanter)
+        if char_class == 'Shaman' and "Time's Antithesis" in focus_scores:
+            total_score += focus_scores["Time's Antithesis"] * 2.0
+            total_weight += 2.0
         
         scores['focus_overall_pct'] = (total_score / total_weight) if total_weight > 0 else 0
     else:
@@ -588,7 +615,7 @@ CLASS_WEIGHTS = {
     'Monk': {
         'hp_pct': 1.0,
         'mana_pct': 0.0,
-        'ac_pct': 1.0,
+        'ac_pct': 0.2,  # Small contribution from AC (all classes get small AC weight)
         'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
@@ -601,7 +628,7 @@ CLASS_WEIGHTS = {
     'Rogue': {
         'hp_pct': 1.0,
         'mana_pct': 0.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
@@ -642,7 +669,7 @@ CLASS_WEIGHTS = {
     'Wizard': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,
         'haste_pct': 0.0,
         'resists_pct': 1.0,
@@ -659,7 +686,7 @@ CLASS_WEIGHTS = {
     'Cleric': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,
         'haste_pct': 0.0,
         'resists_pct': 1.0,
@@ -677,7 +704,7 @@ CLASS_WEIGHTS = {
     'Magician': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,
         'haste_pct': 0.0,
         'resists_pct': 1.0,
@@ -694,12 +721,12 @@ CLASS_WEIGHTS = {
     'Necromancer': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
-            'Spell Damage': {'All': 0.75, 'Disease': 1.0},
+            'Spell Damage': {'All': 0.75, 'DoT': 1.0, 'Disease': 1.0},
             'Spell Mana Efficiency': 1.0,  # det mana
             'Detrimental Spell Duration': 1.0,  # det or all e
             'Detrimental Spell Haste': 1.0,  # det spell h
@@ -711,12 +738,12 @@ CLASS_WEIGHTS = {
     'Shaman': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
-            'Spell Damage': {'Cold': 1.0, 'All': 0.75, 'Disease': 1.0},
+            'Spell Damage': {'Cold': 1.0, 'DoT': 1.0, 'All': 0.75, 'Disease': 1.0},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
             'Detrimental Spell Haste': 0.75,
@@ -724,6 +751,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Duration': 1.0,  # DoT duration focus
             'All Spell Duration': 1.0,  # All duration focus (works for both)
             'Spell Range Extension': 0.5,  # Lower weight for all casters
+            "Time's Antithesis": 2.0,  # Item 24699, same weight as Serpent of Vindication for Enchanter
         }
     },
     
@@ -731,7 +759,7 @@ CLASS_WEIGHTS = {
     'Enchanter': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,
         'haste_pct': 0.0,
         'resists_pct': 1.0,
@@ -768,7 +796,7 @@ CLASS_WEIGHTS = {
     'Druid': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,
         'haste_pct': 0.0,
         'resists_pct': 1.0,
@@ -801,7 +829,7 @@ CLASS_WEIGHTS = {
     'Bard': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.0,
+        'ac_pct': 0.2,  # Small contribution from AC for all classes
         'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
@@ -810,6 +838,19 @@ CLASS_WEIGHTS = {
         }
     },
 }
+
+# Ensure all classes have all simple focus keys (with 0 where not used) so UI can adjust from zero
+_all_simple_focus_keys = set()
+for _w in CLASS_WEIGHTS.values():
+    if 'focus' in _w:
+        for _k, _v in _w['focus'].items():
+            if not isinstance(_v, dict):
+                _all_simple_focus_keys.add(_k)
+for _w in CLASS_WEIGHTS.values():
+    if 'focus' in _w:
+        for _k in _all_simple_focus_keys:
+            if _k not in _w['focus']:
+                _w['focus'][_k] = 0
 
 def normalize_class_weights(weights_config):
     """
@@ -912,17 +953,34 @@ def normalize_class_weights(weights_config):
     if focus_weights and focus_scale > 0:
         for focus_cat, focus_value in focus_weights.items():
             if isinstance(focus_value, dict):
+                # For dict values (like Spell Damage with damage types), include all entries
                 normalized['focus'][focus_cat] = {
                     k: v * focus_scale for k, v in focus_value.items()
                 }
             else:
-                normalized['focus'][focus_cat] = focus_value * focus_scale
+                # Include all weights (including 0) so UI can adjust from zero up
+                if isinstance(focus_value, (int, float)) and focus_value >= 0:
+                    normalized['focus'][focus_cat] = focus_value * focus_scale
     
     # Store ATK and Haste as focus components (if not already in normalized focus dict)
-    if atk_weight_raw > 0 and 'ATK' not in normalized['focus']:
-        normalized['focus']['ATK'] = atk_weight_raw * focus_scale
-    if haste_weight_raw > 0 and 'Haste' not in normalized['focus']:
-        normalized['focus']['Haste'] = haste_weight_raw * focus_scale
+    # Include them if they're > 0 (they will be included when changed from 0 to non-zero)
+    if 'ATK' not in normalized['focus']:
+        if atk_weight_raw > 0:
+            normalized['focus']['ATK'] = atk_weight_raw * focus_scale
+        elif 'ATK' in focus_weights:
+            # Check if ATK weight is now > 0 (for dynamic reweighting)
+            atk_config_value = focus_weights.get('ATK', 0.0)
+            if isinstance(atk_config_value, (int, float)) and atk_config_value > 0:
+                normalized['focus']['ATK'] = atk_config_value * focus_scale
+    
+    if 'Haste' not in normalized['focus']:
+        if haste_weight_raw > 0:
+            normalized['focus']['Haste'] = haste_weight_raw * focus_scale
+        elif 'Haste' in focus_weights:
+            # Check if Haste weight is now > 0 (for dynamic reweighting)
+            haste_config_value = focus_weights.get('Haste', 0.0)
+            if isinstance(haste_config_value, (int, float)) and haste_config_value > 0:
+                normalized['focus']['Haste'] = haste_config_value * focus_scale
     
     return normalized
 
@@ -988,8 +1046,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         # Fallback to default weights if class not found
         return calculate_overall_score_fallback(scores, char_class)
     
-    # Normalize weights so they sum to 1.0
-    weights_config = normalize_class_weights(weights_config)
+    # Don't normalize again - weights_config is already normalized
     
     total_score = 0.0
     total_weight = 0.0
@@ -1137,6 +1194,22 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                     total_score += focus_score * total_focus_weight
                     total_weight += total_focus_weight
         
+        # Add ATK and Haste for Paladin/Shadow Knight (not Warrior - already in focus loop)
+        if char_class in ['Paladin', 'Shadow Knight']:
+            atk_weight = focus_weights.get('ATK', 0.0)
+            if atk_weight > 0 and scores.get('atk_pct') is not None:
+                total_score += scores['atk_pct'] * atk_weight
+                total_weight += atk_weight
+            haste_weight = focus_weights.get('Haste', 0.0)
+            if haste_weight > 0 and scores.get('haste_pct') is not None:
+                total_score += scores['haste_pct'] * haste_weight
+                total_weight += haste_weight
+        # Add FT (Flowing Thought, cap 15) for all classes with mana - including Paladin/SK in tank branch
+        ft_weight = weights_config.get('ft_weight', 0.0)
+        if scores.get('ft_capped') is True and ft_weight > 0:
+            total_score += 100.0 * ft_weight  # 100% for capped (15/15)
+            total_weight += ft_weight
+        
         # After normalization, total_weight should be 1.0, but we divide anyway for safety
         return (total_score / total_weight) if total_weight > 0 else 0
     
@@ -1270,11 +1343,15 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                     for damage_type, weight in weight_config.items():
                         if weight > 0:
                             # Get the character's focus percentage for this damage type
-                            # "All" counts for all damage types, so use max of specific type and "All"
-                            char_pct = max(
-                                char_damage_focii.get(damage_type, 0),
-                                char_damage_focii.get('All', 0)
-                            )
+                            # "All" is instant-only; "DoT" is DoT-only (they don't apply to each other)
+                            if damage_type == 'DoT':
+                                char_pct = char_damage_focii.get('DoT', 0)
+                            else:
+                                # For non-DoT types, "All" (instant) counts
+                                char_pct = max(
+                                    char_damage_focii.get(damage_type, 0),
+                                    char_damage_focii.get('All', 0)
+                                )
                             # Calculate score as % of best spell damage focus
                             # Use max of specific type best and "All" best
                             best_damage = max(
@@ -1593,7 +1670,7 @@ def main():
             class_max_values[char_class] = {
                 'max_hp': max(c['stats']['hp'] for c in class_chars),
                 'max_mana': max(c.get('stats', {}).get('mana', 0) for c in class_chars) if char_class in CLASSES_WITH_MANA else 0,
-                'max_ac': max(c['stats']['ac'] for c in class_chars) if char_class in CLASSES_NEED_AC else 0,
+                'max_ac': max(c.get('stats', {}).get('ac', 0) for c in class_chars),  # All classes have AC for scoring
                 'max_resists': max(c.get('stats', {}).get('resists', 0) for c in class_chars),
             }
     
