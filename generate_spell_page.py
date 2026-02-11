@@ -886,9 +886,9 @@ def load_tracked_item_ids():
                     source_label[sid] = "Raid"
         except Exception as e:
             print(f"Warning: Could not load {raid_path}: {e}")
-    for path, label in [
-        (os.path.join(base_dir, "elemental_armor.json"), "elemental armor"),
-        (os.path.join(base_dir, "praesterium_loot.json"), "praesterium"),
+    for path, label, zone_name in [
+        (os.path.join(base_dir, "elemental_armor.json"), "elemental armor", "Elemental"),
+        (os.path.join(base_dir, "praesterium_loot.json"), "praesterium", "Praesterium"),
     ]:
         if not os.path.exists(path):
             continue
@@ -899,6 +899,8 @@ def load_tracked_item_ids():
                 sid = str(item_id)
                 tracked.add(sid)
                 source_label[sid] = label
+                if zone_name:
+                    item_zone[sid] = zone_name
         except Exception as e:
             print(f"Warning: Could not load {path}: {e}")
     return tracked, source_label, item_zone
@@ -1335,8 +1337,10 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     except Exception as e:
         print(f"Warning: Could not calculate week/month for leaderboard links: {e}")
     
-    # Build navigation links based on what sections will be shown
+    # Build navigation links based on what sections will be shown (Items by Zone first)
     nav_links = []
+    if zone_entries:
+        nav_links.append('<a href="#items-by-zone">📍 Items by Zone</a>')
     if aa_leaderboard:
         nav_links.append('<a href="#aa-leaderboard">🏆 AA Leaderboard</a>')
     if hp_leaderboard:
@@ -1349,8 +1353,6 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append('<a href="#inventory-changes">Inventory Changes</a>')
     if tracked_deltas:
         nav_links.append('<a href="#tracked-items" style="background-color: #FF9800;">📌 Tracked Items</a>')
-        if zone_entries:
-            nav_links.append('<a href="#items-by-zone">📍 Items by Zone</a>')
     
     # Add weekly/monthly leaderboard links
     if week_start:
@@ -1363,6 +1365,31 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     html += "".join(nav_links)
     html += """
             </div>
+        </div>
+"""
+    
+    # Items by zone (at top; raid + elemental + praesterium)
+    if zone_entries:
+        html += """
+        <h2 id="items-by-zone">📍 Items by Zone</h2>
+        <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>
+"""
+        for zone in sorted(zone_entries.keys()):
+            entries = zone_entries[zone]
+            html += f"""
+        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
+            <h3 style="margin-top: 0;">{zone}</h3>
+            <ul style="margin: 0; padding-left: 20px;">
+"""
+            for char_name, item_id, item_name in entries:
+                guild = (current_char_data.get(char_name, {}) or {}).get('guild', '')
+                char_display = f"{char_name} &lt;{guild}&gt;" if guild else char_name
+                char_slug = char_name.lower().replace(' ', '_')
+                item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
+                magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
+                html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
+            html += """
+            </ul>
         </div>
 """
     
@@ -1700,31 +1727,6 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             </div>
 """
             html += """
-        </div>
-"""
-    
-    # Items by zone (zone_entries already built above)
-    if zone_entries:
-        html += """
-        <h2 id="items-by-zone">📍 Items by Zone (raid drops — who got them)</h2>
-        <p><em>Raid items acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>
-"""
-        for zone in sorted(zone_entries.keys()):
-            entries = zone_entries[zone]
-            html += f"""
-        <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
-            <h3 style="margin-top: 0;">{zone}</h3>
-            <ul style="margin: 0; padding-left: 20px;">
-"""
-            for char_name, item_id, item_name in entries:
-                guild = (current_char_data.get(char_name, {}) or {}).get('guild', '')
-                char_display = f"{char_name} &lt;{guild}&gt;" if guild else char_name
-                char_slug = char_name.lower().replace(' ', '_')
-                item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
-                magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
-                html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
-            html += """
-            </ul>
         </div>
 """
     
@@ -2644,16 +2646,41 @@ def generate_delta_history(base_dir):
                 const visTracked = sortedTracked.filter(c => trackedDeltas[c] && trackedDeltas[c].is_visibility_change === true);
                 const nonVisTracked = sortedTracked.filter(c => !trackedDeltas[c] || trackedDeltas[c].is_visibility_change !== true);
                 const allVisNames = [...new Set([...visLevel1, ...visOthers, ...visTracked])].sort();
-                reportHTML += `<p style="margin: 10px 0;"><a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
+                reportHTML += `<p style="margin: 10px 0;">${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}
+                    <a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
                     <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
                     <a href="#character-changes" style="margin-right: 10px;">Character Changes</a>
                     ${allVisNames.length > 0 ? '<a href="#visibility-note" style="margin-right: 10px; color: #757575;">Visibility (anon)</a>' : ''}
                     ${nonVisLevel1.length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
                     <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a>
-                    ${nonVisTracked.length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}
-                    ${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}</p>`;
+                    ${nonVisTracked.length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}</p>`;
                 if (allVisNames.length > 0) {
                     reportHTML += `<details id="visibility-note" style="color: #757575; margin: 15px 0; padding: 10px; background: #fafafa; border-radius: 5px; border-left: 4px solid #9e9e9e;"><summary style="cursor: pointer; font-style: italic;"><strong>Visibility change (anon ↔ not anon)</strong> — ${allVisNames.length} character(s); their inventory and tracked item deltas are not listed below. Click to expand names.</summary><p style="margin: 8px 0 0 0; font-size: 0.9em;">${allVisNames.join(', ')}</p></details>`;
+                }
+                // Items by zone (at top; raid + elemental + praesterium)
+                if (Object.keys(zoneEntries).length > 0) {
+                    reportHTML += `
+                    <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone</h2>
+                    <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>`;
+                    for (const zone of Object.keys(zoneEntries).sort()) {
+                        const entries = zoneEntries[zone];
+                        reportHTML += `
+                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
+                        <h3 style="margin-top: 0;">${zone}</h3>
+                        <ul style="margin: 0; padding-left: 20px;">`;
+                        for (const e of entries) {
+                            const state = endState[e.charName] || startState[e.charName] || {};
+                            const guild = state.guild || '';
+                            const charDisplay = guild ? (e.charName + ' &lt;' + guild + '&gt;') : e.charName;
+                            const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
+                            const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
+                            const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
+                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                        }
+                        reportHTML += `
+                        </ul>
+                    </div>`;
+                    }
                 }
                 const noInventoryOrTrackedBlocks = nonVisLevel1.length === 0 && nonVisOthers.length === 0 && nonVisTracked.length === 0;
                 if (noInventoryOrTrackedBlocks && (Object.keys(invDeltasLevel1).length > 0 || Object.keys(invDeltasOthers).length > 0 || Object.keys(trackedDeltas).length > 0)) {
@@ -2989,32 +3016,6 @@ def generate_delta_history(base_dir):
                             reportHTML += `</div></div>`;
                         }
                         reportHTML += `</div>`;
-                    }
-                }
-                
-                // Items by zone (only chars in both snapshots; only zones that had activity)
-                if (Object.keys(zoneEntries).length > 0) {
-                    reportHTML += `
-                    <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone (raid drops — who got them)</h2>
-                    <p><em>Raid items acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>`;
-                    for (const zone of Object.keys(zoneEntries).sort()) {
-                        const entries = zoneEntries[zone];
-                        reportHTML += `
-                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
-                        <h3 style="margin-top: 0;">${zone}</h3>
-                        <ul style="margin: 0; padding-left: 20px;">`;
-                        for (const e of entries) {
-                            const state = endState[e.charName] || startState[e.charName] || {};
-                            const guild = state.guild || '';
-                            const charDisplay = guild ? (e.charName + ' &lt;' + guild + '&gt;') : e.charName;
-                            const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
-                            const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
-                            const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
-                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
-                        }
-                        reportHTML += `
-                        </ul>
-                    </div>`;
                     }
                 }
                 
