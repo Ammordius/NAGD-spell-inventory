@@ -353,7 +353,7 @@ def check_shaman_focus_items(char_inventory):
     return 100.0 if has_times_antithesis else 0.0, {'has_times_antithesis': has_times_antithesis}
 
 # Calculate class-specific scores
-def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None):
+def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None):
     """Calculate percentage scores for a character based on their class"""
     char_class = char_data['class']
     scores = {}
@@ -386,7 +386,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         scores['ft_current'] = ft_current
         scores['ft_cap'] = ft_cap
         scores['ft_pct'] = (ft_current / ft_cap * 100) if ft_cap > 0 else 0  # For display
-        # FT capped (15/15) is worth 2.0 weight
+        # FT capped (15/15) gets meaningful focus weight (4.0 raw, then scaled)
         scores['ft_capped'] = (ft_current >= ft_cap) if ft_cap > 0 else False
     else:
         scores['ft_current'] = None
@@ -493,6 +493,28 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 else:
                     # Non-caster classes don't need spell damage
                     focus_scores[category] = 0
+            elif category in ['Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration']:
+                # Duration: All counts for both Buff (Bene) and Detrimental (Det)
+                if char_duration_cats is not None:
+                    if category == 'Buff Spell Duration':
+                        effective_pct = max(char_duration_cats.get('Bene', 0), char_duration_cats.get('All', 0))
+                        best_dur = max(best_focii.get('Buff Spell Duration', 25.0), best_focii.get('All Spell Duration', 15.0))
+                    elif category == 'Detrimental Spell Duration':
+                        effective_pct = max(char_duration_cats.get('Det', 0), char_duration_cats.get('All', 0))
+                        best_dur = max(best_focii.get('Detrimental Spell Duration', 25.0), best_focii.get('All Spell Duration', 15.0))
+                    else:  # All Spell Duration
+                        effective_pct = char_duration_cats.get('All', 0)
+                        best_dur = best_focii.get('All Spell Duration', 15.0)
+                    if best_dur > 0:
+                        focus_scores[category] = (effective_pct / best_dur * 100) if effective_pct > 0 else 0
+                    else:
+                        focus_scores[category] = 0
+                else:
+                    char_pct = char_focii.get(category, 0)
+                    if best_pct > 0:
+                        focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
+                    else:
+                        focus_scores[category] = 0
             else:
                 # Other categories work normally
                 char_pct = char_focii.get(category, 0)
@@ -902,8 +924,8 @@ def normalize_class_weights(weights_config):
     # ATK and Haste are now in focus dict, not stat weights
     atk_weight_raw = 0.0  # Will be extracted from focus dict below
     haste_weight_raw = 0.0  # Will be extracted from focus dict below (or from haste_pct for backward compatibility)
-    # FT weight is 2.0 if capped (only for classes with mana)
-    ft_weight_raw = 2.0 if has_mana else 0.0  # FT is 2.0 weight if capped, but only for classes with mana
+    # FT (Flowing Thought, cap 15) - decent weight for all mana classes when capped
+    ft_weight_raw = 4.0 if has_mana else 0.0  # FT weight when capped; meaningful share of focus score
     
     # Calculate total focus weight from config (spell focuses + ATK + Haste + special items)
     focus_weights = weights_config.get('focus', {})
@@ -1404,16 +1426,16 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                             focus_score = (effective_pct / best_haste * 100) if effective_pct > 0 else 0
                             total_score += focus_score * weight_config
                             total_weight += weight_config
-            elif focus_cat in ['Beneficial Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration']:
+            elif focus_cat in ['Buff Spell Duration', 'Beneficial Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration']:
                 # Handle duration categories - look up from char_duration_cats
-                # "All" categories count for both Bene and Det
+                # All Spell Duration counts for both Buff (Bene) and Detrimental (Det) at its percentage
                 if isinstance(weight_config, (int, float)) and weight_config > 0:
                     if char_duration_cats:
                         if focus_cat == 'All Spell Duration':
                             char_pct = char_duration_cats.get('All', 0)
                             best_duration = best_focii.get('All Spell Duration', 15.0)
-                        elif focus_cat == 'Beneficial Spell Duration':
-                            # Use max of Bene and All (All counts for both)
+                        elif focus_cat in ('Buff Spell Duration', 'Beneficial Spell Duration'):
+                            # Buff/Beneficial: use max(Bene, All) so All counts as that % for beneficial
                             char_pct = max(
                                 char_duration_cats.get('Bene', 0),
                                 char_duration_cats.get('All', 0)
@@ -1423,7 +1445,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                                 best_focii.get('All Spell Duration', 15.0)
                             )
                         else:  # Detrimental Spell Duration
-                            # Use max of Det and All (All counts for both)
+                            # Detrimental: use max(Det, All) so All counts as that % for detrimental
                             char_pct = max(
                                 char_duration_cats.get('Det', 0),
                                 char_duration_cats.get('All', 0)
@@ -1678,7 +1700,7 @@ def main():
         char_class = char_data['class']
         char_inventory = inventory.get(char_id, [])
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
-        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats)
+        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats)
         
         # Calculate overall score using class-specific weights with conversion rates
         overall_score = calculate_overall_score_with_weights(

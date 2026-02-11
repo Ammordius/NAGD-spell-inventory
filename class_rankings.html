@@ -889,9 +889,8 @@
             const TARGET_MANA = 0.15;
             
             // Check which stats are applicable
-            // Note: We allow users to adjust stats even if they're 0 by default
-            // So we check if the weight exists (even if 0) rather than if it's > 0
-            const hasMana = weights.mana_pct !== undefined;
+            // hasMana: class has mana (mana_pct > 0) - used for FT weight
+            const hasMana = (weights.mana_pct || 0) > 0;
             const hasAc = weights.ac_pct !== undefined;
             
             // Calculate total target percentage
@@ -920,8 +919,8 @@
             // ATK and Haste are now in focus dict, not stat weights
             let atkWeightRaw = 0.0;  // Will be extracted from focus dict below
             let hasteWeightRaw = 0.0;  // Will be extracted from focus dict below
-            // FT weight is 2.0 if capped (only for classes with mana)
-            const ftWeightRaw = hasMana ? 2.0 : 0.0;  // FT is 2.0 weight if capped, but only for classes with mana
+            // FT (Flowing Thought, cap 15) - decent weight for mana classes when capped
+            const ftWeightRaw = hasMana ? 4.0 : 0.0;
             
             const focusWeights = weights.focus || {};
             let totalSpellFocusWeight = 0.0;
@@ -1930,15 +1929,20 @@
                         const hasteCat = focusCat === 'Beneficial Spell Haste' ? 'Bene' : 'Det';
                         return charSpellHasteCats[hasteCat] || 0;
                     } else if (focusCat === 'Buff Spell Duration' || focusCat === 'Beneficial Spell Duration') {
-                        return charDurationCats['Bene'] || 0;
+                        // All Spell Duration counts for Buff at its %; use max(Bene, All)
+                        return Math.max(charDurationCats['Bene'] || 0, charDurationCats['All'] || 0);
                     } else if (focusCat === 'Detrimental Spell Duration') {
-                        return charDurationCats['Det'] || 0;
+                        // All Spell Duration counts for Det at its %; use max(Det, All)
+                        return Math.max(charDurationCats['Det'] || 0, charDurationCats['All'] || 0);
                     } else if (focusCat === 'All Spell Duration') {
                         return charDurationCats['All'] || 0;
                     } else if (focusCat === 'Haste') {
                         // Haste is binary, show the item haste value
                         const hasteValue = char.stats?.haste || 0;
                         return hasteValue >= 30 ? 30 : hasteValue;
+                    } else if (focusCat === "Time's Antithesis" || focusCat === 'Serpent of Vindication') {
+                        // Binary item focus: 100 if has item, 0 otherwise
+                        return (focusScores[focusCat] === 100) ? 100 : 0;
                     } else {
                         // For other focuses, get from charFocii
                         return charFocii[focusCat] || 0;
@@ -1946,6 +1950,7 @@
                 }
                 
                 for (const [focusCat, score] of Object.entries(focusScores)) {
+                    if (focusCat === 'FT') continue;  // FT shown in dedicated block below (uses normalized.ft_weight)
                     let weight = 0;
                     let rawValue = getRawFocusValue(focusCat);
                     
@@ -2004,14 +2009,15 @@
                     html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td></tr>`;
                 }
                 
-                // FT (Flowing Thought) - part of focus weight
-                if (scores.ft_capped === true) {
-                    const ftWeight = classWeightConfig.ft_weight || 0;
-                    if (ftWeight > 0) {
-                        const ftPoints = 100.0 * ftWeight;
-                        totalFocusPoints += ftPoints;
-                        html += `<tr><td>FT (Capped)</td><td>15/15</td><td>100.0%</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
-                    }
+                // FT (Flowing Thought) - part of focus weight; show for all classes with mana (cap 15)
+                const ftWeight = normalized.ft_weight || 0;
+                if (ftWeight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
+                    const ftCurrent = scores.ft_current != null ? scores.ft_current : 0;
+                    const ftCap = scores.ft_cap != null ? scores.ft_cap : 15;
+                    const ftPct = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
+                    const ftPoints = scores.ft_capped ? (100.0 * ftWeight) : 0;
+                    totalFocusPoints += ftPoints;
+                    html += `<tr><td>FT (Flowing Thought)</td><td>${ftCurrent}/${ftCap}</td><td>${formatScore(ftPct)}</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
                 }
                 
                 // ATK - part of focus weight (only show if not already in focus_scores)
