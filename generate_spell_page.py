@@ -910,6 +910,22 @@ VISIBILITY_CHANGE_ITEM_THRESHOLD = 20
 VISIBILITY_CHANGE_AA_THRESHOLD = 50
 
 
+def apply_visibility_change_to_char_deltas(char_deltas):
+    """Set is_visibility_change on char_deltas that show 0 vs large level/AA (anon flip).
+    Use when char_deltas come from compare_delta_to_delta or from JSON, which don't set this."""
+    for char_name, delta in char_deltas.items():
+        if delta.get('is_visibility_change'):
+            continue
+        prev_aa = delta.get('previous_aa_total', 0)
+        curr_aa = delta.get('current_aa_total', 0)
+        prev_lvl = delta.get('previous_level', 0)
+        curr_lvl = delta.get('current_level', 0)
+        if (prev_aa == 0 and curr_aa >= VISIBILITY_CHANGE_AA_THRESHOLD) or (
+            curr_aa == 0 and prev_aa >= VISIBILITY_CHANGE_AA_THRESHOLD
+        ) or (prev_lvl == 0 and curr_lvl >= 50) or (curr_lvl == 0 and prev_lvl >= 50):
+            delta['is_visibility_change'] = True
+
+
 def compare_inventories(current_inv, previous_inv, character_list=None):
     """Compare current and previous inventories to find item deltas.
     If character_list is None, compares all characters (serverwide).
@@ -3341,6 +3357,9 @@ def main():
             print("Warning: Daily deltas not available, falling back to file comparison")
             char_deltas = compare_character_data(current_char_data, previous_char_data, None)
             inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+        
+        # Ensure visibility change (anon 0 vs large AA/level) is set when char_deltas came from JSON/delta-to-delta
+        apply_visibility_change_to_char_deltas(char_deltas)
         
         # Get item names for inventory deltas
         all_item_ids = set()
