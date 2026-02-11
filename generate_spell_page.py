@@ -801,6 +801,7 @@ def compare_character_data(current_data, previous_data, character_list=None):
         previous_hp = previous.get('hp_max_total', 0)
         
         # Detect deleted characters (not in current data, or level 0 in current but was > 0 in previous)
+        # Anon in one snapshot = character simply absent from that snapshot, so is_new or is_deleted is enough
         is_deleted = (char_name not in current_data) or (current_level == 0 and previous_level > 0)
         
         delta = {
@@ -817,7 +818,7 @@ def compare_character_data(current_data, previous_data, character_list=None):
             'class': current.get('class', '') or previous.get('class', ''),
             'guild': current.get('guild', '') or previous.get('guild', ''),
             'is_new': char_name not in previous_data,
-            'is_deleted': is_deleted
+            'is_deleted': is_deleted,
         }
         
         # Only include if there are changes or it's new/deleted
@@ -1054,10 +1055,13 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             for _ in range(count):
                 zone_entries[zone].append((char_name, item_id, item_name))
     
-    # Calculate AA leaderboard (top gainers)
+    # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon from inventory: in one snapshot but not the other)
+    visibility_change_chars = {name for name, inv_d in inv_deltas.items() if inv_d.get('is_visibility_change')}
+    
+    # Calculate AA leaderboard (top gainers); exclude new/deleted and inv-based visibility change
     aa_leaderboard = []
     for char_name, delta in char_deltas.items():
-        if delta.get('is_deleted', False) or delta.get('is_new', False):
+        if delta.get('is_deleted', False) or delta.get('is_new', False) or char_name in visibility_change_chars:
             continue
         current_level = delta['current_level']
         previous_level = delta['previous_level']
@@ -1080,7 +1084,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     # Calculate HP leaderboard (top gainers)
     hp_leaderboard = []
     for char_name, delta in char_deltas.items():
-        if delta.get('is_deleted', False) or delta.get('is_new', False):
+        if delta.get('is_deleted', False) or delta.get('is_new', False) or char_name in visibility_change_chars:
             continue
         current_level = delta['current_level']
         hp_gain = delta['hp_change']
@@ -1426,9 +1430,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             </thead>
             <tbody>
 """
-        # Sort all deltas
+        # Sort all deltas (skip inv-flagged visibility-change chars; they appear in the visibility note only)
         for char_name in sorted(char_deltas.keys()):
             delta = char_deltas[char_name]
+            if char_name in visibility_change_chars:
+                continue
             current_level = delta['current_level']
             is_deleted = delta.get('is_deleted', False)
             
@@ -2442,13 +2448,12 @@ def generate_delta_history(base_dir):
                         continue;
                     }
                     
-                    // Character exists in both - compare values
+                    // Character exists in both - compare values (anon = not in snapshot, so is_new/is_deleted cover that)
                     if (startChar && endChar) {
                         const levelChange = endChar.level - startChar.level;
                         const aaChange = endChar.aa_total - startChar.aa_total;
                         const hpChange = endChar.hp - startChar.hp;
                         
-                        // Only include if there are changes
                         if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0) {
                             charChanges[charName] = {
                                 level: levelChange,
