@@ -801,8 +801,14 @@ def compare_character_data(current_data, previous_data, character_list=None):
         previous_hp = previous.get('hp_max_total', 0)
         
         # Detect deleted characters (not in current data, or level 0 in current but was > 0 in previous)
-        # Anon in one snapshot = character simply absent from that snapshot, so is_new or is_deleted is enough
         is_deleted = (char_name not in current_data) or (current_level == 0 and previous_level > 0)
+        # Export can include anon with 0 stats: in both snapshots but one side 0 AA the other large = visibility change
+        is_visibility_change = False
+        if char_name in current_data and char_name in previous_data and not is_deleted:
+            if (previous_aa_total == 0 and current_aa_total >= VISIBILITY_CHANGE_AA_THRESHOLD) or (
+                current_aa_total == 0 and previous_aa_total >= VISIBILITY_CHANGE_AA_THRESHOLD
+            ):
+                is_visibility_change = True
         
         delta = {
             'name': char_name,
@@ -819,6 +825,7 @@ def compare_character_data(current_data, previous_data, character_list=None):
             'guild': current.get('guild', '') or previous.get('guild', ''),
             'is_new': char_name not in previous_data,
             'is_deleted': is_deleted,
+            'is_visibility_change': is_visibility_change,
         }
         
         # Only include if there are changes or it's new/deleted
@@ -899,6 +906,8 @@ def load_tracked_item_ids():
 
 # Threshold: if a character has this many items only added or only removed (not both), treat as anon/not-anon visibility change
 VISIBILITY_CHANGE_ITEM_THRESHOLD = 20
+# Character stats: if in both snapshots but one has 0 AA and the other has >= this, treat as anon flip (export includes anon with zeros)
+VISIBILITY_CHANGE_AA_THRESHOLD = 50
 
 
 def compare_inventories(current_inv, previous_inv, character_list=None):
@@ -1055,8 +1064,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             for _ in range(count):
                 zone_entries[zone].append((char_name, item_id, item_name))
     
-    # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon from inventory: in one snapshot but not the other)
+    # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon: from inv or from char stats 0 vs large AA)
     visibility_change_chars = {name for name, inv_d in inv_deltas.items() if inv_d.get('is_visibility_change')}
+    for name, char_d in char_deltas.items():
+        if char_d.get('is_visibility_change'):
+            visibility_change_chars.add(name)
     
     # Calculate AA leaderboard (top gainers); exclude new/deleted and inv-based visibility change
     aa_leaderboard = []
@@ -1501,7 +1513,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
 """
     
     # Single visibility note (show once; sections below show only actual changes)
-    all_vis = set()
+    all_vis = set(visibility_change_chars)
     if inv_deltas_level1:
         for c, d in inv_deltas_level1.items():
             if d.get('is_visibility_change'):
