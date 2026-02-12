@@ -209,6 +209,46 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
                 if item_id in pok_spell_ids:
                     officer_pok_spells[char_name][item_id] += 1
     
+    # Build item search index: item_id -> {name, chars: [(char_name, count), ...]}
+    # Includes all items on regular mules and officer mules (for search/autocomplete)
+    item_search_index = {}
+    for char_name, items in all_items.items():
+        for item in items:
+            item_id = item['item_id']
+            item_name = (item.get('item_name') or '').strip()
+            if not item_id:
+                continue
+            if item_id not in item_search_index:
+                item_search_index[item_id] = {'name': item_name, 'chars': defaultdict(int)}
+            item_search_index[item_id]['chars'][char_name] += 1
+    if officer_all_items:
+        for char_name, items in officer_all_items.items():
+            for item in items:
+                item_id = item['item_id']
+                item_name = (item.get('item_name') or '').strip()
+                if not item_id:
+                    continue
+                if item_id not in item_search_index:
+                    item_search_index[item_id] = {'name': item_name, 'chars': defaultdict(int)}
+                item_search_index[item_id]['chars'][char_name] += 1
+    # Convert chars to sorted list of (char_name, count) for JSON
+    item_search_list = []
+    all_item_names_for_autocomplete = []
+    for item_id, data in item_search_index.items():
+        chars_list = sorted(data['chars'].items(), key=lambda x: (-x[1], x[0]))
+        item_search_list.append({
+            'id': item_id,
+            'name': data['name'],
+            'chars': chars_list
+        })
+        if data['name']:
+            all_item_names_for_autocomplete.append(data['name'])
+    # Safe for embedding in <script>: avoid closing tag
+    def script_safe(s):
+        return s.replace("</", "<\\/")
+    item_search_json = script_safe(json.dumps(item_search_list, ensure_ascii=False))
+    autocomplete_names_json = script_safe(json.dumps(sorted(set(all_item_names_for_autocomplete)), ensure_ascii=False))
+    
     # Create reverse mapping: spell_id -> list of characters who have it
     spell_to_chars = defaultdict(list)
     for char_name, spells in pok_spells.items():
@@ -416,6 +456,91 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
             font-weight: bold;
             color: #1976D2;
         }
+        .search-inventory {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border: 1px solid #c8e6c9;
+        }
+        .search-inventory h2 {
+            margin-top: 0;
+            color: #2e7d32;
+            border-bottom: none;
+        }
+        .search-inventory-wrap {
+            position: relative;
+            max-width: 500px;
+        }
+        .search-inventory input {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 1em;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .search-inventory input:focus {
+            outline: none;
+            border-color: #2e7d32;
+        }
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 280px;
+            overflow-y: auto;
+            background: white;
+            border: 2px solid #4CAF50;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 100;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .autocomplete-list li {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        .autocomplete-list li:hover,
+        .autocomplete-list li.selected {
+            background: #e8f5e9;
+        }
+        .autocomplete-list li:last-child {
+            border-bottom: none;
+        }
+        .search-results {
+            margin-top: 15px;
+        }
+        .item-result-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #e8f5e9;
+            border-left: 5px solid #4CAF50;
+        }
+        .item-result-card .item-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .item-result-card .item-name a {
+            color: #1976D2;
+            text-decoration: none;
+        }
+        .item-result-card .item-name a:hover {
+            text-decoration: underline;
+        }
+        .search-results-empty {
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -423,6 +548,16 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
         <h1>TAKP Mule PoK Spell Inventory</h1>
         <p>Generated from magelo dump (last updated: """ + magelo_update_date + """)</p>
         <p>This page shows spells that can be obtained from PoK turn-ins (Ethereal Parchment, Spectral Parchment, Glyphed Rune Word)</p>
+        
+        <div class="search-inventory">
+            <h2>Search mule inventory</h2>
+            <p style="margin: 0 0 10px 0; color: #555; font-size: 0.95em;">Type to search items on mules. Autocomplete suggests item names; partial text matches multiple items (e.g. "ring" shows all items containing "ring").</p>
+            <div class="search-inventory-wrap">
+                <input type="text" id="item-search-input" placeholder="Item name (e.g. ring, parchment)..." autocomplete="off" />
+                <ul class="autocomplete-list" id="autocomplete-list" style="display: none;"></ul>
+            </div>
+            <div class="search-results" id="search-results"></div>
+        </div>
         
         <div class="summary">
             <h2>Summary</h2>
@@ -773,6 +908,122 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
             html += "</div>"
     
     html += """
+    <script>
+    (function() {
+        var itemSearchData = """ + item_search_json + """;
+        var autocompleteNames = """ + autocomplete_names_json + """;
+        var input = document.getElementById('item-search-input');
+        var listEl = document.getElementById('autocomplete-list');
+        var resultsEl = document.getElementById('search-results');
+        var selectedIdx = -1;
+
+        function showAutocomplete(query) {
+            query = (query || '').trim().toLowerCase();
+            if (!query) {
+                listEl.style.display = 'none';
+                listEl.innerHTML = '';
+                return;
+            }
+            var matches = autocompleteNames.filter(function(name) {
+                return name.toLowerCase().indexOf(query) !== -1;
+            }).slice(0, 80);
+            if (matches.length === 0) {
+                listEl.style.display = 'none';
+                listEl.innerHTML = '';
+                return;
+            }
+            listEl.innerHTML = matches.map(function(name, i) {
+                return '<li data-name="' + name.replace(/"/g, '&quot;') + '" data-idx="' + i + '">' + escapeHtml(name) + '</li>';
+            }).join('');
+            listEl.style.display = 'block';
+            selectedIdx = 0;
+            setSelected(0);
+        }
+
+        function escapeHtml(s) {
+            var div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
+        }
+
+        function setSelected(idx) {
+            var items = listEl.querySelectorAll('li');
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.toggle('selected', i === idx);
+            }
+            selectedIdx = idx;
+            if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+        }
+
+        function runSearch(query) {
+            query = (query || '').trim().toLowerCase();
+            listEl.style.display = 'none';
+            listEl.innerHTML = '';
+            if (!query) {
+                resultsEl.innerHTML = '';
+                return;
+            }
+            var matches = itemSearchData.filter(function(item) {
+                return (item.name || '').toLowerCase().indexOf(query) !== -1;
+            });
+            if (matches.length === 0) {
+                resultsEl.innerHTML = '<p class="search-results-empty">No items on mules matching "' + escapeHtml(query) + '".</p>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < matches.length; i++) {
+                var item = matches[i];
+                var name = escapeHtml(item.name || 'Unknown');
+                var url = 'https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(item.id);
+                html += '<div class="item-result-card"><div class="item-name"><a href="' + url + '" target="_blank">' + name + '</a></div>';
+                html += '<div class="char-list"><strong>Found on:</strong><br>';
+                for (var j = 0; j < item.chars.length; j++) {
+                    var c = item.chars[j];
+                    var countStr = c[1] > 1 ? ' x' + c[1] : '';
+                    html += '<span class="char-item">' + escapeHtml(c[0]) + '<span class="count">' + countStr + '</span></span>';
+                }
+                html += '</div></div>';
+            }
+            resultsEl.innerHTML = html;
+        }
+
+        input.addEventListener('input', function() {
+            showAutocomplete(input.value);
+        });
+        input.addEventListener('keydown', function(e) {
+            if (listEl.style.display !== 'block') {
+                if (e.key === 'Enter') runSearch(input.value);
+                return;
+            }
+            var items = listEl.querySelectorAll('li');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelected(Math.min(selectedIdx + 1, items.length - 1));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelected(Math.max(selectedIdx - 1, 0));
+            } else if (e.key === 'Enter' && items[selectedIdx]) {
+                e.preventDefault();
+                input.value = items[selectedIdx].getAttribute('data-name');
+                runSearch(input.value);
+            } else if (e.key === 'Escape') {
+                listEl.style.display = 'none';
+            }
+        });
+        listEl.addEventListener('click', function(e) {
+            var li = e.target.closest('li');
+            if (li) {
+                input.value = li.getAttribute('data-name');
+                runSearch(input.value);
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !listEl.contains(e.target)) {
+                listEl.style.display = 'none';
+            }
+        });
+    })();
+    </script>
     </div>
 </body>
 </html>
