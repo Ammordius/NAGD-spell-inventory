@@ -3606,76 +3606,76 @@
     "respawn_seconds": 561600
   },
   "28881": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Boots of Silent Dreams",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28882": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Steel Skin Armplates",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28883": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Shaded Amice",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28884": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Ring of Rage",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28885": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Gorget of Superiority",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28886": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Umbracite Bracer",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28887": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Cloak of Icy Shadows",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28888": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Shadow Footpads",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28889": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Living Symbol",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28890": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Cord of Midnight",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28891": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Bracer of the Silent Star",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28892": {
-    "mob": "Eom_Thall",
+    "mob": "Thall_Va_Xakra",
     "zone": "Vex Thal",
     "name": "Cap of the Silent Star",
-    "respawn_seconds": 2640
+    "respawn_seconds": 259200
   },
   "28893": {
     "mob": "Kaas_Thox_Xi_Ans_Dyek",

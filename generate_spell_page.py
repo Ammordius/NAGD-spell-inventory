@@ -5,6 +5,7 @@ spells from PoK turn-ins (items 29112, 29131, 29132).
 """
 
 import json
+import math
 import os
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -1053,11 +1054,15 @@ def compare_character_data(current_data, previous_data, character_list=None):
         
         # Detect deleted characters (not in current data, or level 0 in current but was > 0 in previous)
         is_deleted = (char_name not in current_data) or (current_level == 0 and previous_level > 0)
-        # Export can include anon with 0 stats: in both snapshots but one side 0 AA the other large = visibility change
+        # Export can include anon with 0 stats: in both snapshots one side 0 the other large = visibility change
         is_visibility_change = False
         if char_name in current_data and char_name in previous_data and not is_deleted:
             if (previous_aa_total == 0 and current_aa_total >= VISIBILITY_CHANGE_AA_THRESHOLD) or (
                 current_aa_total == 0 and previous_aa_total >= VISIBILITY_CHANGE_AA_THRESHOLD
+            ):
+                is_visibility_change = True
+            if (previous_hp == 0 and current_hp >= VISIBILITY_CHANGE_HP_THRESHOLD) or (
+                current_hp == 0 and previous_hp >= VISIBILITY_CHANGE_HP_THRESHOLD
             ):
                 is_visibility_change = True
         
@@ -1085,7 +1090,11 @@ def compare_character_data(current_data, previous_data, character_list=None):
         has_level_change = delta['level_change'] != 0 and current_level < 65 and not is_deleted
         has_aa_change = delta['aa_total_change'] != 0 and ((current_level >= 50 or previous_level >= 50) if not is_deleted else previous_level >= 50)
         
-        if has_level_change or has_aa_change or delta['is_new'] or delta['is_deleted']:
+        # Include if HP shows 0 vs large (anon flip) so we mark is_visibility_change and exclude from HP leaderboard
+        has_hp_visibility = (previous_hp == 0 and current_hp >= VISIBILITY_CHANGE_HP_THRESHOLD) or (
+            current_hp == 0 and previous_hp >= VISIBILITY_CHANGE_HP_THRESHOLD
+        )
+        if has_level_change or has_aa_change or has_hp_visibility or delta['is_new'] or delta['is_deleted']:
             deltas[char_name] = delta
     
     return deltas
@@ -1165,10 +1174,12 @@ def load_tracked_item_ids():
 VISIBILITY_CHANGE_ITEM_THRESHOLD = 20
 # Character stats: if in both snapshots but one has 0 AA and the other has >= this, treat as anon flip (export includes anon with zeros)
 VISIBILITY_CHANGE_AA_THRESHOLD = 50
+# HP: if one side 0 and the other >= this, treat as anon flip (anon export often has 0 HP)
+VISIBILITY_CHANGE_HP_THRESHOLD = 500
 
 
 def apply_visibility_change_to_char_deltas(char_deltas):
-    """Set is_visibility_change on char_deltas that show 0 vs large level/AA (anon flip).
+    """Set is_visibility_change on char_deltas that show 0 vs large level/AA/HP (anon flip).
     Use when char_deltas come from compare_delta_to_delta or from JSON, which don't set this."""
     for char_name, delta in char_deltas.items():
         if delta.get('is_visibility_change'):
@@ -1177,9 +1188,13 @@ def apply_visibility_change_to_char_deltas(char_deltas):
         curr_aa = delta.get('current_aa_total', 0)
         prev_lvl = delta.get('previous_level', 0)
         curr_lvl = delta.get('current_level', 0)
+        prev_hp = delta.get('previous_hp', 0)
+        curr_hp = delta.get('current_hp', 0)
         if (prev_aa == 0 and curr_aa >= VISIBILITY_CHANGE_AA_THRESHOLD) or (
             curr_aa == 0 and prev_aa >= VISIBILITY_CHANGE_AA_THRESHOLD
-        ) or (prev_lvl == 0 and curr_lvl >= 50) or (curr_lvl == 0 and prev_lvl >= 50):
+        ) or (prev_lvl == 0 and curr_lvl >= 50) or (curr_lvl == 0 and prev_lvl >= 50) or (
+            prev_hp == 0 and curr_hp >= VISIBILITY_CHANGE_HP_THRESHOLD
+        ) or (curr_hp == 0 and prev_hp >= VISIBILITY_CHANGE_HP_THRESHOLD):
             delta['is_visibility_change'] = True
 
 
@@ -1438,7 +1453,7 @@ def generate_mob_tracker_html(base_dir: str) -> str:
 '''
 
 
-# Server repop reset: every two Wednesdays (e.g. 2026-02-11, 2026-02-25). On these days we clear mob tracker deaths.
+# Server repop reset: every two Wednesdays (e.g. 2026-02-11, 2026-02-25). Deaths before the last reset are dropped.
 REPOP_RESET_REFERENCE_WEDNESDAY = datetime(2026, 2, 11)  # First reset Wednesday
 
 
@@ -1453,10 +1468,28 @@ def is_repop_reset_day(when=None):
     return (d - ref).days % 14 == 0
 
 
+def get_last_repop_reset_utc(when=None):
+    """Return the datetime (UTC, start of day) of the most recent repop reset on or before when."""
+    if when is None:
+        when = datetime.utcnow()
+    d = when.date() if isinstance(when, datetime) else when
+    ref = REPOP_RESET_REFERENCE_WEDNESDAY.date() if isinstance(REPOP_RESET_REFERENCE_WEDNESDAY, datetime) else REPOP_RESET_REFERENCE_WEDNESDAY
+    days_since_ref = (d - ref).days
+    if days_since_ref < 0:
+        # Before ref: last reset on or before d is ref - 14*k for k = ceil((ref-d).days/14)
+        reset_date = ref - timedelta(days=14 * math.ceil((ref - d).days / 14.0))
+    else:
+        back = days_since_ref % 14  # 0 = today is reset day, else days since last reset
+        reset_date = d - timedelta(days=back)
+    return datetime.combine(reset_date, datetime.min.time())
+
+
 def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_age_days=14):
-    """Append (zone, mob) from zone_entries to mob tracker deaths JSON; prune older than max_age_days.
-    Keeps all previous entries (other mobs and older deaths); adds one new death per (zone, mob) seen this run.
-    On repop reset days (every two Wednesdays), clears the deaths list so timers start fresh.
+    """Append (zone, mob) from zone_entries to mob tracker deaths JSON. Do not overwrite existing deaths.
+    - Load existing deaths from file.
+    - If we have gone over a reset: remove entries with observed_at before the last reset.
+    - Also drop entries older than max_age_days.
+    - Append/update one death per (zone, mob) seen this run; write back.
     zone_entries: dict zone -> mob -> list of (char_name, item_id, item_name).
     observed_at: ISO timestamp string (default: utcnow()). Used as death observation time for repop window.
     """
@@ -1465,6 +1498,12 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
     if isinstance(observed_at, datetime):
         observed_at = observed_at.strftime("%Y-%m-%dT%H:%M:%SZ")
     now_dt = datetime.utcnow()
+    last_reset = get_last_repop_reset_utc(now_dt)
+    age_cutoff = now_dt - timedelta(days=max_age_days)
+    # Keep deaths on or after the more recent of (last reset, age cutoff)
+    cutoff_dt = max(last_reset, age_cutoff)
+    cutoff_iso = cutoff_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
     data = {"updated": observed_at, "deaths": []}
     if os.path.exists(output_path):
         try:
@@ -1472,12 +1511,7 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
                 data = json.load(f)
         except Exception:
             pass
-    deaths = list(data.get("deaths", []))
-    if is_repop_reset_day(now_dt):
-        deaths = []
-    else:
-        cutoff = (now_dt - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
-        deaths = [d for d in deaths if (d.get("observed_at") or "") >= cutoff]
+    deaths = [d for d in data.get("deaths", []) if (d.get("observed_at") or "") >= cutoff_iso]
     seen_this_run = set()
     for zone, mobs in zone_entries.items():
         for mob in mobs:

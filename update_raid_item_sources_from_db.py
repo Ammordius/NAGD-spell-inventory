@@ -155,20 +155,23 @@ def query_respawn_by_dropper(conn, item_ids: List[int]) -> Dict[Tuple[str, str],
     return result
 
 
-# Respawn overrides for triggered/script mobs (applied after DB respawn; clears respawn_seconds when set).
+# Respawn overrides for triggered/script mobs (applied after DB respawn).
 # zone_norm: normalize_zone(zone) must match. mob_contains: mob name must contain this (or any if "").
 # mob_excludes: if set, do not apply override when mob contains this (e.g. exclude Xegony in Po Air).
+# If respawn_seconds is set, use that value; otherwise set respawn_note and clear respawn_seconds.
 RESPAWN_OVERRIDES: List[dict] = [
     {"zone_norm": "temple of ssra", "mob_contains": "Emperor", "respawn_note": "7 day (blood)"},
     {"zone_norm": "temple of ssra", "mob_contains": "Cursed", "respawn_note": "Script: 6.5±0.5 days"},
     {"zone_norm": "plane of earth", "mob_contains": "", "respawn_note": "Minis triggered by rings: 3.5±0.5 days"},
     {"zone_norm": "plane of air", "mob_contains": "", "mob_excludes": "Xegony", "respawn_note": "3.5±0.5 days (triggered)"},
     {"zone_norm": "kael drakkel", "mob_contains": "Statue", "respawn_note": "Triggers Avatar of War"},
+    {"zone_norm": "plane of time", "mob_contains": "", "respawn_note": "Triggered/script (not tracked)"},
+    {"zone_norm": "vex thal", "mob_contains": "Thall_Va_Xakra", "respawn_seconds": 259200},
 ]
 
 
 def apply_respawn_overrides(entry: dict) -> None:
-    """If (zone, mob) matches an override, set respawn_note and clear respawn_seconds."""
+    """If (zone, mob) matches an override, set respawn_note/respawn_seconds as specified."""
     zone = entry.get("zone") or ""
     mob = entry.get("mob") or ""
     zone_n = normalize_zone(zone)
@@ -179,8 +182,11 @@ def apply_respawn_overrides(entry: dict) -> None:
             continue
         if ov["mob_contains"] and ov["mob_contains"] not in mob:
             continue
-        entry["respawn_note"] = ov["respawn_note"]
-        entry["respawn_seconds"] = None
+        if "respawn_seconds" in ov:
+            entry["respawn_seconds"] = ov["respawn_seconds"]
+        else:
+            entry["respawn_note"] = ov["respawn_note"]
+            entry["respawn_seconds"] = None
         return
 
 
@@ -190,12 +196,14 @@ def main() -> None:
     parser.add_argument("--input", "-i", type=Path, default=None, help="Input JSON path (default: raid_item_sources.json)")
     parser.add_argument("--output", "-o", type=Path, default=None, help="Output JSON path (default: same as input)")
     parser.add_argument("--dry-run", action="store_true", help="Print changes without writing")
+    parser.add_argument("--no-respawn-update", action="store_true", help="Only update mob/zone; do not touch respawn_seconds/respawn_note (use after reset to preserve repop data)")
     parser.add_argument("conn_or_file", nargs="*", help="DB connection string or --from-file <path>")
     args, rest = parser.parse_known_args()
     # Re-inject for legacy --from-file handling
     sys.argv = [sys.argv[0]] + (["--from-file", rest[1]] if "--from-file" in rest and len(rest) > 1 else rest)
 
     dry_run = args.dry_run
+    no_respawn_update = getattr(args, "no_respawn_update", False)
     json_path = args.input if args.input is not None else JSON_PATH
     if not json_path.is_absolute():
         json_path = SCRIPT_DIR / json_path
@@ -322,28 +330,32 @@ def main() -> None:
         if best is None:
             continue
         new_mob, new_zone = best
+        # DB may return Eom_Thall (placeholder); actual mob is Thall Va Xakra (npcid 158136), 3 day
+        if new_mob == "Eom_Thall" and normalize_zone(new_zone or "") == "vex thal":
+            new_mob = "Thall_Va_Xakra"
         if new_mob != current_mob or (new_zone and new_zone != current_zone):
             updates.append((item_id_str, current_mob, new_mob, current_zone, new_zone))
             entry["mob"] = new_mob
             if new_zone:
                 entry["zone"] = new_zone
 
-    # Populate respawn_seconds from DB and apply overrides for every entry with mob/zone
+    # Populate respawn_seconds from DB and apply overrides (unless --no-respawn-update to preserve post-reset data)
     respawn_filled = 0
     override_applied = 0
-    for entry in data.values():
-        mob = entry.get("mob") or ""
-        zone = entry.get("zone") or ""
-        if not zone and not mob:
-            continue
-        key = (mob, zone)
-        if key in respawn_map:
-            entry["respawn_seconds"] = respawn_map[key]
-            respawn_filled += 1
-        had_note = "respawn_note" in entry
-        apply_respawn_overrides(entry)
-        if "respawn_note" in entry and not had_note:
-            override_applied += 1
+    if not no_respawn_update:
+        for entry in data.values():
+            mob = entry.get("mob") or ""
+            zone = entry.get("zone") or ""
+            if not zone and not mob:
+                continue
+            key = (mob, zone)
+            if key in respawn_map:
+                entry["respawn_seconds"] = respawn_map[key]
+                respawn_filled += 1
+            had_note = "respawn_note" in entry
+            apply_respawn_overrides(entry)
+            if "respawn_note" in entry and not had_note:
+                override_applied += 1
 
     print(f"Updates: {len(updates)} entries corrected from database.")
     for item_id_str, old_mob, new_mob, old_zone, new_zone in updates[:30]:
@@ -352,8 +364,10 @@ def main() -> None:
         print(f"  {item_id_str}: {mob_ch} {zone_ch}")
     if len(updates) > 30:
         print(f"  ... and {len(updates) - 30} more")
-    if respawn_map:
-        print(f"Respawn: {respawn_filled} entries with DB respawn_seconds; {override_applied} with respawn_note override.")
+    if respawn_map and not no_respawn_update:
+        print(f"Respawn: {respawn_filled} entries with DB respawn_seconds; {override_applied} with respawn_note/value override.")
+    if no_respawn_update:
+        print("Respawn: skipped (--no-respawn-update); existing respawn data preserved.")
 
     if dry_run:
         print("Dry run: no file written.")
