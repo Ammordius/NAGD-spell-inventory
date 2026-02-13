@@ -667,7 +667,8 @@
   "8364": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "Talisman of Vah Kerrath"
+    "name": "Talisman of Vah Kerrath",
+    "respawn_seconds": 561600
   },
   "8365": {
     "mob": "Aten_Ha_Ra",
