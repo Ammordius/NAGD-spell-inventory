@@ -2272,7 +2272,7 @@
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
     "name": "(item 26549)",
-    "respawn_seconds": 10800
+    "respawn_seconds": 604800
   },
   "26551": {
     "mob": "Grieg_Veneficus",
@@ -2283,13 +2283,13 @@
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
     "name": "(item 26552)",
-    "respawn_seconds": 10800
+    "respawn_seconds": 604800
   },
   "26553": {
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
     "name": "Mace of Confusion",
-    "respawn_seconds": 10800
+    "respawn_seconds": 604800
   },
   "26555": {
     "mob": "#Arch_Lich_Rhag`Zadune",
@@ -2368,7 +2368,7 @@
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
     "name": "(item 26579)",
-    "respawn_seconds": 10800
+    "respawn_seconds": 604800
   },
   "26580": {
     "mob": "#Vyzh`dra_the_Cursed",
@@ -2386,7 +2386,7 @@
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
     "name": "(item 26582)",
-    "respawn_seconds": 10800
+    "respawn_seconds": 604800
   },
   "26584": {
     "mob": "Emperor_Ssraeshza_",
