@@ -1110,12 +1110,13 @@ def load_no_rent_items():
 
 def load_tracked_item_ids():
     """Load raid, elemental armor, and praesterium item IDs from the 3 JSON files.
-    Returns (set of item_id strings, dict item_id -> source_label for display, dict item_id -> zone for raid items).
+    Returns (set of item_id strings, dict item_id -> source_label for display, dict item_id -> zone for raid items, dict item_id -> mob name).
     Raid items use mob name from JSON (e.g. 'Mob Name (Zone)'); others use category label."""
     base_dir = os.path.dirname(__file__)
     tracked = set()
     source_label = {}
     item_zone = {}  # raid item_id -> zone name (for "Items by zone" grouping)
+    item_mob = {}   # raid item_id -> mob name (for "Items by zone" subheading by mob)
     # Raid: use mob (and zone) from JSON instead of "raid"
     raid_path = os.path.join(base_dir, "raid_item_sources.json")
     if os.path.exists(raid_path):
@@ -1129,6 +1130,8 @@ def load_tracked_item_ids():
                 zone = entry.get("zone", "").strip()
                 if zone:
                     item_zone[sid] = zone
+                if mob:
+                    item_mob[sid] = mob
                 if mob and zone:
                     source_label[sid] = f"{mob} ({zone})"
                 elif mob:
@@ -1152,9 +1155,10 @@ def load_tracked_item_ids():
                 source_label[sid] = label
                 if zone_name:
                     item_zone[sid] = zone_name
+                # no mob for elemental/praesterium; item_mob stays empty for these
         except Exception as e:
             print(f"Warning: Could not load {path}: {e}")
-    return tracked, source_label, item_zone
+    return tracked, source_label, item_zone, item_mob
 
 
 # Threshold: if a character has this many items only added or only removed (not both), treat as anon/not-anon visibility change
@@ -1302,7 +1306,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 char_delta['item_names'][item_id] = item_names[item_id]
     
     # Load tracked item IDs (raid / elemental armor / praesterium) and filter deltas for that set
-    tracked_ids, tracked_source_label, item_zone = load_tracked_item_ids()
+    tracked_ids, tracked_source_label, item_zone, item_mob = load_tracked_item_ids()
     tracked_deltas = {}
     if tracked_ids:
         for char_name, delta in inv_deltas.items():
@@ -1317,6 +1321,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 }
     
     # Items by zone: only chars in BOTH snapshots (exclude visibility-change); only raid zones
+    # Structure: zone_entries[zone][mob] = [(char_name, item_id, item_name), ...]
     chars_in_both = set(current_inv.keys()) & set(previous_inv.keys())
     zone_entries = {}
     for char_name in tracked_deltas:
@@ -1327,11 +1332,14 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             zone = item_zone.get(str(item_id))
             if not zone:
                 continue
+            mob = item_mob.get(str(item_id), "")
             item_name = (delta.get('item_names') or {}).get(item_id, f"Item {item_id}")
             if zone not in zone_entries:
-                zone_entries[zone] = []
+                zone_entries[zone] = {}
+            if mob not in zone_entries[zone]:
+                zone_entries[zone][mob] = []
             for _ in range(count):
-                zone_entries[zone].append((char_name, item_id, item_name))
+                zone_entries[zone][mob].append((char_name, item_id, item_name))
     
     # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon: from inv or from char stats 0 vs large AA)
     visibility_change_chars = {name for name, inv_d in inv_deltas.items() if inv_d.get('is_visibility_change')}
@@ -1626,21 +1634,30 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>
 """
         for zone in sorted(zone_entries.keys()):
-            entries = zone_entries[zone]
+            mobs = zone_entries[zone]
             html += f"""
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
             <h3 style="margin-top: 0;">{zone}</h3>
+"""
+            # Sort mobs: named mobs first (alphabetically), then "" (no mob) last
+            for mob in sorted(mobs.keys(), key=lambda m: (m == "", m)):
+                entries = mobs[mob]
+                if mob:
+                    html += f'            <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">{mob}</h4>\n'
+                html += """
             <ul style="margin: 0; padding-left: 20px;">
 """
-            for char_name, item_id, item_name in entries:
-                guild = (current_char_data.get(char_name, {}) or {}).get('guild', '')
-                char_display = f"{char_name} &lt;{guild}&gt;" if guild else char_name
-                char_slug = char_name.lower().replace(' ', '_')
-                item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
-                magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
-                html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
-            html += """
+                for char_name, item_id, item_name in entries:
+                    guild = (current_char_data.get(char_name, {}) or {}).get('guild', '')
+                    char_display = f"{char_name} &lt;{guild}&gt;" if guild else char_name
+                    char_slug = char_name.lower().replace(' ', '_')
+                    item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
+                    magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
+                    html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
+                html += """
             </ul>
+"""
+            html += """
         </div>
 """
     
@@ -2230,10 +2247,11 @@ def generate_delta_history(base_dir):
     import re
     
     # Load tracked item IDs so we can embed them for the client-side report (Tracked Items + Items by zone)
-    tracked_ids, tracked_source_label, item_zone = load_tracked_item_ids()
+    tracked_ids, tracked_source_label, item_zone, item_mob = load_tracked_item_ids()
     tracked_ids_json = json.dumps(list(tracked_ids))
     tracked_source_json = json.dumps(tracked_source_label)
     tracked_item_zone_json = json.dumps(item_zone)
+    tracked_item_mob_json = json.dumps(item_mob)
     
     # Find all daily delta JSON files
     delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
@@ -2460,10 +2478,12 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="tracked-item-ids">""" + tracked_ids_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="tracked-source-label">""" + tracked_source_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="tracked-item-zone">""" + tracked_item_zone_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="tracked-item-mob">""" + tracked_item_mob_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
         const TRACKED_ITEM_ZONE = JSON.parse((document.getElementById('tracked-item-zone') || { textContent: '{}' }).textContent);
+        const TRACKED_ITEM_MOB = JSON.parse((document.getElementById('tracked-item-mob') || { textContent: '{}' }).textContent);
         // Set default dates (today and 7 days ago)
         const today = new Date().toISOString().split('T')[0];
         const weekAgo = new Date();
@@ -2857,6 +2877,7 @@ def generate_delta_history(base_dir):
                 }
                 
                 // Items by zone: only chars in BOTH snapshots (exclude visibility-change); only raid zones
+                // Structure: zoneEntries[zone][mob] = [{ charName, itemId, name }, ...]
                 const zoneEntries = {};
                 if (TRACKED_ITEM_ZONE && typeof TRACKED_ITEM_ZONE === 'object') {
                     for (const [charName, delta] of Object.entries(trackedDeltas)) {
@@ -2864,10 +2885,12 @@ def generate_delta_history(base_dir):
                         for (const itemId of Object.keys(delta.added || {})) {
                             const zone = TRACKED_ITEM_ZONE[String(itemId)];
                             if (!zone) continue;
+                            const mob = (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[String(itemId)]) || '';
                             const count = delta.added[itemId];
                             const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                            if (!zoneEntries[zone]) zoneEntries[zone] = [];
-                            for (let i = 0; i < count; i++) zoneEntries[zone].push({ charName, itemId, name });
+                            if (!zoneEntries[zone]) zoneEntries[zone] = {};
+                            if (!zoneEntries[zone][mob]) zoneEntries[zone][mob] = [];
+                            for (let i = 0; i < count; i++) zoneEntries[zone][mob].push({ charName, itemId, name });
                         }
                     }
                 }
@@ -2908,28 +2931,36 @@ def generate_delta_history(base_dir):
                 if (allVisNames.length > 0) {
                     reportHTML += `<details id="visibility-note" style="color: #757575; margin: 15px 0; padding: 10px; background: #fafafa; border-radius: 5px; border-left: 4px solid #9e9e9e;"><summary style="cursor: pointer; font-style: italic;"><strong>Visibility change (anon ↔ not anon)</strong> — ${allVisNames.length} character(s); their inventory and tracked item deltas are not listed below. Click to expand names.</summary><p style="margin: 8px 0 0 0; font-size: 0.9em;">${allVisNames.join(', ')}</p></details>`;
                 }
-                // Items by zone (at top; raid + elemental + praesterium)
+                // Items by zone (at top; raid + elemental + praesterium), with mob subheadings
                 if (Object.keys(zoneEntries).length > 0) {
                     reportHTML += `
                     <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone</h2>
-                    <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone. Only characters present in both snapshots.</em></p>`;
+                    <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone and mob. Only characters present in both snapshots.</em></p>`;
                     for (const zone of Object.keys(zoneEntries).sort()) {
-                        const entries = zoneEntries[zone];
+                        const mobs = zoneEntries[zone];
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
-                        <h3 style="margin-top: 0;">${zone}</h3>
+                        <h3 style="margin-top: 0;">${zone}</h3>`;
+                        const mobKeys = Object.keys(mobs).sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)));
+                        for (const mob of mobKeys) {
+                            const entries = mobs[mob];
+                            if (mob) reportHTML += `
+                        <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">${mob}</h4>`;
+                            reportHTML += `
                         <ul style="margin: 0; padding-left: 20px;">`;
-                        for (const e of entries) {
-                            const state = endState[e.charName] || startState[e.charName] || {};
-                            const guild = state.guild || '';
-                            const charDisplay = guild ? (e.charName + ' &lt;' + guild + '&gt;') : e.charName;
-                            const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
-                            const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
-                            const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
-                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                            for (const e of entries) {
+                                const state = endState[e.charName] || startState[e.charName] || {};
+                                const guild = state.guild || '';
+                                const charDisplay = guild ? (e.charName + ' &lt;' + guild + '&gt;') : e.charName;
+                                const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
+                                const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
+                                const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
+                                reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                            }
+                            reportHTML += `
+                        </ul>`;
                         }
                         reportHTML += `
-                        </ul>
                     </div>`;
                     }
                 }
