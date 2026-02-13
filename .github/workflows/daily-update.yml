@@ -523,6 +523,41 @@ jobs:
         fi
         echo "✓ Current and previous character files differ - delta comparison is valid."
     
+    # Restore mob_tracker_deaths.json from last deploy so we merge with existing deaths (file is not in repo).
+    # If fetch fails, use committed seed. If seed exists, merge any seed entries missing from current (one-time backfill).
+    - name: Fetch current mob tracker deaths from Pages (for persistence across runs)
+      continue-on-error: true
+      run: |
+        PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+        echo "Fetching mob_tracker_deaths.json from $PAGES_URL for merge with today's run..."
+        if curl -sfL "${PAGES_URL}/mob_tracker_deaths.json" -o mob_tracker_deaths.json; then
+          echo "✓ Restored mob_tracker_deaths.json from Pages (will merge with today's delta)"
+        elif [ -f "mob_tracker_deaths_seed.json" ]; then
+          cp mob_tracker_deaths_seed.json mob_tracker_deaths.json
+          echo "✓ No file on Pages; using mob_tracker_deaths_seed.json"
+        else
+          echo "No existing file; script will create fresh."
+        fi
+        # Merge seed entries into current if seed exists (backfill yesterday's list without duplicating)
+        if [ -f "mob_tracker_deaths_seed.json" ] && [ -f "mob_tracker_deaths.json" ]; then
+          python3 -c "
+        import json
+        with open('mob_tracker_deaths.json') as f: data = json.load(f)
+        with open('mob_tracker_deaths_seed.json') as f: seed = json.load(f)
+        current_keys = {(d.get('zone'), d.get('mob')) for d in data.get('deaths', [])}
+        added = 0
+        for d in seed.get('deaths', []):
+            k = (d.get('zone'), d.get('mob'))
+            if k not in current_keys:
+                data.setdefault('deaths', []).append(d)
+                current_keys.add(k)
+                added += 1
+        if added:
+            with open('mob_tracker_deaths.json', 'w') as f: json.dump(data, f, indent=2)
+            print('✓ Merged', added, 'entries from seed into mob_tracker_deaths.json')
+        "
+        fi
+    
     - name: Run spell inventory generator
       env:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}

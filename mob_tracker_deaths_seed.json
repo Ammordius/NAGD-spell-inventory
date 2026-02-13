@@ -1,0 +1,16 @@
+{
+  "updated": "2026-02-12T17:27:41Z",
+  "deaths": [
+    {"zone": "Akheva Ruins", "mob": "The_Va`Dyn", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Kael Drakkel", "mob": "King_Tormax", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Sleeper's Tomb", "mob": "#Tukaarak_the_Warder", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "The Umbral Plains", "mob": "#Rumblecrush", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Vex Thal", "mob": "Aten_Ha_Ra", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Vex Thal", "mob": "Diabo_Xi_Va", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Vex Thal", "mob": "Diabo_Xi_Va_Temariel", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Vex Thal", "mob": "Diabo_Xi_Xin", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Vex Thal", "mob": "Diabo_Xi_Xin_Thall", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Vex Thal", "mob": "Thall_Va_Kelun", "observed_at": "2026-02-12T17:27:41Z"},
+    {"zone": "Vex Thal", "mob": "Va_Xi_Aten_Ha_Ra", "observed_at": "2026-02-12T17:27:41Z"}
+  ]
+}
