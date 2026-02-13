@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
 Cross-reference raid_item_sources.json with the TAKP/PEQ SQL database to correct
-mob (and zone) names. Queries loottable -> loottable_entries -> lootdrop_entries
-and spawn data to get the actual NPC that drops each item, then updates the JSON.
+mob (and zone) names and add respawn data. Queries loottable -> spawn2.respawntime
+for DB respawn; applies known overrides for triggered/script-based repops.
 
 Usage:
     python update_raid_item_sources_from_db.py [database_connection_string]
-    python update_raid_item_sources_from_db.py --from-file droppers.json   # use exported data
+    python update_raid_item_sources_from_db.py --from-file droppers.json   # use exported data (no respawn)
 
 Environment: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT (defaults: localhost, root, no password, peq, 3306)
 
-Output: Updates raid_item_sources.json in place. Use --dry-run to print changes without writing.
+Output: Updates raid_item_sources.json in place. Adds respawn_seconds (from DB) and respawn_note (override).
+Use --dry-run to print changes without writing.
 
 Export format for --from-file: JSON array of {"item_id": N, "npc_name": "...", "zone_long_name": "..."}.
 """
@@ -20,6 +21,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 try:
     import pymysql
@@ -114,6 +116,72 @@ def pick_best_dropper(
 
     # Any candidate
     return candidates[0]
+
+
+def query_respawn_by_dropper(conn, item_ids: List[int]) -> Dict[Tuple[str, str], int]:
+    """Return (npc_name, zone_long_name) -> max respawntime in seconds for NPCs that drop these items."""
+    if not item_ids:
+        return {}
+    placeholders = ",".join(["%s"] * len(item_ids))
+    zone_expr = "COALESCE(NULLIF(TRIM(z.long_name), ''), s2.zone, '')"
+    sql = f"""
+    SELECT
+        nt.name AS npc_name,
+        {zone_expr} AS zone_long_name,
+        MAX(COALESCE(s2.respawntime, 0)) AS respawn_seconds
+    FROM lootdrop_entries lde
+    JOIN loottable_entries lte ON lte.lootdrop_id = lde.lootdrop_id
+    JOIN loottable lt ON lt.id = lte.loottable_id
+    JOIN npc_types nt ON nt.loottable_id = lt.id
+    LEFT JOIN spawnentry se ON se.npcID = nt.id
+    LEFT JOIN spawngroup sg ON sg.id = se.spawngroupID
+    LEFT JOIN spawn2 s2 ON s2.spawngroupID = sg.id
+    LEFT JOIN zone z ON z.short_name = s2.zone
+    WHERE lde.item_id IN ({placeholders})
+      AND s2.respawntime IS NOT NULL AND s2.respawntime > 0
+    GROUP BY nt.name, {zone_expr}
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql, tuple(item_ids))
+        rows = cur.fetchall()
+    result: Dict[Tuple[str, str], int] = {}
+    for row in rows:
+        npc = (row["npc_name"] or "").strip()
+        zone = (row["zone_long_name"] or "").strip()
+        sec = int(row["respawn_seconds"] or 0)
+        if sec > 0:
+            key = (npc, zone)
+            result[key] = max(result.get(key, 0), sec)
+    return result
+
+
+# Respawn overrides for triggered/script mobs (applied after DB respawn; clears respawn_seconds when set).
+# zone_norm: normalize_zone(zone) must match. mob_contains: mob name must contain this (or any if "").
+# mob_excludes: if set, do not apply override when mob contains this (e.g. exclude Xegony in Po Air).
+RESPAWN_OVERRIDES: List[dict] = [
+    {"zone_norm": "temple of ssra", "mob_contains": "Emperor", "respawn_note": "7 day (blood)"},
+    {"zone_norm": "temple of ssra", "mob_contains": "Cursed", "respawn_note": "Script: 6.5±0.5 days"},
+    {"zone_norm": "plane of earth", "mob_contains": "", "respawn_note": "Minis triggered by rings: 3.5±0.5 days"},
+    {"zone_norm": "plane of air", "mob_contains": "", "mob_excludes": "Xegony", "respawn_note": "3.5±0.5 days (triggered)"},
+    {"zone_norm": "kael drakkel", "mob_contains": "Statue", "respawn_note": "Triggers Avatar of War"},
+]
+
+
+def apply_respawn_overrides(entry: dict) -> None:
+    """If (zone, mob) matches an override, set respawn_note and clear respawn_seconds."""
+    zone = entry.get("zone") or ""
+    mob = entry.get("mob") or ""
+    zone_n = normalize_zone(zone)
+    for ov in RESPAWN_OVERRIDES:
+        if zone_n != ov["zone_norm"]:
+            continue
+        if ov.get("mob_excludes") and ov["mob_excludes"] in mob:
+            continue
+        if ov["mob_contains"] and ov["mob_contains"] not in mob:
+            continue
+        entry["respawn_note"] = ov["respawn_note"]
+        entry["respawn_seconds"] = None
+        return
 
 
 def main() -> None:
@@ -233,12 +301,17 @@ def main() -> None:
 
         print(f"Querying {db_name}@{db_host} for droppers of {len(item_ids)} items...")
         droppers = query_item_droppers(conn, item_ids)
+        print(f"Querying respawn (spawn2.respawntime) for same items...")
+        respawn_map = query_respawn_by_dropper(conn, item_ids)
         conn.close()
+        print(f"  Respawn data for {len(respawn_map)} (npc, zone) pairs.")
 
         found_count = len(droppers)
         no_drop = [iid for iid in item_ids if iid not in droppers]
         if no_drop:
             print(f"  {len(no_drop)} item(s) have no dropper in DB (loot/spawn): {no_drop[:20]}{'...' if len(no_drop) > 20 else ''}")
+    else:
+        respawn_map = {}
 
     updates: list[tuple[str, str, str, str, str]] = []  # id, old_mob, new_mob, old_zone, new_zone
     for item_id_str, entry in data.items():
@@ -256,6 +329,23 @@ def main() -> None:
             if new_zone:
                 entry["zone"] = new_zone
 
+    # Populate respawn_seconds from DB and apply overrides for every entry with mob/zone
+    respawn_filled = 0
+    override_applied = 0
+    for entry in data.values():
+        mob = entry.get("mob") or ""
+        zone = entry.get("zone") or ""
+        if not zone and not mob:
+            continue
+        key = (mob, zone)
+        if key in respawn_map:
+            entry["respawn_seconds"] = respawn_map[key]
+            respawn_filled += 1
+        had_note = "respawn_note" in entry
+        apply_respawn_overrides(entry)
+        if "respawn_note" in entry and not had_note:
+            override_applied += 1
+
     print(f"Updates: {len(updates)} entries corrected from database.")
     for item_id_str, old_mob, new_mob, old_zone, new_zone in updates[:30]:
         mob_ch = f"mob: {old_mob!r} -> {new_mob!r}" if old_mob != new_mob else ""
@@ -263,12 +353,14 @@ def main() -> None:
         print(f"  {item_id_str}: {mob_ch} {zone_ch}")
     if len(updates) > 30:
         print(f"  ... and {len(updates) - 30} more")
+    if respawn_map:
+        print(f"Respawn: {respawn_filled} entries with DB respawn_seconds; {override_applied} with respawn_note override.")
 
     if dry_run:
         print("Dry run: no file written.")
         return
 
-    if updates:
+    if updates or respawn_filled or override_applied:
         out_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
         print(f"Wrote {out_path}")
     else:

@@ -7,7 +7,7 @@ spells from PoK turn-ins (items 29112, 29131, 29132).
 import json
 import os
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from delta_storage import (
     save_delta_snapshot, load_delta_snapshot,
     get_week_start, get_month_start,
@@ -1269,11 +1269,211 @@ def compare_inventories(current_inv, previous_inv, character_list=None):
     
     return item_deltas
 
+
+def generate_mob_tracker_html(base_dir: str) -> str:
+    """Generate static mob_tracker.html that loads mob_tracker_deaths.json and raid_item_sources.json
+    and shows deaths in last 24h with repop window and % elapsed."""
+    return '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Raid Mob Repop Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px; }
+        .sub { color: #666; margin-bottom: 16px; }
+        a { color: #2196F3; }
+        table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+        th { background: #2196F3; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .in-window { background: #e8f5e9 !important; font-weight: bold; }
+        .passed { color: #999; }
+        .bar { height: 12px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: #4CAF50; }
+        .no-data { color: #999; padding: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Raid Mob Repop Tracker</h1>
+    <p class="sub">All mobs with observed loot (from delta); sorted by <strong>time to repop</strong> (soonest first). Repop window from raid_item_sources.json (DB + overrides).</p>
+    <p class="sub"><a href="delta.html">Delta report</a></p>
+    <div id="content">
+        <p class="no-data">Loading…</p>
+    </div>
+    <p class="sub" id="updated" style="margin-top: 20px; font-size: 0.9em; color: #666;"></p>
+</div>
+<script>
+(function() {
+    function parseRespawnNote(note) {
+        if (!note) return { baseSec: null, varianceSec: 0 };
+        const pm = note.match(/([0-9.]+)\\s*±\\s*([0-9.]+)\\s*day/i);
+        if (pm) return { baseSec: parseFloat(pm[1]) * 86400, varianceSec: parseFloat(pm[2]) * 86400 };
+        const single = note.match(/([0-9.]+)\\s*day/i);
+        if (single) return { baseSec: parseFloat(single[1]) * 86400, varianceSec: 0 };
+        return { baseSec: null, varianceSec: 0 };
+    }
+    function buildRespawnMap(raidItemSources) {
+        const map = {};
+        for (const [itemId, entry] of Object.entries(raidItemSources)) {
+            const zone = (entry.zone || "").trim();
+            const mob = (entry.mob || "").trim();
+            if (!zone && !mob) continue;
+            const key = zone + "|" + mob;
+            if (map[key]) continue;
+            const baseSec = entry.respawn_seconds != null ? entry.respawn_seconds : null;
+            const fromNote = parseRespawnNote(entry.respawn_note || "");
+            map[key] = {
+                respawn_seconds: baseSec,
+                respawn_note: entry.respawn_note || "",
+                baseSec: baseSec != null ? baseSec : fromNote.baseSec,
+                varianceSec: fromNote.varianceSec
+            };
+        }
+        return map;
+    }
+    function formatTime(ms) {
+        const d = new Date(ms);
+        return d.toISOString().replace("T", " ").slice(0, 19) + "Z";
+    }
+    function formatDuration(sec) {
+        if (sec == null) return "—";
+        if (sec < 3600) return (sec / 60).toFixed(0) + "m";
+        if (sec < 86400) return (sec / 3600).toFixed(1) + "h";
+        return (sec / 86400).toFixed(1) + "d";
+    }
+    Promise.all([
+        fetch("mob_tracker_deaths.json").then(r => r.ok ? r.json() : { updated: "", deaths: [] }),
+        fetch("raid_item_sources.json").then(r => r.ok ? r.json() : {})
+    ]).then(([deathsData, raidItemSources]) => {
+        const respawnMap = buildRespawnMap(raidItemSources);
+        const now = Date.now();
+        const deaths = deathsData.deaths || [];
+        document.getElementById("updated").textContent = "Deaths data updated: " + (deathsData.updated || "—") + " (up to 14 days; sorted by time to repop)";
+        if (deaths.length === 0) {
+            document.getElementById("content").innerHTML = "<p class=\\"no-data\\">No mob deaths recorded yet. Run the delta to populate.</p>";
+            return;
+        }
+        const rows = deaths.map(d => {
+            const key = (d.zone || "") + "|" + (d.mob || "");
+            const resp = respawnMap[key] || {};
+            const observedMs = new Date(d.observed_at || 0).getTime();
+            const baseSec = resp.baseSec;
+            const varianceSec = resp.varianceSec || 0;
+            let status = "—";
+            let pct = null;
+            let windowStart = null;
+            let windowEnd = null;
+            if (baseSec != null) {
+                const startMs = observedMs + (baseSec - varianceSec) * 1000;
+                const endMs = observedMs + (baseSec + varianceSec) * 1000;
+                windowStart = startMs;
+                windowEnd = endMs;
+                if (now < startMs) status = "Not yet";
+                else if (now > endMs) status = "Passed";
+                else {
+                    status = "In window";
+                    pct = ((now - startMs) / (endMs - startMs)) * 100;
+                }
+            } else if (resp.respawn_note) {
+                status = resp.respawn_note;
+            }
+            return {
+                zone: d.zone || "—",
+                mob: d.mob || "—",
+                observed_at: d.observed_at,
+                respawn_note: resp.respawn_note || (resp.respawn_seconds != null ? formatDuration(resp.respawn_seconds) + " (DB)" : "—"),
+                window_start: windowStart,
+                window_end: windowEnd,
+                status,
+                pct
+            };
+        });
+        const rank = (r) => r.status === "Not yet" ? 0 : r.status === "In window" ? 1 : 2;
+        const sortTime = (r) => r.status === "Not yet" ? (r.window_start || 0) : (r.window_end || r.window_start || 0);
+        const sorted = [...rows].sort((a, b) => {
+            const ra = rank(a), rb = rank(b);
+            if (ra !== rb) return ra - rb;
+            return sortTime(a) - sortTime(b);
+        });
+        let html = "<table><thead><tr><th>Zone</th><th>Mob</th><th>Died (observed)</th><th>Respawn</th><th>Window start</th><th>Window end</th><th>Status</th><th>% elapsed</th></tr></thead><tbody>";
+        sorted.forEach(r => {
+            const trClass = r.status === "In window" ? " class=\\"in-window\\"" : (r.status === "Passed" ? " class=\\"passed\\"" : "");
+            html += "<tr" + trClass + ">";
+            html += "<td>" + escapeHtml(r.zone) + "</td><td>" + escapeHtml(r.mob) + "</td>";
+            html += "<td>" + escapeHtml(r.observed_at ? r.observed_at.slice(0, 19) + "Z" : "—") + "</td>";
+            html += "<td>" + escapeHtml(r.respawn_note) + "</td>";
+            html += "<td>" + (r.window_start ? formatTime(r.window_start) : "—") + "</td>";
+            html += "<td>" + (r.window_end ? formatTime(r.window_end) : "—") + "</td>";
+            html += "<td>" + escapeHtml(r.status) + "</td>";
+            if (r.pct != null) {
+                html += "<td><div class=\\"bar\\"><div class=\\"bar-fill\\" style=\\"width:" + Math.round(r.pct) + "%\\"></div></div> " + Math.round(r.pct) + "%</td>";
+            } else {
+                html += "<td>—</td>";
+            }
+            html += "</tr>";
+        });
+        html += "</tbody></table>";
+        document.getElementById("content").innerHTML = html;
+    });
+    function escapeHtml(s) {
+        if (s == null) return "";
+        return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+})();
+</script>
+</body>
+</html>
+'''
+
+
+def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_age_days=14):
+    """Append (zone, mob) from zone_entries to mob tracker deaths JSON; prune older than max_age_days.
+    zone_entries: dict zone -> mob -> list of (char_name, item_id, item_name).
+    observed_at: ISO timestamp string (default: utcnow()). Used as death observation time for repop window.
+    """
+    if observed_at is None:
+        observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    if isinstance(observed_at, datetime):
+        observed_at = observed_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+    data = {"updated": observed_at, "deaths": []}
+    if os.path.exists(output_path):
+        try:
+            with open(output_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            pass
+    deaths = list(data.get("deaths", []))
+    cutoff = (datetime.utcnow() - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    deaths = [d for d in deaths if (d.get("observed_at") or "") >= cutoff]
+    seen = {(d.get("zone"), d.get("mob")) for d in deaths}
+    for zone, mobs in zone_entries.items():
+        for mob in mobs:
+            key = (zone, mob)
+            if key not in seen:
+                deaths.append({"zone": zone, "mob": mob, "observed_at": observed_at})
+                seen.add(key)
+    data["deaths"] = deaths
+    data["updated"] = observed_at
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
 def generate_delta_html(current_char_data, previous_char_data, current_inv, previous_inv, 
-                        magelo_update_date, serverwide=True, char_deltas=None, inv_deltas=None):
+                        magelo_update_date, serverwide=True, char_deltas=None, inv_deltas=None,
+                        mob_tracker_deaths_path=None, observed_at=None):
     """Generate HTML page showing deltas between current and previous magelo dump.
     If serverwide is True, compares all characters, otherwise only mules.
-    If char_deltas and inv_deltas are provided, uses those instead of recalculating."""
+    If char_deltas and inv_deltas are provided, uses those instead of recalculating.
+    If mob_tracker_deaths_path and observed_at are set, appends (zone, mob) from this delta to the mob tracker JSON."""
     
     # Compare character data (serverwide) if not provided
     if char_deltas is None:
@@ -1340,6 +1540,9 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 zone_entries[zone][mob] = []
             for _ in range(count):
                 zone_entries[zone][mob].append((char_name, item_id, item_name))
+    
+    if zone_entries and mob_tracker_deaths_path and observed_at is not None:
+        save_mob_deaths_from_delta(zone_entries, mob_tracker_deaths_path, observed_at=observed_at)
     
     # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon: from inv or from char stats 0 vs large AA)
     visibility_change_chars = {name for name, inv_d in inv_deltas.items() if inv_d.get('is_visibility_change')}
@@ -3665,14 +3868,18 @@ def main():
                 if item_id in item_names:
                     char_delta.setdefault('item_names', {})[item_id] = item_names[item_id]
         
-        # Generate delta HTML
+        # Generate delta HTML (and append mob deaths for tracker when we have zone loot)
+        mob_tracker_path = os.path.join(base_dir, "mob_tracker_deaths.json")
+        observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         delta_html = generate_delta_html(
             current_char_data, previous_char_data,
             current_inventories, previous_inventories,
             magelo_update_date,
             serverwide=True,
             char_deltas=char_deltas,
-            inv_deltas=inv_deltas
+            inv_deltas=inv_deltas,
+            mob_tracker_deaths_path=mob_tracker_path,
+            observed_at=observed_at
         )
         
         delta_file = os.path.join(base_dir, "delta.html")
@@ -3680,6 +3887,14 @@ def main():
         with open(delta_file, 'w', encoding='utf-8') as f:
             f.write(delta_html)
         print("Delta page generated successfully!")
+        
+        mob_tracker_file = os.path.join(base_dir, "mob_tracker.html")
+        try:
+            with open(mob_tracker_file, 'w', encoding='utf-8') as f:
+                f.write(generate_mob_tracker_html(base_dir))
+            print(f"Wrote {mob_tracker_file}")
+        except Exception as e:
+            print(f"Warning: Could not write mob_tracker.html: {e}")
         
         # Note: We no longer save historical HTML files - all historical data is in JSON format
         # Historical deltas can be reconstructed on-demand from daily delta JSONs using get_date_range_deltas()
