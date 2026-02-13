@@ -725,6 +725,19 @@ jobs:
         else
           echo "No delta.html found (previous day's files may not exist)"
         fi
+        # Copy mob repop tracker page and its data (generated alongside delta)
+        if [ -f "mob_tracker.html" ]; then
+          cp mob_tracker.html deploy/mob_tracker.html
+          echo "✓ Copied mob_tracker.html to deploy directory"
+        fi
+        if [ -f "mob_tracker_deaths.json" ]; then
+          cp mob_tracker_deaths.json deploy/mob_tracker_deaths.json
+          echo "✓ Copied mob_tracker_deaths.json to deploy directory"
+        fi
+        if [ -f "raid_item_sources.json" ]; then
+          cp raid_item_sources.json deploy/raid_item_sources.json
+          echo "✓ Copied raid_item_sources.json to deploy directory (for mob tracker)"
+        fi
         # Copy delta JSON files to deploy (needed for client-side date range queries)
         # Note: We only copy the compressed JSONs, and they're loaded on-demand by JavaScript
         mkdir -p deploy/delta_snapshots
