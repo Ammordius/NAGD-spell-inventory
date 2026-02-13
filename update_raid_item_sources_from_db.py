@@ -251,6 +251,7 @@ def main() -> None:
         no_drop = [iid for iid in item_ids if iid not in droppers]
         if no_drop:
             print(f"  {len(no_drop)} item(s) have no dropper in file.")
+        respawn_map = {}
     else:
         if not HAS_PYMYSQL:
             print("Warning: pymysql not installed. Install with: pip install pymysql")
@@ -310,8 +311,6 @@ def main() -> None:
         no_drop = [iid for iid in item_ids if iid not in droppers]
         if no_drop:
             print(f"  {len(no_drop)} item(s) have no dropper in DB (loot/spawn): {no_drop[:20]}{'...' if len(no_drop) > 20 else ''}")
-    else:
-        respawn_map = {}
 
     updates: list[tuple[str, str, str, str, str]] = []  # id, old_mob, new_mob, old_zone, new_zone
     for item_id_str, entry in data.items():

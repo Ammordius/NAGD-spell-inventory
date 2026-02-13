@@ -1301,6 +1301,10 @@ def generate_mob_tracker_html(base_dir: str) -> str:
     <h1>Raid Mob Repop Tracker</h1>
     <p class="sub">All mobs with observed loot (from delta); sorted by <strong>time to repop</strong> (soonest first). Repop window from raid_item_sources.json (DB + overrides).</p>
     <p class="sub"><a href="delta.html">Delta report</a></p>
+    <details class="sub" style="margin-bottom: 12px; padding: 8px; background: #fff8e1; border-radius: 4px;" id="respawn-help">
+        <summary style="cursor: pointer;">Respawn timers showing "—"?</summary>
+        <p style="margin: 8px 0 0 0; font-size: 0.9em;">Repop data comes from <code>raid_item_sources.json</code>. Run <code>python update_raid_item_sources_from_db.py</code> (with DB connection or <code>--from-file</code>) to fill <code>respawn_seconds</code> from spawn2 and <code>respawn_note</code> for overrides (Emperor, Cursed, PoEarth, PoAir, Statue). Then commit and push the updated JSON so the deployed site has it.</p>
+    </details>
     <div id="content">
         <p class="no-data">Loading…</p>
     </div>
@@ -1434,8 +1438,25 @@ def generate_mob_tracker_html(base_dir: str) -> str:
 '''
 
 
+# Server repop reset: every two Wednesdays (e.g. 2026-02-11, 2026-02-25). On these days we clear mob tracker deaths.
+REPOP_RESET_REFERENCE_WEDNESDAY = datetime(2026, 2, 11)  # First reset Wednesday
+
+
+def is_repop_reset_day(when=None):
+    """True if the given date (default today UTC) is an every-two-Wednesdays repop reset day."""
+    if when is None:
+        when = datetime.utcnow()
+    d = when.date() if isinstance(when, datetime) else when
+    ref = REPOP_RESET_REFERENCE_WEDNESDAY.date() if isinstance(REPOP_RESET_REFERENCE_WEDNESDAY, datetime) else REPOP_RESET_REFERENCE_WEDNESDAY
+    if d.weekday() != 2:  # not Wednesday
+        return False
+    return (d - ref).days % 14 == 0
+
+
 def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_age_days=14):
     """Append (zone, mob) from zone_entries to mob tracker deaths JSON; prune older than max_age_days.
+    Keeps all previous entries (other mobs and older deaths); adds one new death per (zone, mob) seen this run.
+    On repop reset days (every two Wednesdays), clears the deaths list so timers start fresh.
     zone_entries: dict zone -> mob -> list of (char_name, item_id, item_name).
     observed_at: ISO timestamp string (default: utcnow()). Used as death observation time for repop window.
     """
@@ -1443,6 +1464,7 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
         observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     if isinstance(observed_at, datetime):
         observed_at = observed_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+    now_dt = datetime.utcnow()
     data = {"updated": observed_at, "deaths": []}
     if os.path.exists(output_path):
         try:
@@ -1451,15 +1473,26 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
         except Exception:
             pass
     deaths = list(data.get("deaths", []))
-    cutoff = (datetime.utcnow() - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    deaths = [d for d in deaths if (d.get("observed_at") or "") >= cutoff]
-    seen = {(d.get("zone"), d.get("mob")) for d in deaths}
+    if is_repop_reset_day(now_dt):
+        deaths = []
+    else:
+        cutoff = (now_dt - timedelta(days=max_age_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        deaths = [d for d in deaths if (d.get("observed_at") or "") >= cutoff]
+    seen_this_run = set()
     for zone, mobs in zone_entries.items():
         for mob in mobs:
             key = (zone, mob)
-            if key not in seen:
+            if key in seen_this_run:
+                continue
+            seen_this_run.add(key)
+            found = False
+            for d in deaths:
+                if (d.get("zone"), d.get("mob")) == key:
+                    d["observed_at"] = observed_at
+                    found = True
+                    break
+            if not found:
                 deaths.append({"zone": zone, "mob": mob, "observed_at": observed_at})
-                seen.add(key)
     data["deaths"] = deaths
     data["updated"] = observed_at
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
