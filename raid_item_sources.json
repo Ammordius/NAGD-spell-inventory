@@ -1,2313 +1,363 @@
 {
-  "27994": {
-    "mob": "Grioihin_the_Wise",
-    "zone": "Plane of Water",
-    "name": "Lute of the Flowing Waters"
-  },
-  "10945": {
-    "mob": "Grioihin_the_Wise",
-    "zone": "Plane of Water",
-    "name": "Ring of Algae"
-  },
-  "16605": {
-    "mob": "Grioihin_the_Wise",
-    "zone": "Plane of Water",
-    "name": "Seaweed Woven Leggings"
-  },
-  "9488": {
-    "mob": "Hydrotha",
-    "zone": "Plane of Water",
-    "name": "Abalone Engraved Tribal Mask"
-  },
-  "10654": {
-    "mob": "Hydrotha",
-    "zone": "Plane of Water",
-    "name": "Moss Encrusted Band"
-  },
-  "22990": {
-    "mob": "Krziik_the_Mighty",
-    "zone": "Plane of Water",
-    "name": "Gem Encrusted Axe"
-  },
-  "27646": {
-    "mob": "Krziik the Mighty",
-    "zone": "Plane of Water",
-    "name": "Ornate Abalone Recurve Bow"
-  },
-  "24774": {
-    "mob": "Ofossaa_the_Enlightened",
-    "zone": "Plane of Water",
-    "name": "Algae Covered Stiletto"
-  },
-  "27272": {
-    "mob": "Ofossaa_the_Enlightened",
-    "zone": "Plane of Water",
-    "name": "Intricately Etched Seashell"
-  },
-  "16097": {
-    "mob": "Coirnav_the_Avatar_of_Water",
-    "zone": "Plane of Water",
-    "name": "Double Woven Kelp Cord"
-  },
-  "10242": {
-    "mob": "Coirnav_the_Avatar_of_Water",
-    "zone": "Plane of Water",
-    "name": "Earring of Embedded Coral"
-  },
-  "26220": {
-    "mob": "Coirnav_the_Avatar_of_Water",
-    "zone": "Plane of Water",
-    "name": "Hammer of Crushing Waves"
-  },
-  "13634": {
-    "mob": "Coirnav_the_Avatar_of_Water",
-    "zone": "Plane of Water",
-    "name": "Kelp-Lined Mantle"
-  },
-  "14961": {
-    "mob": "Coirnav_the_Avatar_of_Water",
-    "zone": "Plane of Water",
-    "name": "Mail of Storms"
-  },
-  "13694": {
-    "mob": "Coirnav_the_Avatar_of_Water",
-    "zone": "Plane of Water",
-    "name": "Sharkbone Plated Shoulderpads"
-  },
-  "28930": {
-    "mob": "Eom_Centien",
-    "zone": "Vex Thal",
-    "name": "Great Bow of Slaughter"
-  },
-  "28923": {
-    "mob": "Eom_Centien",
-    "zone": "Vex Thal",
-    "name": "Great Mace of Slaughter"
-  },
-  "28894": {
-    "mob": "Eom_Centien",
-    "zone": "Vex Thal",
-    "name": "Shadow Tendril"
-  },
-  "28929": {
-    "mob": "Eom_Centien",
-    "zone": "Vex Thal",
-    "name": "Short Sword of Slaughter"
-  },
-  "28881": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Boots of Silent Dreams"
-  },
-  "28891": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Bracer of the Silent Star"
-  },
-  "28892": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Cap of the Silent Star"
-  },
-  "28887": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Cloak of Icy Shadows"
-  },
-  "28890": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Cord of Midnight"
-  },
-  "28885": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Gorget of Superiority"
-  },
-  "28889": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Living Symbol"
-  },
-  "28884": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Ring of Rage"
-  },
-  "28883": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Shaded Amice"
-  },
-  "28888": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Shadow Footpads"
-  },
-  "28882": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Steel Skin Armplates"
-  },
-  "28886": {
-    "mob": "Eom_Thall",
-    "zone": "Vex Thal",
-    "name": "Umbracite Bracer"
-  },
-  "28902": {
-    "mob": "Eom Trash",
-    "zone": "Vex Thal",
-    "name": "Dark Wind Shroud"
-  },
-  "28900": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Darkened Claw Amulet"
-  },
-  "28896": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Earring of Vigor"
-  },
-  "28899": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Floating Rune"
-  },
-  "28897": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Gauntlets of Dark Embers"
-  },
-  "28903": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Orb of Evasion"
-  },
-  "28898": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Sandals of Contemplation"
-  },
-  "28893": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Seething Mantle"
-  },
-  "28901": {
-    "mob": "Kaas_Thox_Xi_Ans_Dyek",
-    "zone": "Vex Thal",
-    "name": "Shade Stone Amulet"
-  },
-  "28145": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Elder's Armbands of Ro"
-  },
-  "28982": {
-    "mob": "Diabo Xi Va",
-    "zone": "Vex Thal",
-    "name": "Gauntlets of View"
-  },
-  "28981": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Grimoire of Enchantment"
-  },
-  "28986": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Helmet of Shadow"
-  },
-  "28984": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Ring of Immobilization"
-  },
-  "28991": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Rune of Judgment"
-  },
-  "28983": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Scepter of Calekor"
-  },
-  "28980": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Staff of Lost Rituals"
-  },
-  "28987": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Thorny Chain Sleeves"
-  },
-  "28998": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Wand of Turning"
-  },
-  "28147": {
-    "mob": "Diabo_Xi_Va",
-    "zone": "Vex Thal",
-    "name": "Zevfeer's Shroud of Despair"
-  },
-  "28977": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Amulet of Xuzl"
-  },
-  "28970": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Bone Chill Shield"
-  },
-  "28979": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Cloak of Destruction"
-  },
-  "28975": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Orb of the Sky"
-  },
-  "28976": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Pendant of Malosini"
-  },
-  "28972": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Silver Skin Gauntlets"
-  },
-  "28978": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Stein of Falling Tears"
-  },
-  "28973": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Tiny Bone Bracelet"
-  },
-  "28971": {
-    "mob": "Diabo_Xi_Xin",
-    "zone": "Vex Thal",
-    "name": "Veil of Flames"
-  },
-  "28968": {
-    "mob": "Eom Trash",
-    "zone": "Vex Thal",
-    "name": "Wand of Deflection"
-  },
-  "28916": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Belt of Dark Thought"
-  },
-  "28915": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Book of Contemplation"
-  },
-  "28906": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Bracelet of the Shadow Hive"
-  },
-  "28908": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Dark Mace of Thought"
-  },
-  "28911": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Obsidian Necklace"
-  },
-  "28905": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Ring of Flamewarding"
-  },
-  "28914": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Ring of the Crimson Bull"
-  },
-  "28910": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Robe of Luring Shadows"
-  },
-  "28909": {
-    "mob": "Diabo_Xi_Xin_Thall",
-    "zone": "Vex Thal",
-    "name": "Tiny Cap of Sight"
-  },
-  "28964": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "Cloak of Frozen Flames"
-  },
-  "28992": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "Cloak of Glowing Embers"
-  },
-  "28959": {
-    "mob": "Eom Trash",
-    "zone": "Vex Thal",
-    "name": "Cloak of Maneuvering"
-  },
-  "28149": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "Denon's Drums of Declivity"
-  },
-  "28962": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "Earring of Falling Stars"
-  },
-  "28957": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "Girdle of Focus"
-  },
-  "28144": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "(item 28144)"
-  },
-  "28965": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "(item 28965)"
-  },
-  "28963": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "(item 28963)"
-  },
-  "28958": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "Sanguine Gloves"
-  },
-  "28925": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "(item 28925)"
-  },
-  "28924": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "Armguard of Purity"
-  },
-  "28926": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "Cerulean Sleeves"
-  },
-  "28918": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "(item 28918)"
-  },
-  "28917": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "Dagger of Thought"
-  },
-  "28922": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "Lightbringers Earring"
-  },
-  "28919": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "Shroud of Vigor"
-  },
-  "28921": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "Umbracite Swarm Orb"
-  },
-  "28927": {
-    "mob": "Diabo_Xi_Va_Temariel",
-    "zone": "Vex Thal",
-    "name": "(item 28927)"
-  },
-  "28934": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "(item 28934)"
-  },
-  "28935": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "(item 28935)"
-  },
-  "7904": {
-    "mob": "Eom Trash",
-    "zone": "Vex Thal",
-    "name": "(item 7904)"
-  },
-  "28937": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "Breastplate of Speed"
-  },
-  "28938": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "Cord of Insight"
-  },
-  "28103": {
-    "mob": "Eom Trash",
-    "zone": "Vex Thal",
-    "name": "(item 28103)"
-  },
-  "28936": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "(item 28936)"
-  },
-  "28939": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "(item 28939)"
-  },
-  "28933": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "(item 28933)"
-  },
-  "28931": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "(item 28931)"
-  },
-  "28940": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "Shadow Pearl Earring"
-  },
-  "28932": {
-    "mob": "Thall_Xundraux_Diabo",
-    "zone": "Vex Thal",
-    "name": "(item 28932)"
-  },
-  "28950": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28950)"
-  },
-  "28947": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28947)"
-  },
-  "28943": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Cloudy Mark"
-  },
-  "28942": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28942)"
-  },
-  "28949": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28949)"
-  },
-  "28945": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28945)"
-  },
-  "28948": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Eye of Darkness"
-  },
-  "28104": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Fervid Gloves of the Warder"
-  },
-  "28146": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28146)"
-  },
-  "28951": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28951)"
-  },
-  "28946": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28946)"
-  },
-  "28997": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28997)"
-  },
-  "28952": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Sanguine Robe"
-  },
-  "28148": {
-    "mob": "Va_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Slippers of Dark Whispers"
-  },
-  "26761": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Belt of Mastery"
-  },
-  "26752": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26752)"
-  },
-  "28996": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28996)"
-  },
-  "26759": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26759)"
-  },
-  "26766": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26766)"
-  },
-  "26763": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26763)"
-  },
-  "26762": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26762)"
-  },
-  "26769": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26769)"
-  },
-  "26756": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26756)"
-  },
-  "26755": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26755)"
-  },
-  "26757": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26757)"
-  },
-  "26754": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26754)"
-  },
-  "26750": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26750)"
-  },
-  "26753": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Spiked Shoulderpads"
-  },
-  "28995": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28995)"
-  },
-  "26760": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26760)"
-  },
-  "26764": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Wand of Everlasting Water"
-  },
-  "26768": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Wand of Tranquility"
-  },
-  "26786": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26786)"
-  },
-  "26771": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26771)"
-  },
-  "28994": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Crimson Ring of Judgment"
-  },
-  "26773": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26773)"
-  },
-  "26775": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Earring of Eradication"
-  },
-  "26774": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Gloves of the Crimson Sigil"
-  },
-  "26770": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26770)"
-  },
-  "26772": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26772)"
-  },
-  "26783": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26783)"
-  },
-  "26777": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26777)"
-  },
-  "26785": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Mask of Judgement"
-  },
-  "26779": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26779)"
-  },
-  "26778": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26778)"
-  },
-  "26776": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "Robe of Secrets"
-  },
-  "28993": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 28993)"
-  },
-  "8365": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 8365)"
-  },
-  "26780": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26780)"
-  },
-  "26784": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26784)"
-  },
-  "26787": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26787)"
-  },
-  "26781": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26781)"
-  },
-  "8364": {
-    "mob": "Eom Trash",
-    "zone": "Vex Thal",
-    "name": "Talisman of Vah Kerrath"
-  },
-  "9320": {
-    "mob": "Arch_Mage_Yozanni",
-    "zone": "Plane of Fire",
-    "name": "(item 9320)"
-  },
-  "9462": {
-    "mob": "Babnoxis_the_Spider_Queen",
-    "zone": "Plane of Fire",
-    "name": "(item 9462)"
-  },
-  "15814": {
-    "mob": "Blazzax_the_Omnifiend",
-    "zone": "Plane of Fire",
-    "name": "(item 15814)"
-  },
-  "9487": {
-    "mob": "General_Druav_Flamesinger",
-    "zone": "Plane of Fire",
-    "name": "(item 9487)"
-  },
-  "9479": {
-    "mob": "General_Druav_Flamesinger",
-    "zone": "Plane of Fire",
-    "name": "Lava Forged Face Guard"
-  },
-  "25981": {
-    "mob": "General_Druav_Flamesinger",
-    "zone": "Plane of Fire",
-    "name": "(item 25981)"
-  },
-  "26738": {
-    "mob": "General_Reparm",
-    "zone": "Plane of Fire",
-    "name": "(item 26738)"
-  },
-  "15864": {
-    "mob": "Criare_Sunmane",
-    "zone": "Plane of Fire",
-    "name": "(item 15864)"
-  },
-  "20618": {
-    "mob": "Criare_Sunmane",
-    "zone": "Plane of Fire",
-    "name": "(item 20618)"
-  },
-  "11323": {
-    "mob": "Criare_Sunmane",
-    "zone": "Plane of Fire",
-    "name": "(item 11323)"
-  },
-  "13654": {
-    "mob": "Criare_Sunmane",
-    "zone": "Plane of Fire",
-    "name": "(item 13654)"
-  },
-  "24789": {
-    "mob": "Criare_Sunmane",
-    "zone": "Plane of Fire",
-    "name": "(item 24789)"
-  },
-  "7767": {
-    "mob": "Magmaton",
-    "zone": "Plane of Fire",
-    "name": "(item 7767)"
-  },
-  "20507": {
-    "mob": "Pyronis",
-    "zone": "Plane of Fire",
-    "name": "(item 20507)"
-  },
-  "12082": {
-    "mob": "Quavonis_Firetail",
-    "zone": "Plane of Fire",
-    "name": "(item 12082)"
-  },
-  "10240": {
-    "mob": "Azobian_the_Darklord",
-    "zone": "Plane of Fire",
-    "name": "(item 10240)"
-  },
-  "27648": {
-    "mob": "Azobian_the_Darklord",
-    "zone": "Plane of Fire",
-    "name": "(item 27648)"
-  },
-  "11030": {
-    "mob": "Chancellor_Kirtra",
-    "zone": "Plane of Fire",
-    "name": "Bracer of Flickering Flames"
-  },
-  "12054": {
-    "mob": "Chancellor_Kirtra",
-    "zone": "Plane of Fire",
-    "name": "(item 12054)"
-  },
-  "11324": {
-    "mob": "Chancellor_Kirtra",
-    "zone": "Plane of Fire",
-    "name": "Fire Crested Rune"
-  },
-  "26798": {
-    "mob": "Chancellor_Kirtra",
-    "zone": "Plane of Fire",
-    "name": "(item 26798)"
-  },
-  "16679": {
-    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
-    "zone": "Plane of Fire",
-    "name": "(item 16679)"
-  },
-  "12510": {
-    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
-    "zone": "Plane of Fire",
-    "name": "(item 12510)"
-  },
-  "12592": {
-    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
-    "zone": "Plane of Fire",
-    "name": "(item 12592)"
-  },
-  "24602": {
-    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
-    "zone": "Plane of Fire",
-    "name": "(item 24602)"
-  },
-  "14943": {
-    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
-    "zone": "Plane of Fire",
-    "name": "(item 14943)"
-  },
-  "9444": {
-    "mob": "Anar_of_Water",
-    "zone": "Plane of Time",
-    "name": "Mask of Conceptual Energy"
-  },
-  "25844": {
-    "mob": "Anar_of_Water",
-    "zone": "Plane of Time",
-    "name": "(item 25844)"
-  },
-  "26992": {
-    "mob": "Anar_of_Water",
-    "zone": "Plane of Time",
-    "name": "Ring of Force"
-  },
-  "28655": {
-    "mob": "Anar_of_Water",
-    "zone": "Plane of Time",
-    "name": "(item 28655)"
-  },
-  "28668": {
-    "mob": "Anar_of_Water",
-    "zone": "Plane of Time",
-    "name": "(item 28668)"
-  },
-  "21996": {
-    "mob": "Earthen_Overseer",
-    "zone": "Plane of Time",
-    "name": "(item 21996)"
-  },
-  "22883": {
-    "mob": "Ralthos_Enrok",
-    "zone": "Plane of Time",
-    "name": "(item 22883)"
-  },
-  "28660": {
-    "mob": "Earthen_Overseer",
-    "zone": "Plane of Time",
-    "name": "(item 28660)"
-  },
-  "27990": {
-    "mob": "Earthen_Overseer",
-    "zone": "Plane of Time",
-    "name": "(item 27990)"
-  },
-  "28653": {
-    "mob": "Ralthos_Enrok",
-    "zone": "Plane of Time",
-    "name": "(item 28653)"
-  },
-  "21999": {
-    "mob": "Gutripping_War_Beast",
-    "zone": "Plane of Time",
-    "name": "(item 21999)"
-  },
-  "26995": {
-    "mob": "Gutripping_War_Beast",
-    "zone": "Plane of Time",
-    "name": "(item 26995)"
-  },
-  "26985": {
-    "mob": "Ralthos_Enrok",
-    "zone": "Plane of Time",
-    "name": "(item 26985)"
-  },
-  "26899": {
-    "mob": "Ralthos_Enrok",
-    "zone": "Plane of Time",
-    "name": "(item 26899)"
-  },
-  "21997": {
-    "mob": "A_Deadly_Warboar",
-    "zone": "Plane of Time",
-    "name": "Cloak of Wishes"
-  },
-  "24776": {
-    "mob": "A_Deadly_Warboar",
-    "zone": "Plane of Time",
-    "name": "(item 24776)"
-  },
-  "8782": {
-    "mob": "A_Deadly_Warboar",
-    "zone": "Plane of Time",
-    "name": "(item 8782)"
-  },
-  "68217": {
-    "mob": "Wave 1",
-    "zone": "Plane of Time",
-    "name": "Ossein of Limitless Time"
-  },
-  "21994": {
-    "mob": "A_Deadly_Warboar",
-    "zone": "Plane of Time",
-    "name": "(item 21994)"
-  },
-  "56018": {
-    "mob": "Wave 1",
-    "zone": "Plane of Time",
-    "name": "(item 56018)"
-  },
-  "5760": {
-    "mob": "Avatar_of_the_Elements",
-    "zone": "Plane of Time",
-    "name": "Earring of Xaoth Kor"
-  },
-  "22998": {
-    "mob": "Avatar_of_the_Elements",
-    "zone": "Plane of Time",
-    "name": "(item 22998)"
-  },
-  "26983": {
-    "mob": "Avatar_of_the_Elements",
-    "zone": "Plane of Time",
-    "name": "(item 26983)"
-  },
-  "29174": {
-    "mob": "Avatar_of_the_Elements",
-    "zone": "Plane of Time",
-    "name": "(item 29174)"
-  },
-  "13638": {
-    "mob": "Avatar_of_the_Elements",
-    "zone": "Plane of Time",
-    "name": "Pauldrons of Purity"
-  },
-  "68199": {
-    "mob": "Wave 1",
-    "zone": "Plane of Time",
-    "name": "(item 68199)"
-  },
-  "28648": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 28648)"
-  },
-  "22986": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 22986)"
-  },
-  "28664": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 28664)"
-  },
-  "26996": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "Gloves of the Unseen"
-  },
-  "26994": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 26994)"
-  },
-  "28663": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 28663)"
-  },
-  "13673": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 13673)"
-  },
-  "20898": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 20898)"
-  },
-  "24699": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 24699)"
-  },
-  "26981": {
-    "mob": "Saryrn",
-    "zone": "Plane of Time",
-    "name": "(item 26981)"
-  },
-  "28654": {
-    "mob": "Tallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 28654)"
-  },
-  "26991": {
-    "mob": "Tallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 26991)"
-  },
-  "28667": {
-    "mob": "Tallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 28667)"
-  },
-  "68195": {
-    "mob": "Wave 1",
-    "zone": "Plane of Time",
-    "name": "(item 68195)"
-  },
-  "23498": {
-    "mob": "Tallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 23498)"
-  },
-  "28658": {
-    "mob": "Tallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 28658)"
-  },
-  "28656": {
-    "mob": "Tallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 28656)"
-  },
-  "26988": {
-    "mob": "Tallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 26988)"
-  },
-  "21995": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 21995)"
-  },
-  "21998": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 21998)"
-  },
-  "22890": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 22890)"
-  },
-  "7125": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 7125)"
-  },
-  "21886": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "Hammer of Hours"
-  },
-  "26895": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 26895)"
-  },
-  "8774": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 8774)"
-  },
-  "29172": {
-    "mob": "Terris_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 29172)"
-  },
-  "27818": {
-    "mob": "Vallon_Zek",
-    "zone": "Plane of Time",
-    "name": "Bow of the Tempest"
-  },
-  "5594": {
-    "mob": "Vallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 5594)"
-  },
-  "20627": {
-    "mob": "Vallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 20627)"
-  },
-  "26740": {
-    "mob": "Vallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 26740)"
-  },
-  "26986": {
-    "mob": "Vallon_Zek",
-    "zone": "Plane of Time",
-    "name": "Shoes of Fleeting Fury"
-  },
-  "68197": {
-    "mob": "Wave 1",
-    "zone": "Plane of Time",
-    "name": "(item 68197)"
-  },
-  "21876": {
-    "mob": "Vallon_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 21876)"
-  },
-  "15927": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "(item 15927)"
-  },
-  "25995": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "(item 25995)"
-  },
-  "8977": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "(item 8977)"
-  },
-  "26092": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "Greatblade of Chaos"
-  },
-  "28651": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "Leggings of Furious Might"
-  },
-  "26993": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "(item 26993)"
-  },
-  "20508": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "(item 20508)"
-  },
-  "9435": {
-    "mob": "Bertoxxulous",
-    "zone": "Plane of Time",
-    "name": "(item 9435)"
-  },
-  "15877": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 15877)"
-  },
-  "15842": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 15842)"
-  },
-  "26980": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 26980)"
-  },
-  "28650": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 28650)"
-  },
-  "26984": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 26984)"
-  },
-  "27000": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 27000)"
-  },
-  "24999": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 24999)"
-  },
-  "15867": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 15867)"
-  },
-  "28666": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "Wristband of Echoed Thoughts"
-  },
-  "28665": {
-    "mob": "Cazic_Thule",
-    "zone": "Plane of Time",
-    "name": "(item 28665)"
-  },
-  "27274": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 27274)"
-  },
-  "4119": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 4119)"
-  },
-  "28246": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 28246)"
-  },
-  "13647": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 13647)"
-  },
-  "9289": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 9289)"
-  },
-  "20625": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 20625)"
-  },
-  "13674": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 13674)"
-  },
-  "24570": {
-    "mob": "Innoruuk",
-    "zone": "Plane of Time",
-    "name": "(item 24570)"
-  },
-  "26990": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 26990)"
-  },
-  "22999": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 22999)"
-  },
-  "24793": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 24793)"
-  },
-  "28659": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 28659)"
-  },
-  "15824": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 15824)"
-  },
-  "14818": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "Ring of Thunderous Forces"
-  },
-  "68196": {
-    "mob": "Wave 1",
-    "zone": "Plane of Time",
-    "name": "(item 68196)"
-  },
-  "27298": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 27298)"
-  },
-  "21338": {
-    "mob": "Rallos_Zek",
-    "zone": "Plane of Time",
-    "name": "(item 21338)"
-  },
-  "16156": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 16156)"
-  },
-  "7130": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 7130)"
-  },
-  "32100": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "Earthen Bracer of Fortitude"
-  },
-  "28649": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 28649)"
-  },
-  "22894": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 22894)"
-  },
-  "26989": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 26989)"
-  },
-  "28661": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "Shawl of Eternal Forces"
-  },
-  "7123": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 7123)"
-  },
-  "20496": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 20496)"
-  },
-  "26987": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 26987)"
-  },
-  "7769": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 7769)"
-  },
-  "27280": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 27280)"
-  },
-  "32110": {
-    "mob": "Quarm",
-    "zone": "Plane of Time",
-    "name": "(item 32110)"
-  },
-  "11018": {
-    "mob": "Tantisala_Jaggedtooth",
-    "zone": "Plane of Earth",
-    "name": "(item 11018)"
-  },
-  "15822": {
-    "mob": "Tantisala_Jaggedtooth",
-    "zone": "Plane of Earth",
-    "name": "(item 15822)"
-  },
-  "13767": {
-    "mob": "Tantisala_Jaggedtooth",
-    "zone": "Plane of Earth",
-    "name": "(item 13767)"
-  },
-  "20453": {
-    "mob": "A_Monsterous_Mudwalker",
-    "zone": "Plane of Time",
-    "name": "Bone Sliver Ornament"
-  },
-  "11103": {
-    "mob": "A_Monsterous_Mudwalker",
-    "zone": "Plane of Time",
-    "name": "(item 11103)"
-  },
-  "20454": {
-    "mob": "A_Monsterous_Mudwalker",
-    "zone": "Plane of Time",
-    "name": "Stone Etched Mallet"
-  },
-  "25983": {
-    "mob": "A_Monsterous_Mudwalker",
-    "zone": "Plane of Time",
-    "name": "(item 25983)"
-  },
-  "11096": {
-    "mob": "Peregrin_Rockskull",
-    "zone": "Plane of Time",
-    "name": "(item 11096)"
-  },
-  "16154": {
-    "mob": "Peregrin_Rockskull",
-    "zone": "Plane of Time",
-    "name": "(item 16154)"
-  },
-  "27998": {
-    "mob": "Peregrin_Rockskull",
-    "zone": "Plane of Time",
-    "name": "(item 27998)"
-  },
-  "27106": {
-    "mob": "A_Perfected_Warder_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 27106)"
-  },
-  "8780": {
-    "mob": "A_Perfected_Warder_of_Earth",
-    "zone": "Plane of Time",
-    "name": "Entropy Pendant"
-  },
-  "16637": {
-    "mob": "A_Perfected_Warder_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 16637)"
-  },
-  "11054": {
-    "mob": "A_Perfected_Warder_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 11054)"
-  },
-  "27290": {
-    "mob": "A_Mystical_Arbitor_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 27290)"
-  },
-  "15840": {
-    "mob": "A_Mystical_Arbitor_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 15840)"
-  },
-  "3223": {
-    "mob": "A_Mystical_Arbitor_of_Earth",
-    "zone": "Plane of Time",
-    "name": "Earring of Living Earth"
-  },
-  "22896": {
-    "mob": "Tribal_Leader_Diseranon",
-    "zone": "Plane of Time",
-    "name": "(item 22896)"
-  },
-  "26869": {
-    "mob": "Tribal_Leader_Diseranon",
-    "zone": "Plane of Time",
-    "name": "(item 26869)"
-  },
-  "22972": {
-    "mob": "#War_Chieftan_Galronar",
-    "zone": "Plane of Earth",
-    "name": "(item 22972)"
-  },
-  "8781": {
-    "mob": "#War_Chieftan_Awisano",
-    "zone": "Plane of Earth",
-    "name": "(item 8781)"
-  },
-  "21875": {
-    "mob": "#War_Chieftan_Birak",
-    "zone": "Plane of Earth",
-    "name": "(item 21875)"
-  },
-  "16158": {
-    "mob": "#Warlord_Gintolaken",
-    "zone": "Plane of Earth",
-    "name": "Bands of Earthen Energy"
-  },
-  "24695": {
-    "mob": "#Warlord_Gintolaken",
-    "zone": "Plane of Earth",
-    "name": "(item 24695)"
-  },
-  "15002": {
-    "mob": "#Avatar_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 15002)"
-  },
-  "20621": {
-    "mob": "#Avatar_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 20621)"
-  },
-  "24879": {
-    "mob": "#Avatar_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 24879)"
-  },
-  "14760": {
-    "mob": "Retseth_Tretse",
-    "zone": "The Hole",
-    "name": "(item 14760)"
-  },
-  "11402": {
-    "mob": "#Avatar_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 11402)"
-  },
-  "10137": {
-    "mob": "#Avatar_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 10137)"
-  },
-  "24585": {
-    "mob": "#Avatar_of_Earth",
-    "zone": "Plane of Time",
-    "name": "(item 24585)"
-  },
-  "9239": {
-    "mob": "Arlyxir",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 9239)"
-  },
-  "22300": {
-    "mob": "Galremos",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 22300)"
-  },
-  "13666": {
-    "mob": "Galremos",
-    "zone": "Tower of Solusek Ro",
-    "name": "Obsidian Plated Pauldrons"
-  },
-  "14926": {
-    "mob": "Galremos",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 14926)"
-  },
-  "19074": {
-    "mob": "Galremos",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 19074)"
-  },
-  "10653": {
-    "mob": "Jiva",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 10653)"
-  },
-  "22985": {
-    "mob": "Jiva",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 22985)"
-  },
-  "23497": {
-    "mob": "Jiva",
-    "zone": "Tower of Solusek Ro",
-    "name": "Ornate Broadsword"
-  },
-  "13664": {
-    "mob": "#Rizlona",
-    "zone": "Plane of Time",
-    "name": "(item 13664)"
+  "1097": {
+    "mob": "#Lady_Mirenilla",
+    "zone": "Temple of Veeshan",
+    "name": "Frostwrath"
+  },
+  "1099": {
+    "mob": "#Lady_Mirenilla",
+    "zone": "Temple of Veeshan",
+    "name": "Mithril Boots"
+  },
+  "1100": {
+    "mob": "#Lady_Mirenilla",
+    "zone": "Temple of Veeshan",
+    "name": "Mithril Gauntlets"
+  },
+  "1112": {
+    "mob": "#Lady_Mirenilla",
+    "zone": "Temple of Veeshan",
+    "name": "Mithril Helm"
+  },
+  "1113": {
+    "mob": "#Lady_Mirenilla",
+    "zone": "Temple of Veeshan",
+    "name": "Orb of the Crimson Bull"
+  },
+  "1114": {
+    "mob": "#Lady_Mirenilla",
+    "zone": "Temple of Veeshan",
+    "name": "Shawl of Perception"
+  },
+  "1116": {
+    "mob": "#Lady_Mirenilla",
+    "zone": "Temple of Veeshan",
+    "name": "Ebony Headband"
+  },
+  "1135": {
+    "mob": "#Tukaarak_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Mask of Tinkering"
+  },
+  "1137": {
+    "mob": "#Ventani_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Shroud of Longevity"
+  },
+  "1138": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "White Resistance Stone"
+  },
+  "1139": {
+    "mob": "#Tukaarak_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Blue Resistance Stone"
+  },
+  "1140": {
+    "mob": "#Nanzata_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Red Resistance Stone"
+  },
+  "1152": {
+    "mob": "#Ventani_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Green Resistance Stone"
+  },
+  "1153": {
+    "mob": "#Tukaarak_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Dainty Gloves"
+  },
+  "1157": {
+    "mob": "#Nanzata_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Dragon Scaled Mask"
+  },
+  "1172": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Clawed Guardian Bracer"
+  },
+  "1628": {
+    "mob": "Phara_Dar",
+    "zone": "Veeshan's Peak",
+    "name": "Shroud of Veeshan"
+  },
+  "1867": {
+    "mob": "Quest: Ralgyn's Promise in Skyshrine",
+    "zone": "",
+    "name": "Circlet of the Falinkan"
+  },
+  "2498": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Essence of Nature"
+  },
+  "2509": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Massive Heartwood Thorn"
+  },
+  "2510": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Girdle of Living Thorns"
+  },
+  "2579": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Braid of Golden Hair"
+  },
+  "2580": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Petrified Heartwood Flamberge"
+  },
+  "2581": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Golden Leaf Earring"
+  },
+  "2582": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Sap Encrusted Branch"
   },
   "2629": {
     "mob": "#Rizlona",
     "zone": "Plane of Time",
     "name": "(item 2629)"
   },
-  "24998": {
-    "mob": "#Rizlona",
+  "2630": {
+    "mob": "#Avatar_of_Mist",
+    "zone": "Plane of Air",
+    "name": "Whispering Air Bangle"
+  },
+  "2698": {
+    "mob": "Quest: Essence Lens in Sleeper's Tomb",
+    "zone": "",
+    "name": "Essence Lens"
+  },
+  "2699": {
+    "mob": "Quest: Essence Lens in Sleeper's Tomb",
+    "zone": "",
+    "name": "Essence Mace"
+  },
+  "2700": {
+    "mob": "Quest: Essence Lens in Sleeper's Tomb",
+    "zone": "",
+    "name": "Essence Blade"
+  },
+  "2748": {
+    "mob": "Quest: Essence Lens in Sleeper's Tomb",
+    "zone": "",
+    "name": "Essence Pearl"
+  },
+  "2842": {
+    "mob": "Quest: Essence Lens in Sleeper's Tomb",
+    "zone": "",
+    "name": "Essence Ring"
+  },
+  "3223": {
+    "mob": "A_Mystical_Arbitor_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 24998)"
+    "name": "Earring of Living Earth"
   },
-  "25987": {
-    "mob": "The_Protector_of_Dresolik",
+  "4118": {
+    "mob": "Saryrn",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Miserable Bauble"
+  },
+  "4119": {
+    "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 25987)"
+    "name": "(item 4119)"
   },
-  "24590": {
-    "mob": "The_Protector_of_Dresolik",
+  "4139": {
+    "mob": "Agnarr_the_Storm_Lord",
+    "zone": "Bastion of Thunder",
+    "name": "Karana's Tear"
+  },
+  "5468": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Bestial Tunic"
+  },
+  "5594": {
+    "mob": "Vallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 24590)"
+    "name": "(item 5594)"
   },
-  "21884": {
-    "mob": "The_Protector_of_Dresolik",
+  "5760": {
+    "mob": "Avatar_of_the_Elements",
     "zone": "Plane of Time",
-    "name": "(item 21884)"
+    "name": "Earring of Xaoth Kor"
   },
-  "20469": {
-    "mob": "The_Protector_of_Dresolik",
+  "5776": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Fist of Nature"
+  },
+  "5797": {
+    "mob": "Tallon_Zek",
+    "zone": "Drunder, the Fortress of Zek",
+    "name": "Tallon's War Charm"
+  },
+  "5836": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Fist of Lightning"
+  },
+  "5837": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Dragonrib Club"
+  },
+  "5838": {
+    "mob": "#Zlexak",
+    "zone": "Temple of Veeshan",
+    "name": "Baton of Flame"
+  },
+  "5839": {
+    "mob": "#Cekenar",
+    "zone": "Temple of Veeshan",
+    "name": "Wurmscale Fistwraps"
+  },
+  "5842": {
+    "mob": "#Zlexak",
+    "zone": "Temple of Veeshan",
+    "name": "Dragonspine Rapier"
+  },
+  "5843": {
+    "mob": "#Cekenar",
+    "zone": "Temple of Veeshan",
+    "name": "Frosted Ice Spike"
+  },
+  "5975": {
+    "mob": "Rallos_Zek_the_Warlord",
+    "zone": "Plane of Tactics",
+    "name": "War Charm of Crossed Blades"
+  },
+  "6200": {
+    "mob": "Nexona",
+    "zone": "Veeshan's Peak",
+    "name": "Bo Staff of Trorsmang"
+  },
+  "6512": {
+    "mob": "Agnarr_the_Storm_Lord",
+    "zone": "Bastion of Thunder",
+    "name": "Crystallized Rain"
+  },
+  "6672": {
+    "mob": "Nexona",
+    "zone": "Veeshan's Peak 1.0",
+    "name": "Atrebe's Diabolic Sprinkler"
+  },
+  "7123": {
+    "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "Sphere of Encased Flame"
+    "name": "(item 7123)"
   },
-  "26748": {
-    "mob": "The_Protector_of_Dresolik",
+  "7125": {
+    "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 26748)"
-  },
-  "27278": {
-    "mob": "Xuzl",
-    "zone": "Tower of Solusek Ro",
-    "name": "Circular Shield of the Blaze"
-  },
-  "26086": {
-    "mob": "Xuzl",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 26086)"
-  },
-  "9481": {
-    "mob": "Solusek_Ro",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 9481)"
-  },
-  "11878": {
-    "mob": "Solusek_Ro",
-    "zone": "Tower of Solusek Ro",
-    "name": "Gauntlets of the Burning Prince"
-  },
-  "24611": {
-    "mob": "Solusek_Ro",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 24611)"
-  },
-  "15823": {
-    "mob": "Solusek_Ro",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 15823)"
-  },
-  "20486": {
-    "mob": "Solusek_Ro",
-    "zone": "Tower of Solusek Ro",
-    "name": "(item 20486)"
-  },
-  "28967": {
-    "mob": "Thall_Va_Kelun",
-    "zone": "Vex Thal",
-    "name": "(item 28967)"
-  },
-  "26751": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26751)"
-  },
-  "26758": {
-    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26758)"
-  },
-  "26782": {
-    "mob": "Aten_Ha_Ra",
-    "zone": "Vex Thal",
-    "name": "(item 26782)"
-  },
-  "30558": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30558)"
-  },
-  "86930": {
-    "mob": "Rhag`Zhezum",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 86930)"
-  },
-  "26543": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "Focus Crystal"
-  },
-  "26827": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "Khashek's Katar"
-  },
-  "28812": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28812)"
-  },
-  "30560": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30560)"
-  },
-  "30559": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30559)"
-  },
-  "26501": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26501)"
-  },
-  "30555": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30555)"
-  },
-  "28841": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "Burning Scepter of Elements"
-  },
-  "26512": {
-    "mob": "#Rhag`Zhezum",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26512)"
-  },
-  "28802": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28802)"
-  },
-  "30557": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30557)"
-  },
-  "28837": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28837)"
-  },
-  "30556": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30556)"
-  },
-  "28828": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28828)"
-  },
-  "28807": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28807)"
-  },
-  "26505": {
-    "mob": "#Rhag`Mozdezh",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26505)"
-  },
-  "28850": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28850)"
-  },
-  "30548": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30548)"
-  },
-  "26581": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26581)"
-  },
-  "30535": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30535)"
-  },
-  "7826": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 7826)"
-  },
-  "28830": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28830)"
-  },
-  "28833": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28833)"
-  },
-  "30571": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30571)"
-  },
-  "30549": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30549)"
-  },
-  "30536": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30536)"
-  },
-  "26819": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26819)"
-  },
-  "26595": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "Shield of Auras"
-  },
-  "28815": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28815)"
-  },
-  "26555": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26555)"
-  },
-  "28846": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28846)"
-  },
-  "28804": {
-    "mob": "#Arch_Lich_Rhag`Zadune",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28804)"
-  },
-  "26556": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26556)"
-  },
-  "28831": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28831)"
-  },
-  "28805": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "Bloodbath"
-  },
-  "26558": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26558)"
-  },
-  "26605": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26605)"
-  },
-  "30525": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30525)"
-  },
-  "28821": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28821)"
-  },
-  "28825": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28825)"
-  },
-  "30528": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30528)"
-  },
-  "30531": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30531)"
-  },
-  "26594": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26594)"
-  },
-  "30529": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30529)"
-  },
-  "28838": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28838)"
-  },
-  "30526": {
-    "mob": "High_Priest_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30526)"
-  },
-  "30537": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30537)"
-  },
-  "28824": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28824)"
-  },
-  "28811": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28811)"
-  },
-  "28849": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "Cudgel of Cowardly Death"
-  },
-  "28857": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "Dagger of Entrapment"
-  },
-  "26809": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26809)"
-  },
-  "30538": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30538)"
-  },
-  "28842": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28842)"
-  },
-  "26535": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26535)"
-  },
-  "28845": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28845)"
-  },
-  "26593": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26593)"
-  },
-  "30568": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30568)"
-  },
-  "30567": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 30567)"
-  },
-  "28820": {
-    "mob": "Xerkizh_The_Creator",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 28820)"
-  },
-  "30545": {
-    "mob": "#a_glyph_covered_serpent",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30545)"
-  },
-  "7821": {
-    "mob": "#a_glyph_covered_serpent",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 7821)"
-  },
-  "30546": {
-    "mob": "#a_glyph_covered_serpent",
-    "zone": "Temple of Ssraeshza",
-    "name": "Corrupted Skull Earring"
-  },
-  "30542": {
-    "mob": "#a_glyph_covered_serpent",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30542)"
-  },
-  "28836": {
-    "mob": "#a_glyph_covered_serpent",
-    "zone": "Temple of Ssraeshza",
-    "name": "Hammer of the Sun"
+    "name": "(item 7125)"
+  },
+  "7130": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 7130)"
+  },
+  "7132": {
+    "mob": "#Overlord_Banord_Paffa",
+    "zone": "Crypt of Decay",
+    "name": "Festering Earlobe"
+  },
+  "7277": {
+    "mob": "#Tunare",
+    "zone": "Plane of Growth",
+    "name": "Nature's Melody"
+  },
+  "7544": {
+    "mob": "Vius_Tatrua",
+    "zone": "Akheva Ruins",
+    "name": "Vius Short Sword"
+  },
+  "7558": {
+    "mob": "#Diabo`Gel`Temeriel",
+    "zone": "Akheva Ruins",
+    "name": "Shadow Flame Staff"
+  },
+  "7767": {
+    "mob": "Magmaton",
+    "zone": "Plane of Fire",
+    "name": "(item 7767)"
+  },
+  "7768": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Tactics",
+    "name": "Pendant of the Triumphant Victor"
+  },
+  "7769": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 7769)"
+  },
+  "7770": {
+    "mob": "Rallos_Zek_the_Warlord",
+    "zone": "Plane of Tactics",
+    "name": "Black Collar of Boundless Might"
+  },
+  "7771": {
+    "mob": "Tallon_Zek",
+    "zone": "Drunder, the Fortress of Zek",
+    "name": "Veteran's Battle Charm"
+  },
+  "7789": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Attuned Spire Shard"
   },
   "7820": {
     "mob": "#a_glyph_covered_serpent",
     "zone": "Temple of Ssraeshza",
     "name": "(item 7820)"
   },
-  "27317": {
+  "7821": {
     "mob": "#a_glyph_covered_serpent",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 27317)"
-  },
-  "30544": {
-    "mob": "Rhag`Zhezum",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30544)"
-  },
-  "30547": {
-    "mob": "#a_glyph_covered_serpent",
-    "zone": "Temple of Ssraeshza",
-    "name": "Tainted Scale Belt"
-  },
-  "28809": {
-    "mob": "#a_glyph_covered_serpent",
-    "zone": "Temple of Ssraeshza",
-    "name": "Windspeeder"
-  },
-  "27314": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 27314)"
+    "name": "(item 7821)"
   },
   "7822": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
     "name": "(item 7822)"
   },
-  "28834": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28834)"
-  },
-  "28810": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28810)"
-  },
-  "26848": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26848)"
-  },
-  "27313": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 27313)"
-  },
-  "28840": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28840)"
-  },
-  "28844": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28844)"
-  },
-  "27311": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 27311)"
-  },
-  "27312": {
-    "mob": "#Vyzh`dra_the_Exiled",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 27312)"
-  },
-  "27316": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 27316)"
-  },
-  "28855": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28855)"
-  },
   "7825": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
     "name": "Breastplate of the Void"
   },
-  "30534": {
-    "mob": "#Vyzh`dra_the_Cursed",
+  "7826": {
+    "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30534)"
-  },
-  "26580": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26580)"
-  },
-  "30541": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30541)"
-  },
-  "26567": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26567)"
-  },
-  "30565": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30565)"
-  },
-  "27315": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "Fangs of Vyzh`dra"
-  },
-  "28826": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28826)"
-  },
-  "28806": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 28806)"
-  },
-  "30562": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30562)"
-  },
-  "30527": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30527)"
-  },
-  "26859": {
-    "mob": "Rhag`Zhezum",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26859)"
-  },
-  "30564": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30564)"
-  },
-  "30563": {
-    "mob": "#Vyzh`dra_the_Cursed",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30563)"
-  },
-  "26582": {
-    "mob": "#Blood_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26582)"
-  },
-  "26579": {
-    "mob": "#Blood_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26579)"
-  },
-  "26553": {
-    "mob": "#Blood_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "Mace of Confusion"
-  },
-  "26549": {
-    "mob": "#Blood_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26549)"
-  },
-  "26552": {
-    "mob": "#Blood_of_Ssraeshza",
-    "zone": "Ssraeshza Temple",
-    "name": "(item 26552)"
-  },
-  "26585": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26585)"
-  },
-  "26599": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26599)"
-  },
-  "30569": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30569)"
-  },
-  "8359": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 8359)"
-  },
-  "30566": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 30566)"
-  },
-  "26564": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26564)"
-  },
-  "26587": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26587)"
-  },
-  "26584": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 26584)"
-  },
-  "30570": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "Velvet Slippers of Harmony"
-  },
-  "21809": {
-    "mob": "Emperor_Ssraeshza_",
-    "zone": "Temple of Ssraeshza",
-    "name": "(item 21809)"
+    "name": "(item 7826)"
   },
   "7867": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
     "name": "(item 7867)"
   },
-  "30530": {
+  "7868": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "Bloodied Berserker's Blade"
+    "name": "(item 7868)"
   },
   "7869": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
     "name": "(item 7869)"
-  },
-  "7868": {
-    "mob": "#Lord_Inquisitor_Seru",
-    "zone": "Sanctus Seru",
-    "name": "(item 7868)"
   },
   "7870": {
     "mob": "#Lord_Inquisitor_Seru",
@@ -2319,19 +369,4699 @@
     "zone": "Sanctus Seru",
     "name": "(item 7871)"
   },
-  "30551": {
+  "7902": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Darkblood Sword"
+  },
+  "7903": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Mithril Edged Short Sword"
+  },
+  "7904": {
+    "mob": "Eom Trash",
+    "zone": "Vex Thal",
+    "name": "(item 7904)"
+  },
+  "7905": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Shadow Heart"
+  },
+  "7906": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Pebble Crusher"
+  },
+  "7907": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Petrified Rod"
+  },
+  "7908": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Knotted Knuckles"
+  },
+  "7909": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Grand Shield of Faith"
+  },
+  "7910": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Totem of Shadows"
+  },
+  "7911": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Earring of Quirkiness"
+  },
+  "7912": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Necklace of Wishes"
+  },
+  "7913": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Seared Bone Mask"
+  },
+  "7914": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Chooser's Cap"
+  },
+  "7915": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Shawl of Ice"
+  },
+  "7916": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Ring of the Ages"
+  },
+  "7917": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Threaded Platinum Bracelet"
+  },
+  "7918": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Ethereal Silk Sleeves"
+  },
+  "7920": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Iron Silk Sandals"
+  },
+  "7921": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Black Velvet Pants"
+  },
+  "7922": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Belt of Scintillation"
+  },
+  "7923": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Soft Satin Gloves"
+  },
+  "7924": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Calamity's End"
+  },
+  "7925": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Breastplate of Integrity"
+  },
+  "7926": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Wicked Mail"
+  },
+  "7927": {
+    "mob": "#Rumblecrush",
+    "zone": "The Umbral Plains",
+    "name": "Tunic of Kinship"
+  },
+  "7928": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Wand of Cursed Souls"
+  },
+  "7929": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Flaming Dirk"
+  },
+  "7930": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Hoarfrost Hammer"
+  },
+  "7931": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Longsword of Freedom"
+  },
+  "7932": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Stave of Wit"
+  },
+  "7933": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Rod of Virtue"
+  },
+  "7934": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Edge of Honor"
+  },
+  "7938": {
+    "mob": "#Zelnithak",
+    "zone": "The Umbral Plains",
+    "name": "Bracelet of Sense"
+  },
+  "7939": {
+    "mob": "#Zelnithak",
+    "zone": "The Umbral Plains",
+    "name": "Bracelet of Might"
+  },
+  "7940": {
+    "mob": "#Zelnithak",
+    "zone": "The Umbral Plains",
+    "name": "Bracelet of Comprehension"
+  },
+  "7941": {
+    "mob": "#Zelnithak",
+    "zone": "The Umbral Plains",
+    "name": "Bracelet of Quickness"
+  },
+  "7942": {
+    "mob": "#Zelnithak",
+    "zone": "The Umbral Plains",
+    "name": "Bracelet of Fortitude"
+  },
+  "7943": {
+    "mob": "#Zelnithak",
+    "zone": "The Umbral Plains",
+    "name": "Bracelet of Beauty"
+  },
+  "7944": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Cursed Halo of Thought"
+  },
+  "7945": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Earring of Endless Speed"
+  },
+  "7946": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Crystal Enervated Armband"
+  },
+  "8241": {
+    "mob": "#Doomshade",
+    "zone": "Umbral Plains",
+    "name": "Bow of Doom"
+  },
+  "8288": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 30551)"
+    "name": "(item 8288)"
   },
   "8289": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
     "name": "(item 8289)"
   },
-  "8288": {
+  "8359": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 8359)"
+  },
+  "8364": {
+    "mob": "Eom Trash",
+    "zone": "Vex Thal",
+    "name": "Talisman of Vah Kerrath"
+  },
+  "8365": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 8365)"
+  },
+  "8497": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Bile Drenched Flesh Robe"
+  },
+  "8498": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Ancient Burrower Hide Tunic"
+  },
+  "8724": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Ancient Burrower Spine"
+  },
+  "8725": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Shard from Unfathomable Depths"
+  },
+  "8733": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Ancient Burrower Flesh Cap"
+  },
+  "8734": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Ring of the Depths"
+  },
+  "8735": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Brilliant Stone Ring"
+  },
+  "8736": {
+    "mob": "A_burrower_parasite",
+    "zone": "The Deep",
+    "name": "Ring of Living Ore"
+  },
+  "8772": {
+    "mob": "Sigismond_Windwalker",
+    "zone": "Plane of Air",
+    "name": "Gleaming Pendant of Xegony"
+  },
+  "8774": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 8774)"
+  },
+  "8780": {
+    "mob": "A_Perfected_Warder_of_Earth",
+    "zone": "Plane of Time",
+    "name": "Entropy Pendant"
+  },
+  "8781": {
+    "mob": "#War_Chieftan_Awisano",
+    "zone": "Plane of Earth",
+    "name": "(item 8781)"
+  },
+  "8782": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "(item 8782)"
+  },
+  "8977": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "(item 8977)"
+  },
+  "9239": {
+    "mob": "Arlyxir",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 9239)"
+  },
+  "9289": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "(item 9289)"
+  },
+  "9320": {
+    "mob": "Arch_Mage_Yozanni",
+    "zone": "Plane of Fire",
+    "name": "(item 9320)"
+  },
+  "9325": {
+    "mob": "The_Acolyte_of_Affliction",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Adorned Soulstone Mask"
+  },
+  "9435": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "(item 9435)"
+  },
+  "9436": {
+    "mob": "Rallos_Zek_the_Warlord",
+    "zone": "Plane of Tactics",
+    "name": "Red Eyed Mask of Rage"
+  },
+  "9444": {
+    "mob": "Anar_of_Water",
+    "zone": "Plane of Time",
+    "name": "Mask of Conceptual Energy"
+  },
+  "9462": {
+    "mob": "Babnoxis_the_Spider_Queen",
+    "zone": "Plane of Fire",
+    "name": "(item 9462)"
+  },
+  "9463": {
+    "mob": "Terris_Thule",
+    "zone": "The Lair of Terris Thule",
+    "name": "Knucklebone Beaded Veil"
+  },
+  "9466": {
+    "mob": "#Overlord_Banord_Paffa",
+    "zone": "Crypt of Decay",
+    "name": "Veil of Bile"
+  },
+  "9468": {
+    "mob": "#Queen_Silandria",
+    "zone": "Plane of Air",
+    "name": "Scintillating Feather Mask"
+  },
+  "9469": {
+    "mob": "#Bertoxxulous",
+    "zone": "Crypt of Decay",
+    "name": "Radiant Mask of the Disease Lord"
+  },
+  "9479": {
+    "mob": "General_Druav_Flamesinger",
+    "zone": "Plane of Fire",
+    "name": "Lava Forged Face Guard"
+  },
+  "9480": {
+    "mob": "#Avatar_of_Wind",
+    "zone": "Plane of Air",
+    "name": "Fine Hammered Faceguard"
+  },
+  "9481": {
+    "mob": "Solusek_Ro",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 9481)"
+  },
+  "9483": {
+    "mob": "Tallon_Zek",
+    "zone": "Drunder, the Fortress of Zek",
+    "name": "Visor of Endless Sight"
+  },
+  "9485": {
+    "mob": "Rallos_Zek_the_Warlord",
+    "zone": "Plane of Tactics",
+    "name": "Grimfaced Visor"
+  },
+  "9487": {
+    "mob": "General_Druav_Flamesinger",
+    "zone": "Plane of Fire",
+    "name": "(item 9487)"
+  },
+  "9488": {
+    "mob": "Hydrotha",
+    "zone": "Plane of Water",
+    "name": "Abalone Engraved Tribal Mask"
+  },
+  "9497": {
+    "mob": "Brynju_Thunderclap",
+    "zone": "Bastion of Thunder",
+    "name": "Cap of Drowned Souls"
+  },
+  "9959": {
+    "mob": "#Avatar_of_Mist",
+    "zone": "Plane of Air",
+    "name": "Band of Swirling Air"
+  },
+  "10127": {
+    "mob": "Terris_Thule",
+    "zone": "The Lair of Terris Thule",
+    "name": "Nightmarish Bone Ring"
+  },
+  "10137": {
+    "mob": "#Avatar_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 10137)"
+  },
+  "10231": {
+    "mob": "#Avatar_of_Smoke",
+    "zone": "Plane of Air",
+    "name": "Puremetal Band"
+  },
+  "10232": {
+    "mob": "Kuanbyr_Hailstorm",
+    "zone": "Bastion of Thunder",
+    "name": "Stormriders Signet"
+  },
+  "10234": {
+    "mob": "#Xegony_the_Queen_of_Air",
+    "zone": "Plane of Air",
+    "name": "Simple Ring of Purity"
+  },
+  "10240": {
+    "mob": "Azobian_the_Darklord",
+    "zone": "Plane of Fire",
+    "name": "(item 10240)"
+  },
+  "10241": {
+    "mob": "#Bertoxxulous",
+    "zone": "Crypt of Decay",
+    "name": "Circle of Rotting Flesh"
+  },
+  "10242": {
+    "mob": "Coirnav_the_Avatar_of_Water",
+    "zone": "Plane of Water",
+    "name": "Earring of Embedded Coral"
+  },
+  "10653": {
+    "mob": "Jiva",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 10653)"
+  },
+  "10654": {
+    "mob": "Hydrotha",
+    "zone": "Plane of Water",
+    "name": "Moss Encrusted Band"
+  },
+  "10845": {
+    "mob": "Phara_Dar",
+    "zone": "Veeshan's Peak",
+    "name": "Robe of the Azure Sky"
+  },
+  "10851": {
+    "mob": "Phara_Dar",
+    "zone": "Veeshan's Peak",
+    "name": "Shield of Elders"
+  },
+  "10892": {
+    "mob": "Hoshkar",
+    "zone": "Veeshan's Peak",
+    "name": "Shissar Apothic Staff"
+  },
+  "10912": {
+    "mob": "Phara_Dar",
+    "zone": "Veeshan's Peak",
+    "name": "Yunnb's Earring"
+  },
+  "10945": {
+    "mob": "Grioihin_the_Wise",
+    "zone": "Plane of Water",
+    "name": "Ring of Algae"
+  },
+  "11018": {
+    "mob": "Tantisala_Jaggedtooth",
+    "zone": "Plane of Earth",
+    "name": "(item 11018)"
+  },
+  "11019": {
+    "mob": "Terris_Thule",
+    "zone": "The Lair of Terris Thule",
+    "name": "Indigo Snake Bracelet"
+  },
+  "11030": {
+    "mob": "Chancellor_Kirtra",
+    "zone": "Plane of Fire",
+    "name": "Bracer of Flickering Flames"
+  },
+  "11054": {
+    "mob": "A_Perfected_Warder_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 11054)"
+  },
+  "11096": {
+    "mob": "Peregrin_Rockskull",
+    "zone": "Plane of Time",
+    "name": "(item 11096)"
+  },
+  "11103": {
+    "mob": "A_Monsterous_Mudwalker",
+    "zone": "Plane of Time",
+    "name": "(item 11103)"
+  },
+  "11323": {
+    "mob": "Criare_Sunmane",
+    "zone": "Plane of Fire",
+    "name": "(item 11323)"
+  },
+  "11324": {
+    "mob": "Chancellor_Kirtra",
+    "zone": "Plane of Fire",
+    "name": "Fire Crested Rune"
+  },
+  "11402": {
+    "mob": "#Avatar_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 11402)"
+  },
+  "11878": {
+    "mob": "Solusek_Ro",
+    "zone": "Tower of Solusek Ro",
+    "name": "Gauntlets of the Burning Prince"
+  },
+  "11879": {
+    "mob": "Agnarr_the_Storm_Lord",
+    "zone": "Bastion of Thunder",
+    "name": "Stormriders Gauntlets"
+  },
+  "11899": {
+    "mob": "#Overlord_Banord_Paffa",
+    "zone": "Crypt of Decay",
+    "name": "Soft Tooled Gloves"
+  },
+  "12054": {
+    "mob": "Chancellor_Kirtra",
+    "zone": "Plane of Fire",
+    "name": "(item 12054)"
+  },
+  "12082": {
+    "mob": "Quavonis_Firetail",
+    "zone": "Plane of Fire",
+    "name": "(item 12082)"
+  },
+  "12510": {
+    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
+    "zone": "Plane of Fire",
+    "name": "(item 12510)"
+  },
+  "12592": {
+    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
+    "zone": "Plane of Fire",
+    "name": "(item 12592)"
+  },
+  "13634": {
+    "mob": "Coirnav_the_Avatar_of_Water",
+    "zone": "Plane of Water",
+    "name": "Kelp-Lined Mantle"
+  },
+  "13638": {
+    "mob": "Avatar_of_the_Elements",
+    "zone": "Plane of Time",
+    "name": "Pauldrons of Purity"
+  },
+  "13647": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "(item 13647)"
+  },
+  "13650": {
+    "mob": "Arlyxir",
+    "zone": "Tower of Solusek Ro",
+    "name": "Hooded Sanguine Mantle"
+  },
+  "13654": {
+    "mob": "Criare_Sunmane",
+    "zone": "Plane of Fire",
+    "name": "(item 13654)"
+  },
+  "13664": {
+    "mob": "#Rizlona",
+    "zone": "Plane of Time",
+    "name": "(item 13664)"
+  },
+  "13666": {
+    "mob": "Galremos",
+    "zone": "Tower of Solusek Ro",
+    "name": "Obsidian Plated Pauldrons"
+  },
+  "13668": {
+    "mob": "Melernil_Faal`Armanna",
+    "zone": "Plane of Air",
+    "name": "Resplendent Epaulets"
+  },
+  "13672": {
+    "mob": "#Xegony_the_Queen_of_Air",
+    "zone": "Plane of Air",
+    "name": "Exquisite Phoenix Feather Mantle"
+  },
+  "13673": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 13673)"
+  },
+  "13674": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "(item 13674)"
+  },
+  "13684": {
+    "mob": "Terris_Thule",
+    "zone": "The Lair of Terris Thule",
+    "name": "Sable Lined Mantle"
+  },
+  "13690": {
+    "mob": "Melernil_Faal`Armanna",
+    "zone": "Plane of Air",
+    "name": "Puresteel Mantle"
+  },
+  "13694": {
+    "mob": "Coirnav_the_Avatar_of_Water",
+    "zone": "Plane of Water",
+    "name": "Sharkbone Plated Shoulderpads"
+  },
+  "13767": {
+    "mob": "Tantisala_Jaggedtooth",
+    "zone": "Plane of Earth",
+    "name": "(item 13767)"
+  },
+  "14747": {
+    "mob": "#Xegony_the_Queen_of_Air",
+    "zone": "Plane of Air",
+    "name": "Vest of Phoenix Feathers"
+  },
+  "14754": {
+    "mob": "Nexona",
+    "zone": "Veeshan's Peak",
+    "name": "Pulsating Gem"
+  },
+  "14760": {
+    "mob": "Retseth_Tretse",
+    "zone": "The Hole",
+    "name": "(item 14760)"
+  },
+  "14818": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "Ring of Thunderous Forces"
+  },
+  "14926": {
+    "mob": "Galremos",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 14926)"
+  },
+  "14943": {
+    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
+    "zone": "Plane of Fire",
+    "name": "(item 14943)"
+  },
+  "14961": {
+    "mob": "Coirnav_the_Avatar_of_Water",
+    "zone": "Plane of Water",
+    "name": "Mail of Storms"
+  },
+  "15002": {
+    "mob": "#Avatar_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 15002)"
+  },
+  "15794": {
+    "mob": "The_Acolyte_of_Affliction",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Black Cloak of Malise"
+  },
+  "15806": {
+    "mob": "Saryrn",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Cape Embroidered with Runes"
+  },
+  "15812": {
+    "mob": "An_Elemental_Masterpiece",
+    "zone": "Plane of Air",
+    "name": "Tethered Air Cape"
+  },
+  "15814": {
+    "mob": "Blazzax_the_Omnifiend",
+    "zone": "Plane of Fire",
+    "name": "(item 15814)"
+  },
+  "15822": {
+    "mob": "Tantisala_Jaggedtooth",
+    "zone": "Plane of Earth",
+    "name": "(item 15822)"
+  },
+  "15823": {
+    "mob": "Solusek_Ro",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 15823)"
+  },
+  "15824": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 15824)"
+  },
+  "15839": {
+    "mob": "#Overlord_Banord_Paffa",
+    "zone": "Crypt of Decay",
+    "name": "Rotting Hide Cape"
+  },
+  "15840": {
+    "mob": "A_Mystical_Arbitor_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 15840)"
+  },
+  "15841": {
+    "mob": "#Avatar_of_Wind",
+    "zone": "Plane of Air",
+    "name": "Ensorcelled Metalcloth Cape"
+  },
+  "15842": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 15842)"
+  },
+  "15843": {
+    "mob": "Saryrn",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Unadorned Cloak of Battle"
+  },
+  "15844": {
+    "mob": "Terris_Thule",
+    "zone": "The Lair of Terris Thule",
+    "name": "Fearsome Midnight Cloak"
+  },
+  "15864": {
+    "mob": "Criare_Sunmane",
+    "zone": "Plane of Fire",
+    "name": "(item 15864)"
+  },
+  "15867": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 15867)"
+  },
+  "15871": {
+    "mob": "#Avatar_of_Smoke",
+    "zone": "Plane of Air",
+    "name": "Woven Steel Sash"
+  },
+  "15872": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Tactics",
+    "name": "Girdle of the Tactician"
+  },
+  "15877": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 15877)"
+  },
+  "15927": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "(item 15927)"
+  },
+  "16097": {
+    "mob": "Coirnav_the_Avatar_of_Water",
+    "zone": "Plane of Water",
+    "name": "Double Woven Kelp Cord"
+  },
+  "16152": {
+    "mob": "Pherlondien_Clawpike",
+    "zone": "Plane of Air",
+    "name": "Band of Fortitude"
+  },
+  "16154": {
+    "mob": "Peregrin_Rockskull",
+    "zone": "Plane of Time",
+    "name": "(item 16154)"
+  },
+  "16156": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 16156)"
+  },
+  "16158": {
+    "mob": "#Warlord_Gintolaken",
+    "zone": "Plane of Earth",
+    "name": "Bands of Earthen Energy"
+  },
+  "16567": {
+    "mob": "#Rinturion_Windblade",
+    "zone": "Plane of Air",
+    "name": "Sparkling Satin Pantaloons"
+  },
+  "16605": {
+    "mob": "Grioihin_the_Wise",
+    "zone": "Plane of Water",
+    "name": "Seaweed Woven Leggings"
+  },
+  "16637": {
+    "mob": "A_Perfected_Warder_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 16637)"
+  },
+  "16679": {
+    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
+    "zone": "Plane of Fire",
+    "name": "(item 16679)"
+  },
+  "17207": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Very Large Coin Purse"
+  },
+  "19074": {
+    "mob": "Galremos",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 19074)"
+  },
+  "19079": {
+    "mob": "#Bertoxxulous",
+    "zone": "Crypt of Decay",
+    "name": "Decayed Shoes of the Plaguebringer"
+  },
+  "19082": {
+    "mob": "Rallos_Zek_the_Warlord",
+    "zone": "Plane of Tactics",
+    "name": "Boots of the Warmaster"
+  },
+  "20438": {
+    "mob": "Ta`Grusch_the_Abomination",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Tormented Stone of Souls"
+  },
+  "20453": {
+    "mob": "A_Monsterous_Mudwalker",
+    "zone": "Plane of Time",
+    "name": "Bone Sliver Ornament"
+  },
+  "20454": {
+    "mob": "A_Monsterous_Mudwalker",
+    "zone": "Plane of Time",
+    "name": "Stone Etched Mallet"
+  },
+  "20469": {
+    "mob": "The_Protector_of_Dresolik",
+    "zone": "Plane of Time",
+    "name": "Sphere of Encased Flame"
+  },
+  "20486": {
+    "mob": "Solusek_Ro",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 20486)"
+  },
+  "20496": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 20496)"
+  },
+  "20507": {
+    "mob": "Pyronis",
+    "zone": "Plane of Fire",
+    "name": "(item 20507)"
+  },
+  "20508": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "(item 20508)"
+  },
+  "20618": {
+    "mob": "Criare_Sunmane",
+    "zone": "Plane of Fire",
+    "name": "(item 20618)"
+  },
+  "20621": {
+    "mob": "#Avatar_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 20621)"
+  },
+  "20625": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "(item 20625)"
+  },
+  "20627": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 20627)"
+  },
+  "20896": {
+    "mob": "#Avatar_of_Wind",
+    "zone": "Plane of Air",
+    "name": "Air Fetish"
+  },
+  "20898": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 20898)"
+  },
+  "21338": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 21338)"
+  },
+  "21809": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 21809)"
+  },
+  "21838": {
+    "mob": "Salczek_the_Fleshgrinder",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Baton of Torment"
+  },
+  "21866": {
+    "mob": "#Bertoxxulous",
+    "zone": "Crypt of Decay",
+    "name": "The Rotting Fist"
+  },
+  "21872": {
+    "mob": "Pzo_Adan",
+    "zone": "Crypt of Decay",
+    "name": "Green Fist of Death"
+  },
+  "21875": {
+    "mob": "#War_Chieftan_Birak",
+    "zone": "Plane of Earth",
+    "name": "(item 21875)"
+  },
+  "21876": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 21876)"
+  },
+  "21884": {
+    "mob": "The_Protector_of_Dresolik",
+    "zone": "Plane of Time",
+    "name": "(item 21884)"
+  },
+  "21886": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "Hammer of Hours"
+  },
+  "21893": {
+    "mob": "Bhaly_Adan",
+    "zone": "Crypt of Decay",
+    "name": "Torch of Lxvanvom"
+  },
+  "21994": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "(item 21994)"
+  },
+  "21995": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 21995)"
+  },
+  "21996": {
+    "mob": "Earthen_Overseer",
+    "zone": "Plane of Time",
+    "name": "(item 21996)"
+  },
+  "21997": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "Cloak of Wishes"
+  },
+  "21998": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 21998)"
+  },
+  "21999": {
+    "mob": "Gutripping_War_Beast",
+    "zone": "Plane of Time",
+    "name": "(item 21999)"
+  },
+  "22300": {
+    "mob": "Galremos",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 22300)"
+  },
+  "22879": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Tactics",
+    "name": "Obsidian Scimitar of War"
+  },
+  "22883": {
+    "mob": "Ralthos_Enrok",
+    "zone": "Plane of Time",
+    "name": "(item 22883)"
+  },
+  "22889": {
+    "mob": "#Avatar_of_Mist",
+    "zone": "Plane of Air",
+    "name": "Heavy Bludgeoner"
+  },
+  "22890": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 22890)"
+  },
+  "22893": {
+    "mob": "The_Keeper_of_Sorrows",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Crowned Staff of Anguish"
+  },
+  "22894": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 22894)"
+  },
+  "22896": {
+    "mob": "Tribal_Leader_Diseranon",
+    "zone": "Plane of Time",
+    "name": "(item 22896)"
+  },
+  "22898": {
+    "mob": "Sorrowsong",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Withering Staff of Agony"
+  },
+  "22907": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Tactics",
+    "name": "Furious Hammer of Zek"
+  },
+  "22969": {
+    "mob": "#Baltaldor_the_Cursed",
+    "zone": "Plane of Air",
+    "name": "Sparkling Shortsword"
+  },
+  "22972": {
+    "mob": "#War_Chieftan_Galronar",
+    "zone": "Plane of Earth",
+    "name": "(item 22972)"
+  },
+  "22975": {
+    "mob": "Agnarr_the_Storm_Lord",
+    "zone": "Bastion of Thunder",
+    "name": "Double Edged Stormblade"
+  },
+  "22982": {
+    "mob": "Saryrn",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Twin-Blade of Sorrow"
+  },
+  "22985": {
+    "mob": "Jiva",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 22985)"
+  },
+  "22986": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 22986)"
+  },
+  "22990": {
+    "mob": "Krziik_the_Mighty",
+    "zone": "Plane of Water",
+    "name": "Gem Encrusted Axe"
+  },
+  "22998": {
+    "mob": "Avatar_of_the_Elements",
+    "zone": "Plane of Time",
+    "name": "(item 22998)"
+  },
+  "22999": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 22999)"
+  },
+  "23497": {
+    "mob": "Jiva",
+    "zone": "Tower of Solusek Ro",
+    "name": "Ornate Broadsword"
+  },
+  "23498": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 23498)"
+  },
+  "24568": {
+    "mob": "The_Acolyte_of_Affliction",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Whip of Unending Pain"
+  },
+  "24569": {
+    "mob": "#Avatar_of_Dust",
+    "zone": "Plane of Air",
+    "name": "Rune Stamped Blade"
+  },
+  "24570": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "(item 24570)"
+  },
+  "24585": {
+    "mob": "#Avatar_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 24585)"
+  },
+  "24586": {
+    "mob": "Akkapan_Adan",
+    "zone": "Crypt of Decay",
+    "name": "Akkapan's Tear"
+  },
+  "24587": {
+    "mob": "#Avatar_of_Dust",
+    "zone": "Plane of Air",
+    "name": "Ivory Hilted Cleaver"
+  },
+  "24590": {
+    "mob": "The_Protector_of_Dresolik",
+    "zone": "Plane of Time",
+    "name": "(item 24590)"
+  },
+  "24602": {
+    "mob": "Fennin_Ro_the_Tyrant_of_Fire",
+    "zone": "Plane of Fire",
+    "name": "(item 24602)"
+  },
+  "24605": {
+    "mob": "Salczek_the_Fleshgrinder",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Dirk of Great Sorrow"
+  },
+  "24609": {
+    "mob": "Hoshkar",
+    "zone": "Veeshan's Peak",
+    "name": "Fatesealer"
+  },
+  "24611": {
+    "mob": "Solusek_Ro",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 24611)"
+  },
+  "24617": {
+    "mob": "Hoshkar",
+    "zone": "Veeshan's Peak",
+    "name": "Sword of the Shissar"
+  },
+  "24621": {
+    "mob": "Nexona",
+    "zone": "Veeshan's Peak",
+    "name": "Sprinkler of Suffering"
+  },
+  "24624": {
+    "mob": "Nexona",
+    "zone": "Veeshan's Peak",
+    "name": "Blackstone Maul"
+  },
+  "24628": {
+    "mob": "Xygoz",
+    "zone": "Veeshan's Peak",
+    "name": "Staff of Null"
+  },
+  "24631": {
+    "mob": "Xygoz",
+    "zone": "Veeshan's Peak",
+    "name": "Malevolent Runeblade"
+  },
+  "24635": {
+    "mob": "Druushk",
+    "zone": "Veeshan's Peak",
+    "name": "Skullcrusher of Kragg"
+  },
+  "24636": {
+    "mob": "Druushk",
+    "zone": "Veeshan's Peak",
+    "name": "Blood Orchid Katana"
+  },
+  "24637": {
+    "mob": "Druushk",
+    "zone": "Veeshan's Peak",
+    "name": "Shissar Focus Staff"
+  },
+  "24639": {
+    "mob": "Druushk",
+    "zone": "Veeshan's Peak",
+    "name": "Maelstrom"
+  },
+  "24640": {
+    "mob": "Druushk",
+    "zone": "Veeshan's Peak",
+    "name": "Shissar Deathspeaker Staff"
+  },
+  "24641": {
+    "mob": "Druushk",
+    "zone": "Veeshan's Peak",
+    "name": "Katana of Endurance"
+  },
+  "24645": {
+    "mob": "Brynju_Thunderclap",
+    "zone": "Bastion of Thunder",
+    "name": "Wicked Shank"
+  },
+  "24646": {
+    "mob": "Kuanbyr_Hailstorm",
+    "zone": "Bastion of Thunder",
+    "name": "Gargoyle Talon"
+  },
+  "24649": {
+    "mob": "Xygoz",
+    "zone": "Veeshan's Peak",
+    "name": "Razor Fang of Xygoz"
+  },
+  "24695": {
+    "mob": "#Warlord_Gintolaken",
+    "zone": "Plane of Earth",
+    "name": "(item 24695)"
+  },
+  "24699": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 24699)"
+  },
+  "24773": {
+    "mob": "An_Elemental_Masterpiece",
+    "zone": "Plane of Air",
+    "name": "Bejeweled Dagger of Summoning"
+  },
+  "24774": {
+    "mob": "Ofossaa_the_Enlightened",
+    "zone": "Plane of Water",
+    "name": "Algae Covered Stiletto"
+  },
+  "24776": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "(item 24776)"
+  },
+  "24789": {
+    "mob": "Criare_Sunmane",
+    "zone": "Plane of Fire",
+    "name": "(item 24789)"
+  },
+  "24793": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 24793)"
+  },
+  "24879": {
+    "mob": "#Avatar_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 24879)"
+  },
+  "24998": {
+    "mob": "#Rizlona",
+    "zone": "Plane of Time",
+    "name": "(item 24998)"
+  },
+  "24999": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 24999)"
+  },
+  "25043": {
+    "mob": "Derakor_the_Vindicator",
+    "zone": "Kael Drakkel",
+    "name": "Boots of the Vindicator"
+  },
+  "25044": {
+    "mob": "Derakor_the_Vindicator",
+    "zone": "Kael Drakkel",
+    "name": "Chestplate of Vindication"
+  },
+  "25045": {
+    "mob": "Derakor_the_Vindicator",
+    "zone": "Kael Drakkel",
+    "name": "Living Thunder Earring"
+  },
+  "25194": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "Crown of the Kromzek Kings"
+  },
+  "25195": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "The Horn of Hsagra"
+  },
+  "25196": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "Axe of the Kromzek Kings"
+  },
+  "25197": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "Boots of the Storm"
+  },
+  "25198": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "Ring of Lightning"
+  },
+  "25199": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "White Dragon Scale Sash"
+  },
+  "25200": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "Wrist Guard of Thunder"
+  },
+  "25201": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "Velium Encrusted Gauntlets"
+  },
+  "25202": {
+    "mob": "The_Statue_of_Rallos_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Hammer of Battle"
+  },
+  "25203": {
+    "mob": "The_Statue_of_Rallos_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Swiftblade of Zek"
+  },
+  "25204": {
+    "mob": "The_Statue_of_Rallos_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Reaver"
+  },
+  "25205": {
+    "mob": "The_Statue_of_Rallos_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Iron Scroll of War"
+  },
+  "25206": {
+    "mob": "The_Statue_of_Rallos_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Breastplate of Eradication"
+  },
+  "25207": {
+    "mob": "The_Statue_of_Rallos_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Cloak of the Falling Stars"
+  },
+  "25208": {
+    "mob": "The_Avatar_of_War",
+    "zone": "Kael Drakkel",
+    "name": "War Bow of Rallos Zek"
+  },
+  "25209": {
+    "mob": "The_Avatar_of_War",
+    "zone": "Kael Drakkel",
+    "name": "Helmet of Rallos Zek"
+  },
+  "25210": {
+    "mob": "The_Avatar_of_War",
+    "zone": "Kael Drakkel",
+    "name": "Blade of Carnage"
+  },
+  "25211": {
+    "mob": "The_Avatar_of_War",
+    "zone": "Kael Drakkel",
+    "name": "Ring of Destruction"
+  },
+  "25212": {
+    "mob": "The_Avatar_of_War",
+    "zone": "Kael Drakkel",
+    "name": "Flayed Barbarian Skin Leggings"
+  },
+  "25213": {
+    "mob": "The_Avatar_of_War",
+    "zone": "Kael Drakkel",
+    "name": "Flayed Barbarian Hide Mask"
+  },
+  "25220": {
+    "mob": "Jiva",
+    "zone": "Tower of Solusek Ro",
+    "name": "Rune Etched Bamboo Bo"
+  },
+  "25228": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Tactics",
+    "name": "Resplendent War Maul"
+  },
+  "25452": {
+    "mob": "#a_thifling_sprite",
+    "zone": "Plane of Growth",
+    "name": "Noctivagant Breastplate"
+  },
+  "25459": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Spirit Weaver's Breastplate"
+  },
+  "25487": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Melodic Breastplate"
+  },
+  "25494": {
+    "mob": "#a_thifling_sprite",
+    "zone": "Plane of Growth",
+    "name": "Chestplate of Stability"
+  },
+  "25508": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Sorcerer's Robe"
+  },
+  "25515": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Robe of the Bonecaster"
+  },
+  "25529": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Resplendent Robe"
+  },
+  "25543": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Silver Moon Chest Wraps"
+  },
+  "25800": {
+    "mob": "Kuanbyr_Hailstorm",
+    "zone": "Bastion of Thunder",
+    "name": "Greater Stormwatcher Horn"
+  },
+  "25843": {
+    "mob": "The_Acolyte_of_Affliction",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Staff of Agonizing Battle"
+  },
+  "25844": {
+    "mob": "Anar_of_Water",
+    "zone": "Plane of Time",
+    "name": "(item 25844)"
+  },
+  "25849": {
+    "mob": "Sorrowsong",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Greater Poleaxe of Sorrow"
+  },
+  "25857": {
+    "mob": "Quest: Yelinak's Head in Skyshrine",
+    "zone": "",
+    "name": "Gauntlets of Dragon Slaying"
+  },
+  "25858": {
+    "mob": "Quest: Dain's Head in Icewell Keep",
+    "zone": "",
+    "name": "Belt of Dwarf Slaying"
+  },
+  "25981": {
+    "mob": "General_Druav_Flamesinger",
+    "zone": "Plane of Fire",
+    "name": "(item 25981)"
+  },
+  "25983": {
+    "mob": "A_Monsterous_Mudwalker",
+    "zone": "Plane of Time",
+    "name": "(item 25983)"
+  },
+  "25987": {
+    "mob": "The_Protector_of_Dresolik",
+    "zone": "Plane of Time",
+    "name": "(item 25987)"
+  },
+  "25989": {
+    "mob": "Rallos_Zek_the_Warlord",
+    "zone": "Plane of Tactics",
+    "name": "Blade of War"
+  },
+  "25995": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "(item 25995)"
+  },
+  "26009": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "Zlandicar's Heart"
+  },
+  "26012": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "First Brood Talisman"
+  },
+  "26013": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "Massive Dragonclaw Shard"
+  },
+  "26025": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "Cowl of Mortality"
+  },
+  "26026": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "Gauntlets of Mortality"
+  },
+  "26027": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "Cracked Claw of Zlandicar"
+  },
+  "26086": {
+    "mob": "Xuzl",
+    "zone": "Tower of Solusek Ro",
+    "name": "(item 26086)"
+  },
+  "26087": {
+    "mob": "Saryrn",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Greatstaff of Misery"
+  },
+  "26092": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "Greatblade of Chaos"
+  },
+  "26095": {
+    "mob": "Pherlondien_Clawpike",
+    "zone": "Plane of Air",
+    "name": "Crow Footed Lance"
+  },
+  "26220": {
+    "mob": "Coirnav_the_Avatar_of_Water",
+    "zone": "Plane of Water",
+    "name": "Hammer of Crushing Waves"
+  },
+  "26501": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26501)"
+  },
+  "26505": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26505)"
+  },
+  "26512": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26512)"
+  },
+  "26519": {
+    "mob": "Lcea_Katta",
+    "zone": "Katta Castellum",
+    "name": "Amulet of the Pure Heart"
+  },
+  "26525": {
+    "mob": "Lcea_Katta",
+    "zone": "Katta Castellum",
+    "name": "Katta Staff of Peace"
+  },
+  "26530": {
+    "mob": "Lcea_Katta",
+    "zone": "Katta Castellum",
+    "name": "Acrylia Embedded Visor"
+  },
+  "26531": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Wito xi Tetoracu"
+  },
+  "26532": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Boots of Stability"
+  },
+  "26533": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Geomantic Fingers of Focus"
+  },
+  "26534": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Helm of Grim Blessings"
+  },
+  "26535": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26535)"
+  },
+  "26536": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Crown of the Itraer Vius"
+  },
+  "26539": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Collar of Tavuel Xakreum"
+  },
+  "26543": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "Focus Crystal"
+  },
+  "26546": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Itraer Insignia"
+  },
+  "26547": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Vex xi Vius"
+  },
+  "26548": {
+    "mob": "Lcea_Katta",
+    "zone": "Katta Castellum",
+    "name": "Girdle of Magnificence"
+  },
+  "26549": {
+    "mob": "#Blood_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26549)"
+  },
+  "26551": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Belt of Virility"
+  },
+  "26552": {
+    "mob": "#Blood_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26552)"
+  },
+  "26553": {
+    "mob": "#Blood_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "Mace of Confusion"
+  },
+  "26555": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26555)"
+  },
+  "26556": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26556)"
+  },
+  "26557": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Jenniy's Two-Tone Cuirass"
+  },
+  "26558": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26558)"
+  },
+  "26559": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Veil of Hidden Thought"
+  },
+  "26560": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Crys`Va Mask"
+  },
+  "26561": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Akhevan Shadow Shears"
+  },
+  "26564": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26564)"
+  },
+  "26566": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Ishinaear Xiall"
+  },
+  "26567": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26567)"
+  },
+  "26568": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Belt of Marvelous Visions"
+  },
+  "26570": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Frizznik's Robe of Tinkering"
+  },
+  "26574": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Shadowsong Cloak"
+  },
+  "26579": {
+    "mob": "#Blood_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26579)"
+  },
+  "26580": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26580)"
+  },
+  "26581": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26581)"
+  },
+  "26582": {
+    "mob": "#Blood_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26582)"
+  },
+  "26584": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26584)"
+  },
+  "26585": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26585)"
+  },
+  "26587": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26587)"
+  },
+  "26593": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26593)"
+  },
+  "26594": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26594)"
+  },
+  "26595": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "Shield of Auras"
+  },
+  "26597": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Orb of Lost Souls"
+  },
+  "26598": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Shadowed Torment"
+  },
+  "26599": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26599)"
+  },
+  "26601": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Shadowed Storm Sphere"
+  },
+  "26605": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26605)"
+  },
+  "26737": {
+    "mob": "#Xegony_the_Queen_of_Air",
+    "zone": "Plane of Air",
+    "name": "Exquisite Puresteel Wraps"
+  },
+  "26738": {
+    "mob": "General_Reparm",
+    "zone": "Plane of Fire",
+    "name": "(item 26738)"
+  },
+  "26739": {
+    "mob": "Tallon_Zek",
+    "zone": "Drunder, the Fortress of Zek",
+    "name": "Battle Fists"
+  },
+  "26740": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 26740)"
+  },
+  "26748": {
+    "mob": "The_Protector_of_Dresolik",
+    "zone": "Plane of Time",
+    "name": "(item 26748)"
+  },
+  "26750": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26750)"
+  },
+  "26751": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26751)"
+  },
+  "26752": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26752)"
+  },
+  "26753": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Spiked Shoulderpads"
+  },
+  "26754": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26754)"
+  },
+  "26755": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26755)"
+  },
+  "26756": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26756)"
+  },
+  "26757": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26757)"
+  },
+  "26758": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26758)"
+  },
+  "26759": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26759)"
+  },
+  "26760": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26760)"
+  },
+  "26761": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Belt of Mastery"
+  },
+  "26762": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26762)"
+  },
+  "26763": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26763)"
+  },
+  "26764": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Wand of Everlasting Water"
+  },
+  "26766": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26766)"
+  },
+  "26768": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Wand of Tranquility"
+  },
+  "26769": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26769)"
+  },
+  "26770": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26770)"
+  },
+  "26771": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26771)"
+  },
+  "26772": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26772)"
+  },
+  "26773": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26773)"
+  },
+  "26774": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Gloves of the Crimson Sigil"
+  },
+  "26775": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Earring of Eradication"
+  },
+  "26776": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Robe of Secrets"
+  },
+  "26777": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26777)"
+  },
+  "26778": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26778)"
+  },
+  "26779": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26779)"
+  },
+  "26780": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26780)"
+  },
+  "26781": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26781)"
+  },
+  "26782": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26782)"
+  },
+  "26783": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26783)"
+  },
+  "26784": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26784)"
+  },
+  "26785": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Mask of Judgement"
+  },
+  "26786": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26786)"
+  },
+  "26787": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 26787)"
+  },
+  "26788": {
+    "mob": "#Xegony_the_Queen_of_Air",
+    "zone": "Plane of Air",
+    "name": "Xephyrus, Wand of the Flowing Wind"
+  },
+  "26797": {
+    "mob": "Agnarr_the_Storm_Lord",
+    "zone": "Bastion of Thunder",
+    "name": "Orb of Thunderous Spirits"
+  },
+  "26798": {
+    "mob": "Chancellor_Kirtra",
+    "zone": "Plane of Fire",
+    "name": "(item 26798)"
+  },
+  "26807": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Gold Inlaid Ulak"
+  },
+  "26808": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Etched Bone Ulak"
+  },
+  "26809": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 26809)"
+  },
+  "26819": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26819)"
+  },
+  "26827": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "Khashek's Katar"
+  },
+  "26836": {
+    "mob": "The Insanity Crawler",
+    "zone": "Akheva Ruins",
+    "name": "Horns of Frenzy"
+  },
+  "26848": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26848)"
+  },
+  "26849": {
+    "mob": "The Itraer Vius",
+    "zone": "Akheva Ruins",
+    "name": "Fist of Acrylia"
+  },
+  "26859": {
+    "mob": "Rhag`Zhezum",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 26859)"
+  },
+  "26860": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Fist of Glowing Acrylia"
+  },
+  "26861": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Horns of Chaos"
+  },
+  "26865": {
+    "mob": "#Bertoxxulous",
+    "zone": "Crypt of Decay",
+    "name": "Symbol of the Plaguebringer"
+  },
+  "26869": {
+    "mob": "Tribal_Leader_Diseranon",
+    "zone": "Plane of Time",
+    "name": "(item 26869)"
+  },
+  "26895": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 26895)"
+  },
+  "26899": {
+    "mob": "Ralthos_Enrok",
+    "zone": "Plane of Time",
+    "name": "(item 26899)"
+  },
+  "26980": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 26980)"
+  },
+  "26981": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 26981)"
+  },
+  "26983": {
+    "mob": "Avatar_of_the_Elements",
+    "zone": "Plane of Time",
+    "name": "(item 26983)"
+  },
+  "26984": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 26984)"
+  },
+  "26985": {
+    "mob": "Ralthos_Enrok",
+    "zone": "Plane of Time",
+    "name": "(item 26985)"
+  },
+  "26986": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Shoes of Fleeting Fury"
+  },
+  "26987": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 26987)"
+  },
+  "26988": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 26988)"
+  },
+  "26989": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 26989)"
+  },
+  "26990": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 26990)"
+  },
+  "26991": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 26991)"
+  },
+  "26992": {
+    "mob": "Anar_of_Water",
+    "zone": "Plane of Time",
+    "name": "Ring of Force"
+  },
+  "26993": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "(item 26993)"
+  },
+  "26994": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 26994)"
+  },
+  "26995": {
+    "mob": "Gutripping_War_Beast",
+    "zone": "Plane of Time",
+    "name": "(item 26995)"
+  },
+  "26996": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "Gloves of the Unseen"
+  },
+  "27000": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 27000)"
+  },
+  "27106": {
+    "mob": "A_Perfected_Warder_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 27106)"
+  },
+  "27164": {
+    "mob": "Ta`Grusch_the_Abomination",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Shield of Unimaginable Horrors"
+  },
+  "27258": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "Zlandicar's Talisman"
+  },
+  "27260": {
+    "mob": "Zlandicar",
+    "zone": "Dragon Necropolis",
+    "name": "Frakadar's Talisman"
+  },
+  "27266": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Yelinak's Talisman"
+  },
+  "27272": {
+    "mob": "Ofossaa_the_Enlightened",
+    "zone": "Plane of Water",
+    "name": "Intricately Etched Seashell"
+  },
+  "27273": {
+    "mob": "#Avatar_of_Dust",
+    "zone": "Plane of Air",
+    "name": "Bulwark of Shimmering Steel"
+  },
+  "27274": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "(item 27274)"
+  },
+  "27276": {
+    "mob": "Salczek_the_Fleshgrinder",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Aegis of Gloom"
+  },
+  "27278": {
+    "mob": "Xuzl",
+    "zone": "Tower of Solusek Ro",
+    "name": "Circular Shield of the Blaze"
+  },
+  "27280": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 27280)"
+  },
+  "27290": {
+    "mob": "A_Mystical_Arbitor_of_Earth",
+    "zone": "Plane of Time",
+    "name": "(item 27290)"
+  },
+  "27298": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 27298)"
+  },
+  "27303": {
+    "mob": "an_aged_caretaker",
+    "zone": "Sleeper's Tomb",
+    "name": "Priceless Velium Claidhmore"
+  },
+  "27311": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 27311)"
+  },
+  "27312": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 27312)"
+  },
+  "27313": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 27313)"
+  },
+  "27314": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 27314)"
+  },
+  "27315": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "Fangs of Vyzh`dra"
+  },
+  "27316": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 27316)"
+  },
+  "27317": {
+    "mob": "#a_glyph_covered_serpent",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 27317)"
+  },
+  "27321": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium Battlehammer"
+  },
+  "27322": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium Spear"
+  },
+  "27323": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium Claidhmore"
+  },
+  "27324": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium Brawl Stick"
+  },
+  "27325": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium War Lance"
+  },
+  "27326": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium Reinforced Bow"
+  },
+  "27327": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium Battle Axe"
+  },
+  "27328": {
+    "mob": "#Hraashna_the_Warder",
+    "zone": "Sleeper's Tomb",
+    "name": "Primal Velium Warsword"
+  },
+  "27407": {
+    "mob": "Saryrn",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Orb of Infinite Terror"
+  },
+  "27637": {
+    "mob": "Brynju_Thunderclap",
+    "zone": "Bastion of Thunder",
+    "name": "Glowing Orb of the Stormwatcher"
+  },
+  "27646": {
+    "mob": "Krziik the Mighty",
+    "zone": "Plane of Water",
+    "name": "Ornate Abalone Recurve Bow"
+  },
+  "27648": {
+    "mob": "Azobian_the_Darklord",
+    "zone": "Plane of Fire",
+    "name": "(item 27648)"
+  },
+  "27649": {
+    "mob": "Agnarr_the_Storm_Lord",
+    "zone": "Bastion of Thunder",
+    "name": "Longbow of the Stormcaller"
+  },
+  "27818": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Bow of the Tempest"
+  },
+  "27950": {
+    "mob": "Avatar_of_Dread",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Ring of Dreadful Dreams"
+  },
+  "27951": {
+    "mob": "Avatar_of_Dread",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Pearl of Dread"
+  },
+  "27952": {
+    "mob": "Avatar_of_Dread",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Dread Coronet"
+  },
+  "27953": {
+    "mob": "Avatar_of_Fright",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Fright Imbued Battlestaff"
+  },
+  "27954": {
+    "mob": "Avatar_of_Fright",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Mantle of Paralyzing Fright"
+  },
+  "27955": {
+    "mob": "Avatar_of_Fright",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Talisman of Fright"
+  },
+  "27956": {
+    "mob": "Avatar_of_Fright",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Frightful Shroud"
+  },
+  "27957": {
+    "mob": "Avatar_of_Terror",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Terror Woven Wraps"
+  },
+  "27958": {
+    "mob": "Avatar_of_Terror",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Boots of Hidden Terror"
+  },
+  "27959": {
+    "mob": "Avatar_of_Terror",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Terror Forged Short Sword"
+  },
+  "27960": {
+    "mob": "Avatar_of_Terror",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Trinket of Ancient Fears"
+  },
+  "27961": {
+    "mob": "Avatar_of_Fear",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Feartouched Greatsword"
+  },
+  "27962": {
+    "mob": "Avatar_of_Fear",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Bladed Thulian Eviscerator"
+  },
+  "27963": {
+    "mob": "Avatar_of_Fear",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Fearsome Girdle"
+  },
+  "27964": {
+    "mob": "Avatar_of_Fear",
+    "zone": "Cazic-Thule 2.0",
+    "name": "Slime Crusted Shoes"
+  },
+  "27986": {
+    "mob": "Avatar of Smoke",
+    "zone": "Plane of Air",
+    "name": "Alabaster Hilted Wind Bow"
+  },
+  "27989": {
+    "mob": "Tallon_Zek",
+    "zone": "Drunder, the Fortress of Zek",
+    "name": "Warmaster's Recurved Longbow"
+  },
+  "27990": {
+    "mob": "Earthen_Overseer",
+    "zone": "Plane of Time",
+    "name": "(item 27990)"
+  },
+  "27991": {
+    "mob": "Salczek_the_Fleshgrinder",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Tormented Flute"
+  },
+  "27992": {
+    "mob": "Sigismond_Windwalker",
+    "zone": "Plane of Air",
+    "name": "The Rhythm of Xegony"
+  },
+  "27994": {
+    "mob": "Grioihin_the_Wise",
+    "zone": "Plane of Water",
+    "name": "Lute of the Flowing Waters"
+  },
+  "27998": {
+    "mob": "Peregrin_Rockskull",
+    "zone": "Plane of Time",
+    "name": "(item 27998)"
+  },
+  "28103": {
+    "mob": "Eom Trash",
+    "zone": "Vex Thal",
+    "name": "(item 28103)"
+  },
+  "28104": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Fervid Gloves of the Warder"
+  },
+  "28144": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "(item 28144)"
+  },
+  "28145": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Elder's Armbands of Ro"
+  },
+  "28146": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28146)"
+  },
+  "28147": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Zevfeer's Shroud of Despair"
+  },
+  "28148": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Slippers of Dark Whispers"
+  },
+  "28149": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "Denon's Drums of Declivity"
+  },
+  "28246": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "(item 28246)"
+  },
+  "28648": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 28648)"
+  },
+  "28649": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 28649)"
+  },
+  "28650": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 28650)"
+  },
+  "28651": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "Leggings of Furious Might"
+  },
+  "28653": {
+    "mob": "Ralthos_Enrok",
+    "zone": "Plane of Time",
+    "name": "(item 28653)"
+  },
+  "28654": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 28654)"
+  },
+  "28655": {
+    "mob": "Anar_of_Water",
+    "zone": "Plane of Time",
+    "name": "(item 28655)"
+  },
+  "28656": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 28656)"
+  },
+  "28658": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 28658)"
+  },
+  "28659": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 28659)"
+  },
+  "28660": {
+    "mob": "Earthen_Overseer",
+    "zone": "Plane of Time",
+    "name": "(item 28660)"
+  },
+  "28661": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "Shawl of Eternal Forces"
+  },
+  "28663": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 28663)"
+  },
+  "28664": {
+    "mob": "Saryrn",
+    "zone": "Plane of Time",
+    "name": "(item 28664)"
+  },
+  "28665": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 28665)"
+  },
+  "28666": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Wristband of Echoed Thoughts"
+  },
+  "28667": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "(item 28667)"
+  },
+  "28668": {
+    "mob": "Anar_of_Water",
+    "zone": "Plane of Time",
+    "name": "(item 28668)"
+  },
+  "28802": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28802)"
+  },
+  "28803": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Tor Vignus"
+  },
+  "28804": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28804)"
+  },
+  "28805": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "Bloodbath"
+  },
+  "28806": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28806)"
+  },
+  "28807": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28807)"
+  },
+  "28808": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Ribcracker"
+  },
+  "28809": {
+    "mob": "#a_glyph_covered_serpent",
+    "zone": "Temple of Ssraeshza",
+    "name": "Windspeeder"
+  },
+  "28810": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28810)"
+  },
+  "28811": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28811)"
+  },
+  "28812": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28812)"
+  },
+  "28813": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Aleje's Ceremonial Cudgel"
+  },
+  "28814": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Sunbeam Staff"
+  },
+  "28815": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28815)"
+  },
+  "28818": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Shield of Infused Power"
+  },
+  "28819": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Iceshatter"
+  },
+  "28820": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28820)"
+  },
+  "28821": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28821)"
+  },
+  "28823": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Ancient Gladius"
+  },
+  "28824": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28824)"
+  },
+  "28825": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28825)"
+  },
+  "28826": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28826)"
+  },
+  "28827": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Skybreaker"
+  },
+  "28828": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28828)"
+  },
+  "28829": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Ichorflow"
+  },
+  "28830": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28830)"
+  },
+  "28831": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28831)"
+  },
+  "28832": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Toetwister"
+  },
+  "28833": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28833)"
+  },
+  "28834": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28834)"
+  },
+  "28836": {
+    "mob": "#a_glyph_covered_serpent",
+    "zone": "Temple of Ssraeshza",
+    "name": "Hammer of the Sun"
+  },
+  "28837": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28837)"
+  },
+  "28838": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28838)"
+  },
+  "28840": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28840)"
+  },
+  "28841": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "Burning Scepter of Elements"
+  },
+  "28842": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28842)"
+  },
+  "28843": {
+    "mob": "Grieg_Veneficus",
+    "zone": "Grieg's End",
+    "name": "Bonecurse"
+  },
+  "28844": {
+    "mob": "#Vyzh`dra_the_Exiled",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28844)"
+  },
+  "28845": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 28845)"
+  },
+  "28846": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28846)"
+  },
+  "28847": {
+    "mob": "The_Itraer_Vius",
+    "zone": "Akheva Ruins",
+    "name": "Light Woodsman's Blade"
+  },
+  "28849": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "Cudgel of Cowardly Death"
+  },
+  "28850": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28850)"
+  },
+  "28851": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Winterstorm"
+  },
+  "28855": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 28855)"
+  },
+  "28856": {
+    "mob": "Thought Horror Overfiend",
+    "zone": "The Deep",
+    "name": "Scepter of Channeled Lightning"
+  },
+  "28857": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "Dagger of Entrapment"
+  },
+  "28881": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Boots of Silent Dreams"
+  },
+  "28882": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Steel Skin Armplates"
+  },
+  "28883": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Shaded Amice"
+  },
+  "28884": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Ring of Rage"
+  },
+  "28885": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Gorget of Superiority"
+  },
+  "28886": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Umbracite Bracer"
+  },
+  "28887": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Cloak of Icy Shadows"
+  },
+  "28888": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Shadow Footpads"
+  },
+  "28889": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Living Symbol"
+  },
+  "28890": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Cord of Midnight"
+  },
+  "28891": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Bracer of the Silent Star"
+  },
+  "28892": {
+    "mob": "Eom_Thall",
+    "zone": "Vex Thal",
+    "name": "Cap of the Silent Star"
+  },
+  "28893": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Seething Mantle"
+  },
+  "28894": {
+    "mob": "Eom_Centien",
+    "zone": "Vex Thal",
+    "name": "Shadow Tendril"
+  },
+  "28896": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Earring of Vigor"
+  },
+  "28897": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Gauntlets of Dark Embers"
+  },
+  "28898": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Sandals of Contemplation"
+  },
+  "28899": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Floating Rune"
+  },
+  "28900": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Darkened Claw Amulet"
+  },
+  "28901": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Shade Stone Amulet"
+  },
+  "28902": {
+    "mob": "Eom Trash",
+    "zone": "Vex Thal",
+    "name": "Dark Wind Shroud"
+  },
+  "28903": {
+    "mob": "Kaas_Thox_Xi_Ans_Dyek",
+    "zone": "Vex Thal",
+    "name": "Orb of Evasion"
+  },
+  "28905": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Ring of Flamewarding"
+  },
+  "28906": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Bracelet of the Shadow Hive"
+  },
+  "28908": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Dark Mace of Thought"
+  },
+  "28909": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Tiny Cap of Sight"
+  },
+  "28910": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Robe of Luring Shadows"
+  },
+  "28911": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Obsidian Necklace"
+  },
+  "28914": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Ring of the Crimson Bull"
+  },
+  "28915": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Book of Contemplation"
+  },
+  "28916": {
+    "mob": "Diabo_Xi_Xin_Thall",
+    "zone": "Vex Thal",
+    "name": "Belt of Dark Thought"
+  },
+  "28917": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "Dagger of Thought"
+  },
+  "28918": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "(item 28918)"
+  },
+  "28919": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "Shroud of Vigor"
+  },
+  "28921": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "Umbracite Swarm Orb"
+  },
+  "28922": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "Lightbringers Earring"
+  },
+  "28923": {
+    "mob": "Eom_Centien",
+    "zone": "Vex Thal",
+    "name": "Great Mace of Slaughter"
+  },
+  "28924": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "Armguard of Purity"
+  },
+  "28925": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "(item 28925)"
+  },
+  "28926": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "Cerulean Sleeves"
+  },
+  "28927": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "(item 28927)"
+  },
+  "28929": {
+    "mob": "Eom_Centien",
+    "zone": "Vex Thal",
+    "name": "Short Sword of Slaughter"
+  },
+  "28930": {
+    "mob": "Eom_Centien",
+    "zone": "Vex Thal",
+    "name": "Great Bow of Slaughter"
+  },
+  "28931": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "(item 28931)"
+  },
+  "28932": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "(item 28932)"
+  },
+  "28933": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "(item 28933)"
+  },
+  "28934": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "(item 28934)"
+  },
+  "28935": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "(item 28935)"
+  },
+  "28936": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "(item 28936)"
+  },
+  "28937": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "Breastplate of Speed"
+  },
+  "28938": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "Cord of Insight"
+  },
+  "28939": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "(item 28939)"
+  },
+  "28940": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "Shadow Pearl Earring"
+  },
+  "28942": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28942)"
+  },
+  "28943": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Cloudy Mark"
+  },
+  "28945": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28945)"
+  },
+  "28946": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28946)"
+  },
+  "28947": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28947)"
+  },
+  "28948": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Eye of Darkness"
+  },
+  "28949": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28949)"
+  },
+  "28950": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28950)"
+  },
+  "28951": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28951)"
+  },
+  "28952": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Sanguine Robe"
+  },
+  "28957": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "Girdle of Focus"
+  },
+  "28958": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "Sanguine Gloves"
+  },
+  "28959": {
+    "mob": "Eom Trash",
+    "zone": "Vex Thal",
+    "name": "Cloak of Maneuvering"
+  },
+  "28962": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "Earring of Falling Stars"
+  },
+  "28963": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "(item 28963)"
+  },
+  "28964": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "Cloak of Frozen Flames"
+  },
+  "28965": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "(item 28965)"
+  },
+  "28967": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "(item 28967)"
+  },
+  "28968": {
+    "mob": "Eom Trash",
+    "zone": "Vex Thal",
+    "name": "Wand of Deflection"
+  },
+  "28970": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Bone Chill Shield"
+  },
+  "28971": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Veil of Flames"
+  },
+  "28972": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Silver Skin Gauntlets"
+  },
+  "28973": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Tiny Bone Bracelet"
+  },
+  "28975": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Orb of the Sky"
+  },
+  "28976": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Pendant of Malosini"
+  },
+  "28977": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Amulet of Xuzl"
+  },
+  "28978": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Stein of Falling Tears"
+  },
+  "28979": {
+    "mob": "Diabo_Xi_Xin",
+    "zone": "Vex Thal",
+    "name": "Cloak of Destruction"
+  },
+  "28980": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Staff of Lost Rituals"
+  },
+  "28981": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Grimoire of Enchantment"
+  },
+  "28982": {
+    "mob": "Diabo Xi Va",
+    "zone": "Vex Thal",
+    "name": "Gauntlets of View"
+  },
+  "28983": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Scepter of Calekor"
+  },
+  "28984": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Ring of Immobilization"
+  },
+  "28986": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Helmet of Shadow"
+  },
+  "28987": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Thorny Chain Sleeves"
+  },
+  "28991": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Rune of Judgment"
+  },
+  "28992": {
+    "mob": "Thall_Va_Kelun",
+    "zone": "Vex Thal",
+    "name": "Cloak of Glowing Embers"
+  },
+  "28993": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28993)"
+  },
+  "28994": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Crimson Ring of Judgment"
+  },
+  "28995": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28995)"
+  },
+  "28996": {
+    "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28996)"
+  },
+  "28997": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "(item 28997)"
+  },
+  "28998": {
+    "mob": "Diabo_Xi_Va",
+    "zone": "Vex Thal",
+    "name": "Wand of Turning"
+  },
+  "29172": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "(item 29172)"
+  },
+  "29174": {
+    "mob": "Avatar_of_the_Elements",
+    "zone": "Plane of Time",
+    "name": "(item 29174)"
+  },
+  "29188": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Signet of the Shrine"
+  },
+  "29189": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Aegis of the Shrine"
+  },
+  "29190": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Amulet of the Shrine"
+  },
+  "29191": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Scepter of the Shrine"
+  },
+  "29192": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Wurmscale Encrusted Armguards"
+  },
+  "29198": {
+    "mob": "Agnarr_the_Storm_Lord",
+    "zone": "Bastion of Thunder",
+    "name": "Amulet of the Rain"
+  },
+  "29317": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Outrider's Taming Whip"
+  },
+  "29319": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Mask of the Dragon Slayer"
+  },
+  "29320": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Dragons Blood Earring"
+  },
+  "29327": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Craslith"
+  },
+  "29328": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Soul Defiler"
+  },
+  "29329": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Sacrifice"
+  },
+  "29330": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Ayill's Aged Stone Shield"
+  },
+  "29331": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Dragons Blood Earring"
+  },
+  "29332": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Dragons Tear Earring"
+  },
+  "29333": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Celestial Essence Robe"
+  },
+  "29334": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Dragon's Eye Sage Ring"
+  },
+  "29339": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Mark of the Master"
+  },
+  "29340": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Boots of the Savage"
+  },
+  "29345": {
+    "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
+    "zone": "Skyshrine",
+    "name": "Rod of the Healers"
+  },
+  "29426": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Premier Bow of Secundae"
+  },
+  "29433": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Bow"
+  },
+  "29434": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Lance"
+  },
+  "29435": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Spear"
+  },
+  "29436": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Claymore"
+  },
+  "29437": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Brawl Stick"
+  },
+  "29438": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Battlehammer"
+  },
+  "29439": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Warsword"
+  },
+  "29440": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Axe"
+  },
+  "29441": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Fist Wraps"
+  },
+  "29442": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Staff"
+  },
+  "29443": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Stiletto"
+  },
+  "29444": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Ancient Prismatic Mace"
+  },
+  "29445": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Clandestine Veil of M`Rata"
+  },
+  "29446": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Dowel of the Secundarum"
+  },
+  "29447": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Gloves of Temperantia"
+  },
+  "29448": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Bracchium Secundae"
+  },
+  "29449": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Tyro's Manuscript"
+  },
+  "29450": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Heritage of Secundae"
+  },
+  "29451": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Despondent Shroud"
+  },
+  "29452": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Fedora Secundae"
+  },
+  "29453": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Legacy of Tyro"
+  },
+  "29454": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Tenuous Dragonscale Slippers"
+  },
+  "29455": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Boots of the Ancients"
+  },
+  "29456": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Lungi of the Forbidden"
+  },
+  "29457": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Clawed Coat of Tyro"
+  },
+  "29458": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Fascia Secundae"
+  },
+  "29459": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Surreptitious Brooch"
+  },
+  "29460": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Sharpened Dragon's Scale"
+  },
+  "29462": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Eye of Tjudawos"
+  },
+  "29476": {
+    "mob": "Master of the Guard",
+    "zone": "Sleeper's Tomb",
+    "name": "Fist of Pummeling Prowess"
+  },
+  "29477": {
+    "mob": "Master of the Guard",
+    "zone": "Sleeper's Tomb",
+    "name": "Velium Fraught Shackles"
+  },
+  "29480": {
+    "mob": "The Progenitor",
+    "zone": "Sleeper's Tomb",
+    "name": "Tome of Innovation"
+  },
+  "29481": {
+    "mob": "Tjudawos/Kildrukaun/Vyskudra/Zeixshi`Kar the Ancient",
+    "zone": "Sleeper's Tomb",
+    "name": "Besmirched Mask of Conception"
+  },
+  "29482": {
+    "mob": "The Final Arbiter",
+    "zone": "Sleeper's Tomb",
+    "name": "Sightless Velium Eye"
+  },
+  "29645": {
+    "mob": "Quest: Tormax's Head - Dragons in Kael Drakkel",
+    "zone": "",
+    "name": "White Dragonscale Boots"
+  },
+  "29647": {
+    "mob": "Quest: Tormax's Head - Dragons in Kael Drakkel",
+    "zone": "",
+    "name": "Clawed Griffin Sword"
+  },
+  "29648": {
+    "mob": "Quest: Tormax's Head - Dragons in Kael Drakkel",
+    "zone": "",
+    "name": "White Dragon Helm"
+  },
+  "29686": {
+    "mob": "Quest: Ralgyn's Promise in Skyshrine",
+    "zone": "",
+    "name": "Bracer of Benevolence"
+  },
+  "30380": {
+    "mob": "Tunare",
+    "zone": "Plane of Growth",
+    "name": "Blade of the Swarm"
+  },
+  "30388": {
+    "mob": "Quest: Charayan's Ring in Skyshrine",
+    "zone": "",
+    "name": "Rluas's Chromatic Ring"
+  },
+  "30393": {
+    "mob": "Quest: Charayan's Guantlets in Skyshrine",
+    "zone": "",
+    "name": "Chromatic Gauntlets of the Ages"
+  },
+  "30502": {
+    "mob": "#Dain_Frostreaver_IV",
+    "zone": "Icewell Keep",
+    "name": "Tri-Plated Golden Hackle Hammer"
+  },
+  "30503": {
+    "mob": "#Dain_Frostreaver_IV",
+    "zone": "Icewell Keep",
+    "name": "Frostreaver"
+  },
+  "30504": {
+    "mob": "#Dain_Frostreaver_IV",
+    "zone": "Icewell Keep",
+    "name": "Aegis of Ice"
+  },
+  "30505": {
+    "mob": "#Dain_Frostreaver_IV",
+    "zone": "Icewell Keep",
+    "name": "Frostreaver's Embroidered Cloak"
+  },
+  "30506": {
+    "mob": "#Dain_Frostreaver_IV",
+    "zone": "Icewell Keep",
+    "name": "Ring of Winter"
+  },
+  "30507": {
+    "mob": "#Dain_Frostreaver_IV",
+    "zone": "Icewell Keep",
+    "name": "Frostreaver's Velium Crown"
+  },
+  "30525": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30525)"
+  },
+  "30526": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30526)"
+  },
+  "30527": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30527)"
+  },
+  "30528": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30528)"
+  },
+  "30529": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30529)"
+  },
+  "30530": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 8288)"
+    "name": "Bloodied Berserker's Blade"
+  },
+  "30531": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30531)"
+  },
+  "30532": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Leggings of Serenity"
+  },
+  "30533": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Mantle of Fortitude"
+  },
+  "30534": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30534)"
+  },
+  "30535": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30535)"
+  },
+  "30536": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30536)"
+  },
+  "30537": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30537)"
+  },
+  "30538": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30538)"
+  },
+  "30540": {
+    "mob": "Shei_Vinitras_",
+    "zone": "Akheva Ruins",
+    "name": "Flowing Gossamer Cloak"
+  },
+  "30541": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30541)"
+  },
+  "30542": {
+    "mob": "#a_glyph_covered_serpent",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30542)"
+  },
+  "30544": {
+    "mob": "Rhag`Zhezum",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30544)"
+  },
+  "30545": {
+    "mob": "#a_glyph_covered_serpent",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30545)"
+  },
+  "30546": {
+    "mob": "#a_glyph_covered_serpent",
+    "zone": "Temple of Ssraeshza",
+    "name": "Corrupted Skull Earring"
+  },
+  "30547": {
+    "mob": "#a_glyph_covered_serpent",
+    "zone": "Temple of Ssraeshza",
+    "name": "Tainted Scale Belt"
+  },
+  "30548": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30548)"
+  },
+  "30549": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30549)"
+  },
+  "30551": {
+    "mob": "#Lord_Inquisitor_Seru",
+    "zone": "Sanctus Seru",
+    "name": "(item 30551)"
+  },
+  "30555": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30555)"
+  },
+  "30556": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30556)"
+  },
+  "30557": {
+    "mob": "#Rhag`Mozdezh",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30557)"
+  },
+  "30558": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30558)"
+  },
+  "30559": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30559)"
+  },
+  "30560": {
+    "mob": "#Rhag`Zhezum",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30560)"
+  },
+  "30561": {
+    "mob": "Thought_Horror_Overfiend",
+    "zone": "The Deep",
+    "name": "Brilliant Metal Bauble"
+  },
+  "30562": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30562)"
+  },
+  "30563": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30563)"
+  },
+  "30564": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30564)"
+  },
+  "30565": {
+    "mob": "#Vyzh`dra_the_Cursed",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30565)"
+  },
+  "30566": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30566)"
+  },
+  "30567": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30567)"
+  },
+  "30568": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "(item 30568)"
+  },
+  "30569": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30569)"
+  },
+  "30570": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "Temple of Ssraeshza",
+    "name": "Velvet Slippers of Harmony"
+  },
+  "30571": {
+    "mob": "#Arch_Lich_Rhag`Zadune",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 30571)"
+  },
+  "31201": {
+    "mob": "#Adjutant_Brunkin",
+    "zone": "Kael Drakkel",
+    "name": "White Bear Pelt Cloak"
+  },
+  "31211": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Shield of Fury"
+  },
+  "31212": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Shield of the Protector"
+  },
+  "31213": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Bow of the Silver Fang"
+  },
+  "31214": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Barrier of Sound"
+  },
+  "31216": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Shield of the Wurms"
+  },
+  "31217": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Shield of Thorns"
+  },
+  "31218": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Melodic Charm"
+  },
+  "31219": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Runed Fang Necklace"
+  },
+  "31220": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Shadow Fang Necklace"
+  },
+  "31222": {
+    "mob": "#Cyndor_Lightningfang",
+    "zone": "Temple of Veeshan",
+    "name": "Ring of Superiority"
+  },
+  "31223": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Brother Xave's Headband"
+  },
+  "31224": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Mrylokar's Dagger of Vengeance"
+  },
+  "31225": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Tolan's Longsword of the Glade"
+  },
+  "31226": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Hobart's War Helmet"
+  },
+  "31227": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Do`Vassir's Gauntlets of Might"
+  },
+  "31228": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Solist's Earring of Insight"
+  },
+  "31229": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Rowyl's Metal Armguards"
+  },
+  "31230": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Yakatizma's Shield of Crafting"
+  },
+  "31231": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Crystasia's Crystal Ring"
+  },
+  "31232": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Palladius' Axe of Slaughter"
+  },
+  "31233": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Akkirus' Mask of Warfare"
+  },
+  "31234": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Valtron's Necklace of Wonder"
+  },
+  "31235": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Feeliux's Cord of Velocity"
+  },
+  "31236": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Vyrinn's Earring of Insanity"
+  },
+  "31237": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Kelsiferous' Armband of Artistry"
+  },
+  "31238": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Maclaer's Boots of Silence"
+  },
+  "31239": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Sal`Varae's Robe of Darkness"
+  },
+  "31240": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Viik's Pauldrons of Pain"
+  },
+  "31241": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Gharn's Rock of Smashing"
+  },
+  "31242": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Abashi's Rod of Disempowerment"
+  },
+  "31243": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Jaelen's Katana"
+  },
+  "31244": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Ssra's Bloodstone Eyepatch"
+  },
+  "31245": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Sirran's Boots of Insanity"
+  },
+  "31246": {
+    "mob": "#Vulak`Aerr",
+    "zone": "Temple of Veeshan",
+    "name": "Camii's Bracer of Vigor"
+  },
+  "31300": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Silver Whip of Rage"
+  },
+  "31301": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Vyemm's Fang"
+  },
+  "31302": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Vyemm's Right Eye"
+  },
+  "31303": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Vyemm's Left Eye"
+  },
+  "31304": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Sledge of Smashing"
+  },
+  "31305": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Gaudralek, Sword of the Sky"
+  },
+  "31306": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Onyx Gauntlets"
+  },
+  "31307": {
+    "mob": "#Lord_Vyemm",
+    "zone": "Temple of Veeshan",
+    "name": "Silver Bracelet of Rage"
+  },
+  "31308": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Trident of the Deep Sea"
+  },
+  "31309": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Net of the Deep Sea"
+  },
+  "31310": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Greaves of the Deep Sea"
+  },
+  "31311": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Helm of the Deep Sea"
+  },
+  "31312": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Orb of the Deep Sea"
+  },
+  "31313": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Pirate's Eyepatch"
+  },
+  "31314": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Bracelet of the Deep Sea"
+  },
+  "31315": {
+    "mob": "#Lord_Koi`Doken",
+    "zone": "Temple of Veeshan",
+    "name": "Siren Song, Dagger of the Sea"
+  },
+  "31316": {
+    "mob": "#Aaryonar",
+    "zone": "Temple of Veeshan",
+    "name": "Whitestone Shield"
+  },
+  "31317": {
+    "mob": "#Aaryonar",
+    "zone": "Temple of Veeshan",
+    "name": "Rocksmasher"
+  },
+  "31318": {
+    "mob": "#Aaryonar",
+    "zone": "Temple of Veeshan",
+    "name": "Amulet of the Dreadgazer"
+  },
+  "31319": {
+    "mob": "#Aaryonar",
+    "zone": "Temple of Veeshan",
+    "name": "Reaper's Ring"
+  },
+  "31321": {
+    "mob": "#Aaryonar",
+    "zone": "Temple of Veeshan",
+    "name": "Hand of the Master"
+  },
+  "31322": {
+    "mob": "#Aaryonar",
+    "zone": "Temple of Veeshan",
+    "name": "Circlet of Summer"
+  },
+  "31323": {
+    "mob": "#Aaryonar",
+    "zone": "Temple of Veeshan",
+    "name": "Mask of Fall"
+  },
+  "31324": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Chestplate of Fiery Might"
+  },
+  "31325": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Beldron's Vambraces of Impiety"
+  },
+  "31326": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Staff of the Silent Star"
+  },
+  "31327": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Boots of the Dead Dream"
+  },
+  "31328": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Sky Watcher's Monocle"
+  },
+  "31329": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Vambraces of Discontent"
+  },
+  "31330": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Amulet of the Storm"
+  },
+  "31331": {
+    "mob": "#Lord_Feshlak",
+    "zone": "Temple of Veeshan",
+    "name": "Thunderstone"
+  },
+  "31332": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Wurm Hide Greaves"
+  },
+  "31333": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Wurm Hide Robe"
+  },
+  "31334": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Belt of the Destroyer"
+  },
+  "31335": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Bow of the Destroyer"
+  },
+  "31336": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Boots of the Destroyer"
+  },
+  "31337": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Wurm Claw Pauldrons"
+  },
+  "31338": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Dagarn's Tail"
+  },
+  "31339": {
+    "mob": "Dagarn_the_Destroyer",
+    "zone": "Temple of Veeshan",
+    "name": "Shining Metallic Pantaloons"
+  },
+  "31340": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Shiny Metallic Gloves"
+  },
+  "31341": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Verlekarnorm's Horn of Disaster"
+  },
+  "31342": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Shiny Metallic Sleeves"
+  },
+  "31343": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Kreizenn's Flame"
+  },
+  "31344": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Fire Etched Flamberge"
+  },
+  "31345": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Flame Etched Short Sword"
+  },
+  "31346": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Dawncaller, Blade of the Morning"
+  },
+  "31347": {
+    "mob": "#Lord_Kreizenn",
+    "zone": "Temple of Veeshan",
+    "name": "Silver Disk"
+  },
+  "31348": {
+    "mob": "#Cekenar",
+    "zone": "Temple of Veeshan",
+    "name": "Blackstar, Mace of Night"
+  },
+  "31349": {
+    "mob": "#Cekenar",
+    "zone": "Temple of Veeshan",
+    "name": "Silver Dagger of Destruction"
+  },
+  "31350": {
+    "mob": "#Cekenar",
+    "zone": "Temple of Veeshan",
+    "name": "Meljeldin, Bane of Giants"
+  },
+  "31351": {
+    "mob": "#Cekenar",
+    "zone": "Temple of Veeshan",
+    "name": "Cekenar's Claw"
+  },
+  "31352": {
+    "mob": "#Zlexak",
+    "zone": "Temple of Veeshan",
+    "name": "Spinning Orb of Confusion"
+  },
+  "31353": {
+    "mob": "#Zlexak",
+    "zone": "Temple of Veeshan",
+    "name": "Windraider's Belt"
+  },
+  "31354": {
+    "mob": "#Zlexak",
+    "zone": "Temple of Veeshan",
+    "name": "Dragon Skin Bracelet"
+  },
+  "31355": {
+    "mob": "#Zlexak",
+    "zone": "Temple of Veeshan",
+    "name": "Tvenken's Slippers of Silence"
+  },
+  "31356": {
+    "mob": "#Sevalak",
+    "zone": "Temple of Veeshan",
+    "name": "Great Spear of Dawn"
+  },
+  "31357": {
+    "mob": "#Sevalak",
+    "zone": "Temple of Veeshan",
+    "name": "Axe of Resistance"
+  },
+  "31358": {
+    "mob": "#Sevalak",
+    "zone": "Temple of Veeshan",
+    "name": "Shield of the Dawn"
+  },
+  "31359": {
+    "mob": "#Sevalak",
+    "zone": "Temple of Veeshan",
+    "name": "Shield of Midnight"
+  },
+  "31360": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Nevederia's Left Eye"
+  },
+  "31361": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Nevederia's Right Eye"
+  },
+  "31362": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Nevederia's Horn"
+  },
+  "31363": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Mask of Terror"
+  },
+  "31364": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Girdle of Dark Power"
+  },
+  "31365": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Medal of Deep Thought"
+  },
+  "31366": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Cloak of Thorns"
+  },
+  "31367": {
+    "mob": "#Lady_Nevederia",
+    "zone": "Temple of Veeshan",
+    "name": "Nevederia's Claw"
+  },
+  "31368": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Helmet of the Crawler"
+  },
+  "31369": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Blydreln's Bane"
+  },
+  "31370": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Earring of the Icecaster"
+  },
+  "31371": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Silver Chains"
+  },
+  "31372": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Crown of Resiliance"
+  },
+  "31373": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Sprinkler of the Spirits"
+  },
+  "31374": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Onyx Chain Leggings"
+  },
+  "31375": {
+    "mob": "#Jorlleag",
+    "zone": "Temple of Veeshan",
+    "name": "Facesmasher"
+  },
+  "31376": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Cloak of the Sky"
+  },
+  "31377": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Ring of the Sky"
+  },
+  "31378": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Mask of the Sky"
+  },
+  "31379": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Claw of Lightning"
+  },
+  "31381": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Onyx Chain Sleeves"
+  },
+  "31382": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Twisted Steel Gauntlets"
+  },
+  "31383": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Twisted Steel Bastard Sword"
+  },
+  "31384": {
+    "mob": "#Eashen_of_the_Sky",
+    "zone": "Temple of Veeshan",
+    "name": "Bracelet of the Sky"
+  },
+  "31385": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Wyvern Hide Tunic"
+  },
+  "31386": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Wyvern Hide Leggings"
+  },
+  "31387": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Wyvern Hide Sleeves"
+  },
+  "31388": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Wyvern Hide Boots"
+  },
+  "31389": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Mask of Venom"
+  },
+  "31390": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Cloak of Venom"
+  },
+  "31391": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Poison Soaked Tunic"
+  },
+  "31392": {
+    "mob": "#Ikatiar_the_Venom",
+    "zone": "Temple of Veeshan",
+    "name": "Ikatiar's Stinger"
+  },
+  "31393": {
+    "mob": "#Gozzrem",
+    "zone": "Temple of Veeshan",
+    "name": "Bracelet of Protection"
+  },
+  "31395": {
+    "mob": "#Gozzrem",
+    "zone": "Temple of Veeshan",
+    "name": "Rekeklo's War Sword"
+  },
+  "31398": {
+    "mob": "#Gozzrem",
+    "zone": "Temple of Veeshan",
+    "name": "Shovel of the Harvest"
+  },
+  "31400": {
+    "mob": "#Gozzrem",
+    "zone": "Temple of Veeshan",
+    "name": "Eye of the Rigtorgn"
+  },
+  "31401": {
+    "mob": "#Lendiniara_the_Keeper",
+    "zone": "Temple of Veeshan",
+    "name": "Silver Girdle of Stability"
+  },
+  "31402": {
+    "mob": "#Lendiniara_the_Keeper",
+    "zone": "Temple of Veeshan",
+    "name": "Gloves of Stability"
+  },
+  "31405": {
+    "mob": "#Lendiniara_the_Keeper",
+    "zone": "Temple of Veeshan",
+    "name": "Breastplate of Superiority"
+  },
+  "31407": {
+    "mob": "#Lendiniara_the_Keeper",
+    "zone": "Temple of Veeshan",
+    "name": "Truesight Helmet"
+  },
+  "31408": {
+    "mob": "#Lendiniara_the_Keeper",
+    "zone": "Temple of Veeshan",
+    "name": "Boots of Superiority"
+  },
+  "31411": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "Necklace of Nightstalking"
+  },
+  "31412": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "Emerald Bastardsword of Purity"
+  },
+  "31413": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "Black Rock Maul of Crushing"
+  },
+  "31414": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "True Mithril Breastplate"
+  },
+  "31415": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "Lance of Thunder"
+  },
+  "31416": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "Pauldrons of Blight"
+  },
+  "31417": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "Circlet of Suffering"
+  },
+  "31418": {
+    "mob": "#Telkorenar",
+    "zone": "Temple of Veeshan",
+    "name": "Transparent Eyepatch"
+  },
+  "32100": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "Earthen Bracer of Fortitude"
+  },
+  "32110": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "(item 32110)"
+  },
+  "32161": {
+    "mob": "#Itraer`Renthias",
+    "zone": "Akheva Ruins",
+    "name": "Shaded Boots"
+  },
+  "32178": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Shaderock Crown"
+  },
+  "32179": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Shaderock Robe"
+  },
+  "32180": {
+    "mob": "#The_Insanity_Crawler",
+    "zone": "Akheva Ruins",
+    "name": "Mind Worm Hide Mantle"
+  },
+  "32181": {
+    "mob": "#The_Insanity_Crawler",
+    "zone": "Akheva Ruins",
+    "name": "Mind Worm Hide Belt"
+  },
+  "32182": {
+    "mob": "#The_Insanity_Crawler",
+    "zone": "Akheva Ruins",
+    "name": "Insanity Crawler Fang"
+  },
+  "32183": {
+    "mob": "#The_Insanity_Crawler",
+    "zone": "Akheva Ruins",
+    "name": "Insanity Crawler Hide Shield"
+  },
+  "32184": {
+    "mob": "#The_Insanity_Crawler",
+    "zone": "Akheva Ruins",
+    "name": "Orb of Mental Energy"
+  },
+  "32185": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Shaderock Girdle"
+  },
+  "32186": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Shaderock Bracer"
+  },
+  "32187": {
+    "mob": "The_Va`Dyn",
+    "zone": "Akheva Ruins",
+    "name": "Shaderock Amulet"
+  },
+  "32516": {
+    "mob": "a_horror_guard",
+    "zone": "The Deep",
+    "name": "Thought Horror Fangs"
+  },
+  "56018": {
+    "mob": "Wave 1",
+    "zone": "Plane of Time",
+    "name": "(item 56018)"
+  },
+  "68195": {
+    "mob": "Wave 1",
+    "zone": "Plane of Time",
+    "name": "(item 68195)"
+  },
+  "68196": {
+    "mob": "Wave 1",
+    "zone": "Plane of Time",
+    "name": "(item 68196)"
+  },
+  "68197": {
+    "mob": "Wave 1",
+    "zone": "Plane of Time",
+    "name": "(item 68197)"
+  },
+  "68199": {
+    "mob": "Wave 1",
+    "zone": "Plane of Time",
+    "name": "(item 68199)"
+  },
+  "68217": {
+    "mob": "Wave 1",
+    "zone": "Plane of Time",
+    "name": "Ossein of Limitless Time"
+  },
+  "79883": {
+    "mob": "Lord Yelinak",
+    "zone": "Skyshrine",
+    "name": "Circlet of the Struggle"
+  },
+  "79887": {
+    "mob": "The Itraer Vius",
+    "zone": "Akheva Ruins",
+    "name": "Signet of Fiel'Tian"
+  },
+  "79895": {
+    "mob": "Kuanbyr Hailstorm",
+    "zone": "Torden, Bastion of Thunder",
+    "name": "Pauldrons of the Eternal Storm"
+  },
+  "86930": {
+    "mob": "Rhag`Zhezum",
+    "zone": "Temple of Ssraeshza",
+    "name": "(item 86930)"
   }
 }

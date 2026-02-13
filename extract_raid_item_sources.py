@@ -3,14 +3,19 @@
 Extract item IDs and their drop sources (mob, zone) from raid_items.txt.
 Processes every item block (data-id); itemdrop may be missing in truncated/corrupt blocks.
 Outputs: raid_item_ids.txt (plain list) and raid_item_sources.json (item -> mob/zone).
+
+Optional: --input FILE --output-json FILE [--output-ids FILE] to process another file
+(e.g. raid_items2.txt) and write to separate outputs without overwriting defaults.
 """
+import argparse
 import re
 import json
 from pathlib import Path
 
-INPUT = Path(__file__).parent / "raid_items.txt"
-IDS_OUT = Path(__file__).parent / "raid_item_ids.txt"
-JSON_OUT = Path(__file__).parent / "raid_item_sources.json"
+SCRIPT_DIR = Path(__file__).resolve().parent
+DEFAULT_INPUT = SCRIPT_DIR / "raid_items.txt"
+DEFAULT_IDS_OUT = SCRIPT_DIR / "raid_item_ids.txt"
+DEFAULT_JSON_OUT = SCRIPT_DIR / "raid_item_sources.json"
 
 # Start of next item block (details row with data-id)
 DATA_ID_PAT = re.compile(r'data-id="(\d+)"')
@@ -88,7 +93,21 @@ def _mob_in_zone(item_start: int, zone_start: int, h2_sections: list[tuple[int, 
 
 
 def main():
-    text = INPUT.read_text(encoding="utf-8", errors="replace")
+    parser = argparse.ArgumentParser(description="Extract raid item IDs and sources from HTML paste.")
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT, help="Input text/HTML file")
+    parser.add_argument("--output-json", type=Path, default=DEFAULT_JSON_OUT, help="Output JSON path")
+    parser.add_argument("--output-ids", type=Path, default=DEFAULT_IDS_OUT, help="Output item IDs list path")
+    args = parser.parse_args()
+
+    input_path = args.input if args.input.is_absolute() else SCRIPT_DIR / args.input
+    json_out = args.output_json if args.output_json.is_absolute() else SCRIPT_DIR / args.output_json
+    ids_out = args.output_ids if args.output_ids.is_absolute() else SCRIPT_DIR / args.output_ids
+
+    if not input_path.exists():
+        print(f"Error: input file not found: {input_path}")
+        return 1
+
+    text = input_path.read_text(encoding="utf-8", errors="replace")
 
     # Build (position, mob name) for each <h2> so we can infer boss for items with no itemdrop
     h2_sections = [(m.start(), m.group(1).strip()) for m in H2_PAT.finditer(text)]
@@ -147,16 +166,18 @@ def main():
 
     item_ids = sorted(sources.keys(), key=int)
 
-    IDS_OUT.write_text("\n".join(item_ids) + "\n", encoding="utf-8")
-    print(f"Wrote {len(item_ids)} item IDs to {IDS_OUT}")
+    ids_out.write_text("\n".join(item_ids) + "\n", encoding="utf-8")
+    print(f"Wrote {len(item_ids)} item IDs to {ids_out}")
 
     out = {k: {"mob": v["mob"], "zone": v["zone"], "name": v["name"]} for k, v in sources.items()}
-    JSON_OUT.write_text(json.dumps(out, indent=2), encoding="utf-8")
-    print(f"Wrote {len(sources)} item sources to {JSON_OUT}")
+    json_out.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    print(f"Wrote {len(sources)} item sources to {json_out}")
 
     with_source = sum(1 for v in sources.values() if v["mob"] or v["zone"])
     print(f"  ({with_source} with mob/zone, {len(sources) - with_source} without)")
 
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
