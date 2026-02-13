@@ -7,6 +7,7 @@ spells from PoK turn-ins (items 29112, 29131, 29132).
 import json
 import math
 import os
+import re
 from collections import defaultdict
 from datetime import datetime, timedelta
 from delta_storage import (
@@ -1314,12 +1315,11 @@ def generate_mob_tracker_html(base_dir: str) -> str:
 <body>
 <div class="container">
     <h1>Raid Mob Repop Tracker</h1>
-    <p class="sub">All mobs with observed loot (from delta); sorted by <strong>time to repop</strong> (soonest first). Death is assumed in the <strong>last 24h</strong> before observation; repop window includes timer variance (DB: ±10% when no note).</p>
+    <p class="sub">All mobs with observed loot (from delta); sorted by <strong>time to repop</strong> (soonest first).</p>
     <p class="sub"><a href="delta.html">Delta report</a></p>
     <details class="sub" style="margin-bottom: 12px; padding: 8px; background: #fff8e1; border-radius: 4px;" id="respawn-help">
         <summary style="cursor: pointer;">Respawn timers showing "—"?</summary>
         <p style="margin: 8px 0 0 0; font-size: 0.9em;">Repop data comes from <code>raid_item_sources.json</code>. Run <code>python update_raid_item_sources_from_db.py</code> (with DB connection or <code>--from-file</code>) to fill <code>respawn_seconds</code> from spawn2 and <code>respawn_note</code> for overrides (Emperor, Cursed, PoEarth, PoAir, Statue). Then commit and push the updated JSON so the deployed site has it.</p>
-        <p style="margin: 6px 0 0 0; font-size: 0.9em;">Window start/end: we only know the mob died <em>before</em> the observed time (within the last 24h), so repop window is [earliest death + respawn−variance, latest death + respawn+variance]. DB timers use ±10% variance when no <code>respawn_note</code> gives ±.</p>
     </details>
     <div id="content">
         <p class="no-data">Loading…</p>
@@ -1508,14 +1508,55 @@ def get_last_repop_reset_utc(when=None):
     return datetime.combine(reset_date, datetime.min.time())
 
 
-def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_age_days=14):
+def _parse_respawn_note_py(note):
+    """Return (base_sec, variance_sec) from respawn_note; (None, 0) if unparseable."""
+    if not note or not note.strip():
+        return (None, 0)
+    note = note.strip()
+    pm = re.match(r"([0-9.]+)\s*±\s*([0-9.]+)\s*day", note, re.I)
+    if pm:
+        return (float(pm.group(1)) * 86400, float(pm.group(2)) * 86400)
+    single = re.match(r"([0-9.]+)\s*day", note, re.I)
+    if single:
+        return (float(single.group(1)) * 86400, 0)
+    return (None, 0)
+
+
+def _build_respawn_map_py(raid_item_sources):
+    """Return dict (zone, mob) -> (base_sec, variance_sec). Default variance 10% when no note."""
+    result = {}
+    for _item_id, entry in raid_item_sources.items():
+        zone = (entry.get("zone") or "").strip()
+        mob = (entry.get("mob") or "").strip()
+        if not zone and not mob:
+            continue
+        key = (zone, mob)
+        if key in result:
+            continue
+        base = entry.get("respawn_seconds")
+        if base is not None:
+            base = int(base)
+        note = entry.get("respawn_note") or ""
+        from_note_base, from_note_var = _parse_respawn_note_py(note)
+        if base is None:
+            base = from_note_base
+        variance = from_note_var
+        if base is not None and variance == 0:
+            variance = base * 0.10
+        result[key] = (base, variance)
+    return result
+
+
+def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_age_days=14,
+                               raid_item_sources_path=None):
     """Append (zone, mob) from zone_entries to mob tracker deaths JSON. Do not overwrite existing deaths.
     - Load existing deaths from file.
     - If we have gone over a reset: remove entries with observed_at before the last reset.
     - Also drop entries older than max_age_days.
+    - If raid_item_sources_path: drop deaths whose repop window ended more than 1 day ago.
     - Append/update one death per (zone, mob) seen this run; write back.
     zone_entries: dict zone -> mob -> list of (char_name, item_id, item_name).
-    observed_at: ISO timestamp string (default: utcnow()). Used as death observation time for repop window.
+    observed_at: ISO timestamp string (default: utcnow()). Use magelo pull time when available.
     """
     if observed_at is None:
         observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -1524,9 +1565,16 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
     now_dt = datetime.utcnow()
     last_reset = get_last_repop_reset_utc(now_dt)
     age_cutoff = now_dt - timedelta(days=max_age_days)
-    # Keep deaths on or after the more recent of (last reset, age cutoff)
     cutoff_dt = max(last_reset, age_cutoff)
     cutoff_iso = cutoff_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    respawn_map = {}
+    if raid_item_sources_path and os.path.exists(raid_item_sources_path):
+        try:
+            with open(raid_item_sources_path, "r", encoding="utf-8") as f:
+                respawn_map = _build_respawn_map_py(json.load(f))
+        except Exception:
+            pass
 
     data = {"updated": observed_at, "deaths": []}
     if os.path.exists(output_path):
@@ -1536,6 +1584,27 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
         except Exception:
             pass
     deaths = [d for d in data.get("deaths", []) if (d.get("observed_at") or "") >= cutoff_iso]
+
+    # Remove deaths whose repop window ended more than 1 day ago
+    if respawn_map:
+        one_day = timedelta(days=1)
+        kept = []
+        for d in deaths:
+            key = (d.get("zone") or "").strip(), (d.get("mob") or "").strip()
+            base, variance = respawn_map.get(key, (None, 0))
+            if base is None:
+                kept.append(d)
+                continue
+            try:
+                obs_str = d.get("observed_at") or ""
+                obs_dt = datetime.strptime(obs_str.replace("Z", ""), "%Y-%m-%dT%H:%M:%S")
+                window_end = obs_dt + timedelta(seconds=base + variance)
+                if now_dt <= window_end + one_day:
+                    kept.append(d)
+            except Exception:
+                kept.append(d)
+        deaths = kept
+
     seen_this_run = set()
     for zone, mobs in zone_entries.items():
         for mob in mobs:
@@ -1560,11 +1629,12 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
 
 def generate_delta_html(current_char_data, previous_char_data, current_inv, previous_inv, 
                         magelo_update_date, serverwide=True, char_deltas=None, inv_deltas=None,
-                        mob_tracker_deaths_path=None, observed_at=None):
+                        mob_tracker_deaths_path=None, observed_at=None, raid_item_sources_path=None):
     """Generate HTML page showing deltas between current and previous magelo dump.
     If serverwide is True, compares all characters, otherwise only mules.
     If char_deltas and inv_deltas are provided, uses those instead of recalculating.
-    If mob_tracker_deaths_path and observed_at are set, appends (zone, mob) from this delta to the mob tracker JSON."""
+    If mob_tracker_deaths_path and observed_at are set, appends (zone, mob) from this delta to the mob tracker JSON.
+    If raid_item_sources_path is set, used to drop deaths 1 day after repop window ends."""
     
     # Compare character data (serverwide) if not provided
     if char_deltas is None:
@@ -1633,7 +1703,8 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 zone_entries[zone][mob].append((char_name, item_id, item_name))
     
     if zone_entries and mob_tracker_deaths_path and observed_at is not None:
-        save_mob_deaths_from_delta(zone_entries, mob_tracker_deaths_path, observed_at=observed_at)
+        save_mob_deaths_from_delta(zone_entries, mob_tracker_deaths_path, observed_at=observed_at,
+                                   raid_item_sources_path=raid_item_sources_path)
     
     # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon: from inv or from char stats 0 vs large AA)
     visibility_change_chars = {name for name, inv_d in inv_deltas.items() if inv_d.get('is_visibility_change')}
@@ -3961,7 +4032,16 @@ def main():
         
         # Generate delta HTML (and append mob deaths for tracker when we have zone loot)
         mob_tracker_path = os.path.join(base_dir, "mob_tracker_deaths.json")
-        observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        raid_sources_path = os.path.join(base_dir, "raid_item_sources.json")
+        # Use magelo pull timestamp for "died (observed)", not script run time
+        if magelo_update_date != 'Unknown':
+            try:
+                magelo_dt = datetime.strptime(magelo_update_date, '%a %b %d %H:%M:%S UTC %Y')
+                observed_at = magelo_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+            except ValueError:
+                observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        else:
+            observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         delta_html = generate_delta_html(
             current_char_data, previous_char_data,
             current_inventories, previous_inventories,
@@ -3970,7 +4050,8 @@ def main():
             char_deltas=char_deltas,
             inv_deltas=inv_deltas,
             mob_tracker_deaths_path=mob_tracker_path,
-            observed_at=observed_at
+            observed_at=observed_at,
+            raid_item_sources_path=raid_sources_path
         )
         
         delta_file = os.path.join(base_dir, "delta.html")
