@@ -1314,11 +1314,12 @@ def generate_mob_tracker_html(base_dir: str) -> str:
 <body>
 <div class="container">
     <h1>Raid Mob Repop Tracker</h1>
-    <p class="sub">All mobs with observed loot (from delta); sorted by <strong>time to repop</strong> (soonest first). Repop window from raid_item_sources.json (DB + overrides).</p>
+    <p class="sub">All mobs with observed loot (from delta); sorted by <strong>time to repop</strong> (soonest first). Death is assumed in the <strong>last 24h</strong> before observation; repop window includes timer variance (DB: ±10% when no note).</p>
     <p class="sub"><a href="delta.html">Delta report</a></p>
     <details class="sub" style="margin-bottom: 12px; padding: 8px; background: #fff8e1; border-radius: 4px;" id="respawn-help">
         <summary style="cursor: pointer;">Respawn timers showing "—"?</summary>
         <p style="margin: 8px 0 0 0; font-size: 0.9em;">Repop data comes from <code>raid_item_sources.json</code>. Run <code>python update_raid_item_sources_from_db.py</code> (with DB connection or <code>--from-file</code>) to fill <code>respawn_seconds</code> from spawn2 and <code>respawn_note</code> for overrides (Emperor, Cursed, PoEarth, PoAir, Statue). Then commit and push the updated JSON so the deployed site has it.</p>
+        <p style="margin: 6px 0 0 0; font-size: 0.9em;">Window start/end: we only know the mob died <em>before</em> the observed time (within the last 24h), so repop window is [earliest death + respawn−variance, latest death + respawn+variance]. DB timers use ±10% variance when no <code>respawn_note</code> gives ±.</p>
     </details>
     <div id="content">
         <p class="no-data">Loading…</p>
@@ -1335,6 +1336,9 @@ def generate_mob_tracker_html(base_dir: str) -> str:
         if (single) return { baseSec: parseFloat(single[1]) * 86400, varianceSec: 0 };
         return { baseSec: null, varianceSec: 0 };
     }
+    const OBSERVATION_WINDOW_MS = 24 * 3600 * 1000;  // Death could have been anytime in last 24h before we saw loot
+    const DEFAULT_RESPAWN_VARIANCE_PCT = 0.10;      // ±10% when DB gives only base time (no note variance)
+    const NEXT_HOURS_MS = 6 * 3600 * 1000;          // Chance to spawn in next 6 hours
     function buildRespawnMap(raidItemSources) {
         const map = {};
         for (const [itemId, entry] of Object.entries(raidItemSources)) {
@@ -1345,11 +1349,14 @@ def generate_mob_tracker_html(base_dir: str) -> str:
             if (map[key]) continue;
             const baseSec = entry.respawn_seconds != null ? entry.respawn_seconds : null;
             const fromNote = parseRespawnNote(entry.respawn_note || "");
+            const base = baseSec != null ? baseSec : fromNote.baseSec;
+            let varianceSec = fromNote.varianceSec;
+            if (base != null && varianceSec === 0) varianceSec = base * DEFAULT_RESPAWN_VARIANCE_PCT;
             map[key] = {
                 respawn_seconds: baseSec,
                 respawn_note: entry.respawn_note || "",
-                baseSec: baseSec != null ? baseSec : fromNote.baseSec,
-                varianceSec: fromNote.varianceSec
+                baseSec: base,
+                varianceSec: varianceSec
             };
         }
         return map;
@@ -1371,7 +1378,7 @@ def generate_mob_tracker_html(base_dir: str) -> str:
         const respawnMap = buildRespawnMap(raidItemSources);
         const now = Date.now();
         const deaths = deathsData.deaths || [];
-        document.getElementById("updated").textContent = "Deaths data updated: " + (deathsData.updated || "—") + " (up to 14 days; sorted by time to repop)";
+        document.getElementById("updated").textContent = "Deaths data updated: " + (deathsData.updated || "—") + " (up to 14 days; sorted by time to repop). Status and % use your browser time (now: " + new Date().toISOString().slice(0, 19) + "Z).";
         if (deaths.length === 0) {
             document.getElementById("content").innerHTML = "<p class=\\"no-data\\">No mob deaths recorded yet. Run the delta to populate.</p>";
             return;
@@ -1386,16 +1393,27 @@ def generate_mob_tracker_html(base_dir: str) -> str:
             let pct = null;
             let windowStart = null;
             let windowEnd = null;
+            let chanceNext6h = null;
             if (baseSec != null) {
-                const startMs = observedMs + (baseSec - varianceSec) * 1000;
-                const endMs = observedMs + (baseSec + varianceSec) * 1000;
-                windowStart = startMs;
-                windowEnd = endMs;
-                if (now < startMs) status = "Not yet";
-                else if (now > endMs) status = "Passed";
+                // Death happened sometime in the 24h before we observed loot; respawn has natural variance
+                const earliestDeathMs = observedMs - OBSERVATION_WINDOW_MS;
+                const latestDeathMs = observedMs;
+                windowStart = earliestDeathMs + (baseSec - varianceSec) * 1000;
+                windowEnd = latestDeathMs + (baseSec + varianceSec) * 1000;
+                if (now < windowStart) status = "Not yet";
+                else if (now > windowEnd) status = "Passed";
                 else {
                     status = "In window";
-                    pct = ((now - startMs) / (endMs - startMs)) * 100;
+                    pct = ((now - windowStart) / (windowEnd - windowStart)) * 100;
+                }
+                // Chance repop falls in [now, now+6h]: uniform over [windowStart, windowEnd], so overlap/windowLength
+                if (windowStart != null && windowEnd != null && windowEnd > windowStart) {
+                    const overlapStart = Math.max(now, windowStart);
+                    const overlapEnd = Math.min(now + NEXT_HOURS_MS, windowEnd);
+                    const overlap = Math.max(0, overlapEnd - overlapStart);
+                    chanceNext6h = (overlap / (windowEnd - windowStart)) * 100;
+                } else {
+                    chanceNext6h = 0;
                 }
             } else if (resp.respawn_note) {
                 status = resp.respawn_note;
@@ -1408,7 +1426,8 @@ def generate_mob_tracker_html(base_dir: str) -> str:
                 window_start: windowStart,
                 window_end: windowEnd,
                 status,
-                pct
+                pct,
+                chanceNext6h
             };
         });
         const rank = (r) => r.status === "Not yet" ? 0 : r.status === "In window" ? 1 : 2;
@@ -1418,7 +1437,7 @@ def generate_mob_tracker_html(base_dir: str) -> str:
             if (ra !== rb) return ra - rb;
             return sortTime(a) - sortTime(b);
         });
-        let html = "<table><thead><tr><th>Zone</th><th>Mob</th><th>Died (observed)</th><th>Respawn</th><th>Window start</th><th>Window end</th><th>Status</th><th>% elapsed</th></tr></thead><tbody>";
+        let html = "<table><thead><tr><th>Zone</th><th>Mob</th><th>Died (observed)</th><th>Respawn</th><th>Window start</th><th>Window end</th><th>Status</th><th>% elapsed</th><th>Chance next 6h</th></tr></thead><tbody>";
         sorted.forEach(r => {
             const trClass = r.status === "In window" ? " class=\\"in-window\\"" : (r.status === "Passed" ? " class=\\"passed\\"" : "");
             html += "<tr" + trClass + ">";
@@ -1430,6 +1449,11 @@ def generate_mob_tracker_html(base_dir: str) -> str:
             html += "<td>" + escapeHtml(r.status) + "</td>";
             if (r.pct != null) {
                 html += "<td><div class=\\"bar\\"><div class=\\"bar-fill\\" style=\\"width:" + Math.round(r.pct) + "%\\"></div></div> " + Math.round(r.pct) + "%</td>";
+            } else {
+                html += "<td>—</td>";
+            }
+            if (r.chanceNext6h != null) {
+                html += "<td>" + (r.chanceNext6h < 0.5 ? "&lt;1" : Math.round(r.chanceNext6h)) + "%</td>";
             } else {
                 html += "<td>—</td>";
             }
