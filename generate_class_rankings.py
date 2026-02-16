@@ -37,6 +37,19 @@ def load_focii():
     print("Warning: spell_focii_level65.json not found. Focus analysis will be skipped.")
     return []
 
+# Get CSV row value by key, trying exact match then case-insensitive match.
+# Handles export format variations (e.g. Mana_Regen_Item) so FT (Flowing Thought) is read correctly.
+def _row_get(row, preferred_key, default=''):
+    value = row.get(preferred_key, default)
+    if value != '' and value is not None:
+        return value
+    key_lower = preferred_key.lower().replace(' ', '')
+    for k, v in row.items():
+        if k and v not in ('', None) and k.lower().replace(' ', '') == key_lower:
+            return v
+    return default
+
+
 # Normalize item name for matching (handle apostrophes, case, etc.)
 def normalize_item_name(name):
     """Normalize item name for matching"""
@@ -1590,13 +1603,21 @@ def main():
     print(f"Using character file: {os.path.basename(char_file)}")
     print(f"Using inventory file: {os.path.basename(inv_file)}")
     
-    # Load characters
+    # Load characters (utf-8-sig strips BOM so header keys like 'name' are correct)
     characters = {}
-    with open(char_file, 'r', encoding='utf-8') as f:
+    with open(char_file, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f, delimiter='\t')
         for row in reader:
-            if row['level'] == '65':
-                char_id = row['id']
+            # Normalize row keys: strip BOM from first key if present (e.g. Excel export)
+            if row and reader.fieldnames:
+                first_key = reader.fieldnames[0]
+                if first_key.startswith('\ufeff'):
+                    row[first_key.lstrip('\ufeff')] = row.pop(first_key)
+            level = _row_get(row, 'level', '')
+            if level == '65':
+                char_id = _row_get(row, 'id', '')
+                if not char_id:
+                    continue
                 try:
                     def safe_int(value, default=0):
                         if not value or value == 'NULL' or value == '':
@@ -1606,9 +1627,11 @@ def main():
                         except (ValueError, TypeError):
                             return default
                     
-                    # Parse FT (Flowing Thought) - mana_regen_item / mana_regen_item_cap
-                    ft_current = safe_int(row.get('mana_regen_item', 0))
-                    ft_cap = safe_int(row.get('mana_regen_item_cap', 15))
+                    # Parse FT (Flowing Thought) - mana_regen_item / mana_regen_item_cap.
+                    # Source: same TAKP export as Magelo. Use _row_get so we read FT even if export
+                    # uses different casing (e.g. Mana_Regen_Item) or BOM affected header keys.
+                    ft_current = safe_int(_row_get(row, 'mana_regen_item', 0))
+                    ft_cap = safe_int(_row_get(row, 'mana_regen_item_cap', 15))
                     ft_str = f"{ft_current} / {ft_cap}" if ft_cap > 0 else "0 / 15"
                     
                     # Extract resists
@@ -1655,10 +1678,10 @@ def main():
     
     print(f"Found {len(characters)} level 65 characters")
     
-    # Load inventory
+    # Load inventory (utf-8-sig for consistency with character file)
     print("Loading inventory data...")
     inventory = {}
-    with open(inv_file, 'r', encoding='utf-8') as f:
+    with open(inv_file, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f, delimiter='\t')
         for row in reader:
             char_id = row['id']
