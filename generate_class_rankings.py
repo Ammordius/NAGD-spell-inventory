@@ -1248,10 +1248,11 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             if haste_weight > 0 and scores.get('haste_pct') is not None:
                 total_score += scores['haste_pct'] * haste_weight
                 total_weight += haste_weight
-        # Add FT (Flowing Thought, cap 15) for all classes with mana - including Paladin/SK in tank branch
+        # Add FT (Flowing Thought, cap 15) - partial credit when uncapped (e.g. 11/15 = 73.3% of weight)
         ft_weight = weights_config.get('ft_weight', 0.0)
-        if scores.get('ft_capped') is True and ft_weight > 0:
-            total_score += 100.0 * ft_weight  # 100% for capped (15/15)
+        if ft_weight > 0 and scores.get('ft_capped') is not None:
+            ft_pct = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
+            total_score += (ft_pct / 100.0) * ft_weight
             total_weight += ft_weight
         
         # After normalization, total_weight should be 1.0, but we divide anyway for safety
@@ -1366,10 +1367,11 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             total_score += scores['haste_pct'] * haste_weight
             total_weight += haste_weight
     
-    # Add FT to focus if capped
+    # Add FT (partial when uncapped, full when 15/15)
     ft_weight = weights_config.get('ft_weight', 0.0)
-    if scores.get('ft_capped') is True and ft_weight > 0:
-        total_score += 100.0 * ft_weight  # 100% for capped
+    if ft_weight > 0 and scores.get('ft_capped') is not None:
+        ft_pct = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
+        total_score += (ft_pct / 100.0) * ft_weight
         total_weight += ft_weight
     
     # Spell focuses

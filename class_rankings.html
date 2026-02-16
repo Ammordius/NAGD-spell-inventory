@@ -1110,10 +1110,11 @@
                     }
                 }
                 
-                // Add FT to focus if capped
+                // Add FT (partial when uncapped, full when 15/15)
                 const ftWeight = normalized.ft_weight || 0.0;
-                if (scores.ft_capped === true && ftWeight > 0) {
-                    totalScore += 100.0 * ftWeight;  // 100% for capped
+                if (ftWeight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
+                    const ftPct = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
+                    totalScore += (ftPct / 100.0) * ftWeight;
                     totalWeight += ftWeight;
                 }
                 
@@ -2009,13 +2010,13 @@
                     html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td></tr>`;
                 }
                 
-                // FT (Flowing Thought) - part of focus weight; show for all classes with mana (cap 15)
+                // FT (Flowing Thought) - part of focus weight; points proportional to % (11/15 = 73.3% of weight)
                 const ftWeight = normalized.ft_weight || 0;
                 if (ftWeight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
                     const ftCurrent = scores.ft_current != null ? scores.ft_current : 0;
                     const ftCap = scores.ft_cap != null ? scores.ft_cap : 15;
                     const ftPct = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
-                    const ftPoints = scores.ft_capped ? (100.0 * ftWeight) : 0;
+                    const ftPoints = (ftPct / 100.0) * ftWeight;
                     totalFocusPoints += ftPoints;
                     html += `<tr><td>FT (Flowing Thought)</td><td>${ftCurrent}/${ftCap}</td><td>${formatScore(ftPct)}</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
                 }
