@@ -9,8 +9,8 @@ import os
 import sys
 from collections import defaultdict
 
-# Class definitions
-CLASSES_WITH_MANA = {'Cleric', 'Druid', 'Shaman', 'Necromancer', 'Wizard', 'Magician', 'Enchanter', 'Bard'}
+# Class definitions (hybrids Paladin, Shadow Knight, Beastlord, Ranger have mana and FT)
+CLASSES_WITH_MANA = {'Cleric', 'Druid', 'Shaman', 'Necromancer', 'Wizard', 'Magician', 'Enchanter', 'Bard', 'Paladin', 'Shadow Knight', 'Beastlord', 'Ranger'}
 CLASSES_NEED_AC = {'Warrior', 'Shadow Knight', 'Paladin', 'Beastlord', 'Ranger'}
 CLASSES_NEED_ATK = {'Rogue', 'Ranger', 'Monk', 'Warrior', 'Shadow Knight', 'Paladin', 'Beastlord', 'Bard'}
 PURE_MELEE = {'Warrior', 'Rogue', 'Monk'}
