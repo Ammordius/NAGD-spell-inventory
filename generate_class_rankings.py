@@ -459,7 +459,16 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                     focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
                 else:
                     focus_scores[category] = 0
-            # Spell Haste (Beneficial) will be handled via spell_haste_cats in the scoring function
+        # Beneficial Spell Haste for display (e.g. Haste of Mithaniel from item 26983)
+        if char_spell_haste_cats is not None:
+            bene_pct = max(char_spell_haste_cats.get('Bene', 0), char_spell_haste_cats.get('All', 0))
+            best_haste = best_focii.get('Spell Haste', 33.0)
+            if best_haste > 0:
+                focus_scores['Beneficial Spell Haste'] = (bene_pct / best_haste * 100) if bene_pct > 0 else 0
+            else:
+                focus_scores['Beneficial Spell Haste'] = 0
+        else:
+            focus_scores['Beneficial Spell Haste'] = 0
     elif char_class == 'Shadow Knight':
         pal_sk_focus_score, pal_sk_items = check_paladin_sk_focus_items(char_inventory or [])
         focus_scores = {'Shield of Strife': pal_sk_focus_score}
