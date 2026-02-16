@@ -1301,12 +1301,17 @@
                 console.log('Loading custom weights...');
                 loadCustomWeights();
                 
+                // Recompute overall_score and class_rank from the same formula used in the detail panel
+                // (total_points / class max). This keeps ranking consistent with "Overall Total" points.
+                console.log('Recalculating scores for consistent ranking...');
+                recalculateScores();
+                
                 console.log('Populating filters...');
                 populateFilters();
                 console.log('Setting up weight controls...');
                 setupWeightControls();
                 console.log('Rendering table...');
-                renderTable();
+                filterAndSort();  // Sort by recalculated overall_score so rank matches displayed points
                 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('rankingsTable').style.display = 'table';
