@@ -37,6 +37,24 @@ def load_focii():
     print("Warning: spell_focii_level65.json not found. Focus analysis will be skipped.")
     return []
 
+def load_bard_instruments():
+    """Load bard instrument focus data (item mods, cap 390%, 60% AA, 230% from items)."""
+    possible_paths = [
+        'bard_instrument_focii.json',
+        '../magelo/bard_instrument_focii.json',
+        '../bard_instrument_focii.json',
+    ]
+    for path in possible_paths:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                print(f"Loaded bard instruments from: {path}")
+                return data
+        except FileNotFoundError:
+            continue
+    print("Warning: bard_instrument_focii.json not found. Bard instrument focus will be skipped.")
+    return None
+
 # Get CSV row value by key, trying exact match then case-insensitive match.
 # Handles export format variations (e.g. Mana_Regen_Item) so FT (Flowing Thought) is read correctly.
 def _row_get(row, preferred_key, default=''):
@@ -272,7 +290,7 @@ CLASS_FOCUS_PRIORITIES = {
     'Wizard': ['Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
     'Magician': ['Spell Damage (Fire)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
     'Enchanter': ['Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Buff Spell Duration'],
-    'Bard': ['Spell Haste', 'Spell Mana Efficiency'],
+    'Bard': ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'],
 }
 
 # Class-specific focus items
@@ -293,6 +311,63 @@ ENCHANTER_FOCUS_ITEMS = {
 SHAMAN_FOCUS_ITEMS = {
     'range': '24699'  # Time's Antithesis in Range (slot 11)
 }
+
+def check_bard_instrument_focus(char_inventory, bard_data):
+    """Bard instrument focus: take the BEST single mod in each category (not sum).
+    All-type items (e.g. epic +80%) count for every instrument type.
+    Singing: best regular singing item + best of the two harmonize items (Voice of the Serpent 60%, Shadowsong 90%).
+    Cap 230% from items per type (390 total - 100 base - 60 AA)."""
+    if not bard_data or not bard_data.get('items'):
+        return {}, {}
+    item_cap = bard_data.get('item_cap_from_items', 230)
+    resonance = bard_data.get('singing_resonance_mods', {})  # item_id -> singing mod (VoS 60, Shadowsong 90)
+    resonance_ids = set(resonance.keys())
+    inst_types = ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind']
+    # Build lookup: item_id -> list of (instrument_type, mod). All -> contributes to all 5 types.
+    item_to_contrib = {}
+    for rec in bard_data['items']:
+        iid = str(rec['item_id'])
+        mod = rec['mod']
+        typ = rec.get('instrument_type', '')
+        if typ == 'All':
+            contrib = [(t, mod) for t in inst_types]
+        else:
+            contrib = [(typ, mod)] if typ in inst_types else []
+        if iid not in item_to_contrib:
+            item_to_contrib[iid] = []
+        item_to_contrib[iid].extend(contrib)
+    # For resonance items, use their override mod for Singing only (for the "best harmonize" bucket)
+    for iid in resonance_ids:
+        if iid in item_to_contrib:
+            item_to_contrib[iid] = [(t, resonance[iid] if t == 'Singing' else m) for t, m in item_to_contrib[iid]]
+    equipped_ids = {str(item.get('item_id', '')) for item in char_inventory}
+    # Per type: take BEST single mod from any equipped item that applies (including All)
+    best_per_type = {t: 0 for t in inst_types}
+    for iid in equipped_ids:
+        for typ, mod in item_to_contrib.get(iid, []):
+            if mod > best_per_type[typ]:
+                best_per_type[typ] = mod
+    # Singing: best regular (non-resonance) + best of the two harmonize items only
+    best_regular_singing = 0
+    best_resonance_singing = 0
+    for iid in equipped_ids:
+        for typ, mod in item_to_contrib.get(iid, []):
+            if typ != 'Singing':
+                continue
+            if iid in resonance_ids:
+                if mod > best_resonance_singing:
+                    best_resonance_singing = mod
+            else:
+                if mod > best_regular_singing:
+                    best_regular_singing = mod
+    best_per_type['Singing'] = best_regular_singing + best_resonance_singing
+    # Cap at item_cap per type, score 0-100 as % of cap
+    focus_scores = {}
+    for t in inst_types:
+        capped = min(best_per_type[t], item_cap)
+        focus_scores[t] = (capped / item_cap * 100.0) if item_cap > 0 else 0.0
+    items_detail = {t: min(best_per_type[t], item_cap) for t in inst_types}
+    return focus_scores, items_detail
 
 def check_warrior_focus_items(char_inventory, char_haste):
     """Check if Warrior has the required focus items anywhere in inventory and max haste
@@ -366,7 +441,7 @@ def check_shaman_focus_items(char_inventory):
     return 100.0 if has_times_antithesis else 0.0, {'has_times_antithesis': has_times_antithesis}
 
 # Calculate class-specific scores
-def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None):
+def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, bard_instrument_data=None):
     """Calculate percentage scores for a character based on their class"""
     char_class = char_data['class']
     scores = {}
@@ -493,6 +568,25 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                     focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
                 else:
                     focus_scores[category] = 0
+    elif char_class == 'Bard' and bard_instrument_data:
+        bard_focus_scores, bard_items_detail = check_bard_instrument_focus(char_inventory or [], bard_instrument_data)
+        focus_scores = dict(bard_focus_scores)
+        scores['focus_items'] = bard_items_detail
+        if scores.get('atk_pct') is not None:
+            focus_scores['ATK'] = scores['atk_pct']
+        if char_data.get('stats', {}).get('haste', 0) is not None:
+            char_haste = char_data.get('stats', {}).get('haste', 0)
+            focus_scores['Haste'] = 100.0 if (isinstance(char_haste, (int, float)) and char_haste >= 30) else 0.0
+        else:
+            focus_scores['Haste'] = 0.0
+    elif char_class == 'Bard':
+        focus_scores = {'Brass': 0, 'Percussion': 0, 'Singing': 0, 'Strings': 0, 'Wind': 0, 'Haste': 0.0}
+        if scores.get('atk_pct') is not None:
+            focus_scores['ATK'] = scores['atk_pct']
+        if char_data.get('stats', {}).get('haste', 0) is not None:
+            char_haste = char_data.get('stats', {}).get('haste', 0)
+            focus_scores['Haste'] = 100.0 if (isinstance(char_haste, (int, float)) and char_haste >= 30) else 0.0
+        scores['focus_items'] = {}
     else:
         focus_scores = {}
         for category, best_pct in best_focii.items():
@@ -869,16 +963,22 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Bard - Support hybrid
+    # Bard - Support hybrid (instrument mods cap 390%: 100 base + 60 AA + 230 items)
     'Bard': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
-        'ac_pct': 0.2,  # Small contribution from AC for all classes
+        'ac_pct': 0.2,
         'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 1.0,  # ATK moved to focus (Bards cannot use spell focuses)
+            'ATK': 1.0,
+            'Haste': 1.0,
+            'Brass': 1.0,
+            'Percussion': 1.0,
+            'Singing': 1.0,
+            'Strings': 1.0,
+            'Wind': 1.0,
         }
     },
 }
@@ -1555,6 +1655,7 @@ def main():
     focii_data = load_focii()
     focus_lookup = create_focus_lookup(focii_data)
     best_focii = get_best_focii_by_category(focii_data)
+    bard_instrument_data = load_bard_instruments()
     
     print(f"Loaded {len(focii_data)} focus effects")
     print(f"Best focii by category: {best_focii}")
@@ -1734,7 +1835,7 @@ def main():
         char_class = char_data['class']
         char_inventory = inventory.get(char_id, [])
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
-        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats)
+        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, bard_instrument_data)
         
         # Calculate overall score using class-specific weights with conversion rates
         overall_score = calculate_overall_score_with_weights(
