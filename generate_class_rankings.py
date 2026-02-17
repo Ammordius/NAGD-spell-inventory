@@ -964,6 +964,7 @@ CLASS_WEIGHTS = {
     },
     
     # Bard - Support hybrid (instrument mods cap 390%: 100 base + 60 AA + 230 items)
+    # target_focus 0.40 so instruments+ATK+Haste = 35 pts and FT = 5 pts at 100%
     'Bard': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
@@ -971,14 +972,15 @@ CLASS_WEIGHTS = {
         'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
+        'target_focus': 0.40,  # 35 pts from 7 focus + 5 from FT when at 100%
         'focus': {
-            'ATK': 1.0,
-            'Haste': 1.0,
-            'Brass': 1.0,
-            'Percussion': 1.0,
-            'Singing': 1.0,
-            'Strings': 1.0,
-            'Wind': 1.0,
+            'ATK': 4.0,
+            'Haste': 4.0,
+            'Brass': 4.0,
+            'Percussion': 4.0,
+            'Singing': 4.0,
+            'Strings': 4.0,
+            'Wind': 4.0,
         }
     },
 }
@@ -1012,34 +1014,49 @@ def normalize_class_weights(weights_config):
     TARGET_HP = 0.20
     TARGET_AC = 0.175
     TARGET_RESISTS = 0.175  # TOTAL across all 5 resists
-    TARGET_FOCUS = 0.30  # Includes ATK, FT, Haste, and spell focuses
+    TARGET_FOCUS = weights_config.get('target_focus')  # Per-class override (e.g. Bard 0.40)
+    if TARGET_FOCUS is None:
+        TARGET_FOCUS = 0.30  # Default: ATK, FT, Haste, and spell focuses
     TARGET_MANA = 0.15
     
     # Check which stats are applicable
     has_mana = weights_config.get('mana_pct', 0) > 0
     has_ac = weights_config.get('ac_pct', 0) > 0
     
-    # Calculate total target percentage
-    total_target = TARGET_HP + TARGET_RESISTS + TARGET_FOCUS
-    if has_mana:
-        total_target += TARGET_MANA
-    if has_ac:
-        total_target += TARGET_AC
-    
-    # Normalize targets to sum to 1.0
-    if total_target > 0:
-        hp_target = TARGET_HP / total_target
-        resists_target = TARGET_RESISTS / total_target
-        focus_target = TARGET_FOCUS / total_target
-        mana_target = (TARGET_MANA / total_target) if has_mana else 0.0
-        ac_target = (TARGET_AC / total_target) if has_ac else 0.0
+    # Calculate total target percentage and normalize to sum to 1.0
+    # If target_focus is set (e.g. Bard 0.40), reserve that share and scale others to fill the rest
+    custom_focus = weights_config.get('target_focus')
+    if custom_focus is not None and 0 < custom_focus < 1.0:
+        # Reserve custom focus share; scale other targets to sum to (1 - custom_focus)
+        focus_target = custom_focus
+        other_sum = TARGET_HP + TARGET_RESISTS
+        if has_mana:
+            other_sum += TARGET_MANA
+        if has_ac:
+            other_sum += TARGET_AC
+        scale_other = (1.0 - focus_target) / other_sum if other_sum > 0 else 0.0
+        hp_target = TARGET_HP * scale_other
+        resists_target = TARGET_RESISTS * scale_other
+        mana_target = (TARGET_MANA * scale_other) if has_mana else 0.0
+        ac_target = (TARGET_AC * scale_other) if has_ac else 0.0
     else:
-        # Fallback if no applicable stats
-        hp_target = 1.0
-        resists_target = 0.0
-        focus_target = 0.0
-        mana_target = 0.0
-        ac_target = 0.0
+        total_target = TARGET_HP + TARGET_RESISTS + TARGET_FOCUS
+        if has_mana:
+            total_target += TARGET_MANA
+        if has_ac:
+            total_target += TARGET_AC
+        if total_target > 0:
+            hp_target = TARGET_HP / total_target
+            resists_target = TARGET_RESISTS / total_target
+            focus_target = TARGET_FOCUS / total_target
+            mana_target = (TARGET_MANA / total_target) if has_mana else 0.0
+            ac_target = (TARGET_AC / total_target) if has_ac else 0.0
+        else:
+            hp_target = 1.0
+            resists_target = 0.0
+            focus_target = 0.0
+            mana_target = 0.0
+            ac_target = 0.0
     
     # Calculate focus weight components from config
     # ATK, FT, Haste are part of focus weight
