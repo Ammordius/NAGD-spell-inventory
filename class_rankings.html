@@ -517,7 +517,7 @@
             });
             
             // Calculate normalized weights to show current contributions
-            const normalized = normalizeWeights(weights);
+            const normalized = normalizeWeights(weights, 2.4, selectedClass);
             
             // All stats are always shown, even if default is 0
             // This allows users to enable stats that are 0 by default (e.g., AC for casters, Mana for melees)
@@ -712,7 +712,7 @@
                         weights[key] = 0.0;
                     }
                 });
-                const normalized = normalizeWeights(weights);
+                const normalized = normalizeWeights(weights, 2.4, selectedClass);
                 
                 // Update this stat's contribution
                 const contrib = (normalized[statKey] || 0) * 100;
@@ -752,7 +752,7 @@
             const selectedClass = document.getElementById('weightClass')?.value;
             if (selectedClass) {
                 const weights = {...classWeights[selectedClass]};
-                const normalized = normalizeWeights(weights);
+                const normalized = normalizeWeights(weights, 2.4, selectedClass);
                 const focusContrib = (normalized.focusTarget || 0) * 100;
                 const focusMultValueSpan = document.getElementById('value_focus_mult');
                 if (focusMultValueSpan) {
@@ -880,7 +880,9 @@
             return { score: score, weight: weight };
         }
 
-        function normalizeWeights(weights, focusMultiplier = 2.4) {
+        const BARD_INSTRUMENT_CATS = ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'];
+
+        function normalizeWeights(weights, focusMultiplier = 2.4, charClass = null) {
             // Target percentages: 20% HP, 17.5% AC, 17.5% Resists (TOTAL across 5 resists), 30% Focus, 15% Mana
             const TARGET_HP = 0.20;
             const TARGET_AC = 0.175;
@@ -944,52 +946,76 @@
                 hasteWeightRaw = weights.haste_pct || 0.0;
             }
             
-            // Total focus components = ATK + Haste + FT + spell focuses + special items
-            const totalFocusComponents = atkWeightRaw + hasteWeightRaw + ftWeightRaw + totalSpellFocusWeight;
-            
-            // Scale focus components to achieve target focus percentage
-            const focusScale = (totalFocusComponents > 0) ? (focusTarget / totalFocusComponents) : 0.0;
-            
-            // Add remaining normalized weights (focusTarget already set above)
             normalized.atk_pct = 0.0;  // Moved to focus
             normalized.haste_pct = 0.0;  // Moved to focus
-            normalized.ft_weight = ftWeightRaw * focusScale;
             normalized.focus = {};
             
-            // Normalize focus weights (with scaling applied)
-            if (focusWeights && focusScale > 0) {
-                for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
-                    if (typeof focusValue === 'object' && focusValue !== null) {
-                        normalized.focus[focusCat] = {};
-                        for (const [k, v] of Object.entries(focusValue)) {
-                            if (typeof v === 'number') {
-                                normalized.focus[focusCat][k] = v * focusScale;
-                            }
+            // Bard: fixed focus shares — FT 20%, Instruments 60%, Haste 10%, ATK 10%
+            if (charClass === 'Bard') {
+                const BARD_FT_SHARE = 0.20;
+                const BARD_INSTRUMENTS_SHARE = 0.60;
+                const BARD_HASTE_SHARE = 0.10;
+                const BARD_ATK_SHARE = 0.10;
+                normalized.ft_weight = hasMana ? (BARD_FT_SHARE * focusTarget) : 0;
+                if (atkWeightRaw > 0) normalized.focus['ATK'] = BARD_ATK_SHARE * focusTarget;
+                if (hasteWeightRaw > 0) normalized.focus['Haste'] = BARD_HASTE_SHARE * focusTarget;
+                let totalInstrumentRaw = 0;
+                for (const cat of BARD_INSTRUMENT_CATS) {
+                    const v = focusWeights[cat];
+                    if (typeof v === 'number') totalInstrumentRaw += v;
+                }
+                if (totalInstrumentRaw > 0) {
+                    const instrumentTarget = BARD_INSTRUMENTS_SHARE * focusTarget;
+                    for (const cat of BARD_INSTRUMENT_CATS) {
+                        const raw = focusWeights[cat];
+                        if (typeof raw === 'number') {
+                            normalized.focus[cat] = (raw / totalInstrumentRaw) * instrumentTarget;
                         }
-                    } else if (typeof focusValue === 'number') {
-                        normalized.focus[focusCat] = focusValue * focusScale;
                     }
                 }
-            }
-            
-            // Store ATK and Haste as focus components (if not already in normalized focus dict)
-            if (atkWeightRaw > 0 && !normalized.focus['ATK']) {
-                normalized.focus['ATK'] = atkWeightRaw * focusScale;
-            }
-            if (hasteWeightRaw > 0 && !normalized.focus['Haste']) {
-                normalized.focus['Haste'] = hasteWeightRaw * focusScale;
-            }
-            
-            // Ensure Darkblade and Raex Chest are normalized if they exist in raw weights
-            // (They might be in the raw weights but not in focusWeights if the JSON format is old)
-            const rawFocusWeights = weights.focus || {};
-            if (rawFocusWeights['Darkblade'] !== undefined && !normalized.focus['Darkblade']) {
-                const darkbladeWeight = typeof rawFocusWeights['Darkblade'] === 'number' ? rawFocusWeights['Darkblade'] : 1.0;
-                normalized.focus['Darkblade'] = darkbladeWeight * focusScale;
-            }
-            if (rawFocusWeights['Raex Chest'] !== undefined && !normalized.focus['Raex Chest']) {
-                const raexWeight = typeof rawFocusWeights['Raex Chest'] === 'number' ? rawFocusWeights['Raex Chest'] : 1.0;
-                normalized.focus['Raex Chest'] = raexWeight * focusScale;
+            } else {
+                // Non-Bard: split focus target — utility (ATK, Haste, FT) vs spell/instrument
+                const UTILITY_FOCUS_SHARE = 0.5;
+                const SPELL_FOCUS_SHARE = 0.5;
+                const utilityTarget = focusTarget * UTILITY_FOCUS_SHARE;
+                const spellTarget = focusTarget * SPELL_FOCUS_SHARE;
+                const totalUtilityRaw = atkWeightRaw + hasteWeightRaw + ftWeightRaw;
+                const utilityScale = (totalUtilityRaw > 0) ? (utilityTarget / totalUtilityRaw) : 0.0;
+                const spellScale = (totalSpellFocusWeight > 0) ? (spellTarget / totalSpellFocusWeight) : 0.0;
+                
+                normalized.ft_weight = ftWeightRaw * utilityScale;
+                
+                if (focusWeights) {
+                    for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
+                        const scale = (focusCat === 'ATK' || focusCat === 'Haste') ? utilityScale : spellScale;
+                        if (scale <= 0) continue;
+                        if (typeof focusValue === 'object' && focusValue !== null) {
+                            normalized.focus[focusCat] = {};
+                            for (const [k, v] of Object.entries(focusValue)) {
+                                if (typeof v === 'number') {
+                                    normalized.focus[focusCat][k] = v * scale;
+                                }
+                            }
+                        } else if (typeof focusValue === 'number') {
+                            normalized.focus[focusCat] = focusValue * scale;
+                        }
+                    }
+                }
+                if (atkWeightRaw > 0 && !normalized.focus['ATK']) {
+                    normalized.focus['ATK'] = atkWeightRaw * utilityScale;
+                }
+                if (hasteWeightRaw > 0 && !normalized.focus['Haste']) {
+                    normalized.focus['Haste'] = hasteWeightRaw * utilityScale;
+                }
+                const rawFocusWeights = weights.focus || {};
+                if (rawFocusWeights['Darkblade'] !== undefined && !normalized.focus['Darkblade']) {
+                    const darkbladeWeight = typeof rawFocusWeights['Darkblade'] === 'number' ? rawFocusWeights['Darkblade'] : 1.0;
+                    normalized.focus['Darkblade'] = darkbladeWeight * spellScale;
+                }
+                if (rawFocusWeights['Raex Chest'] !== undefined && !normalized.focus['Raex Chest']) {
+                    const raexWeight = typeof rawFocusWeights['Raex Chest'] === 'number' ? rawFocusWeights['Raex Chest'] : 1.0;
+                    normalized.focus['Raex Chest'] = raexWeight * spellScale;
+                }
             }
             
             return normalized;
@@ -1033,7 +1059,7 @@
                     });
                 }
 
-                const normalized = normalizeWeights(weights, focusMultiplier);
+                const normalized = normalizeWeights(weights, focusMultiplier, charClass);
                 const scores = char.scores || {};
                 let totalScore = 0.0;
                 let totalWeight = 0.0;
@@ -1110,11 +1136,11 @@
                     }
                 }
                 
-                // Add FT (partial when uncapped, full when 15/15)
+                // Add FT (same scale as Haste/ATK: score 0-100 * weight)
                 const ftWeight = normalized.ft_weight || 0.0;
                 if (ftWeight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
                     const ftPct = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
-                    totalScore += (ftPct / 100.0) * ftWeight;
+                    totalScore += ftPct * ftWeight;
                     totalWeight += ftWeight;
                 }
                 
@@ -1759,7 +1785,7 @@
             }
             
             // Normalize weights (same as recalculateScores)
-            const normalized = normalizeWeights(weights, focusMultiplier);
+            const normalized = normalizeWeights(weights, focusMultiplier, char.class);
             const classWeightConfig = weights; // Use the weights (not normalized) for display
             const focusWeights = normalized.focus || {};
             
@@ -2020,13 +2046,13 @@
                     html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td></tr>`;
                 }
                 
-                // FT (Flowing Thought) - part of focus weight; points proportional to % (11/15 = 73.3% of weight)
+                // FT (Flowing Thought) - same points scale as Haste/ATK: score 0-100 * weight
                 const ftWeight = normalized.ft_weight || 0;
                 if (ftWeight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
                     const ftCurrent = scores.ft_current != null ? scores.ft_current : 0;
                     const ftCap = scores.ft_cap != null ? scores.ft_cap : 15;
                     const ftPct = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
-                    const ftPoints = (ftPct / 100.0) * ftWeight;
+                    const ftPoints = ftPct * ftWeight;
                     totalFocusPoints += ftPoints;
                     html += `<tr><td>FT (Flowing Thought)</td><td>${ftCurrent}/${ftCap}</td><td>${formatScore(ftPct)}</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
                 }
@@ -2061,6 +2087,7 @@
                 // This ensures consistency with the ranking calculation
                 const overallTotal = char.total_points !== undefined ? char.total_points : (totalStatPoints + totalFocusPoints);
                 html += `<h3 style="margin-top: 20px;">Overall Total: ${overallTotal.toFixed(2)} points</h3>`;
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Overall Total = Stat Total + Focus Total (sum of all row Points above).</p>`;
                 // Calculate class maximum safely
                 let classMaxDisplay = 'N/A';
                 if (char.overall_score > 0 && char.total_points !== undefined) {
