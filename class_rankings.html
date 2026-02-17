@@ -1955,10 +1955,13 @@
                     }
                 }
                 
+                const bardInstrumentCats = ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'];
                 for (const [focusCat, score] of Object.entries(focusScores)) {
                     if (focusCat === 'FT') continue;  // FT shown in dedicated block below (uses normalized.ft_weight)
                     let weight = 0;
-                    let rawValue = getRawFocusValue(focusCat);
+                    let rawValue = bardInstrumentCats.includes(focusCat) && (scores.focus_items || {})[focusCat] != null
+                        ? scores.focus_items[focusCat]
+                        : getRawFocusValue(focusCat);
                     
                     if (focusCat === 'Spell Damage') {
                         // Spell Damage has nested weights
@@ -2001,9 +2004,11 @@
                     
                     // Format raw value
                     let rawDisplay = 'N/A';
-                    if (rawValue > 0) {
+                    if (rawValue > 0 || (bardInstrumentCats.includes(focusCat) && rawValue === 0)) {
                         if (focusCat === 'Haste') {
                             rawDisplay = `${rawValue}% (${rawValue >= 30 ? 'Capped' : 'Not Capped'})`;
+                        } else if (bardInstrumentCats.includes(focusCat)) {
+                            rawDisplay = `${Number(rawValue).toFixed(0)}%`;
                         } else {
                             rawDisplay = `${rawValue.toFixed(1)}%`;
                         }
@@ -2081,8 +2086,9 @@
                 }
             }
             
-            // Gear display with item links
-            if (char.inventory && char.inventory.length > 0) {
+            // Gear display with item links (worn slots 1-22 only)
+            const equippedOnly = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 22);
+            if (equippedOnly.length > 0) {
                 html += `<h3>Equipped Gear</h3>`;
                 html += `<div style="display: flex; flex-wrap: wrap; gap: 10px;">`;
                 const slotNames = {
@@ -2092,7 +2098,7 @@
                     15: 'Primary', 16: 'Secondary', 17: 'Chest', 18: 'Legs',
                     19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo'
                 };
-                char.inventory.forEach(item => {
+                equippedOnly.forEach(item => {
                     const slotName = slotNames[item.slot_id] || `Slot ${item.slot_id}`;
                     const itemLink = `<a href="https://www.takproject.net/allaclone/item.php?id=${item.item_id}" target="_blank">${escapeHtml(item.item_name || `Item ${item.item_id}`)}</a>`;
                     html += `<div style="padding: 5px; background: #f0f0f0; border-radius: 3px;"><strong>${slotName}:</strong> ${itemLink}</div>`;

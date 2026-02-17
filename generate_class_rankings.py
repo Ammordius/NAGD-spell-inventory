@@ -1791,6 +1791,7 @@ def main():
     print(f"Found {len(characters)} level 65 characters")
     
     # Load inventory (utf-8-sig for consistency with character file)
+    # Include all slots (worn + bags) so focus items like harmonize clickies count when in inventory
     print("Loading inventory data...")
     inventory = {}
     with open(inv_file, 'r', encoding='utf-8-sig') as f:
@@ -1798,16 +1799,15 @@ def main():
         for row in reader:
             char_id = row['id']
             slot_id = int(row['slot_id'])
-            
-            if char_id in characters and 1 <= slot_id <= 22:  # Worn slots
-                if char_id not in inventory:
-                    inventory[char_id] = []
-                inventory[char_id].append({
-                    'item_id': row['item_id'],
-                    'item_name': row['item_name'],
-                    'slot_id': slot_id
-                })
-    
+            if char_id not in characters:
+                continue
+            if char_id not in inventory:
+                inventory[char_id] = []
+            inventory[char_id].append({
+                'item_id': row['item_id'],
+                'item_name': row['item_name'],
+                'slot_id': slot_id
+            })
     print(f"Loaded inventory for {len(inventory)} characters")
     
     # Group characters by class
