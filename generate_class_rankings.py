@@ -595,17 +595,33 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 if char_class in CLASS_DAMAGE_TYPES:
                     damage_types = CLASS_DAMAGE_TYPES[char_class]
                     best_damage_score = 0
-                    for damage_type in damage_types:
-                        char_pct = char_damage_focii.get(damage_type, 0)
-                        if best_pct > 0:
-                            damage_score = (char_pct / best_pct * 100) if char_pct > 0 else 0
+                    # Shaman: store best-in-each per type (DoT 80%, Cold 20% of detrimental weight)
+                    if char_class == 'Shaman':
+                        for damage_type in damage_types:
+                            char_pct = char_damage_focii.get(damage_type, 0)
+                            if best_pct > 0:
+                                damage_score = (char_pct / best_pct * 100) if char_pct > 0 else 0
+                            else:
+                                damage_score = 0
+                            focus_scores[f'Spell Damage ({damage_type})'] = damage_score
                             best_damage_score = max(best_damage_score, damage_score)
-                    # Also check "All" damage type
-                    all_pct = char_damage_focii.get('All', 0)
-                    if best_pct > 0:
-                        all_score = (all_pct / best_pct * 100) if all_pct > 0 else 0
-                        best_damage_score = max(best_damage_score, all_score)
-                    focus_scores[category] = best_damage_score
+                        # Composite for detrimental: 80% DoT, 20% Cold (best in each)
+                        focus_scores[category] = (
+                            0.8 * focus_scores.get('Spell Damage (DoT)', 0) +
+                            0.2 * focus_scores.get('Spell Damage (Cold)', 0)
+                        )
+                    else:
+                        for damage_type in damage_types:
+                            char_pct = char_damage_focii.get(damage_type, 0)
+                            if best_pct > 0:
+                                damage_score = (char_pct / best_pct * 100) if char_pct > 0 else 0
+                                best_damage_score = max(best_damage_score, damage_score)
+                        # Also check "All" damage type
+                        all_pct = char_damage_focii.get('All', 0)
+                        if best_pct > 0:
+                            all_score = (all_pct / best_pct * 100) if all_pct > 0 else 0
+                            best_damage_score = max(best_damage_score, all_score)
+                        focus_scores[category] = best_damage_score
                 else:
                     # Non-caster classes don't need spell damage
                     focus_scores[category] = 0
@@ -701,11 +717,23 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         # Weighted average of priority focus categories
         total_score = 0
         total_weight = 0
+        added_shaman_detrimental = False
         for i, cat in enumerate(priority_cats):
+            # Shaman detrimental = 80% DoT, 20% Cold (best in each); one composite, weight 5
+            if char_class == 'Shaman' and cat.startswith('Spell Damage ('):
+                if not added_shaman_detrimental:
+                    det_composite = (
+                        0.8 * focus_scores.get('Spell Damage (DoT)', 0) +
+                        0.2 * focus_scores.get('Spell Damage (Cold)', 0)
+                    )
+                    total_score += det_composite * 5
+                    total_weight += 5
+                    added_shaman_detrimental = True
+                continue
             weight = len(priority_cats) - i  # Higher weight for higher priority
-            # Handle spell damage with damage type
+            # Handle spell damage with damage type (use per-type score when available)
             if cat.startswith('Spell Damage ('):
-                score = focus_scores.get('Spell Damage', 0)
+                score = focus_scores.get(cat, focus_scores.get('Spell Damage', 0))
             else:
                 score = focus_scores.get(cat, 0)
             total_score += score * weight
@@ -881,7 +909,8 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
-            'Spell Damage': {'Cold': 1.0, 'DoT': 1.0, 'All': 0.75, 'Disease': 1.0},
+            # Detrimental focus: 80% DoT, 20% Cold (best in each); 4 pts DoT, 1 pt Cold
+            'Spell Damage': {'DoT': 4.0, 'Cold': 1.0},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
             'Detrimental Spell Haste': 0.75,
