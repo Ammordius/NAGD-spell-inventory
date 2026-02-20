@@ -1,1 +1,480 @@
-{\n  \"Primalist_Saosith\": {\n    \"spells\": [28544, 28545, 21629, 28547, 28548],\n    \"spell_names\": [\"Spirit of Arag\", \"Healing of Sorsha\", \"Infusion of Spirit\", \"Scorpion Venom\", \"Spiritual Vigor\"]\n  }\n}
+{
+  "items": {
+    "29112": {
+      "name": "Ethereal Parchment",
+      "description": "Level 61-62 spells",
+      "npcs": [
+        {
+          "npc": "Wanderer_Astobin",
+          "class": "Druid",
+          "spells": [26943, 28524, 28525, 28526, 28564, 21656, 28527, 28528, 28529, 28530],
+          "spell_names": ["Earthen Roots", "Storm's Fury", "Hand of Ro", "Winter's Storm", "Catastrophe", "Flight of Eagles", "Immolation of Ro", "Karana's Rage", "Nature's Might", "Ro's Illumination"]
+        },
+        {
+          "npc": "Vicar_Ceraen",
+          "class": "Cleric",
+          "spells": [28646, 28557, 28561, 28572, 21690, 26945, 26946, 28558, 28563, 28566, 28567, 28564, 26947],
+          "spell_names": ["Faith", "Symbol of Kazad", "Ward of Gallantry", "Tarnation", "Sermon of Penitence", "Petrifying Earth", "Greater Immobilize", "Virtue", "Blessing of Reverence", "Supernal Elixir", "Condemnation", "Catastrophe", "Pacification"]
+        },
+        {
+          "npc": "Reaver_Nydlil",
+          "class": "Shadowknight",
+          "spells": [26920, 26924, 26921, 26925, 26937],
+          "spell_names": ["Festering Darkness", "Aura of Darkness", "Touch of Volatis", "Zevfeer's Bite", "Deny Undead"]
+        },
+        {
+          "npc": "Primalist_Saosith",
+          "class": "Beastlord",
+          "spells": [28544, 28545, 21629, 28547, 28548],
+          "spell_names": ["Spirit of Arag", "Infusion of Spirit", "Healing of Sorsha", "Scorpion Venom", "Spiritual Vigor"]
+        },
+        {
+          "npc": "Pathfinder_Viliken",
+          "class": "Ranger",
+          "spells": [26943, 21628, 21627],
+          "spell_names": ["Earthen Roots", "Call of the Rathe", "Strength of Tunare"]
+        },
+        {
+          "npc": "Mystic_Abomin",
+          "class": "Shaman",
+          "spells": [28487, 28488, 28489, 28490, 26945, 26946, 21660, 21661, 28491, 28492, 28493, 28494],
+          "spell_names": ["True Spirit", "Agility of the Wrulan", "Spear of Torment", "Cloud of Grummus", "Greater Immobilize", "Tnarg's Mending", "Focus of Soul", "Ancestral Guard", "Endurance of the Boar", "Talisman of the Wrulan", "Talisman of the Tribunal", "Petrifying Earth"]
+        },
+        {
+          "npc": "Minstrel_Eoweril",
+          "class": "Bard",
+          "spells": [28471, 28473, 21636, 28474, 28475, 28484, 16391],
+          "spell_names": ["Silent Song of Quellious", "Tuyen's Chant of the Plague", "Dreams of Thule", "Druzzil's Disillusionment", "Melody of Mischief", "Warsong of Zek", "Wind of Marr"]
+        },
+        {
+          "npc": "Illusionist_Jerup",
+          "class": "Enchanter",
+          "spells": [26944, 28413, 28643, 28644, 28452, 28453, 26947, 21665, 21667, 28455, 28457, 28469, 21639],
+          "spell_names": ["Greater Fetter", "Shield of the Arcane", "Arcane Rune", "Boggle", "Howl of Tashan", "Rune of Zebuxoruk", "Pacification", "Speed of Vallon", "Guard of Druzzil", "Strangle", "Beckon", "Word of Morell", "Aeldorb's Animation"]
+        },
+        {
+          "npc": "Heretic_Drahur",
+          "class": "Necromancer",
+          "spells": [26945, 21638, 21640, 28413, 28417, 26946, 28418, 28419],
+          "spell_names": ["Greater Immobilize", "Touch of Mujaki", "Neurotoxin", "Shield of the Arcane", "Legacy of Zek", "Petrifying Earth", "Rune of Death", "Saryrn's Kiss"]
+        },
+        {
+          "npc": "Elementalist_Somat",
+          "class": "Magician",
+          "spells": [21641, 21642, 32411, 29357, 29358, 29359, 29360, 29361, 28413, 28428, 28440, 21637, 21643, 21646, 21669, 28430, 28431],
+          "spell_names": ["Belt of Magi'Kot", "Blade of Walnan", "Flameshield of Ro", "Summon Platinum Choker", "Summon Runed Mantle", "Summon Sapphire Bracelet", "Summon Spiked Ring", "Summon Glowing Bauble", "Shield of the Arcane", "Ward of Xegony", "Elemental Barrier", "Xegony's Phantasmal Guard", "Fist of Ixiblat", "Talisman of Return", "Burnout V", "Sun Storm", "Servant of Marr"]
+        },
+        {
+          "npc": "Channeler_Olaemos",
+          "class": "Wizard",
+          "spells": [26944, 28413, 28438, 28437, 21662, 28440, 28441, 28442],
+          "spell_names": ["Greater Fetter", "Shield of the Arcane", "Tears of Ro", "Resistant Armor", "Teleport", "Elemental Barrier", "Draught of Ro", "Lure of Ro"]
+        },
+        {
+          "npc": "Cavalier_Waut",
+          "class": "Paladin",
+          "spells": [26945, 21631, 26941, 21652, 26933, 26937],
+          "spell_names": ["Greater Immobilize", "Touch of Nife", "Crusader's Touch", "Force of Akilae", "Ward of Nife", "Deny Undead"]
+        }
+      ]
+    },
+    "29131": {
+      "name": "Spectral Parchment",
+      "description": "Level 63-64 spells",
+      "npcs": [
+        {
+          "npc": "Wanderer_Astobin",
+          "class": "Druid",
+          "spells": [21658, 21659, 28531, 28532, 28533, 28535, 28536, 28538, 21657, 28534, 28537, 28539, 28540],
+          "spell_names": ["Protection of the Nine", "Destroy Summoned", "Blessing of Replenishment", "E'ci's Frosty Breath", "Nature's Infusion", "Command of Tunare", "Swarming Death", "Shield of Bracken", "Karana's Renewal", "Protection of Seasons", "Savage Roots", "Summer's Flame", "Brackencoat"]
+        },
+        {
+          "npc": "Vicar_Ceraen",
+          "class": "Cleric",
+          "spells": [21647, 28569, 28571, 28573, 28559, 28560, 28562],
+          "spell_names": ["Kazad's Mark", "Hammer of Damnation", "Supernal Light", "Sound of Might", "Destroy Undead", "Mark of Kings", "Word of Replenishment"]
+        },
+        {
+          "npc": "Reaver_Nydlil",
+          "class": "Shadowknight",
+          "spells": [21651, 26922, 26923, 21632, 21634, 21633],
+          "spell_names": ["Shroud of Chaos", "Aura of Pain", "Terror of Thule", "Blood of Hate", "Pact of Hate", "Spear of Decay"]
+        },
+        {
+          "npc": "Primalist_Saosith",
+          "class": "Beastlord",
+          "spells": [28549, 28550, 21630, 28551, 28552],
+          "spell_names": ["Arag's Celerity", "Spirit of Rellic", "Frost Spear", "Spiritual Dominion", "Spirit of Sorsha"]
+        },
+        {
+          "npc": "Pathfinder_Viliken",
+          "class": "Ranger",
+          "spells": [26931, 26929, 26930, 21626],
+          "spell_names": ["Frozen Wind", "Nature's Rebuke", "Spirit of the Predator", "Brushfire"]
+        },
+        {
+          "npc": "Mystic_Abomin",
+          "class": "Shaman",
+          "spells": [28495, 28496, 28497, 28498, 28499, 28531, 26910, 26912, 26913, 26914, 26911],
+          "spell_names": ["Tears of Saryrn", "Malicious Decay", "Malosinia", "Strength of the Diaku", "Talisman of the Boar", "Blessing of Replenishment", "Velium Strike", "Talisman of the Diaku", "Tiny Terror", "Breath of Ultor", "Talisman of Alacrity"]
+        },
+        {
+          "npc": "Minstrel_Eoweril",
+          "class": "Bard",
+          "spells": [28478, 28480, 28483, 28472, 28479, 28481, 28482, 21650],
+          "spell_names": ["Psalm of Veeshan", "Tuyen's Chant of Venom", "Tuyen's Chant of Ice", "Rizlona's Call of Flame", "Dreams of Terris", "Call of the Banshee", "Chorus of Marr", "Requiem of Time"]
+        },
+        {
+          "npc": "Illusionist_Jerup",
+          "class": "Enchanter",
+          "spells": [21666, 28458, 28460, 28461, 28464, 28415, 28459, 28465, 28468],
+          "spell_names": ["Night's Dark Terror", "Torment of Scio", "Tranquility", "Uproar", "Sleep", "Shield of Maelin", "Insanity", "Command of Druzzil", "Bliss"]
+        },
+        {
+          "npc": "Heretic_Drahur",
+          "class": "Necromancer",
+          "spells": [28414, 28420, 28421, 28422, 28415, 28423, 28424, 28559],
+          "spell_names": ["Force Shield", "Death's Silence", "Embracing Darkness", "Saryrn's Companion", "Shield of Maelin", "Seduction of Saryrn", "Touch of Death", "Destroy Undead"]
+        },
+        {
+          "npc": "Elementalist_Somat",
+          "class": "Magician",
+          "spells": [21644, 29362, 28432, 28433, 28497, 16341, 29363, 21645, 21659, 21668, 28415, 28434],
+          "spell_names": ["Blade of The Kedge", "Summon Jewelry Bag", "Black Steel", "Child of Ro", "Malosinia", "Elemental Silence", "Maelstrom of Ro", "Girdle of Magi'Kot", "Destroy Summoned", "Planar Renewal", "Shield of Maelin", "Maelstrom of Thunder"]
+        },
+        {
+          "npc": "Channeler_Olaemos",
+          "class": "Wizard",
+          "spells": [28414, 28445, 28446, 28448, 26940, 28415, 28444, 28447],
+          "spell_names": ["Force Shield", "Draught of Thunder", "Agnarr's Thunder", "Iceflame of E'ci", "Tears of Arlyxir", "Shield of Maelin", "Telekin", "Draught of E'ci"]
+        },
+        {
+          "npc": "Cavalier_Waut",
+          "class": "Paladin",
+          "spells": [26934, 26939, 21654, 26935, 21649],
+          "spell_names": ["Pious Might", "Light of Nife", "Aura of the Crusader", "Quellious' Word of Serenity", "Supernal Cleansing"]
+        }
+      ]
+    },
+    "29132": {
+      "name": "Glyphed Rune Word",
+      "description": "Level 65 spells",
+      "npcs": [
+        {
+          "npc": "Wanderer_Astobin",
+          "class": "Druid",
+          "spells": [28645, 28541, 28542, 28543],
+          "spell_names": ["Legacy of Bracken", "Blessing of the Nine", "Winter's Frost", "Mask of the Forest"]
+        },
+        {
+          "npc": "Vicar_Ceraen",
+          "class": "Cleric",
+          "spells": [21689, 28555, 28565, 28568, 28570],
+          "spell_names": ["Yaulp VI", "The Silent Command", "Armor of the Zealot", "Mark of the Righteous", "Hand of Virtue"]
+        },
+        {
+          "npc": "Reaver_Nydlil",
+          "class": "Shadowknight",
+          "spells": [26926, 26927, 26928, 21635],
+          "spell_names": ["Voice of Thule", "Aura of Hate", "Touch of Innoruuk", "Cloak of Luclin"]
+        },
+        {
+          "npc": "Primalist_Saosith",
+          "class": "Beastlord",
+          "spells": [28553, 28554],
+          "spell_names": ["Sha's Revenge", "Ferocity"]
+        },
+        {
+          "npc": "Pathfinder_Viliken",
+          "class": "Ranger",
+          "spells": [21655, 26932],
+          "spell_names": ["Protection of the Wild", "Cry of Thunder"]
+        },
+        {
+          "npc": "Mystic_Abomin",
+          "class": "Shaman",
+          "spells": [26915, 26916, 26917, 26918, 26919],
+          "spell_names": ["Malos", "Blood of Saryrn", "Focus of the Seventh", "Quiescence", "Ferine Avatar"]
+        },
+        {
+          "npc": "Minstrel_Eoweril",
+          "class": "Bard",
+          "spells": [28477, 28485, 28486],
+          "spell_names": ["Tuyen's Chant of Fire", "Harmony of Sound", "Lullaby of Morell"]
+        },
+        {
+          "npc": "Illusionist_Jerup",
+          "class": "Enchanter",
+          "spells": [21648, 21664, 28470],
+          "spell_names": ["Illusion Froglok", "Vallon's Quickening", "Voice of Quellious"]
+        },
+        {
+          "npc": "Heretic_Drahur",
+          "class": "Necromancer",
+          "spells": [28416, 28425, 28427],
+          "spell_names": ["Blood of Thule", "Child of Bertoxxulous", "Word of Terris"]
+        },
+        {
+          "npc": "Elementalist_Somat",
+          "class": "Magician",
+          "spells": [28435, 28436, 16342],
+          "spell_names": ["Rathe's Son", "Sun Vortex", "Call of the Arch Mage"]
+        },
+        {
+          "npc": "Channeler_Olaemos",
+          "class": "Wizard",
+          "spells": [26942, 21663, 28443, 28450],
+          "spell_names": ["Shock of Magic", "Greater Decession", "Tears of Marr", "Strike of Solusek"]
+        },
+        {
+          "npc": "Cavalier_Waut",
+          "class": "Paladin",
+          "spells": [21653, 26936, 26938],
+          "spell_names": ["Shackles of Tunare", "Wave of Marr", "Brell's Stalwart Shield"]
+        }
+      ]
+    }
+  },
+  "npcs": {
+    "Wanderer_Astobin": {
+      "class": "Druid",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [26943, 28524, 28525, 28526, 28564, 21656, 28527, 28528, 28529, 28530],
+          "spell_names": ["Earthen Roots", "Storm's Fury", "Hand of Ro", "Winter's Storm", "Catastrophe", "Flight of Eagles", "Immolation of Ro", "Karana's Rage", "Nature's Might", "Ro's Illumination"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [21658, 21659, 28531, 28532, 28533, 28535, 28536, 28538, 21657, 28534, 28537, 28539, 28540],
+          "spell_names": ["Protection of the Nine", "Destroy Summoned", "Blessing of Replenishment", "E'ci's Frosty Breath", "Nature's Infusion", "Command of Tunare", "Swarming Death", "Shield of Bracken", "Karana's Renewal", "Protection of Seasons", "Savage Roots", "Summer's Flame", "Brackencoat"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [28645, 28541, 28542, 28543],
+          "spell_names": ["Legacy of Bracken", "Blessing of the Nine", "Winter's Frost", "Mask of the Forest"]
+        }
+      }
+    },
+    "Vicar_Ceraen": {
+      "class": "Cleric",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [28646, 28557, 28561, 28572, 21690, 26945, 26946, 28558, 28563, 28566, 28567, 28564, 26947],
+          "spell_names": ["Faith", "Symbol of Kazad", "Ward of Gallantry", "Tarnation", "Sermon of Penitence", "Petrifying Earth", "Greater Immobilize", "Virtue", "Blessing of Reverence", "Supernal Elixir", "Condemnation", "Catastrophe", "Pacification"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [21647, 28569, 28571, 28573, 28559, 28560, 28562],
+          "spell_names": ["Kazad's Mark", "Hammer of Damnation", "Supernal Light", "Sound of Might", "Destroy Undead", "Mark of Kings", "Word of Replenishment"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [21689, 28555, 28565, 28568, 28570],
+          "spell_names": ["Yaulp VI", "The Silent Command", "Armor of the Zealot", "Mark of the Righteous", "Hand of Virtue"]
+        }
+      }
+    },
+    "Reaver_Nydlil": {
+      "class": "Shadowknight",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [26920, 26924, 26921, 26925, 26937],
+          "spell_names": ["Festering Darkness", "Aura of Darkness", "Touch of Volatis", "Zevfeer's Bite", "Deny Undead"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [21651, 26922, 26923, 21632, 21634, 21633],
+          "spell_names": ["Shroud of Chaos", "Aura of Pain", "Terror of Thule", "Blood of Hate", "Pact of Hate", "Spear of Decay"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [26926, 26927, 26928, 21635],
+          "spell_names": ["Voice of Thule", "Aura of Hate", "Touch of Innoruuk", "Cloak of Luclin"]
+        }
+      }
+    },
+    "Primalist_Saosith": {
+      "class": "Beastlord",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [28548, 28544, 28545, 21629, 28547],
+          "spell_names": ["Spirit of Arag", "Infusion of Spirit", "Healing of Sorsha", "Scorpion Venom", "Spiritual Vigor"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [28549, 28550, 21630, 28551, 28552],
+          "spell_names": ["Arag's Celerity", "Spirit of Rellic", "Frost Spear", "Spiritual Dominion", "Spirit of Sorsha"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [28553, 28554],
+          "spell_names": ["Sha's Revenge", "Ferocity"]
+        }
+      }
+    },
+    "Pathfinder_Viliken": {
+      "class": "Ranger",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [26943, 21628, 21627],
+          "spell_names": ["Earthen Roots", "Call of the Rathe", "Strength of Tunare"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [26931, 26929, 26930, 21626],
+          "spell_names": ["Frozen Wind", "Nature's Rebuke", "Spirit of the Predator", "Brushfire"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [21655, 26932],
+          "spell_names": ["Protection of the Wild", "Cry of Thunder"]
+        }
+      }
+    },
+    "Mystic_Abomin": {
+      "class": "Shaman",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [28487, 28488, 28489, 28490, 26945, 26946, 21660, 21661, 28491, 28492, 28493, 28494],
+          "spell_names": ["True Spirit", "Agility of the Wrulan", "Spear of Torment", "Cloud of Grummus", "Greater Immobilize", "Tnarg's Mending", "Focus of Soul", "Ancestral Guard", "Endurance of the Boar", "Talisman of the Wrulan", "Talisman of the Tribunal", "Petrifying Earth"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [28495, 28496, 28497, 28498, 28499, 28531, 26910, 26912, 26913, 26914, 26911],
+          "spell_names": ["Tears of Saryrn", "Malicious Decay", "Malosinia", "Strength of the Diaku", "Talisman of the Boar", "Blessing of Replenishment", "Velium Strike", "Talisman of the Diaku", "Tiny Terror", "Breath of Ultor", "Talisman of Alacrity"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [26915, 26916, 26917, 26918, 26919],
+          "spell_names": ["Malos", "Blood of Saryrn", "Focus of the Seventh", "Quiescence", "Ferine Avatar"]
+        }
+      }
+    },
+    "Minstrel_Eoweril": {
+      "class": "Bard",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [28471, 28473, 21636, 28474, 28475, 28484, 16391],
+          "spell_names": ["Silent Song of Quellious", "Tuyen's Chant of the Plague", "Dreams of Thule", "Druzzil's Disillusionment", "Melody of Mischief", "Warsong of Zek", "Wind of Marr"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [28478, 28480, 28483, 28472, 28479, 28481, 28482, 21650],
+          "spell_names": ["Psalm of Veeshan", "Tuyen's Chant of Venom", "Tuyen's Chant of Ice", "Rizlona's Call of Flame", "Dreams of Terris", "Call of the Banshee", "Chorus of Marr", "Requiem of Time"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [28477, 28485, 28486],
+          "spell_names": ["Tuyen's Chant of Fire", "Harmony of Sound", "Lullaby of Morell"]
+        }
+      }
+    },
+    "Illusionist_Jerup": {
+      "class": "Enchanter",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [26944, 28413, 28643, 28644, 28452, 28453, 26947, 21665, 21667, 28455, 28457, 28469, 21639],
+          "spell_names": ["Greater Fetter", "Shield of the Arcane", "Arcane Rune", "Boggle", "Howl of Tashan", "Rune of Zebuxoruk", "Pacification", "Speed of Vallon", "Guard of Druzzil", "Strangle", "Beckon", "Word of Morell", "Aeldorb's Animation"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [21666, 28458, 28460, 28461, 28464, 28415, 28459, 28465, 28468],
+          "spell_names": ["Night's Dark Terror", "Torment of Scio", "Tranquility", "Uproar", "Sleep", "Shield of Maelin", "Insanity", "Command of Druzzil", "Bliss"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [21648, 21664, 28470],
+          "spell_names": ["Illusion Froglok", "Vallon's Quickening", "Voice of Quellious"]
+        }
+      }
+    },
+    "Heretic_Drahur": {
+      "class": "Necromancer",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [26945, 21638, 21640, 28413, 28417, 26946, 28418, 28419],
+          "spell_names": ["Greater Immobilize", "Touch of Mujaki", "Neurotoxin", "Shield of the Arcane", "Legacy of Zek", "Petrifying Earth", "Rune of Death", "Saryrn's Kiss"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [28414, 28420, 28421, 28422, 28415, 28423, 28424, 28559],
+          "spell_names": ["Force Shield", "Death's Silence", "Embracing Darkness", "Saryrn's Companion", "Shield of Maelin", "Seduction of Saryrn", "Touch of Death", "Destroy Undead"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [28416, 28425, 28427],
+          "spell_names": ["Blood of Thule", "Child of Bertoxxulous", "Word of Terris"]
+        }
+      }
+    },
+    "Elementalist_Somat": {
+      "class": "Magician",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [21641, 21642, 32411, 29357, 29358, 29359, 29360, 29361, 28413, 28428, 28440, 21637, 21643, 21646, 21669, 28430, 28431],
+          "spell_names": ["Belt of Magi'Kot", "Blade of Walnan", "Flameshield of Ro", "Summon Platinum Choker", "Summon Runed Mantle", "Summon Sapphire Bracelet", "Summon Spiked Ring", "Summon Glowing Bauble", "Shield of the Arcane", "Ward of Xegony", "Elemental Barrier", "Xegony's Phantasmal Guard", "Fist of Ixiblat", "Talisman of Return", "Burnout V", "Sun Storm", "Servant of Marr"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [21644, 29362, 28432, 28433, 28497, 16341, 29363, 21645, 21659, 21668, 28415, 28434],
+          "spell_names": ["Blade of The Kedge", "Summon Jewelry Bag", "Black Steel", "Child of Ro", "Malosinia", "Elemental Silence", "Maelstrom of Ro", "Girdle of Magi'Kot", "Destroy Summoned", "Planar Renewal", "Shield of Maelin", "Maelstrom of Thunder"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [28435, 28436, 16342],
+          "spell_names": ["Rathe's Son", "Sun Vortex", "Call of the Arch Mage"]
+        }
+      }
+    },
+    "Channeler_Olaemos": {
+      "class": "Wizard",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [26944, 28413, 28438, 28437, 21662, 28440, 28441, 28442],
+          "spell_names": ["Greater Fetter", "Shield of the Arcane", "Tears of Ro", "Resistant Armor", "Teleport", "Elemental Barrier", "Draught of Ro", "Lure of Ro"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [28414, 28445, 28446, 28448, 26940, 28415, 28444, 28447],
+          "spell_names": ["Force Shield", "Draught of Thunder", "Agnarr's Thunder", "Iceflame of E'ci", "Tears of Arlyxir", "Shield of Maelin", "Telekin", "Draught of E'ci"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [26942, 21663, 28443, 28450],
+          "spell_names": ["Shock of Magic", "Greater Decession", "Tears of Marr", "Strike of Solusek"]
+        }
+      }
+    },
+    "Cavalier_Waut": {
+      "class": "Paladin",
+      "items": {
+        "29112": {
+          "item_name": "Ethereal Parchment",
+          "spells": [26945, 21631, 26941, 21652, 26933, 26937],
+          "spell_names": ["Greater Immobilize", "Touch of Nife", "Crusader's Touch", "Force of Akilae", "Ward of Nife", "Deny Undead"]
+        },
+        "29131": {
+          "item_name": "Spectral Parchment",
+          "spells": [26934, 26939, 21654, 26935, 21649],
+          "spell_names": ["Pious Might", "Light of Nife", "Aura of the Crusader", "Quellious' Word of Serenity", "Supernal Cleansing"]
+        },
+        "29132": {
+          "item_name": "Glyphed Rune Word",
+          "spells": [21653, 26936, 26938],
+          "spell_names": ["Shackles of Tunare", "Wave of Marr", "Brell's Stalwart Shield"]
+        }
+      }
+    }
+  }
+}
