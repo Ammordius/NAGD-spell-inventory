@@ -8,7 +8,7 @@
           "npc": "Wanderer_Astobin",
           "class": "Druid",
           "spells": [26943, 28524, 28525, 28526, 28564, 21656, 28527, 28528, 28529, 28530],
-          "spell_names": ["Earthen Roots", "Storm's Fury", "Hand of Ro", "Winter's Storm", "Catastrophe", "Flight of Eagles", "Immolation of Ro", "Karana's Rage", "Nature's Might", "Ro's Illumination"]
+          "spell_names": ["Earthen Roots", "Storm's Fury", "Hand of Ro", "Winter's Storm", "Catastrophe", "Flight of Eagles", "Fury of Ro", "Karana's Rage", "Nature's Might", "Ro's Illumination"]
         },
         {
           "npc": "Vicar_Ceraen",
@@ -26,7 +26,7 @@
           "npc": "Primalist_Saosith",
           "class": "Beastlord",
           "spells": [28544, 28545, 21629, 28547, 28548],
-          "spell_names": ["Spirit of Arag", "Infusion of Spirit", "Healing of Sorsha", "Scorpion Venom", "Spiritual Vigor"]
+          "spell_names": ["Infusion of Spirit", "Healing of Sorsha", "Scorpion Venom", "Spiritual Vigor", "Spirit of Arag"]
         },
         {
           "npc": "Pathfinder_Viliken",
@@ -38,7 +38,7 @@
           "npc": "Mystic_Abomin",
           "class": "Shaman",
           "spells": [28487, 28488, 28489, 28490, 26945, 26946, 21660, 21661, 28491, 28492, 28493, 28494],
-          "spell_names": ["True Spirit", "Agility of the Wrulan", "Spear of Torment", "Cloud of Grummus", "Greater Immobilize", "Tnarg's Mending", "Focus of Soul", "Ancestral Guard", "Endurance of the Boar", "Talisman of the Wrulan", "Talisman of the Tribunal", "Petrifying Earth"]
+          "spell_names": ["True Spirit", "Agility of the Wrulan", "Spear of Torment", "Cloud of Grummus", "Greater Immobilize", "Petrifying Earth", "Tnarg's Mending", "Focus of Soul", "Ancestral Guard", "Endurance of the Boar", "Talisman of the Wrulan", "Talisman of the Tribunal"]
         },
         {
           "npc": "Minstrel_Eoweril",
@@ -74,7 +74,7 @@
           "npc": "Cavalier_Waut",
           "class": "Paladin",
           "spells": [26945, 21631, 26941, 21652, 26933, 26937],
-          "spell_names": ["Greater Immobilize", "Touch of Nife", "Crusader's Touch", "Force of Akilae", "Ward of Nife", "Deny Undead"]
+          "spell_names": ["Greater Immobilize", "Touch of Nife", "Crusaders Touch", "Force of Akilae", "Ward of Nife", "Deny Undead"]
         }
       ]
     },
@@ -92,13 +92,13 @@
           "npc": "Vicar_Ceraen",
           "class": "Cleric",
           "spells": [21647, 28569, 28571, 28573, 28559, 28560, 28562],
-          "spell_names": ["Kazad's Mark", "Hammer of Damnation", "Supernal Light", "Sound of Might", "Destroy Undead", "Mark of Kings", "Word of Replenishment"]
+          "spell_names": ["Mark of Kazad", "Hammer of Damnation", "Supernal Light", "Sound of Might", "Destroy Undead", "Mark of Kings", "Word of Replenishment"]
         },
         {
           "npc": "Reaver_Nydlil",
           "class": "Shadowknight",
           "spells": [21651, 26922, 26923, 21632, 21634, 21633],
-          "spell_names": ["Shroud of Chaos", "Aura of Pain", "Terror of Thule", "Blood of Hate", "Pact of Hate", "Spear of Decay"]
+          "spell_names": ["Shroud of Chaos", "Aura of Pain", "Terror of Thule", "Pact of Hate", "Spear of Decay", "Blood of Hate"]
         },
         {
           "npc": "Primalist_Saosith",
@@ -116,7 +116,7 @@
           "npc": "Mystic_Abomin",
           "class": "Shaman",
           "spells": [28495, 28496, 28497, 28498, 28499, 28531, 26910, 26912, 26913, 26914, 26911],
-          "spell_names": ["Tears of Saryrn", "Malicious Decay", "Malosinia", "Strength of the Diaku", "Talisman of the Boar", "Blessing of Replenishment", "Velium Strike", "Talisman of the Diaku", "Tiny Terror", "Breath of Ultor", "Talisman of Alacrity"]
+          "spell_names": ["Tears of Saryrn", "Malicious Decay", "Malosinia", "Strength of the Diaku", "Talisman of the Boar", "Blessing of Replenishment", "Velium Strike", "Talisman of the Diaku", "Tiny Terror", "Breath of Ultor", "Talisman of Celerity"]
         },
         {
           "npc": "Minstrel_Eoweril",
@@ -146,7 +146,7 @@
           "npc": "Channeler_Olaemos",
           "class": "Wizard",
           "spells": [28414, 28445, 28446, 28448, 26940, 28415, 28444, 28447],
-          "spell_names": ["Force Shield", "Draught of Thunder", "Agnarr's Thunder", "Iceflame of E'ci", "Tears of Arlyxir", "Shield of Maelin", "Telekin", "Draught of E'ci"]
+          "spell_names": ["Force Shield", "Draught of Thunder", "Agnarr's Thunder", "Iceflame of Ec'I", "Tears of Aryxil", "Shield of Maelin", "Telekin", "Draught of E'ci"]
         },
         {
           "npc": "Cavalier_Waut",
@@ -242,7 +242,7 @@
         "29112": {
           "item_name": "Ethereal Parchment",
           "spells": [26943, 28524, 28525, 28526, 28564, 21656, 28527, 28528, 28529, 28530],
-          "spell_names": ["Earthen Roots", "Storm's Fury", "Hand of Ro", "Winter's Storm", "Catastrophe", "Flight of Eagles", "Immolation of Ro", "Karana's Rage", "Nature's Might", "Ro's Illumination"]
+          "spell_names": ["Earthen Roots", "Storm's Fury", "Hand of Ro", "Winter's Storm", "Catastrophe", "Flight of Eagles", "Fury of Ro", "Karana's Rage", "Nature's Might", "Ro's Illumination"]
         },
         "29131": {
           "item_name": "Spectral Parchment",
@@ -267,7 +267,7 @@
         "29131": {
           "item_name": "Spectral Parchment",
           "spells": [21647, 28569, 28571, 28573, 28559, 28560, 28562],
-          "spell_names": ["Kazad's Mark", "Hammer of Damnation", "Supernal Light", "Sound of Might", "Destroy Undead", "Mark of Kings", "Word of Replenishment"]
+          "spell_names": ["Mark of Kazad", "Hammer of Damnation", "Supernal Light", "Sound of Might", "Destroy Undead", "Mark of Kings", "Word of Replenishment"]
         },
         "29132": {
           "item_name": "Glyphed Rune Word",
@@ -287,7 +287,7 @@
         "29131": {
           "item_name": "Spectral Parchment",
           "spells": [21651, 26922, 26923, 21632, 21634, 21633],
-          "spell_names": ["Shroud of Chaos", "Aura of Pain", "Terror of Thule", "Blood of Hate", "Pact of Hate", "Spear of Decay"]
+          "spell_names": ["Shroud of Chaos", "Aura of Pain", "Terror of Thule", "Pact of Hate", "Spear of Decay", "Blood of Hate"]
         },
         "29132": {
           "item_name": "Glyphed Rune Word",
@@ -301,8 +301,8 @@
       "items": {
         "29112": {
           "item_name": "Ethereal Parchment",
-          "spells": [28548, 28544, 28545, 21629, 28547],
-          "spell_names": ["Spirit of Arag", "Infusion of Spirit", "Healing of Sorsha", "Scorpion Venom", "Spiritual Vigor"]
+          "spells": [28544, 28545, 21629, 28547, 28548],
+          "spell_names": ["Infusion of Spirit", "Healing of Sorsha", "Scorpion Venom", "Spiritual Vigor", "Spirit of Arag"]
         },
         "29131": {
           "item_name": "Spectral Parchment",
@@ -342,12 +342,12 @@
         "29112": {
           "item_name": "Ethereal Parchment",
           "spells": [28487, 28488, 28489, 28490, 26945, 26946, 21660, 21661, 28491, 28492, 28493, 28494],
-          "spell_names": ["True Spirit", "Agility of the Wrulan", "Spear of Torment", "Cloud of Grummus", "Greater Immobilize", "Tnarg's Mending", "Focus of Soul", "Ancestral Guard", "Endurance of the Boar", "Talisman of the Wrulan", "Talisman of the Tribunal", "Petrifying Earth"]
+          "spell_names": ["True Spirit", "Agility of the Wrulan", "Spear of Torment", "Cloud of Grummus", "Greater Immobilize", "Petrifying Earth", "Tnarg's Mending", "Focus of Soul", "Ancestral Guard", "Endurance of the Boar", "Talisman of the Wrulan", "Talisman of the Tribunal"]
         },
         "29131": {
           "item_name": "Spectral Parchment",
           "spells": [28495, 28496, 28497, 28498, 28499, 28531, 26910, 26912, 26913, 26914, 26911],
-          "spell_names": ["Tears of Saryrn", "Malicious Decay", "Malosinia", "Strength of the Diaku", "Talisman of the Boar", "Blessing of Replenishment", "Velium Strike", "Talisman of the Diaku", "Tiny Terror", "Breath of Ultor", "Talisman of Alacrity"]
+          "spell_names": ["Tears of Saryrn", "Malicious Decay", "Malosinia", "Strength of the Diaku", "Talisman of the Boar", "Blessing of Replenishment", "Velium Strike", "Talisman of the Diaku", "Tiny Terror", "Breath of Ultor", "Talisman of Celerity"]
         },
         "29132": {
           "item_name": "Glyphed Rune Word",
@@ -447,7 +447,7 @@
         "29131": {
           "item_name": "Spectral Parchment",
           "spells": [28414, 28445, 28446, 28448, 26940, 28415, 28444, 28447],
-          "spell_names": ["Force Shield", "Draught of Thunder", "Agnarr's Thunder", "Iceflame of E'ci", "Tears of Arlyxir", "Shield of Maelin", "Telekin", "Draught of E'ci"]
+          "spell_names": ["Force Shield", "Draught of Thunder", "Agnarr's Thunder", "Iceflame of Ec'I", "Tears of Aryxil", "Shield of Maelin", "Telekin", "Draught of E'ci"]
         },
         "29132": {
           "item_name": "Glyphed Rune Word",
@@ -462,7 +462,7 @@
         "29112": {
           "item_name": "Ethereal Parchment",
           "spells": [26945, 21631, 26941, 21652, 26933, 26937],
-          "spell_names": ["Greater Immobilize", "Touch of Nife", "Crusader's Touch", "Force of Akilae", "Ward of Nife", "Deny Undead"]
+          "spell_names": ["Greater Immobilize", "Touch of Nife", "Crusaders Touch", "Force of Akilae", "Ward of Nife", "Deny Undead"]
         },
         "29131": {
           "item_name": "Spectral Parchment",
