@@ -1881,6 +1881,7 @@
             
             // Focus Scores
             const focusScores = scores.focus_scores || {};
+            const focusDetails = scores.focus_details || {};
             const charFocii = char.focii || {};
             const charDamageFocii = char.damage_focii || {};
             const charManaEffCats = char.mana_efficiency_cats || {};
@@ -1971,6 +1972,26 @@
                 
                 const bardInstrumentCats = ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'];
                 for (const [focusCat, score] of Object.entries(focusScores)) {
+                    // Skip composite Spell Haste when we show Beneficial/Detrimental separately
+                    if (focusCat === 'Spell Haste' && (focusScores['Beneficial Spell Haste'] !== undefined || focusScores['Detrimental Spell Haste'] !== undefined)) {
+                        continue;
+                    }
+                    // When focus_details exists for this category (e.g. Spell Mana Efficiency), show one row per subcategory
+                    if (focusDetails[focusCat] && Array.isArray(focusDetails[focusCat])) {
+                        const rows = focusDetails[focusCat];
+                        const parentWeight = (typeof focusWeights[focusCat] === 'number') ? focusWeights[focusCat] : 0;
+                        const sumWeightShare = rows.reduce((s, r) => s + (r.weight_share || 0), 0);
+                        rows.forEach(row => {
+                            const rowWeight = sumWeightShare > 0 && parentWeight > 0
+                                ? (row.weight_share / sumWeightShare) * parentWeight : 0;
+                            const focusPoints = (row.score_pct || 0) * rowWeight;
+                            totalFocusPoints += focusPoints;
+                            const focusPctOfTotal = (focusPoints / totalPoints * 100).toFixed(1);
+                            const displayName = focusCat + ' (' + (row.label || row.cat) + ')';
+                            html += `<tr><td>${escapeHtml(displayName)}</td><td>${(row.raw != null ? row.raw + '%' : 'N/A')}</td><td>${formatScore(row.score_pct)}</td><td>${rowWeight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
+                        });
+                        continue;
+                    }
                     let weight = 0;
                     let rawValue = bardInstrumentCats.includes(focusCat) && (scores.focus_items || {})[focusCat] != null
                         ? scores.focus_items[focusCat]

@@ -111,6 +111,36 @@ def get_best_focii_by_category(focii_data):
     
     return best_by_category
 
+
+def get_best_focii_by_subcategory(focii_data):
+    """Get the best focus percentage per subcategory for Mana Efficiency, Spell Haste, and Duration.
+    Used so we can show and score each category separately (e.g. Det vs Bene vs Self-only mana eff)."""
+    best_mana = defaultdict(float)
+    best_haste = defaultdict(float)
+    best_duration = defaultdict(float)
+    for focus in focii_data:
+        name = focus.get('name', '')
+        cat = focus.get('category', '')
+        pct = focus.get('percentage', 0)
+        if cat == 'Spell Mana Efficiency':
+            sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(name, 'Nuke')
+            if pct > best_mana[sub]:
+                best_mana[sub] = pct
+        elif cat == 'Spell Haste':
+            sub = SPELL_HASTE_CATEGORY_MAP.get(name, 'Bene')
+            if pct > best_haste[sub]:
+                best_haste[sub] = pct
+        elif cat == 'Buff Spell Duration':
+            if pct > best_duration['Bene']:
+                best_duration['Bene'] = pct
+        elif cat == 'Detrimental Spell Duration':
+            if pct > best_duration['Det']:
+                best_duration['Det'] = pct
+        elif cat == 'All Spell Duration':
+            if pct > best_duration['All']:
+                best_duration['All'] = pct
+    return dict(best_mana), dict(best_haste), dict(best_duration)
+
 # Analyze character gear for focii
 def analyze_character_focii(char_inventory, focus_lookup):
     """Analyze a character's gear and return best focus in each category and damage type"""
@@ -242,7 +272,9 @@ SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
     # 'Mana Preservation': 'All',  # if generic preservation applies to all
 }
 
-# Map Spell Haste focii to categories (detrimental, beneficial)
+# Map Spell Haste focii to categories (detrimental, beneficial, or All).
+# Scoring uses max(Bene, All) and max(Det, All), so 'All' counts for BOTH Beneficial and Detrimental.
+# Add e.g. 'All Spell Haste': 'All' here if a focus applies to both; then track best_haste['All'] in get_best_focii_by_subcategory.
 SPELL_HASTE_CATEGORY_MAP = {
     # Detrimental haste
     'Affliction Haste': 'Det',
@@ -256,6 +288,8 @@ SPELL_HASTE_CATEGORY_MAP = {
     'Haste of Mithaniel': 'Bene',  # Paladin beneficial
     'Haste of Druzzil': 'Bene',  # Usually beneficial
     'Spell Haste': 'Bene',  # Generic beneficial
+    
+    # 'All Spell Haste': 'All',  # Uncomment if a focus applies to both Bene and Det
 }
 
 # Map Duration focii to categories (detrimental, beneficial)
@@ -292,9 +326,10 @@ SPELL_MANA_EFFICIENCY_WEIGHTS = {
 }
 
 
-def calculate_spell_mana_efficiency_score(char_mana_efficiency_cats, char_class, best_mana_eff):
-    """Weighted Spell Mana Efficiency score (0-100). Each category (Bene/Det/Nuke) considered separately.
-    All counts for all possible: effective_cat = max(cat_pct, all_pct)."""
+def calculate_spell_mana_efficiency_score(char_mana_efficiency_cats, char_class, best_mana_eff, best_mana_by_cat=None):
+    """Weighted Spell Mana Efficiency score (0-100). Each category (Bene/Det/Nuke/Sanguine) considered separately.
+    All counts for all possible: effective_cat = max(cat_pct, all_pct).
+    When best_mana_by_cat is provided, each category is compared to its own best; otherwise use best_mana_eff for all."""
     if not char_mana_efficiency_cats or best_mana_eff <= 0:
         return 0.0
     weights = SPELL_MANA_EFFICIENCY_WEIGHTS.get(char_class)
@@ -307,7 +342,10 @@ def calculate_spell_mana_efficiency_score(char_mana_efficiency_cats, char_class,
         if w <= 0:
             continue
         effective_pct = max(char_mana_efficiency_cats.get(cat, 0), all_pct)
-        cat_score = (effective_pct / best_mana_eff * 100) if effective_pct > 0 else 0
+        best_for_cat = (best_mana_by_cat.get(cat, best_mana_eff)) if best_mana_by_cat else best_mana_eff
+        if best_for_cat <= 0:
+            continue
+        cat_score = (effective_pct / best_for_cat * 100) if effective_pct > 0 else 0
         weighted_sum += cat_score * w
         total_weight += w
     if total_weight <= 0:
@@ -486,8 +524,9 @@ def check_shaman_focus_items(char_inventory):
     return 100.0 if has_times_antithesis else 0.0, {'has_times_antithesis': has_times_antithesis}
 
 # Calculate class-specific scores
-def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, bard_instrument_data=None):
-    """Calculate percentage scores for a character based on their class"""
+def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, bard_instrument_data=None, best_mana_by_cat=None, best_haste_by_cat=None, best_duration_by_cat=None):
+    """Calculate percentage scores for a character based on their class.
+    best_*_by_cat: best focus % per subcategory (Det/Bene/Nuke/Sanguine for mana; Det/Bene for haste; Bene/Det/All for duration)."""
     char_class = char_data['class']
     scores = {}
     
@@ -590,9 +629,9 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         else:
             focus_scores['Beneficial Spell Haste'] = 0
         # Spell Mana Efficiency - Paladin: beneficial
-        best_mana_eff = best_focii.get('Spell Mana Efficiency', 40.0)
+        best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
         focus_scores['Spell Mana Efficiency'] = calculate_spell_mana_efficiency_score(
-            char_mana_efficiency_cats or {}, 'Paladin', best_mana_eff
+            char_mana_efficiency_cats or {}, 'Paladin', best_mana_eff, best_mana_by_cat
         )
     elif char_class == 'Shadow Knight':
         pal_sk_focus_score, pal_sk_items = check_paladin_sk_focus_items(char_inventory or [])
@@ -602,37 +641,54 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         char_haste = char_data.get('stats', {}).get('haste', 0)
         focus_scores['Haste'] = 100.0 if (isinstance(char_haste, (int, float)) and char_haste >= 30) else 0.0
         # Spell Mana Efficiency - weighted by class (SHD: Det only)
-        best_mana_eff = best_focii.get('Spell Mana Efficiency', 40.0)
+        best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
         focus_scores['Spell Mana Efficiency'] = calculate_spell_mana_efficiency_score(
-            char_mana_efficiency_cats or {}, 'Shadow Knight', best_mana_eff
+            char_mana_efficiency_cats or {}, 'Shadow Knight', best_mana_eff, best_mana_by_cat
         )
         scores['focus_items'] = pal_sk_items
     elif char_class == 'Enchanter':
         enchanter_focus_score, enchanter_items = check_enchanter_focus_items(char_inventory or [])
         focus_scores = {'Serpent of Vindication': enchanter_focus_score}
         scores['focus_items'] = enchanter_items
-        # Add other focus scores for Enchanters (spell focuses)
-        for category, best_pct in best_focii.items():
-            if category == 'Spell Damage':
-                # Handle spell damage separately
-                char_pct = char_damage_focii.get('Magic', 0)
-                if best_pct > 0:
-                    focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
-                else:
-                    focus_scores[category] = 0
-            elif category == 'Spell Mana Efficiency':
-                # Enchanter: weighted Det primary, small Bene
-                best_mana_eff = best_focii.get('Spell Mana Efficiency', 40.0)
-                focus_scores[category] = calculate_spell_mana_efficiency_score(
-                    char_mana_efficiency_cats or {}, 'Enchanter', best_mana_eff
-                ) if char_mana_efficiency_cats else (char_focii.get(category, 0) / best_pct * 100 if best_pct > 0 else 0)
-            elif category in ['Spell Haste', 'Spell Range Extension']:
-                # Track these for Enchanters
-                char_pct = char_focii.get(category, 0)
-                if best_pct > 0:
-                    focus_scores[category] = (char_pct / best_pct * 100) if char_pct > 0 else 0
-                else:
-                    focus_scores[category] = 0
+        # Spell Damage (Magic)
+        best_dmg = best_focii.get('Spell Damage', 35.0)
+        char_pct = char_damage_focii.get('Magic', 0)
+        focus_scores['Spell Damage'] = (char_pct / best_dmg * 100) if best_dmg > 0 and char_pct > 0 else 0
+        # Spell Mana Efficiency: weighted by category (Det, Bene; Sanguine/self-only not weighted)
+        best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
+        focus_scores['Spell Mana Efficiency'] = calculate_spell_mana_efficiency_score(
+            char_mana_efficiency_cats or {}, 'Enchanter', best_mana_eff, best_mana_by_cat
+        ) if char_mana_efficiency_cats else 0
+        # Spell Haste: consider Beneficial and Detrimental separately (Enchanter uses both).
+        # All counts for both: effective best = max(cat_best, All_best).
+        if char_spell_haste_cats and best_haste_by_cat:
+            best_all_haste = best_haste_by_cat.get('All', 0)
+            best_bene = max(best_haste_by_cat.get('Bene', 0), best_all_haste) or best_focii.get('Spell Haste', 33.0)
+            bene_pct = max(char_spell_haste_cats.get('Bene', 0), char_spell_haste_cats.get('All', 0))
+            focus_scores['Beneficial Spell Haste'] = (bene_pct / best_bene * 100) if best_bene > 0 and bene_pct > 0 else 0
+            best_det = max(best_haste_by_cat.get('Det', 0), best_all_haste) or best_focii.get('Spell Haste', 33.0)
+            det_pct = max(char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
+            focus_scores['Detrimental Spell Haste'] = (det_pct / best_det * 100) if best_det > 0 and det_pct > 0 else 0
+            # Composite for focus_overall_pct (CLASS_FOCUS_PRIORITIES has 'Spell Haste')
+            focus_scores['Spell Haste'] = 0.5 * focus_scores.get('Beneficial Spell Haste', 0) + 0.5 * focus_scores.get('Detrimental Spell Haste', 0)
+        else:
+            char_pct = char_focii.get('Spell Haste', 0)
+            best_pct = best_focii.get('Spell Haste', 33.0)
+            focus_scores['Spell Haste'] = (char_pct / best_pct * 100) if best_pct > 0 and char_pct > 0 else 0
+        # Spell Range Extension
+        best_range = best_focii.get('Spell Range Extension', 20.0)
+        focus_scores['Spell Range Extension'] = (char_focii.get('Spell Range Extension', 0) / best_range * 100) if best_range > 0 and char_focii.get('Spell Range Extension', 0) > 0 else 0
+        # Buff Spell Duration and Detrimental Spell Duration (by category)
+        if char_duration_cats and best_duration_by_cat:
+            best_buff = max(best_duration_by_cat.get('Bene', 0), best_duration_by_cat.get('All', 0))
+            eff_buff = max(char_duration_cats.get('Bene', 0), char_duration_cats.get('All', 0))
+            focus_scores['Buff Spell Duration'] = (eff_buff / best_buff * 100) if best_buff > 0 and eff_buff > 0 else 0
+            best_det_dur = max(best_duration_by_cat.get('Det', 0), best_duration_by_cat.get('All', 0))
+            eff_det_dur = max(char_duration_cats.get('Det', 0), char_duration_cats.get('All', 0))
+            focus_scores['Detrimental Spell Duration'] = (eff_det_dur / best_det_dur * 100) if best_det_dur > 0 and eff_det_dur > 0 else 0
+        else:
+            focus_scores['Buff Spell Duration'] = 0
+            focus_scores['Detrimental Spell Duration'] = 0
     elif char_class == 'Bard' and bard_instrument_data:
         bard_focus_scores, bard_items_detail = check_bard_instrument_focus(char_inventory or [], bard_instrument_data)
         focus_scores = dict(bard_focus_scores)
@@ -714,9 +770,9 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                         focus_scores[category] = 0
             elif category == 'Spell Mana Efficiency':
                 # Weighted by class (Bene/Det/Nuke separately; All counts for all)
-                best_mana_eff = best_focii.get('Spell Mana Efficiency', 40.0)
+                best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
                 focus_scores[category] = calculate_spell_mana_efficiency_score(
-                    char_mana_efficiency_cats or {}, char_class, best_mana_eff
+                    char_mana_efficiency_cats or {}, char_class, best_mana_eff, best_mana_by_cat
                 ) if char_mana_efficiency_cats else (
                     (char_focii.get(category, 0) / best_pct * 100) if best_pct > 0 and char_focii.get(category, 0) > 0 else 0
                 )
@@ -748,6 +804,30 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         focus_scores['FT'] = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
     
     scores['focus_scores'] = focus_scores
+    
+    # Build focus_details for display: per-category rows for Mana Efficiency (and optionally Haste/Duration)
+    # so the UI can show Detrimental / Beneficial / Self-only separately with correct raw and score %
+    focus_details = {}
+    if char_mana_efficiency_cats and best_mana_by_cat:
+        weights = SPELL_MANA_EFFICIENCY_WEIGHTS.get(char_class, {})
+        all_pct = char_mana_efficiency_cats.get('All', 0)
+        cat_labels = {'Det': 'Detrimental', 'Bene': 'Beneficial', 'Nuke': 'Nuke', 'Sanguine': 'Self only'}
+        rows = []
+        for cat in ('Det', 'Bene', 'Nuke', 'Sanguine'):
+            raw = max(char_mana_efficiency_cats.get(cat, 0), all_pct)
+            best = best_mana_by_cat.get(cat, 0)
+            score_pct = (raw / best * 100) if best > 0 and raw > 0 else 0
+            weight_share = weights.get(cat, 0)
+            rows.append({
+                'label': cat_labels.get(cat, cat),
+                'cat': cat,
+                'raw': round(raw, 1),
+                'best': round(best, 1),
+                'score_pct': round(score_pct, 1),
+                'weight_share': weight_share
+            })
+        focus_details['Spell Mana Efficiency'] = rows
+    scores['focus_details'] = focus_details if focus_details else None
     
     # Store damage-specific focii for display
     scores['damage_focii'] = char_damage_focii
@@ -1754,6 +1834,7 @@ def main():
     focii_data = load_focii()
     focus_lookup = create_focus_lookup(focii_data)
     best_focii = get_best_focii_by_category(focii_data)
+    best_mana_by_cat, best_haste_by_cat, best_duration_by_cat = get_best_focii_by_subcategory(focii_data)
     bard_instrument_data = load_bard_instruments()
     
     print(f"Loaded {len(focii_data)} focus effects")
@@ -1934,7 +2015,7 @@ def main():
         char_class = char_data['class']
         char_inventory = inventory.get(char_id, [])
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
-        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, char_mana_efficiency_cats, bard_instrument_data)
+        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, char_mana_efficiency_cats, bard_instrument_data, best_mana_by_cat, best_haste_by_cat, best_duration_by_cat)
         
         # Calculate overall score using class-specific weights with conversion rates
         overall_score = calculate_overall_score_with_weights(
