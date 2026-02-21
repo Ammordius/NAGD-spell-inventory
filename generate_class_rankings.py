@@ -803,8 +803,9 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Shadow Knight/Paladin - Tank hybrids
+    # Shadow Knight/Paladin - Tank hybrids (FT contribution halved; remainder goes to other foci)
     'Shadow Knight': {
+        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -816,6 +817,7 @@ CLASS_WEIGHTS = {
         }
     },
     'Paladin': {
+        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -941,8 +943,9 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Beastlord - Hybrid melee/caster
+    # Beastlord - Hybrid melee/caster (FT contribution halved; remainder goes to other foci)
     'Beastlord': {
+        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -979,8 +982,9 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Ranger - Hybrid melee/caster
+    # Ranger - Hybrid melee/caster (FT contribution halved; remainder goes to other foci)
     'Ranger': {
+        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -1093,7 +1097,8 @@ def normalize_class_weights(weights_config):
     atk_weight_raw = 0.0  # Will be extracted from focus dict below
     haste_weight_raw = 0.0  # Will be extracted from focus dict below (or from haste_pct for backward compatibility)
     # FT (Flowing Thought, cap 15) - decent weight for all mana classes when capped
-    ft_weight_raw = 4.0 if has_mana else 0.0  # FT weight when capped; meaningful share of focus score
+    # SHD, PAL, RNG, BST use half FT weight; the remainder is reassigned to other foci via focus_scale
+    ft_weight_raw = 2.0 if (weights_config.get('ft_half') and has_mana) else (4.0 if has_mana else 0.0)
     
     # Calculate total focus weight from config (spell focuses + ATK + Haste + special items)
     focus_weights = weights_config.get('focus', {})
