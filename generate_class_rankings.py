@@ -842,14 +842,14 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
 # Class-specific weight configuration
 # This defines how much each stat/focus contributes to the overall score per class
 CLASS_WEIGHTS = {
-    # Warrior/Monk - Tank melees
+    # Warrior/Monk - Tank melees (Warrior: HP 3x, AC 2x, Resists 2x; no mana)
     'Warrior': {
-        'hp_pct': 1.0,
+        'hp_pct': 3.0,
         'mana_pct': 0.0,
-        'ac_pct': 1.0,
+        'ac_pct': 2.0,
         'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 0.0,  # Moved to focus
-        'resists_pct': 1.0,
+        'resists_pct': 2.0,
         'focus': {
             'ATK': 1.0,  # ATK moved to focus
             'Haste': 1.0,  # Item haste (30% item = 100% total) moved to focus
@@ -882,14 +882,14 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Shadow Knight - Tank hybrid: haste 0.75, atk 0.75, det mana pres 0.5, Shield of Strife 2.0, FT 1.0
+    # Shadow Knight - Tank hybrid: HP 3x, Mana 1x, AC 2x, Resists 2x
     'Shadow Knight': {
-        'hp_pct': 1.0,
+        'hp_pct': 3.0,
         'mana_pct': 1.0,
-        'ac_pct': 1.0,
+        'ac_pct': 2.0,
         'atk_pct': 0.0,   # Moved to focus
         'haste_pct': 0.0, # Moved to focus
-        'resists_pct': 1.0,
+        'resists_pct': 2.0,
         'focus': {
             'Haste': 0.75,
             'ATK': 0.75,
@@ -899,15 +899,15 @@ CLASS_WEIGHTS = {
         }
     },
     'Paladin': {
-        'hp_pct': 1.0,
+        'hp_pct': 3.0,
         'mana_pct': 1.0,
-        'ac_pct': 1.0,
+        'ac_pct': 2.0,
         'atk_pct': 0.0,
         'haste_pct': 0.0,  # Moved to focus (weight 0.5)
-        'resists_pct': 1.0,
+        'resists_pct': 2.0,
         'focus': {
             'ATK': 0.5,
-            'FT': 2.0,   # Half weight for hybrid
+            'FT': 1.0,
             'Haste': 0.5,
             'Beneficial Spell Haste': 0.75,
             'Healing Enhancement': 0.5,
@@ -1032,17 +1032,17 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Beastlord - Hybrid melee/caster (FT half weight)
+    # Beastlord - Hybrid melee/caster (HP 3x, Mana 1x, AC 2x, Resists 2x)
     'Beastlord': {
-        'hp_pct': 1.0,
+        'hp_pct': 3.0,
         'mana_pct': 1.0,
-        'ac_pct': 1.0,
+        'ac_pct': 2.0,
         'atk_pct': 0.0,
         'haste_pct': 1.0,
-        'resists_pct': 1.0,
+        'resists_pct': 2.0,
         'focus': {
             'ATK': 1.0,
-            'FT': 2.0,   # Half weight for hybrid
+            'FT': 1.0,
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
             'Spell Mana Efficiency': 1.0,
@@ -1072,17 +1072,17 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Ranger - Hybrid melee/caster (FT half weight)
+    # Ranger - Hybrid melee/caster (HP 3x, Mana 1x, AC 2x, Resists 2x)
     'Ranger': {
-        'hp_pct': 1.0,
+        'hp_pct': 3.0,
         'mana_pct': 1.0,
-        'ac_pct': 1.0,
+        'ac_pct': 2.0,
         'atk_pct': 0.0,
         'haste_pct': 1.0,
-        'resists_pct': 1.0,
+        'resists_pct': 2.0,
         'focus': {
             'ATK': 1.0,
-            'FT': 2.0,   # Half weight for hybrid
+            'FT': 1.0,
         }
     },
     
@@ -1130,13 +1130,8 @@ def normalize_class_weights(weights_config):
     Total = 100%. This yields Stat Total out of 65 points and Focus Total out of 35 points.
     ATK, FT, and Haste are part of focus weight. Resists weight is TOTAL across all 5 resists.
     """
-    # Raw stat targets (will be scaled so stat total = 0.65)
-    TARGET_HP = 0.20
-    TARGET_AC = 0.175
-    TARGET_RESISTS = 0.175  # TOTAL across all 5 resists
+    # Stat weights from config are relative (e.g. HP 3, Mana 1, AC 2, Resists 2); scaled so stat total = 65%
     TARGET_FOCUS = 0.35  # Focus gets 35% (35 points out of 100)
-    TARGET_MANA = 0.15
-    STAT_TOTAL_TARGET = 0.65  # Stats get 65% (65 points out of 100)
 
     # Per-class override (e.g. Bard 0.40)
     focus_target = weights_config.get('target_focus')
@@ -1149,17 +1144,17 @@ def normalize_class_weights(weights_config):
     has_mana = weights_config.get('mana_pct', 0) > 0
     has_ac = weights_config.get('ac_pct', 0) > 0
 
-    # Scale stat targets so they sum to stat_total_target (e.g. 0.65)
-    other_sum = TARGET_HP + TARGET_RESISTS
-    if has_mana:
-        other_sum += TARGET_MANA
-    if has_ac:
-        other_sum += TARGET_AC
-    scale_stat = (stat_total_target / other_sum) if other_sum > 0 else 0.0
-    hp_target = TARGET_HP * scale_stat
-    resists_target = TARGET_RESISTS * scale_stat
-    mana_target = (TARGET_MANA * scale_stat) if has_mana else 0.0
-    ac_target = (TARGET_AC * scale_stat) if has_ac else 0.0
+    # Use config as relative weights; scale so they sum to stat_total_target
+    hp_w = weights_config.get('hp_pct', 0.0)
+    mana_w = weights_config.get('mana_pct', 0.0)
+    ac_w = weights_config.get('ac_pct', 0.0)
+    resists_w = weights_config.get('resists_pct', 0.0)
+    stat_sum = hp_w + (mana_w if has_mana else 0.0) + (ac_w if has_ac else 0.0) + resists_w
+    scale_stat = (stat_total_target / stat_sum) if stat_sum > 0 else 0.0
+    hp_target = hp_w * scale_stat
+    resists_target = resists_w * scale_stat
+    mana_target = (mana_w * scale_stat) if has_mana else 0.0
+    ac_target = (ac_w * scale_stat) if has_ac else 0.0
     
     # Calculate focus weight components from config
     # ATK, FT, Haste and spell focuses all in focus dict; one scale for ~35% total
