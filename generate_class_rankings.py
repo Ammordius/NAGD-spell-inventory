@@ -1124,63 +1124,42 @@ for _w in CLASS_WEIGHTS.values():
 
 def normalize_class_weights(weights_config):
     """
-    Normalize class weights to achieve target percentages:
-    - 20% HP
-    - 17.5% AC (if applicable)
-    - 17.5% Resists (TOTAL across all 5 resists)
-    - 30% Focus (including ATK, FT, Haste, and spell focuses)
-    - 15% Mana (if applicable)
-    
-    ATK, FT, and Haste are part of the 30% focus weight, not stat weights.
-    Note: Resists weight is 17.5% TOTAL, not per resist. Each of the 5 resists contributes to this total.
+    Normalize class weights so that:
+    - Stats (HP, AC, Mana where applied, Resists) sum to 65% (0.65)
+    - Focus (ATK, FT, Haste, spell focuses) sum to 35% (0.35)
+    Total = 100%. This yields Stat Total out of 65 points and Focus Total out of 35 points.
+    ATK, FT, and Haste are part of focus weight. Resists weight is TOTAL across all 5 resists.
     """
-    # Target percentages
+    # Raw stat targets (will be scaled so stat total = 0.65)
     TARGET_HP = 0.20
     TARGET_AC = 0.175
     TARGET_RESISTS = 0.175  # TOTAL across all 5 resists
-    TARGET_FOCUS = weights_config.get('target_focus')  # Per-class override (e.g. Bard 0.40)
-    if TARGET_FOCUS is None:
-        TARGET_FOCUS = 0.30  # Default: ATK, FT, Haste, and spell focuses
+    TARGET_FOCUS = 0.35  # Focus gets 35% (35 points out of 100)
     TARGET_MANA = 0.15
-    
+    STAT_TOTAL_TARGET = 0.65  # Stats get 65% (65 points out of 100)
+
+    # Per-class override (e.g. Bard 0.40)
+    focus_target = weights_config.get('target_focus')
+    if focus_target is None:
+        focus_target = TARGET_FOCUS
+    focus_target = max(0.0, min(1.0, focus_target))
+    stat_total_target = 1.0 - focus_target
+
     # Check which stats are applicable
     has_mana = weights_config.get('mana_pct', 0) > 0
     has_ac = weights_config.get('ac_pct', 0) > 0
-    
-    # Calculate total target percentage and normalize to sum to 1.0
-    # If target_focus is set (e.g. Bard 0.40), reserve that share and scale others to fill the rest
-    custom_focus = weights_config.get('target_focus')
-    if custom_focus is not None and 0 < custom_focus < 1.0:
-        # Reserve custom focus share; scale other targets to sum to (1 - custom_focus)
-        focus_target = custom_focus
-        other_sum = TARGET_HP + TARGET_RESISTS
-        if has_mana:
-            other_sum += TARGET_MANA
-        if has_ac:
-            other_sum += TARGET_AC
-        scale_other = (1.0 - focus_target) / other_sum if other_sum > 0 else 0.0
-        hp_target = TARGET_HP * scale_other
-        resists_target = TARGET_RESISTS * scale_other
-        mana_target = (TARGET_MANA * scale_other) if has_mana else 0.0
-        ac_target = (TARGET_AC * scale_other) if has_ac else 0.0
-    else:
-        total_target = TARGET_HP + TARGET_RESISTS + TARGET_FOCUS
-        if has_mana:
-            total_target += TARGET_MANA
-        if has_ac:
-            total_target += TARGET_AC
-        if total_target > 0:
-            hp_target = TARGET_HP / total_target
-            resists_target = TARGET_RESISTS / total_target
-            focus_target = TARGET_FOCUS / total_target
-            mana_target = (TARGET_MANA / total_target) if has_mana else 0.0
-            ac_target = (TARGET_AC / total_target) if has_ac else 0.0
-        else:
-            hp_target = 1.0
-            resists_target = 0.0
-            focus_target = 0.0
-            mana_target = 0.0
-            ac_target = 0.0
+
+    # Scale stat targets so they sum to stat_total_target (e.g. 0.65)
+    other_sum = TARGET_HP + TARGET_RESISTS
+    if has_mana:
+        other_sum += TARGET_MANA
+    if has_ac:
+        other_sum += TARGET_AC
+    scale_stat = (stat_total_target / other_sum) if other_sum > 0 else 0.0
+    hp_target = TARGET_HP * scale_stat
+    resists_target = TARGET_RESISTS * scale_stat
+    mana_target = (TARGET_MANA * scale_stat) if has_mana else 0.0
+    ac_target = (TARGET_AC * scale_stat) if has_ac else 0.0
     
     # Calculate focus weight components from config
     # ATK, FT, Haste and spell focuses all in focus dict; one scale for ~35% total
