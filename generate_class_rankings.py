@@ -1126,21 +1126,11 @@ def normalize_class_weights(weights_config):
     total_focus_components = other_raw + ft_weight_raw
     
     # Scale focus components to achieve target focus percentage
-    # For ft_half (SHD, PAL, RNG, BST): use original scale so non-FT foci keep same weight; FT gets half; remainder goes to stats
+    # For ft_half (SHD, PAL, RNG, BST): keep focus slice at focus_target (~35%); halve FT within it (use 2 instead of 4)
     ft_half = weights_config.get('ft_half') and has_mana
     if ft_half and other_raw > 0:
-        # Original scale as if FT were 4.0: other foci and FT use this scale; FT gets 2*scale (half of 4*scale)
-        focus_scale = focus_target / (other_raw + 4.0)
-        actual_focus_total = focus_target * (other_raw + 2.0) / (other_raw + 4.0)
-        remainder = focus_target - actual_focus_total
-        stat_sum = hp_target + resists_target + ((mana_target if has_mana else 0.0) + (ac_target if has_ac else 0.0))
-        if stat_sum > 0:
-            hp_target += remainder * (hp_target / stat_sum)
-            resists_target += remainder * (resists_target / stat_sum)
-            if has_mana:
-                mana_target += remainder * (mana_target / stat_sum)
-            if has_ac:
-                ac_target += remainder * (ac_target / stat_sum)
+        # Total focus stays at focus_target; scale = focus_target / (other_raw + 2) so (other_raw + 2)*scale = focus_target
+        focus_scale = focus_target / (other_raw + 2.0)
     elif total_focus_components > 0:
         focus_scale = focus_target / total_focus_components
     else:
@@ -1947,10 +1937,15 @@ def main():
         char['overall_rank'] = len([c for c in output_data if c['overall_score'] > char['overall_score']]) + 1
     
     # Write output with class weights for filtering in UI
+    # normalized_class_weights: per-class weights used for scoring (focus ~35%); use for card Stat/Focus Total and Weight column
     output_file = 'class_rankings.json'
+    normalized_by_class = {
+        cls: normalize_class_weights(CLASS_WEIGHTS[cls]) for cls in CLASS_WEIGHTS
+    }
     output = {
         'characters': output_data,
-        'class_weights': CLASS_WEIGHTS
+        'class_weights': CLASS_WEIGHTS,
+        'normalized_class_weights': normalized_by_class
     }
     # Helper function to round floats in nested structures
     def round_floats(obj):
