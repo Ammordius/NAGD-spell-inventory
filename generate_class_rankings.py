@@ -226,10 +226,7 @@ SPELL_DAMAGE_TYPE_MAP = {
     'Enchantment of Destruction': 'Magic',
     'Insidious Dreams': 'Magic',
     
-    # Disease/Poison (DoT) focii (Bertoxxulous, Saryrn are disease/poison)
-    'Fury of Bertoxxulous': 'Disease',
-    'Saryrn\'s Torment': 'Disease',
-    'Saryrn\'s Venom': 'Disease',
+    # Saryrn's Torment / Saryrn's Venom are mana preservation on nuke, not spell damage. Fury of Bertoxxulous is SK-only.
     
     # DoT-only spell damage (not instant); tracked for Necro/Shaman. "All" is instant-only and does not apply.
     'Vengeance of Eternity': 'DoT',   # 30% DoT, items 32142, 20898
@@ -353,26 +350,28 @@ def calculate_spell_mana_efficiency_score(char_mana_efficiency_cats, char_class,
     return weighted_sum / total_weight
 
 
-# Class-specific damage type priorities
+# Class-specific damage type priorities (DoT is special; "All" applies to other subcategories only, not a separate line)
 CLASS_DAMAGE_TYPES = {
-    'Necromancer': ['All', 'DoT', 'Disease'],  # Instant + DoT-only focus + Disease
-    'Shaman': ['Cold', 'DoT', 'Disease'],  # Cold + DoT-only focus + Disease
+    'Necromancer': ['DoT'],   # DoT-only; instant covered by All but not a separate weighted category
+    'Shaman': ['Cold', 'DoT'],  # Cold + DoT-only focus
     'Wizard': ['Fire', 'Cold', 'Magic'],
     'Magician': ['Fire', 'Magic'],
     'Druid': ['Fire', 'Cold'],
     'Enchanter': ['Magic'],
     'Cleric': ['Magic'],
+    'Beastlord': ['Cold'],
 }
 
 # Class-specific focus priorities (updated with damage types)
 CLASS_FOCUS_PRIORITIES = {
-    'Necromancer': ['Spell Damage (All)', 'Spell Damage (DoT)', 'Spell Damage (Disease)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration'],
-    'Shaman': ['Spell Damage (Cold)', 'Spell Damage (DoT)', 'Spell Damage (Disease)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration'],
+    'Necromancer': ['Spell Damage (DoT)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration'],
+    'Shaman': ['Spell Damage (Cold)', 'Spell Damage (DoT)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration'],
     'Druid': ['Healing Enhancement', 'Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Mana Efficiency', 'Buff Spell Duration'],
-    'Cleric': ['Healing Enhancement', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Buff Spell Duration'],
+    'Cleric': ['Healing Enhancement', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration'],
     'Wizard': ['Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
     'Magician': ['Spell Damage (Fire)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
     'Enchanter': ['Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Buff Spell Duration'],
+    'Beastlord': ['ATK', 'FT', 'Spell Damage (Cold)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration', 'Beneficial Spell Haste', 'Detrimental Spell Haste'],
     'Bard': ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'],
 }
 
@@ -716,7 +715,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 if char_class in CLASS_DAMAGE_TYPES:
                     damage_types = CLASS_DAMAGE_TYPES[char_class]
                     best_damage_score = 0
-                    # Shaman: store best-in-each per type (DoT 80%, Cold 20% of detrimental weight)
+                    # Shaman: store best-in-each per type (DoT 1.0, Cold 0.2 weight ratio)
                     if char_class == 'Shaman':
                         for damage_type in damage_types:
                             char_pct = char_damage_focii.get(damage_type, 0)
@@ -726,22 +725,30 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                                 damage_score = 0
                             focus_scores[f'Spell Damage ({damage_type})'] = damage_score
                             best_damage_score = max(best_damage_score, damage_score)
-                        # Composite for detrimental: 80% DoT, 20% Cold (best in each)
+                        # Composite: DoT 1.0, Cold 0.2 => 5/6 DoT, 1/6 Cold
                         focus_scores[category] = (
-                            0.8 * focus_scores.get('Spell Damage (DoT)', 0) +
-                            0.2 * focus_scores.get('Spell Damage (Cold)', 0)
+                            (5/6) * focus_scores.get('Spell Damage (DoT)', 0) +
+                            (1/6) * focus_scores.get('Spell Damage (Cold)', 0)
                         )
                     else:
                         for damage_type in damage_types:
-                            char_pct = char_damage_focii.get(damage_type, 0)
+                            if damage_type == 'DoT':
+                                char_pct = char_damage_focii.get('DoT', 0)
+                            else:
+                                # "All" (instant) applies to non-DoT subcategories
+                                char_pct = max(char_damage_focii.get(damage_type, 0), char_damage_focii.get('All', 0))
                             if best_pct > 0:
                                 damage_score = (char_pct / best_pct * 100) if char_pct > 0 else 0
-                                best_damage_score = max(best_damage_score, damage_score)
-                        # Also check "All" damage type
-                        all_pct = char_damage_focii.get('All', 0)
-                        if best_pct > 0:
-                            all_score = (all_pct / best_pct * 100) if all_pct > 0 else 0
-                            best_damage_score = max(best_damage_score, all_score)
+                            else:
+                                damage_score = 0
+                            focus_scores[f'Spell Damage ({damage_type})'] = damage_score
+                            best_damage_score = max(best_damage_score, damage_score)
+                        # "All" only applies to non-DoT types; don't add for DoT-only classes (e.g. Necro)
+                        if any(dt != 'DoT' for dt in damage_types):
+                            all_pct = char_damage_focii.get('All', 0)
+                            if best_pct > 0:
+                                all_score = (all_pct / best_pct * 100) if all_pct > 0 else 0
+                                best_damage_score = max(best_damage_score, all_score)
                         focus_scores[category] = best_damage_score
                 else:
                     # Non-caster classes don't need spell damage
@@ -878,12 +885,12 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         total_weight = 0
         added_shaman_detrimental = False
         for i, cat in enumerate(priority_cats):
-            # Shaman detrimental = 80% DoT, 20% Cold (best in each); one composite, weight 5
+            # Shaman detrimental = DoT 1.0, Cold 0.2 => 5/6 DoT, 1/6 Cold (one composite, weight 5)
             if char_class == 'Shaman' and cat.startswith('Spell Damage ('):
                 if not added_shaman_detrimental:
                     det_composite = (
-                        0.8 * focus_scores.get('Spell Damage (DoT)', 0) +
-                        0.2 * focus_scores.get('Spell Damage (Cold)', 0)
+                        (5/6) * focus_scores.get('Spell Damage (DoT)', 0) +
+                        (1/6) * focus_scores.get('Spell Damage (Cold)', 0)
                     )
                     total_score += det_composite * 5
                     total_weight += 5
@@ -1031,7 +1038,7 @@ CLASS_WEIGHTS = {
             'Spell Mana Efficiency': 1.0,
             'Spell Range Extension': 0.5,  # Lower weight for all casters
             'Buff Spell Duration': 1.0,
-            'Beneficial Spell Haste': 1.0,
+            'Beneficial Spell Haste': 2.0,  # Class-defining for priests (spot heals)
         }
     },
     
@@ -1063,7 +1070,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'FT': 4.0,
-            'Spell Damage': {'All': 0.75, 'DoT': 1.0, 'Disease': 1.0},
+            'Spell Damage': {'DoT': 1.0},
             'Spell Mana Efficiency': 1.0,  # det mana
             'Detrimental Spell Duration': 1.0,  # det or all e
             'Detrimental Spell Haste': 1.0,  # det spell h
@@ -1081,14 +1088,14 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'FT': 4.0,
-            # Detrimental focus: 80% DoT, 20% Cold (best in each); 4 pts DoT, 1 pt Cold
-            'Spell Damage': {'DoT': 4.0, 'Cold': 1.0},
+            # Detrimental focus: DoT 1.0, Cold 0.2 (best in each)
+            'Spell Damage': {'DoT': 1.0, 'Cold': 0.2},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
+            'Beneficial Spell Haste': 2.0,  # Class-defining for priests (spot heals)
             'Detrimental Spell Haste': 0.75,
             'Buff Spell Duration': 1.0,  # Bene exter
-            'Detrimental Spell Duration': 1.0,  # DoT duration focus
-            'All Spell Duration': 1.0,  # All duration focus (works for both)
+            'Detrimental Spell Duration': 1.0,  # DoT duration focus (All duration applies to both, no separate weight)
             'Spell Range Extension': 0.5,  # Lower weight for all casters
             "Time's Antithesis": 2.0,  # Item 24699, same weight as Serpent of Vindication for Enchanter
         }
@@ -1128,11 +1135,12 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
             'Spell Mana Efficiency': 1.0,
+            'Buff Spell Duration': 1.0,
             'Beneficial Spell Haste': 0.75,
             'Detrimental Spell Haste': 0.75,
         }
     },
-    
+
     # Druid - Hybrid healer/caster
     'Druid': {
         'hp_pct': 1.0,
@@ -1146,7 +1154,7 @@ CLASS_WEIGHTS = {
             'Spell Damage': {'Fire': 1.0, 'Cold': 1.0},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
-            'Beneficial Spell Haste': 1.0,
+            'Beneficial Spell Haste': 2.0,  # Class-defining for priests (spot heals)
             'Detrimental Spell Haste': 0.75,
             'Detrimental Spell Duration': 0.5,  # det or all e
             'Buff Spell Duration': 1.0,  # Bene exter
