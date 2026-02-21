@@ -1121,12 +1121,27 @@ def normalize_class_weights(weights_config):
     if haste_weight_raw == 0.0:
         haste_weight_raw = weights_config.get('haste_pct', 0.0)
     
-    # Total focus weight components = ATK + Haste + FT + spell focuses + special items
-    total_focus_components = atk_weight_raw + haste_weight_raw + ft_weight_raw + total_spell_focus_weight
+    # Other focus components (excluding FT) - used for ft_half to keep their weights unchanged
+    other_raw = atk_weight_raw + haste_weight_raw + total_spell_focus_weight
+    total_focus_components = other_raw + ft_weight_raw
     
     # Scale focus components to achieve target focus percentage
-    # We need to distribute the focus_target among ATK, Haste, FT, and spell focuses
-    if total_focus_components > 0:
+    # For ft_half (SHD, PAL, RNG, BST): use original scale so non-FT foci keep same weight; FT gets half; remainder goes to stats
+    ft_half = weights_config.get('ft_half') and has_mana
+    if ft_half and other_raw > 0:
+        # Original scale as if FT were 4.0: other foci and FT use this scale; FT gets 2*scale (half of 4*scale)
+        focus_scale = focus_target / (other_raw + 4.0)
+        actual_focus_total = focus_target * (other_raw + 2.0) / (other_raw + 4.0)
+        remainder = focus_target - actual_focus_total
+        stat_sum = hp_target + resists_target + ((mana_target if has_mana else 0.0) + (ac_target if has_ac else 0.0))
+        if stat_sum > 0:
+            hp_target += remainder * (hp_target / stat_sum)
+            resists_target += remainder * (resists_target / stat_sum)
+            if has_mana:
+                mana_target += remainder * (mana_target / stat_sum)
+            if has_ac:
+                ac_target += remainder * (ac_target / stat_sum)
+    elif total_focus_components > 0:
         focus_scale = focus_target / total_focus_components
     else:
         focus_scale = 0.0
@@ -1141,7 +1156,7 @@ def normalize_class_weights(weights_config):
     # ATK, Haste are stored as focus components (not stat weights)
     normalized['atk_pct'] = 0.0  # Moved to focus
     normalized['haste_pct'] = 0.0  # Moved to focus
-    normalized['ft_weight'] = ft_weight_raw * focus_scale  # FT weight (will be applied if capped)
+    normalized['ft_weight'] = ft_weight_raw * focus_scale  # FT weight (half for ft_half via ft_weight_raw=2 and scale)
     
     # Normalize focus weights (with scaling applied)
     normalized['focus'] = {}
