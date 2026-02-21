@@ -930,11 +930,12 @@
                 focus: {}
             };
 
-            if (statSum <= 0 && focusSum <= 0) return normalized;
+            if (statSum <= 0 && focusSubSum <= 0) return normalized;
 
-            // When no focus is selected (weight 0), stats get 100%. Otherwise 65% stats / 35% focus.
-            const statTarget = focusSum > 0 ? STAT_TARGET : 1.0;
-            const focusTarget = focusSum > 0 ? FOCUS_TARGET : 0;
+            // When no focus is selected (all focus weights 0), stats get 100%. Otherwise 65% stats / 35% focus.
+            // Use focusSubSum (actual focus weight sum), not focusSum, so that "all zeros except mana" gives 100% to mana.
+            const statTarget = focusSubSum > 0 ? STAT_TARGET : 1.0;
+            const focusTarget = focusSubSum > 0 ? FOCUS_TARGET : 0;
 
             if (statSum > 0) {
                 const statScale = statTarget / statSum;
@@ -943,7 +944,7 @@
                 normalized.ac_pct = ac * statScale;
                 normalized.resists_pct = resists * statScale;
             }
-            if (focusSum > 0) {
+            if (focusSubSum > 0) {
                 normalized.focusTarget = focusTarget;
                 const focusScale = focusTarget / (focusSubSum > 0 ? focusSubSum : (focusMult || 1));
                 if (focusSubSum > 0) {
@@ -985,8 +986,15 @@
                 
                 let weights = JSON.parse(JSON.stringify(originalClassWeights[charClass] || classWeights[charClass]));
                 
+                // Apply custom stat weights (ensure stat keys exist so e.g. "mana only" is applied even if backend omitted a key)
+                const statKeys = ['hp_pct', 'mana_pct', 'ac_pct', 'resists_pct'];
+                statKeys.forEach(k => {
+                    if (customWeight[k] !== undefined) {
+                        weights[k] = customWeight[k];
+                    }
+                });
                 Object.keys(customWeight).forEach(key => {
-                    if (key !== '_meta' && key !== 'focus' && weights.hasOwnProperty(key)) {
+                    if (key !== '_meta' && key !== 'focus' && !statKeys.includes(key) && weights.hasOwnProperty(key)) {
                         weights[key] = customWeight[key];
                     }
                 });
