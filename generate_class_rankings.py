@@ -201,6 +201,93 @@ def analyze_character_focii(char_inventory, focus_lookup):
     return (dict(char_focii), dict(char_damage_focii), 
             dict(char_mana_efficiency_cats), dict(char_spell_haste_cats), dict(char_duration_cats))
 
+
+def get_focus_sources(char_inventory, focus_lookup):
+    """Return per-focus item sources for equipped gear (slots 1-22 only).
+    Pet Power is checked from full inventory (including bags) so swap-in is shown.
+    Keys match focus_scores keys where possible. Skip attack haste (Haste/ATK) item listing.
+    Value is list of {item_name, slot_id, value, item_id} for the best item(s) providing that focus."""
+    EQUIPPED_SLOTS = set(range(1, 23))  # 1-22
+    best = {}  # focus_key -> (pct, item_name, slot_id, item_id)
+
+    def set_best(key, pct, item_name, slot_id, item_id=None):
+        if key not in best or pct > best[key][0]:
+            best[key] = (pct, item_name, slot_id, item_id)
+
+    # Pet Power: check full inventory (including bags) so swap-in items are shown
+    for item in char_inventory or []:
+        item_id = str(item.get('item_id', '')) if item.get('item_id') is not None else ''
+        if item_id in PET_POWER_ITEMS:
+            pct = PET_POWER_ITEMS[item_id]
+            item_name = item.get('item_name', '') or item.get('name', '') or f'Item {item_id}'
+            slot_id = item.get('slot_id', 0)
+            set_best('Pet Power', pct, item_name, slot_id, item_id)
+
+    for item in char_inventory or []:
+        slot_id = item.get('slot_id', 0)
+        if slot_id not in EQUIPPED_SLOTS:
+            continue
+        item_id = str(item.get('item_id', '')) if item.get('item_id') is not None else ''
+        item_name = item.get('item_name', '') or item.get('name', '') or f'Item {item_id}'
+
+        # Binary focus items (we don't list ATK/Haste sources per user request)
+        if item_id == PALADIN_SK_FOCUS_ITEMS['shield']:
+            set_best('Shield of Strife', 100, item_name, slot_id, item_id)
+            continue
+        if item_id == ENCHANTER_FOCUS_ITEMS['range']:
+            set_best('Serpent of Vindication', 100, item_name, slot_id, item_id)
+            continue
+        if item_id == SHAMAN_FOCUS_ITEMS['range']:
+            set_best("Time's Antithesis", 100, item_name, slot_id, item_id)
+            continue
+        if item_id == WARRIOR_FOCUS_ITEMS['mh']:
+            set_best('Darkblade', 100, item_name, slot_id, item_id)
+            continue
+        if item_id == WARRIOR_FOCUS_ITEMS['chest']:
+            set_best('Raex Chest', 100, item_name, slot_id, item_id)
+            continue
+
+        item_name_norm = normalize_item_name(item_name)
+        lookup_key = item_name_norm if item_name_norm in focus_lookup else (item_id if item_id in focus_lookup else None)
+        if lookup_key is None:
+            continue
+
+        for focus_effect in focus_lookup[lookup_key]:
+            focus_name = focus_effect['name']
+            cat = focus_effect['category']
+            pct = focus_effect['percentage']
+
+            if cat == 'Spell Damage':
+                damage_type = SPELL_DAMAGE_TYPE_MAP.get(focus_name, 'All')
+                set_best(f'Spell Damage ({damage_type})', pct, item_name, slot_id, item_id)
+            elif cat == 'Spell Mana Efficiency':
+                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(focus_name, 'Nuke')
+                set_best(f'Spell Mana Efficiency ({sub})', pct, item_name, slot_id, item_id)
+            elif cat == 'Spell Haste':
+                sub = SPELL_HASTE_CATEGORY_MAP.get(focus_name, 'Bene')
+                if sub == 'Det':
+                    set_best('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
+                else:
+                    set_best('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
+            elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
+                if cat == 'All Spell Duration':
+                    set_best('Buff Spell Duration', pct, item_name, slot_id, item_id)
+                    set_best('Detrimental Spell Duration', pct, item_name, slot_id, item_id)
+                else:
+                    dur_cat = SPELL_DURATION_CATEGORY_MAP.get(focus_name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
+                    key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
+                    set_best(key, pct, item_name, slot_id, item_id)
+            else:
+                # Healing Enhancement, Spell Range Extension, etc.
+                set_best(cat, pct, item_name, slot_id, item_id)
+
+    # Convert to list of dicts for JSON (include item_id for item links in UI)
+    result = {}
+    for key, (pct, name, sid, iid) in best.items():
+        result[key] = [{'item_name': name, 'slot_id': sid, 'value': pct, 'item_id': iid}]
+    return result
+
+
 # Map spell damage focii to damage types
 SPELL_DAMAGE_TYPE_MAP = {
     # Magic damage focii (Druzzil is the god of magic)
@@ -370,7 +457,7 @@ CLASS_DAMAGE_TYPES = {
 
 # Class-specific focus priorities (updated with damage types)
 CLASS_FOCUS_PRIORITIES = {
-    'Necromancer': ['Spell Damage (DoT)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration'],
+    'Necromancer': ['Spell Damage (DoT)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration', 'Pet Power'],
     'Shaman': ['Spell Damage (Cold)', 'Spell Damage (DoT)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration'],
     'Druid': ['Healing Enhancement', 'Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Mana Efficiency', 'Buff Spell Duration'],
     'Cleric': ['Healing Enhancement', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration'],
@@ -399,6 +486,21 @@ ENCHANTER_FOCUS_ITEMS = {
 SHAMAN_FOCUS_ITEMS = {
     'range': '24699'  # Time's Antithesis in Range (slot 11)
 }
+
+# Pet Power focus: item_id -> percentage. Checked from full inventory (including bags) so they can swap in.
+PET_POWER_ITEMS = {
+    '28144': 20,
+    '20508': 25,
+}
+
+def get_char_pet_power(char_inventory):
+    """Return best Pet Power % from full inventory (including bags). Items 28144=20%, 20508=25%."""
+    best = 0
+    for item in char_inventory or []:
+        iid = str(item.get('item_id', '')) if item.get('item_id') is not None else ''
+        if iid in PET_POWER_ITEMS and PET_POWER_ITEMS[iid] > best:
+            best = PET_POWER_ITEMS[iid]
+    return best
 
 def check_bard_instrument_focus(char_inventory, bard_data):
     """Bard instrument focus: take the BEST single mod in each category (not sum).
@@ -529,7 +631,7 @@ def check_shaman_focus_items(char_inventory):
     return 100.0 if has_times_antithesis else 0.0, {'has_times_antithesis': has_times_antithesis}
 
 # Calculate class-specific scores
-def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, bard_instrument_data=None, best_mana_by_cat=None, best_haste_by_cat=None, best_duration_by_cat=None):
+def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, bard_instrument_data=None, best_mana_by_cat=None, best_haste_by_cat=None, best_duration_by_cat=None, best_pet_power_by_class=None):
     """Calculate percentage scores for a character based on their class.
     best_*_by_cat: best focus % per subcategory (Det/Bene/Nuke/Sanguine for mana; Det/Bene for haste; Bene/Det/All for duration)."""
     char_class = char_data['class']
@@ -811,6 +913,11 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
             shaman_focus_score, shaman_items = check_shaman_focus_items(char_inventory or [])
             focus_scores["Time's Antithesis"] = shaman_focus_score
             scores['focus_items'] = shaman_items
+        # Pet Power: Magician, Beastlord, Necromancer; checked from full inventory (including bags)
+        if char_class in ('Magician', 'Beastlord', 'Necromancer'):
+            best_pp = (best_pet_power_by_class or {}).get(char_class, 25)
+            char_pp = get_char_pet_power(char_inventory or [])
+            focus_scores['Pet Power'] = (char_pp / best_pp * 100) if best_pp > 0 and char_pp > 0 else 0
     
     # FT (Flowing Thought) - tracked focus for all classes with mana, cap 15
     if char_class in CLASSES_WITH_MANA and scores.get('ft_capped') is not None:
@@ -1063,6 +1170,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Haste': 1.0,
             'Detrimental Spell Duration': 0.75,
             'Spell Range Extension': 0.5,  # Lower weight for all casters
+            'Pet Power': 3.0,
         }
     },
     
@@ -1081,6 +1189,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Duration': 1.0,  # det or all e
             'Detrimental Spell Haste': 1.0,  # det spell h
             'Spell Range Extension': 0.5,  # Lower weight for all casters
+            'Pet Power': 2.0,
         }
     },
     
@@ -1144,6 +1253,7 @@ CLASS_WEIGHTS = {
             'Buff Spell Duration': 1.0,
             'Beneficial Spell Haste': 0.75,
             'Detrimental Spell Haste': 0.75,
+            'Pet Power': 3.0,
         }
     },
 
@@ -2027,11 +2137,25 @@ def main():
                 'max_resists': max(c.get('stats', {}).get('resists', 0) for c in class_chars),
             }
     
+    # Best Pet Power % per class (for normalizing Pet Power score); uses full inventory
+    best_pet_power_by_class = {}
+    for char_class in ('Magician', 'Beastlord', 'Necromancer'):
+        best_pp = 0
+        for cid, c in characters.items():
+            if c.get('class') != char_class:
+                continue
+            inv = inventory.get(cid, [])
+            p = get_char_pet_power(inv)
+            if p > best_pp:
+                best_pp = p
+        best_pet_power_by_class[char_class] = best_pp
+
     for char_id, char_data in characters.items():
         char_class = char_data['class']
         char_inventory = inventory.get(char_id, [])
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
-        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, char_mana_efficiency_cats, bard_instrument_data, best_mana_by_cat, best_haste_by_cat, best_duration_by_cat)
+        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, char_mana_efficiency_cats, bard_instrument_data, best_mana_by_cat, best_haste_by_cat, best_duration_by_cat, best_pet_power_by_class)
+        scores['focus_sources'] = get_focus_sources(char_inventory, focus_lookup)
         
         # Calculate overall score using class-specific weights with conversion rates
         overall_score = calculate_overall_score_with_weights(

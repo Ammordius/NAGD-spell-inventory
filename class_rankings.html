@@ -246,6 +246,21 @@
             margin: 2px;
         }
 
+        .focus-breakdown-section { margin-top: 24px; padding: 16px; background: linear-gradient(135deg, #f8f9fc 0%, #eef1f8 100%); border-radius: 8px; border: 1px solid #dee2e6; }
+        .focus-breakdown-section h3 { margin: 0 0 12px 0; color: #333; font-size: 1.1em; }
+        .focus-breakdown-item { margin-bottom: 14px; }
+        .focus-breakdown-name { font-weight: 600; color: #495057; margin-bottom: 4px; }
+        .focus-breakdown-bar-wrap { height: 22px; background: #e9ecef; border-radius: 6px; overflow: hidden; margin-bottom: 4px; }
+        .focus-breakdown-bar { height: 100%; border-radius: 6px; transition: width 0.3s ease; min-width: 2px; }
+        .focus-breakdown-bar.high { background: linear-gradient(90deg, #28a745, #20c997); }
+        .focus-breakdown-bar.mid { background: linear-gradient(90deg, #ffc107, #fd7e14); }
+        .focus-breakdown-bar.low { background: linear-gradient(90deg, #dc3545, #e83e8c); }
+        .focus-breakdown-bar.none { background: #adb5bd; }
+        .focus-breakdown-value { font-size: 0.85em; color: #6c757d; }
+        .focus-breakdown-sources { font-size: 0.85em; color: #495057; margin-top: 2px; }
+        .focus-breakdown-sources a { color: #667eea; text-decoration: none; }
+        .focus-breakdown-sources a:hover { text-decoration: underline; }
+
         .loading, .error {
             text-align: center;
             padding: 40px;
@@ -2088,6 +2103,51 @@
                 const focusTotalPctOfTotal = (displayFocusTotal / totalPoints * 100).toFixed(1);
                 html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Focus Total</strong></td><td colspan="3"></td><td><strong>${displayFocusTotal.toFixed(2)}</strong></td><td><strong>${focusTotalPctOfTotal}%</strong></td></tr>`;
                 html += `</tbody></table>`;
+                
+                // Focus breakdown: all focuses we're scored on, with bar and sources (uses same focusWeights as sliders, so updates when sliders change)
+                const focusSources = scores.focus_sources || {};
+                const slotNames = { 0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Primary', 16: 'Secondary', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+                function getScoredFocusKeys(fw) {
+                    const keys = [];
+                    if (!fw) return keys;
+                    for (const [k, v] of Object.entries(fw)) {
+                        if (typeof v === 'object' && v !== null) {
+                            for (const sub of Object.keys(v)) keys.push(k === 'Spell Damage' ? `Spell Damage (${sub})` : `${k} (${sub})`);
+                        } else keys.push(k);
+                    }
+                    return keys;
+                }
+                const scoredFocusKeys = getScoredFocusKeys(focusWeights);
+                if (scoredFocusKeys.length > 0) {
+                    html += `<div class="focus-breakdown-section"><h3>Focus breakdown (what you're scored on)</h3>`;
+                    scoredFocusKeys.forEach(focusKey => {
+                        let scorePct = focusScores[focusKey];
+                        if (scorePct === undefined && focusKey === 'Spell Damage') scorePct = focusScores['Spell Damage'];
+                        if (scorePct === undefined) scorePct = 0;
+                        const barClass = scorePct >= 80 ? 'high' : scorePct >= 40 ? 'mid' : scorePct > 0 ? 'low' : 'none';
+                        let sources = focusSources[focusKey];
+                        if (!sources && focusKey === 'Spell Mana Efficiency') {
+                            sources = [];
+                            ['Det', 'Bene', 'Nuke', 'Sanguine'].forEach(sub => {
+                                const s = focusSources['Spell Mana Efficiency (' + sub + ')'];
+                                if (s) sources = sources.concat(s);
+                            });
+                        }
+                        let sourceHtml = '';
+                        if (sources && sources.length > 0) {
+                            sourceHtml = sources.map(s => {
+                                const slotName = slotNames[s.slot_id] || `Slot ${s.slot_id}`;
+                                const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
+                                const id = (s.item_id != null && s.item_id !== '') ? s.item_id : (char.inventory?.find(i => i.slot_id === s.slot_id)?.item_id || '');
+                                return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a> (${slotName})${valStr}`;
+                            }).join(', ');
+                            sourceHtml = `<span class="focus-breakdown-sources">From: ${sourceHtml}</span>`;
+                        }
+                        const displayName = focusKey === 'FT' ? 'FT (Flowing Thought)' : focusKey;
+                        html += `<div class="focus-breakdown-item"><div class="focus-breakdown-name">${escapeHtml(displayName)}</div><div class="focus-breakdown-bar-wrap"><div class="focus-breakdown-bar ${barClass}" style="width:${Math.min(100, Math.max(0, scorePct))}%"></div></div><div class="focus-breakdown-value">${formatScore(scorePct)}%</div>${sourceHtml}</div>`;
+                    });
+                    html += `</div>`;
+                }
                 
                 // Overall total = Stat Total + Focus Total (from recalculateScores; works with dynamic reweighting)
                 // This ensures consistency with the ranking calculation

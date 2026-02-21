@@ -21,7 +21,7 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 
 | Class       | Priorities (first = highest weight in average) |
 |------------|--------------------------------------------------|
-| Necromancer | Spell Damage (DoT), Spell Mana Efficiency, Spell Haste, Detrimental Spell Duration |
+| Necromancer | Spell Damage (DoT), Spell Mana Efficiency, Spell Haste, Detrimental Spell Duration, Pet Power |
 | Shaman      | Spell Damage (Cold), (DoT), Healing Enhancement, Spell Mana Efficiency, Beneficial Spell Haste, Buff Spell Duration |
 | Druid       | Healing Enhancement, Spell Damage (Fire), (Cold), Spell Mana Efficiency, Buff Spell Duration |
 | Cleric      | Healing Enhancement, Spell Damage (Magic), Spell Mana Efficiency, Beneficial Spell Haste, Buff Spell Duration |
@@ -44,11 +44,11 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 | **Paladin** | ATK 0.5, FT 1.0, Haste 0.5, Beneficial Spell Haste 0.75, Healing Enhancement 0.5, Shield of Strife 2.0, Spell Mana Efficiency 0.5 |
 | **Wizard**  | FT 4.0, Spell Damage (Fire 1.0, Cold 1.0, Magic 0.5), Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5 |
 | **Cleric**  | FT 4.0, Spell Damage (Magic 0.5), Healing Enhancement 2.0, Spell Mana Efficiency 1.0, Spell Range Extension 0.5, Buff Spell Duration 1.0, Beneficial Spell Haste 2.0 |
-| **Magician**| FT 4.0, Spell Damage (Fire 1.0, Magic 0.5), Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5 |
-| **Necromancer** | FT 4.0, Spell Damage (DoT 1.0), Spell Mana Efficiency 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.5 |
+| **Magician**| FT 4.0, Spell Damage (Fire 1.0, Magic 0.5), Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5, Pet Power 3.0 |
+| **Necromancer** | FT 4.0, Spell Damage (DoT 1.0), Spell Mana Efficiency 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.5, Pet Power 2.0 |
 | **Shaman**  | FT 4.0, Spell Damage (DoT 1.0, Cold 0.2), Healing Enhancement 1.0, Spell Mana Efficiency 1.0, Beneficial Spell Haste 2.0, Detrimental Spell Haste 0.75, Buff Spell Duration 1.0, Detrimental Spell Duration 1.0, Spell Range Extension 0.5, Time's Antithesis 2.0 |
 | **Enchanter** | FT 4.0, Spell Damage (Magic 0.5), Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.75, Serpent of Vindication 2.0 |
-| **Beastlord** | ATK 1.0, FT 1.0, Spell Damage (Cold 0.5), Healing Enhancement 0.75, Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Beneficial Spell Haste 0.75, Detrimental Spell Haste 0.75 |
+| **Beastlord** | ATK 1.0, FT 1.0, Spell Damage (Cold 0.5), Healing Enhancement 0.75, Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Beneficial Spell Haste 0.75, Detrimental Spell Haste 0.75, Pet Power 3.0 |
 | **Druid**   | FT 4.0, Spell Damage (Fire 1.0, Cold 1.0), Healing Enhancement 1.0, Spell Mana Efficiency 1.0, Beneficial Spell Haste 2.0, Detrimental Spell Haste 0.75, Detrimental Spell Duration 0.5, Buff Spell Duration 1.0, Spell Range Extension 0.5 |
 | **Ranger**  | ATK 1.0, FT 1.0 |
 | **Bard**    | ATK 4.0, FT 4.0, Haste 4.0, Brass 4.0, Percussion 4.0, Singing 4.0, Strings 4.0, Wind 4.0 |
@@ -63,3 +63,4 @@ Spell Damage uses the same subcategory system: each class lists only the subcate
 - **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 276 (Det, Bene). Add `'Focus Name': 'All'` to have a focus count for both.
 - **Spell Duration:** Buff/Detrimental/All Spell Duration; “All Spell Duration” is tracked as `All` and counts for both Buff (Bene) and Detrimental (Det) in scoring.
 - **Spell Mana Efficiency weights per class:** `SPELL_MANA_EFFICIENCY_WEIGHTS` ~line 311 (e.g. Enchanter Det 1.0, Bene 0.25).
+- **Pet Power:** Item-based focus for Magician (3.0), Beastlord (3.0), Necromancer (2.0). Items: 28144 = 20%, 20508 = 25%. Checked from **full inventory (including bags)** so swap-in is counted. See `PET_POWER_ITEMS` and `get_char_pet_power()`.
