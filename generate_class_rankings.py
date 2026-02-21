@@ -441,7 +441,7 @@ def check_shaman_focus_items(char_inventory):
     return 100.0 if has_times_antithesis else 0.0, {'has_times_antithesis': has_times_antithesis}
 
 # Calculate class-specific scores
-def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, bard_instrument_data=None):
+def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, bard_instrument_data=None):
     """Calculate percentage scores for a character based on their class"""
     char_class = char_data['class']
     scores = {}
@@ -547,6 +547,17 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     elif char_class == 'Shadow Knight':
         pal_sk_focus_score, pal_sk_items = check_paladin_sk_focus_items(char_inventory or [])
         focus_scores = {'Shield of Strife': pal_sk_focus_score}
+        if scores.get('atk_pct') is not None:
+            focus_scores['ATK'] = scores['atk_pct']
+        char_haste = char_data.get('stats', {}).get('haste', 0)
+        focus_scores['Haste'] = 100.0 if (isinstance(char_haste, (int, float)) and char_haste >= 30) else 0.0
+        # Spell Mana Efficiency (detrimental) - score as % of best
+        if char_mana_efficiency_cats is not None:
+            det_pct = char_mana_efficiency_cats.get('Det', 0)
+            best_mana_eff = best_focii.get('Spell Mana Efficiency', 40.0)
+            focus_scores['Spell Mana Efficiency'] = (det_pct / best_mana_eff * 100) if best_mana_eff > 0 and det_pct > 0 else 0
+        else:
+            focus_scores['Spell Mana Efficiency'] = 0
         scores['focus_items'] = pal_sk_items
     elif char_class == 'Enchanter':
         enchanter_focus_score, enchanter_items = check_enchanter_focus_items(char_inventory or [])
@@ -710,8 +721,14 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 total_weight += 0.75
         scores['focus_overall_pct'] = (total_score / total_weight) if total_weight > 0 else 0
     elif char_class == 'Shadow Knight':
-        # For SK, focus score is just the Shield of Strife score
-        scores['focus_overall_pct'] = focus_scores.get('Shield of Strife', 0)
+        # Weighted average: Shield of Strife 2.0, Haste 0.75, ATK 0.75, Spell Mana Efficiency 0.5, FT 1.0
+        total_score = 0.0
+        total_weight = 0.0
+        for name, w in [('Shield of Strife', 2.0), ('Haste', 0.75), ('ATK', 0.75), ('Spell Mana Efficiency', 0.5), ('FT', 1.0)]:
+            s = focus_scores.get(name, 0)
+            total_score += s * w
+            total_weight += w
+        scores['focus_overall_pct'] = (total_score / total_weight) if total_weight > 0 else 0
     elif char_class in CLASS_FOCUS_PRIORITIES:
         priority_cats = CLASS_FOCUS_PRIORITIES[char_class]
         # Weighted average of priority focus categories
@@ -803,17 +820,20 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Shadow Knight/Paladin - Tank hybrids (FT at half weight so focus slice stays ~35%)
+    # Shadow Knight - Tank hybrid: haste 0.75, atk 0.75, det mana pres 0.5, Shield of Strife 2.0, FT 1.0
     'Shadow Knight': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 0.0,  # Moved to focus (reduced to 0.5 weight in normalize)
-        'haste_pct': 1.0,
+        'atk_pct': 0.0,   # Moved to focus
+        'haste_pct': 0.0, # Moved to focus
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 0.5,
-            'FT': 2.0,   # Half weight for hybrid (slider can adjust)
+            'Haste': 0.75,
+            'ATK': 0.75,
+            'Spell Mana Efficiency': 0.5,  # detrimental mana preservation
+            'Shield of Strife': 2.0,
+            'FT': 1.0,
         }
     },
     'Paladin': {
@@ -1361,6 +1381,19 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                             total_score += serpent_score * weight_config
                             total_weight += weight_config
                     # Other focuses (Spell Damage, Spell Mana Efficiency, etc.) handled in main loop below
+            elif char_class == 'Shadow Knight':
+                # Handle Shadow Knight focuses individually: Shield of Strife 2.0, Haste 0.75, ATK 0.75, Spell Mana Efficiency 0.5, FT 1.0 (ATK/Haste/FT added below)
+                for focus_cat, weight_config in focus_weights.items():
+                    if focus_cat in ['ATK', 'Haste', 'FT']:
+                        continue  # Handled below
+                    if focus_cat == 'Shield of Strife':
+                        if isinstance(weight_config, (int, float)) and weight_config > 0:
+                            total_score += focus_scores.get('Shield of Strife', 0) * weight_config
+                            total_weight += weight_config
+                    elif focus_cat == 'Spell Mana Efficiency':
+                        if isinstance(weight_config, (int, float)) and weight_config > 0:
+                            total_score += focus_scores.get('Spell Mana Efficiency', 0) * weight_config
+                            total_weight += weight_config
             else:
                 # For other classes, use focus_overall_pct
                 focus_score = scores.get('focus_overall_pct', 0)
@@ -1873,7 +1906,7 @@ def main():
         char_class = char_data['class']
         char_inventory = inventory.get(char_id, [])
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
-        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, bard_instrument_data)
+        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, char_mana_efficiency_cats, bard_instrument_data)
         
         # Calculate overall score using class-specific weights with conversion rates
         overall_score = calculate_overall_score_with_weights(
@@ -1885,7 +1918,7 @@ def main():
             class_max_values.get(char_class, {}),
             char_spell_haste_cats,
             char_duration_cats,
-            None,  # char_mana_efficiency_cats (not used in this function)
+            char_mana_efficiency_cats,
             char_data  # Pass char_data for individual_resists
         )
         
