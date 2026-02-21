@@ -370,6 +370,7 @@
         let sortBy = 'overall';
 
         let classWeights = {};
+        let normalizedClassWeights = {}; // Backend-normalized weights (focus ~35%, ft_half applied); use for card when no custom
         let customWeights = {}; // User-customized weights
         let originalClassWeights = {}; // Backup of original weights
 
@@ -520,9 +521,7 @@
             const _cw = customWeights[selectedClass];
             const _meta = _cw && _cw._meta;
             const _fromCustom = _meta != null && _meta.focusMultiplier != null ? _meta.focusMultiplier : null;
-            const _sliderEl = document.getElementById('slider_focus_mult');
-            const _fromSlider = _sliderEl && _sliderEl.value !== '' ? parseFloat(_sliderEl.value) : NaN;
-            const focusMult = (_fromCustom != null ? _fromCustom : (isNaN(_fromSlider) ? 2.4 : _fromSlider));
+            const focusMult = _fromCustom != null ? _fromCustom : 2.4;
             const normalized = normalizeWeights(weights, focusMult, selectedClass);
             
             // All stats are always shown, even if default is 0
@@ -563,38 +562,6 @@
                 slidersDiv.appendChild(sliderDiv);
             });
 
-            // Focus weight multiplier (2.4x HP weight)
-            const hpWeight = weights.hp_pct || 1.0;
-            const focusMultiplier = customWeights[selectedClass]?._meta?.focusMultiplier || 2.4;
-            // Calculate focus contribution percentage
-            const focusContrib = (normalized.focusTarget || 0) * 100;
-            const sliderDiv = document.createElement('div');
-            sliderDiv.style.padding = '10px';
-            sliderDiv.style.background = 'white';
-            sliderDiv.style.borderRadius = '4px';
-            sliderDiv.innerHTML = `
-                <label style="display: block; margin-bottom: 5px;">
-                    <strong>Focus Weight Multiplier:</strong> 
-                    <span id="value_focus_mult">${focusMultiplier.toFixed(1)}</span>
-                    <span style="color: #6c757d; font-size: 0.9em; margin-left: 8px;">
-                        (${focusContrib.toFixed(1)}% contribution)
-                    </span>
-                </label>
-                <input type="range" 
-                       id="slider_focus_mult" 
-                       min="0" 
-                       max="5" 
-                       step="0.1" 
-                       value="${focusMultiplier}" 
-                       style="width: 100%;"
-                       oninput="updateFocusMultiplierValue(this.value)">
-                <p style="font-size: 0.85em; color: #6c757d; margin: 5px 0 0 0;">
-                    Sliders are relative: 0 = off. Each non-zero value is its share of the total. Default: 2.4.
-                    When only one stat (HP/Mana/AC/Resists) has weight, ranking sorts exactly by that stat.
-                </p>
-            `;
-            slidersDiv.appendChild(sliderDiv);
-            
             // Add focus weight customization section
             const focusSlidersDiv = document.getElementById('focusWeightSliders');
             if (focusSlidersDiv) {
@@ -745,8 +712,6 @@
                             localStorage.setItem('focusWeightsEnabled_' + selectedClass, focusWeightsEnabledCheckbox.checked.toString());
                             if (!focusWeightsEnabledCheckbox.checked) {
                                 setAllFocusSlidersTo(0);
-                                const multSlider = document.getElementById('slider_focus_mult');
-                                if (multSlider) { multSlider.value = 0; document.getElementById('value_focus_mult').textContent = '0'; }
                             } else restoreDefaultFocusWeights();
                         });
                     }
@@ -754,8 +719,6 @@
                     if (focusWeightsSetZeroBtn) {
                         focusWeightsSetZeroBtn.addEventListener('click', () => {
                             setAllFocusSlidersTo(0);
-                            const multSlider = document.getElementById('slider_focus_mult');
-                            if (multSlider) { multSlider.value = 0; document.getElementById('value_focus_mult').textContent = '0'; }
                             if (focusWeightsEnabledCheckbox) focusWeightsEnabledCheckbox.checked = false;
                             localStorage.setItem('focusWeightsEnabled_' + selectedClass, 'false');
                         });
@@ -788,7 +751,7 @@
                         weights[key] = 0.0;
                     }
                 });
-                const focusMult = parseFloat(document.getElementById('slider_focus_mult')?.value) || 2.4;
+                const focusMult = 2.4;
                 const normalized = normalizeWeights(weights, focusMult, selectedClass);
                 
                 // Update this stat's contribution
@@ -808,36 +771,6 @@
                         }
                     }
                 });
-                
-                // Update focus multiplier contribution
-                const focusContrib = (normalized.focusTarget || 0) * 100;
-                const focusMultValueSpan = document.getElementById('value_focus_mult');
-                if (focusMultValueSpan) {
-                    const focusMultContribSpan = focusMultValueSpan.nextElementSibling;
-                    if (focusMultContribSpan && focusMultContribSpan.tagName === 'SPAN') {
-                        focusMultContribSpan.textContent = ` (${focusContrib.toFixed(1)}% contribution)`;
-                    }
-                }
-            }
-        }
-
-        function updateFocusMultiplierValue(value) {
-            const val = parseFloat(value);
-            document.getElementById('value_focus_mult').textContent = val.toFixed(1);
-            
-            // Update focus contribution percentage
-            const selectedClass = document.getElementById('weightClass')?.value;
-            if (selectedClass) {
-                const weights = {...classWeights[selectedClass]};
-                const normalized = normalizeWeights(weights, val, selectedClass);
-                const focusContrib = (normalized.focusTarget || 0) * 100;
-                const focusMultValueSpan = document.getElementById('value_focus_mult');
-                if (focusMultValueSpan) {
-                    const focusMultContribSpan = focusMultValueSpan.nextElementSibling;
-                    if (focusMultContribSpan && focusMultContribSpan.tagName === 'SPAN') {
-                        focusMultContribSpan.textContent = ` (${focusContrib.toFixed(1)}% contribution)`;
-                    }
-                }
             }
         }
 
@@ -858,15 +791,6 @@
                 }
             });
 
-            // Store focus multiplier separately
-            const focusMultSlider = document.getElementById('slider_focus_mult');
-            if (focusMultSlider) {
-                if (!customWeights[selectedClass]._meta) {
-                    customWeights[selectedClass]._meta = {};
-                }
-                customWeights[selectedClass]._meta.focusMultiplier = parseFloat(focusMultSlider.value);
-            }
-            
             // Save focus weights (use union of class + custom keys so 0-weight and custom keys are saved)
             const focusWeights = classWeights[selectedClass]?.focus || {};
             const customFocus = customWeights[selectedClass]?.focus || {};
@@ -1079,7 +1003,14 @@
                     });
                 }
 
-                const normalized = normalizeWeights(weights, focusMultiplier, charClass);
+                // Use backend-normalized weights when no custom weights (keeps focus ~35%, ft_half for SHD/PAL/RNG/BST)
+                let normalized;
+                const hasCustom = customWeight && Object.keys(customWeight).filter(k => k !== '_meta').length > 0;
+                if (!hasCustom && normalizedClassWeights[charClass]) {
+                    normalized = normalizedClassWeights[charClass];
+                } else {
+                    normalized = normalizeWeights(weights, focusMultiplier, charClass);
+                }
                 const scores = char.scores || {};
                 let totalScore = 0.0;
                 let totalWeight = 0.0;
@@ -1338,6 +1269,7 @@
                 } else {
                     characters = data.characters || [];
                     classWeights = data.class_weights || {};
+                    normalizedClassWeights = data.normalized_class_weights || {};
                     originalClassWeights = JSON.parse(JSON.stringify(classWeights)); // Deep copy
                     console.log(`Loaded ${characters.length} characters, ${Object.keys(classWeights).length} class weights`);
                 }
@@ -1804,9 +1736,15 @@
                 });
             }
             
-            // Normalize weights (same as recalculateScores)
-            const normalized = normalizeWeights(weights, focusMultiplier, char.class);
-            const classWeightConfig = weights; // Use the weights (not normalized) for display
+            // Use backend-normalized weights when no custom (keeps focus ~35%, ft_half for SHD/PAL/RNG/BST); else same as recalculateScores
+            let normalized;
+            const hasCustom = customWeight && Object.keys(customWeight).filter(k => k !== '_meta').length > 0;
+            if (!hasCustom && normalizedClassWeights[charClass]) {
+                normalized = normalizedClassWeights[charClass];
+            } else {
+                normalized = normalizeWeights(weights, focusMultiplier, char.class);
+            }
+            const classWeightConfig = (hasCustom || !normalizedClassWeights[charClass]) ? weights : normalized; // Display: normalized when from backend
             const focusWeights = normalized.focus || {};
             
             let html = `<h2>${escapeHtml(char.name)} (${escapeHtml(char.class)})</h2>`;
