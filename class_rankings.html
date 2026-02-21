@@ -1050,6 +1050,10 @@
                         }
                     });
                 }
+                // When user set all focus to 0, use empty focus so stats get 100% and ranking is by stat only
+                if (customWeight.focus && typeof customWeight.focus === 'object' && sumFocusWeights(customWeight.focus) === 0 && (weights.hp_pct || weights.mana_pct || weights.ac_pct || weights.resists_pct)) {
+                    weights.focus = {};
+                }
 
                 // Use backend-normalized weights when no custom weights (focus ~35%, FT in focus)
                 let normalized;
@@ -1589,7 +1593,9 @@
                 const cells = [];
                 
                 // Rank, Class Rank, Name, Guild, Class, Overall (fixed columns - indices 0-5)
-                cells.push(`<td class="rank">#${char.overall_rank || index + 1}</td>`);
+                // When filtering by class, show rank as position in this list (1,2,3...) so "sort by mana" shows correct order
+                const rankDisplay = (filterClass && sortBy === 'overall') ? (index + 1) : (char.overall_rank || index + 1);
+                cells.push(`<td class="rank">#${rankDisplay}</td>`);
                 cells.push(`<td class="rank">#${char.class_rank || '-'}</td>`);
                 cells.push(`<td class="name"><a href="https://www.takproject.net/magelo/character.php?char=${encodeURIComponent(char.name)}" target="_blank">${escapeHtml(char.name)}</a></td>`);
                 cells.push(`<td>${escapeHtml(char.guild || '')}</td>`);
