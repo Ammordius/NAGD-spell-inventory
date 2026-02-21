@@ -516,8 +516,9 @@
                 }
             });
             
-            // Calculate normalized weights to show current contributions
-            const normalized = normalizeWeights(weights, 2.4, selectedClass);
+            // Calculate normalized weights to show current contributions (use slider/custom focus mult)
+            const focusMult = customWeights[selectedClass]?._meta?.focusMultiplier ?? parseFloat(document.getElementById('slider_focus_mult')?.value) || 2.4;
+            const normalized = normalizeWeights(weights, focusMult, selectedClass);
             
             // All stats are always shown, even if default is 0
             // This allows users to enable stats that are 0 by default (e.g., AC for casters, Mana for melees)
@@ -583,7 +584,8 @@
                        style="width: 100%;"
                        oninput="updateFocusMultiplierValue(this.value)">
                 <p style="font-size: 0.85em; color: #6c757d; margin: 5px 0 0 0;">
-                    Total focus weight = (HP weight × multiplier). Default: 2.4
+                    Sliders are relative: 0 = off. Each non-zero value is its share of the total. Default: 2.4.
+                    When only one stat (HP/Mana/AC/Resists) has weight, ranking sorts exactly by that stat.
                 </p>
             `;
             slidersDiv.appendChild(sliderDiv);
@@ -600,6 +602,34 @@
                 if (Object.keys(focusWeights).length === 0) {
                     focusSlidersDiv.innerHTML = '<p style="color: #6c757d; padding: 10px;">This class has no focus weights configured.</p>';
                 } else {
+                    function setAllFocusSlidersTo(val) {
+                        const panel = document.getElementById('focusWeightSliders');
+                        if (!panel) return;
+                        panel.querySelectorAll('input[type="range"]').forEach(input => {
+                            input.value = val;
+                            const valueId = input.id.replace('slider_', 'value_');
+                            const span = document.getElementById(valueId);
+                            if (span) span.textContent = parseFloat(val).toFixed(2);
+                        });
+                    }
+                    function restoreDefaultFocusWeights() {
+                        const defaults = originalClassWeights[selectedClass]?.focus ?? classWeights[selectedClass]?.focus ?? {};
+                        for (const [focusKey, focusVal] of Object.entries(defaults)) {
+                            if (typeof focusVal === 'object' && focusVal !== null) {
+                                for (const [nestedKey, v] of Object.entries(focusVal)) {
+                                    const sliderId = `slider_focus_${focusKey}_${nestedKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                                    const valueId = `value_focus_${focusKey}_${nestedKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                                    const slider = document.getElementById(sliderId);
+                                    if (slider) { slider.value = v; const span = document.getElementById(valueId); if (span) span.textContent = parseFloat(v).toFixed(2); }
+                                }
+                            } else {
+                                const sliderId = `slider_focus_${focusKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                                const valueId = `value_focus_${focusKey}`.replace(/[^a-zA-Z0-9_]/g, '_');
+                                const slider = document.getElementById(sliderId);
+                                if (slider) { slider.value = focusVal; const span = document.getElementById(valueId); if (span) span.textContent = parseFloat(focusVal).toFixed(2); }
+                            }
+                        }
+                    }
                     const headerDiv = document.createElement('div');
                     headerDiv.style.marginBottom = '15px';
                     headerDiv.style.padding = '10px';
@@ -608,8 +638,17 @@
                     headerDiv.innerHTML = `
                         <h4 style="margin: 0;">Focus Weights</h4>
                         <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #6c757d;">
-                            Adjust individual focus category weights. These are relative weights that will be scaled by the Focus Weight Multiplier.
+                            Adjust individual focus category weights. 0 = off; non-zero values are relative (same scale as stat sliders).
                         </p>
+                        <label style="display: flex; align-items: center; margin-top: 10px; cursor: pointer;">
+                            <input type="checkbox" id="focusWeightsEnabled" checked style="margin-right: 8px; width: 18px; height: 18px;">
+                            <strong>Use focus weights</strong>
+                            <span style="color: #6c757d; font-size: 0.9em; margin-left: 8px;">(uncheck to set all to 0)</span>
+                        </label>
+                        <div style="margin-top: 8px;">
+                            <button type="button" id="focusWeightsSetZero" style="padding: 6px 12px; margin-right: 8px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Set all to 0</button>
+                            <button type="button" id="focusWeightsRestoreDefaults" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em;">Restore defaults</button>
+                        </div>
                     `;
                     focusSlidersDiv.appendChild(headerDiv);
                     
@@ -692,6 +731,38 @@
                     });
                     
                     focusSlidersDiv.appendChild(focusGrid);
+                    
+                    const focusWeightsEnabledCheckbox = document.getElementById('focusWeightsEnabled');
+                    if (focusWeightsEnabledCheckbox) {
+                        const saved = localStorage.getItem('focusWeightsEnabled_' + selectedClass);
+                        if (saved !== null) focusWeightsEnabledCheckbox.checked = saved === 'true';
+                        focusWeightsEnabledCheckbox.addEventListener('change', () => {
+                            localStorage.setItem('focusWeightsEnabled_' + selectedClass, focusWeightsEnabledCheckbox.checked.toString());
+                            if (!focusWeightsEnabledCheckbox.checked) {
+                                setAllFocusSlidersTo(0);
+                                const multSlider = document.getElementById('slider_focus_mult');
+                                if (multSlider) { multSlider.value = 0; document.getElementById('value_focus_mult').textContent = '0'; }
+                            } else restoreDefaultFocusWeights();
+                        });
+                    }
+                    const focusWeightsSetZeroBtn = document.getElementById('focusWeightsSetZero');
+                    if (focusWeightsSetZeroBtn) {
+                        focusWeightsSetZeroBtn.addEventListener('click', () => {
+                            setAllFocusSlidersTo(0);
+                            const multSlider = document.getElementById('slider_focus_mult');
+                            if (multSlider) { multSlider.value = 0; document.getElementById('value_focus_mult').textContent = '0'; }
+                            if (focusWeightsEnabledCheckbox) focusWeightsEnabledCheckbox.checked = false;
+                            localStorage.setItem('focusWeightsEnabled_' + selectedClass, 'false');
+                        });
+                    }
+                    const focusWeightsRestoreBtn = document.getElementById('focusWeightsRestoreDefaults');
+                    if (focusWeightsRestoreBtn) {
+                        focusWeightsRestoreBtn.addEventListener('click', () => {
+                            restoreDefaultFocusWeights();
+                            if (focusWeightsEnabledCheckbox) focusWeightsEnabledCheckbox.checked = true;
+                            localStorage.setItem('focusWeightsEnabled_' + selectedClass, 'true');
+                        });
+                    }
                 }
             }
         }
@@ -712,7 +783,8 @@
                         weights[key] = 0.0;
                     }
                 });
-                const normalized = normalizeWeights(weights, 2.4, selectedClass);
+                const focusMult = parseFloat(document.getElementById('slider_focus_mult')?.value) || 2.4;
+                const normalized = normalizeWeights(weights, focusMult, selectedClass);
                 
                 // Update this stat's contribution
                 const contrib = (normalized[statKey] || 0) * 100;
@@ -752,7 +824,7 @@
             const selectedClass = document.getElementById('weightClass')?.value;
             if (selectedClass) {
                 const weights = {...classWeights[selectedClass]};
-                const normalized = normalizeWeights(weights, 2.4, selectedClass);
+                const normalized = normalizeWeights(weights, val, selectedClass);
                 const focusContrib = (normalized.focusTarget || 0) * 100;
                 const focusMultValueSpan = document.getElementById('value_focus_mult');
                 if (focusMultValueSpan) {
@@ -882,142 +954,85 @@
 
         const BARD_INSTRUMENT_CATS = ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'];
 
+        /** Sum all numeric values in focus weights (including nested objects). */
+        function sumFocusWeights(focusWeights) {
+            if (!focusWeights || typeof focusWeights !== 'object') return 0;
+            let sum = 0;
+            for (const v of Object.values(focusWeights)) {
+                if (typeof v === 'number') sum += v;
+                else if (v && typeof v === 'object') sum += Object.values(v).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0);
+            }
+            return sum;
+        }
+
+        /**
+         * Normalize weights so sliders act as relative weights: 0 = off, and each slider's
+         * value is its share of the total. E.g. only Mana=1 and rest 0 → 100% mana; all at 3 → equal.
+         * - Only positive weights are included in the denominator (0 weight = no contribution).
+         * - When exactly one stat (hp/mana/ac/resists) has positive weight, focus is excluded
+         *   from the denominator so the sort is exactly on that single priority.
+         */
         function normalizeWeights(weights, focusMultiplier = 2.4, charClass = null) {
-            // Target percentages: 20% HP, 17.5% AC, 17.5% Resists (TOTAL across 5 resists), 30% Focus, 15% Mana
-            const TARGET_HP = 0.20;
-            const TARGET_AC = 0.175;
-            const TARGET_RESISTS = 0.175;  // TOTAL across all 5 resists
-            const TARGET_FOCUS = 0.30;  // Includes ATK, FT, Haste, and spell focuses
-            const TARGET_MANA = 0.15;
-            
-            // Check which stats are applicable
-            // hasMana: class has mana (mana_pct > 0) - used for FT weight
-            const hasMana = (weights.mana_pct || 0) > 0;
-            const hasAc = weights.ac_pct !== undefined;
-            
-            // Calculate total target percentage
-            // Always include all targets, but normalize based on what's actually set
-            let totalTarget = TARGET_HP + TARGET_RESISTS + TARGET_FOCUS;
-            if (hasMana) totalTarget += TARGET_MANA;
-            if (hasAc) totalTarget += TARGET_AC;
-            
-            // Normalize targets to sum to 1.0
-            const hpTarget = TARGET_HP / totalTarget;
-            const resistsTarget = TARGET_RESISTS / totalTarget;
-            const focusTarget = TARGET_FOCUS / totalTarget;
-            const manaTarget = hasMana ? (TARGET_MANA / totalTarget) : 0.0;
-            const acTarget = hasAc ? (TARGET_AC / totalTarget) : 0.0;
-            
-            // Store focusTarget in the normalized object for display
-            const normalized = {
-                hp_pct: hpTarget,
-                resists_pct: resistsTarget,
-                mana_pct: manaTarget,
-                ac_pct: acTarget,
-                focusTarget: focusTarget  // Store for display
-            };
-            
-            // Calculate focus weight components
-            // ATK and Haste are now in focus dict, not stat weights
-            let atkWeightRaw = 0.0;  // Will be extracted from focus dict below
-            let hasteWeightRaw = 0.0;  // Will be extracted from focus dict below
-            // FT (Flowing Thought, cap 15) - decent weight for mana classes when capped
-            const ftWeightRaw = hasMana ? 4.0 : 0.0;
-            
+            const hp = Math.max(0, parseFloat(weights.hp_pct) || 0);
+            const mana = Math.max(0, parseFloat(weights.mana_pct) || 0);
+            const ac = Math.max(0, parseFloat(weights.ac_pct) || 0);
+            const resists = Math.max(0, parseFloat(weights.resists_pct) || 0);
+            const focusMult = Math.max(0, parseFloat(focusMultiplier) || 0);
             const focusWeights = weights.focus || {};
-            let totalSpellFocusWeight = 0.0;
-            for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
-                if (focusCat === 'ATK') {
-                    // Extract ATK weight from focus dict
-                    atkWeightRaw = (typeof focusValue === 'number') ? focusValue : 0.0;
-                } else if (focusCat === 'Haste') {
-                    // Extract Haste weight from focus dict (for Warriors, etc.)
-                    hasteWeightRaw = (typeof focusValue === 'number') ? focusValue : 0.0;
-                } else if (typeof focusValue === 'object') {
-                    totalSpellFocusWeight += Object.values(focusValue).reduce((a, b) => a + b, 0);
-                } else {
-                    // Include all other focus items (Darkblade, Raex Chest, Shield of Strife, etc.)
-                    totalSpellFocusWeight += focusValue;
-                }
-            }
-            
-            // If Haste is still in haste_pct (backward compatibility), use that
-            if (hasteWeightRaw === 0.0) {
-                hasteWeightRaw = weights.haste_pct || 0.0;
-            }
-            
-            normalized.atk_pct = 0.0;  // Moved to focus
-            normalized.haste_pct = 0.0;  // Moved to focus
-            normalized.focus = {};
-            
-            // Bard: fixed focus shares — FT 20%, Instruments 60%, Haste 10%, ATK 10%
-            if (charClass === 'Bard') {
-                const BARD_FT_SHARE = 0.20;
-                const BARD_INSTRUMENTS_SHARE = 0.60;
-                const BARD_HASTE_SHARE = 0.10;
-                const BARD_ATK_SHARE = 0.10;
-                normalized.ft_weight = hasMana ? (BARD_FT_SHARE * focusTarget) : 0;
-                if (atkWeightRaw > 0) normalized.focus['ATK'] = BARD_ATK_SHARE * focusTarget;
-                if (hasteWeightRaw > 0) normalized.focus['Haste'] = BARD_HASTE_SHARE * focusTarget;
-                let totalInstrumentRaw = 0;
-                for (const cat of BARD_INSTRUMENT_CATS) {
-                    const v = focusWeights[cat];
-                    if (typeof v === 'number') totalInstrumentRaw += v;
-                }
-                if (totalInstrumentRaw > 0) {
-                    const instrumentTarget = BARD_INSTRUMENTS_SHARE * focusTarget;
-                    for (const cat of BARD_INSTRUMENT_CATS) {
-                        const raw = focusWeights[cat];
-                        if (typeof raw === 'number') {
-                            normalized.focus[cat] = (raw / totalInstrumentRaw) * instrumentTarget;
-                        }
-                    }
-                }
-            } else {
-                // Non-Bard: split focus target — utility (ATK, Haste, FT) vs spell/instrument
-                const UTILITY_FOCUS_SHARE = 0.5;
-                const SPELL_FOCUS_SHARE = 0.5;
-                const utilityTarget = focusTarget * UTILITY_FOCUS_SHARE;
-                const spellTarget = focusTarget * SPELL_FOCUS_SHARE;
-                const totalUtilityRaw = atkWeightRaw + hasteWeightRaw + ftWeightRaw;
-                const utilityScale = (totalUtilityRaw > 0) ? (utilityTarget / totalUtilityRaw) : 0.0;
-                const spellScale = (totalSpellFocusWeight > 0) ? (spellTarget / totalSpellFocusWeight) : 0.0;
-                
-                normalized.ft_weight = ftWeightRaw * utilityScale;
-                
-                if (focusWeights) {
-                    for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
-                        const scale = (focusCat === 'ATK' || focusCat === 'Haste') ? utilityScale : spellScale;
-                        if (scale <= 0) continue;
-                        if (typeof focusValue === 'object' && focusValue !== null) {
+
+            const statSum = hp + mana + ac + resists;
+            const positiveStatCount = [hp, mana, ac, resists].filter(w => w > 0).length;
+            // When exactly one stat is weighted, exclude focus from denominator so sort is 100% on that stat
+            const includeFocusInDenom = focusMult > 0 && positiveStatCount !== 1;
+            const totalSum = statSum + (includeFocusInDenom ? focusMult : 0);
+
+            const normalized = {
+                hp_pct: 0,
+                mana_pct: 0,
+                ac_pct: 0,
+                resists_pct: 0,
+                focusTarget: 0,
+                atk_pct: 0,
+                haste_pct: 0,
+                ft_weight: 0,
+                focus: {}
+            };
+
+            if (totalSum <= 0) return normalized;
+
+            normalized.hp_pct = hp / totalSum;
+            normalized.mana_pct = mana / totalSum;
+            normalized.ac_pct = ac / totalSum;
+            normalized.resists_pct = resists / totalSum;
+            normalized.focusTarget = includeFocusInDenom ? (focusMult / totalSum) : 0;
+
+            const focusSubSum = sumFocusWeights(focusWeights);
+            if (focusSubSum > 0 && normalized.focusTarget > 0) {
+                for (const [focusCat, focusValue] of Object.entries(focusWeights)) {
+                    if (focusCat === 'ATK' || focusCat === 'Haste') {
+                        const v = typeof focusValue === 'number' ? focusValue : 0;
+                        if (v > 0) normalized.focus[focusCat] = (v / focusSubSum) * normalized.focusTarget;
+                    } else if (typeof focusValue === 'object' && focusValue !== null) {
+                        const innerSum = Object.values(focusValue).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0);
+                        if (innerSum > 0) {
                             normalized.focus[focusCat] = {};
                             for (const [k, v] of Object.entries(focusValue)) {
-                                if (typeof v === 'number') {
-                                    normalized.focus[focusCat][k] = v * scale;
+                                if (typeof v === 'number' && v > 0) {
+                                    normalized.focus[focusCat][k] = (v / focusSubSum) * normalized.focusTarget;
                                 }
                             }
-                        } else if (typeof focusValue === 'number') {
-                            normalized.focus[focusCat] = focusValue * scale;
                         }
+                    } else if (typeof focusValue === 'number' && focusValue > 0) {
+                        normalized.focus[focusCat] = (focusValue / focusSubSum) * normalized.focusTarget;
                     }
                 }
-                if (atkWeightRaw > 0 && !normalized.focus['ATK']) {
-                    normalized.focus['ATK'] = atkWeightRaw * utilityScale;
-                }
-                if (hasteWeightRaw > 0 && !normalized.focus['Haste']) {
-                    normalized.focus['Haste'] = hasteWeightRaw * utilityScale;
-                }
-                const rawFocusWeights = weights.focus || {};
-                if (rawFocusWeights['Darkblade'] !== undefined && !normalized.focus['Darkblade']) {
-                    const darkbladeWeight = typeof rawFocusWeights['Darkblade'] === 'number' ? rawFocusWeights['Darkblade'] : 1.0;
-                    normalized.focus['Darkblade'] = darkbladeWeight * spellScale;
-                }
-                if (rawFocusWeights['Raex Chest'] !== undefined && !normalized.focus['Raex Chest']) {
-                    const raexWeight = typeof rawFocusWeights['Raex Chest'] === 'number' ? rawFocusWeights['Raex Chest'] : 1.0;
-                    normalized.focus['Raex Chest'] = raexWeight * spellScale;
+                const hasMana = mana > 0;
+                const ftWeightRaw = hasMana ? 4.0 : 0.0;
+                if (ftWeightRaw > 0) {
+                    normalized.ft_weight = (ftWeightRaw / (focusSubSum + ftWeightRaw)) * normalized.focusTarget;
                 }
             }
-            
+
             return normalized;
         }
 
