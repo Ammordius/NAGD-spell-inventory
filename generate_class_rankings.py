@@ -803,9 +803,8 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Shadow Knight/Paladin - Tank hybrids (FT contribution halved; remainder goes to other foci)
+    # Shadow Knight/Paladin - Tank hybrids
     'Shadow Knight': {
-        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -814,10 +813,10 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'ATK': 0.5,  # ATK moved to focus, reduced weight for Pal/SK
+            'FT': 4.0,   # Flowing Thought (cap 15); same as other focus, slider to adjust
         }
     },
     'Paladin': {
-        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -826,6 +825,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'ATK': 0.5,  # ATK moved to focus, reduced weight for Pal/SK
+            'FT': 4.0,
             'Haste': 0.5,  # Item haste (binary: 30%+ = 100%, else 0%)
             'Beneficial Spell Haste': 0.75,
             'Healing Enhancement': 0.5,
@@ -842,6 +842,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
+            'FT': 4.0,
             'Spell Damage': {'Fire': 1.0, 'Cold': 1.0, 'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
             'Detrimental Spell Haste': 1.0,  # Required
@@ -859,6 +860,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
+            'FT': 4.0,
             'Spell Damage': {'Magic': 0.5},
             'Healing Enhancement': 2.0,
             'Spell Mana Efficiency': 1.0,
@@ -877,6 +879,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
+            'FT': 4.0,
             'Spell Damage': {'Fire': 1.0, 'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
             'Detrimental Spell Haste': 1.0,
@@ -894,6 +897,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
+            'FT': 4.0,
             'Spell Damage': {'All': 0.75, 'DoT': 1.0, 'Disease': 1.0},
             'Spell Mana Efficiency': 1.0,  # det mana
             'Detrimental Spell Duration': 1.0,  # det or all e
@@ -911,6 +915,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
+            'FT': 4.0,
             # Detrimental focus: 80% DoT, 20% Cold (best in each); 4 pts DoT, 1 pt Cold
             'Spell Damage': {'DoT': 4.0, 'Cold': 1.0},
             'Healing Enhancement': 1.0,
@@ -933,6 +938,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
+            'FT': 4.0,
             'Spell Damage': {'Magic': 0.5},
             'Spell Mana Efficiency': 1.0,
             'Buff Spell Duration': 1.0,  # Bene exter
@@ -943,9 +949,8 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Beastlord - Hybrid melee/caster (FT contribution halved; remainder goes to other foci)
+    # Beastlord - Hybrid melee/caster
     'Beastlord': {
-        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -954,6 +959,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'ATK': 1.0,  # ATK moved to focus
+            'FT': 4.0,
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
             'Spell Mana Efficiency': 1.0,
@@ -971,6 +977,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
+            'FT': 4.0,
             'Spell Damage': {'Fire': 1.0, 'Cold': 1.0},
             'Healing Enhancement': 1.0,
             'Spell Mana Efficiency': 1.0,
@@ -982,9 +989,8 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Ranger - Hybrid melee/caster (FT contribution halved; remainder goes to other foci)
+    # Ranger - Hybrid melee/caster
     'Ranger': {
-        'ft_half': True,  # Flowing Thought weight halved, rest reassigned to other foci
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
@@ -993,11 +999,12 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'ATK': 1.0,  # ATK moved to focus
+            'FT': 4.0,
         }
     },
     
     # Bard - Support hybrid (instrument mods cap 390%: 100 base + 60 AA + 230 items)
-    # target_focus 0.40 so instruments+ATK+Haste = 35 pts and FT = 5 pts at 100%
+    # target_focus 0.40 so instruments+ATK+Haste+FT share ~35% focus
     'Bard': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
@@ -1005,9 +1012,10 @@ CLASS_WEIGHTS = {
         'atk_pct': 0.0,  # Moved to focus
         'haste_pct': 1.0,
         'resists_pct': 1.0,
-        'target_focus': 0.40,  # 35 pts from 7 focus + 5 from FT when at 100%
+        'target_focus': 0.40,
         'focus': {
             'ATK': 4.0,
+            'FT': 4.0,
             'Haste': 4.0,
             'Brass': 4.0,
             'Percussion': 4.0,
@@ -1092,49 +1100,26 @@ def normalize_class_weights(weights_config):
             ac_target = 0.0
     
     # Calculate focus weight components from config
-    # ATK, FT, Haste are part of focus weight
-    # ATK and Haste are now in focus dict, not stat weights
-    atk_weight_raw = 0.0  # Will be extracted from focus dict below
-    haste_weight_raw = 0.0  # Will be extracted from focus dict below (or from haste_pct for backward compatibility)
-    # FT (Flowing Thought, cap 15) - decent weight for all mana classes when capped
-    # SHD, PAL, RNG, BST use half FT weight; the remainder is reassigned to other foci via focus_scale
-    ft_weight_raw = 2.0 if (weights_config.get('ft_half') and has_mana) else (4.0 if has_mana else 0.0)
-    
-    # Calculate total focus weight from config (spell focuses + ATK + Haste + special items)
+    # ATK, FT, Haste and spell focuses all in focus dict; one scale for ~35% total
     focus_weights = weights_config.get('focus', {})
-    total_spell_focus_weight = 0.0
+    atk_weight_raw = 0.0
+    haste_weight_raw = 0.0
+    total_focus_components = 0.0
     if focus_weights:
         for focus_cat, focus_value in focus_weights.items():
             if focus_cat == 'ATK':
-                # Extract ATK weight from focus dict
                 atk_weight_raw = focus_value if isinstance(focus_value, (int, float)) else 0.0
             elif focus_cat == 'Haste':
-                # Extract Haste weight from focus dict (for Warriors, etc.)
                 haste_weight_raw = focus_value if isinstance(focus_value, (int, float)) else 0.0
             elif isinstance(focus_value, dict):
-                total_spell_focus_weight += sum(focus_value.values())
-            else:
-                # Include all other focus items (Darkblade, Raex Chest, Shield of Strife, etc.)
-                total_spell_focus_weight += focus_value
-    
-    # If Haste is still in haste_pct (backward compatibility), use that
+                total_focus_components += sum(focus_value.values())
+            elif isinstance(focus_value, (int, float)):
+                total_focus_components += focus_value  # FT and other scalar foci
     if haste_weight_raw == 0.0:
         haste_weight_raw = weights_config.get('haste_pct', 0.0)
+    total_focus_components += atk_weight_raw + haste_weight_raw
     
-    # Other focus components (excluding FT) - used for ft_half to keep their weights unchanged
-    other_raw = atk_weight_raw + haste_weight_raw + total_spell_focus_weight
-    total_focus_components = other_raw + ft_weight_raw
-    
-    # Scale focus components to achieve target focus percentage
-    # For ft_half (SHD, PAL, RNG, BST): keep focus slice at focus_target (~35%); halve FT within it (use 2 instead of 4)
-    ft_half = weights_config.get('ft_half') and has_mana
-    if ft_half and other_raw > 0:
-        # Total focus stays at focus_target; scale = focus_target / (other_raw + 2) so (other_raw + 2)*scale = focus_target
-        focus_scale = focus_target / (other_raw + 2.0)
-    elif total_focus_components > 0:
-        focus_scale = focus_target / total_focus_components
-    else:
-        focus_scale = 0.0
+    focus_scale = (focus_target / total_focus_components) if total_focus_components > 0 else 0.0
     
     # Build normalized weights
     normalized = {}
@@ -1143,12 +1128,10 @@ def normalize_class_weights(weights_config):
     normalized['mana_pct'] = mana_target
     normalized['ac_pct'] = ac_target
     
-    # ATK, Haste are stored as focus components (not stat weights)
-    normalized['atk_pct'] = 0.0  # Moved to focus
-    normalized['haste_pct'] = 0.0  # Moved to focus
-    normalized['ft_weight'] = ft_weight_raw * focus_scale  # FT weight (half for ft_half via ft_weight_raw=2 and scale)
+    normalized['atk_pct'] = 0.0
+    normalized['haste_pct'] = 0.0
     
-    # Normalize focus weights (with scaling applied)
+    # Normalize focus weights (ATK, FT, Haste, spell foci - same scale)
     normalized['focus'] = {}
     if focus_weights and focus_scale > 0:
         for focus_cat, focus_value in focus_weights.items():
@@ -1381,11 +1364,11 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             else:
                 # For other classes, use focus_overall_pct
                 focus_score = scores.get('focus_overall_pct', 0)
-                # Sum all spell focus weights (excluding ATK, Haste, FT which are handled above)
+                # Sum spell focus weights (excluding ATK, Haste, FT - handled above)
                 total_focus_weight = 0.0
                 for focus_cat, weight_config in focus_weights.items():
-                    if focus_cat in ['ATK', 'Haste']:
-                        continue  # Already handled above
+                    if focus_cat in ['ATK', 'Haste', 'FT']:
+                        continue
                     if isinstance(weight_config, dict):
                         total_focus_weight += sum(weight_config.values())
                     else:
@@ -1404,11 +1387,11 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             if haste_weight > 0 and scores.get('haste_pct') is not None:
                 total_score += scores['haste_pct'] * haste_weight
                 total_weight += haste_weight
-        # Add FT (Flowing Thought, cap 15) - partial credit when uncapped (e.g. 11/15 = 73.3% of weight)
-        ft_weight = weights_config.get('ft_weight', 0.0)
+        # Add FT (Flowing Thought, cap 15) - from focus dict like ATK/Haste; score 0-100
+        ft_weight = focus_weights.get('FT', 0.0)
         if ft_weight > 0 and scores.get('ft_capped') is not None:
             ft_pct = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
-            total_score += (ft_pct / 100.0) * ft_weight
+            total_score += ft_pct * ft_weight
             total_weight += ft_weight
         
         # After normalization, total_weight should be 1.0, but we divide anyway for safety
@@ -1523,11 +1506,11 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             total_score += scores['haste_pct'] * haste_weight
             total_weight += haste_weight
     
-    # Add FT (partial when uncapped, full when 15/15)
-    ft_weight = weights_config.get('ft_weight', 0.0)
+    # Add FT (from focus dict; score 0-100, same scale as ATK/Haste)
+    ft_weight = focus_weights.get('FT', 0.0)
     if ft_weight > 0 and scores.get('ft_capped') is not None:
         ft_pct = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
-        total_score += (ft_pct / 100.0) * ft_weight
+        total_score += ft_pct * ft_weight
         total_weight += ft_weight
     
     # Spell focuses
@@ -1535,8 +1518,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
         best_spell_damage = best_focii.get('Spell Damage', 35.0)
         
         for focus_cat, weight_config in focus_weights.items():
-            # Skip ATK and Haste - already handled above
-            if focus_cat in ['ATK', 'Haste']:
+            if focus_cat in ['ATK', 'Haste', 'FT']:
                 continue
             if focus_cat == 'Spell Damage':
                 # Handle damage type specific weights

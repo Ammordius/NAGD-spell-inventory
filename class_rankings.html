@@ -370,7 +370,7 @@
         let sortBy = 'overall';
 
         let classWeights = {};
-        let normalizedClassWeights = {}; // Backend-normalized weights (focus ~35%, ft_half applied); use for card when no custom
+        let normalizedClassWeights = {}; // Backend-normalized weights (focus ~35%, FT in focus); use for card when no custom
         let customWeights = {}; // User-customized weights
         let originalClassWeights = {}; // Backup of original weights
 
@@ -923,7 +923,6 @@
                 focusTarget: 0,
                 atk_pct: 0,
                 haste_pct: 0,
-                ft_weight: 0,
                 focus: {}
             };
 
@@ -954,11 +953,6 @@
                     } else if (typeof focusValue === 'number' && focusValue > 0) {
                         normalized.focus[focusCat] = (focusValue / focusSubSum) * normalized.focusTarget;
                     }
-                }
-                const hasMana = mana > 0;
-                const ftWeightRaw = hasMana ? 4.0 : 0.0;
-                if (ftWeightRaw > 0) {
-                    normalized.ft_weight = (ftWeightRaw / (focusSubSum + ftWeightRaw)) * normalized.focusTarget;
                 }
             }
 
@@ -1003,7 +997,7 @@
                     });
                 }
 
-                // Use backend-normalized weights when no custom weights (keeps focus ~35%, ft_half for SHD/PAL/RNG/BST)
+                // Use backend-normalized weights when no custom weights (focus ~35%, FT in focus)
                 let normalized;
                 const hasCustom = customWeight && Object.keys(customWeight).filter(k => k !== '_meta').length > 0;
                 if (!hasCustom && normalizedClassWeights[charClass]) {
@@ -1087,8 +1081,8 @@
                     }
                 }
                 
-                // Add FT (same scale as Haste/ATK: score 0-100 * weight)
-                const ftWeight = normalized.ft_weight || 0.0;
+                // Add FT from focus dict (same as ATK/Haste: score 0-100 * weight)
+                const ftWeight = focusWeights['FT'] || 0.0;
                 if (ftWeight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
                     const ftPct = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
                     totalScore += ftPct * ftWeight;
@@ -1754,12 +1748,13 @@
             // Initialize totals
             let totalStatPoints = 0.0;
             let totalFocusPoints = 0.0;
+            const totalPoints = (char.total_points !== undefined && char.total_points > 0) ? char.total_points : 1;
             
             html += `<h3>Overall Score: ${formatScore(char.overall_score)}%</h3>`;
             
             // Stat Scores
             html += `<h3>Stat Scores</h3>`;
-            html += `<table><thead><tr><th>Stat</th><th>Value</th><th>Score %</th><th>Weight</th><th>Points</th></tr></thead><tbody>`;
+            html += `<table><thead><tr><th>Stat</th><th>Value</th><th>Score %</th><th>Weight</th><th>Points</th><th>% of total</th></tr></thead><tbody>`;
             
             // HP - use normalized weight for calculation, but show raw weight for display
             if (scores.hp_pct !== undefined && normalized.hp_pct > 0) {
@@ -1769,7 +1764,8 @@
                 const hpPct = scores.hp_pct;
                 const points = hpPct * normalizedWeight;  // Use normalized for calculation
                 totalStatPoints += points;
-                html += `<tr><td>HP</td><td>${hpValue.toLocaleString()}</td><td>${formatScore(hpPct)}</td><td>${rawWeight.toFixed(2)}</td><td>${points.toFixed(2)}</td></tr>`;
+                const hpPctOfTotal = (points / totalPoints * 100).toFixed(1);
+                html += `<tr><td>HP</td><td>${hpValue.toLocaleString()}</td><td>${formatScore(hpPct)}</td><td>${rawWeight.toFixed(2)}</td><td>${points.toFixed(2)}</td><td>${hpPctOfTotal}%</td></tr>`;
             }
             
             // Mana - use normalized weight for calculation, but show raw weight for display
@@ -1780,7 +1776,8 @@
                 const manaPct = scores.mana_pct;
                 const points = manaPct * normalizedWeight;  // Use normalized for calculation
                 totalStatPoints += points;
-                html += `<tr><td>Mana</td><td>${manaValue.toLocaleString()}</td><td>${formatScore(manaPct)}</td><td>${rawWeight.toFixed(2)}</td><td>${points.toFixed(2)}</td></tr>`;
+                const manaPctOfTotal = (points / totalPoints * 100).toFixed(1);
+                html += `<tr><td>Mana</td><td>${manaValue.toLocaleString()}</td><td>${formatScore(manaPct)}</td><td>${rawWeight.toFixed(2)}</td><td>${points.toFixed(2)}</td><td>${manaPctOfTotal}%</td></tr>`;
             }
             
             // AC - use normalized weight for calculation, but show raw weight for display
@@ -1791,7 +1788,8 @@
                 const acPct = scores.ac_pct;
                 const points = acPct * normalizedWeight;  // Use normalized for calculation
                 totalStatPoints += points;
-                html += `<tr><td>AC</td><td>${acValue.toLocaleString()}</td><td>${formatScore(acPct)}</td><td>${rawWeight.toFixed(2)}</td><td>${points.toFixed(2)}</td></tr>`;
+                const acPctOfTotal = (points / totalPoints * 100).toFixed(1);
+                html += `<tr><td>AC</td><td>${acValue.toLocaleString()}</td><td>${formatScore(acPct)}</td><td>${rawWeight.toFixed(2)}</td><td>${points.toFixed(2)}</td><td>${acPctOfTotal}%</td></tr>`;
             }
             
             // ATK is now in Focus Scores, not Stat Scores - skip it here
@@ -1807,7 +1805,7 @@
                 const charIndividualResists = char.individual_resists || {};
                 
                 if (individualResistScores && Object.keys(individualResistScores).length > 0 && advancedResists) {
-                    html += `<tr><td colspan="5"><strong>Resists (Advanced)</strong></td></tr>`;
+                    html += `<tr><td colspan="6"><strong>Resists (Advanced)</strong></td></tr>`;
                     const resistTypes = ['MR', 'FR', 'CR', 'DR', 'PR'];
                     const numResists = resistTypes.filter(rt => individualResistScores[rt] && individualResistScores[rt].value > 0).length || 5;
                     const resistWeightPerResist = normalizedResistWeight / numResists;  // Total normalized weight divided by number of resists
@@ -1827,26 +1825,29 @@
                             totalResistScore += resistData.score * effectiveWeight;
                             totalResistWeight += effectiveWeight;
                             // Display the per-resist weight (total weight / num_resists)
-                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${resistWeightPerResist.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td></tr>`;
+                            const resistPctOfTotal = (resistPoints / totalPoints * 100).toFixed(1);
+                            html += `<tr><td style="padding-left: 20px;">${resistType}</td><td>${resistData.value}</td><td>${formatScore(resistData.score)}</td><td>${resistWeightPerResist.toFixed(2)}</td><td>${resistPoints.toFixed(2)}</td><td>${resistPctOfTotal}%</td></tr>`;
                         }
                     });
                     
                     // Calculate average resist score percentage
                     const avgResistPct = totalResistWeight > 0 ? (totalResistScore / totalResistWeight) : (scores.resists_pct || 0);
                     
-                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(avgResistPct)}</strong></td><td><strong>${rawResistWeight.toFixed(2)}</strong></td><td><strong>${totalAdvancedPoints.toFixed(2)}</strong></td></tr>`;
+                    const resistsTotalPctOfTotal = (totalAdvancedPoints / totalPoints * 100).toFixed(1);
+                    html += `<tr><td><strong>Total</strong></td><td><strong>${totalRawValue.toLocaleString()}</strong></td><td><strong>${formatScore(avgResistPct)}</strong></td><td><strong>${rawResistWeight.toFixed(2)}</strong></td><td><strong>${totalAdvancedPoints.toFixed(2)}</strong></td><td><strong>${resistsTotalPctOfTotal}%</strong></td></tr>`;
                     totalStatPoints += totalAdvancedPoints;
                 } else {
                     // Use simple total resists
                     const resistsPct = (scores.resists_pct !== undefined && scores.resists_pct !== null && typeof scores.resists_pct === 'number') ? scores.resists_pct : 0;
                     const resistsPoints = resistsPct * normalizedResistWeight;  // Use normalized weight for calculation
                     totalStatPoints += resistsPoints;
-                    html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${rawResistWeight.toFixed(2)}</td><td>${resistsPoints.toFixed(2)}</td></tr>`;
+                    const resistsPctOfTotal = (resistsPoints / totalPoints * 100).toFixed(1);
+                    html += `<tr><td>Resists</td><td>${resistsValue.toLocaleString()}</td><td>${formatScore(resistsPct)}</td><td>${rawResistWeight.toFixed(2)}</td><td>${resistsPoints.toFixed(2)}</td><td>${resistsPctOfTotal}%</td></tr>`;
                 }
             }
             
-            // Total stat points
-            html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Stat Total</strong></td><td colspan="3"></td><td><strong>${totalStatPoints.toFixed(2)}</strong></td></tr>`;
+            const statTotalPctOfTotal = (totalStatPoints / totalPoints * 100).toFixed(1);
+            html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Stat Total</strong></td><td colspan="4"></td><td><strong>${totalStatPoints.toFixed(2)}</strong></td><td><strong>${statTotalPctOfTotal}%</strong></td></tr>`;
             html += `</tbody></table>`;
             
             // Focus Scores
@@ -1859,7 +1860,7 @@
             
             if (Object.keys(focusScores).length > 0) {
                 html += `<h3>Focus Scores</h3>`;
-                html += `<table><thead><tr><th>Focus</th><th>Raw Value</th><th>Score %</th><th>Weight</th><th>Points</th></tr></thead><tbody>`;
+                html += `<table><thead><tr><th>Focus</th><th>Raw Value</th><th>Score %</th><th>Weight</th><th>Points</th><th>% of total</th></tr></thead><tbody>`;
                 
                 // For Warriors/Pal/SK, calculate focus weight as 2.4x HP weight (after normalization)
                 // For other classes, use the focus weights from config
@@ -1941,7 +1942,6 @@
                 
                 const bardInstrumentCats = ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'];
                 for (const [focusCat, score] of Object.entries(focusScores)) {
-                    if (focusCat === 'FT') continue;  // FT shown in dedicated block below (uses normalized.ft_weight)
                     let weight = 0;
                     let rawValue = bardInstrumentCats.includes(focusCat) && (scores.focus_items || {})[focusCat] != null
                         ? scores.focus_items[focusCat]
@@ -1982,6 +1982,11 @@
                             const hasteValue = char.stats?.haste || 0;
                             rawValue = hasteValue >= 30 ? 30 : hasteValue;
                         }
+                    } else if (focusCat === 'FT') {
+                        weight = focusWeights['FT'] || 0;
+                        if (weight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
+                            rawValue = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
+                        }
                     } else {
                         weight = focusWeights[focusCat] || 0;
                     }
@@ -1991,6 +1996,10 @@
                     if (rawValue > 0 || (bardInstrumentCats.includes(focusCat) && rawValue === 0)) {
                         if (focusCat === 'Haste') {
                             rawDisplay = `${rawValue}% (${rawValue >= 30 ? 'Capped' : 'Not Capped'})`;
+                        } else if (focusCat === 'FT') {
+                            const ftCurrent = scores.ft_current != null ? scores.ft_current : 0;
+                            const ftCap = scores.ft_cap != null ? scores.ft_cap : 15;
+                            rawDisplay = `${ftCurrent}/${ftCap}`;
                         } else if (bardInstrumentCats.includes(focusCat)) {
                             rawDisplay = `${Number(rawValue).toFixed(0)}%`;
                         } else {
@@ -2000,45 +2009,33 @@
                     
                     const focusPoints = score * weight;
                     totalFocusPoints += focusPoints;
-                    
-                    html += `<tr><td>${escapeHtml(focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td></tr>`;
-                }
-                
-                // FT (Flowing Thought) - same points scale as Haste/ATK: score 0-100 * weight
-                const ftWeight = normalized.ft_weight || 0;
-                if (ftWeight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
-                    const ftCurrent = scores.ft_current != null ? scores.ft_current : 0;
-                    const ftCap = scores.ft_cap != null ? scores.ft_cap : 15;
-                    const ftPct = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
-                    const ftPoints = ftPct * ftWeight;
-                    totalFocusPoints += ftPoints;
-                    html += `<tr><td>FT (Flowing Thought)</td><td>${ftCurrent}/${ftCap}</td><td>${formatScore(ftPct)}</td><td>${ftWeight.toFixed(2)}</td><td>${ftPoints.toFixed(2)}</td></tr>`;
+                    const focusPctOfTotal = (focusPoints / totalPoints * 100).toFixed(1);
+                    html += `<tr><td>${escapeHtml(focusCat === 'FT' ? 'FT (Flowing Thought)' : focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
                 }
                 
                 // ATK - part of focus weight (only show if not already in focus_scores)
                 if (scores.atk_pct !== undefined && scores.atk_pct !== null && !focusScores['ATK']) {
-                    // Use normalized weight from focusWeights
                     const atkWeight = focusWeights['ATK'] || 0;
                     if (atkWeight > 0) {
                         const atkPoints = scores.atk_pct * atkWeight;
                         totalFocusPoints += atkPoints;
-                        html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${atkWeight.toFixed(2)}</td><td>${atkPoints.toFixed(2)}</td></tr>`;
+                        const atkPctOfTotal = (atkPoints / totalPoints * 100).toFixed(1);
+                        html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${atkWeight.toFixed(2)}</td><td>${atkPoints.toFixed(2)}</td><td>${atkPctOfTotal}%</td></tr>`;
                     }
                 }
                 
-                // Haste - part of focus weight (only show if not already in focus_scores)
                 if (scores.haste_pct !== undefined && scores.haste_pct !== null && !focusScores['Haste']) {
-                    // Use normalized weight from focusWeights
                     const hasteWeight = focusWeights['Haste'] || 0;
                     if (hasteWeight > 0) {
                         const hastePoints = scores.haste_pct * hasteWeight;
                         totalFocusPoints += hastePoints;
-                        html += `<tr><td>Haste</td><td>${scores.haste_value || 'N/A'}%</td><td>${formatScore(scores.haste_pct)}</td><td>${hasteWeight.toFixed(2)}</td><td>${hastePoints.toFixed(2)}</td></tr>`;
+                        const hastePctOfTotal = (hastePoints / totalPoints * 100).toFixed(1);
+                        html += `<tr><td>Haste</td><td>${scores.haste_value || 'N/A'}%</td><td>${formatScore(scores.haste_pct)}</td><td>${hasteWeight.toFixed(2)}</td><td>${hastePoints.toFixed(2)}</td><td>${hastePctOfTotal}%</td></tr>`;
                     }
                 }
                 
-                // Total focus points
-                html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Focus Total</strong></td><td colspan="3"></td><td><strong>${totalFocusPoints.toFixed(2)}</strong></td></tr>`;
+                const focusTotalPctOfTotal = (totalFocusPoints / totalPoints * 100).toFixed(1);
+                html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Focus Total</strong></td><td colspan="4"></td><td><strong>${totalFocusPoints.toFixed(2)}</strong></td><td><strong>${focusTotalPctOfTotal}%</strong></td></tr>`;
                 html += `</tbody></table>`;
                 
                 // Overall total - ALWAYS use stored total_points from recalculateScores
