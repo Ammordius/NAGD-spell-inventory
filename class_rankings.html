@@ -538,6 +538,12 @@
                     }
                 });
             }
+            // When user customized stats but not focus (or focus sum is 0), use stats-only so contribution shows 100% stats
+            const hasCustomStatHere = allStatKeys.some(k => customWeight[k] !== undefined);
+            const focusSumHere = (customWeight.focus && typeof customWeight.focus === 'object') ? sumFocusWeights(customWeight.focus) : -1;
+            if (hasCustomStatHere && (focusSumHere === 0 || focusSumHere === -1) && (weights.hp_pct || weights.mana_pct || weights.ac_pct || weights.resists_pct)) {
+                weights.focus = {};
+            }
             allStatKeys.forEach(key => {
                 if (weights[key] === undefined) weights[key] = 0.0;
             });
@@ -787,7 +793,12 @@
                 statKeys.forEach(key => {
                     weights[key] = key === statKey ? val : (parseFloat(document.getElementById(`slider_${key}`)?.value) ?? base[key] ?? 0);
                 });
+                // Stats-only when user has no custom focus or focus all zero (match recalculateScores)
                 const _cw = customWeights[selectedClass];
+                const focusSum = (_cw?.focus && typeof _cw.focus === 'object') ? sumFocusWeights(_cw.focus) : -1;
+                if ((focusSum === 0 || focusSum === -1) && (weights.hp_pct || weights.mana_pct || weights.ac_pct || weights.resists_pct)) {
+                    weights.focus = {};
+                }
                 const focusMult = _cw?._meta?.focusMultiplier ?? 2.4;
                 const normalized = normalizeWeights(weights, focusMult, selectedClass);
                 
@@ -1050,8 +1061,10 @@
                         }
                     });
                 }
-                // When user set all focus to 0, use empty focus so stats get 100% and ranking is by stat only
-                if (customWeight.focus && typeof customWeight.focus === 'object' && sumFocusWeights(customWeight.focus) === 0 && (weights.hp_pct || weights.mana_pct || weights.ac_pct || weights.resists_pct)) {
+                // When user set all focus to 0, or never customized focus (stats-only custom), give 100% to stats
+                const hasCustomStat = statKeys.some(k => customWeight[k] !== undefined);
+                const customFocusSum = (customWeight.focus && typeof customWeight.focus === 'object') ? sumFocusWeights(customWeight.focus) : -1;
+                if (hasCustomStat && (customFocusSum === 0 || customFocusSum === -1) && (weights.hp_pct || weights.mana_pct || weights.ac_pct || weights.resists_pct)) {
                     weights.focus = {};
                 }
 
