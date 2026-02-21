@@ -80,22 +80,25 @@ def normalize_item_name(name):
     normalized = ' '.join(normalized.split())
     return normalized
 
-# Create focus lookup by item name (normalized)
+# Create focus lookup by item name (normalized) and optionally by item id
 def create_focus_lookup(focii_data):
-    """Create a lookup: item_name (normalized) -> focus effects"""
+    """Create a lookup: item_name (normalized) or item_id (str) -> focus effects"""
     focus_by_item_name = defaultdict(list)
     
     for focus in focii_data:
         for item in focus.get('items', []):
+            effect = {
+                'name': focus['name'],
+                'category': focus['category'],
+                'percentage': focus['percentage']
+            }
             item_name = normalize_item_name(item.get('name', ''))
             if item_name:
-                focus_by_item_name[item_name].append({
-                    'name': focus['name'],
-                    'category': focus['category'],
-                    'percentage': focus['percentage']
-                })
+                focus_by_item_name[item_name].append(effect)
+            if item.get('id') is not None:
+                focus_by_item_name[str(item['id'])].append(effect)
     
-    print(f"Created focus lookup with {len(focus_by_item_name)} unique item names")
+    print(f"Created focus lookup with {len(focus_by_item_name)} unique item names/ids")
     return focus_by_item_name
 
 # Get best focus percentage for each category
@@ -153,8 +156,10 @@ def analyze_character_focii(char_inventory, focus_lookup):
     
     for item in char_inventory:
         item_name = normalize_item_name(item.get('item_name', ''))
-        if item_name in focus_lookup:
-            for focus_effect in focus_lookup[item_name]:
+        item_id = str(item.get('item_id', '')) if item.get('item_id') is not None else ''
+        lookup_key = item_name if item_name in focus_lookup else (item_id if item_id in focus_lookup else None)
+        if lookup_key is not None:
+            for focus_effect in focus_lookup[lookup_key]:
                 focus_name = focus_effect['name']
                 cat = focus_effect['category']
                 pct = focus_effect['percentage']
