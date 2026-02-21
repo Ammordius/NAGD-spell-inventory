@@ -517,7 +517,12 @@
             });
             
             // Calculate normalized weights to show current contributions (use slider/custom focus mult)
-            const focusMult = customWeights[selectedClass]?._meta?.focusMultiplier ?? parseFloat(document.getElementById('slider_focus_mult')?.value) || 2.4;
+            const _cw = customWeights[selectedClass];
+            const _meta = _cw && _cw._meta;
+            const _fromCustom = _meta != null && _meta.focusMultiplier != null ? _meta.focusMultiplier : null;
+            const _sliderEl = document.getElementById('slider_focus_mult');
+            const _fromSlider = _sliderEl && _sliderEl.value !== '' ? parseFloat(_sliderEl.value) : NaN;
+            const focusMult = (_fromCustom != null ? _fromCustom : (isNaN(_fromSlider) ? 2.4 : _fromSlider));
             const normalized = normalizeWeights(weights, focusMult, selectedClass);
             
             // All stats are always shown, even if default is 0
