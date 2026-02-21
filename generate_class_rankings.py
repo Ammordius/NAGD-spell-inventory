@@ -803,7 +803,7 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Shadow Knight/Paladin - Tank hybrids
+    # Shadow Knight/Paladin - Tank hybrids (FT at half weight so focus slice stays ~35%)
     'Shadow Knight': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
@@ -812,21 +812,21 @@ CLASS_WEIGHTS = {
         'haste_pct': 1.0,
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 0.5,  # ATK moved to focus, reduced weight for Pal/SK
-            'FT': 4.0,   # Flowing Thought (cap 15); same as other focus, slider to adjust
+            'ATK': 0.5,
+            'FT': 2.0,   # Half weight for hybrid (slider can adjust)
         }
     },
     'Paladin': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 0.0,  # Moved to focus (reduced to 0.5 weight in normalize)
+        'atk_pct': 0.0,
         'haste_pct': 0.0,  # Moved to focus (weight 0.5)
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 0.5,  # ATK moved to focus, reduced weight for Pal/SK
-            'FT': 4.0,
-            'Haste': 0.5,  # Item haste (binary: 30%+ = 100%, else 0%)
+            'ATK': 0.5,
+            'FT': 2.0,   # Half weight for hybrid
+            'Haste': 0.5,
             'Beneficial Spell Haste': 0.75,
             'Healing Enhancement': 0.5,
             'Shield of Strife': 2.0,
@@ -949,17 +949,17 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Beastlord - Hybrid melee/caster
+    # Beastlord - Hybrid melee/caster (FT half weight)
     'Beastlord': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 0.0,  # Moved to focus
+        'atk_pct': 0.0,
         'haste_pct': 1.0,
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 1.0,  # ATK moved to focus
-            'FT': 4.0,
+            'ATK': 1.0,
+            'FT': 2.0,   # Half weight for hybrid
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
             'Spell Mana Efficiency': 1.0,
@@ -989,17 +989,17 @@ CLASS_WEIGHTS = {
         }
     },
     
-    # Ranger - Hybrid melee/caster
+    # Ranger - Hybrid melee/caster (FT half weight)
     'Ranger': {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 1.0,
-        'atk_pct': 0.0,  # Moved to focus
+        'atk_pct': 0.0,
         'haste_pct': 1.0,
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 1.0,  # ATK moved to focus
-            'FT': 4.0,
+            'ATK': 1.0,
+            'FT': 2.0,   # Half weight for hybrid
         }
     },
     
