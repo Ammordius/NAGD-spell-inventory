@@ -13,7 +13,8 @@ Environment: DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT
 
 Outputs:
     items_seen_to_mobs.json  - each items_seen item name -> list of { mob, zone } that drop it
-    dkp_mob_loot.json       - each DKP mob -> { mob, zone, loot: [...], respawn_seconds? }
+    dkp_mob_loot.json       - grouped by (zone, identical loot): { mob, mobs: [...], zone, loot, respawn_seconds? }
+                              Mobs with the same zone and same loot table are merged into one entry.
 """
 
 import json
@@ -223,6 +224,98 @@ def query_respawn_for_mobs(conn, mob_zone_pairs: List[Tuple[str, str]]) -> Dict[
             if sec > 0:
                 out[key] = max(out.get(key, 0), sec)
     return out
+
+
+# Plane of Time merges for loot-by-mob: merge these mobs into a single row each
+POT_ZONE = "Plane of Time"
+# P3 Guardian -> show under Avatar_of_the_Elements
+POT_MERGE_P3_GUARDIAN_INTO = "Avatar_of_the_Elements"
+# P3 minis -> show under P3 (canonical mob name)
+POT_P3_MOB_NAMES = [
+    "P3",
+    "A_Deadly_Warboar",
+    "A_Ferocious_Warboar",
+    "A_Needletusk_Warboar",
+    "Champion_of_Torment",
+    "Dark_Knight_of_Terris",
+    "Deathbringer_Blackheart",
+    "Deathbringer_Rianit",
+    "Deathbringer_Skullsmash",
+    "Dersool_Fal`Giersnaol",
+    "Dreamwarp",
+    "Herlsoakian",
+    "Kraksmaal_Fir`Dethsin",
+    "Sinrunal_Gorgedreal",
+    "Undead_Squad_Leader",
+    "Xeroan_Xi`Geruonask",
+    "Xerskel_Gerodnsal",
+]
+# Anar_of_Water -> show under P1
+POT_MERGE_ANAR_INTO = "P1"
+
+
+def _merge_loot(left: List[Dict[str, Any]], right: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Union two loot lists by (item_id, name); merge sources lists for same item."""
+    by_key: Dict[Tuple[Any, Any], Dict[str, Any]] = {}
+    for item in (left or []) + (right or []):
+        key = (item.get("item_id"), (item.get("name") or "").strip())
+        if key not in by_key:
+            by_key[key] = {"item_id": item.get("item_id"), "name": item.get("name"), "sources": list(item.get("sources") or [])}
+        else:
+            existing = by_key[key]["sources"]
+            for s in item.get("sources") or []:
+                if s not in existing:
+                    existing.append(s)
+    out = list(by_key.values())
+    out.sort(key=lambda x: (x.get("name") or "", x.get("item_id") or 0))
+    return out
+
+
+def _merge_entry_into(
+    result_grouped: Dict[str, Any],
+    from_key: str,
+    to_key: str,
+) -> None:
+    """Merge entry from_key into to_key (mobs + loot), then delete from_key."""
+    if from_key not in result_grouped or to_key not in result_grouped:
+        if from_key in result_grouped:
+            del result_grouped[from_key]
+        return
+    from_ent = result_grouped[from_key]
+    to_ent = result_grouped[to_key]
+    to_mobs = list(to_ent.get("mobs") or [to_ent.get("mob")] or [])
+    from_mobs = list(from_ent.get("mobs") or [from_ent.get("mob")] or [])
+    for m in from_mobs:
+        if m and m not in to_mobs:
+            to_mobs.append(m)
+    to_mobs.sort(key=lambda s: (s.lower(), s))
+    to_ent["mobs"] = to_mobs
+    to_ent["mob"] = to_ent.get("mob") or (to_mobs[0] if to_mobs else "")
+    to_ent["loot"] = _merge_loot(to_ent.get("loot") or [], from_ent.get("loot") or [])
+    del result_grouped[from_key]
+
+
+def _apply_plane_of_time_merges(result_grouped: Dict[str, Any]) -> Dict[str, Any]:
+    """Merge P3 Guardian into Avatar_of_the_Elements; P3 minis into P3; Anar_of_Water into P1 (Plane of Time only)."""
+    # P3 Guardian -> Avatar_of_the_Elements
+    _merge_entry_into(
+        result_grouped,
+        f"P3 Guardian|{POT_ZONE}",
+        f"{POT_MERGE_P3_GUARDIAN_INTO}|{POT_ZONE}",
+    )
+    # All P3 minis -> P3 (merge each into P3|Plane of Time)
+    p3_key = f"P3|{POT_ZONE}"
+    for mob_name in POT_P3_MOB_NAMES:
+        if mob_name == "P3":
+            continue
+        _merge_entry_into(result_grouped, f"{mob_name}|{POT_ZONE}", p3_key)
+    # Anar_of_Water -> P1
+    _merge_entry_into(
+        result_grouped,
+        f"Anar_of_Water|{POT_ZONE}",
+        f"{POT_MERGE_ANAR_INTO}|{POT_ZONE}",
+    )
+    return result_grouped
 
 
 def main() -> None:
@@ -477,12 +570,61 @@ def main() -> None:
                     existing_names.add(name)
             result[out_key]["loot"].sort(key=lambda x: (x["name"] or "", x["item_id"] or 0))
 
-    # Only include mobs that have at least one loot item (compact list for selecting at kill time)
+    # Only include mobs that have at least one loot item
     result = {k: v for k, v in result.items() if v["loot"]}
+
+    # Group entries with identical (zone, loot) into one entry per group with mobs: [names]
+    def loot_signature(loot_list: List[Dict[str, Any]]) -> Tuple[Tuple[Any, ...], ...]:
+        return tuple(sorted(((x.get("item_id"), x.get("name")) for x in (loot_list or []))))
+
+    grouped: Dict[Tuple[Any, ...], Dict[str, Any]] = {}
+    for out_key, entry in result.items():
+        zone = (entry.get("zone") or "").strip()
+        zone_n = normalize_zone(zone)
+        sig = loot_signature(entry.get("loot") or [])
+        group_key = (zone_n, sig)
+        mob_name = (entry.get("mob") or out_key.split("|")[0] or "").strip()
+        mob_display = mob_name.lstrip("#").strip() or mob_name
+        if group_key not in grouped:
+            grouped[group_key] = {
+                "first_key": out_key,
+                "mob": entry.get("mob"),
+                "mobs": [],
+                "zone": zone or entry.get("zone"),
+                "loot": entry.get("loot") or [],
+                "respawn_seconds": entry.get("respawn_seconds"),
+            }
+        g = grouped[group_key]
+        if mob_display and mob_display not in g["mobs"]:
+            g["mobs"].append(mob_display)
+        if entry.get("respawn_seconds") is not None:
+            current = g.get("respawn_seconds")
+            if current is None or (entry["respawn_seconds"] or 0) > (current or 0):
+                g["respawn_seconds"] = entry["respawn_seconds"]
+
+    # Build final output: one key per group (use first entry's key for uniqueness), sort mobs per entry
+    result_grouped: Dict[str, Any] = {}
+    for (_zone_n, _sig), g in grouped.items():
+        g["mobs"].sort(key=lambda s: (s.lower(), s))
+        orig_mob = g.get("mob") or (g["mobs"][0] if g["mobs"] else "")
+        out_key = g["first_key"]
+        result_grouped[out_key] = {
+            "mob": orig_mob,
+            "mobs": g["mobs"],
+            "zone": (g.get("zone") or "").strip(),
+            "loot": g["loot"],
+        }
+        if g.get("respawn_seconds") is not None:
+            result_grouped[out_key]["respawn_seconds"] = g["respawn_seconds"]
+
+    # Plane of Time display merges: combine specific mobs into one row for loot-by-mob UI
+    result_grouped = _apply_plane_of_time_merges(result_grouped)
+
     out_loot_path.write_text(
-        json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8"
+        json.dumps(result_grouped, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-    print(f"Wrote {len(result)} DKP mobs with loot to {out_loot_path.name}.")
+    total_mobs = sum(len(v.get("mobs") or [v.get("mob")] or []) for v in result_grouped.values())
+    print(f"Wrote {len(result_grouped)} grouped entries ({total_mobs} mobs) to {out_loot_path.name}.")
 
 
 if __name__ == "__main__":
