@@ -510,19 +510,39 @@
                 return;
             }
 
-            const weights = classWeights[selectedClass] || {};
-            
-            // Ensure all stat keys exist in weights (even if 0) so users can adjust them
-            // This allows users to enable stats that are 0 by default
+            // Build weights the same way as recalculateScores so contribution % matches scoring and sums to 100%
+            let weights = JSON.parse(JSON.stringify(originalClassWeights[selectedClass] || classWeights[selectedClass] || {}));
+            const customWeight = customWeights[selectedClass] || {};
             const allStatKeys = ['hp_pct', 'mana_pct', 'ac_pct', 'resists_pct'];
-            allStatKeys.forEach(key => {
-                if (weights[key] === undefined) {
-                    // Set to 0 if not defined, so slider can be shown and adjusted
-                    weights[key] = 0.0;
+            allStatKeys.forEach(k => {
+                if (customWeight[k] !== undefined) weights[k] = customWeight[k];
+            });
+            Object.keys(customWeight).forEach(key => {
+                if (key !== '_meta' && key !== 'focus' && !allStatKeys.includes(key) && weights.hasOwnProperty(key)) {
+                    weights[key] = customWeight[key];
                 }
             });
-            
-            // Calculate normalized weights to show current contributions (use slider/custom focus mult)
+            if (customWeight.focus && weights.focus) {
+                Object.keys(customWeight.focus).forEach(focusKey => {
+                    if (typeof customWeight.focus[focusKey] === 'object' && customWeight.focus[focusKey] !== null) {
+                        if (!weights.focus[focusKey]) weights.focus[focusKey] = {};
+                        Object.keys(customWeight.focus[focusKey]).forEach(nestedKey => {
+                            if (weights.focus[focusKey][nestedKey] !== undefined) {
+                                weights.focus[focusKey][nestedKey] = customWeight.focus[focusKey][nestedKey];
+                            }
+                        });
+                    } else {
+                        if (weights.focus[focusKey] !== undefined) {
+                            weights.focus[focusKey] = customWeight.focus[focusKey];
+                        }
+                    }
+                });
+            }
+            allStatKeys.forEach(key => {
+                if (weights[key] === undefined) weights[key] = 0.0;
+            });
+
+            // Normalized weights: 0.65 to stats (or 1.0 when all focus weights 0), 0.35 to focus; contributions sum to 100%
             const _cw = customWeights[selectedClass];
             const _meta = _cw && _cw._meta;
             const _fromCustom = _meta != null && _meta.focusMultiplier != null ? _meta.focusMultiplier : null;
@@ -566,6 +586,20 @@
                 `;
                 slidersDiv.appendChild(sliderDiv);
             });
+
+            // Show that contributions sum to 100% (stats + focus when focus used, else stats only)
+            const statContribSum = (normalized.hp_pct + normalized.mana_pct + normalized.ac_pct + normalized.resists_pct) * 100;
+            const focusContribSum = normalized.focusTarget * 100;
+            const totalContrib = statContribSum + focusContribSum;
+            const summaryDiv = document.createElement('p');
+            summaryDiv.id = 'weightContribSummary';
+            summaryDiv.style.cssText = 'font-size: 0.9em; color: #6c757d; margin: 8px 0 0 0; padding: 6px 10px; background: #f0f0f0; border-radius: 4px;';
+            if (focusContribSum > 0) {
+                summaryDiv.textContent = `Contributions sum to ${totalContrib.toFixed(1)}% (Stats: ${statContribSum.toFixed(1)}%, Focus: ${focusContribSum.toFixed(1)}%)`;
+            } else {
+                summaryDiv.textContent = `Contributions sum to ${totalContrib.toFixed(1)}% (Stats: 100% when all focus weights are 0)`;
+            }
+            slidersDiv.appendChild(summaryDiv);
 
             // Add focus weight customization section
             const focusSlidersDiv = document.getElementById('focusWeightSliders');
@@ -744,38 +778,34 @@
             const val = parseFloat(value);
             document.getElementById(`value_${statKey}`).textContent = val.toFixed(2);
             
-            // Update contribution percentage for this stat and all others (including focus)
+            // Build weights from current stat slider values so contribution sums to 100% as user drags
             const selectedClass = document.getElementById('weightClass')?.value;
             if (selectedClass) {
-                const weights = {...classWeights[selectedClass]};
-                // Ensure the stat key exists (even if it was 0 or undefined)
-                weights[statKey] = val;
-                // Ensure all stat keys exist for normalization
-                ['hp_pct', 'mana_pct', 'ac_pct', 'resists_pct'].forEach(key => {
-                    if (weights[key] === undefined) {
-                        weights[key] = 0.0;
-                    }
+                const base = classWeights[selectedClass] || {};
+                const statKeys = ['hp_pct', 'mana_pct', 'ac_pct', 'resists_pct'];
+                const weights = { ...base };
+                statKeys.forEach(key => {
+                    weights[key] = key === statKey ? val : (parseFloat(document.getElementById(`slider_${key}`)?.value) ?? base[key] ?? 0);
                 });
-                const focusMult = 2.4;
+                const _cw = customWeights[selectedClass];
+                const focusMult = _cw?._meta?.focusMultiplier ?? 2.4;
                 const normalized = normalizeWeights(weights, focusMult, selectedClass);
                 
-                // Update this stat's contribution
-                const contrib = (normalized[statKey] || 0) * 100;
-                const contribSpan = document.getElementById(`contrib_${statKey}`);
-                if (contribSpan) {
-                    contribSpan.textContent = ` (${contrib.toFixed(1)}% contribution)`;
-                }
-                
-                // Update all other stat contributions
-                ['hp_pct', 'mana_pct', 'ac_pct', 'resists_pct'].forEach(key => {
-                    if (key !== statKey) {
-                        const otherContrib = (normalized[key] || 0) * 100;
-                        const otherContribSpan = document.getElementById(`contrib_${key}`);
-                        if (otherContribSpan) {
-                            otherContribSpan.textContent = ` (${otherContrib.toFixed(1)}% contribution)`;
-                        }
-                    }
+                statKeys.forEach(key => {
+                    const contrib = (normalized[key] || 0) * 100;
+                    const contribSpan = document.getElementById(`contrib_${key}`);
+                    if (contribSpan) contribSpan.textContent = ` (${contrib.toFixed(1)}% contribution)`;
                 });
+                // Update summary line if present
+                const statContribSum = statKeys.reduce((s, k) => s + (normalized[k] || 0), 0) * 100;
+                const focusContribSum = (normalized.focusTarget || 0) * 100;
+                const totalContrib = statContribSum + focusContribSum;
+                const summaryEl = document.getElementById('weightContribSummary');
+                if (summaryEl) {
+                    summaryEl.textContent = focusContribSum > 0
+                        ? `Contributions sum to ${totalContrib.toFixed(1)}% (Stats: ${statContribSum.toFixed(1)}%, Focus: ${focusContribSum.toFixed(1)}%)`
+                        : `Contributions sum to ${totalContrib.toFixed(1)}% (Stats: 100% when all focus weights are 0)`;
+                }
             }
         }
 
