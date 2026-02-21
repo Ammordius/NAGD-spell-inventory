@@ -252,6 +252,7 @@ SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
     # Beneficial mana efficiency
     'Enhancement Efficiency': 'Bene',
     'Enhancement Preservation': 'Bene',
+    'Preservation of Mithaniel': 'Bene',
     'Reanimation Efficiency': 'Bene',
     'Reanimation Preservation': 'Bene',
     'Summoning Efficiency': 'Bene',

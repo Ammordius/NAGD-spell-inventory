@@ -2271,6 +2271,11 @@
           "name": "Necklace of Eternal Visions",
           "zone": "The Plane of Time",
           "mob": "Innoruuk"
+        },
+        {
+          "id": 26984,
+          "zone": "The Plane of Time",
+          "mob": "Cazic Thule"
         }
       ]
     },
