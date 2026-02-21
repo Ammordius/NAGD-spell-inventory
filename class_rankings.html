@@ -1859,7 +1859,7 @@
             }
             
             const statTotalPctOfTotal = (totalStatPoints / totalPoints * 100).toFixed(1);
-            html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Stat Total</strong></td><td colspan="4"></td><td><strong>${totalStatPoints.toFixed(2)}</strong></td><td><strong>${statTotalPctOfTotal}%</strong></td></tr>`;
+            html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Stat Total</strong></td><td colspan="3"></td><td><strong>${totalStatPoints.toFixed(2)}</strong></td><td><strong>${statTotalPctOfTotal}%</strong></td></tr>`;
             html += `</tbody></table>`;
             
             // Focus Scores
@@ -2047,7 +2047,7 @@
                 }
                 
                 const focusTotalPctOfTotal = (totalFocusPoints / totalPoints * 100).toFixed(1);
-                html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Focus Total</strong></td><td colspan="4"></td><td><strong>${totalFocusPoints.toFixed(2)}</strong></td><td><strong>${focusTotalPctOfTotal}%</strong></td></tr>`;
+                html += `<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Focus Total</strong></td><td colspan="3"></td><td><strong>${totalFocusPoints.toFixed(2)}</strong></td><td><strong>${focusTotalPctOfTotal}%</strong></td></tr>`;
                 html += `</tbody></table>`;
                 
                 // Overall total - ALWAYS use stored total_points from recalculateScores
