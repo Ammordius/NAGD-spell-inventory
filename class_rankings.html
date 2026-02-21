@@ -274,6 +274,10 @@
                 </select>
             </div>
             <div class="control-group">
+                <label>Search Name:</label>
+                <input type="text" id="searchName" placeholder="Partial name..." style="padding: 8px 12px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px; min-width: 160px;">
+            </div>
+            <div class="control-group">
                 <label>Sort by:</label>
                 <select id="sortBy">
                     <option value="overall">Overall Score</option>
@@ -367,6 +371,7 @@
         let characters = [];
         let filteredCharacters = [];
         let filterClass = '';
+        let nameSearch = '';
         let sortBy = 'overall';
 
         let classWeights = {};
@@ -1308,8 +1313,10 @@
         }
 
         function filterAndSort() {
+            const search = (nameSearch || '').trim().toLowerCase();
             filteredCharacters = characters.filter(char => {
                 if (filterClass && char.class !== filterClass) return false;
+                if (search && !(char.name || '').toLowerCase().includes(search)) return false;
                 return true;
             });
             
@@ -1669,6 +1676,11 @@
 
         document.getElementById('filterClass').addEventListener('change', (e) => {
             filterClass = e.target.value;
+            filterAndSort();
+        });
+
+        document.getElementById('searchName').addEventListener('input', (e) => {
+            nameSearch = e.target.value;
             filterAndSort();
         });
 
