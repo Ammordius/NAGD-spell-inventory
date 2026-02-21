@@ -1331,6 +1331,17 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             total_score += ac_score * ac_weight
             total_weight += ac_weight
         
+        # Mana for Paladin/Shadow Knight (hybrids with mana) - so frontend custom "mana only" works
+        if char_class in ['Paladin', 'Shadow Knight']:
+            mana_weight = weights_config.get('mana_pct', 0.0)
+            mana_value = scores.get('mana', 0) if scores.get('mana') is not None else 0
+            max_mana = class_max_values.get('max_mana', 1)
+            if mana_weight > 0 and max_mana > 0 and mana_value > 0:
+                mana_score = (mana_value / max_mana * 100) if mana_value > 0 else 0
+                scores['mana_pct'] = mana_score  # Store percentage for display (and frontend reweighting)
+                total_score += mana_score * mana_weight
+                total_weight += mana_weight
+
         # ATK and Haste are now part of focus weight (handled below)
         
         # Resists - calculate individual resist scores with weight curve
