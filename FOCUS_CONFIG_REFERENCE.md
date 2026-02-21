@@ -37,8 +37,8 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 | Class        | Focus weights (name: weight) |
 |-------------|------------------------------|
 | **Warrior** | ATK 1.0, Haste 1.0, Darkblade 1.0, Raex Chest 1.0 |
-| **Monk**    | ATK 1.0 |
-| **Rogue**   | ATK 1.0 |
+| **Monk**    | ATK 1.0, Haste 1.0 |
+| **Rogue**   | ATK 1.0, Haste 1.0 |
 | **Shadow Knight** | Haste 0.75, ATK 0.75, Spell Mana Efficiency 0.5, Shield of Strife 2.0, FT 1.0 |
 | **Paladin** | ATK 0.5, FT 1.0, Haste 0.5, Beneficial Spell Haste 0.75, Healing Enhancement 0.5, Shield of Strife 2.0, Spell Mana Efficiency 0.5 |
 | **Wizard**  | FT 4.0, Spell Damage {Fire 1.0, Cold 1.0, Magic 0.5}, Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5 |

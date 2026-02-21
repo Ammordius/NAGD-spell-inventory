@@ -946,6 +946,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'ATK': 1.0,  # ATK moved to focus
+            'Haste': 1.0,  # Item haste
         }
     },
     
@@ -959,6 +960,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 1.0,
         'focus': {
             'ATK': 1.0,  # ATK moved to focus
+            'Haste': 1.0,  # Item haste
         }
     },
     
