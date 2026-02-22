@@ -26,7 +26,7 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 | Druid       | Healing Enhancement, Spell Damage (Fire), (Cold), Spell Mana Efficiency, Buff Spell Duration |
 | Cleric      | Healing Enhancement, Spell Damage (Magic), Spell Mana Efficiency, Beneficial Spell Haste, Buff Spell Duration |
 | Wizard      | Spell Damage (Fire), (Cold), (Magic), Spell Mana Efficiency, Spell Haste |
-| Magician    | Spell Damage (Fire), (Magic), Spell Mana Efficiency, Spell Haste |
+| Magician    | Spell Damage (Fire), (Magic), Spell Mana Efficiency, Spell Haste, Detrimental Spell Haste |
 | Enchanter   | Spell Damage (Magic), Spell Mana Efficiency, Spell Haste, Buff Spell Duration |
 | Beastlord   | ATK, FT, Spell Damage (Cold), Healing Enhancement, Spell Mana Efficiency, Buff Spell Duration, Beneficial Spell Haste, Detrimental Spell Haste |
 | Bard        | Brass, Percussion, Singing, Strings, Wind |

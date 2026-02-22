@@ -288,6 +288,55 @@ def get_focus_sources(char_inventory, focus_lookup):
     return result
 
 
+def get_all_focus_candidates(focii_data):
+    """Build a map of focus_key -> list of {item_name, item_id, value} for all items that provide that focus.
+    Used in the UI to show 'items that could give this focus' when the character doesn't have it but weight > 0."""
+    candidates = defaultdict(list)
+    for focus in focii_data:
+        name = focus.get('name', '')
+        cat = focus.get('category', '')
+        pct = focus.get('percentage', 0)
+        for item in focus.get('items', []):
+            item_name = item.get('name', '') or ('Item ' + str(item.get('id', '')) if item.get('id') is not None else '')
+            item_id = str(item['id']) if item.get('id') is not None else ''
+            if not item_name and not item_id:
+                continue
+            entry = {'item_name': item_name or f'Item {item_id}', 'item_id': item_id, 'value': pct}
+            if cat == 'Spell Damage':
+                damage_type = SPELL_DAMAGE_TYPE_MAP.get(name, 'All')
+                key = f'Spell Damage ({damage_type})'
+                candidates[key].append(entry)
+            elif cat == 'Spell Mana Efficiency':
+                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(name, 'Nuke')
+                key = f'Spell Mana Efficiency ({sub})'
+                candidates[key].append(entry)
+            elif cat == 'Spell Haste':
+                sub = SPELL_HASTE_CATEGORY_MAP.get(name, 'Bene')
+                key = 'Detrimental Spell Haste' if sub == 'Det' else 'Beneficial Spell Haste'
+                candidates[key].append(entry)
+            elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
+                if cat == 'All Spell Duration':
+                    candidates['Buff Spell Duration'].append(entry)
+                    candidates['Detrimental Spell Duration'].append(entry)
+                else:
+                    dur_cat = SPELL_DURATION_CATEGORY_MAP.get(name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
+                    key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
+                    candidates[key].append(entry)
+            else:
+                # Healing Enhancement, Spell Range Extension, etc.
+                candidates[cat].append(entry)
+    # Dedupe by item_id per key (keep highest value)
+    result = {}
+    for key, items in candidates.items():
+        by_id = {}
+        for it in items:
+            iid = it.get('item_id', '')
+            if iid not in by_id or (it.get('value', 0) or 0) > (by_id[iid].get('value', 0) or 0):
+                by_id[iid] = it
+        result[key] = sorted(by_id.values(), key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', '')))
+    return result
+
+
 # Map spell damage focii to damage types
 SPELL_DAMAGE_TYPE_MAP = {
     # Magic damage focii (Druzzil is the god of magic)
@@ -462,7 +511,7 @@ CLASS_FOCUS_PRIORITIES = {
     'Druid': ['Healing Enhancement', 'Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Mana Efficiency', 'Buff Spell Duration'],
     'Cleric': ['Healing Enhancement', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration'],
     'Wizard': ['Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
-    'Magician': ['Spell Damage (Fire)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
+    'Magician': ['Spell Damage (Fire)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Haste'],
     'Enchanter': ['Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Buff Spell Duration'],
     'Beastlord': ['ATK', 'FT', 'Spell Damage (Cold)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration', 'Beneficial Spell Haste', 'Detrimental Spell Haste'],
     'Bard': ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'],
@@ -891,6 +940,16 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 ) if char_mana_efficiency_cats else (
                     (char_focii.get(category, 0) / best_pct * 100) if best_pct > 0 and char_focii.get(category, 0) > 0 else 0
                 )
+            elif category == 'Spell Haste' and char_class == 'Magician' and char_spell_haste_cats and best_haste_by_cat:
+                # Magician: score Beneficial and Detrimental Spell Haste separately (like Enchanter)
+                best_all_haste = best_haste_by_cat.get('All', 0)
+                best_bene = max(best_haste_by_cat.get('Bene', 0), best_all_haste) or best_focii.get('Spell Haste', 33.0)
+                bene_pct = max(char_spell_haste_cats.get('Bene', 0), char_spell_haste_cats.get('All', 0))
+                focus_scores['Beneficial Spell Haste'] = (bene_pct / best_bene * 100) if best_bene > 0 and bene_pct > 0 else 0
+                best_det = max(best_haste_by_cat.get('Det', 0), best_all_haste) or best_focii.get('Spell Haste', 33.0)
+                det_pct = max(char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
+                focus_scores['Detrimental Spell Haste'] = (det_pct / best_det * 100) if best_det > 0 and det_pct > 0 else 0
+                focus_scores['Spell Haste'] = 0.5 * focus_scores.get('Beneficial Spell Haste', 0) + 0.5 * focus_scores.get('Detrimental Spell Haste', 0)
             else:
                 # Other categories work normally
                 char_pct = char_focii.get(category, 0)
@@ -1961,6 +2020,7 @@ def main():
     focus_lookup = create_focus_lookup(focii_data)
     best_focii = get_best_focii_by_category(focii_data)
     best_mana_by_cat, best_haste_by_cat, best_duration_by_cat = get_best_focii_by_subcategory(focii_data)
+    focus_candidates = get_all_focus_candidates(focii_data)
     bard_instrument_data = load_bard_instruments()
     
     print(f"Loaded {len(focii_data)} focus effects")
@@ -2209,7 +2269,8 @@ def main():
     output = {
         'characters': output_data,
         'class_weights': CLASS_WEIGHTS,
-        'normalized_class_weights': normalized_by_class
+        'normalized_class_weights': normalized_by_class,
+        'focus_candidates': focus_candidates,
     }
     # Helper function to round floats in nested structures
     def round_floats(obj):

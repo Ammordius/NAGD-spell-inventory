@@ -393,6 +393,7 @@
         let normalizedClassWeights = {}; // Backend-normalized weights (focus ~35%, FT in focus); use for card when no custom
         let customWeights = {}; // User-customized weights
         let originalClassWeights = {}; // Backup of original weights
+        let focusCandidates = {}; // focus_key -> list of { item_name, item_id, value } for items that could give that focus
 
         // Weight customization functions
         function loadCustomWeights() {
@@ -1298,6 +1299,7 @@
                     classWeights = data.class_weights || {};
                     normalizedClassWeights = data.normalized_class_weights || {};
                     originalClassWeights = JSON.parse(JSON.stringify(classWeights)); // Deep copy
+                    focusCandidates = data.focus_candidates || {};
                     console.log(`Loaded ${characters.length} characters, ${Object.keys(classWeights).length} class weights`);
                 }
                 filteredCharacters = [...characters];
@@ -1986,6 +1988,7 @@
                 }
                 
                 const bardInstrumentCats = ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'];
+                const focusTableRows = [];
                 for (const [focusCat, score] of Object.entries(focusScores)) {
                     // Skip composite Spell Haste when we show Beneficial/Detrimental separately
                     if (focusCat === 'Spell Haste' && (focusScores['Beneficial Spell Haste'] !== undefined || focusScores['Detrimental Spell Haste'] !== undefined)) {
@@ -2003,7 +2006,7 @@
                             totalFocusPoints += focusPoints;
                             const focusPctOfTotal = (focusPoints / totalPoints * 100).toFixed(1);
                             const displayName = focusCat + ' (' + (row.label || row.cat) + ')';
-                            html += `<tr><td>${escapeHtml(displayName)}</td><td>${(row.raw != null ? row.raw + '%' : 'N/A')}</td><td>${formatScore(row.score_pct)}</td><td>${rowWeight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
+                            focusTableRows.push({ focusPoints, html: `<tr><td>${escapeHtml(displayName)}</td><td>${(row.raw != null ? row.raw + '%' : 'N/A')}</td><td>${formatScore(row.score_pct)}</td><td>${rowWeight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>` });
                         });
                         continue;
                     }
@@ -2035,7 +2038,7 @@
                         rawValue = score === 100 ? 100 : 0;
                     } else if (focusCat === 'Shield of Strife' || focusCat === 'Serpent of Vindication' || 
                                focusCat === 'Healing Enhancement' || focusCat === 'Beneficial Spell Haste' || 
-                               focusCat === 'ATK') {
+                               focusCat === 'Detrimental Spell Haste' || focusCat === 'ATK') {
                         // For specific focus items, use normalized weight from focusWeights
                         weight = focusWeights[focusCat] || 0;
                         
@@ -2075,7 +2078,18 @@
                     const focusPoints = score * weight;
                     totalFocusPoints += focusPoints;
                     const focusPctOfTotal = (focusPoints / totalPoints * 100).toFixed(1);
-                    html += `<tr><td>${escapeHtml(focusCat === 'FT' ? 'FT (Flowing Thought)' : focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
+                    let rowHtml = `<tr><td>${escapeHtml(focusCat === 'FT' ? 'FT (Flowing Thought)' : focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
+                    // When you don't have this focus and it has non-zero weight, show items that could give it
+                    if (score === 0 && weight > 0 && focusCandidates[focusCat] && focusCandidates[focusCat].length > 0) {
+                        const candidateLinks = focusCandidates[focusCat].slice(0, 20).map(s => {
+                            const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
+                            const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
+                            return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
+                        }).join(', ');
+                        const more = focusCandidates[focusCat].length > 20 ? ` (+${focusCandidates[focusCat].length - 20} more)` : '';
+                        rowHtml += `<tr><td colspan="6" class="focus-candidates-row">Items that could give this focus: ${candidateLinks}${more}</td></tr>`;
+                    }
+                    focusTableRows.push({ focusPoints, html: rowHtml });
                 }
                 
                 // ATK - part of focus weight (only show if not already in focus_scores)
@@ -2085,7 +2099,7 @@
                         const atkPoints = scores.atk_pct * atkWeight;
                         totalFocusPoints += atkPoints;
                         const atkPctOfTotal = (atkPoints / totalPoints * 100).toFixed(1);
-                        html += `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${atkWeight.toFixed(2)}</td><td>${atkPoints.toFixed(2)}</td><td>${atkPctOfTotal}%</td></tr>`;
+                        focusTableRows.push({ focusPoints: atkPoints, html: `<tr><td>ATK</td><td>${char.stats.atk_item || 'N/A'}</td><td>${formatScore(scores.atk_pct)}</td><td>${atkWeight.toFixed(2)}</td><td>${atkPoints.toFixed(2)}</td><td>${atkPctOfTotal}%</td></tr>` });
                     }
                 }
                 
@@ -2095,9 +2109,13 @@
                         const hastePoints = scores.haste_pct * hasteWeight;
                         totalFocusPoints += hastePoints;
                         const hastePctOfTotal = (hastePoints / totalPoints * 100).toFixed(1);
-                        html += `<tr><td>Haste</td><td>${scores.haste_value || 'N/A'}%</td><td>${formatScore(scores.haste_pct)}</td><td>${hasteWeight.toFixed(2)}</td><td>${hastePoints.toFixed(2)}</td><td>${hastePctOfTotal}%</td></tr>`;
+                        focusTableRows.push({ focusPoints: hastePoints, html: `<tr><td>Haste</td><td>${scores.haste_value || 'N/A'}%</td><td>${formatScore(scores.haste_pct)}</td><td>${hasteWeight.toFixed(2)}</td><td>${hastePoints.toFixed(2)}</td><td>${hastePctOfTotal}%</td></tr>` });
                     }
                 }
+                
+                // Order focus rows by overall score (points) descending
+                focusTableRows.sort((a, b) => b.focusPoints - a.focusPoints);
+                focusTableRows.forEach(r => { html += r.html; });
                 
                 const displayFocusTotal = useComputedPoints ? char.focus_points : totalFocusPoints;
                 const focusTotalPctOfTotal = (displayFocusTotal / totalPoints * 100).toFixed(1);
@@ -2142,6 +2160,19 @@
                                 return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a> (${slotName})${valStr}`;
                             }).join(', ');
                             sourceHtml = `<span class="focus-breakdown-sources">From: ${sourceHtml}</span>`;
+                        }
+                        const weightForFocus = (() => {
+                            const fw = focusWeights[focusKey] ?? (focusKey.startsWith('Spell Damage (') ? (focusWeights['Spell Damage'] && Object.values(focusWeights['Spell Damage']).reduce((a, b) => a + b, 0)) : 0);
+                            return typeof fw === 'number' ? fw : 0;
+                        })();
+                        if (scorePct === 0 && weightForFocus > 0 && focusCandidates[focusKey] && focusCandidates[focusKey].length > 0) {
+                            const candidateLinks = focusCandidates[focusKey].slice(0, 15).map(s => {
+                                const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
+                                const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
+                                return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
+                            }).join(', ');
+                            const more = focusCandidates[focusKey].length > 15 ? ` (+${focusCandidates[focusKey].length - 15} more)` : '';
+                            sourceHtml = (sourceHtml ? sourceHtml + ' ' : '') + `<span class="focus-breakdown-candidates">Items that could give this: ${candidateLinks}${more}</span>`;
                         }
                         const displayName = focusKey === 'FT' ? 'FT (Flowing Thought)' : focusKey;
                         html += `<div class="focus-breakdown-item"><div class="focus-breakdown-name">${escapeHtml(displayName)}</div><div class="focus-breakdown-bar-wrap"><div class="focus-breakdown-bar ${barClass}" style="width:${Math.min(100, Math.max(0, scorePct))}%"></div></div><div class="focus-breakdown-value">${formatScore(scorePct)}%</div>${sourceHtml}</div>`;
