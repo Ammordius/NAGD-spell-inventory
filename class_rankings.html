@@ -2526,11 +2526,21 @@
             if (itemCardTimer) clearTimeout(itemCardTimer);
             let itemId = link.getAttribute('data-item-id');
             const itemName = link.getAttribute('data-item-name') || '';
-            if ((!itemId || itemId === '') && itemName) {
-                const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
-                if (resolvedId != null) itemId = String(resolvedId);
+            const needResolveByName = (!itemId || itemId === '') && itemName;
+            if (needResolveByName) {
+                // itemNameToId is only populated after loadItemStats(); wait for it then resolve and show card
+                loadItemStats().then(() => {
+                    const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
+                    if (resolvedId != null) itemId = String(resolvedId);
+                    itemCardTimer = setTimeout(() => showItemCard(link, itemId, itemName), HOVER_DELAY_MS);
+                });
+            } else {
+                if ((!itemId || itemId === '') && itemName) {
+                    const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
+                    if (resolvedId != null) itemId = String(resolvedId);
+                }
+                itemCardTimer = setTimeout(() => showItemCard(link, itemId, itemName), HOVER_DELAY_MS);
             }
-            itemCardTimer = setTimeout(() => showItemCard(link, itemId, itemName), HOVER_DELAY_MS);
         });
         document.body.addEventListener('mouseout', function(e) {
             if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest('.item-link') || e.relatedTarget.closest('.item-card-popover'))) return;
@@ -2539,6 +2549,8 @@
         });
 
         loadData();
+        // Preload item_stats so name→id resolution works on first hover (e.g. gear slots that lack item_id in JSON)
+        loadItemStats().catch(() => {});
     </script>
 </body>
 </html>

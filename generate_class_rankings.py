@@ -301,6 +301,26 @@ def load_item_stats():
     return {}
 
 
+def load_item_stats_name_to_id():
+    """Load data/item_stats.json and return normalized item name -> item_id (str). Used to backfill missing item_id in inventory."""
+    base_dir = os.path.dirname(__file__) if '__file__' in globals() else '.'
+    for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            name_to_id = {}
+            for iid, info in (data or {}).items():
+                name = (info.get('name') or '').strip()
+                if name:
+                    norm = normalize_item_name(name)
+                    if norm and norm not in name_to_id:
+                        name_to_id[norm] = str(iid)
+            return name_to_id
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+    return {}
+
+
 def get_all_focus_candidates(focii_data, item_stats_lookup=None):
     """Build a map of focus_key -> list of {item_name, item_id, value, classes?} for all items that provide that focus.
     Used in the UI to show 'items that could give this focus' when the character doesn't have it but weight > 0.
@@ -2205,22 +2225,39 @@ def main():
     
     # Load inventory (utf-8-sig for consistency with character file)
     # Include all slots (worn + bags) so focus items like harmonize clickies count when in inventory
+    # Backfill missing item_id from item name using data/item_stats.json so item cards work for all slots
     print("Loading inventory data...")
+    item_name_to_id = load_item_stats_name_to_id()
+    if item_name_to_id:
+        print(f"  Name->id lookup: {len(item_name_to_id)} items (for backfilling missing item_id)")
     inventory = {}
+    backfilled = 0
     with open(inv_file, 'r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f, delimiter='\t')
         for row in reader:
-            char_id = row['id']
-            slot_id = int(row['slot_id'])
+            char_id = row.get('id', '')
+            try:
+                slot_id = int(row.get('slot_id', 0))
+            except (ValueError, TypeError):
+                continue
             if char_id not in characters:
                 continue
             if char_id not in inventory:
                 inventory[char_id] = []
+            item_id = (row.get('item_id') or '').strip()
+            item_name = (row.get('item_name') or '').strip()
+            if not item_id and item_name and item_name_to_id:
+                resolved = item_name_to_id.get(normalize_item_name(item_name), '')
+                if resolved:
+                    item_id = resolved
+                    backfilled += 1
             inventory[char_id].append({
-                'item_id': row['item_id'],
-                'item_name': row['item_name'],
+                'item_id': item_id,
+                'item_name': item_name or row.get('item_name', ''),
                 'slot_id': slot_id
             })
+    if backfilled:
+        print(f"  Backfilled item_id for {backfilled} inventory rows from name lookup")
     print(f"Loaded inventory for {len(inventory)} characters")
     
     # Group characters by class
