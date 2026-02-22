@@ -2079,15 +2079,16 @@
                     totalFocusPoints += focusPoints;
                     const focusPctOfTotal = (focusPoints / totalPoints * 100).toFixed(1);
                     let rowHtml = `<tr><td>${escapeHtml(focusCat === 'FT' ? 'FT (Flowing Thought)' : focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
-                    // When you don't have this focus and it has non-zero weight, show items that could give it
-                    if (score === 0 && weight > 0 && focusCandidates[focusCat] && focusCandidates[focusCat].length > 0) {
+                    // When not at max for this focus, show upgrade options (items that could give it, with %)
+                    if (score < 100 && weight > 0 && focusCandidates[focusCat] && focusCandidates[focusCat].length > 0) {
                         const candidateLinks = focusCandidates[focusCat].slice(0, 20).map(s => {
                             const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                             const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                             return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                         }).join(', ');
                         const more = focusCandidates[focusCat].length > 20 ? ` (+${focusCandidates[focusCat].length - 20} more)` : '';
-                        rowHtml += `<tr><td colspan="6" class="focus-candidates-row">Items that could give this focus: ${candidateLinks}${more}</td></tr>`;
+                        const label = score === 0 ? 'Items that could give this focus (with %):' : 'Upgrades (with %):';
+                        rowHtml += `<tr><td colspan="6" class="focus-candidates-row">${label} ${candidateLinks}${more}</td></tr>`;
                     }
                     focusTableRows.push({ focusPoints, html: rowHtml });
                 }
@@ -2165,17 +2166,19 @@
                             const fw = focusWeights[focusKey] ?? (focusKey.startsWith('Spell Damage (') ? (focusWeights['Spell Damage'] && Object.values(focusWeights['Spell Damage']).reduce((a, b) => a + b, 0)) : 0);
                             return typeof fw === 'number' ? fw : 0;
                         })();
-                        if (scorePct === 0 && weightForFocus > 0 && focusCandidates[focusKey] && focusCandidates[focusKey].length > 0) {
+                        // When not at max for this category, show upgrade options (items that could give this focus, with %)
+                        if (scorePct < 100 && weightForFocus > 0 && focusCandidates[focusKey] && focusCandidates[focusKey].length > 0) {
                             const candidateLinks = focusCandidates[focusKey].slice(0, 15).map(s => {
                                 const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                                 const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                                 return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                             }).join(', ');
                             const more = focusCandidates[focusKey].length > 15 ? ` (+${focusCandidates[focusKey].length - 15} more)` : '';
-                            sourceHtml = (sourceHtml ? sourceHtml + ' ' : '') + `<span class="focus-breakdown-candidates">Items that could give this: ${candidateLinks}${more}</span>`;
+                            const label = scorePct === 0 ? 'Items that could give this (with %):' : 'Upgrades (with %):';
+                            sourceHtml = (sourceHtml ? sourceHtml + ' ' : '') + `<span class="focus-breakdown-candidates">${label} ${candidateLinks}${more}</span>`;
                         }
                         const displayName = focusKey === 'FT' ? 'FT (Flowing Thought)' : focusKey;
-                        html += `<div class="focus-breakdown-item"><div class="focus-breakdown-name">${escapeHtml(displayName)}</div><div class="focus-breakdown-bar-wrap"><div class="focus-breakdown-bar ${barClass}" style="width:${Math.min(100, Math.max(0, scorePct))}%"></div></div><div class="focus-breakdown-value">${formatScore(scorePct)}%</div>${sourceHtml}</div>`;
+                        html += `<div class="focus-breakdown-item"><div class="focus-breakdown-name">${escapeHtml(displayName)}</div><div class="focus-breakdown-bar-wrap"><div class="focus-breakdown-bar ${barClass}" style="width:${Math.min(100, Math.max(0, scorePct))}%"></div></div><div class="focus-breakdown-value">${formatScore(scorePct)}</div>${sourceHtml}</div>`;
                     });
                     html += `</div>`;
                 }

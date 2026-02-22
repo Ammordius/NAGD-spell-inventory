@@ -334,6 +334,11 @@ def get_all_focus_candidates(focii_data):
             if iid not in by_id or (it.get('value', 0) or 0) > (by_id[iid].get('value', 0) or 0):
                 by_id[iid] = it
         result[key] = sorted(by_id.values(), key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', '')))
+    # Pet Power: item-based, not in spell focii data
+    result['Pet Power'] = sorted(
+        [{'item_id': str(iid), 'item_name': f'Item {iid}', 'value': pct} for iid, pct in PET_POWER_ITEMS.items()],
+        key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', ''))
+    )
     return result
 
 
