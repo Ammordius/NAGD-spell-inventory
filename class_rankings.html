@@ -2316,6 +2316,22 @@
             return name.toLowerCase().replace(/['`\u2019]/g, '').replace(/\s+/g, ' ').trim();
         }
 
+        /** Resolve item name to id from itemNameToId (exact + variants so more cards work despite name spelling differences). */
+        function resolveItemIdByName(itemName) {
+            if (!itemName || typeof itemName !== 'string') return null;
+            const norm = normalizeItemNameForLookup(itemName);
+            if (!norm) return null;
+            let id = itemNameToId[norm];
+            if (id != null) return id;
+            const withoutThe = norm.replace(/\s+the\s+/g, ' ').trim();
+            if (withoutThe !== norm) { id = itemNameToId[withoutThe]; if (id != null) return id; }
+            const withThe = norm.replace(/\s+of\s+/, ' of the ');
+            if (withThe !== norm) { id = itemNameToId[withThe]; if (id != null) return id; }
+            const noLeadingThe = norm.replace(/^the\s+/, '').trim();
+            if (noLeadingThe !== norm) { id = itemNameToId[noLeadingThe]; if (id != null) return id; }
+            return null;
+        }
+
         /** Normalize magelo item_stats format (string flags/mods/resists) to DKP-style (arrays) for the card renderer. */
         function normalizeItemStats(raw) {
             if (!raw || typeof raw !== 'object') return raw;
@@ -2351,9 +2367,12 @@
         /** Load item_name_to_id.json (normalized name -> id) first so name resolution works for all raid/DKP items. */
         function loadItemNameToId() {
             const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
-            const paths = ['data/item_name_to_id.json', './data/item_name_to_id.json', baseDir + 'data/item_name_to_id.json'];
-            const repoMatch = window.location.pathname.match(/^\/[^/]+\/[^/]+/);
-            if (repoMatch) paths.push(repoMatch[0] + '/data/item_name_to_id.json');
+            const paths = [
+                new URL('data/item_name_to_id.json', document.baseURI).href,
+                'data/item_name_to_id.json',
+                './data/item_name_to_id.json',
+                baseDir + 'data/item_name_to_id.json'
+            ];
             return (async () => {
                 for (const path of paths) {
                     try {
@@ -2376,12 +2395,11 @@
             if (itemStatsLoadPromise == null) {
                 const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
                 const possiblePaths = [
+                    new URL('data/item_stats.json', document.baseURI).href,
                     'data/item_stats.json',
                     './data/item_stats.json',
                     baseDir + 'data/item_stats.json',
                 ];
-                const repoMatch = window.location.pathname.match(/^\/[^/]+\/[^/]+/);
-                if (repoMatch) possiblePaths.push(repoMatch[0] + '/data/item_stats.json');
 
                 itemStatsLoadPromise = (async () => {
                     await loadItemNameToId();
@@ -2526,7 +2544,7 @@
             }
             getItemStats(id).then(stats => {
                 if (!stats && itemName) {
-                    const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
+                    const resolvedId = resolveItemIdByName(itemName);
                     if (resolvedId != null) {
                         return getItemStats(resolvedId).then(s => showCard(String(resolvedId), s));
                     }
@@ -2564,13 +2582,13 @@
             if (needResolveByName) {
                 // itemNameToId is only populated after loadItemStats(); wait for it then resolve and show card
                 loadItemStats().then(() => {
-                    const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
+                    const resolvedId = resolveItemIdByName(itemName);
                     if (resolvedId != null) itemId = String(resolvedId);
                     itemCardTimer = setTimeout(() => showItemCard(link, itemId, itemName), HOVER_DELAY_MS);
                 });
             } else {
                 if ((!itemId || itemId === '') && itemName) {
-                    const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
+                    const resolvedId = resolveItemIdByName(itemName);
                     if (resolvedId != null) itemId = String(resolvedId);
                 }
                 itemCardTimer = setTimeout(() => showItemCard(link, itemId, itemName), HOVER_DELAY_MS);
@@ -2584,7 +2602,19 @@
 
         loadData();
         // Preload item_stats so name→id resolution works on first hover (e.g. gear slots that lack item_id in JSON)
-        loadItemStats().catch(() => {});
+        loadItemStats().then(() => {
+            const hasNames = Object.keys(itemNameToId).length > 0;
+            const hasStats = Object.keys(itemStatsCache).length > 0;
+            if (!hasNames && !hasStats) {
+                console.warn('Item cards: data/item_name_to_id.json and data/item_stats.json could not be loaded. If you opened this file from disk (file://), serve the folder via a local web server (e.g. npx serve .) for item hover cards to work.');
+                const notice = document.createElement('div');
+                notice.id = 'item-card-data-notice';
+                notice.style.cssText = 'position:fixed;bottom:12px;right:12px;max-width:320px;padding:10px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:12px;color:#856404;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,0.15);';
+                notice.textContent = 'Item hover data could not be loaded. If you opened this file from disk, use a local server (e.g. npx serve .) for item cards to work.';
+                document.body.appendChild(notice);
+                setTimeout(() => { const n = document.getElementById('item-card-data-notice'); if (n) n.remove(); }, 12000);
+            }
+        }).catch(() => {});
     </script>
 </body>
 </html>

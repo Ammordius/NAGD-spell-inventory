@@ -593,6 +593,10 @@ jobs:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
       run: |
         echo "Generating class rankings..."
+        # Regenerate item_name_to_id.json from raid_item_sources BEFORE class rankings so the generator
+        # can backfill item_id in focus_sources/focus_candidates (e.g. Cap of Flowing Time, Mask of Strategic Insight).
+        # This ensures emitted class_rankings.json has item_id for item cards without relying on client-side name resolution.
+        python merge_dkp_loot_into_raid_sources.py --write-name-to-id || true
         # Check if spell focus data exists in various locations
         FOCUS_FILE=""
         if [ -f "spell_focii_level65.json" ]; then
@@ -732,6 +736,14 @@ jobs:
         python merge_dkp_loot_into_raid_sources.py --write-name-to-id
         if [ -f "data/item_name_to_id.json" ]; then
           echo "✓ item_name_to_id.json ready for deploy ($(wc -l < data/item_name_to_id.json) lines)"
+          # Verify key items (e.g. Cap of Flowing Time) are present so item cards work on live site
+          for key in "cap of flowing time" "mask of strategic insight" "amulet of crystal dreams" "bracer of precision"; do
+            if grep -q "\"$key\"" data/item_name_to_id.json; then
+              echo "  ✓ $key"
+            else
+              echo "  ✗ MISSING: $key (item cards may not resolve for this item)"
+            fi
+          done
         else
           echo "⚠ data/item_name_to_id.json not found (item cards may not resolve on live site)"
         fi
