@@ -2081,12 +2081,13 @@
                     let rowHtml = `<tr><td>${escapeHtml(focusCat === 'FT' ? 'FT (Flowing Thought)' : focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
                     // When not at max for this focus, show upgrade options (items that could give it, with %)
                     if (score < 100 && weight > 0 && focusCandidates[focusCat] && focusCandidates[focusCat].length > 0) {
-                        const candidateLinks = focusCandidates[focusCat].slice(0, 20).map(s => {
+                        const maxShow = 50;
+                        const candidateLinks = focusCandidates[focusCat].slice(0, maxShow).map(s => {
                             const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                             const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                             return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                         }).join(', ');
-                        const more = focusCandidates[focusCat].length > 20 ? ` (+${focusCandidates[focusCat].length - 20} more)` : '';
+                        const more = focusCandidates[focusCat].length > maxShow ? ` (+${focusCandidates[focusCat].length - maxShow} more)` : '';
                         const label = score === 0 ? 'Items that could give this focus (with %):' : 'Upgrades (with %):';
                         rowHtml += `<tr><td colspan="6" class="focus-candidates-row">${label} ${candidateLinks}${more}</td></tr>`;
                     }
@@ -2168,12 +2169,13 @@
                         })();
                         // When not at max for this category, show upgrade options (items that could give this focus, with %)
                         if (scorePct < 100 && weightForFocus > 0 && focusCandidates[focusKey] && focusCandidates[focusKey].length > 0) {
-                            const candidateLinks = focusCandidates[focusKey].slice(0, 15).map(s => {
+                            const maxShow = 50;
+                            const candidateLinks = focusCandidates[focusKey].slice(0, maxShow).map(s => {
                                 const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                                 const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                                 return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                             }).join(', ');
-                            const more = focusCandidates[focusKey].length > 15 ? ` (+${focusCandidates[focusKey].length - 15} more)` : '';
+                            const more = focusCandidates[focusKey].length > maxShow ? ` (+${focusCandidates[focusKey].length - maxShow} more)` : '';
                             const label = scorePct === 0 ? 'Items that could give this (with %):' : 'Upgrades (with %):';
                             sourceHtml = (sourceHtml ? sourceHtml + ' ' : '') + `<span class="focus-breakdown-candidates">${label} ${candidateLinks}${more}</span>`;
                         }

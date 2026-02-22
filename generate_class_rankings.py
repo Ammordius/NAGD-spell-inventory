@@ -336,7 +336,7 @@ def get_all_focus_candidates(focii_data):
         result[key] = sorted(by_id.values(), key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', '')))
     # Pet Power: item-based, not in spell focii data
     result['Pet Power'] = sorted(
-        [{'item_id': str(iid), 'item_name': f'Item {iid}', 'value': pct} for iid, pct in PET_POWER_ITEMS.items()],
+        [{'item_id': str(iid), 'item_name': PET_POWER_ITEM_NAMES.get(str(iid), f'Item {iid}'), 'value': pct} for iid, pct in PET_POWER_ITEMS.items()],
         key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', ''))
     )
     return result
@@ -545,6 +545,11 @@ SHAMAN_FOCUS_ITEMS = {
 PET_POWER_ITEMS = {
     '28144': 20,
     '20508': 25,
+}
+# Display names for Pet Power items (so we show names instead of "Item 20508")
+PET_POWER_ITEM_NAMES = {
+    '20508': 'Symbol of Ancient Summoning',
+    '28144': 'Gloves of Dark Summoning',
 }
 
 def get_char_pet_power(char_inventory):
