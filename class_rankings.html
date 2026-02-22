@@ -447,6 +447,15 @@
         // Full class name -> EQ class abbreviation (for filtering items by usable class)
         const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
 
+        // Slot_id (1-22) -> EQ slot strings that can fill this slot (item_stats.slot may list multiple, e.g. "NECK WAIST")
+        const SLOT_ID_TO_EQ_SLOTS = {
+            1: ['EAR'], 2: ['HEAD'], 3: ['FACE'], 4: ['EAR'], 5: ['NECK'],
+            6: ['SHOULDER', 'SHOULDERS'], 7: ['ARMS'], 8: ['BACK'], 9: ['WRIST'], 10: ['WRIST'],
+            11: ['RANGE'], 12: ['HANDS'], 13: ['PRIMARY', 'MAIN'], 14: ['SECONDARY', 'OFF'],
+            15: ['PRIMARY', 'MAIN'], 16: ['SECONDARY', 'OFF'], 17: ['CHEST'], 18: ['LEGS'], 19: ['FEET'],
+            20: ['WAIST'], 21: ['POWER'], 22: ['AMMO']
+        };
+
         /** Return numeric weight for a focus category (handles nested e.g. Spell Damage). */
         function getFocusWeight(cat, focusWeights) {
             if (!focusWeights) return 0;
@@ -486,6 +495,145 @@
                 }
                 return true;
             });
+        }
+
+        /** True if item_stats.slot (e.g. "HEAD" or "RANGE PRIMARY SECONDARY") can fill slotId (1-22). */
+        function itemMatchesSlot(slotId, itemSlotString) {
+            if (!itemSlotString || typeof itemSlotString !== 'string') return false;
+            const eqSlots = SLOT_ID_TO_EQ_SLOTS[slotId];
+            if (!eqSlots) return false;
+            const parts = itemSlotString.toUpperCase().split(/\s+/);
+            return eqSlots.some(eq => parts.some(p => p === eq || p.startsWith(eq)));
+        }
+
+        /** True if item is usable by this class (item_stats.classes "WAR CLR ..." or "ALL"). */
+        function itemUsableByClass(itemClasses, classAbbrev) {
+            if (!classAbbrev) return true;
+            if (!itemClasses || typeof itemClasses !== 'string') return true;
+            const c = (itemClasses || '').trim().toUpperCase();
+            if (c === 'ALL') return true;
+            return c.split(/\s+/).indexOf(classAbbrev) !== -1;
+        }
+
+        /** Build map itemId -> { focusKey: value } from focusCandidates (value is 0-100 percent). */
+        function buildFocusValuesByItem() {
+            const byItem = {};
+            for (const [focusKey, list] of Object.entries(focusCandidates)) {
+                if (!Array.isArray(list)) continue;
+                for (const it of list) {
+                    const id = it.item_id != null && it.item_id !== '' ? Number(it.item_id) : null;
+                    if (id == null || isNaN(id)) continue;
+                    if (!byItem[id]) byItem[id] = {};
+                    const val = (it.value != null && it.value !== '') ? Number(it.value) : 0;
+                    if (!byItem[id][focusKey] || val > byItem[id][focusKey]) byItem[id][focusKey] = val;
+                }
+            }
+            return byItem;
+        }
+
+        /** Typical scales so raw stats contribute in a comparable way to normalized weights (0-1). */
+        const ITEM_SCORE_SCALES = { hp: 5000, mana: 4000, ac: 1200, resists: 400 };
+
+        /** Stat-only score for one item using normalized weights. */
+        function getStatScoreForItem(stats, norm) {
+            if (!stats || !norm) return 0;
+            const mods = stats.mods || [];
+            let hp = 0, mana = 0;
+            mods.forEach(m => {
+                if ((m.label || '').toUpperCase() === 'HP') hp += Number(m.value) || 0;
+                if ((m.label || '').toUpperCase() === 'MANA') mana += Number(m.value) || 0;
+            });
+            const ac = Number(stats.ac) || 0;
+            const resists = (stats.resists || []).reduce((s, r) => s + (Number(r.value) || 0), 0);
+            const scale = ITEM_SCORE_SCALES;
+            return (hp / scale.hp) * (norm.hp_pct || 0) + (mana / scale.mana) * (norm.mana_pct || 0) +
+                (ac / scale.ac) * (norm.ac_pct || 0) + (resists / scale.resists) * (norm.resists_pct || 0);
+        }
+
+        /** Focus score for one item: sum over (value/100)*weight for each focus the item provides. */
+        function getFocusScoreForItem(itemId, focusWeights, focusValuesByItem) {
+            const vals = focusValuesByItem[itemId];
+            if (!vals) return 0;
+            let s = 0;
+            for (const [focusKey, value] of Object.entries(vals)) {
+                const w = getWeightForFocusKey(focusKey, focusWeights);
+                if (w > 0) s += (value / 100) * w;
+            }
+            return s;
+        }
+
+        /** Total score for an item (stats + focus) for upgrade ranking. */
+        function scoreItemForUpgrade(itemStats, itemId, norm, focusWeights, focusValuesByItem) {
+            const statScore = getStatScoreForItem(itemStats, norm);
+            const focusScore = getFocusScoreForItem(itemId, focusWeights, focusValuesByItem);
+            return statScore + focusScore;
+        }
+
+        /**
+         * Compute upgrade suggestions per slot using full item_stats list and char's current weights.
+         * Returns { bySlot: [{ slotId, slotName, currentItem, currentScore, currentInData, upgrades }], anyMissing }.
+         */
+        function computeUpgradesForCharacter(char) {
+            const charClass = char.class;
+            const classAbbrev = CLASS_TO_ABBREV[charClass] || '';
+            const customWeight = customWeights[charClass] || {};
+            let weights = JSON.parse(JSON.stringify(originalClassWeights[charClass] || classWeights[charClass] || {}));
+            Object.keys(customWeight).forEach(key => {
+                if (key !== '_meta' && key !== 'focus' && weights.hasOwnProperty(key)) weights[key] = customWeight[key];
+            });
+            if (customWeight.focus && weights.focus) {
+                Object.keys(customWeight.focus).forEach(fk => {
+                    if (weights.focus[fk] !== undefined) {
+                        if (typeof customWeight.focus[fk] === 'object' && customWeight.focus[fk] !== null) {
+                            if (!weights.focus[fk]) weights.focus[fk] = {};
+                            Object.keys(customWeight.focus[fk]).forEach(nk => {
+                                if (weights.focus[fk][nk] !== undefined) weights.focus[fk][nk] = customWeight.focus[fk][nk];
+                            });
+                        } else weights.focus[fk] = customWeight.focus[fk];
+                    }
+                });
+            }
+            const focusMultiplier = customWeight._meta?.focusMultiplier || 2.4;
+            const norm = normalizeWeights(weights, focusMultiplier, charClass);
+            const focusWeights = norm.focus || {};
+            const focusValuesByItem = buildFocusValuesByItem();
+
+            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Primary', 16: 'Secondary', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+            const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+            const bySlot = [];
+            let anyMissing = false;
+
+            for (const inv of equippedOnly) {
+                const slotId = inv.slot_id;
+                const slotName = slotNames[slotId] || `Slot ${slotId}`;
+                const currentItemId = inv.item_id != null && inv.item_id !== '' ? Number(inv.item_id) : null;
+                const currentItemName = inv.item_name || (currentItemId ? `Item ${currentItemId}` : '');
+                let currentScore = 0;
+                let currentInData = false;
+                if (currentItemId != null && !isNaN(currentItemId) && itemStatsCache[currentItemId]) {
+                    currentInData = true;
+                    currentScore = scoreItemForUpgrade(itemStatsCache[currentItemId], currentItemId, norm, focusWeights, focusValuesByItem);
+                } else {
+                    anyMissing = true;
+                }
+
+                const candidates = [];
+                for (const [idStr, stats] of Object.entries(itemStatsCache)) {
+                    const id = Number(idStr);
+                    if (isNaN(id) || !stats) continue;
+                    if (!itemMatchesSlot(slotId, stats.slot)) continue;
+                    if (!itemUsableByClass(stats.classes, classAbbrev)) continue;
+                    const score = scoreItemForUpgrade(stats, id, norm, focusWeights, focusValuesByItem);
+                    if (score <= currentScore) continue;
+                    candidates.push({ itemId: id, itemName: stats.name || `Item ${id}`, score, delta: score - currentScore });
+                }
+                candidates.sort((a, b) => b.delta - a.delta);
+                const upgrades = candidates.slice(0, 5);
+
+                bySlot.push({ slotId, slotName, currentItemName, currentItemId, currentScore, currentInData, upgrades });
+            }
+
+            return { bySlot, anyMissing };
         }
 
         // Weight customization functions
@@ -2295,10 +2443,40 @@
                 });
                 html += `</div>`;
             }
+
+            // Placeholder for upgrade suggestions (filled async from item_stats, using current stat priorities)
+            html += `<div id="upgradeSuggestionsPlaceholder" style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 6px; color: #6c757d;">Loading upgrade suggestions…</div>`;
             
             html += `</div>`;
             modalContent.innerHTML = html;
             modal.style.display = 'block';
+
+            // Fill upgrade list from full item_stats (browser-only, so stat priority changes apply)
+            loadItemStats().then(() => {
+                const upgradeData = computeUpgradesForCharacter(char);
+                const placeholder = document.getElementById('upgradeSuggestionsPlaceholder');
+                if (!placeholder) return;
+                let section = `<h3 style="margin-top: 20px;">Upgrade suggestions (by your stat priorities)</h3>`;
+                if (upgradeData.anyMissing) {
+                    section += `<p style="color: #856404; font-size: 0.9em;">Some equipped items were not in our database; those slots were ranked assuming current score = 0.</p>`;
+                }
+                let hasAny = false;
+                upgradeData.bySlot.forEach(({ slotName, currentItemName, currentInData, upgrades }) => {
+                    if (upgrades.length === 0) return;
+                    hasAny = true;
+                    section += `<div style="margin-bottom: 14px;"><strong>${escapeHtml(slotName)}</strong> (current: ${escapeHtml(currentItemName)}${!currentInData ? ' <em>— not in database</em>' : ''})<ul style="margin: 4px 0 0 18px; padding: 0;">`;
+                    upgrades.forEach(u => {
+                        const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${u.itemId}" target="_blank" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}">${escapeHtml(u.itemName || `Item ${u.itemId}`)}</a>`;
+                        section += `<li>${link} <span style="color: #28a745;">+${u.delta.toFixed(2)}</span></li>`;
+                    });
+                    section += `</ul></div>`;
+                });
+                if (!hasAny) section += `<p style="color: #6c757d;">No upgrades found in item database for your equipped slots, or you already have top items.</p>`;
+                placeholder.outerHTML = section;
+            }).catch(() => {
+                const placeholder = document.getElementById('upgradeSuggestionsPlaceholder');
+                if (placeholder) placeholder.outerHTML = `<p style="color: #6c757d;">Upgrade suggestions require item_stats.json.</p>`;
+            });
         }
 
         // --- Item cards (hover popover), using DKP-style logic + local purple theme ---
