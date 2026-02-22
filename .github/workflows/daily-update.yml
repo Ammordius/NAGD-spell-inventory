@@ -1,6 +1,6 @@
 name: Daily Spell Inventory Update
 
-# Set workflow run retention to 30 days (GitHub default is 90 days)
+# Artifact retention: set to 3 days via upload step to stay under 500MB limit (~40MB per run).
 on:
   schedule:
     # Run daily at 16:40 UTC (10 minutes after Magelo update at 16:30 UTC)
@@ -842,6 +842,8 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         path: ./deploy
+        name: github-pages-${{ github.run_id }}
+        retention-days: 3
     
     - name: Calculate week and month boundaries
       id: date-info
@@ -904,6 +906,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}
       - name: Verify deployment
         run: |
           echo "Deployment should have created/updated the gh-pages branch"
