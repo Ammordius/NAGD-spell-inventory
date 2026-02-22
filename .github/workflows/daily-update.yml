@@ -785,6 +785,12 @@ jobs:
           cp class_rankings.json deploy/class_rankings.json
           echo "✓ Copied class_rankings.json to deploy directory"
         fi
+        # Copy item_stats.json for class rankings item card hover (data/ relative to site root)
+        if [ -f "data/item_stats.json" ]; then
+          mkdir -p deploy/data
+          cp data/item_stats.json deploy/data/item_stats.json
+          echo "✓ Copied data/item_stats.json to deploy (for item cards)"
+        fi
         # Copy scoring explanation page
         if [ -f "scoring_explanation.html" ]; then
           cp scoring_explanation.html deploy/scoring_explanation.html

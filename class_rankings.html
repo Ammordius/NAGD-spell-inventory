@@ -2309,20 +2309,66 @@
         let itemStatsCache = {};
         let itemStatsLoadPromise = null;
 
+        /** Normalize magelo item_stats format (string flags/mods/resists) to DKP-style (arrays) for the card renderer. */
+        function normalizeItemStats(raw) {
+            if (!raw || typeof raw !== 'object') return raw;
+            const out = { ...raw };
+            if (typeof raw.flags === 'string' && raw.flags.trim()) {
+                out.flags = raw.flags.split(/\s*\|\s*/).map(s => s.trim()).filter(Boolean);
+            } else if (!Array.isArray(out.flags)) out.flags = [];
+            if (typeof raw.mods === 'string' && raw.mods.trim()) {
+                out.mods = raw.mods.split(',').map(s => s.trim()).filter(Boolean).map(part => {
+                    const m = part.match(/^([A-Za-z]+):\s*(-?\d+)$/);
+                    if (m) return { label: m[1], value: parseInt(m[2], 10) };
+                    return { label: part.replace(/:.*$/, '').trim(), value: part.replace(/^[^:]+:\s*/, '').trim() };
+                });
+            } else if (!Array.isArray(out.mods)) out.mods = [];
+            if (typeof raw.resists === 'string' && raw.resists.trim()) {
+                out.resists = raw.resists.split(',').map(s => s.trim()).filter(Boolean).map(part => {
+                    const m = part.match(/^([A-Za-z]+):\s*(-?\d+)$/);
+                    if (m) return { label: m[1], value: parseInt(m[2], 10) };
+                    return { label: part.replace(/:.*$/, '').trim(), value: part.replace(/^[^:]+:\s*/, '').trim() };
+                });
+            } else if (!Array.isArray(out.resists)) out.resists = [];
+            if (raw.effect != null && raw.effect !== '') { out.effectSpellName = raw.effect; }
+            if (raw.focus != null && raw.focus !== '') { out.focusSpellName = raw.focus; }
+            if (raw.required_level != null && raw.required_level !== '') {
+                const rl = parseInt(raw.required_level, 10);
+                out.requiredLevel = isNaN(rl) ? raw.required_level : rl;
+            }
+            if (out.ac === '') out.ac = null;
+            if (out.weight === '') out.weight = null;
+            return out;
+        }
+
         function loadItemStats() {
             if (itemStatsLoadPromise == null) {
-                itemStatsLoadPromise = fetch('data/item_stats.json')
-                    .then(r => r.ok ? r.json() : {})
-                    .then(obj => {
-                        if (obj && typeof obj === 'object') {
-                            for (const [k, v] of Object.entries(obj)) {
-                                if (v != null && typeof v === 'object' && Object.keys(v).length > 0)
-                                    itemStatsCache[Number(k)] = v;
+                const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
+                const possiblePaths = [
+                    'data/item_stats.json',
+                    './data/item_stats.json',
+                    baseDir + 'data/item_stats.json',
+                ];
+                const repoMatch = window.location.pathname.match(/^\/[^/]+\/[^/]+/);
+                if (repoMatch) possiblePaths.push(repoMatch[0] + '/data/item_stats.json');
+
+                itemStatsLoadPromise = (async () => {
+                    for (const path of possiblePaths) {
+                        try {
+                            const r = await fetch(path);
+                            if (!r.ok) continue;
+                            const obj = await r.json();
+                            if (obj && typeof obj === 'object') {
+                                for (const [k, v] of Object.entries(obj)) {
+                                    if (v != null && typeof v === 'object' && Object.keys(v).length > 0)
+                                        itemStatsCache[Number(k)] = normalizeItemStats(v);
+                                }
+                                return obj;
                             }
-                        }
-                        return obj;
-                    })
-                    .catch(() => ({}));
+                        } catch (e) { /* try next path */ }
+                    }
+                    return {};
+                })();
             }
             return itemStatsLoadPromise;
         }
