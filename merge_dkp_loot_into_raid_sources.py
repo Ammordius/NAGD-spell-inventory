@@ -37,13 +37,13 @@ PLACEHOLDER_PAT = re.compile(r"^\(item\s+\d+\)$", re.I)
 
 
 def normalize_name(s: str) -> str:
-    """Lowercase, collapse spaces, normalize apostrophe/backtick (match frontend)."""
+    """Lowercase, collapse spaces, remove apostrophe/backtick (match frontend normalizeItemNameForLookup)."""
     if not s or not isinstance(s, str):
         return ""
     s = s.lower().strip()
-    s = re.sub(r"['`\u2019]", "'", s)
+    s = re.sub(r"['`\u2019]", "", s)
     s = re.sub(r"\s+", " ", s)
-    return s
+    return s.strip()
 
 
 def is_placeholder_name(name: str) -> bool:
