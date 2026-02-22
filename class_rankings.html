@@ -398,6 +398,29 @@
         // Full class name -> EQ class abbreviation (for filtering items by usable class)
         const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
 
+        /** Return numeric weight for a focus category (handles nested e.g. Spell Damage). */
+        function getFocusWeight(cat, focusWeights) {
+            if (!focusWeights) return 0;
+            const w = focusWeights[cat];
+            if (typeof w === 'number') return w;
+            if (typeof w === 'object' && w !== null) return Object.values(w).reduce((a, b) => a + b, 0);
+            return 0;
+        }
+
+        /** Return numeric weight for a focus key (e.g. "Spell Damage (Fire)" -> focusWeights['Spell Damage']['Fire']). */
+        function getWeightForFocusKey(focusKey, focusWeights) {
+            if (!focusWeights) return 0;
+            const match = focusKey.match(/^(.+)\s+\(([^)]+)\)$/);
+            if (match) {
+                const [, parent, sub] = match;
+                const parentW = focusWeights[parent];
+                if (typeof parentW === 'object' && parentW !== null && parentW[sub] !== undefined) return parentW[sub];
+                return 0;
+            }
+            const w = focusWeights[focusKey];
+            return typeof w === 'number' ? w : 0;
+        }
+
         /** Filter focus candidates to upgrades only (value > current raw) and items usable by charClass. */
         function filterFocusCandidates(candidates, currentRawValue, charClass) {
             if (!candidates || candidates.length === 0) return [];
@@ -1464,145 +1487,89 @@
                         damageBadges = '<span style="color: #6c757d;">-</span>';
                         otherBadges = '<span style="color: #6c757d;">-</span>';
                     } else {
-                        // Get damage-specific focii - show all damage types the character has
-                        // (even if not weighted, so users can see what they have)
+                        // Get damage-specific focii - only show damage types that are scored for this class
                         const damageFocii = char.damage_focii || {};
                         const allDamageFocii = Object.entries(damageFocii)
-                            .sort((a, b) => b[1] - a[1]);
+                            .filter(([type]) => (spellDamageWeights[type] || 0) > 0)
+                            .sort((a, b) => (spellDamageWeights[b[0]] || 0) - (spellDamageWeights[a[0]] || 0));
                         
-                        // Highlight weighted damage types, show others too
                         damageBadges = allDamageFocii
                             .map(([type, pct]) => {
-                                const isWeighted = spellDamageWeights.hasOwnProperty(type);
                                 const weight = spellDamageWeights[type] || 0;
-                                const title = isWeighted 
-                                    ? `${type} Damage: ${pct}% (weighted: ${weight})`
-                                    : `${type} Damage: ${pct}% (not weighted for ${charClass})`;
-                                const style = isWeighted ? '' : 'opacity: 0.6;';
-                                return `<span class="focus-badge" title="${title}" style="${style}">${type} ${pct}%</span>`;
+                                const title = `${type} Damage: ${pct}% (weighted: ${weight})`;
+                                return `<span class="focus-badge" title="${title}">${type} ${pct}%</span>`;
                             }).join('');
                         
-                        // Get other focii - show all focii the character has
-                        // Highlight weighted ones, show others with reduced opacity
-                        const relevantFocusCats = Object.keys(focusWeights).filter(cat => cat !== 'Spell Damage');
-                        
-                        // Build focus display with categories
+                        // Only show focuses that the current priority list has as scored stats; sort by max contribution (weight) desc
                         const focusDisplay = [];
                     
-                    // Helper function to format focus with category
-                    const formatFocusWithCategory = (baseName, category, pct, isWeighted, weight) => {
-                        const catAbbrev = {
-                            'Det': 'Det',
-                            'Bene': 'Bene',
-                            'Nuke': '',
-                            'Sanguine': 'Sanguine',
-                            'All': 'All'
-                        }[category] || '';
-                        
-                        // Format: "Bene Spell Haste 30%" or "Mana Efficiency 25%" (no prefix for Nuke)
-                        let displayName = baseName;
-                        if (catAbbrev) {
-                            displayName = `${catAbbrev} ${baseName}`;
-                        }
-                        
-                        const title = isWeighted 
-                            ? `${baseName} (${category}): ${pct}% (weighted: ${weight})`
-                            : `${baseName} (${category}): ${pct}% (not weighted for ${charClass})`;
-                        const style = isWeighted ? '' : 'opacity: 0.6;';
-                        return `<span class="focus-badge" title="${title}" style="${style}">${displayName} ${pct}%</span>`;
+                    // Helper: returns html for a focus badge (all shown items are scored)
+                    const formatFocusWithCategory = (baseName, category, pct, weight) => {
+                        const catAbbrev = { 'Det': 'Det', 'Bene': 'Bene', 'Nuke': '', 'Sanguine': 'Sanguine', 'All': 'All' }[category] || '';
+                        let displayName = catAbbrev ? `${catAbbrev} ${baseName}` : baseName;
+                        const title = `${baseName} (${category}): ${pct}% (weighted: ${weight})`;
+                        return `<span class="focus-badge" title="${title}">${displayName} ${pct}%</span>`;
                     };
                     
-                    // Handle Mana Efficiency with categories
-                    if (focii['Spell Mana Efficiency'] > 0) {
+                    if (focii['Spell Mana Efficiency'] > 0 && getFocusWeight('Spell Mana Efficiency', focusWeights) > 0) {
                         const manaEffCats = char.mana_efficiency_cats || {};
-                        Object.entries(manaEffCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
-                            // Skip Sanguine (self-only) - don't display it
+                        const weight = getFocusWeight('Spell Mana Efficiency', focusWeights);
+                        Object.entries(manaEffCats).forEach(([cat, pct]) => {
                             if (cat === 'Sanguine') return;
-                            
-                            const isWeighted = relevantFocusCats.includes('Spell Mana Efficiency');
-                            const weight = focusWeights['Spell Mana Efficiency'] || 0;
-                            // For Nuke, show "Mana Efficiency" (no prefix), others show category prefix
-                            const baseName = 'Mana Efficiency';
-                            focusDisplay.push(formatFocusWithCategory(baseName, cat, pct, isWeighted, weight));
+                            focusDisplay.push({ weight, html: formatFocusWithCategory('Mana Efficiency', cat, pct, weight) });
                         });
                     }
                     
-                    // Handle Spell Haste with categories
                     if (focii['Spell Haste'] > 0) {
                         const hasteCats = char.spell_haste_cats || {};
-                        Object.entries(hasteCats).sort((a, b) => b[1] - a[1]).forEach(([cat, pct]) => {
-                            // Check for specific haste category weight: 'Bene' -> 'Beneficial Spell Haste', 'Det' -> 'Detrimental Spell Haste'
+                        Object.entries(hasteCats).forEach(([cat, pct]) => {
                             const hasteWeightKey = cat === 'Bene' ? 'Beneficial Spell Haste' : 'Detrimental Spell Haste';
-                            const isWeighted = relevantFocusCats.includes(hasteWeightKey);
                             const weight = focusWeights[hasteWeightKey] || 0;
-                            focusDisplay.push(formatFocusWithCategory('Spell Haste', cat, pct, isWeighted, weight));
+                            if (weight <= 0) return;
+                            focusDisplay.push({ weight, html: formatFocusWithCategory('Spell Haste', cat, pct, weight) });
                         });
                     }
                     
-                    // Handle Duration with categories
-                    // Only show relevant categories for each duration type to avoid duplicates
-                    if (focii['Buff Spell Duration'] > 0) {
+                    if (focii['Buff Spell Duration'] > 0 && getFocusWeight('Buff Spell Duration', focusWeights) > 0) {
                         const durCats = char.duration_cats || {};
-                        // Buff Spell Duration: show 'Bene' and 'All' only
+                        const weight = getFocusWeight('Buff Spell Duration', focusWeights);
                         ['Bene', 'All'].forEach(cat => {
                             if (durCats[cat] !== undefined && durCats[cat] > 0) {
-                                const isWeighted = relevantFocusCats.includes('Buff Spell Duration');
-                                const weight = focusWeights['Buff Spell Duration'] || 0;
-                                const displayCat = cat === 'All' ? 'All' : 'Bene';
-                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, durCats[cat], isWeighted, weight));
+                                focusDisplay.push({ weight, html: formatFocusWithCategory('Duration', cat === 'All' ? 'All' : 'Bene', durCats[cat], weight) });
                             }
                         });
                     }
-                    if (focii['Detrimental Spell Duration'] > 0) {
+                    if (focii['Detrimental Spell Duration'] > 0 && getFocusWeight('Detrimental Spell Duration', focusWeights) > 0) {
                         const durCats = char.duration_cats || {};
-                        // Detrimental Spell Duration: show 'Det' and 'All' only
+                        const weight = getFocusWeight('Detrimental Spell Duration', focusWeights);
                         ['Det', 'All'].forEach(cat => {
                             if (durCats[cat] !== undefined && durCats[cat] > 0) {
-                                const isWeighted = relevantFocusCats.includes('Detrimental Spell Duration');
-                                const weight = focusWeights['Detrimental Spell Duration'] || 0;
-                                const displayCat = cat === 'All' ? 'All' : 'Det';
-                                focusDisplay.push(formatFocusWithCategory('Duration', displayCat, durCats[cat], isWeighted, weight));
+                                focusDisplay.push({ weight, html: formatFocusWithCategory('Duration', cat === 'All' ? 'All' : 'Det', durCats[cat], weight) });
                             }
                         });
                     }
-                    if (focii['All Spell Duration'] > 0) {
+                    if (focii['All Spell Duration'] > 0 && getFocusWeight('All Spell Duration', focusWeights) > 0) {
                         const durCats = char.duration_cats || {};
-                        // All Spell Duration: show 'All' only
                         if (durCats['All'] !== undefined && durCats['All'] > 0) {
-                            const isWeighted = relevantFocusCats.includes('All Spell Duration');
-                            const weight = focusWeights['All Spell Duration'] || 0;
-                            focusDisplay.push(formatFocusWithCategory('Duration', 'All', durCats['All'], isWeighted, weight));
+                            const weight = getFocusWeight('All Spell Duration', focusWeights);
+                            focusDisplay.push({ weight, html: formatFocusWithCategory('Duration', 'All', durCats['All'], weight) });
                         }
                     }
                     
-                    // Handle other focii (Healing Enhancement, Range Extension, etc.)
-                    const otherFocii = Object.entries(focii)
+                    Object.entries(focii)
                         .filter(([cat]) => !['Spell Damage', 'Spell Mana Efficiency', 'Spell Haste', 
                                              'Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'].includes(cat))
-                        .sort((a, b) => {
-                            const aWeighted = relevantFocusCats.includes(a[0]);
-                            const bWeighted = relevantFocusCats.includes(b[0]);
-                            if (aWeighted && !bWeighted) return -1;
-                            if (!aWeighted && bWeighted) return 1;
-                            return b[1] - a[1];
+                        .filter(([cat]) => getFocusWeight(cat, focusWeights) > 0)
+                        .forEach(([cat, pct]) => {
+                            const weight = getFocusWeight(cat, focusWeights);
+                            let shortName = cat.replace('Spell ', '');
+                            if (shortName === 'Healing Enhancement') shortName = 'Healing';
+                            else if (shortName === 'Spell Range Extension') shortName = 'Range Ext';
+                            focusDisplay.push({ weight, html: `<span class="focus-badge" title="${cat}: ${pct}% (weighted: ${weight})">${shortName} ${pct}%</span>` });
                         });
                     
-                    otherFocii.forEach(([cat, pct]) => {
-                        const isWeighted = relevantFocusCats.includes(cat);
-                        const weight = focusWeights[cat] || 0;
-                        // Shorten names: "Healing Enhancement" -> "Healing", "Range Extension" -> "Range Ext"
-                        let shortName = cat.replace('Spell ', '');
-                        if (shortName === 'Healing Enhancement') shortName = 'Healing';
-                        else if (shortName === 'Spell Range Extension') shortName = 'Range Ext';
-                        const title = isWeighted 
-                            ? `${cat}: ${pct}% (weighted: ${weight})`
-                            : `${cat}: ${pct}% (not weighted for ${charClass})`;
-                        const style = isWeighted ? '' : 'opacity: 0.6;';
-                        focusDisplay.push(`<span class="focus-badge" title="${title}" style="${style}">${shortName} ${pct}%</span>`);
-                    });
-                    
-                        // Join with commas and spaces
-                        otherBadges = focusDisplay.length > 0 ? focusDisplay.join(', ') : '<span style="color: #6c757d;">-</span>';
+                    focusDisplay.sort((a, b) => b.weight - a.weight);
+                    otherBadges = focusDisplay.length > 0 ? focusDisplay.map(x => x.html).join(', ') : '<span style="color: #6c757d;">-</span>';
                     }
                 }
                 
@@ -2163,6 +2130,7 @@
                 }
                 const scoredFocusKeys = getScoredFocusKeys(focusWeights);
                 if (scoredFocusKeys.length > 0) {
+                    scoredFocusKeys.sort((a, b) => getWeightForFocusKey(b, focusWeights) - getWeightForFocusKey(a, focusWeights));
                     html += `<div class="focus-breakdown-section"><h3>Focus breakdown (what you're scored on)</h3>`;
                     scoredFocusKeys.forEach(focusKey => {
                         let scorePct = focusScores[focusKey];
