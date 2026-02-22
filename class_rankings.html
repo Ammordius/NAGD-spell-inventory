@@ -271,6 +271,55 @@
         .error {
             color: #dc3545;
         }
+
+        /* Item card — Magelo-style, matches local purple theme (#667eea / #764ba2) */
+        .item-link { cursor: pointer; }
+        .item-card {
+            --item-card-bg: #fefefe;
+            --item-card-border: #667eea;
+            --item-card-name: #667eea;
+            min-width: 260px;
+            max-width: 320px;
+            background: var(--item-card-bg);
+            border: 1px solid var(--item-card-border);
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.25);
+            overflow: hidden;
+        }
+        .item-card--compact { min-width: 180px; max-width: 280px; }
+        .item-card--compact .ItemInner { display: none; }
+        .ItemOuter .ItemTitle {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0.4rem 0.6rem;
+            border-bottom: 1px solid var(--item-card-border);
+        }
+        .ItemTitleLeft, .ItemTitleRight { flex: 0 0 0; }
+        .ItemTitleMid { flex: 1; text-align: center; min-width: 0; }
+        .ItemTitleMid a { color: white; font-weight: 700; text-decoration: none; }
+        .ItemTitleMid a:hover { text-decoration: underline; }
+        .ItemInner {
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            color: #333;
+            line-height: 1.45;
+        }
+        .ItemInner br { display: block; content: ""; margin-top: 0.15rem; }
+        .item-card__spell-link { color: #764ba2; text-decoration: none; }
+        .item-card__spell-link:hover { text-decoration: underline; }
+        .ItemInner i { color: #6c757d; font-style: italic; }
+        .item-card-popover {
+            position: fixed;
+            z-index: 10000;
+            padding: 8px;
+            animation: item-card-fade 0.15s ease-out;
+        }
+        @keyframes item-card-fade {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -2076,7 +2125,7 @@
                         const candidateLinks = filteredCandidates.slice(0, maxShow).map(s => {
                             const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                             const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
-                            return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
+                            return `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank" data-item-id="${id}" data-item-name="${escapeHtml(s.item_name || '')}">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                         }).join(', ');
                         const more = filteredCandidates.length > maxShow ? ` (+${filteredCandidates.length - maxShow} more)` : '';
                         const label = score === 0 ? 'Items that could give this focus (with %):' : 'Upgrades (with %):';
@@ -2169,7 +2218,7 @@
                                 const slotName = slotNames[s.slot_id] || `Slot ${s.slot_id}`;
                                 const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                                 const id = (s.item_id != null && s.item_id !== '') ? s.item_id : (char.inventory?.find(i => i.slot_id === s.slot_id)?.item_id || '');
-                                return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a> (${slotName})${valStr}`;
+                                return `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank" data-item-id="${id}" data-item-name="${escapeHtml(s.item_name || '')}">${escapeHtml(s.item_name || '')}</a> (${slotName})${valStr}`;
                             }).join(', ');
                             sourceHtml = `<span class="focus-breakdown-sources">From: ${sourceHtml}</span>`;
                         }
@@ -2185,7 +2234,7 @@
                             const candidateLinks = filteredBreakdown.slice(0, maxShow).map(s => {
                                 const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                                 const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
-                                return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
+                                return `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank" data-item-id="${id}" data-item-name="${escapeHtml(s.item_name || '')}">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                             }).join(', ');
                             const more = filteredBreakdown.length > maxShow ? ` (+${filteredBreakdown.length - maxShow} more)` : '';
                             const label = scorePct === 0 ? 'Items that could give this (with %):' : 'Upgrades (with %):';
@@ -2241,7 +2290,7 @@
                 };
                 equippedOnly.forEach(item => {
                     const slotName = slotNames[item.slot_id] || `Slot ${item.slot_id}`;
-                    const itemLink = `<a href="https://www.takproject.net/allaclone/item.php?id=${item.item_id}" target="_blank">${escapeHtml(item.item_name || `Item ${item.item_id}`)}</a>`;
+                    const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${item.item_id}" target="_blank" data-item-id="${item.item_id}" data-item-name="${escapeHtml(item.item_name || '')}">${escapeHtml(item.item_name || `Item ${item.item_id}`)}</a>`;
                     html += `<div style="padding: 5px; background: #f0f0f0; border-radius: 3px;"><strong>${slotName}:</strong> ${itemLink}</div>`;
                 });
                 html += `</div>`;
@@ -2251,6 +2300,179 @@
             modalContent.innerHTML = html;
             modal.style.display = 'block';
         }
+
+        // --- Item cards (hover popover), using DKP-style logic + local purple theme ---
+        const TAKP_ITEM_BASE = 'https://www.takproject.net/allaclone/item.php?id=';
+        const TAKP_SPELL_BASE = 'https://www.takproject.net/allaclone/spell.php?id=';
+        const HOVER_DELAY_MS = 400;
+        const POPOVER_OFFSET = 8;
+        let itemStatsCache = {};
+        let itemStatsLoadPromise = null;
+
+        function loadItemStats() {
+            if (itemStatsLoadPromise == null) {
+                itemStatsLoadPromise = fetch('data/item_stats.json')
+                    .then(r => r.ok ? r.json() : {})
+                    .then(obj => {
+                        if (obj && typeof obj === 'object') {
+                            for (const [k, v] of Object.entries(obj)) {
+                                if (v != null && typeof v === 'object' && Object.keys(v).length > 0)
+                                    itemStatsCache[Number(k)] = v;
+                            }
+                        }
+                        return obj;
+                    })
+                    .catch(() => ({}));
+            }
+            return itemStatsLoadPromise;
+        }
+
+        function getItemStats(itemId) {
+            if (itemId == null || itemId === '') return Promise.resolve(null);
+            const id = Number(itemId);
+            if (itemStatsCache[id]) return Promise.resolve(itemStatsCache[id]);
+            return loadItemStats().then(() => itemStatsCache[id] || null);
+        }
+
+        function spellLinkHtml(spellId, name) {
+            if (spellId == null || !name) return escapeHtml(name || '');
+            return `<a class="item-card__spell-link" href="${TAKP_SPELL_BASE}${spellId}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}</a>`;
+        }
+
+        function renderItemCardHtml(name, itemId, stats, compact) {
+            const href = itemId != null && itemId !== '' ? TAKP_ITEM_BASE + itemId : '#';
+            const displayName = name || 'Unknown item';
+            const titleLink = href !== '#' ? `<a href="${href}" target="_blank" rel="noopener noreferrer">${escapeHtml(displayName)}</a>` : `<span>${escapeHtml(displayName)}</span>`;
+            if (compact || !stats) {
+                return `<div class="item-card item-card--compact ItemOuter"><div class="ItemTitle"><div class="ItemTitleLeft"></div><div class="ItemTitleMid">${titleLink}</div><div class="ItemTitleRight"></div></div></div>`;
+            }
+            const flags = stats.flags || [];
+            const slot = stats.slot;
+            const skill = stats.skill;
+            const ac = stats.ac;
+            const atkDelay = stats.atkDelay;
+            const dmg = stats.dmg;
+            const dmgBonus = stats.dmgBonus;
+            const dmgBonusNote = stats.dmgBonusNote;
+            const mods = stats.mods || [];
+            const resists = stats.resists || [];
+            const instrumentMods = stats.instrumentMods || [];
+            const levelType = stats.levelType || 'required';
+            const requiredLevel = stats.requiredLevel;
+            const effectSpellId = stats.effectSpellId;
+            const effectSpellName = stats.effectSpellName;
+            const effectNote = stats.effectNote;
+            const focusSpellId = stats.focusSpellId;
+            const focusSpellName = stats.focusSpellName;
+            const weight = stats.weight;
+            const size = stats.size;
+            const classes = stats.classes;
+            const races = stats.races;
+            const skillMod = stats.skillMod;
+            const light = stats.light;
+            const tint = stats.tint;
+            const levelStr = requiredLevel != null ? (levelType === 'recommended' ? `Recommended level of ${requiredLevel}.` : `Required level of ${requiredLevel}.`) : null;
+            const statsLine = mods.length > 0 ? mods.map(m => {
+                const v = m.value;
+                const plus = (typeof v === 'number' && (m.label === 'HP' || m.label === 'MANA')) ? (v >= 0 ? '+' : '') + v : v;
+                return `${m.label}: ${plus}`;
+            }).join(' ') : null;
+            const resistsLine = resists.length > 0 ? resists.map(r => `${r.label}: ${r.value}`).join(' ') : null;
+            let inner = '';
+            if (flags.length > 0) inner += flags.join('  ') + '<br>';
+            if (slot) inner += 'Slot: ' + slot + '<br>';
+            if (skill && atkDelay != null && dmg != null) inner += 'Skill: ' + skill + ' Atk Delay: ' + atkDelay + '<br>';
+            if (skill && dmg != null) {
+                inner += 'DMG: ' + dmg + (dmgBonus != null ? ' Dmg bonus:' + dmgBonus + (dmgBonusNote ? ' <i>' + escapeHtml(dmgBonusNote) + '</i> ' : '') : '') + (ac != null ? ' AC: ' + ac : '') + '<br>';
+            }
+            if (!skill && ac != null) inner += ' AC: ' + ac + '<br>';
+            if (effectSpellId != null || effectSpellName) inner += 'Effect: ' + spellLinkHtml(effectSpellId, effectSpellName) + (effectNote ? ' ' + escapeHtml(effectNote) : '') + '<br>';
+            if (skillMod) inner += 'Skill Mod: ' + skillMod + '<br>';
+            if (statsLine) inner += statsLine + '<br>';
+            if (resistsLine) inner += resistsLine + '<br>';
+            instrumentMods.forEach(inst => {
+                inner += (inst.label != null && inst.label !== '' ? inst.label + ': ' : '') + inst.value + (inst.pct != null ? ' <i>(' + inst.pct + ')</i>' : '') + '<br>';
+            });
+            if (levelStr) inner += levelStr + '<br>';
+            if (focusSpellId != null || focusSpellName) inner += 'Focus: ' + spellLinkHtml(focusSpellId, focusSpellName) + '<br>';
+            if (weight != null || size) inner += 'WT: ' + (weight != null ? weight : '?') + ' Size: ' + (size || '?') + '<br>';
+            if (classes) inner += 'Class: ' + classes + '<br>';
+            if (races) inner += 'Race: ' + races + '<br>';
+            if (light != null) inner += 'Light: ' + light + '<br>';
+            if (tint) inner += 'Tint: ' + escapeHtml(tint) + '<br>';
+            return `<div class="item-card ItemOuter"><div class="ItemTitle"><div class="ItemTitleLeft"></div><div class="ItemTitleMid">${titleLink}</div><div class="ItemTitleRight"></div></div><div class="ItemInner">${inner || ''}</div></div>`;
+        }
+
+        let itemCardTimer = null;
+        let itemCardHideTimer = null;
+        let itemCardPopover = null;
+
+        function showItemCard(anchor, itemId, itemName) {
+            if (itemCardHideTimer) { clearTimeout(itemCardHideTimer); itemCardHideTimer = null; }
+            if (itemCardPopover) {
+                itemCardPopover.remove();
+                itemCardPopover = null;
+            }
+            const id = itemId != null && itemId !== '' ? String(itemId).trim() : null;
+            getItemStats(id).then(stats => {
+                const compact = !stats;
+                const cardHtml = renderItemCardHtml(itemName || 'Item', id, stats, compact);
+                const pop = document.createElement('div');
+                pop.className = 'item-card-popover';
+                pop.innerHTML = cardHtml;
+                pop.setAttribute('role', 'tooltip');
+                document.body.appendChild(pop);
+                itemCardPopover = pop;
+                const cardWidth = 320;
+                const cardHeight = 400;
+                const rect = anchor.getBoundingClientRect();
+                let left = rect.left + rect.width + POPOVER_OFFSET;
+                let top = rect.top;
+                if (left + cardWidth > window.innerWidth - 12) left = rect.left - cardWidth - POPOVER_OFFSET;
+                if (left < 12) left = 12;
+                if (top + cardHeight > window.innerHeight - 12) top = window.innerHeight - cardHeight - 12;
+                if (top < 12) top = 12;
+                pop.style.left = left + 'px';
+                pop.style.top = top + 'px';
+                pop.addEventListener('mouseenter', () => {
+                    if (itemCardHideTimer) { clearTimeout(itemCardHideTimer); itemCardHideTimer = null; }
+                });
+                pop.addEventListener('mouseleave', hideItemCard);
+            });
+        }
+
+        function hideItemCard() {
+            if (itemCardTimer) {
+                clearTimeout(itemCardTimer);
+                itemCardTimer = null;
+            }
+            if (itemCardHideTimer) {
+                clearTimeout(itemCardHideTimer);
+                itemCardHideTimer = null;
+            }
+            if (itemCardPopover) {
+                itemCardPopover.remove();
+                itemCardPopover = null;
+            }
+        }
+
+        document.body.addEventListener('mouseover', function(e) {
+            const link = e.target.closest('.item-link');
+            if (!link) {
+                if (!e.relatedTarget || !e.relatedTarget.closest || !e.relatedTarget.closest('.item-card-popover')) hideItemCard();
+                return;
+            }
+            if (itemCardHideTimer) { clearTimeout(itemCardHideTimer); itemCardHideTimer = null; }
+            if (itemCardTimer) clearTimeout(itemCardTimer);
+            const itemId = link.getAttribute('data-item-id');
+            const itemName = link.getAttribute('data-item-name') || '';
+            itemCardTimer = setTimeout(() => showItemCard(link, itemId, itemName), HOVER_DELAY_MS);
+        });
+        document.body.addEventListener('mouseout', function(e) {
+            if (e.relatedTarget && e.relatedTarget.closest && (e.relatedTarget.closest('.item-link') || e.relatedTarget.closest('.item-card-popover'))) return;
+            if (itemCardTimer) { clearTimeout(itemCardTimer); itemCardTimer = null; }
+            itemCardHideTimer = setTimeout(hideItemCard, 150);
+        });
 
         loadData();
     </script>
