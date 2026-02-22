@@ -8,7 +8,8 @@
         {
           "name": "Crown of Ambivalence",
           "zone": "Vex Thal",
-          "mob": "Kaas Thox Xi Aten Ha Ra"
+          "mob": "Kaas Thox Xi Aten Ha Ra",
+          "id": 26763
         }
       ]
     },
@@ -20,7 +21,8 @@
         {
           "name": "Pulsing Onyx Ring",
           "zone": "The Plane of Time",
-          "mob": "Bertoxxulous"
+          "mob": "Bertoxxulous",
+          "id": 26993
         }
       ]
     },
@@ -32,17 +34,21 @@
         {
           "name": "Drape of the Unending",
           "zone": "The Plane of Time",
-          "mob": "Ralthos Enrok"
+          "mob": "Ralthos Enrok",
+          "id": 28660
         },
         {
           "name": "Earring of Embedded Coral",
           "zone": "The Plane of Water",
-          "mob": "Coirnav the Avatar of Water"
+          "mob": "Coirnav the Avatar of Water",
+          "id": 10242,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Veil of Warmth",
           "zone": "The Plane of Time",
-          "mob": "Ralthos Enrok"
+          "mob": "Ralthos Enrok",
+          "id": 26985
         }
       ]
     },
@@ -104,12 +110,15 @@
         {
           "name": "Dragon Scaled Mask",
           "zone": "The Sleeper's Tomb",
-          "mob": "Nanzata the Warder"
+          "mob": "Nanzata the Warder",
+          "id": 1157,
+          "classes": "NEC WIZ MAG ENC"
         },
         {
           "name": "Fascia Secundae",
           "zone": "The Sleeper's Tomb",
-          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient, Zeixshi`Kar the Ancient"
+          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient, Zeixshi`Kar the Ancient",
+          "id": 29458
         },
         {
           "name": "Rokyls Channelling Crystal",
@@ -119,12 +128,14 @@
         {
           "name": "Ceramic Shield of Valor",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Shield Of Valor"
+          "mob": "Recipe\u00a0: Ceramic Shield Of Valor"
         },
         {
           "name": "Cloak of the Wrulons",
           "zone": "The Temple of Marr",
-          "mob": "Lord Mithaniel Marr"
+          "mob": "Lord Mithaniel Marr",
+          "id": 15804,
+          "classes": "ALL"
         },
         {
           "name": "Headsmans Hoop",
@@ -146,7 +157,9 @@
         {
           "name": "Woven Steel Sash",
           "zone": "Plane of Air",
-          "mob": "Avatar of Smoke"
+          "mob": "Avatar of Smoke",
+          "id": 15871,
+          "classes": "ALL"
         }
       ]
     },
@@ -175,22 +188,28 @@
         {
           "name": "Hammer of Hours",
           "zone": "The Plane of Time",
-          "mob": "Terris Thule"
+          "mob": "Terris Thule",
+          "id": 21886
         },
         {
           "name": "Kelp-lined Mantle",
           "zone": "The Plane of Water",
-          "mob": "Coirnav the Avatar of Water"
+          "mob": "Coirnav the Avatar of Water",
+          "id": 13634,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Pauldrons of Purity",
           "zone": "The Plane of Time",
-          "mob": "Supernatural Guardian"
+          "mob": "Supernatural Guardian",
+          "id": 13638,
+          "classes": "NEC WIZ MAG ENC"
         },
         {
           "name": "Wand of Temporal Power",
           "zone": "The Plane of Time",
-          "mob": "Vallon Zek"
+          "mob": "Vallon Zek",
+          "id": 21876
         }
       ]
     },
@@ -227,7 +246,8 @@
         {
           "name": "Frakadar's Talisman",
           "zone": "Dragon Necropolis",
-          "mob": "Zlandicar"
+          "mob": "Zlandicar",
+          "id": 27260
         },
         {
           "name": "Meditative Blanket",
@@ -242,22 +262,27 @@
         {
           "name": "Mask of Fall",
           "zone": "The Temple of Veeshan",
-          "mob": "Aaryonar"
+          "mob": "Aaryonar",
+          "id": 31323
         },
         {
           "name": "Shroud of Veeshan",
           "zone": "Veeshan's Peak",
-          "mob": "Phara Dar"
+          "mob": "Phara Dar",
+          "id": 1628,
+          "classes": "ALL"
         },
         {
           "name": "Ceramic Totem of The Rathe",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Totem Of The Rathe"
+          "mob": "Recipe\u00a0: Ceramic Totem Of The Rathe"
         },
         {
           "name": "Knucklebone Beaded Veil",
           "zone": "The Lair of Terris Thule",
-          "mob": "Terris Thule"
+          "mob": "Terris Thule",
+          "id": 9463,
+          "classes": "CLR DRU SHM"
         },
         {
           "name": "Mantle of Flame Wisdom",
@@ -272,7 +297,9 @@
         {
           "name": "Primal Mask of the Earthcrafter",
           "zone": "The Plane of Earth",
-          "mob": "A Pristine Gem Golem, A Shimmering Gem Sentry"
+          "mob": "A Pristine Gem Golem, A Shimmering Gem Sentry",
+          "id": 9490,
+          "classes": "CLR PAL RNG DRU SHM BST"
         },
         {
           "name": "Scaled Avatar's Sleeves",
@@ -309,7 +336,9 @@
         {
           "name": "Mantle of Pure Spirit",
           "zone": "The Plane of Time",
-          "mob": "Innoruuk"
+          "mob": "Innoruuk",
+          "id": 13647,
+          "classes": "CLR PAL RNG DRU SHM BST"
         },
         {
           "name": "Trydan's Chestplate of Nobility",
@@ -324,7 +353,8 @@
         {
           "name": "Whorl of Unnatural Forces",
           "zone": "The Plane of Time",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 27280
         }
       ]
     },
@@ -341,7 +371,9 @@
         {
           "name": "Raiment of the Fire Son",
           "zone": "The Tower of Solusek Ro",
-          "mob": "Solusek Ro"
+          "mob": "Solusek Ro",
+          "id": 15823,
+          "classes": "CLR DRU SHM"
         },
         {
           "name": "Rosrak's Sleeves of the Primal",
@@ -351,7 +383,9 @@
         {
           "name": "Simple Ring of Purity",
           "zone": "The Plane of Air",
-          "mob": "Xegony the Queen of the Air"
+          "mob": "Xegony the Queen of the Air",
+          "id": 10234,
+          "classes": "ALL"
         },
         {
           "name": "Ultor's Vambraces of Faith",
@@ -368,7 +402,8 @@
         {
           "name": "Leggings of Judgement",
           "zone": "Vex Thal",
-          "mob": "Aten Ha Ra"
+          "mob": "Aten Ha Ra",
+          "id": 26783
         }
       ]
     },
@@ -385,7 +420,8 @@
         {
           "name": "Staff of Swiftness",
           "zone": "The Halls of Honor",
-          "mob": "Halgoz Rellinic"
+          "mob": "Halgoz Rellinic",
+          "id": 26897
         }
       ]
     },
@@ -397,12 +433,16 @@
         {
           "name": "Glowing Steel Shim",
           "zone": "The Plane of Innovation",
-          "mob": "Manaetic Behemoth"
+          "mob": "Manaetic Behemoth",
+          "id": 10074,
+          "classes": "ALL"
         },
         {
           "name": "Indigo Snake Bracelet",
           "zone": "Lair of Terris Thule",
-          "mob": "Terris Thule"
+          "mob": "Terris Thule",
+          "id": 11019,
+          "classes": "NEC WIZ MAG ENC"
         },
         {
           "name": "Wand of the War Wizard",
@@ -434,7 +474,9 @@
         {
           "name": "Stormriders Signet",
           "zone": "Torden, The Bastion of Thunder",
-          "mob": "Kuanbyr Hailstorm"
+          "mob": "Kuanbyr Hailstorm",
+          "id": 10232,
+          "classes": "NEC WIZ MAG ENC"
         }
       ]
     },
@@ -468,17 +510,22 @@
         {
           "name": "Cudgel of Glowing Clay",
           "zone": "Ragrax, Stronghold of the Twelve",
-          "mob": "War Chieftan Birak"
+          "mob": "War Chieftan Birak",
+          "id": 21875
         },
         {
           "name": "Mail of Storms",
           "zone": "Reef of Coirnav (The Plane of Water)",
-          "mob": "Coirnav the Avatar of Water"
+          "mob": "Coirnav the Avatar of Water",
+          "id": 14961,
+          "classes": "RNG ROG SHM"
         },
         {
           "name": "Red Eyed Mask of Rage",
           "zone": "Drunder, Fortress of Zek (Plane of Tactics)",
-          "mob": "Rallos Zek the Warlord"
+          "mob": "Rallos Zek the Warlord",
+          "id": 9436,
+          "classes": "ALL"
         }
       ]
     },
@@ -530,12 +577,15 @@
         {
           "name": "Bone-Clasped Girdle",
           "zone": "Plane of Fear",
-          "mob": "Dread"
+          "mob": "Dread",
+          "id": 11666,
+          "classes": "CLR DRU BRD SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Bracelet of the Deep Sea",
           "zone": "The Temple of Veeshan",
-          "mob": "Lord Koi`Doken"
+          "mob": "Lord Koi`Doken",
+          "id": 31314
         },
         {
           "name": "Coldain Military Wristguard",
@@ -550,7 +600,7 @@
         {
           "name": "Ceramic Shackles of Torment",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Shackles Of Torment"
+          "mob": "Recipe\u00a0: Ceramic Shackles Of Torment"
         },
         {
           "name": "Grimror's Sleeves of the Plagues",
@@ -560,7 +610,9 @@
         {
           "name": "Miserable Bauble",
           "zone": "Torment, the Plane of Pain",
-          "mob": "Saryrn"
+          "mob": "Saryrn",
+          "id": 4118,
+          "classes": "ALL"
         },
         {
           "name": "Orb of the Fearless",
@@ -577,7 +629,8 @@
         {
           "name": "Umbracite Hoop",
           "zone": "Vex Thal",
-          "mob": "Va Xi Aten Ha Ra"
+          "mob": "Va Xi Aten Ha Ra",
+          "id": 28944
         }
       ]
     },
@@ -589,7 +642,8 @@
         {
           "name": "Grimoire of Enchantment",
           "zone": "Vex Thal",
-          "mob": "Diabo Xi Va"
+          "mob": "Diabo Xi Va",
+          "id": 28981
         }
       ]
     },
@@ -601,7 +655,8 @@
         {
           "name": "Ring of Flamewarding",
           "zone": "Vex Thal",
-          "mob": "Diabo Xi Xin Thall"
+          "mob": "Diabo Xi Xin Thall",
+          "id": 28905
         }
       ]
     },
@@ -625,17 +680,20 @@
         {
           "name": "Amulet of the Rain",
           "zone": "Torden, the Bastion of Thunder",
-          "mob": "Agnarr the Storm Lord"
+          "mob": "Agnarr the Storm Lord",
+          "id": 29198
         },
         {
           "name": "Cloak of Ferocity",
           "zone": "The Plane of Time: Phase 2",
-          "mob": "Ralthos Enrok"
+          "mob": "Ralthos Enrok",
+          "id": 21996
         },
         {
           "name": "Xephyrus, Wand of the Flowing Wind",
           "zone": "The Plane of Air",
-          "mob": "Xegony the Queen of Air"
+          "mob": "Xegony the Queen of Air",
+          "id": 26788
         }
       ]
     },
@@ -647,17 +705,21 @@
         {
           "name": "Cloak of Combustion",
           "zone": "The Plane of Fire",
-          "mob": "Quavonis Firetail"
+          "mob": "Quavonis Firetail",
+          "id": 12082,
+          "classes": "ALL"
         },
         {
           "name": "Shield of the Vortex",
           "zone": "The Plane of Time: Phase 2",
-          "mob": "Ralthos Enrok"
+          "mob": "Ralthos Enrok",
+          "id": 25998
         },
         {
           "name": "The Orb of the Sun",
           "zone": "The Tower of Solusek Ro",
-          "mob": "Solusek Ro"
+          "mob": "Solusek Ro",
+          "id": 20486
         }
       ]
     },
@@ -669,12 +731,15 @@
         {
           "name": "Intricately Etched Seashell",
           "zone": "The Plane of Water",
-          "mob": "Ofossaa the Enlightened"
+          "mob": "Ofossaa the Enlightened",
+          "id": 27272
         },
         {
           "name": "Mask of Conceptual Energy",
           "zone": "The Plane of Time: Phase 1",
-          "mob": "Kazrok of Fire"
+          "mob": "Kazrok of Fire",
+          "id": 9444,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         }
       ]
     },
@@ -686,12 +751,14 @@
         {
           "name": "Greatstaff of Power",
           "zone": "The Plane of Time: Phase 2",
-          "mob": "Rallos Zek"
+          "mob": "Rallos Zek",
+          "id": 26087
         },
         {
           "name": "Spool of Woven Time",
           "zone": "The Plane of Time: Phase 2",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 20496
         }
       ]
     },
@@ -770,12 +837,14 @@
         {
           "name": "Fedora Secundae",
           "zone": "The Sleeper's Tomb (sleeper)",
-          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient. Zeixshi`Kar the Ancient"
+          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient. Zeixshi`Kar the Ancient",
+          "id": 29452
         },
         {
           "name": "Harla Dar's Talisman",
           "zone": "The Western Wastes",
-          "mob": "Harla Dar"
+          "mob": "Harla Dar",
+          "id": 27260
         },
         {
           "name": "Jungle Spider Fur Cap",
@@ -785,12 +854,14 @@
         {
           "name": "Mask of the Dragon Slayer",
           "zone": "Skyshrine",
-          "mob": "Lord Yelinak"
+          "mob": "Lord Yelinak",
+          "id": 29319
         },
         {
           "name": "White Dragonscale Cloak",
           "zone": "The Rathe Mountains",
-          "mob": "Quest: White Dragonscale Cloak"
+          "mob": "Quest: White Dragonscale Cloak",
+          "id": 29645
         },
         {
           "name": "Askr's Thunderous Armplates",
@@ -800,7 +871,7 @@
         {
           "name": "Ceramic Incense Burner of Ro",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Incense Burner Of Ro"
+          "mob": "Recipe\u00a0: Ceramic Incense Burner Of Ro"
         },
         {
           "name": "Honorary Amulet",
@@ -822,7 +893,8 @@
         {
           "name": "Boots of Silent Dreams",
           "zone": "Vex Thal",
-          "mob": "Thall Va Xakra"
+          "mob": "Thall Va Xakra",
+          "id": 28881
         }
       ]
     },
@@ -839,7 +911,8 @@
         {
           "name": "Symbol of the Planemasters",
           "zone": "Plane of Time Phase 2",
-          "mob": "Saryrn"
+          "mob": "Saryrn",
+          "id": 20898
         }
       ]
     },
@@ -851,13 +924,15 @@
         {
           "name": "Circlet of Flowing Time",
           "zone": "Plane of Time Phase 4",
-          "mob": "Tallon Zek"
+          "mob": "Tallon Zek",
+          "id": 32607
         },
         {
           "id": 14818,
           "name": "Ring of Thunderous Forces",
           "zone": "Plane of Time Phase 5",
-          "mob": "Rallos Zek"
+          "mob": "Rallos Zek",
+          "classes": "CLR PAL SHD NEC WIZ MAG ENC"
         }
       ]
     },
@@ -869,12 +944,14 @@
         {
           "name": "Barrier of Freezing Winds",
           "zone": "Plane of Time Phase 2",
-          "mob": "Innoruuk"
+          "mob": "Innoruuk",
+          "id": 27274
         },
         {
           "name": "Bracer of Precision",
           "zone": "Plane of Time Phase 2",
-          "mob": "Tallon Zek"
+          "mob": "Tallon Zek",
+          "id": 28667
         },
         {
           "name": "Dumul's Chestwraps of the Brute",
@@ -901,7 +978,8 @@
         {
           "name": "Cape of Endless Torment",
           "zone": "Plane of Time Phase 2",
-          "mob": "Terris Thule"
+          "mob": "Terris Thule",
+          "id": 21998
         },
         {
           "name": "Maelins Robe of Lore",
@@ -958,32 +1036,38 @@
         {
           "name": "Bracelet of the Sky",
           "zone": "Temple of Veeshan",
-          "mob": "Eashen of the Sky"
+          "mob": "Eashen of the Sky",
+          "id": 31384
         },
         {
           "name": "Circlet of the Falinkan",
           "zone": "Skyshrine",
-          "mob": "Quest: Ralgyn's Promise"
+          "mob": "Quest: Ralgyn's Promise",
+          "id": 1867,
+          "classes": "ALL"
         },
         {
           "name": "Girdle of Magnificence",
           "zone": "Katta Castellum",
-          "mob": "Lcea Katta"
+          "mob": "Lcea Katta",
+          "id": 26548
         },
         {
           "name": "Surreptitious Broach",
           "zone": "Kerafyrm's Lair (Sleeper's Tomb)",
-          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient, Zeixshi`Kar the Ancient"
+          "mob": "Kildrukaun the Ancient, Tjudawos the Ancient, Vyskudra the Ancient, Zeixshi`Kar the Ancient",
+          "id": 29459
         },
         {
           "name": "Ceramic Skull of Decay",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Skull Of Decay"
+          "mob": "Recipe\u00a0: Ceramic Skull Of Decay"
         },
         {
           "name": "Torch of Lxvanvom",
           "zone": "Ruins of Lxanvom (Crypt of Decay)",
-          "mob": "Bhaly Adan"
+          "mob": "Bhaly Adan",
+          "id": 21893
         }
       ]
     },
@@ -995,17 +1079,22 @@
         {
           "name": "Leaf-twined Guards",
           "zone": "Ragrax, Stronghold of the Twelve",
-          "mob": "Avatar of Earth"
+          "mob": "Avatar of Earth",
+          "id": 11402,
+          "classes": "CLR PAL RNG SHD DRU SHM BST"
         },
         {
           "name": "Lightbringers Earring",
           "zone": "Vex Thal",
-          "mob": "Diabo Xi Va Temariel"
+          "mob": "Diabo Xi Va Temariel",
+          "id": 28922
         },
         {
           "name": "Earring of Eternal Flame",
           "zone": "Plane of Fire",
-          "mob": "Fennin Ro"
+          "mob": "Fennin Ro",
+          "id": 16679,
+          "classes": "NEC WIZ MAG ENC"
         }
       ]
     },
@@ -1029,7 +1118,8 @@
         {
           "name": "Book of Contemplation",
           "zone": "Vex Thal",
-          "mob": "Diabo Xi Xin Thall"
+          "mob": "Diabo Xi Xin Thall",
+          "id": 28915
         }
       ]
     },
@@ -1041,7 +1131,8 @@
         {
           "name": "Wristband of Secrets",
           "zone": "Vex Thal",
-          "mob": "Aten Ha Ra"
+          "mob": "Aten Ha Ra",
+          "id": 26781
         }
       ]
     },
@@ -1113,27 +1204,34 @@
         {
           "name": "Ring of the Shissar",
           "zone": "Ssraeshza Temple",
-          "mob": "Quest: http://everquest.allakhazam.com/db/quest.html?quest=1999"
+          "mob": "Quest: http://everquest.allakhazam.com/db/quest.html?quest=1999",
+          "id": 24617
         },
         {
           "name": "Yunnb's Earring",
           "zone": "Veeshan's Peak",
-          "mob": "Phara Dar"
+          "mob": "Phara Dar",
+          "id": 10912,
+          "classes": "ALL"
         },
         {
           "name": "Ceramic Hammer of Innovation",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Hammer Of Innovation"
+          "mob": "Recipe\u00a0: Ceramic Hammer Of Innovation"
         },
         {
           "name": "Obsidian Plated Pauldrons",
           "zone": "The Tower of Solusek Ro",
-          "mob": "Arlyxir"
+          "mob": "Arlyxir",
+          "id": 13666,
+          "classes": "WAR PAL RNG SHD MNK BRD ROG BST"
         },
         {
           "name": "Protective Dust Drape",
           "zone": "Plane of Innovation",
-          "mob": "Quest: Destroy the Behemoth (Tactics Access)"
+          "mob": "Quest: Destroy the Behemoth (Tactics Access)",
+          "id": 15831,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Signet of the Valorous",
@@ -1150,12 +1248,16 @@
         {
           "name": "Bands of Earthen Energy",
           "zone": "Ragrax, Stronghold of the Twelve",
-          "mob": "Warlord Gintolaken"
+          "mob": "Warlord Gintolaken",
+          "id": 16158,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Karana's Tear",
           "zone": "Torden, The Bastion of Thunder",
-          "mob": "Agnarr the Storm Lord"
+          "mob": "Agnarr the Storm Lord",
+          "id": 4139,
+          "classes": "ALL"
         }
       ]
     },
@@ -1204,12 +1306,14 @@
         {
           "name": "Circular Shield of the Blaze",
           "zone": "The Tower of Solusek Ro",
-          "mob": "Xuzl"
+          "mob": "Xuzl",
+          "id": 27278
         },
         {
           "name": "Hammer of the Wind",
           "zone": "Bastion of Thunder",
-          "mob": "Hreidar Lynhillig"
+          "mob": "Hreidar Lynhillig",
+          "id": 28836
         },
         {
           "name": "Ivory Candle Skull",
@@ -1224,7 +1328,8 @@
         {
           "name": "Symbol of the Plaguebringer",
           "zone": "Ruins of Lxanvom (Crypt of Decay)",
-          "mob": "Bertoxxulous"
+          "mob": "Bertoxxulous",
+          "id": 26865
         },
         {
           "name": "The Weapon's Driveshaft",
@@ -1268,22 +1373,26 @@
         {
           "name": "Bracer of the Inferno",
           "zone": "The Plane of Time",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 21993
         },
         {
           "name": "Earthen Bracer of Fortitude",
           "zone": "The Plane of Time",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 32100
         },
         {
           "name": "Ethereal Silk Leggings",
           "zone": "The Plane of Time",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 28649
         },
         {
           "name": "Wristband of Icy Vengeance",
           "zone": "The Plane of Time",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 32110
         }
       ]
     },
@@ -1295,22 +1404,27 @@
         {
           "name": "Amulet of Crystal Dreams",
           "zone": "The Plane of Time",
-          "mob": "Tallon Zek"
+          "mob": "Tallon Zek",
+          "id": 28654
         },
         {
           "name": "Earring of Unseen Horrors",
           "zone": "The Plane of Time",
-          "mob": "Cazic Thule"
+          "mob": "Cazic Thule",
+          "id": 26980
         },
         {
           "name": "Faceguard of Frenzy",
           "zone": "The Plane of Time",
-          "mob": "Supernatural Guardian"
+          "mob": "Supernatural Guardian",
+          "id": 26983
         },
         {
           "name": "Gleaming Mesh Girdle",
           "zone": "Doomfire, the Burning Lands",
-          "mob": "Fennin Ro, The Tyrant of Fire"
+          "mob": "Fennin Ro, The Tyrant of Fire",
+          "id": 12510,
+          "classes": "CLR DRU SHM"
         }
       ]
     },
@@ -1322,17 +1436,22 @@
         {
           "name": "Bracer of Timeless Rage",
           "zone": "Plane of Time Phase 5",
-          "mob": "Innoruuk"
+          "mob": "Innoruuk",
+          "id": 32609
         },
         {
           "name": "Cord of Potential",
           "zone": "Plane of Time Phase 4",
-          "mob": "Vallon Zek"
+          "mob": "Vallon Zek",
+          "id": 15881,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Shroud of Provocation",
           "zone": "Plane of Time Phase 2",
-          "mob": "Saryrn"
+          "mob": "Saryrn",
+          "id": 13673,
+          "classes": "PAL RNG SHD BRD BST"
         }
       ]
     },
@@ -1379,7 +1498,9 @@
         {
           "name": "Grotesque Girdle",
           "zone": "The Plane of Fear",
-          "mob": "a dracoliche"
+          "mob": "a dracoliche",
+          "id": 1556,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Slick Leather Courier`s Cape",
@@ -1396,7 +1517,8 @@
         {
           "name": "Shade Stone Amulet",
           "zone": "Vex Thal",
-          "mob": "Kaas Thox Xi Ans Dyek"
+          "mob": "Kaas Thox Xi Ans Dyek",
+          "id": 28901
         }
       ]
     },
@@ -1408,22 +1530,28 @@
         {
           "name": "Basalt Plated Pauldrons",
           "zone": "Tower of Solusek Ro",
-          "mob": "Rizlona"
+          "mob": "Rizlona",
+          "id": 13664,
+          "classes": "PAL RNG SHD BRD BST"
         },
         {
           "name": "Flame Idol of Ro",
           "zone": "Doomfire, the Burning Lands",
-          "mob": "Chancellor Kirta"
+          "mob": "Chancellor Kirta",
+          "id": 26798
         },
         {
           "name": "Hooded Sanguine Mantle",
           "zone": "The Tower of Solusek Ro",
-          "mob": "Arlyxir"
+          "mob": "Arlyxir",
+          "id": 13650,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Orb of Thunderous Spirits",
           "zone": "Bastion of Thunder",
-          "mob": "Agnarr the Storm Lord"
+          "mob": "Agnarr the Storm Lord",
+          "id": 26797
         }
       ]
     },
@@ -1435,27 +1563,35 @@
         {
           "name": "Bone Sliver Ornament",
           "zone": "Vegarlson, the Earthen Badlands",
-          "mob": "A Monsterous Mudwalker"
+          "mob": "A Monsterous Mudwalker",
+          "id": 20453
         },
         {
           "name": "Bracer of Flickering Flames",
           "zone": "Doomfire, the Burning Lands",
-          "mob": "Chancellor Kirta"
+          "mob": "Chancellor Kirta",
+          "id": 11030,
+          "classes": "CLR DRU SHM"
         },
         {
           "name": "Bulwark of Shimmering Steel",
           "zone": "Eryslai, the Kingdom of Wind",
-          "mob": "Avatar of Dust"
+          "mob": "Avatar of Dust",
+          "id": 27273
         },
         {
           "name": "Gauntlets of the Burning Prince",
           "zone": "The Tower of Solusek Ro",
-          "mob": "Solusek Ro"
+          "mob": "Solusek Ro",
+          "id": 11878,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Tethered Air Cape",
           "zone": "Eryslai, the Kingdom of Wind",
-          "mob": "An Elemental Masterpiece"
+          "mob": "An Elemental Masterpiece",
+          "id": 15812,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         }
       ]
     },
@@ -1522,22 +1658,27 @@
         {
           "name": "Essence Lens",
           "zone": "The Western Wastes",
-          "mob": "Quest: Essence Lens"
+          "mob": "Quest: Essence Lens",
+          "id": 2698,
+          "classes": "ALL"
         },
         {
           "name": "Frostreavers Embroidered Cloak",
           "zone": "Icewell Keep",
-          "mob": "Dain Frostreaver IV"
+          "mob": "Dain Frostreaver IV",
+          "id": 30505
         },
         {
           "name": "Hand of the Master",
           "zone": "The Temple of Veeshan",
-          "mob": "Aaryonar"
+          "mob": "Aaryonar",
+          "id": 31321
         },
         {
           "name": "Valtrons Necklace of Wonder",
           "zone": "The Temple of Veeshan",
-          "mob": "Vulak`Aerr"
+          "mob": "Vulak`Aerr",
+          "id": 31234
         },
         {
           "name": "Arantir's Sandals of Discovery",
@@ -1547,7 +1688,7 @@
         {
           "name": "Ceramic Totem of Xegony",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Totem Of Xegony"
+          "mob": "Recipe\u00a0: Ceramic Totem Of Xegony"
         },
         {
           "name": "Dumul's Sleeves of the Brute",
@@ -1567,7 +1708,9 @@
         {
           "name": "Shimmering Sleeves of Flame",
           "zone": "The Plane of Fire",
-          "mob": "Criare Sunmane"
+          "mob": "Criare Sunmane",
+          "id": 11323,
+          "classes": "NEC WIZ MAG ENC"
         },
         {
           "name": "Silken Augmenter's Shoes",
@@ -1577,7 +1720,9 @@
         {
           "name": "Tallon's War Charm",
           "zone": "Drunder, the Fortress of Zek",
-          "mob": "Tallon Zek"
+          "mob": "Tallon Zek",
+          "id": 5797,
+          "classes": "NEC WIZ MAG ENC"
         },
         {
           "name": "Tormentor's Chain Collar",
@@ -1614,7 +1759,8 @@
         {
           "name": "Earring of Essence",
           "zone": "The Temple of Droga",
-          "mob": "Soothsayer Dregzak"
+          "mob": "Soothsayer Dregzak",
+          "id": 26512
         },
         {
           "name": "Incandescent Mask",
@@ -1649,7 +1795,8 @@
         {
           "name": "Ring of Lightning",
           "zone": "Kael Drakkel",
-          "mob": "King Tormax"
+          "mob": "King Tormax",
+          "id": 25198
         },
         {
           "name": "Decaying Bone Idol",
@@ -1681,12 +1828,14 @@
         {
           "name": "Nightcaller Leggings",
           "zone": "Vex Thal",
-          "mob": "Kaas Thox Xi Aten Ha Ra"
+          "mob": "Kaas Thox Xi Aten Ha Ra",
+          "id": 26755
         },
         {
           "name": "Slippers of Dark Whispers",
           "zone": "Vex Thal",
-          "mob": "Va Xi Aten Ha Ra"
+          "mob": "Va Xi Aten Ha Ra",
+          "id": 28148
         }
       ]
     },
@@ -1728,17 +1877,20 @@
         {
           "name": "Boots of Superiority",
           "zone": "The Temple of Veeshan",
-          "mob": "Lendiniara the Keeper"
+          "mob": "Lendiniara the Keeper",
+          "id": 31408
         },
         {
           "name": "Boots of the Dead Dream",
           "zone": "The Temple of Veeshan",
-          "mob": "Lord Feshlak"
+          "mob": "Lord Feshlak",
+          "id": 31327
         },
         {
           "name": "Talisman of Evasion",
           "zone": "Ssraeshza Temple",
-          "mob": "Rhag`Mozdezh"
+          "mob": "Rhag`Mozdezh",
+          "id": 26505
         },
         {
           "name": "Ceramic Gavel of Justice",
@@ -1770,7 +1922,8 @@
         {
           "name": "Robe of Luring Shadow",
           "zone": "Vex Thal",
-          "mob": "Diabo Xi Xin Thall"
+          "mob": "Diabo Xi Xin Thall",
+          "id": 28910
         }
       ]
     },
@@ -1830,7 +1983,9 @@
         {
           "name": "Earring of Temporal Solstice",
           "zone": "The Plane of Time",
-          "mob": "Vallon Zek"
+          "mob": "Vallon Zek",
+          "id": 5594,
+          "classes": "SHD DRU SHM NEC ENC BST"
         }
       ]
     },
@@ -1842,7 +1997,9 @@
         {
           "name": "Black Collar of Boundless Might",
           "zone": "Drunder, Fortress of Zek (Plane of Tactics)",
-          "mob": "Rallos Zek the Warlord"
+          "mob": "Rallos Zek the Warlord",
+          "id": 7770,
+          "classes": "ALL"
         }
       ]
     },
@@ -1854,17 +2011,23 @@
         {
           "name": "Decayed Shoes of the Plaguebringer",
           "zone": "Ruins of Lxanvom (Crypt of Decay)",
-          "mob": "Bertoxxulous"
+          "mob": "Bertoxxulous",
+          "id": 19079,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Entropy Pendant",
           "zone": "Vegarlson, the Earthen Badlands",
-          "mob": "A Perfected Warder of Earth"
+          "mob": "A Perfected Warder of Earth",
+          "id": 8780,
+          "classes": "CLR PAL RNG SHD DRU BRD SHM BST"
         },
         {
           "name": "Gleaming Pendant of Xegony",
           "zone": "Eryslai, the Kingdom of Wind",
-          "mob": "Sigismond Windwalker"
+          "mob": "Sigismond Windwalker",
+          "id": 8772,
+          "classes": "NEC WIZ MAG ENC"
         },
         {
           "name": "Secrets of the Planes",
@@ -1881,12 +2044,15 @@
         {
           "name": "Gloves of the Unseen",
           "zone": "Plane of Time Phase 2",
-          "mob": "Saryrn"
+          "mob": "Saryrn",
+          "id": 26996
         },
         {
           "name": "Talisman of the Elements",
           "zone": "The Plane of Time",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 7769,
+          "classes": "ALL"
         }
       ]
     },
@@ -1898,7 +2064,8 @@
         {
           "name": "Darkened Claw Amulet",
           "zone": "Vex Thal",
-          "mob": "Kaas Thox Xi Ans Dyek"
+          "mob": "Kaas Thox Xi Ans Dyek",
+          "id": 28900
         }
       ]
     },
@@ -1944,12 +2111,15 @@
         {
           "name": "Flame Encased Earring",
           "zone": "Tower of Solusek Ro",
-          "mob": "Rizlona"
+          "mob": "Rizlona",
+          "id": 2629,
+          "classes": "ALL"
         },
         {
           "name": "Glowing Orb of the Stormwatcher",
           "zone": "Bastion of Thunder",
-          "mob": "Brynju Thunderclap"
+          "mob": "Brynju Thunderclap",
+          "id": 27637
         },
         {
           "name": "Malarian Leg Ear Stud",
@@ -1959,7 +2129,8 @@
         {
           "name": "Tormented Stone of Souls",
           "zone": "Torment, the Plane of Pain",
-          "mob": "Ta`Grusch the Abomination"
+          "mob": "Ta`Grusch the Abomination",
+          "id": 20438
         }
       ]
     },
@@ -1971,7 +2142,8 @@
         {
           "name": "Orb of Secrets",
           "zone": "Vex Thal",
-          "mob": "Aten Ha Ra"
+          "mob": "Aten Ha Ra",
+          "id": 26778
         }
       ]
     },
@@ -2101,12 +2273,13 @@
         {
           "name": "Helm of Nocturnal Phantasms",
           "zone": "Jewelry Making",
-          "mob": "Recipe : Helm Of Nocturnal Phantasms"
+          "mob": "Recipe\u00a0: Helm Of Nocturnal Phantasms"
         },
         {
           "name": "Nevederias Left Eye",
           "zone": "The Temple of Veeshan",
-          "mob": "Lady Nevederia"
+          "mob": "Lady Nevederia",
+          "id": 31360
         },
         {
           "name": "Obulus Death Shroud",
@@ -2116,7 +2289,8 @@
         {
           "name": "Sky Watcher's Monocle",
           "zone": "The Temple of Veeshan",
-          "mob": "Lord Feshlak"
+          "mob": "Lord Feshlak",
+          "id": 31328
         },
         {
           "name": "Arantir's Sleeves of Discovery",
@@ -2136,12 +2310,14 @@
         {
           "name": "Carved Bone Ring",
           "zone": "The Lair of Terris Thule",
-          "mob": "Terris Thule"
+          "mob": "Terris Thule",
+          "id": 10127,
+          "classes": "ALL"
         },
         {
           "name": "Ceramic Water Sprinkler of Marr",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Water Sprinkler Of Marr"
+          "mob": "Recipe\u00a0: Ceramic Water Sprinkler Of Marr"
         },
         {
           "name": "Dumul's Boots of the Brute",
@@ -2161,7 +2337,9 @@
         {
           "name": "Pendant of the Triumphant Victor",
           "zone": "Drunder, the Fortress of Zek",
-          "mob": "Vallon Zek"
+          "mob": "Vallon Zek",
+          "id": 7768,
+          "classes": "ALL"
         },
         {
           "name": "Scaled Avatar's Boots",
@@ -2171,12 +2349,15 @@
         {
           "name": "Self Contained Force Barrier",
           "zone": "The Plane of Innovation",
-          "mob": "Quest: Destroy the Behemoth (Tactics Access)"
+          "mob": "Quest: Destroy the Behemoth (Tactics Access)",
+          "id": 27286
         },
         {
           "name": "Shining Crimson Shawl",
           "zone": "The Plane of Fire",
-          "mob": "Criare Sunmane"
+          "mob": "Criare Sunmane",
+          "id": 13654,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Silken Augmenter's Sleeves",
@@ -2237,7 +2418,8 @@
         {
           "name": "Obsidian Necklace",
           "zone": "Vex Thall",
-          "mob": "Diabo Xi Xin Thall"
+          "mob": "Diabo Xi Xin Thall",
+          "id": 28911
         }
       ]
     },
@@ -2249,7 +2431,8 @@
         {
           "name": "Bracelet of Darkness",
           "zone": "Vex Thall",
-          "mob": "Kaas Thox Xi Aten Ha Ra"
+          "mob": "Kaas Thox Xi Aten Ha Ra",
+          "id": 26752
         }
       ]
     },
@@ -2261,12 +2444,15 @@
         {
           "name": "Mask of Simplicity",
           "zone": "The Plane of Time",
-          "mob": "Cazic Thule"
+          "mob": "Cazic Thule",
+          "id": 26984
         },
         {
           "name": "Necklace of Eternal Visions",
           "zone": "The Plane of Time",
-          "mob": "Innoruuk"
+          "mob": "Innoruuk",
+          "id": 9289,
+          "classes": "WAR CLR PAL SHD BRD"
         },
         {
           "id": 26984,
@@ -2283,17 +2469,23 @@
         {
           "name": "Cloak of the Falling Skies",
           "zone": "The Plane of Time",
-          "mob": "Tallon Zek"
+          "mob": "Tallon Zek",
+          "id": 15815,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Sharkbone Plated Shoulderpads",
           "zone": "The Plane of Water",
-          "mob": "Coirnav the Avatar of Water"
+          "mob": "Coirnav the Avatar of Water",
+          "id": 13694,
+          "classes": "WAR PAL RNG SHD BRD ROG"
         },
         {
           "name": "Talisman of Tainted Energy",
           "zone": "The Plane of Time",
-          "mob": "Terris Thule"
+          "mob": "Terris Thule",
+          "id": 8774,
+          "classes": "ALL"
         }
       ]
     },
@@ -2305,17 +2497,22 @@
         {
           "name": "Chestguard of Enchanted Marble",
           "zone": "Ragrax, Stronghold of the Twelve",
-          "mob": "Avatar of Earth"
+          "mob": "Avatar of Earth",
+          "id": 15002,
+          "classes": "WAR CLR PAL SHD BRD"
         },
         {
           "name": "Cloak of Wishes",
           "zone": "The Plane of Time",
-          "mob": "A Ferocious Warboar"
+          "mob": "A Ferocious Warboar",
+          "id": 21997
         },
         {
           "name": "Immaculate Vest of the Fire Tyrant",
           "zone": "The Plane of Fire",
-          "mob": "Fennin Ro, The Tyrant of Fire"
+          "mob": "Fennin Ro, The Tyrant of Fire",
+          "id": 14943,
+          "classes": "DRU MNK BST"
         },
         {
           "name": "Kerasha's Sylvan Boots",
@@ -2350,7 +2547,8 @@
         {
           "name": "Signet of the Arcane",
           "zone": "Councilman Taldarius",
-          "mob": "Quest: Signets of the Councilman"
+          "mob": "Quest: Signets of the Councilman",
+          "id": 29188
         },
         {
           "name": "Ultor's Boots of Faith",
@@ -2360,7 +2558,9 @@
         {
           "name": "Vest of Phoenix Feathers",
           "zone": "The Plane of Air",
-          "mob": "Xegony the Queen of Air"
+          "mob": "Xegony the Queen of Air",
+          "id": 14747,
+          "classes": "NEC WIZ MAG ENC"
         }
       ]
     },
@@ -2372,12 +2572,14 @@
         {
           "name": "Mask of Judgement",
           "zone": "Vex Thal",
-          "mob": "Aten Ha Ra"
+          "mob": "Aten Ha Ra",
+          "id": 26785
         },
         {
           "name": "Mask of Secrets",
           "zone": "Vex Thal",
-          "mob": "Aten Ha Ra"
+          "mob": "Aten Ha Ra",
+          "id": 26779
         }
       ]
     },
@@ -2414,7 +2616,8 @@
         {
           "name": "Crown of Resiliance",
           "zone": "The Temple of Veeshan",
-          "mob": "Jorlleag"
+          "mob": "Jorlleag",
+          "id": 31372
         },
         {
           "name": "Mask of Pulchritude",
@@ -2424,7 +2627,8 @@
         {
           "name": "Onyx Gauntlets",
           "zone": "The Temple of Veeshan",
-          "mob": "Lord Vyemm"
+          "mob": "Lord Vyemm",
+          "id": 31306
         }
       ]
     },
@@ -2436,7 +2640,8 @@
         {
           "name": "Sanguine Eyepatch",
           "zone": "Vex Thall",
-          "mob": "Thall Va Kelun"
+          "mob": "Thall Va Kelun",
+          "id": 28963
         }
       ]
     },
@@ -2448,17 +2653,21 @@
         {
           "name": "Sanguine Robe",
           "zone": "Vex Thal",
-          "mob": "Va Xi Aten Ha Ra"
+          "mob": "Va Xi Aten Ha Ra",
+          "id": 28952
         },
         {
           "name": "Sanguine Slippers",
           "zone": "The Tower of Solusek Ro",
-          "mob": "Galremos"
+          "mob": "Galremos",
+          "id": 19074,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Smooth Onyx Torque",
           "zone": "The Plane of Time",
-          "mob": "Rythor of the Undead"
+          "mob": "Rythor of the Undead",
+          "id": 28655
         }
       ]
     },
@@ -2494,7 +2703,8 @@
         {
           "name": "Leggings of Secrets",
           "zone": "Vex Thal",
-          "mob": "Aten Ha Ra"
+          "mob": "Aten Ha Ra",
+          "id": 26777
         }
       ]
     },
@@ -2565,7 +2775,8 @@
         {
           "name": "Circlet of Summer",
           "zone": "The Temple of Veeshan",
-          "mob": "Aaryonar"
+          "mob": "Aaryonar",
+          "id": 31322
         },
         {
           "name": "Enshrouded Veil",
@@ -2592,7 +2803,8 @@
         {
           "name": "Boots of the Wind",
           "zone": "Vex Thal",
-          "mob": "Thall Xundraux Diabo"
+          "mob": "Thall Xundraux Diabo",
+          "id": 28934
         }
       ]
     },
@@ -2604,17 +2816,22 @@
         {
           "name": "Air Fetish",
           "zone": "Eryslai, the Kingdom of Wind",
-          "mob": "Avatar of Wind"
+          "mob": "Avatar of Wind",
+          "id": 20896
         },
         {
           "name": "Bracers of Earthen Energy",
           "zone": "Vegarlson, the Earthen Badlands",
-          "mob": "A Monsterous Mudwalker"
+          "mob": "A Monsterous Mudwalker",
+          "id": 11103,
+          "classes": "WAR CLR PAL SHD BRD"
         },
         {
           "name": "Clay Bracers of the Golem",
           "zone": "Vegarlson, the Earthen Badlands",
-          "mob": "Peregrin Rockskull"
+          "mob": "Peregrin Rockskull",
+          "id": 11096,
+          "classes": "RNG ROG SHM"
         },
         {
           "name": "Crystal Tipped Onyxwood Staff",
@@ -2624,27 +2841,35 @@
         {
           "name": "Hoop of the Enlightened",
           "zone": "The Plane of Time: Phase 2",
-          "mob": "Gutripping War Beast"
+          "mob": "Gutripping War Beast",
+          "id": 21999
         },
         {
           "name": "Mask of the Insightful",
           "zone": "Doomfire, the Burning Lands",
-          "mob": "Babnoxis the Spider Queen"
+          "mob": "Babnoxis the Spider Queen",
+          "id": 9462,
+          "classes": "CLR PAL RNG SHD DRU BRD SHM BST"
         },
         {
           "name": "War Charm of Crossed Blades",
           "zone": "Drunder, Fortress of Zek (Plane of Tactics)",
-          "mob": "Rallos Zek the Warlord"
+          "mob": "Rallos Zek the Warlord",
+          "id": 5975,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Wristband of the Rathe",
           "zone": "Vegarlson, the Earthen Badlands",
-          "mob": "A Perfected Warder of Earth"
+          "mob": "A Perfected Warder of Earth",
+          "id": 11054,
+          "classes": "DRU MNK BST"
         },
         {
           "name": "Wristguard of Keen Vision",
           "zone": "The Plane of Time: Phase 1",
-          "mob": "Kazrok of Fire"
+          "mob": "Kazrok of Fire",
+          "id": 28668
         }
       ]
     },
@@ -2656,17 +2881,21 @@
         {
           "name": "Earring of Influxed Gravity",
           "zone": "The Plane of Time",
-          "mob": "Quarm"
+          "mob": "Quarm",
+          "id": 7130,
+          "classes": "CLR DRU SHM NEC WIZ MAG ENC"
         },
         {
           "name": "Visor of the Berserker",
           "zone": "The Plane of Time",
-          "mob": "Rallos Zek"
+          "mob": "Rallos Zek",
+          "id": 26982
         },
         {
           "name": "Zealot's Spiked Bracer",
           "zone": "The Plane of Time",
-          "mob": "Cazic Thule"
+          "mob": "Cazic Thule",
+          "id": 28665
         }
       ]
     },
@@ -2743,7 +2972,7 @@
         {
           "name": "Ceramic Sword of War",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Sword Of War"
+          "mob": "Recipe\u00a0: Ceramic Sword Of War"
         },
         {
           "name": "Diseased Ratskin Mask",
@@ -2778,7 +3007,8 @@
         {
           "name": "Wand of the Ice Storm",
           "zone": "Bastion of Thunder",
-          "mob": "Auliffe Chaoswind"
+          "mob": "Auliffe Chaoswind",
+          "id": 26748
         },
         {
           "name": "Wind Worn Luckstone",
@@ -2800,7 +3030,8 @@
         {
           "name": "Wristband of Judgement",
           "zone": "Vex Thal",
-          "mob": "Aten Ha Ra"
+          "mob": "Aten Ha Ra",
+          "id": 26787
         }
       ]
     },
@@ -2812,7 +3043,8 @@
         {
           "name": "Bracer of the Silent Star",
           "zone": "Vex Thal",
-          "mob": "Thall Va Xakra"
+          "mob": "Thall Va Xakra",
+          "id": 28891
         }
       ]
     },
@@ -2824,7 +3056,8 @@
         {
           "name": "Tiny Jade Ring",
           "zone": "The Plane of Time Phase 2",
-          "mob": "Gutripping War Beast"
+          "mob": "Gutripping War Beast",
+          "id": 26995
         }
       ]
     },
@@ -2917,6 +3150,5 @@
         }
       ]
     }
-  ],
-  "total_count": 98
+  ]
 }
