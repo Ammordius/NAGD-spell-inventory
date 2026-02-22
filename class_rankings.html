@@ -2310,10 +2310,10 @@
         let itemNameToId = {};  // normalized name -> item id (for links that have name but no id)
         let itemStatsLoadPromise = null;
 
-        /** Normalize item name for lookup: lowercase, collapse spaces, normalize apostrophe/backtick. */
+        /** Normalize item name for lookup: lowercase, collapse spaces, remove apostrophe/backtick (match Python normalize_item_name). */
         function normalizeItemNameForLookup(name) {
             if (name == null || typeof name !== 'string') return '';
-            return name.toLowerCase().replace(/['`\u2019]/g, "'").replace(/\s+/g, ' ').trim();
+            return name.toLowerCase().replace(/['`\u2019]/g, '').replace(/\s+/g, ' ').trim();
         }
 
         /** Normalize magelo item_stats format (string flags/mods/resists) to DKP-style (arrays) for the card renderer. */
@@ -2348,6 +2348,30 @@
             return out;
         }
 
+        /** Load item_name_to_id.json (normalized name -> id) first so name resolution works for all raid/DKP items. */
+        function loadItemNameToId() {
+            const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
+            const paths = ['data/item_name_to_id.json', './data/item_name_to_id.json', baseDir + 'data/item_name_to_id.json'];
+            const repoMatch = window.location.pathname.match(/^\/[^/]+\/[^/]+/);
+            if (repoMatch) paths.push(repoMatch[0] + '/data/item_name_to_id.json');
+            return (async () => {
+                for (const path of paths) {
+                    try {
+                        const r = await fetch(path);
+                        if (!r.ok) continue;
+                        const obj = await r.json();
+                        if (obj && typeof obj === 'object') {
+                            for (const [norm, id] of Object.entries(obj)) {
+                                if (norm && (itemNameToId[norm] === undefined || itemNameToId[norm] === null))
+                                    itemNameToId[norm] = Number(id);
+                            }
+                            return;
+                        }
+                    } catch (e) { /* try next */ }
+                }
+            })();
+        }
+
         function loadItemStats() {
             if (itemStatsLoadPromise == null) {
                 const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
@@ -2360,6 +2384,7 @@
                 if (repoMatch) possiblePaths.push(repoMatch[0] + '/data/item_stats.json');
 
                 itemStatsLoadPromise = (async () => {
+                    await loadItemNameToId();
                     for (const path of possiblePaths) {
                         try {
                             const r = await fetch(path);
@@ -2474,9 +2499,9 @@
                 itemCardPopover = null;
             }
             const id = itemId != null && itemId !== '' ? String(itemId).trim() : null;
-            getItemStats(id).then(stats => {
+            function showCard(useId, stats) {
                 const compact = !stats;
-                const cardHtml = renderItemCardHtml(itemName || 'Item', id, stats, compact);
+                const cardHtml = renderItemCardHtml(itemName || 'Item', useId, stats, compact);
                 const pop = document.createElement('div');
                 pop.className = 'item-card-popover';
                 pop.innerHTML = cardHtml;
@@ -2498,6 +2523,15 @@
                     if (itemCardHideTimer) { clearTimeout(itemCardHideTimer); itemCardHideTimer = null; }
                 });
                 pop.addEventListener('mouseleave', hideItemCard);
+            }
+            getItemStats(id).then(stats => {
+                if (!stats && itemName) {
+                    const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
+                    if (resolvedId != null) {
+                        return getItemStats(resolvedId).then(s => showCard(String(resolvedId), s));
+                    }
+                }
+                showCard(id, stats);
             });
         }
 

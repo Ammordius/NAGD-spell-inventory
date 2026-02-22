@@ -785,11 +785,16 @@ jobs:
           cp class_rankings.json deploy/class_rankings.json
           echo "✓ Copied class_rankings.json to deploy directory"
         fi
-        # Copy item_stats.json for class rankings item card hover (data/ relative to site root)
+        # Copy item_stats.json and item_name_to_id.json for class rankings item card hover (data/ relative to site root)
         if [ -f "data/item_stats.json" ]; then
           mkdir -p deploy/data
           cp data/item_stats.json deploy/data/item_stats.json
           echo "✓ Copied data/item_stats.json to deploy (for item cards)"
+        fi
+        if [ -f "data/item_name_to_id.json" ]; then
+          mkdir -p deploy/data
+          cp data/item_name_to_id.json deploy/data/item_name_to_id.json
+          echo "✓ Copied data/item_name_to_id.json to deploy (name→id resolution for item cards)"
         fi
         # Copy scoring explanation page
         if [ -f "scoring_explanation.html" ]; then

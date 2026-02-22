@@ -89,6 +89,11 @@
     "name": "Dragon Scaled Mask",
     "respawn_seconds": 475200
   },
+  "11450": {
+    "name": "Dumul's Sleeves of the Brute",
+    "zone": "The Plane of Tranquility",
+    "mob": "Quest: Leather Elemental Tranquility Armor"
+  },
   "1172": {
     "mob": "#Hraashna_the_Warder",
     "zone": "Sleeper's Tomb",
@@ -144,13 +149,13 @@
   "2629": {
     "mob": "#Rizlona",
     "zone": "Plane of Time",
-    "name": "(item 2629)"
+    "name": "Flame Encased Earring"
   },
   "2630": {
     "mob": "#Avatar_of_Mist",
     "zone": "Plane of Air",
     "name": "Whispering Air Bangle",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "2698": {
@@ -192,7 +197,7 @@
   "4119": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 4119)"
+    "name": "Earring of Celestial Energy"
   },
   "4139": {
     "mob": "Agnarr_the_Storm_Lord",
@@ -209,7 +214,7 @@
   "5594": {
     "mob": "Vallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 5594)"
+    "name": "Earring of Temporal Solstice"
   },
   "5760": {
     "mob": "Avatar_of_the_Elements",
@@ -288,17 +293,17 @@
   "7123": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 7123)"
+    "name": "Silver Hoop of Speed"
   },
   "7125": {
     "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 7125)"
+    "name": "Earring of Corporeal Essence"
   },
   "7130": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 7130)"
+    "name": "Earring of Influxed Gravity"
   },
   "7132": {
     "mob": "#Overlord_Banord_Paffa",
@@ -325,7 +330,7 @@
   "7767": {
     "mob": "Magmaton",
     "zone": "Plane of Fire",
-    "name": "(item 7767)",
+    "name": "Necklace of Reflected Flames",
     "respawn_seconds": 259200
   },
   "7768": {
@@ -336,7 +341,7 @@
   "7769": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 7769)"
+    "name": "Talisman of the Elements"
   },
   "7770": {
     "mob": "Rallos_Zek_the_Warlord",
@@ -357,58 +362,58 @@
   "7820": {
     "mob": "#a_glyph_covered_serpent",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 7820)"
+    "name": "Rancorous Skull of Szaldrezh"
   },
   "7821": {
     "mob": "#a_glyph_covered_serpent",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 7821)"
+    "name": "Braided Strands of Corrupted Mana"
   },
   "7822": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 7822)"
+    "name": "Blasphemous Blade of the Exiled"
   },
   "7825": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
     "name": "Breastplate of the Void",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "7826": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 7826)"
+    "name": "Jade Skull Ring"
   },
   "7867": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 7867)",
+    "name": "Black Ornate Chain Bridle",
     "respawn_seconds": 561600
   },
   "7868": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 7868)",
+    "name": "Seru's Torque",
     "respawn_seconds": 561600
   },
   "7869": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 7869)",
+    "name": "Heavy Yttrium Chestplate",
     "respawn_seconds": 561600
   },
   "7870": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 7870)",
+    "name": "Starred Yttrium Ring",
     "respawn_seconds": 561600
   },
   "7871": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 7871)",
+    "name": "Yttrium Studded Leather Boots",
     "respawn_seconds": 561600
   },
   "7902": {
@@ -424,7 +429,7 @@
   "7904": {
     "mob": "Eom Trash",
     "zone": "Vex Thal",
-    "name": "(item 7904)"
+    "name": "Bow of Shadows"
   },
   "7905": {
     "mob": "#Doomshade",
@@ -648,19 +653,19 @@
   "8288": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 8288)",
+    "name": "Yttrium Wrapped Sleeves",
     "respawn_seconds": 561600
   },
   "8289": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 8289)",
+    "name": "Yttrium Wrapped Leggings",
     "respawn_seconds": 561600
   },
   "8359": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 8359)",
+    "name": "Gebron's Demented Cloak",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
@@ -673,7 +678,7 @@
   "8365": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 8365)",
+    "name": "Soul Essence of Aten Ha Ra",
     "respawn_seconds": 561600
   },
   "8497": {
@@ -721,12 +726,12 @@
     "zone": "Plane of Air",
     "name": "Gleaming Pendant of Xegony",
     "respawn_seconds": null,
-    "respawn_note": "3.5\u00b10.5 days (triggered)"
+    "respawn_note": "3.5±0.5 days (triggered)"
   },
   "8774": {
     "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 8774)"
+    "name": "Talisman of Tainted Energy"
   },
   "8780": {
     "mob": "A_Perfected_Warder_of_Earth",
@@ -736,35 +741,35 @@
   "8781": {
     "mob": "#War_Chieftan_Awisano",
     "zone": "Plane of Earth",
-    "name": "(item 8781)",
+    "name": "Twisted Twig Charm",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "8782": {
     "mob": "A_Deadly_Warboar",
     "zone": "Plane of Time",
-    "name": "(item 8782)"
+    "name": "Necklace of Celestial Energy"
   },
   "8977": {
     "mob": "Bertoxxulous",
     "zone": "Plane of Time",
-    "name": "(item 8977)"
+    "name": "Collar of Catastrophe"
   },
   "9239": {
     "mob": "Arlyxir",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 9239)",
+    "name": "Collar of Corrupted Flame",
     "respawn_seconds": 259200
   },
   "9289": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 9289)"
+    "name": "Necklace of Eternal Visions"
   },
   "9320": {
     "mob": "Arch_Mage_Yozanni",
     "zone": "Plane of Fire",
-    "name": "(item 9320)",
+    "name": "Phoenix Claw Talisman",
     "respawn_seconds": 259200
   },
   "9325": {
@@ -776,7 +781,7 @@
   "9435": {
     "mob": "Bertoxxulous",
     "zone": "Plane of Time",
-    "name": "(item 9435)"
+    "name": "Veil of the Inferno"
   },
   "9436": {
     "mob": "Rallos_Zek_the_Warlord",
@@ -791,7 +796,7 @@
   "9462": {
     "mob": "Babnoxis_the_Spider_Queen",
     "zone": "Plane of Fire",
-    "name": "(item 9462)",
+    "name": "Mask of the Insightful",
     "respawn_seconds": 259200
   },
   "9463": {
@@ -810,7 +815,7 @@
     "zone": "Plane of Air",
     "name": "Scintillating Feather Mask",
     "respawn_seconds": null,
-    "respawn_note": "3.5\u00b10.5 days (triggered)"
+    "respawn_note": "3.5±0.5 days (triggered)"
   },
   "9469": {
     "mob": "#Bertoxxulous",
@@ -827,13 +832,13 @@
     "mob": "#Avatar_of_Wind",
     "zone": "Plane of Air",
     "name": "Fine Hammered Faceguard",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "9481": {
     "mob": "Solusek_Ro",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 9481)",
+    "name": "Baroque Half Mask of Solusek Ro",
     "respawn_seconds": 259200
   },
   "9483": {
@@ -850,7 +855,7 @@
   "9487": {
     "mob": "General_Druav_Flamesinger",
     "zone": "Plane of Fire",
-    "name": "(item 9487)",
+    "name": "Burning Mask of Terror",
     "respawn_seconds": 259200
   },
   "9488": {
@@ -869,7 +874,7 @@
     "mob": "#Avatar_of_Mist",
     "zone": "Plane of Air",
     "name": "Band of Swirling Air",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "10127": {
@@ -881,13 +886,13 @@
   "10137": {
     "mob": "#Avatar_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 10137)"
+    "name": "Ring of Flowing Stones"
   },
   "10231": {
     "mob": "#Avatar_of_Smoke",
     "zone": "Plane of Air",
     "name": "Puremetal Band",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "10232": {
@@ -905,7 +910,7 @@
   "10240": {
     "mob": "Azobian_the_Darklord",
     "zone": "Plane of Fire",
-    "name": "(item 10240)"
+    "name": "Band of Elder Understanding"
   },
   "10241": {
     "mob": "#Bertoxxulous",
@@ -921,7 +926,7 @@
   "10653": {
     "mob": "Jiva",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 10653)",
+    "name": "Black Basalt Band",
     "respawn_seconds": 259200
   },
   "10654": {
@@ -963,9 +968,9 @@
   "11018": {
     "mob": "Tantisala_Jaggedtooth",
     "zone": "Plane of Earth",
-    "name": "(item 11018)",
+    "name": "Manacle of Disruption",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "11019": {
     "mob": "Terris_Thule",
@@ -981,22 +986,22 @@
   "11054": {
     "mob": "A_Perfected_Warder_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 11054)"
+    "name": "Wristband of the Rathe"
   },
   "11096": {
     "mob": "Peregrin_Rockskull",
     "zone": "Plane of Time",
-    "name": "(item 11096)"
+    "name": "Clay Bracers of the Golem"
   },
   "11103": {
     "mob": "A_Monsterous_Mudwalker",
     "zone": "Plane of Time",
-    "name": "(item 11103)"
+    "name": "Bracers of Earthen Energy"
   },
   "11323": {
     "mob": "Criare_Sunmane",
     "zone": "Plane of Fire",
-    "name": "(item 11323)",
+    "name": "Shimmering Sleeves of Flame",
     "respawn_seconds": 86400
   },
   "11324": {
@@ -1007,7 +1012,7 @@
   "11402": {
     "mob": "#Avatar_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 11402)"
+    "name": "Leaf-twined Guards"
   },
   "11878": {
     "mob": "Solusek_Ro",
@@ -1029,23 +1034,23 @@
   "12054": {
     "mob": "Chancellor_Kirtra",
     "zone": "Plane of Fire",
-    "name": "(item 12054)"
+    "name": "Cord of the Pyre"
   },
   "12082": {
     "mob": "Quavonis_Firetail",
     "zone": "Plane of Fire",
-    "name": "(item 12082)",
+    "name": "Cloak of Combustion",
     "respawn_seconds": 259200
   },
   "12510": {
     "mob": "Fennin_Ro_the_Tyrant_of_Fire",
     "zone": "Plane of Fire",
-    "name": "(item 12510)"
+    "name": "Gleaming Mesh Girdle"
   },
   "12592": {
     "mob": "Fennin_Ro_the_Tyrant_of_Fire",
     "zone": "Plane of Fire",
-    "name": "(item 12592)"
+    "name": "Great Mask of Flame"
   },
   "13634": {
     "mob": "Coirnav_the_Avatar_of_Water",
@@ -1061,7 +1066,7 @@
   "13647": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 13647)"
+    "name": "Mantle of Pure Spirit"
   },
   "13650": {
     "mob": "Arlyxir",
@@ -1072,13 +1077,13 @@
   "13654": {
     "mob": "Criare_Sunmane",
     "zone": "Plane of Fire",
-    "name": "(item 13654)",
+    "name": "Shining Crimson Shawl",
     "respawn_seconds": 86400
   },
   "13664": {
     "mob": "#Rizlona",
     "zone": "Plane of Time",
-    "name": "(item 13664)"
+    "name": "Basalt Plated Pauldrons"
   },
   "13666": {
     "mob": "Galremos",
@@ -1090,7 +1095,7 @@
     "mob": "Melernil_Faal`Armanna",
     "zone": "Plane of Air",
     "name": "Resplendent Epaulets",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "13672": {
@@ -1102,12 +1107,12 @@
   "13673": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 13673)"
+    "name": "Shroud of Provocation"
   },
   "13674": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 13674)"
+    "name": "Shroud of Survival"
   },
   "13684": {
     "mob": "Terris_Thule",
@@ -1119,7 +1124,7 @@
     "mob": "Melernil_Faal`Armanna",
     "zone": "Plane of Air",
     "name": "Puresteel Mantle",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "13694": {
@@ -1131,9 +1136,9 @@
   "13767": {
     "mob": "Tantisala_Jaggedtooth",
     "zone": "Plane of Earth",
-    "name": "(item 13767)",
+    "name": "Spiked Skull Shoulderpads",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "14747": {
     "mob": "#Xegony_the_Queen_of_Air",
@@ -1150,7 +1155,7 @@
   "14760": {
     "mob": "Retseth_Tretse",
     "zone": "The Hole",
-    "name": "(item 14760)",
+    "name": "Essence of Earth",
     "respawn_seconds": 1024
   },
   "14818": {
@@ -1161,13 +1166,13 @@
   "14926": {
     "mob": "Galremos",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 14926)",
+    "name": "Padded Leather Tunic",
     "respawn_seconds": 3508
   },
   "14943": {
     "mob": "Fennin_Ro_the_Tyrant_of_Fire",
     "zone": "Plane of Fire",
-    "name": "(item 14943)"
+    "name": "Immaculate Vest of the Fire Tyrant"
   },
   "14961": {
     "mob": "Coirnav_the_Avatar_of_Water",
@@ -1178,7 +1183,7 @@
   "15002": {
     "mob": "#Avatar_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 15002)"
+    "name": "Chestguard of Enchanted Marble"
   },
   "15794": {
     "mob": "The_Acolyte_of_Affliction",
@@ -1196,32 +1201,32 @@
     "mob": "An_Elemental_Masterpiece",
     "zone": "Plane of Air",
     "name": "Tethered Air Cape",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "15814": {
     "mob": "Blazzax_the_Omnifiend",
     "zone": "Plane of Fire",
-    "name": "(item 15814)",
+    "name": "Cape of Flames",
     "respawn_seconds": 259200
   },
   "15822": {
     "mob": "Tantisala_Jaggedtooth",
     "zone": "Plane of Earth",
-    "name": "(item 15822)",
+    "name": "Shroud of the Stonecrafter",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "15823": {
     "mob": "Solusek_Ro",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 15823)",
+    "name": "Raiment of the Fire Son",
     "respawn_seconds": 259200
   },
   "15824": {
     "mob": "Rallos_Zek",
     "zone": "Plane of Time",
-    "name": "(item 15824)"
+    "name": "Platinum Cloak of War"
   },
   "15839": {
     "mob": "#Overlord_Banord_Paffa",
@@ -1231,19 +1236,19 @@
   "15840": {
     "mob": "A_Mystical_Arbitor_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 15840)"
+    "name": "Cloak of Flickering Flame"
   },
   "15841": {
     "mob": "#Avatar_of_Wind",
     "zone": "Plane of Air",
     "name": "Ensorcelled Metalcloth Cape",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "15842": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 15842)"
+    "name": "Cloak of Retribution"
   },
   "15843": {
     "mob": "Saryrn",
@@ -1260,19 +1265,19 @@
   "15864": {
     "mob": "Criare_Sunmane",
     "zone": "Plane of Fire",
-    "name": "(item 15864)",
+    "name": "Drape of the Agile",
     "respawn_seconds": 86400
   },
   "15867": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 15867)"
+    "name": "Wand of Impenetrable Force"
   },
   "15871": {
     "mob": "#Avatar_of_Smoke",
     "zone": "Plane of Air",
     "name": "Woven Steel Sash",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "15872": {
@@ -1283,12 +1288,12 @@
   "15877": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 15877)"
+    "name": "Belt of Tidal Energy"
   },
   "15927": {
     "mob": "Bertoxxulous",
     "zone": "Plane of Time",
-    "name": "(item 15927)"
+    "name": "Belt of Temporal Bindings"
   },
   "16097": {
     "mob": "Coirnav_the_Avatar_of_Water",
@@ -1300,32 +1305,32 @@
     "mob": "Pherlondien_Clawpike",
     "zone": "Plane of Air",
     "name": "Band of Fortitude",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "16154": {
     "mob": "Peregrin_Rockskull",
     "zone": "Plane of Time",
-    "name": "(item 16154)"
+    "name": "Girdle of Earthen Stability"
   },
   "16156": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 16156)"
+    "name": "Cord of Temporal Weavings"
   },
   "16158": {
     "mob": "#Warlord_Gintolaken",
     "zone": "Plane of Earth",
     "name": "Bands of Earthen Energy",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "16567": {
     "mob": "#Rinturion_Windblade",
     "zone": "Plane of Air",
     "name": "Sparkling Satin Pantaloons",
     "respawn_seconds": null,
-    "respawn_note": "3.5\u00b10.5 days (triggered)"
+    "respawn_note": "3.5±0.5 days (triggered)"
   },
   "16605": {
     "mob": "Grioihin_the_Wise",
@@ -1336,12 +1341,12 @@
   "16637": {
     "mob": "A_Perfected_Warder_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 16637)"
+    "name": "Leaf-jointed Cloak"
   },
   "16679": {
     "mob": "Fennin_Ro_the_Tyrant_of_Fire",
     "zone": "Plane of Fire",
-    "name": "(item 16679)"
+    "name": "Earring of Eternal Flame"
   },
   "17207": {
     "mob": "Lord_Yelinak",
@@ -1352,7 +1357,7 @@
   "19074": {
     "mob": "Galremos",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 19074)",
+    "name": "Sanguine Slippers",
     "respawn_seconds": 3508
   },
   "19079": {
@@ -1389,67 +1394,67 @@
   "20486": {
     "mob": "Solusek_Ro",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 20486)",
+    "name": "The Orb of the Sun",
     "respawn_seconds": 259200
   },
   "20496": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 20496)"
+    "name": "Spool of Woven Time"
   },
   "20507": {
     "mob": "Pyronis",
     "zone": "Plane of Fire",
-    "name": "(item 20507)",
+    "name": "Blackflame Sphere",
     "respawn_seconds": 259200
   },
   "20508": {
     "mob": "Bertoxxulous",
     "zone": "Plane of Time",
-    "name": "(item 20508)"
+    "name": "Symbol of Ancient Summoning"
   },
   "20618": {
     "mob": "Criare_Sunmane",
     "zone": "Plane of Fire",
-    "name": "(item 20618)",
+    "name": "Fang of Flame",
     "respawn_seconds": 86400
   },
   "20621": {
     "mob": "#Avatar_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 20621)"
+    "name": "Earthen Bile"
   },
   "20625": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 20625)"
+    "name": "Serrated Dart of Energy"
   },
   "20627": {
     "mob": "Vallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 20627)"
+    "name": "Hammer of Holy Vengeance"
   },
   "20896": {
     "mob": "#Avatar_of_Wind",
     "zone": "Plane of Air",
     "name": "Air Fetish",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "20898": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 20898)"
+    "name": "Symbol of the Planemasters"
   },
   "21338": {
     "mob": "Rallos_Zek",
     "zone": "Plane of Time",
-    "name": "(item 21338)"
+    "name": "Ton Po's Mystical Pouch"
   },
   "21809": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 21809)",
+    "name": "White Ornate Chain Bridle",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
@@ -1472,19 +1477,19 @@
   "21875": {
     "mob": "#War_Chieftan_Birak",
     "zone": "Plane of Earth",
-    "name": "(item 21875)",
+    "name": "Cudgel of Glowing Clay",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "21876": {
     "mob": "Vallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 21876)"
+    "name": "Wand of Temporal Power"
   },
   "21884": {
     "mob": "The_Protector_of_Dresolik",
     "zone": "Plane of Time",
-    "name": "(item 21884)"
+    "name": "Mithril Battle Hammer"
   },
   "21886": {
     "mob": "Terris_Thule",
@@ -1499,17 +1504,17 @@
   "21994": {
     "mob": "A_Deadly_Warboar",
     "zone": "Plane of Time",
-    "name": "(item 21994)"
+    "name": "Protective Sleeves"
   },
   "21995": {
     "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 21995)"
+    "name": "Armguards of the Brute"
   },
   "21996": {
     "mob": "Earthen_Overseer",
     "zone": "Plane of Time",
-    "name": "(item 21996)"
+    "name": "Cloak of Ferocity"
   },
   "21997": {
     "mob": "A_Deadly_Warboar",
@@ -1519,17 +1524,17 @@
   "21998": {
     "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 21998)"
+    "name": "Cape of Endless Torment"
   },
   "21999": {
     "mob": "Gutripping_War_Beast",
     "zone": "Plane of Time",
-    "name": "(item 21999)"
+    "name": "Hoop of the Enlightened"
   },
   "22300": {
     "mob": "Galremos",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 22300)",
+    "name": "Flameforge Hammer",
     "respawn_seconds": 3508
   },
   "22879": {
@@ -1540,19 +1545,19 @@
   "22883": {
     "mob": "Ralthos_Enrok",
     "zone": "Plane of Time",
-    "name": "(item 22883)"
+    "name": "Cudgel of Wrecking"
   },
   "22889": {
     "mob": "#Avatar_of_Mist",
     "zone": "Plane of Air",
     "name": "Heavy Bludgeoner",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "22890": {
     "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 22890)"
+    "name": "Cudgel of Venomous Hatred"
   },
   "22893": {
     "mob": "The_Keeper_of_Sorrows",
@@ -1563,12 +1568,12 @@
   "22894": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 22894)"
+    "name": "Hammer of the Timeweaver"
   },
   "22896": {
     "mob": "Tribal_Leader_Diseranon",
     "zone": "Plane of Time",
-    "name": "(item 22896)"
+    "name": "Club of Slime"
   },
   "22898": {
     "mob": "Sorrowsong",
@@ -1586,14 +1591,14 @@
     "zone": "Plane of Air",
     "name": "Sparkling Shortsword",
     "respawn_seconds": null,
-    "respawn_note": "3.5\u00b10.5 days (triggered)"
+    "respawn_note": "3.5±0.5 days (triggered)"
   },
   "22972": {
     "mob": "#War_Chieftan_Galronar",
     "zone": "Plane of Earth",
-    "name": "(item 22972)",
+    "name": "Clawed Earthcrafter's Hoop",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "22975": {
     "mob": "Agnarr_the_Storm_Lord",
@@ -1610,13 +1615,13 @@
   "22985": {
     "mob": "Jiva",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 22985)",
+    "name": "Jagged Shard of Frozen Flame",
     "respawn_seconds": 259200
   },
   "22986": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 22986)"
+    "name": "Edge of Eternity"
   },
   "22990": {
     "mob": "Krziik_the_Mighty",
@@ -1627,12 +1632,12 @@
   "22998": {
     "mob": "Avatar_of_the_Elements",
     "zone": "Plane of Time",
-    "name": "(item 22998)"
+    "name": "Ethereal Destroyer"
   },
   "22999": {
     "mob": "Rallos_Zek",
     "zone": "Plane of Time",
-    "name": "(item 22999)"
+    "name": "Darkblade of the Warlord"
   },
   "23497": {
     "mob": "Jiva",
@@ -1643,7 +1648,7 @@
   "23498": {
     "mob": "Tallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 23498)"
+    "name": "Hopebringer"
   },
   "24568": {
     "mob": "The_Acolyte_of_Affliction",
@@ -1655,18 +1660,18 @@
     "mob": "#Avatar_of_Dust",
     "zone": "Plane of Air",
     "name": "Rune Stamped Blade",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "24570": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 24570)"
+    "name": "Songblade of the Eternal"
   },
   "24585": {
     "mob": "#Avatar_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 24585)"
+    "name": "Sword of Primordial Power"
   },
   "24586": {
     "mob": "Akkapan_Adan",
@@ -1677,18 +1682,18 @@
     "mob": "#Avatar_of_Dust",
     "zone": "Plane of Air",
     "name": "Ivory Hilted Cleaver",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "24590": {
     "mob": "The_Protector_of_Dresolik",
     "zone": "Plane of Time",
-    "name": "(item 24590)"
+    "name": "Gleaming Obsidian Shard"
   },
   "24602": {
     "mob": "Fennin_Ro_the_Tyrant_of_Fire",
     "zone": "Plane of Fire",
-    "name": "(item 24602)"
+    "name": "Ifir, Dagger of Fire"
   },
   "24605": {
     "mob": "Salczek_the_Fleshgrinder",
@@ -1705,7 +1710,7 @@
   "24611": {
     "mob": "Solusek_Ro",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 24611)",
+    "name": "Gold Runed Mithril Knife",
     "respawn_seconds": 259200
   },
   "24617": {
@@ -1795,20 +1800,20 @@
   "24695": {
     "mob": "#Warlord_Gintolaken",
     "zone": "Plane of Earth",
-    "name": "(item 24695)",
+    "name": "Reinforced Mephit Talon",
     "respawn_seconds": null,
-    "respawn_note": "Minis triggered by rings: 3.5\u00b10.5 days"
+    "respawn_note": "Minis triggered by rings: 3.5±0.5 days"
   },
   "24699": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 24699)"
+    "name": "Time's Antithesis"
   },
   "24773": {
     "mob": "An_Elemental_Masterpiece",
     "zone": "Plane of Air",
     "name": "Bejeweled Dagger of Summoning",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "24774": {
@@ -1820,33 +1825,33 @@
   "24776": {
     "mob": "A_Deadly_Warboar",
     "zone": "Plane of Time",
-    "name": "(item 24776)"
+    "name": "Dagger of Distraction"
   },
   "24789": {
     "mob": "Criare_Sunmane",
     "zone": "Plane of Fire",
-    "name": "(item 24789)",
+    "name": "Staff of Eternal Flames",
     "respawn_seconds": 86400
   },
   "24793": {
     "mob": "Rallos_Zek",
     "zone": "Plane of Time",
-    "name": "(item 24793)"
+    "name": "Greatstaff of Power"
   },
   "24879": {
     "mob": "#Avatar_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 24879)"
+    "name": "Earthspined Staff"
   },
   "24998": {
     "mob": "#Rizlona",
     "zone": "Plane of Time",
-    "name": "(item 24998)"
+    "name": "Mithril Shod Staff"
   },
   "24999": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 24999)"
+    "name": "Staff of Transcendence"
   },
   "25043": {
     "mob": "Derakor_the_Vindicator",
@@ -2060,7 +2065,7 @@
   "25844": {
     "mob": "Anar_of_Water",
     "zone": "Plane of Time",
-    "name": "(item 25844)"
+    "name": "Pulsing Emerald Hoop"
   },
   "25849": {
     "mob": "Sorrowsong",
@@ -2081,18 +2086,18 @@
   "25981": {
     "mob": "General_Druav_Flamesinger",
     "zone": "Plane of Fire",
-    "name": "(item 25981)",
+    "name": "Ornate Greatblade",
     "respawn_seconds": 259200
   },
   "25983": {
     "mob": "A_Monsterous_Mudwalker",
     "zone": "Plane of Time",
-    "name": "(item 25983)"
+    "name": "Stone Etched War Sword"
   },
   "25987": {
     "mob": "The_Protector_of_Dresolik",
     "zone": "Plane of Time",
-    "name": "(item 25987)"
+    "name": "Basalt Greatsword of the Protector"
   },
   "25989": {
     "mob": "Rallos_Zek_the_Warlord",
@@ -2102,7 +2107,7 @@
   "25995": {
     "mob": "Bertoxxulous",
     "zone": "Plane of Time",
-    "name": "(item 25995)"
+    "name": "Boots of Despair"
   },
   "26009": {
     "mob": "Zlandicar",
@@ -2143,7 +2148,7 @@
   "26086": {
     "mob": "Xuzl",
     "zone": "Tower of Solusek Ro",
-    "name": "(item 26086)",
+    "name": "Lance of the Flame Knight",
     "respawn_seconds": 259200
   },
   "26087": {
@@ -2161,7 +2166,7 @@
     "mob": "Pherlondien_Clawpike",
     "zone": "Plane of Air",
     "name": "Crow Footed Lance",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "26220": {
@@ -2173,18 +2178,18 @@
   "26501": {
     "mob": "#Rhag`Zhezum",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26501)",
+    "name": "Silver Lined Sleeves",
     "respawn_seconds": 281232
   },
   "26505": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26505)"
+    "name": "Talisman of Evasion"
   },
   "26512": {
     "mob": "#Rhag`Zhezum",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26512)",
+    "name": "Earring of Resistance",
     "respawn_seconds": 281232
   },
   "26519": {
@@ -2230,7 +2235,7 @@
   "26535": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26535)",
+    "name": "Headband of Many Visions",
     "respawn_seconds": 561600
   },
   "26536": {
@@ -2272,7 +2277,7 @@
   "26549": {
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26549)",
+    "name": "Ssraeshzaen Blood Cord",
     "respawn_seconds": 604800
   },
   "26551": {
@@ -2283,7 +2288,7 @@
   "26552": {
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26552)",
+    "name": "Ssraeshzaen Honor Guard Bracer",
     "respawn_seconds": 604800
   },
   "26553": {
@@ -2295,12 +2300,12 @@
   "26555": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26555)"
+    "name": "Sleeves of Elemental Auras"
   },
   "26556": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26556)",
+    "name": "Belt of Mystical Protection",
     "respawn_seconds": 561600
   },
   "26557": {
@@ -2311,7 +2316,7 @@
   "26558": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26558)",
+    "name": "Earring of Dissention",
     "respawn_seconds": 561600
   },
   "26559": {
@@ -2333,7 +2338,7 @@
   "26564": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26564)",
+    "name": "Shield of Mental Fortitude",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
@@ -2345,8 +2350,8 @@
   "26567": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26567)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Cloak of Mourning",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "26568": {
@@ -2368,58 +2373,58 @@
   "26579": {
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26579)",
+    "name": "Imperial Symbol of the Shissar",
     "respawn_seconds": 604800
   },
   "26580": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26580)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Claw of Vyzh`dra",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "26581": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26581)"
+    "name": "Great Helm of True Vision"
   },
   "26582": {
     "mob": "#Blood_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26582)",
+    "name": "Blood Veil of the Shissar",
     "respawn_seconds": 604800
   },
   "26584": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26584)",
+    "name": "Torque of the Wyrmlord",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
   "26585": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26585)",
+    "name": "Acrylia Handled Broadsword",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
   "26587": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26587)",
+    "name": "The Sword of Ssraeshza",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
   "26593": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26593)",
+    "name": "Shield of the Creator",
     "respawn_seconds": 561600
   },
   "26594": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26594)",
+    "name": "Shield of Ssraeshza",
     "respawn_seconds": 561600
   },
   "26595": {
@@ -2441,7 +2446,7 @@
   "26599": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26599)",
+    "name": "Caen's Bo Staff of Fury",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
@@ -2453,7 +2458,7 @@
   "26605": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26605)",
+    "name": "Halo of Enlightening Barriers",
     "respawn_seconds": 561600
   },
   "26737": {
@@ -2465,7 +2470,7 @@
   "26738": {
     "mob": "General_Reparm",
     "zone": "Plane of Fire",
-    "name": "(item 26738)",
+    "name": "Fiery Staff of Zha",
     "respawn_seconds": 259200
   },
   "26739": {
@@ -2477,29 +2482,29 @@
   "26740": {
     "mob": "Vallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 26740)"
+    "name": "Shinai of the Ancients"
   },
   "26748": {
     "mob": "The_Protector_of_Dresolik",
     "zone": "Plane of Time",
-    "name": "(item 26748)"
+    "name": "Wand of the Firestorm"
   },
   "26750": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26750)",
+    "name": "Spiked Chain Leggings",
     "respawn_seconds": 561600
   },
   "26751": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26751)",
+    "name": "Mask of Piety",
     "respawn_seconds": 561600
   },
   "26752": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26752)",
+    "name": "Bracelet of Darkness",
     "respawn_seconds": 561600
   },
   "26753": {
@@ -2511,43 +2516,43 @@
   "26754": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26754)",
+    "name": "Shield of Energy",
     "respawn_seconds": 561600
   },
   "26755": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26755)",
+    "name": "Nightcaller Leggings",
     "respawn_seconds": 561600
   },
   "26756": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26756)",
+    "name": "Mask of Dark Thoughts",
     "respawn_seconds": 561600
   },
   "26757": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26757)",
+    "name": "Ring of Resistance",
     "respawn_seconds": 561600
   },
   "26758": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26758)",
+    "name": "Orb of Satisfaction",
     "respawn_seconds": 561600
   },
   "26759": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26759)",
+    "name": "Circlet of Disguise",
     "respawn_seconds": 561600
   },
   "26760": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26760)",
+    "name": "Umbracite Plate Leggings",
     "respawn_seconds": 561600
   },
   "26761": {
@@ -2559,13 +2564,13 @@
   "26762": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26762)",
+    "name": "Crown of Energy",
     "respawn_seconds": 561600
   },
   "26763": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26763)",
+    "name": "Crown of Ambivalence",
     "respawn_seconds": 561600
   },
   "26764": {
@@ -2577,7 +2582,7 @@
   "26766": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26766)",
+    "name": "Cloak of the Black Wind",
     "respawn_seconds": 561600
   },
   "26768": {
@@ -2589,31 +2594,31 @@
   "26769": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26769)",
+    "name": "Mark of Shadows",
     "respawn_seconds": 561600
   },
   "26770": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26770)",
+    "name": "Great Shadow Platemail",
     "respawn_seconds": 561600
   },
   "26771": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26771)",
+    "name": "Armguard of Shadows",
     "respawn_seconds": 561600
   },
   "26772": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26772)",
+    "name": "Leg Guard of Shadows",
     "respawn_seconds": 561600
   },
   "26773": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26773)",
+    "name": "Crimson Runed Mask",
     "respawn_seconds": 561600
   },
   "26774": {
@@ -2637,49 +2642,49 @@
   "26777": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26777)",
+    "name": "Leggings of Secrets",
     "respawn_seconds": 561600
   },
   "26778": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26778)",
+    "name": "Orb of Secrets",
     "respawn_seconds": 561600
   },
   "26779": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26779)",
+    "name": "Mask of Secrets",
     "respawn_seconds": 561600
   },
   "26780": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26780)",
+    "name": "Tome of Secrets",
     "respawn_seconds": 561600
   },
   "26781": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26781)",
+    "name": "Wristband of Secrets",
     "respawn_seconds": 561600
   },
   "26782": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26782)",
+    "name": "Mail of Judgement",
     "respawn_seconds": 561600
   },
   "26783": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26783)",
+    "name": "Leggings of Judgement",
     "respawn_seconds": 561600
   },
   "26784": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26784)",
+    "name": "Torch of Judgment",
     "respawn_seconds": 561600
   },
   "26785": {
@@ -2691,13 +2696,13 @@
   "26786": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26786)",
+    "name": "Aegis of Judgement",
     "respawn_seconds": 561600
   },
   "26787": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 26787)",
+    "name": "Wristband of Judgement",
     "respawn_seconds": 561600
   },
   "26788": {
@@ -2715,7 +2720,7 @@
   "26798": {
     "mob": "Chancellor_Kirtra",
     "zone": "Plane of Fire",
-    "name": "(item 26798)"
+    "name": "Flame Idol of Ro"
   },
   "26807": {
     "mob": "The_Va`Dyn",
@@ -2731,13 +2736,13 @@
   "26809": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 26809)",
+    "name": "Glowing Mithril Ulak",
     "respawn_seconds": 561600
   },
   "26819": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26819)"
+    "name": "Savage Lord's Pitchatka"
   },
   "26827": {
     "mob": "#Rhag`Zhezum",
@@ -2753,7 +2758,7 @@
   "26848": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26848)"
+    "name": "Fist of Mithril"
   },
   "26849": {
     "mob": "The Itraer Vius",
@@ -2763,7 +2768,7 @@
   "26859": {
     "mob": "Rhag`Zhezum",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 26859)"
+    "name": "Savage Lord's Eitchatka"
   },
   "26860": {
     "mob": "The_Itraer_Vius",
@@ -2785,42 +2790,42 @@
   "26869": {
     "mob": "Tribal_Leader_Diseranon",
     "zone": "Plane of Time",
-    "name": "(item 26869)"
+    "name": "Ent Leaf"
   },
   "26895": {
     "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 26895)"
+    "name": "Orb of Clinging Death"
   },
   "26899": {
     "mob": "Ralthos_Enrok",
     "zone": "Plane of Time",
-    "name": "(item 26899)"
+    "name": "Wand of the Vortex"
   },
   "26980": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 26980)"
+    "name": "Earring of Unseen Horrors"
   },
   "26981": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 26981)"
+    "name": "Veil of Lost Hopes"
   },
   "26983": {
     "mob": "Avatar_of_the_Elements",
     "zone": "Plane of Time",
-    "name": "(item 26983)"
+    "name": "Faceguard of Frenzy"
   },
   "26984": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 26984)"
+    "name": "Mask of Simplicity"
   },
   "26985": {
     "mob": "Ralthos_Enrok",
     "zone": "Plane of Time",
-    "name": "(item 26985)"
+    "name": "Veil of Warmth"
   },
   "26986": {
     "mob": "Vallon_Zek",
@@ -2830,27 +2835,27 @@
   "26987": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 26987)"
+    "name": "Stone of Flowing Time"
   },
   "26988": {
     "mob": "Tallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 26988)"
+    "name": "Winged Storm Boots"
   },
   "26989": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 26989)"
+    "name": "Prismatic Ring of Resistance"
   },
   "26990": {
     "mob": "Rallos_Zek",
     "zone": "Plane of Time",
-    "name": "(item 26990)"
+    "name": "Band of Primordial Energy"
   },
   "26991": {
     "mob": "Tallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 26991)"
+    "name": "Band of Prismatic Focus"
   },
   "26992": {
     "mob": "Anar_of_Water",
@@ -2860,17 +2865,17 @@
   "26993": {
     "mob": "Bertoxxulous",
     "zone": "Plane of Time",
-    "name": "(item 26993)"
+    "name": "Pulsing Onyx Ring"
   },
   "26994": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 26994)"
+    "name": "Ring of Evasion"
   },
   "26995": {
     "mob": "Gutripping_War_Beast",
     "zone": "Plane of Time",
-    "name": "(item 26995)"
+    "name": "Tiny Jade Ring"
   },
   "26996": {
     "mob": "Saryrn",
@@ -2880,12 +2885,12 @@
   "27000": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 27000)"
+    "name": "Padded Tigerskin Gloves"
   },
   "27106": {
     "mob": "A_Perfected_Warder_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 27106)"
+    "name": "Circular Crystalline Formation"
   },
   "27164": {
     "mob": "Ta`Grusch_the_Abomination",
@@ -2921,13 +2926,13 @@
     "mob": "#Avatar_of_Dust",
     "zone": "Plane of Air",
     "name": "Bulwark of Shimmering Steel",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "27274": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 27274)"
+    "name": "Barrier of Freezing Winds"
   },
   "27276": {
     "mob": "Salczek_the_Fleshgrinder",
@@ -2944,17 +2949,17 @@
   "27280": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 27280)"
+    "name": "Whorl of Unnatural Forces"
   },
   "27290": {
     "mob": "A_Mystical_Arbitor_of_Earth",
     "zone": "Plane of Time",
-    "name": "(item 27290)"
+    "name": "Aegis of the Earth"
   },
   "27298": {
     "mob": "Rallos_Zek",
     "zone": "Plane of Time",
-    "name": "(item 27298)"
+    "name": "Shield of Strife"
   },
   "27303": {
     "mob": "an_aged_caretaker",
@@ -2965,41 +2970,41 @@
   "27311": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 27311)"
+    "name": "Scorched Silver Pauldrons"
   },
   "27312": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 27312)"
+    "name": "Shroud of Unholiness"
   },
   "27313": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 27313)"
+    "name": "Gleaming Serpent Tooth Choker"
   },
   "27314": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 27314)"
+    "name": "Band of Disrupted Auras"
   },
   "27315": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
     "name": "Fangs of Vyzh`dra",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "27316": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 27316)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Black Runed Pants",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "27317": {
     "mob": "#a_glyph_covered_serpent",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 27317)"
+    "name": "Ssraeshzian Longbow"
   },
   "27321": {
     "mob": "#Hraashna_the_Warder",
@@ -3069,7 +3074,7 @@
   "27648": {
     "mob": "Azobian_the_Darklord",
     "zone": "Plane of Fire",
-    "name": "(item 27648)"
+    "name": "Fire Marked Rune"
   },
   "27649": {
     "mob": "Agnarr_the_Storm_Lord",
@@ -3161,7 +3166,7 @@
     "mob": "Avatar of Smoke",
     "zone": "Plane of Air",
     "name": "Alabaster Hilted Wind Bow",
-    "respawn_note": "3.5\u00b10.5 days (triggered)",
+    "respawn_note": "3.5±0.5 days (triggered)",
     "respawn_seconds": null
   },
   "27989": {
@@ -3173,7 +3178,7 @@
   "27990": {
     "mob": "Earthen_Overseer",
     "zone": "Plane of Time",
-    "name": "(item 27990)"
+    "name": "Gauntlets of Disruption"
   },
   "27991": {
     "mob": "Salczek_the_Fleshgrinder",
@@ -3186,7 +3191,7 @@
     "zone": "Plane of Air",
     "name": "The Rhythm of Xegony",
     "respawn_seconds": null,
-    "respawn_note": "3.5\u00b10.5 days (triggered)"
+    "respawn_note": "3.5±0.5 days (triggered)"
   },
   "27994": {
     "mob": "Grioihin_the_Wise",
@@ -3197,12 +3202,12 @@
   "27998": {
     "mob": "Peregrin_Rockskull",
     "zone": "Plane of Time",
-    "name": "(item 27998)"
+    "name": "War Drums of the Rathe"
   },
   "28103": {
     "mob": "Eom Trash",
     "zone": "Vex Thal",
-    "name": "(item 28103)"
+    "name": "Great Bow of Slaughter"
   },
   "28104": {
     "mob": "Va_Xi_Aten_Ha_Ra",
@@ -3213,7 +3218,7 @@
   "28144": {
     "mob": "Thall_Va_Kelun",
     "zone": "Vex Thal",
-    "name": "(item 28144)",
+    "name": "Gloves of Dark Summoning",
     "respawn_seconds": 561600
   },
   "28145": {
@@ -3225,7 +3230,7 @@
   "28146": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28146)",
+    "name": "Karn's Armplates of Retaliation",
     "respawn_seconds": 561600
   },
   "28147": {
@@ -3249,22 +3254,22 @@
   "28246": {
     "mob": "Innoruuk",
     "zone": "Plane of Time",
-    "name": "(item 28246)"
+    "name": "Gloves of Airy Mists"
   },
   "28648": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 28648)"
+    "name": "Cap of Flowing Time"
   },
   "28649": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 28649)"
+    "name": "Ethereal Silk Leggings"
   },
   "28650": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 28650)"
+    "name": "Greaves of Furious Might"
   },
   "28651": {
     "mob": "Bertoxxulous",
@@ -3274,37 +3279,37 @@
   "28653": {
     "mob": "Ralthos_Enrok",
     "zone": "Plane of Time",
-    "name": "(item 28653)"
+    "name": "Glowing Chains"
   },
   "28654": {
     "mob": "Tallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 28654)"
+    "name": "Amulet of Crystal Dreams"
   },
   "28655": {
     "mob": "Anar_of_Water",
     "zone": "Plane of Time",
-    "name": "(item 28655)"
+    "name": "Smooth Onyx Torque"
   },
   "28656": {
     "mob": "Tallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 28656)"
+    "name": "Tactician's Shield"
   },
   "28658": {
     "mob": "Tallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 28658)"
+    "name": "Mantle of Deadly Precision"
   },
   "28659": {
     "mob": "Rallos_Zek",
     "zone": "Plane of Time",
-    "name": "(item 28659)"
+    "name": "Pauldrons of Devastation"
   },
   "28660": {
     "mob": "Earthen_Overseer",
     "zone": "Plane of Time",
-    "name": "(item 28660)"
+    "name": "Drape of the Unending"
   },
   "28661": {
     "mob": "Quarm",
@@ -3314,17 +3319,17 @@
   "28663": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 28663)"
+    "name": "Runewarded Belt"
   },
   "28664": {
     "mob": "Saryrn",
     "zone": "Plane of Time",
-    "name": "(item 28664)"
+    "name": "Girdle of Intense Durability"
   },
   "28665": {
     "mob": "Cazic_Thule",
     "zone": "Plane of Time",
-    "name": "(item 28665)"
+    "name": "Zealot's Spiked Bracer"
   },
   "28666": {
     "mob": "Cazic_Thule",
@@ -3334,17 +3339,17 @@
   "28667": {
     "mob": "Tallon_Zek",
     "zone": "Plane of Time",
-    "name": "(item 28667)"
+    "name": "Bracer of Precision"
   },
   "28668": {
     "mob": "Anar_of_Water",
     "zone": "Plane of Time",
-    "name": "(item 28668)"
+    "name": "Wristguard of Keen Vision"
   },
   "28802": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28802)"
+    "name": "Rei`s Battleworn Dirk"
   },
   "28803": {
     "mob": "Thought_Horror_Overfiend",
@@ -3355,7 +3360,7 @@
   "28804": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28804)"
+    "name": "Tendonslicer"
   },
   "28805": {
     "mob": "High_Priest_of_Ssraeshza",
@@ -3366,14 +3371,14 @@
   "28806": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28806)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Khalshazar",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "28807": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28807)"
+    "name": "Sword of Nochular"
   },
   "28808": {
     "mob": "The_Itraer_Vius",
@@ -3389,18 +3394,18 @@
   "28810": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28810)"
+    "name": "Elphorn`s Cleaver"
   },
   "28811": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28811)",
+    "name": "Bonechiller",
     "respawn_seconds": 561600
   },
   "28812": {
     "mob": "#Rhag`Zhezum",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28812)",
+    "name": "Righteousness",
     "respawn_seconds": 281232
   },
   "28813": {
@@ -3418,7 +3423,7 @@
   "28815": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28815)"
+    "name": "Shield of Holy Vigor"
   },
   "28818": {
     "mob": "The_Va`Dyn",
@@ -3435,13 +3440,13 @@
   "28820": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28820)",
+    "name": "Willful Dirk of Domination",
     "respawn_seconds": 561600
   },
   "28821": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28821)",
+    "name": "Mindpuncture",
     "respawn_seconds": 561600
   },
   "28823": {
@@ -3453,20 +3458,20 @@
   "28824": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28824)",
+    "name": "Blade of Angles",
     "respawn_seconds": 561600
   },
   "28825": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28825)",
+    "name": "Norge`tal",
     "respawn_seconds": 561600
   },
   "28826": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28826)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Goldenrod",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "28827": {
@@ -3478,7 +3483,7 @@
   "28828": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28828)"
+    "name": "Smouldershank"
   },
   "28829": {
     "mob": "Grieg_Veneficus",
@@ -3488,12 +3493,12 @@
   "28830": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28830)"
+    "name": "Keen Edged Cleaver"
   },
   "28831": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28831)",
+    "name": "Blackout",
     "respawn_seconds": 561600
   },
   "28832": {
@@ -3505,12 +3510,12 @@
   "28833": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28833)"
+    "name": "Lava Infused Bludgeon"
   },
   "28834": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28834)"
+    "name": "Blazing Rapier"
   },
   "28836": {
     "mob": "#a_glyph_covered_serpent",
@@ -3520,18 +3525,18 @@
   "28837": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28837)"
+    "name": "Scimitar of Oak"
   },
   "28838": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28838)",
+    "name": "Sporecaller",
     "respawn_seconds": 561600
   },
   "28840": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28840)"
+    "name": "Memory"
   },
   "28841": {
     "mob": "#Rhag`Mozdezh",
@@ -3541,7 +3546,7 @@
   "28842": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28842)",
+    "name": "Harnessed Flame Dirk",
     "respawn_seconds": 561600
   },
   "28843": {
@@ -3552,18 +3557,18 @@
   "28844": {
     "mob": "#Vyzh`dra_the_Exiled",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28844)"
+    "name": "Scepter of Paralysis"
   },
   "28845": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 28845)",
+    "name": "Mournfollow",
     "respawn_seconds": 561600
   },
   "28846": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28846)"
+    "name": "Sword of Lost Crusades"
   },
   "28847": {
     "mob": "The_Itraer_Vius",
@@ -3580,7 +3585,7 @@
   "28850": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28850)"
+    "name": "Blindfoe"
   },
   "28851": {
     "mob": "Thought_Horror_Overfiend",
@@ -3591,8 +3596,8 @@
   "28855": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 28855)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Bloodfrenzy",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "28856": {
@@ -3800,7 +3805,7 @@
   "28918": {
     "mob": "Diabo_Xi_Va_Temariel",
     "zone": "Vex Thal",
-    "name": "(item 28918)",
+    "name": "Crystal Shadow Cloak",
     "respawn_seconds": 561600
   },
   "28919": {
@@ -3836,7 +3841,7 @@
   "28925": {
     "mob": "Diabo_Xi_Va_Temariel",
     "zone": "Vex Thal",
-    "name": "(item 28925)",
+    "name": "Armguard of Piety",
     "respawn_seconds": 561600
   },
   "28926": {
@@ -3848,7 +3853,7 @@
   "28927": {
     "mob": "Diabo_Xi_Va_Temariel",
     "zone": "Vex Thal",
-    "name": "(item 28927)",
+    "name": "Umbral Vambraces",
     "respawn_seconds": 561600
   },
   "28929": {
@@ -3866,37 +3871,37 @@
   "28931": {
     "mob": "Thall_Xundraux_Diabo",
     "zone": "Vex Thal",
-    "name": "(item 28931)",
+    "name": "Mask of Resiliance",
     "respawn_seconds": 561600
   },
   "28932": {
     "mob": "Thall_Xundraux_Diabo",
     "zone": "Vex Thal",
-    "name": "(item 28932)",
+    "name": "Shadow Wind Leggings",
     "respawn_seconds": 561600
   },
   "28933": {
     "mob": "Thall_Xundraux_Diabo",
     "zone": "Vex Thal",
-    "name": "(item 28933)",
+    "name": "Horn of Shadows",
     "respawn_seconds": 561600
   },
   "28934": {
     "mob": "Thall_Xundraux_Diabo",
     "zone": "Vex Thal",
-    "name": "(item 28934)",
+    "name": "Boots of the Wind",
     "respawn_seconds": 561600
   },
   "28935": {
     "mob": "Thall_Xundraux_Diabo",
     "zone": "Vex Thal",
-    "name": "(item 28935)",
+    "name": "Bow of Flames",
     "respawn_seconds": 561600
   },
   "28936": {
     "mob": "Thall_Xundraux_Diabo",
     "zone": "Vex Thal",
-    "name": "(item 28936)",
+    "name": "Great Cloak of Shadows",
     "respawn_seconds": 561600
   },
   "28937": {
@@ -3914,7 +3919,7 @@
   "28939": {
     "mob": "Thall_Xundraux_Diabo",
     "zone": "Vex Thal",
-    "name": "(item 28939)",
+    "name": "Hoop of Chaos",
     "respawn_seconds": 561600
   },
   "28940": {
@@ -3926,7 +3931,7 @@
   "28942": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28942)",
+    "name": "Cloudy Steel Mask",
     "respawn_seconds": 561600
   },
   "28943": {
@@ -3938,19 +3943,19 @@
   "28945": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28945)",
+    "name": "Earring of Battle",
     "respawn_seconds": 561600
   },
   "28946": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28946)",
+    "name": "Necklace of Endless Concepts",
     "respawn_seconds": 561600
   },
   "28947": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28947)",
+    "name": "Bone Necklace of Battle",
     "respawn_seconds": 561600
   },
   "28948": {
@@ -3962,19 +3967,19 @@
   "28949": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28949)",
+    "name": "Dark Hand Wraps",
     "respawn_seconds": 561600
   },
   "28950": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28950)",
+    "name": "Bone Earring of Evasion",
     "respawn_seconds": 561600
   },
   "28951": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28951)",
+    "name": "Lunar Fungus Covered Tunic",
     "respawn_seconds": 561600
   },
   "28952": {
@@ -4009,7 +4014,7 @@
   "28963": {
     "mob": "Thall_Va_Kelun",
     "zone": "Vex Thal",
-    "name": "(item 28963)",
+    "name": "Sanguine Eyepatch",
     "respawn_seconds": 561600
   },
   "28964": {
@@ -4021,13 +4026,13 @@
   "28965": {
     "mob": "Thall_Va_Kelun",
     "zone": "Vex Thal",
-    "name": "(item 28965)",
+    "name": "Leggings of Fiery Might",
     "respawn_seconds": 561600
   },
   "28967": {
     "mob": "Thall_Va_Kelun",
     "zone": "Vex Thal",
-    "name": "(item 28967)",
+    "name": "Gloves of Warding",
     "respawn_seconds": 561600
   },
   "28968": {
@@ -4145,7 +4150,7 @@
   "28993": {
     "mob": "Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28993)",
+    "name": "Silver Band of Secrets",
     "respawn_seconds": 561600
   },
   "28994": {
@@ -4157,19 +4162,19 @@
   "28995": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28995)",
+    "name": "Thorny Chain Helm",
     "respawn_seconds": 561600
   },
   "28996": {
     "mob": "Kaas_Thox_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28996)",
+    "name": "Bracer of Black Blood",
     "respawn_seconds": 561600
   },
   "28997": {
     "mob": "Va_Xi_Aten_Ha_Ra",
     "zone": "Vex Thal",
-    "name": "(item 28997)",
+    "name": "Pauldrons of Seething Darkness",
     "respawn_seconds": 561600
   },
   "28998": {
@@ -4181,12 +4186,12 @@
   "29172": {
     "mob": "Terris_Thule",
     "zone": "Plane of Time",
-    "name": "(item 29172)"
+    "name": "Vanazir, Dreamer's Despair"
   },
   "29174": {
     "mob": "Avatar_of_the_Elements",
     "zone": "Plane of Time",
-    "name": "(item 29174)"
+    "name": "Mask of Strategic Insight"
   },
   "29188": {
     "mob": "Charayan the Crusader / Grendish the Crusader / Jortreva the Crusader",
@@ -4549,32 +4554,32 @@
   "30525": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30525)",
+    "name": "Ivory Crystal Greaves",
     "respawn_seconds": 561600
   },
   "30526": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30526)",
+    "name": "Supple Onyx Chains",
     "respawn_seconds": 561600
   },
   "30527": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30527)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Opaline Charm",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "30528": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30528)",
+    "name": "Pearlescent Armlet",
     "respawn_seconds": 561600
   },
   "30529": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30529)",
+    "name": "Shroud of Emerald Vines",
     "respawn_seconds": 561600
   },
   "30530": {
@@ -4586,7 +4591,7 @@
   "30531": {
     "mob": "High_Priest_of_Ssraeshza",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30531)",
+    "name": "Sapphire Studded Mantle",
     "respawn_seconds": 561600
   },
   "30532": {
@@ -4602,30 +4607,30 @@
   "30534": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30534)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Circle of Smoke",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "30535": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30535)"
+    "name": "Hoop of Emptiness"
   },
   "30536": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30536)"
+    "name": "Pristine Jade Idol"
   },
   "30537": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30537)",
+    "name": "Adamantite Wristguard",
     "respawn_seconds": 561600
   },
   "30538": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30538)",
+    "name": "Grey Dusted Wraps",
     "respawn_seconds": 561600
   },
   "30540": {
@@ -4636,24 +4641,24 @@
   "30541": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30541)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Cloak of Dark Shadows",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "30542": {
     "mob": "#a_glyph_covered_serpent",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30542)"
+    "name": "Dusty Blue Shawl"
   },
   "30544": {
     "mob": "Rhag`Zhezum",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30544)"
+    "name": "Ssraeshzian Longbow"
   },
   "30545": {
     "mob": "#a_glyph_covered_serpent",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30545)"
+    "name": "Black Runed Talisman"
   },
   "30546": {
     "mob": "#a_glyph_covered_serpent",
@@ -4668,50 +4673,50 @@
   "30548": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30548)"
+    "name": "Faded Skull Medallion"
   },
   "30549": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30549)"
+    "name": "Polished Bone Collar"
   },
   "30551": {
     "mob": "#Lord_Inquisitor_Seru",
     "zone": "Sanctus Seru",
-    "name": "(item 30551)",
+    "name": "Yttrium Studded Mantle",
     "respawn_seconds": 561600
   },
   "30555": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30555)"
+    "name": "Bone Golem Greaves"
   },
   "30556": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30556)"
+    "name": "Shadowed Silk Pants"
   },
   "30557": {
     "mob": "#Rhag`Mozdezh",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30557)"
+    "name": "Scale Mesh Leggings"
   },
   "30558": {
     "mob": "#Rhag`Zhezum",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30558)",
+    "name": "Bone Golem Vambraces",
     "respawn_seconds": 281232
   },
   "30559": {
     "mob": "#Rhag`Zhezum",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30559)",
+    "name": "Serpent Skin Armlet",
     "respawn_seconds": 281232
   },
   "30560": {
     "mob": "#Rhag`Zhezum",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30560)",
+    "name": "Scale Mesh Vambraces",
     "respawn_seconds": 281232
   },
   "30561": {
@@ -4723,54 +4728,54 @@
   "30562": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30562)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Nocnivin's Small Book of Logic",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "30563": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30563)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Wistful Tunic of the Void",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "30564": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30564)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Vengeful Mail of the Void",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "30565": {
     "mob": "#Vyzh`dra_the_Cursed",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30565)",
-    "respawn_note": "Script: 6.5\u00b10.5 days",
+    "name": "Crystallized Serpent Eye",
+    "respawn_note": "Script: 6.5±0.5 days",
     "respawn_seconds": null
   },
   "30566": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30566)",
+    "name": "Shawl of Awakenings",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
   "30567": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30567)",
+    "name": "Soft Scale Slippers",
     "respawn_seconds": 561600
   },
   "30568": {
     "mob": "Xerkizh_The_Creator",
     "zone": "Ssraeshza Temple",
-    "name": "(item 30568)",
+    "name": "Singed Petrified Leaf",
     "respawn_seconds": 561600
   },
   "30569": {
     "mob": "Emperor_Ssraeshza_",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30569)",
+    "name": "Envenomed Moccasins",
     "respawn_note": "7 day (blood)",
     "respawn_seconds": null
   },
@@ -4784,7 +4789,7 @@
   "30571": {
     "mob": "#Arch_Lich_Rhag`Zadune",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 30571)"
+    "name": "Platinum Mesh Guard"
   },
   "31201": {
     "mob": "#Adjutant_Brunkin",
@@ -5628,7 +5633,7 @@
   "32110": {
     "mob": "Quarm",
     "zone": "Plane of Time",
-    "name": "(item 32110)"
+    "name": "Wristband of Icy Vengeance"
   },
   "32161": {
     "mob": "#Itraer`Renthias",
@@ -5744,6 +5749,1101 @@
   "86930": {
     "mob": "Rhag`Zhezum",
     "zone": "Temple of Ssraeshza",
-    "name": "(item 86930)"
+    "name": "Item 86930"
+  },
+  "15847": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "Celestial Cloak"
+  },
+  "9574": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "Eye of Dreams"
+  },
+  "16377": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "Timeless Leather Tunic Pattern"
+  },
+  "24573": {
+    "mob": "Bertoxxulous",
+    "zone": "Plane of Time",
+    "name": "Timespinner, Blade of the Hunter"
+  },
+  "16367": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "Elemental Chain Pant Pattern"
+  },
+  "16373": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "Elemental Greaves Mold"
+  },
+  "16381": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "Elemental Leather Pant Pattern"
+  },
+  "16388": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "Elemental Silk Pant Pattern"
+  },
+  "26789": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "Time Traveler's Abandoned Notebook"
+  },
+  "7389": {
+    "mob": "A_Possessed_Underking",
+    "zone": "",
+    "name": "Seer's Orb of Power"
+  },
+  "7363": {
+    "mob": "A_Possessed_Warlord",
+    "zone": "",
+    "name": "Robe of the Enslaved Soul"
+  },
+  "17587": {
+    "mob": "A_Possessed_Warmonger",
+    "zone": "",
+    "name": "Feather Lined Box"
+  },
+  "7977": {
+    "mob": "A_Possessed_Warmonger",
+    "zone": "",
+    "name": "Gem Encrusted Choker"
+  },
+  "9442": {
+    "mob": "A_Prismatic_Basilisk",
+    "zone": "",
+    "name": "Precious Gemstone Adorned Mask"
+  },
+  "22980": {
+    "mob": "A_Prismatic_Basilisk",
+    "zone": "",
+    "name": "Whip of the Earthcrafter"
+  },
+  "9490": {
+    "mob": "A_Pristine_Gem_Golem",
+    "zone": "",
+    "name": "Primal Mask of the Earthcrafter"
+  },
+  "32166": {
+    "mob": "A_shadow_reaver",
+    "zone": "",
+    "name": "Shaded amice"
+  },
+  "32159": {
+    "mob": "A_shadow_reaver",
+    "zone": "",
+    "name": "Shaded cloak"
+  },
+  "22877": {
+    "mob": "An_Ancient_Vekerchiki_Champion",
+    "zone": "",
+    "name": "Earthen Fist"
+  },
+  "28657": {
+    "mob": "Avatar_of_the_Elements",
+    "zone": "Plane of Time",
+    "name": "Fiery Crystal Guard"
+  },
+  "32606": {
+    "mob": "Avatar_of_the_Elements",
+    "zone": "Plane of Time",
+    "name": "Timeless Coral Greatsword"
+  },
+  "27996": {
+    "mob": "Azobian_the_Darklord",
+    "zone": "Plane of Fire",
+    "name": "Blaring Horn of Fire"
+  },
+  "19094": {
+    "mob": "Azobian_the_Darklord",
+    "zone": "Plane of Fire",
+    "name": "Sable Shoes of Flame"
+  },
+  "25695": {
+    "mob": "Calris_Bristlebranch",
+    "zone": "Plane of Earth",
+    "name": "Entwood Earring"
+  },
+  "27295": {
+    "mob": "Calris_Bristlebranch",
+    "zone": "Plane of Earth",
+    "name": "Large Chunk of Ent Bark"
+  },
+  "16384": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Timeless Silk Robe Pattern"
+  },
+  "10948": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Timestone Adorned Ring"
+  },
+  "16369": {
+    "mob": "Derugoak_Bloodwalker",
+    "zone": "Plane of Earth",
+    "name": "Elemental Bracer Mold"
+  },
+  "16365": {
+    "mob": "Derugoak_Bloodwalker",
+    "zone": "Plane of Earth",
+    "name": "Elemental Chain Bracelet Pattern"
+  },
+  "16379": {
+    "mob": "Derugoak_Bloodwalker",
+    "zone": "Plane of Earth",
+    "name": "Elemental Leather Wrist Pattern"
+  },
+  "16386": {
+    "mob": "Derugoak_Bloodwalker",
+    "zone": "Plane of Earth",
+    "name": "Elemental Silk Bracelet Pattern"
+  },
+  "25998": {
+    "mob": "Earthen_Overseer",
+    "zone": "Plane of Time",
+    "name": "Shield of the Vortex"
+  },
+  "26749": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "",
+    "name": "Azaliil's Ring of Analogies"
+  },
+  "26604": {
+    "mob": "Emperor_Ssraeshza_",
+    "zone": "",
+    "name": "Koadic's Robe of Heightened Focus"
+  },
+  "23491": {
+    "mob": "Freegan_Haun",
+    "zone": "Halls of Honor",
+    "name": "Gembladed Axe"
+  },
+  "9484": {
+    "mob": "Freegan_Haun",
+    "zone": "Halls of Honor",
+    "name": "Guard Captains Faceguard"
+  },
+  "16355": {
+    "mob": "Freegan_Haun",
+    "zone": "Halls of Honor",
+    "name": "Ornate Silk Robe Pattern"
+  },
+  "21812": {
+    "mob": "Grieg_Veneficus",
+    "zone": "",
+    "name": "Black Silken Bridle"
+  },
+  "24928": {
+    "mob": "Grondon_Zekkin",
+    "zone": "",
+    "name": "Corroded Breastplate"
+  },
+  "28662": {
+    "mob": "Gutripping_War_Beast",
+    "zone": "Plane of Time",
+    "name": "Girdle of Restoration"
+  },
+  "10248": {
+    "mob": "Halgoz_Rellinic",
+    "zone": "Halls of Honor",
+    "name": "Intricately Inscribed Band"
+  },
+  "16348": {
+    "mob": "Halgoz_Rellinic",
+    "zone": "Halls of Honor",
+    "name": "Ornate Leather Tunic Pattern"
+  },
+  "13669": {
+    "mob": "Halgoz_Rellinic",
+    "zone": "Halls of Honor",
+    "name": "Platoon Leaders Pauldrons"
+  },
+  "26897": {
+    "mob": "Halgoz_Rellinic",
+    "zone": "Halls of Honor",
+    "name": "Staff of Swiftness"
+  },
+  "32609": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "Bracer of Timeless Rage"
+  },
+  "31603": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "Girdle of Stability"
+  },
+  "24692": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "Jagged Timeforged Blade"
+  },
+  "16363": {
+    "mob": "Innoruuk",
+    "zone": "Plane of Time",
+    "name": "Timeless Chain Tunic Pattern"
+  },
+  "11621": {
+    "mob": "Ixiblat_Fer",
+    "zone": "",
+    "name": "Cloak of Flames"
+  },
+  "9495": {
+    "mob": "Jeplak,_Lord_of_Srerendi",
+    "zone": "",
+    "name": "Circlet of the Victor"
+  },
+  "10949": {
+    "mob": "Jeplak,_Lord_of_Srerendi",
+    "zone": "",
+    "name": "Crackling Ring of Lightning"
+  },
+  "1738": {
+    "mob": "Narandi_the_Wretched",
+    "zone": "The Great Divide",
+    "name": "Narandi's Lance"
+  },
+  "19144": {
+    "mob": "Peregrin_Rockskull",
+    "zone": "Plane of Earth",
+    "name": "Flowing Moss Mantle"
+  },
+  "21993": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "Bracer of the Inferno"
+  },
+  "15805": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "Shroud of Eternity"
+  },
+  "16375": {
+    "mob": "Quarm",
+    "zone": "Plane of Time",
+    "name": "Timeless Breastplate Mold"
+  },
+  "28652": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "Pants of Furious Might"
+  },
+  "32610": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "Sandals of Empowerment"
+  },
+  "26982": {
+    "mob": "Rallos_Zek",
+    "zone": "Plane of Time",
+    "name": "Visor of the Berserker"
+  },
+  "22878": {
+    "mob": "Rydda`Dar",
+    "zone": "",
+    "name": "Grandmasters Mace"
+  },
+  "27267": {
+    "mob": "Rydda`Dar",
+    "zone": "",
+    "name": "Ivory Etched Aegis"
+  },
+  "16346": {
+    "mob": "Rydda`Dar",
+    "zone": "",
+    "name": "Ornate Breastplate Mold"
+  },
+  "32176": {
+    "mob": "Shei_Vinitras_",
+    "zone": "",
+    "name": "Temariel Vex"
+  },
+  "32607": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Circlet of Flowing Time"
+  },
+  "15815": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Cloak of the Falling Skies"
+  },
+  "22959": {
+    "mob": "Tallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Serpent of Vindication"
+  },
+  "28605": {
+    "mob": "Terris_Thule",
+    "zone": "Plane of Time",
+    "name": "Coif of Flowing Time"
+  },
+  "10249": {
+    "mob": "The_Living_Earth",
+    "zone": "Plane of Earth",
+    "name": "Earthtoned Band"
+  },
+  "15881": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Cord of Potential"
+  },
+  "26799": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Globe of Mystical Protection"
+  },
+  "28647": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Helm of Flowing Time"
+  },
+  "32608": {
+    "mob": "Vallon_Zek",
+    "zone": "Plane of Time",
+    "name": "Temporal Chainmail Sleeves"
+  },
+  "13653": {
+    "mob": "Zandal_Adan",
+    "zone": "",
+    "name": "Drape of Wings"
+  },
+  "8447": {
+    "mob": "a_grimling_high_commander",
+    "zone": "",
+    "name": "Possessed Sacrificial Cleaver"
+  },
+  "16298": {
+    "mob": "an_Enchanted_War_Boar",
+    "zone": "Tower of Solusek Ro",
+    "name": "Ornate Boot Mold"
+  },
+  "27908": {
+    "mob": "an_acidic_mass",
+    "zone": "",
+    "name": "Acid Pocked Mithril Blade"
+  },
+  "27851": {
+    "mob": "an_acidic_mass",
+    "zone": "",
+    "name": "Crystallized Acid Bracer"
+  },
+  "27853": {
+    "mob": "an_acidic_mass",
+    "zone": "",
+    "name": "Crystallized Acid Pauldrons"
+  },
+  "27883": {
+    "mob": "an_acidic_mass",
+    "zone": "",
+    "name": "Robe of Viscid Slime"
+  },
+  "27888": {
+    "mob": "an_acidic_mass",
+    "zone": "",
+    "name": "Viscid Slime Gloves"
+  },
+  "16291": {
+    "mob": "Brynju_Thunderclap",
+    "zone": "Bastion of Thunder",
+    "name": "Ornate Chain Tunic Pattern"
+  },
+  "16344": {
+    "mob": "Gaukr_Sandstorm",
+    "zone": "Bastion of Thunder",
+    "name": "Ornate Greaves Mold"
+  },
+  "5772": {
+    "mob": "Foreman_Ku`lul",
+    "zone": "Chardok",
+    "name": "Mask of Secrets"
+  },
+  "26034": {
+    "mob": "Vaniki",
+    "zone": "Dragon Necropolis",
+    "name": "Willsapper"
+  },
+  "26541": {
+    "mob": "Servitor_of_Luclin",
+    "zone": "Grieg's End",
+    "name": "Wand of Musing"
+  },
+  "24936": {
+    "mob": "Armor_of_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Corroded Chain Leggings"
+  },
+  "24935": {
+    "mob": "Armor_of_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Corroded Chain Tunic"
+  },
+  "24943": {
+    "mob": "Armor_of_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Eroded Leather Leggings"
+  },
+  "24942": {
+    "mob": "Armor_of_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Eroded Leather Tunic"
+  },
+  "24949": {
+    "mob": "Armor_of_Zek",
+    "zone": "Kael Drakkel",
+    "name": "Torn Enchanted Silk Robe"
+  },
+  "9296": {
+    "mob": "Derakor_the_Vindicator",
+    "zone": "Kael Drakkel",
+    "name": "Shard of Hsagra's Talisman"
+  },
+  "30516": {
+    "mob": "King_Tormax",
+    "zone": "Kael Drakkel",
+    "name": "King Tormax's Head"
+  },
+  "17701": {
+    "mob": "Lady_Vox",
+    "zone": "Permafrost Caverns",
+    "name": "Kavruul`s Mystic Pouch"
+  },
+  "11601": {
+    "mob": "Lady_Vox",
+    "zone": "Permafrost Caverns",
+    "name": "Runed Bolster Belt"
+  },
+  "10229": {
+    "mob": "Sigismond_Windwalker",
+    "zone": "Plane of Air",
+    "name": "Essence of Wind"
+  },
+  "11646": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Amulet of Necropotence"
+  },
+  "1550": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Bile Etched Obsidian Choker"
+  },
+  "1554": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Brain of Cazic Thule"
+  },
+  "1551": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Cloak of the Fearsome"
+  },
+  "11641": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Crimson Robe of Alendine"
+  },
+  "11648": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "DawnFire, Morning Star of Light"
+  },
+  "1547": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Eye of Cazic Thule"
+  },
+  "1549": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Halo of the Enlightened"
+  },
+  "11642": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Lyssa`s Darkwood Piccolo"
+  },
+  "1531": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Pauldrons of Ferocity"
+  },
+  "11643": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Puppet Strings"
+  },
+  "1552": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Robe of Inspiration"
+  },
+  "11649": {
+    "mob": "Cazic_Thule",
+    "zone": "Plane of Time",
+    "name": "Staff of the Earthcrafter"
+  },
+  "11666": {
+    "mob": "Dread",
+    "zone": "Plane of Fear",
+    "name": "Bone-Clasped Girdle"
+  },
+  "1558": {
+    "mob": "a_dracoliche",
+    "zone": "Plane of Fear",
+    "name": "Berserkers Ring"
+  },
+  "1555": {
+    "mob": "a_dracoliche",
+    "zone": "Plane of Fear",
+    "name": "Fearsome Shield"
+  },
+  "1556": {
+    "mob": "a_dracoliche",
+    "zone": "Plane of Fear",
+    "name": "Grotesque Girdle"
+  },
+  "1559": {
+    "mob": "a_dracoliche",
+    "zone": "Plane of Fear",
+    "name": "Zombie Flesh Bracer"
+  },
+  "16366": {
+    "mob": "Arch_Mage_Yozanni",
+    "zone": "Plane of Fire",
+    "name": "Elemental Chain Glove Pattern"
+  },
+  "16374": {
+    "mob": "Arch_Mage_Yozanni",
+    "zone": "Plane of Fire",
+    "name": "Elemental Gauntlet Mold"
+  },
+  "16376": {
+    "mob": "Arch_Mage_Yozanni",
+    "zone": "Plane of Fire",
+    "name": "Elemental Leather Helm Pattern"
+  },
+  "16383": {
+    "mob": "Arch_Mage_Yozanni",
+    "zone": "Plane of Fire",
+    "name": "Elemental Silk Turban Pattern"
+  },
+  "16380": {
+    "mob": "Babnoxis_the_Spider_Queen",
+    "zone": "Plane of Fire",
+    "name": "Elemental Leather Glove Pattern"
+  },
+  "16387": {
+    "mob": "Babnoxis_the_Spider_Queen",
+    "zone": "Plane of Fire",
+    "name": "Elemental Silk Glove Pattern"
+  },
+  "16370": {
+    "mob": "Blazzax_the_Omnifiend",
+    "zone": "Plane of Fire",
+    "name": "Elemental Boot Mold"
+  },
+  "16389": {
+    "mob": "Blazzax_the_Omnifiend",
+    "zone": "Plane of Fire",
+    "name": "Elemental Silk Boot Pattern"
+  },
+  "16362": {
+    "mob": "General_Reparm",
+    "zone": "Plane of Fire",
+    "name": "Elemental Chain Coif Pattern"
+  },
+  "16371": {
+    "mob": "General_Reparm",
+    "zone": "Plane of Fire",
+    "name": "Elemental Helm Mold"
+  },
+  "16368": {
+    "mob": "Magmaton",
+    "zone": "Plane of Fire",
+    "name": "Elemental Chain Boot Pattern"
+  },
+  "16382": {
+    "mob": "Magmaton",
+    "zone": "Plane of Fire",
+    "name": "Elemental Leather Boot Pattern"
+  },
+  "16364": {
+    "mob": "Quavonis_Firetail",
+    "zone": "Plane of Fire",
+    "name": "Elemental Chain Sleeve Pattern"
+  },
+  "16378": {
+    "mob": "Quavonis_Firetail",
+    "zone": "Plane of Fire",
+    "name": "Elemental Leather Sleeve Pattern"
+  },
+  "16385": {
+    "mob": "Quavonis_Firetail",
+    "zone": "Plane of Fire",
+    "name": "Elemental Silk Sleeve Pattern"
+  },
+  "16372": {
+    "mob": "Quavonis_Firetail",
+    "zone": "Plane of Fire",
+    "name": "Elemental Vambrace Mold"
+  },
+  "25522": {
+    "mob": "Ail_the_Elder",
+    "zone": "Plane of Growth",
+    "name": "Robe of Conjuration"
+  },
+  "9498": {
+    "mob": "Manaetic_Behemoth",
+    "zone": "Plane of Innovation",
+    "name": "Coil of Twisted Platinum Wire"
+  },
+  "10074": {
+    "mob": "Manaetic_Behemoth",
+    "zone": "Plane of Innovation",
+    "name": "Glowing Steel Shim"
+  },
+  "21865": {
+    "mob": "Manaetic_Behemoth",
+    "zone": "Plane of Innovation",
+    "name": "Innovators Hammer"
+  },
+  "15831": {
+    "mob": "Manaetic_Behemoth",
+    "zone": "Plane of Innovation",
+    "name": "Protective Dust Drape"
+  },
+  "27286": {
+    "mob": "Manaetic_Behemoth",
+    "zone": "Plane of Innovation",
+    "name": "Self Contained Force Barrier"
+  },
+  "20938": {
+    "mob": "an_azarack",
+    "zone": "Plane of Sky",
+    "name": "Silver Disc"
+  },
+  "7124": {
+    "mob": "Gurebk,_Lord_of_Krendic",
+    "zone": "Plane of Storms",
+    "name": "Earring of the Stormcloud"
+  },
+  "24696": {
+    "mob": "Neffiken,_Lord_of_Kelek`Vor",
+    "zone": "Plane of Storms",
+    "name": "Dirk of the Ravaging Wind"
+  },
+  "16265": {
+    "mob": "Coirnav_the_Avatar_of_Water",
+    "zone": "Plane of Water",
+    "name": "Essence of Water"
+  },
+  "25986": {
+    "mob": "Triloun_Egg_Keeper",
+    "zone": "Plane of Water",
+    "name": "Plankton Laced Greatsword"
+  },
+  "4523": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Blood Ember Breastplate"
+  },
+  "4516": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Cobalt Breastplate"
+  },
+  "4544": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Deepwater Breastplate"
+  },
+  "4565": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Donal's Chestplate of Mourning"
+  },
+  "4572": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Elder Spiritist's Breastplate"
+  },
+  "4530": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Jaundiced Bone Breastplate"
+  },
+  "4551": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Mrylokar's Breastplate"
+  },
+  "4558": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Singing Steel Breastplate"
+  },
+  "4537": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Tolan's Darkwood Breastplate"
+  },
+  "5461": {
+    "mob": "Trakanon",
+    "zone": "Ruins of Sebilis",
+    "name": "Wild Lord's Tunic"
+  },
+  "11585": {
+    "mob": "Talendor",
+    "zone": "Skyfire Mountains",
+    "name": "Shield of the Red Dragon"
+  },
+  "24984": {
+    "mob": "Lord_Yelinak",
+    "zone": "Skyshrine",
+    "name": "Yelinak's Head"
+  },
+  "28852": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "Bone of Bertoxxulous"
+  },
+  "26603": {
+    "mob": "High_Priest_of_Ssraeshza",
+    "zone": "Ssraeshza Temple",
+    "name": "Wrath's Edge"
+  },
+  "26562": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "Hammer of the Ironfrost"
+  },
+  "28854": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "Hategiver"
+  },
+  "26563": {
+    "mob": "Xerkizh_The_Creator",
+    "zone": "Ssraeshza Temple",
+    "name": "Shiny Trinket of Speed"
+  },
+  "24576": {
+    "mob": "Lord_Mithaniel_Marr",
+    "zone": "Temple of Marr",
+    "name": "Blade of the Tempest"
+  },
+  "27815": {
+    "mob": "Lord_Mithaniel_Marr",
+    "zone": "Temple of Marr",
+    "name": "Bow of Contortion"
+  },
+  "15804": {
+    "mob": "Lord_Mithaniel_Marr",
+    "zone": "Temple of Marr",
+    "name": "Cloak of the Wrulons"
+  },
+  "24647": {
+    "mob": "Lord_Mithaniel_Marr",
+    "zone": "Temple of Marr",
+    "name": "Dart of Immobility"
+  },
+  "8773": {
+    "mob": "Lord_Mithaniel_Marr",
+    "zone": "Temple of Marr",
+    "name": "Gemstone Choker"
+  },
+  "20623": {
+    "mob": "Lord_Mithaniel_Marr",
+    "zone": "Temple of Marr",
+    "name": "Signet of the Advisor"
+  },
+  "24916": {
+    "mob": "A_Lava_Defender",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Leather Sleeves"
+  },
+  "24922": {
+    "mob": "A_Lava_Defender",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Silk Pantaloons"
+  },
+  "24926": {
+    "mob": "A_Lava_Defender",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Silk Turban"
+  },
+  "24900": {
+    "mob": "A_Lava_Defender",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Tarnished Breastplate"
+  },
+  "24909": {
+    "mob": "A_Lava_Defender",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Tarnished Chain Sleeves"
+  },
+  "24907": {
+    "mob": "A_Lava_Defender",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Tarnished Chain Tunic"
+  },
+  "24902": {
+    "mob": "A_Lava_Defender",
+    "zone": "Temple of Veeshan",
+    "name": "Ancient Tarnished Vambraces"
+  },
+  "31215": {
+    "mob": "Beldion_Icewind",
+    "zone": "Temple of Veeshan",
+    "name": "Shield of Dragonkind"
+  },
+  "31221": {
+    "mob": "Beldion_Icewind",
+    "zone": "Temple of Veeshan",
+    "name": "Silent Fang Necklace"
+  },
+  "24980": {
+    "mob": "a_cerulean_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Tattered Silk Boots"
+  },
+  "24978": {
+    "mob": "a_cerulean_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Tattered Silk Pantaloons"
+  },
+  "24977": {
+    "mob": "a_cerulean_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Tattered Silk Robe"
+  },
+  "24979": {
+    "mob": "a_cerulean_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Tattered Silk Sleeves"
+  },
+  "24982": {
+    "mob": "a_cerulean_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Tattered Silk Turban"
+  },
+  "24973": {
+    "mob": "a_fiery_drake",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Leather Boots"
+  },
+  "24971": {
+    "mob": "a_fiery_drake",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Leather Leggings"
+  },
+  "24972": {
+    "mob": "a_fiery_drake",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Leather Sleeves"
+  },
+  "24970": {
+    "mob": "a_fiery_drake",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Leather Tunic"
+  },
+  "24956": {
+    "mob": "a_fiery_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Breastplate"
+  },
+  "24960": {
+    "mob": "a_fiery_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Plate Bracer"
+  },
+  "24962": {
+    "mob": "a_fiery_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Plate Gauntlets"
+  },
+  "24957": {
+    "mob": "a_fiery_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Plate Greaves"
+  },
+  "24961": {
+    "mob": "a_fiery_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Plate Helmet"
+  },
+  "24958": {
+    "mob": "a_fiery_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Plate Vambraces"
+  },
+  "24966": {
+    "mob": "an_ancient_frost_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Chain Boots"
+  },
+  "24969": {
+    "mob": "an_ancient_frost_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Chain Gauntlets"
+  },
+  "24964": {
+    "mob": "an_ancient_frost_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Chain Leggings"
+  },
+  "24965": {
+    "mob": "an_ancient_frost_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Chain Sleeves"
+  },
+  "24963": {
+    "mob": "an_ancient_frost_guardian",
+    "zone": "Temple of Veeshan",
+    "name": "Unadorned Chain Tunic"
+  },
+  "6441": {
+    "mob": "Crusader_Kezzal",
+    "zone": "The Grey",
+    "name": "Carved Bone Ring"
+  },
+  "21897": {
+    "mob": "Ta`Grusch_the_Abomination",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Staff of Primordial Ooze"
+  },
+  "15820": {
+    "mob": "The_Keeper_of_Sorrows",
+    "zone": "Torment, the Plane of Pain",
+    "name": "Shaded Cloak"
+  },
+  "10913": {
+    "mob": "Phara_Dar",
+    "zone": "Veeshan's Peak",
+    "name": "Crown of Rile"
+  },
+  "6670": {
+    "mob": "Silverwing",
+    "zone": "Veeshan's Peak",
+    "name": "Hammer of the Dragonborn"
+  },
+  "10846": {
+    "mob": "Silverwing",
+    "zone": "Veeshan's Peak",
+    "name": "Lyran's Mystical Lute"
+  },
+  "25095": {
+    "mob": "Velketor_the_Sorcerer",
+    "zone": "Velketor's Labyrinth",
+    "name": "Bone Bracelet of Condemnation"
+  },
+  "25298": {
+    "mob": "Velketor_the_Sorcerer",
+    "zone": "Velketor's Labyrinth",
+    "name": "Bone Ring of Condemnation"
+  },
+  "25097": {
+    "mob": "Velketor_the_Sorcerer",
+    "zone": "Velketor's Labyrinth",
+    "name": "Boots of Bladecalling"
+  },
+  "25296": {
+    "mob": "Velketor_the_Sorcerer",
+    "zone": "Velketor's Labyrinth",
+    "name": "Crystal Rod of Confusion"
+  },
+  "1117": {
+    "mob": "Velketor_the_Sorcerer",
+    "zone": "Velketor's Labyrinth",
+    "name": "Velketor's Spell Book"
+  },
+  "25094": {
+    "mob": "Velketor_the_Sorcerer",
+    "zone": "Velketor's Labyrinth",
+    "name": "Vermilion Robe of Torrefaction"
+  },
+  "26620": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Ancient: Chaotic Visions"
+  },
+  "26615": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Ancient: Destruction of Ice"
+  },
+  "26616": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Ancient: Greater Concussion"
+  },
+  "26609": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Ancient: Legacy of Blades"
+  },
+  "26612": {
+    "mob": "Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Ancient: Scourge of Nife"
+  },
+  "28920": {
+    "mob": "Diabo_Xi_Va_Temariel",
+    "zone": "Vex Thal",
+    "name": "Twilight Shroud"
+  },
+  "28989": {
+    "mob": "Thall_Xundraux_Diabo",
+    "zone": "Vex Thal",
+    "name": "Bow of Shadows"
+  },
+  "28944": {
+    "mob": "Va_Xi_Aten_Ha_Ra",
+    "zone": "Vex Thal",
+    "name": "Umbracite Hoop"
+  },
+  "27141": {
+    "mob": "Bufa",
+    "zone": "Western Wastes",
+    "name": "Peerless Dragonleg Breeches"
+  },
+  "27244": {
+    "mob": "Harla_Dar",
+    "zone": "Western Wastes",
+    "name": "Harla Dar's Talisman"
+  },
+  "27156": {
+    "mob": "Hechaeva",
+    "zone": "Western Wastes",
+    "name": "Matchless Dragonspine Vambraces"
+  },
+  "27255": {
+    "mob": "Klandicar",
+    "zone": "Western Wastes",
+    "name": "Klandicar's Talisman"
+  },
+  "27148": {
+    "mob": "Klandicar",
+    "zone": "Western Wastes",
+    "name": "Peerless Dragonhide Breastplate"
+  },
+  "27115": {
+    "mob": "Klandicar",
+    "zone": "Western Wastes",
+    "name": "Worked Dragonhide Breastplate"
+  },
+  "27256": {
+    "mob": "Sontalak",
+    "zone": "Western Wastes",
+    "name": "Sontalak's Talisman"
   }
 }
