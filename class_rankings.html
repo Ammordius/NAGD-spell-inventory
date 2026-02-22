@@ -2394,11 +2394,12 @@
         function loadItemStats() {
             if (itemStatsLoadPromise == null) {
                 const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
+                // Prefer path relative to page (GitHub Pages: /repo/class_rankings.html -> /repo/data/item_stats.json)
                 const possiblePaths = [
+                    baseDir + 'data/item_stats.json',
                     new URL('data/item_stats.json', document.baseURI).href,
                     'data/item_stats.json',
                     './data/item_stats.json',
-                    baseDir + 'data/item_stats.json',
                 ];
 
                 itemStatsLoadPromise = (async () => {
@@ -2424,6 +2425,7 @@
                             }
                         } catch (e) { /* try next path */ }
                     }
+                    console.warn('Item stats: could not load data/item_stats.json from any path. Check Network tab for 404.');
                     return {};
                 })();
             }

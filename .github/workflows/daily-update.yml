@@ -809,13 +809,14 @@ jobs:
           echo "✓ Copied class_rankings.json to deploy directory"
         fi
         # Copy item_stats.json and item_name_to_id.json for class rankings item card hover (data/ relative to site root)
+        # Required: without these, item cards show "no details in the database" (e.g. Cap of Flowing Time)
         mkdir -p deploy/data
-        if [ -f "data/item_stats.json" ]; then
-          cp data/item_stats.json deploy/data/item_stats.json
-          echo "✓ Copied data/item_stats.json to deploy (for item cards)"
-        else
-          echo "⚠ data/item_stats.json missing - item cards may show without stats"
+        if [ ! -f "data/item_stats.json" ]; then
+          echo "::error::data/item_stats.json is missing in repo - item cards will show 'no details in the database'. Run: python scripts/copy_dkp_item_stats_to_magelo.py and commit data/item_stats.json"
+          exit 1
         fi
+        cp data/item_stats.json deploy/data/item_stats.json
+        echo "✓ Copied data/item_stats.json to deploy (for item cards)"
         if [ -f "data/item_name_to_id.json" ]; then
           cp data/item_name_to_id.json deploy/data/item_name_to_id.json
           echo "✓ Copied data/item_name_to_id.json to deploy (name→id resolution for item cards)"
