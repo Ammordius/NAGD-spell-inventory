@@ -43,9 +43,19 @@ def build_name_to_id_from_raid_loot(
     raid_mob_loot_path: Path,
     raid_sources_path: Path,
     dkp_mob_loot_path: Path | None = None,
-) -> dict[str, int]:
-    """Build normalized_name -> item_id from raid_mob_loot, raid_item_sources, and optionally dkp_mob_loot."""
+) -> tuple[dict[str, int], dict[int, str]]:
+    """Build normalized_name -> item_id and item_id -> display name from raid/dkp loot.
+    Returns (name_to_id, id_to_name). Prefers real item names over '(item NNN)' placeholders."""
     name_to_id: dict[str, int] = {}
+    id_to_name: dict[int, str] = {}
+
+    def prefer_name(existing: str | None, new: str) -> bool:
+        """True if we should use new over existing (e.g. real name over '(item 123)')."""
+        if not existing:
+            return True
+        if new.startswith("(item ") and ")" in new:
+            return False
+        return True
 
     def add_loot(data: dict) -> None:
         for entry in (data.values() if isinstance(data, dict) else []):
@@ -53,9 +63,12 @@ def build_name_to_id_from_raid_loot(
                 iid = item.get("item_id")
                 name = (item.get("name") or "").strip()
                 if iid is not None and name:
+                    iid = int(iid)
                     norm = normalize_name(name)
                     if norm and norm not in name_to_id:
-                        name_to_id[norm] = int(iid)
+                        name_to_id[norm] = iid
+                    if prefer_name(id_to_name.get(iid), name):
+                        id_to_name[iid] = name
 
     if raid_mob_loot_path.exists():
         add_loot(json.loads(raid_mob_loot_path.read_text(encoding="utf-8")))
@@ -75,8 +88,10 @@ def build_name_to_id_from_raid_loot(
                 norm = normalize_name(name)
                 if norm and norm not in name_to_id:
                     name_to_id[norm] = iid
+                if prefer_name(id_to_name.get(iid), name):
+                    id_to_name[iid] = name
 
-    return name_to_id
+    return name_to_id, id_to_name
 
 
 def load_item_stats_csv(csv_path: Path) -> tuple[dict[int, dict], dict[str, int]]:
@@ -306,7 +321,7 @@ def main() -> None:
     args = p.parse_args()
 
     print("Building name->id from raid loot...")
-    name_to_id_raid = build_name_to_id_from_raid_loot(
+    name_to_id_raid, id_to_name_raid = build_name_to_id_from_raid_loot(
         args.raid_loot, args.raid_sources, args.dkp_mob_loot
     )
     print(f"  Raid loot/sources (+ dkp): {len(name_to_id_raid)} unique item names")
@@ -314,6 +329,14 @@ def main() -> None:
     print("Loading item_stats.csv...")
     id_to_stats, name_to_id_stats = load_item_stats_csv(args.item_stats)
     print(f"  Item stats: {len(id_to_stats)} items")
+
+    # Merge in raid/dkp items that are not in CSV so item cards can resolve by id (and name)
+    id_to_stats_merged = dict(id_to_stats)
+    for iid, name in id_to_name_raid.items():
+        if iid not in id_to_stats_merged:
+            id_to_stats_merged[iid] = {"name": name}
+    if len(id_to_stats_merged) > len(id_to_stats):
+        print(f"  Merged {len(id_to_stats_merged) - len(id_to_stats)} raid/dkp-only items into stats")
 
     if not args.focii.exists():
         print(f"Missing focii file: {args.focii}", file=sys.stderr)
@@ -342,10 +365,10 @@ def main() -> None:
         args.focii.write_text(json.dumps(updated, indent=2), encoding="utf-8")
         print(f"Wrote {args.focii}")
 
-    if not args.no_write_stats and id_to_stats:
-        write_item_stats_json(id_to_stats, OUT_ITEM_STATS_JSON)
+    if not args.no_write_stats and id_to_stats_merged:
+        write_item_stats_json(id_to_stats_merged, OUT_ITEM_STATS_JSON)
         print(f"Wrote {OUT_ITEM_STATS_JSON}")
-        write_all_items_csv(id_to_stats, OUT_ALL_ITEMS_CSV)
+        write_all_items_csv(id_to_stats_merged, OUT_ALL_ITEMS_CSV)
         print(f"Wrote {OUT_ALL_ITEMS_CSV}")
 
 

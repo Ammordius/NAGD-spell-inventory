@@ -2307,7 +2307,14 @@
         const HOVER_DELAY_MS = 400;
         const POPOVER_OFFSET = 8;
         let itemStatsCache = {};
+        let itemNameToId = {};  // normalized name -> item id (for links that have name but no id)
         let itemStatsLoadPromise = null;
+
+        /** Normalize item name for lookup: lowercase, collapse spaces, normalize apostrophe/backtick. */
+        function normalizeItemNameForLookup(name) {
+            if (name == null || typeof name !== 'string') return '';
+            return name.toLowerCase().replace(/['`\u2019]/g, "'").replace(/\s+/g, ' ').trim();
+        }
 
         /** Normalize magelo item_stats format (string flags/mods/resists) to DKP-style (arrays) for the card renderer. */
         function normalizeItemStats(raw) {
@@ -2360,8 +2367,15 @@
                             const obj = await r.json();
                             if (obj && typeof obj === 'object') {
                                 for (const [k, v] of Object.entries(obj)) {
-                                    if (v != null && typeof v === 'object' && Object.keys(v).length > 0)
-                                        itemStatsCache[Number(k)] = normalizeItemStats(v);
+                                    if (v != null && typeof v === 'object' && Object.keys(v).length > 0) {
+                                        const id = Number(k);
+                                        itemStatsCache[id] = normalizeItemStats(v);
+                                        const name = (v.name || '').toString().trim();
+                                        if (name) {
+                                            const norm = normalizeItemNameForLookup(name);
+                                            if (norm && itemNameToId[norm] === undefined) itemNameToId[norm] = id;
+                                        }
+                                    }
                                 }
                                 return obj;
                             }
@@ -2510,8 +2524,12 @@
             }
             if (itemCardHideTimer) { clearTimeout(itemCardHideTimer); itemCardHideTimer = null; }
             if (itemCardTimer) clearTimeout(itemCardTimer);
-            const itemId = link.getAttribute('data-item-id');
+            let itemId = link.getAttribute('data-item-id');
             const itemName = link.getAttribute('data-item-name') || '';
+            if ((!itemId || itemId === '') && itemName) {
+                const resolvedId = itemNameToId[normalizeItemNameForLookup(itemName)];
+                if (resolvedId != null) itemId = String(resolvedId);
+            }
             itemCardTimer = setTimeout(() => showItemCard(link, itemId, itemName), HOVER_DELAY_MS);
         });
         document.body.addEventListener('mouseout', function(e) {

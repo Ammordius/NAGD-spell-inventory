@@ -4856,5 +4856,2666 @@
     "classes": "CLR DRU SHM NEC WIZ MAG ENC",
     "weight": "0.8",
     "size": "SMALL"
+  },
+  "26087": {
+    "name": "Greatstaff of Misery"
+  },
+  "27407": {
+    "name": "Orb of Infinite Terror"
+  },
+  "22982": {
+    "name": "Twin-Blade of Sorrow"
+  },
+  "29198": {
+    "name": "Amulet of the Rain"
+  },
+  "22975": {
+    "name": "Double Edged Stormblade"
+  },
+  "27649": {
+    "name": "Longbow of the Stormcaller"
+  },
+  "26797": {
+    "name": "Orb of Thunderous Spirits"
+  },
+  "25494": {
+    "name": "Chestplate of Stability"
+  },
+  "25487": {
+    "name": "Melodic Breastplate"
+  },
+  "25452": {
+    "name": "Noctivagant Breastplate"
+  },
+  "25529": {
+    "name": "Resplendent Robe"
+  },
+  "25522": {
+    "name": "Robe of Conjuration"
+  },
+  "25515": {
+    "name": "Robe of the Bonecaster"
+  },
+  "25543": {
+    "name": "Silver Moon Chest Wraps"
+  },
+  "25508": {
+    "name": "Sorcerer's Robe"
+  },
+  "25459": {
+    "name": "Spirit Weaver's Breastplate"
+  },
+  "26739": {
+    "name": "Battle Fists"
+  },
+  "27989": {
+    "name": "Warmaster's Recurved Longbow"
+  },
+  "24624": {
+    "name": "Blackstone Maul"
+  },
+  "24621": {
+    "name": "Sprinkler of Suffering"
+  },
+  "32166": {
+    "name": "Shaded amice"
+  },
+  "32161": {
+    "name": "Shaded Boots"
+  },
+  "32159": {
+    "name": "Shaded cloak"
+  },
+  "26786": {
+    "name": "Aegis of Judgement"
+  },
+  "26620": {
+    "name": "Ancient: Chaotic Visions"
+  },
+  "26615": {
+    "name": "Ancient: Destruction of Ice"
+  },
+  "26616": {
+    "name": "Ancient: Greater Concussion"
+  },
+  "26609": {
+    "name": "Ancient: Legacy of Blades"
+  },
+  "26612": {
+    "name": "Ancient: Scourge of Nife"
+  },
+  "26771": {
+    "name": "Armguard of Shadows"
+  },
+  "28994": {
+    "name": "Crimson Ring of Judgment"
+  },
+  "26773": {
+    "name": "Crimson Runed Mask"
+  },
+  "26775": {
+    "name": "Earring of Eradication"
+  },
+  "26774": {
+    "name": "Gloves of the Crimson Sigil"
+  },
+  "26770": {
+    "name": "Great Shadow Platemail"
+  },
+  "26772": {
+    "name": "Leg Guard of Shadows"
+  },
+  "26783": {
+    "name": "Leggings of Judgement"
+  },
+  "26777": {
+    "name": "Leggings of Secrets"
+  },
+  "26782": {
+    "name": "Mail of Judgement"
+  },
+  "26785": {
+    "name": "Mask of Judgement"
+  },
+  "26779": {
+    "name": "Mask of Secrets"
+  },
+  "26778": {
+    "name": "Orb of Secrets"
+  },
+  "26776": {
+    "name": "Robe of Secrets"
+  },
+  "28993": {
+    "name": "Silver Band of Secrets"
+  },
+  "26780": {
+    "name": "Tome of Secrets"
+  },
+  "26784": {
+    "name": "Torch of Judgment"
+  },
+  "26787": {
+    "name": "Wristband of Judgement"
+  },
+  "26781": {
+    "name": "Wristband of Secrets"
+  },
+  "27992": {
+    "name": "The Rhythm of Xegony"
+  },
+  "25843": {
+    "name": "Staff of Agonizing Battle"
+  },
+  "24568": {
+    "name": "Whip of Unending Pain"
+  },
+  "25981": {
+    "name": "Ornate Greatblade"
+  },
+  "24611": {
+    "name": "Gold Runed Mithril Knife"
+  },
+  "20486": {
+    "name": "The Orb of the Sun"
+  },
+  "27637": {
+    "name": "Glowing Orb of the Stormwatcher"
+  },
+  "24645": {
+    "name": "Wicked Shank"
+  },
+  "24646": {
+    "name": "Gargoyle Talon"
+  },
+  "25800": {
+    "name": "Greater Stormwatcher Horn"
+  },
+  "26220": {
+    "name": "Hammer of Crushing Waves"
+  },
+  "22985": {
+    "name": "Jagged Shard of Frozen Flame"
+  },
+  "23497": {
+    "name": "Ornate Broadsword"
+  },
+  "25220": {
+    "name": "Rune Etched Bamboo Bo"
+  },
+  "24609": {
+    "name": "Fatesealer"
+  },
+  "24641": {
+    "name": "Katana of Endurance"
+  },
+  "24617": {
+    "name": "Sword of the Shissar"
+  },
+  "27994": {
+    "name": "Lute of the Flowing Waters"
+  },
+  "20618": {
+    "name": "Fang of Flame"
+  },
+  "24789": {
+    "name": "Staff of Eternal Flames"
+  },
+  "22300": {
+    "name": "Flameforge Hammer"
+  },
+  "29330": {
+    "name": "Ayill's Aged Stone Shield"
+  },
+  "29333": {
+    "name": "Celestial Essence Robe"
+  },
+  "29327": {
+    "name": "Craslith"
+  },
+  "29334": {
+    "name": "Dragon's Eye Sage Ring"
+  },
+  "29320": {
+    "name": "Dragons Blood Earring"
+  },
+  "29331": {
+    "name": "Dragons Blood Earring"
+  },
+  "29332": {
+    "name": "Dragons Tear Earring"
+  },
+  "29319": {
+    "name": "Mask of the Dragon Slayer"
+  },
+  "29317": {
+    "name": "Outrider's Taming Whip"
+  },
+  "29329": {
+    "name": "Sacrifice"
+  },
+  "29328": {
+    "name": "Soul Defiler"
+  },
+  "24984": {
+    "name": "Yelinak's Head"
+  },
+  "27266": {
+    "name": "Yelinak's Talisman"
+  },
+  "27164": {
+    "name": "Shield of Unimaginable Horrors"
+  },
+  "21897": {
+    "name": "Staff of Primordial Ooze"
+  },
+  "20438": {
+    "name": "Tormented Stone of Souls"
+  },
+  "20507": {
+    "name": "Blackflame Sphere"
+  },
+  "27276": {
+    "name": "Aegis of Gloom"
+  },
+  "21838": {
+    "name": "Baton of Torment"
+  },
+  "24605": {
+    "name": "Dirk of Great Sorrow"
+  },
+  "27991": {
+    "name": "Tormented Flute"
+  },
+  "22893": {
+    "name": "Crowned Staff of Anguish"
+  },
+  "25849": {
+    "name": "Greater Poleaxe of Sorrow"
+  },
+  "22898": {
+    "name": "Withering Staff of Agony"
+  },
+  "22990": {
+    "name": "Gem Encrusted Axe"
+  },
+  "24631": {
+    "name": "Malevolent Runeblade"
+  },
+  "24649": {
+    "name": "Razor Fang of Xygoz"
+  },
+  "24628": {
+    "name": "Staff of Null"
+  },
+  "24636": {
+    "name": "Blood Orchid Katana"
+  },
+  "24639": {
+    "name": "Maelstrom"
+  },
+  "24640": {
+    "name": "Shissar Deathspeaker Staff"
+  },
+  "24637": {
+    "name": "Shissar Focus Staff"
+  },
+  "24635": {
+    "name": "Skullcrusher of Kragg"
+  },
+  "24774": {
+    "name": "Algae Covered Stiletto"
+  },
+  "27272": {
+    "name": "Intricately Etched Seashell"
+  },
+  "25043": {
+    "name": "Boots of the Vindicator"
+  },
+  "25044": {
+    "name": "Chestplate of Vindication"
+  },
+  "25045": {
+    "name": "Living Thunder Earring"
+  },
+  "25196": {
+    "name": "Axe of the Kromzek Kings"
+  },
+  "25197": {
+    "name": "Boots of the Storm"
+  },
+  "25194": {
+    "name": "Crown of the Kromzek Kings"
+  },
+  "30516": {
+    "name": "King Tormax's Head"
+  },
+  "25198": {
+    "name": "Ring of Lightning"
+  },
+  "25195": {
+    "name": "The Horn of Hsagra"
+  },
+  "25201": {
+    "name": "Velium Encrusted Gauntlets"
+  },
+  "25199": {
+    "name": "White Dragon Scale Sash"
+  },
+  "25200": {
+    "name": "Wrist Guard of Thunder"
+  },
+  "25206": {
+    "name": "Breastplate of Eradication"
+  },
+  "25207": {
+    "name": "Cloak of the Falling Stars"
+  },
+  "25202": {
+    "name": "Hammer of Battle"
+  },
+  "25205": {
+    "name": "Iron Scroll of War"
+  },
+  "25204": {
+    "name": "Reaver"
+  },
+  "25203": {
+    "name": "Swiftblade of Zek"
+  },
+  "26025": {
+    "name": "Cowl of Mortality"
+  },
+  "26027": {
+    "name": "Cracked Claw of Zlandicar"
+  },
+  "26012": {
+    "name": "First Brood Talisman"
+  },
+  "27260": {
+    "name": "Frakadar's Talisman"
+  },
+  "26026": {
+    "name": "Gauntlets of Mortality"
+  },
+  "26013": {
+    "name": "Massive Dragonclaw Shard"
+  },
+  "26009": {
+    "name": "Zlandicar's Heart"
+  },
+  "27258": {
+    "name": "Zlandicar's Talisman"
+  },
+  "27278": {
+    "name": "Circular Shield of the Blaze"
+  },
+  "26086": {
+    "name": "Lance of the Flame Knight"
+  },
+  "26530": {
+    "name": "Acrylia Embedded Visor"
+  },
+  "26519": {
+    "name": "Amulet of the Pure Heart"
+  },
+  "26548": {
+    "name": "Girdle of Magnificence"
+  },
+  "26525": {
+    "name": "Katta Staff of Peace"
+  },
+  "26539": {
+    "name": "Collar of Tavuel Xakreum"
+  },
+  "26536": {
+    "name": "Crown of the Itraer Vius"
+  },
+  "26860": {
+    "name": "Fist of Glowing Acrylia"
+  },
+  "28819": {
+    "name": "Iceshatter"
+  },
+  "26546": {
+    "name": "Itraer Insignia"
+  },
+  "28847": {
+    "name": "Light Woodsman's Blade"
+  },
+  "28808": {
+    "name": "Ribcracker"
+  },
+  "28814": {
+    "name": "Sunbeam Staff"
+  },
+  "26547": {
+    "name": "Vex xi Vius"
+  },
+  "26531": {
+    "name": "Wito xi Tetoracu"
+  },
+  "28823": {
+    "name": "Ancient Gladius"
+  },
+  "26568": {
+    "name": "Belt of Marvelous Visions"
+  },
+  "30561": {
+    "name": "Brilliant Metal Bauble"
+  },
+  "26534": {
+    "name": "Helm of Grim Blessings"
+  },
+  "26861": {
+    "name": "Horns of Chaos"
+  },
+  "26597": {
+    "name": "Orb of Lost Souls"
+  },
+  "26555": {
+    "name": "Sleeves of Elemental Auras"
+  },
+  "28803": {
+    "name": "Tor Vignus"
+  },
+  "26559": {
+    "name": "Veil of Hidden Thought"
+  },
+  "28851": {
+    "name": "Winterstorm"
+  },
+  "30537": {
+    "name": "Adamantite Wristguard"
+  },
+  "28824": {
+    "name": "Blade of Angles"
+  },
+  "28811": {
+    "name": "Bonechiller"
+  },
+  "28849": {
+    "name": "Cudgel of Cowardly Death"
+  },
+  "28857": {
+    "name": "Dagger of Entrapment"
+  },
+  "26809": {
+    "name": "Glowing Mithril Ulak"
+  },
+  "30538": {
+    "name": "Grey Dusted Wraps"
+  },
+  "26562": {
+    "name": "Hammer of the Ironfrost"
+  },
+  "28842": {
+    "name": "Harnessed Flame Dirk"
+  },
+  "28854": {
+    "name": "Hategiver"
+  },
+  "26535": {
+    "name": "Headband of Many Visions"
+  },
+  "28845": {
+    "name": "Mournfollow"
+  },
+  "26593": {
+    "name": "Shield of the Creator"
+  },
+  "26563": {
+    "name": "Shiny Trinket of Speed"
+  },
+  "30568": {
+    "name": "Singed Petrified Leaf"
+  },
+  "30567": {
+    "name": "Soft Scale Slippers"
+  },
+  "28820": {
+    "name": "Willful Dirk of Domination"
+  },
+  "26556": {
+    "name": "Belt of Mystical Protection"
+  },
+  "28831": {
+    "name": "Blackout"
+  },
+  "28805": {
+    "name": "Bloodbath"
+  },
+  "28852": {
+    "name": "Bone of Bertoxxulous"
+  },
+  "26558": {
+    "name": "Earring of Dissention"
+  },
+  "26605": {
+    "name": "Halo of Enlightening Barriers"
+  },
+  "30525": {
+    "name": "Ivory Crystal Greaves"
+  },
+  "28821": {
+    "name": "Mindpuncture"
+  },
+  "28825": {
+    "name": "Norge`tal"
+  },
+  "30528": {
+    "name": "Pearlescent Armlet"
+  },
+  "30531": {
+    "name": "Sapphire Studded Mantle"
+  },
+  "26594": {
+    "name": "Shield of Ssraeshza"
+  },
+  "30529": {
+    "name": "Shroud of Emerald Vines"
+  },
+  "28838": {
+    "name": "Sporecaller"
+  },
+  "30526": {
+    "name": "Supple Onyx Chains"
+  },
+  "26603": {
+    "name": "Wrath's Edge"
+  },
+  "26738": {
+    "name": "Fiery Staff of Zha"
+  },
+  "26761": {
+    "name": "Belt of Mastery"
+  },
+  "26752": {
+    "name": "Bracelet of Darkness"
+  },
+  "28996": {
+    "name": "Bracer of Black Blood"
+  },
+  "26759": {
+    "name": "Circlet of Disguise"
+  },
+  "26766": {
+    "name": "Cloak of the Black Wind"
+  },
+  "26763": {
+    "name": "Crown of Ambivalence"
+  },
+  "26762": {
+    "name": "Crown of Energy"
+  },
+  "26769": {
+    "name": "Mark of Shadows"
+  },
+  "26756": {
+    "name": "Mask of Dark Thoughts"
+  },
+  "26751": {
+    "name": "Mask of Piety"
+  },
+  "26755": {
+    "name": "Nightcaller Leggings"
+  },
+  "26758": {
+    "name": "Orb of Satisfaction"
+  },
+  "26757": {
+    "name": "Ring of Resistance"
+  },
+  "26754": {
+    "name": "Shield of Energy"
+  },
+  "26750": {
+    "name": "Spiked Chain Leggings"
+  },
+  "26753": {
+    "name": "Spiked Shoulderpads"
+  },
+  "28995": {
+    "name": "Thorny Chain Helm"
+  },
+  "26760": {
+    "name": "Umbracite Plate Leggings"
+  },
+  "26764": {
+    "name": "Wand of Everlasting Water"
+  },
+  "26768": {
+    "name": "Wand of Tranquility"
+  },
+  "28813": {
+    "name": "Aleje's Ceremonial Cudgel"
+  },
+  "26807": {
+    "name": "Gold Inlaid Ulak"
+  },
+  "32187": {
+    "name": "Shaderock Amulet"
+  },
+  "32178": {
+    "name": "Shaderock Crown"
+  },
+  "32179": {
+    "name": "Shaderock Robe"
+  },
+  "32186": {
+    "name": "Shaderock Bracer"
+  },
+  "32185": {
+    "name": "Shaderock Girdle"
+  },
+  "28818": {
+    "name": "Shield of Infused Power"
+  },
+  "28827": {
+    "name": "Skybreaker"
+  },
+  "28832": {
+    "name": "Toetwister"
+  },
+  "27303": {
+    "name": "Priceless Velium Claidhmore"
+  },
+  "28950": {
+    "name": "Bone Earring of Evasion"
+  },
+  "28947": {
+    "name": "Bone Necklace of Battle"
+  },
+  "28943": {
+    "name": "Cloudy Mark"
+  },
+  "28942": {
+    "name": "Cloudy Steel Mask"
+  },
+  "28949": {
+    "name": "Dark Hand Wraps"
+  },
+  "28945": {
+    "name": "Earring of Battle"
+  },
+  "28948": {
+    "name": "Eye of Darkness"
+  },
+  "28104": {
+    "name": "Fervid Gloves of the Warder"
+  },
+  "28146": {
+    "name": "Karn's Armplates of Retaliation"
+  },
+  "28951": {
+    "name": "Lunar Fungus Covered Tunic"
+  },
+  "28946": {
+    "name": "Necklace of Endless Concepts"
+  },
+  "28997": {
+    "name": "Pauldrons of Seething Darkness"
+  },
+  "28952": {
+    "name": "Sanguine Robe"
+  },
+  "28148": {
+    "name": "Slippers of Dark Whispers"
+  },
+  "28944": {
+    "name": "Umbracite Hoop"
+  },
+  "28964": {
+    "name": "Cloak of Frozen Flames"
+  },
+  "28992": {
+    "name": "Cloak of Glowing Embers"
+  },
+  "28149": {
+    "name": "Denon's Drums of Declivity"
+  },
+  "28962": {
+    "name": "Earring of Falling Stars"
+  },
+  "28957": {
+    "name": "Girdle of Focus"
+  },
+  "28144": {
+    "name": "Gloves of Dark Summoning"
+  },
+  "28967": {
+    "name": "Gloves of Warding"
+  },
+  "28965": {
+    "name": "Leggings of Fiery Might"
+  },
+  "28963": {
+    "name": "Sanguine Eyepatch"
+  },
+  "28958": {
+    "name": "Sanguine Gloves"
+  },
+  "28145": {
+    "name": "Elder's Armbands of Ro"
+  },
+  "28981": {
+    "name": "Grimoire of Enchantment"
+  },
+  "28986": {
+    "name": "Helmet of Shadow"
+  },
+  "28984": {
+    "name": "Ring of Immobilization"
+  },
+  "28991": {
+    "name": "Rune of Judgment"
+  },
+  "28983": {
+    "name": "Scepter of Calekor"
+  },
+  "28980": {
+    "name": "Staff of Lost Rituals"
+  },
+  "28987": {
+    "name": "Thorny Chain Sleeves"
+  },
+  "28998": {
+    "name": "Wand of Turning"
+  },
+  "28147": {
+    "name": "Zevfeer's Shroud of Despair"
+  },
+  "28881": {
+    "name": "Boots of Silent Dreams"
+  },
+  "28891": {
+    "name": "Bracer of the Silent Star"
+  },
+  "28892": {
+    "name": "Cap of the Silent Star"
+  },
+  "28887": {
+    "name": "Cloak of Icy Shadows"
+  },
+  "28890": {
+    "name": "Cord of Midnight"
+  },
+  "28885": {
+    "name": "Gorget of Superiority"
+  },
+  "28889": {
+    "name": "Living Symbol"
+  },
+  "28884": {
+    "name": "Ring of Rage"
+  },
+  "28883": {
+    "name": "Shaded Amice"
+  },
+  "28888": {
+    "name": "Shadow Footpads"
+  },
+  "28882": {
+    "name": "Steel Skin Armplates"
+  },
+  "28886": {
+    "name": "Umbracite Bracer"
+  },
+  "28900": {
+    "name": "Darkened Claw Amulet"
+  },
+  "28896": {
+    "name": "Earring of Vigor"
+  },
+  "28899": {
+    "name": "Floating Rune"
+  },
+  "28897": {
+    "name": "Gauntlets of Dark Embers"
+  },
+  "28903": {
+    "name": "Orb of Evasion"
+  },
+  "28898": {
+    "name": "Sandals of Contemplation"
+  },
+  "28893": {
+    "name": "Seething Mantle"
+  },
+  "28901": {
+    "name": "Shade Stone Amulet"
+  },
+  "28930": {
+    "name": "Great Bow of Slaughter"
+  },
+  "28923": {
+    "name": "Great Mace of Slaughter"
+  },
+  "28894": {
+    "name": "Shadow Tendril"
+  },
+  "28929": {
+    "name": "Short Sword of Slaughter"
+  },
+  "28916": {
+    "name": "Belt of Dark Thought"
+  },
+  "28915": {
+    "name": "Book of Contemplation"
+  },
+  "28906": {
+    "name": "Bracelet of the Shadow Hive"
+  },
+  "28908": {
+    "name": "Dark Mace of Thought"
+  },
+  "28911": {
+    "name": "Obsidian Necklace"
+  },
+  "28905": {
+    "name": "Ring of Flamewarding"
+  },
+  "28914": {
+    "name": "Ring of the Crimson Bull"
+  },
+  "28910": {
+    "name": "Robe of Luring Shadows"
+  },
+  "28909": {
+    "name": "Tiny Cap of Sight"
+  },
+  "28925": {
+    "name": "Armguard of Piety"
+  },
+  "28924": {
+    "name": "Armguard of Purity"
+  },
+  "28926": {
+    "name": "Cerulean Sleeves"
+  },
+  "28918": {
+    "name": "Crystal Shadow Cloak"
+  },
+  "28917": {
+    "name": "Dagger of Thought"
+  },
+  "28922": {
+    "name": "Lightbringers Earring"
+  },
+  "28919": {
+    "name": "Shroud of Vigor"
+  },
+  "28920": {
+    "name": "Twilight Shroud"
+  },
+  "28921": {
+    "name": "Umbracite Swarm Orb"
+  },
+  "28927": {
+    "name": "Umbral Vambraces"
+  },
+  "28934": {
+    "name": "Boots of the Wind"
+  },
+  "28935": {
+    "name": "Bow of Flames"
+  },
+  "28989": {
+    "name": "Bow of Shadows"
+  },
+  "28937": {
+    "name": "Breastplate of Speed"
+  },
+  "28938": {
+    "name": "Cord of Insight"
+  },
+  "28936": {
+    "name": "Great Cloak of Shadows"
+  },
+  "28939": {
+    "name": "Hoop of Chaos"
+  },
+  "28933": {
+    "name": "Horn of Shadows"
+  },
+  "28931": {
+    "name": "Mask of Resiliance"
+  },
+  "28940": {
+    "name": "Shadow Pearl Earring"
+  },
+  "28932": {
+    "name": "Shadow Wind Leggings"
+  },
+  "28977": {
+    "name": "Amulet of Xuzl"
+  },
+  "28970": {
+    "name": "Bone Chill Shield"
+  },
+  "28979": {
+    "name": "Cloak of Destruction"
+  },
+  "28975": {
+    "name": "Orb of the Sky"
+  },
+  "28976": {
+    "name": "Pendant of Malosini"
+  },
+  "28972": {
+    "name": "Silver Skin Gauntlets"
+  },
+  "28978": {
+    "name": "Stein of Falling Tears"
+  },
+  "28973": {
+    "name": "Tiny Bone Bracelet"
+  },
+  "28971": {
+    "name": "Veil of Flames"
+  },
+  "31332": {
+    "name": "Ancient Wurm Hide Greaves"
+  },
+  "31333": {
+    "name": "Ancient Wurm Hide Robe"
+  },
+  "31334": {
+    "name": "Belt of the Destroyer"
+  },
+  "31336": {
+    "name": "Boots of the Destroyer"
+  },
+  "31335": {
+    "name": "Bow of the Destroyer"
+  },
+  "31338": {
+    "name": "Dagarn's Tail"
+  },
+  "31339": {
+    "name": "Shining Metallic Pantaloons"
+  },
+  "31337": {
+    "name": "Wurm Claw Pauldrons"
+  },
+  "25995": {
+    "name": "Boots of Despair"
+  },
+  "26092": {
+    "name": "Greatblade of Chaos"
+  },
+  "28651": {
+    "name": "Leggings of Furious Might"
+  },
+  "26993": {
+    "name": "Pulsing Onyx Ring"
+  },
+  "20508": {
+    "name": "Symbol of Ancient Summoning"
+  },
+  "24573": {
+    "name": "Timespinner, Blade of the Hunter"
+  },
+  "21997": {
+    "name": "Cloak of Wishes"
+  },
+  "24776": {
+    "name": "Dagger of Distraction"
+  },
+  "21994": {
+    "name": "Protective Sleeves"
+  },
+  "26789": {
+    "name": "Time Traveler's Abandoned Notebook"
+  },
+  "20453": {
+    "name": "Bone Sliver Ornament"
+  },
+  "20454": {
+    "name": "Stone Etched Mallet"
+  },
+  "25983": {
+    "name": "Stone Etched War Sword"
+  },
+  "27290": {
+    "name": "Aegis of the Earth"
+  },
+  "27106": {
+    "name": "Circular Crystalline Formation"
+  },
+  "22980": {
+    "name": "Whip of the Earthcrafter"
+  },
+  "22877": {
+    "name": "Earthen Fist"
+  },
+  "25844": {
+    "name": "Pulsing Emerald Hoop"
+  },
+  "26992": {
+    "name": "Ring of Force"
+  },
+  "28655": {
+    "name": "Smooth Onyx Torque"
+  },
+  "28668": {
+    "name": "Wristguard of Keen Vision"
+  },
+  "22998": {
+    "name": "Ethereal Destroyer"
+  },
+  "26983": {
+    "name": "Faceguard of Frenzy"
+  },
+  "28657": {
+    "name": "Fiery Crystal Guard"
+  },
+  "29174": {
+    "name": "Mask of Strategic Insight"
+  },
+  "32606": {
+    "name": "Timeless Coral Greatsword"
+  },
+  "27996": {
+    "name": "Blaring Horn of Fire"
+  },
+  "27648": {
+    "name": "Fire Marked Rune"
+  },
+  "19094": {
+    "name": "Sable Shoes of Flame"
+  },
+  "21893": {
+    "name": "Torch of Lxvanvom"
+  },
+  "25695": {
+    "name": "Entwood Earring"
+  },
+  "27295": {
+    "name": "Large Chunk of Ent Bark"
+  },
+  "26980": {
+    "name": "Earring of Unseen Horrors"
+  },
+  "28650": {
+    "name": "Greaves of Furious Might"
+  },
+  "26984": {
+    "name": "Mask of Simplicity"
+  },
+  "27000": {
+    "name": "Padded Tigerskin Gloves"
+  },
+  "24999": {
+    "name": "Staff of Transcendence"
+  },
+  "28666": {
+    "name": "Wristband of Echoed Thoughts"
+  },
+  "28665": {
+    "name": "Zealot's Spiked Bracer"
+  },
+  "26798": {
+    "name": "Flame Idol of Ro"
+  },
+  "21996": {
+    "name": "Cloak of Ferocity"
+  },
+  "28660": {
+    "name": "Drape of the Unending"
+  },
+  "27990": {
+    "name": "Gauntlets of Disruption"
+  },
+  "25998": {
+    "name": "Shield of the Vortex"
+  },
+  "26585": {
+    "name": "Acrylia Handled Broadsword"
+  },
+  "26749": {
+    "name": "Azaliil's Ring of Analogies"
+  },
+  "26599": {
+    "name": "Caen's Bo Staff of Fury"
+  },
+  "30569": {
+    "name": "Envenomed Moccasins"
+  },
+  "26604": {
+    "name": "Koadic's Robe of Heightened Focus"
+  },
+  "30566": {
+    "name": "Shawl of Awakenings"
+  },
+  "26564": {
+    "name": "Shield of Mental Fortitude"
+  },
+  "26587": {
+    "name": "The Sword of Ssraeshza"
+  },
+  "26584": {
+    "name": "Torque of the Wyrmlord"
+  },
+  "30570": {
+    "name": "Velvet Slippers of Harmony"
+  },
+  "21809": {
+    "name": "White Ornate Chain Bridle"
+  },
+  "24602": {
+    "name": "Ifir, Dagger of Fire"
+  },
+  "23491": {
+    "name": "Gembladed Axe"
+  },
+  "21812": {
+    "name": "Black Silken Bridle"
+  },
+  "26808": {
+    "name": "Etched Bone Ulak"
+  },
+  "26533": {
+    "name": "Geomantic Fingers of Focus"
+  },
+  "24928": {
+    "name": "Corroded Breastplate"
+  },
+  "28662": {
+    "name": "Girdle of Restoration"
+  },
+  "21999": {
+    "name": "Hoop of the Enlightened"
+  },
+  "26995": {
+    "name": "Tiny Jade Ring"
+  },
+  "26897": {
+    "name": "Staff of Swiftness"
+  },
+  "27274": {
+    "name": "Barrier of Freezing Winds"
+  },
+  "32609": {
+    "name": "Bracer of Timeless Rage"
+  },
+  "31603": {
+    "name": "Girdle of Stability"
+  },
+  "28246": {
+    "name": "Gloves of Airy Mists"
+  },
+  "24692": {
+    "name": "Jagged Timeforged Blade"
+  },
+  "20625": {
+    "name": "Serrated Dart of Energy"
+  },
+  "24570": {
+    "name": "Songblade of the Eternal"
+  },
+  "19144": {
+    "name": "Flowing Moss Mantle"
+  },
+  "27998": {
+    "name": "War Drums of the Rathe"
+  },
+  "26095": {
+    "name": "Crow Footed Lance"
+  },
+  "21872": {
+    "name": "Green Fist of Death"
+  },
+  "21993": {
+    "name": "Bracer of the Inferno"
+  },
+  "32100": {
+    "name": "Earthen Bracer of Fortitude"
+  },
+  "28649": {
+    "name": "Ethereal Silk Leggings"
+  },
+  "22894": {
+    "name": "Hammer of the Timeweaver"
+  },
+  "26989": {
+    "name": "Prismatic Ring of Resistance"
+  },
+  "28661": {
+    "name": "Shawl of Eternal Forces"
+  },
+  "20496": {
+    "name": "Spool of Woven Time"
+  },
+  "26987": {
+    "name": "Stone of Flowing Time"
+  },
+  "27280": {
+    "name": "Whorl of Unnatural Forces"
+  },
+  "32110": {
+    "name": "Wristband of Icy Vengeance"
+  },
+  "26990": {
+    "name": "Band of Primordial Energy"
+  },
+  "22999": {
+    "name": "Darkblade of the Warlord"
+  },
+  "24793": {
+    "name": "Greatstaff of Power"
+  },
+  "28652": {
+    "name": "Pants of Furious Might"
+  },
+  "28659": {
+    "name": "Pauldrons of Devastation"
+  },
+  "32610": {
+    "name": "Sandals of Empowerment"
+  },
+  "27298": {
+    "name": "Shield of Strife"
+  },
+  "21338": {
+    "name": "Ton Po's Mystical Pouch"
+  },
+  "26982": {
+    "name": "Visor of the Berserker"
+  },
+  "25989": {
+    "name": "Blade of War"
+  },
+  "19082": {
+    "name": "Boots of the Warmaster"
+  },
+  "22883": {
+    "name": "Cudgel of Wrecking"
+  },
+  "28653": {
+    "name": "Glowing Chains"
+  },
+  "26985": {
+    "name": "Veil of Warmth"
+  },
+  "26899": {
+    "name": "Wand of the Vortex"
+  },
+  "22878": {
+    "name": "Grandmasters Mace"
+  },
+  "27267": {
+    "name": "Ivory Etched Aegis"
+  },
+  "28648": {
+    "name": "Cap of Flowing Time"
+  },
+  "22986": {
+    "name": "Edge of Eternity"
+  },
+  "28664": {
+    "name": "Girdle of Intense Durability"
+  },
+  "26996": {
+    "name": "Gloves of the Unseen"
+  },
+  "26994": {
+    "name": "Ring of Evasion"
+  },
+  "28663": {
+    "name": "Runewarded Belt"
+  },
+  "20898": {
+    "name": "Symbol of the Planemasters"
+  },
+  "24699": {
+    "name": "Time's Antithesis"
+  },
+  "26981": {
+    "name": "Veil of Lost Hopes"
+  },
+  "26561": {
+    "name": "Akhevan Shadow Shears"
+  },
+  "26560": {
+    "name": "Crys`Va Mask"
+  },
+  "30540": {
+    "name": "Flowing Gossamer Cloak"
+  },
+  "26570": {
+    "name": "Frizznik's Robe of Tinkering"
+  },
+  "26566": {
+    "name": "Ishinaear Xiall"
+  },
+  "30532": {
+    "name": "Leggings of Serenity"
+  },
+  "30533": {
+    "name": "Mantle of Fortitude"
+  },
+  "26601": {
+    "name": "Shadowed Storm Sphere"
+  },
+  "26598": {
+    "name": "Shadowed Torment"
+  },
+  "26574": {
+    "name": "Shadowsong Cloak"
+  },
+  "32176": {
+    "name": "Temariel Vex"
+  },
+  "28654": {
+    "name": "Amulet of Crystal Dreams"
+  },
+  "26991": {
+    "name": "Band of Prismatic Focus"
+  },
+  "28667": {
+    "name": "Bracer of Precision"
+  },
+  "32607": {
+    "name": "Circlet of Flowing Time"
+  },
+  "23498": {
+    "name": "Hopebringer"
+  },
+  "28658": {
+    "name": "Mantle of Deadly Precision"
+  },
+  "22959": {
+    "name": "Serpent of Vindication"
+  },
+  "28656": {
+    "name": "Tactician's Shield"
+  },
+  "26988": {
+    "name": "Winged Storm Boots"
+  },
+  "21995": {
+    "name": "Armguards of the Brute"
+  },
+  "21998": {
+    "name": "Cape of Endless Torment"
+  },
+  "28605": {
+    "name": "Coif of Flowing Time"
+  },
+  "22890": {
+    "name": "Cudgel of Venomous Hatred"
+  },
+  "21886": {
+    "name": "Hammer of Hours"
+  },
+  "26895": {
+    "name": "Orb of Clinging Death"
+  },
+  "29172": {
+    "name": "Vanazir, Dreamer's Despair"
+  },
+  "25210": {
+    "name": "Blade of Carnage"
+  },
+  "25213": {
+    "name": "Flayed Barbarian Hide Mask"
+  },
+  "25212": {
+    "name": "Flayed Barbarian Skin Leggings"
+  },
+  "25209": {
+    "name": "Helmet of Rallos Zek"
+  },
+  "25211": {
+    "name": "Ring of Destruction"
+  },
+  "25208": {
+    "name": "War Bow of Rallos Zek"
+  },
+  "25987": {
+    "name": "Basalt Greatsword of the Protector"
+  },
+  "24590": {
+    "name": "Gleaming Obsidian Shard"
+  },
+  "21884": {
+    "name": "Mithril Battle Hammer"
+  },
+  "20469": {
+    "name": "Sphere of Encased Flame"
+  },
+  "26748": {
+    "name": "Wand of the Firestorm"
+  },
+  "22896": {
+    "name": "Club of Slime"
+  },
+  "27818": {
+    "name": "Bow of the Tempest"
+  },
+  "22907": {
+    "name": "Furious Hammer of Zek"
+  },
+  "26799": {
+    "name": "Globe of Mystical Protection"
+  },
+  "20627": {
+    "name": "Hammer of Holy Vengeance"
+  },
+  "28647": {
+    "name": "Helm of Flowing Time"
+  },
+  "22879": {
+    "name": "Obsidian Scimitar of War"
+  },
+  "25228": {
+    "name": "Resplendent War Maul"
+  },
+  "26740": {
+    "name": "Shinai of the Ancients"
+  },
+  "26986": {
+    "name": "Shoes of Fleeting Fury"
+  },
+  "32608": {
+    "name": "Temporal Chainmail Sleeves"
+  },
+  "21876": {
+    "name": "Wand of Temporal Power"
+  },
+  "27908": {
+    "name": "Acid Pocked Mithril Blade"
+  },
+  "27851": {
+    "name": "Crystallized Acid Bracer"
+  },
+  "27853": {
+    "name": "Crystallized Acid Pauldrons"
+  },
+  "27883": {
+    "name": "Robe of Viscid Slime"
+  },
+  "27888": {
+    "name": "Viscid Slime Gloves"
+  },
+  "26865": {
+    "name": "Symbol of the Plaguebringer"
+  },
+  "21866": {
+    "name": "The Rotting Fist"
+  },
+  "26034": {
+    "name": "Willsapper"
+  },
+  "26551": {
+    "name": "Belt of Virility"
+  },
+  "28843": {
+    "name": "Bonecurse"
+  },
+  "26532": {
+    "name": "Boots of Stability"
+  },
+  "28829": {
+    "name": "Ichorflow"
+  },
+  "26557": {
+    "name": "Jenniy's Two-Tone Cuirass"
+  },
+  "26541": {
+    "name": "Wand of Musing"
+  },
+  "30504": {
+    "name": "Aegis of Ice"
+  },
+  "30503": {
+    "name": "Frostreaver"
+  },
+  "30505": {
+    "name": "Frostreaver's Embroidered Cloak"
+  },
+  "30507": {
+    "name": "Frostreaver's Velium Crown"
+  },
+  "30506": {
+    "name": "Ring of Winter"
+  },
+  "30502": {
+    "name": "Tri-Plated Golden Hackle Hammer"
+  },
+  "31201": {
+    "name": "White Bear Pelt Cloak"
+  },
+  "24936": {
+    "name": "Corroded Chain Leggings"
+  },
+  "24935": {
+    "name": "Corroded Chain Tunic"
+  },
+  "24943": {
+    "name": "Eroded Leather Leggings"
+  },
+  "24942": {
+    "name": "Eroded Leather Tunic"
+  },
+  "24949": {
+    "name": "Torn Enchanted Silk Robe"
+  },
+  "22889": {
+    "name": "Heavy Bludgeoner"
+  },
+  "26737": {
+    "name": "Exquisite Puresteel Wraps"
+  },
+  "26788": {
+    "name": "Xephyrus, Wand of the Flowing Wind"
+  },
+  "24773": {
+    "name": "Bejeweled Dagger of Summoning"
+  },
+  "21875": {
+    "name": "Cudgel of Glowing Clay"
+  },
+  "22972": {
+    "name": "Clawed Earthcrafter's Hoop"
+  },
+  "24695": {
+    "name": "Reinforced Mephit Talon"
+  },
+  "21865": {
+    "name": "Innovators Hammer"
+  },
+  "27286": {
+    "name": "Self Contained Force Barrier"
+  },
+  "20938": {
+    "name": "Silver Disc"
+  },
+  "24696": {
+    "name": "Dirk of the Ravaging Wind"
+  },
+  "20621": {
+    "name": "Earthen Bile"
+  },
+  "24879": {
+    "name": "Earthspined Staff"
+  },
+  "24585": {
+    "name": "Sword of Primordial Power"
+  },
+  "24998": {
+    "name": "Mithril Shod Staff"
+  },
+  "26869": {
+    "name": "Ent Leaf"
+  },
+  "25986": {
+    "name": "Plankton Laced Greatsword"
+  },
+  "30530": {
+    "name": "Bloodied Berserker's Blade"
+  },
+  "30551": {
+    "name": "Yttrium Studded Mantle"
+  },
+  "27327": {
+    "name": "Primal Velium Battle Axe"
+  },
+  "27321": {
+    "name": "Primal Velium Battlehammer"
+  },
+  "27324": {
+    "name": "Primal Velium Brawl Stick"
+  },
+  "27323": {
+    "name": "Primal Velium Claidhmore"
+  },
+  "27326": {
+    "name": "Primal Velium Reinforced Bow"
+  },
+  "27322": {
+    "name": "Primal Velium Spear"
+  },
+  "27325": {
+    "name": "Primal Velium War Lance"
+  },
+  "27328": {
+    "name": "Primal Velium Warsword"
+  },
+  "29481": {
+    "name": "Besmirched Mask of Conception"
+  },
+  "29455": {
+    "name": "Boots of the Ancients"
+  },
+  "29448": {
+    "name": "Bracchium Secundae"
+  },
+  "29445": {
+    "name": "Clandestine Veil of M`Rata"
+  },
+  "29457": {
+    "name": "Clawed Coat of Tyro"
+  },
+  "29451": {
+    "name": "Despondent Shroud"
+  },
+  "29446": {
+    "name": "Dowel of the Secundarum"
+  },
+  "29462": {
+    "name": "Eye of Tjudawos"
+  },
+  "29458": {
+    "name": "Fascia Secundae"
+  },
+  "29452": {
+    "name": "Fedora Secundae"
+  },
+  "29447": {
+    "name": "Gloves of Temperantia"
+  },
+  "29450": {
+    "name": "Heritage of Secundae"
+  },
+  "29453": {
+    "name": "Legacy of Tyro"
+  },
+  "29456": {
+    "name": "Lungi of the Forbidden"
+  },
+  "29426": {
+    "name": "Premier Bow of Secundae"
+  },
+  "29460": {
+    "name": "Sharpened Dragon's Scale"
+  },
+  "29459": {
+    "name": "Surreptitious Brooch"
+  },
+  "29454": {
+    "name": "Tenuous Dragonscale Slippers"
+  },
+  "29449": {
+    "name": "Tyro's Manuscript"
+  },
+  "26582": {
+    "name": "Blood Veil of the Shissar"
+  },
+  "26579": {
+    "name": "Imperial Symbol of the Shissar"
+  },
+  "26553": {
+    "name": "Mace of Confusion"
+  },
+  "26549": {
+    "name": "Ssraeshzaen Blood Cord"
+  },
+  "26552": {
+    "name": "Ssraeshzaen Honor Guard Bracer"
+  },
+  "30558": {
+    "name": "Bone Golem Vambraces"
+  },
+  "26512": {
+    "name": "Earring of Resistance"
+  },
+  "26543": {
+    "name": "Focus Crystal"
+  },
+  "26827": {
+    "name": "Khashek's Katar"
+  },
+  "28812": {
+    "name": "Righteousness"
+  },
+  "30560": {
+    "name": "Scale Mesh Vambraces"
+  },
+  "30559": {
+    "name": "Serpent Skin Armlet"
+  },
+  "26501": {
+    "name": "Silver Lined Sleeves"
+  },
+  "24576": {
+    "name": "Blade of the Tempest"
+  },
+  "27815": {
+    "name": "Bow of Contortion"
+  },
+  "24647": {
+    "name": "Dart of Immobility"
+  },
+  "20623": {
+    "name": "Signet of the Advisor"
+  },
+  "28850": {
+    "name": "Blindfoe"
+  },
+  "30548": {
+    "name": "Faded Skull Medallion"
+  },
+  "26581": {
+    "name": "Great Helm of True Vision"
+  },
+  "30535": {
+    "name": "Hoop of Emptiness"
+  },
+  "28830": {
+    "name": "Keen Edged Cleaver"
+  },
+  "28833": {
+    "name": "Lava Infused Bludgeon"
+  },
+  "30571": {
+    "name": "Platinum Mesh Guard"
+  },
+  "30549": {
+    "name": "Polished Bone Collar"
+  },
+  "30536": {
+    "name": "Pristine Jade Idol"
+  },
+  "26819": {
+    "name": "Savage Lord's Pitchatka"
+  },
+  "26595": {
+    "name": "Shield of Auras"
+  },
+  "28815": {
+    "name": "Shield of Holy Vigor"
+  },
+  "28846": {
+    "name": "Sword of Lost Crusades"
+  },
+  "28804": {
+    "name": "Tendonslicer"
+  },
+  "30555": {
+    "name": "Bone Golem Greaves"
+  },
+  "28841": {
+    "name": "Burning Scepter of Elements"
+  },
+  "28802": {
+    "name": "Rei`s Battleworn Dirk"
+  },
+  "30557": {
+    "name": "Scale Mesh Leggings"
+  },
+  "28837": {
+    "name": "Scimitar of Oak"
+  },
+  "30556": {
+    "name": "Shadowed Silk Pants"
+  },
+  "28828": {
+    "name": "Smouldershank"
+  },
+  "28807": {
+    "name": "Sword of Nochular"
+  },
+  "26505": {
+    "name": "Talisman of Evasion"
+  },
+  "27316": {
+    "name": "Black Runed Pants"
+  },
+  "28855": {
+    "name": "Bloodfrenzy"
+  },
+  "30534": {
+    "name": "Circle of Smoke"
+  },
+  "26580": {
+    "name": "Claw of Vyzh`dra"
+  },
+  "30541": {
+    "name": "Cloak of Dark Shadows"
+  },
+  "26567": {
+    "name": "Cloak of Mourning"
+  },
+  "30565": {
+    "name": "Crystallized Serpent Eye"
+  },
+  "27315": {
+    "name": "Fangs of Vyzh`dra"
+  },
+  "28826": {
+    "name": "Goldenrod"
+  },
+  "28806": {
+    "name": "Khalshazar"
+  },
+  "30562": {
+    "name": "Nocnivin's Small Book of Logic"
+  },
+  "30527": {
+    "name": "Opaline Charm"
+  },
+  "30564": {
+    "name": "Vengeful Mail of the Void"
+  },
+  "30563": {
+    "name": "Wistful Tunic of the Void"
+  },
+  "27314": {
+    "name": "Band of Disrupted Auras"
+  },
+  "28834": {
+    "name": "Blazing Rapier"
+  },
+  "28810": {
+    "name": "Elphorn`s Cleaver"
+  },
+  "26848": {
+    "name": "Fist of Mithril"
+  },
+  "27313": {
+    "name": "Gleaming Serpent Tooth Choker"
+  },
+  "28840": {
+    "name": "Memory"
+  },
+  "28844": {
+    "name": "Scepter of Paralysis"
+  },
+  "27311": {
+    "name": "Scorched Silver Pauldrons"
+  },
+  "27312": {
+    "name": "Shroud of Unholiness"
+  },
+  "30545": {
+    "name": "Black Runed Talisman"
+  },
+  "30546": {
+    "name": "Corrupted Skull Earring"
+  },
+  "30542": {
+    "name": "Dusty Blue Shawl"
+  },
+  "28836": {
+    "name": "Hammer of the Sun"
+  },
+  "27317": {
+    "name": "Ssraeshzian Longbow"
+  },
+  "30547": {
+    "name": "Tainted Scale Belt"
+  },
+  "28809": {
+    "name": "Windspeeder"
+  },
+  "86930": {
+    "name": "Item 86930"
+  },
+  "26859": {
+    "name": "Savage Lord's Eitchatka"
+  },
+  "30544": {
+    "name": "Ssraeshzian Longbow"
+  },
+  "31318": {
+    "name": "Amulet of the Dreadgazer"
+  },
+  "31322": {
+    "name": "Circlet of Summer"
+  },
+  "31321": {
+    "name": "Hand of the Master"
+  },
+  "31323": {
+    "name": "Mask of Fall"
+  },
+  "31319": {
+    "name": "Reaper's Ring"
+  },
+  "31317": {
+    "name": "Rocksmasher"
+  },
+  "31316": {
+    "name": "Whitestone Shield"
+  },
+  "31348": {
+    "name": "Blackstar, Mace of Night"
+  },
+  "31351": {
+    "name": "Cekenar's Claw"
+  },
+  "31350": {
+    "name": "Meljeldin, Bane of Giants"
+  },
+  "31349": {
+    "name": "Silver Dagger of Destruction"
+  },
+  "31214": {
+    "name": "Barrier of Sound"
+  },
+  "31213": {
+    "name": "Bow of the Silver Fang"
+  },
+  "31218": {
+    "name": "Melodic Charm"
+  },
+  "31222": {
+    "name": "Ring of Superiority"
+  },
+  "31219": {
+    "name": "Runed Fang Necklace"
+  },
+  "31220": {
+    "name": "Shadow Fang Necklace"
+  },
+  "31211": {
+    "name": "Shield of Fury"
+  },
+  "31217": {
+    "name": "Shield of Thorns"
+  },
+  "31212": {
+    "name": "Shield of the Protector"
+  },
+  "31216": {
+    "name": "Shield of the Wurms"
+  },
+  "31384": {
+    "name": "Bracelet of the Sky"
+  },
+  "31379": {
+    "name": "Claw of Lightning"
+  },
+  "31376": {
+    "name": "Cloak of the Sky"
+  },
+  "31378": {
+    "name": "Mask of the Sky"
+  },
+  "31381": {
+    "name": "Onyx Chain Sleeves"
+  },
+  "31377": {
+    "name": "Ring of the Sky"
+  },
+  "31383": {
+    "name": "Twisted Steel Bastard Sword"
+  },
+  "31382": {
+    "name": "Twisted Steel Gauntlets"
+  },
+  "31393": {
+    "name": "Bracelet of Protection"
+  },
+  "31400": {
+    "name": "Eye of the Rigtorgn"
+  },
+  "31395": {
+    "name": "Rekeklo's War Sword"
+  },
+  "31398": {
+    "name": "Shovel of the Harvest"
+  },
+  "31388": {
+    "name": "Ancient Wyvern Hide Boots"
+  },
+  "31386": {
+    "name": "Ancient Wyvern Hide Leggings"
+  },
+  "31387": {
+    "name": "Ancient Wyvern Hide Sleeves"
+  },
+  "31385": {
+    "name": "Ancient Wyvern Hide Tunic"
+  },
+  "31390": {
+    "name": "Cloak of Venom"
+  },
+  "31392": {
+    "name": "Ikatiar's Stinger"
+  },
+  "31389": {
+    "name": "Mask of Venom"
+  },
+  "31391": {
+    "name": "Poison Soaked Tunic"
+  },
+  "31369": {
+    "name": "Blydreln's Bane"
+  },
+  "31372": {
+    "name": "Crown of Resiliance"
+  },
+  "31370": {
+    "name": "Earring of the Icecaster"
+  },
+  "31375": {
+    "name": "Facesmasher"
+  },
+  "31368": {
+    "name": "Helmet of the Crawler"
+  },
+  "31374": {
+    "name": "Onyx Chain Leggings"
+  },
+  "31371": {
+    "name": "Silver Chains"
+  },
+  "31373": {
+    "name": "Sprinkler of the Spirits"
+  },
+  "31366": {
+    "name": "Cloak of Thorns"
+  },
+  "31364": {
+    "name": "Girdle of Dark Power"
+  },
+  "31363": {
+    "name": "Mask of Terror"
+  },
+  "31365": {
+    "name": "Medal of Deep Thought"
+  },
+  "31367": {
+    "name": "Nevederia's Claw"
+  },
+  "31362": {
+    "name": "Nevederia's Horn"
+  },
+  "31360": {
+    "name": "Nevederia's Left Eye"
+  },
+  "31361": {
+    "name": "Nevederia's Right Eye"
+  },
+  "31408": {
+    "name": "Boots of Superiority"
+  },
+  "31405": {
+    "name": "Breastplate of Superiority"
+  },
+  "31402": {
+    "name": "Gloves of Stability"
+  },
+  "31401": {
+    "name": "Silver Girdle of Stability"
+  },
+  "31407": {
+    "name": "Truesight Helmet"
+  },
+  "31330": {
+    "name": "Amulet of the Storm"
+  },
+  "31325": {
+    "name": "Beldron's Vambraces of Impiety"
+  },
+  "31327": {
+    "name": "Boots of the Dead Dream"
+  },
+  "31324": {
+    "name": "Chestplate of Fiery Might"
+  },
+  "31328": {
+    "name": "Sky Watcher's Monocle"
+  },
+  "31326": {
+    "name": "Staff of the Silent Star"
+  },
+  "31331": {
+    "name": "Thunderstone"
+  },
+  "31329": {
+    "name": "Vambraces of Discontent"
+  },
+  "31313": {
+    "name": "Ancient Pirate's Eyepatch"
+  },
+  "31314": {
+    "name": "Bracelet of the Deep Sea"
+  },
+  "31310": {
+    "name": "Greaves of the Deep Sea"
+  },
+  "31311": {
+    "name": "Helm of the Deep Sea"
+  },
+  "31309": {
+    "name": "Net of the Deep Sea"
+  },
+  "31312": {
+    "name": "Orb of the Deep Sea"
+  },
+  "31315": {
+    "name": "Siren Song, Dagger of the Sea"
+  },
+  "31308": {
+    "name": "Trident of the Deep Sea"
+  },
+  "31344": {
+    "name": "Ancient Fire Etched Flamberge"
+  },
+  "31346": {
+    "name": "Dawncaller, Blade of the Morning"
+  },
+  "31345": {
+    "name": "Flame Etched Short Sword"
+  },
+  "31343": {
+    "name": "Kreizenn's Flame"
+  },
+  "31340": {
+    "name": "Shiny Metallic Gloves"
+  },
+  "31342": {
+    "name": "Shiny Metallic Sleeves"
+  },
+  "31347": {
+    "name": "Silver Disk"
+  },
+  "31341": {
+    "name": "Verlekarnorm's Horn of Disaster"
+  },
+  "31305": {
+    "name": "Gaudralek, Sword of the Sky"
+  },
+  "31306": {
+    "name": "Onyx Gauntlets"
+  },
+  "31307": {
+    "name": "Silver Bracelet of Rage"
+  },
+  "31300": {
+    "name": "Silver Whip of Rage"
+  },
+  "31304": {
+    "name": "Sledge of Smashing"
+  },
+  "31301": {
+    "name": "Vyemm's Fang"
+  },
+  "31303": {
+    "name": "Vyemm's Left Eye"
+  },
+  "31302": {
+    "name": "Vyemm's Right Eye"
+  },
+  "31357": {
+    "name": "Axe of Resistance"
+  },
+  "31356": {
+    "name": "Great Spear of Dawn"
+  },
+  "31359": {
+    "name": "Shield of Midnight"
+  },
+  "31358": {
+    "name": "Shield of the Dawn"
+  },
+  "31413": {
+    "name": "Black Rock Maul of Crushing"
+  },
+  "31417": {
+    "name": "Circlet of Suffering"
+  },
+  "31412": {
+    "name": "Emerald Bastardsword of Purity"
+  },
+  "31415": {
+    "name": "Lance of Thunder"
+  },
+  "31411": {
+    "name": "Necklace of Nightstalking"
+  },
+  "31416": {
+    "name": "Pauldrons of Blight"
+  },
+  "31418": {
+    "name": "Transparent Eyepatch"
+  },
+  "31414": {
+    "name": "True Mithril Breastplate"
+  },
+  "31242": {
+    "name": "Abashi's Rod of Disempowerment"
+  },
+  "31233": {
+    "name": "Akkirus' Mask of Warfare"
+  },
+  "31223": {
+    "name": "Brother Xave's Headband"
+  },
+  "31246": {
+    "name": "Camii's Bracer of Vigor"
+  },
+  "31231": {
+    "name": "Crystasia's Crystal Ring"
+  },
+  "31227": {
+    "name": "Do`Vassir's Gauntlets of Might"
+  },
+  "31235": {
+    "name": "Feeliux's Cord of Velocity"
+  },
+  "31241": {
+    "name": "Gharn's Rock of Smashing"
+  },
+  "31226": {
+    "name": "Hobart's War Helmet"
+  },
+  "31243": {
+    "name": "Jaelen's Katana"
+  },
+  "31237": {
+    "name": "Kelsiferous' Armband of Artistry"
+  },
+  "31238": {
+    "name": "Maclaer's Boots of Silence"
+  },
+  "31224": {
+    "name": "Mrylokar's Dagger of Vengeance"
+  },
+  "31232": {
+    "name": "Palladius' Axe of Slaughter"
+  },
+  "31229": {
+    "name": "Rowyl's Metal Armguards"
+  },
+  "31239": {
+    "name": "Sal`Varae's Robe of Darkness"
+  },
+  "31245": {
+    "name": "Sirran's Boots of Insanity"
+  },
+  "31228": {
+    "name": "Solist's Earring of Insight"
+  },
+  "31244": {
+    "name": "Ssra's Bloodstone Eyepatch"
+  },
+  "31225": {
+    "name": "Tolan's Longsword of the Glade"
+  },
+  "31234": {
+    "name": "Valtron's Necklace of Wonder"
+  },
+  "31240": {
+    "name": "Viik's Pauldrons of Pain"
+  },
+  "31236": {
+    "name": "Vyrinn's Earring of Insanity"
+  },
+  "31230": {
+    "name": "Yakatizma's Shield of Crafting"
+  },
+  "31354": {
+    "name": "Dragon Skin Bracelet"
+  },
+  "31352": {
+    "name": "Spinning Orb of Confusion"
+  },
+  "31355": {
+    "name": "Tvenken's Slippers of Silence"
+  },
+  "31353": {
+    "name": "Windraider's Belt"
+  },
+  "24916": {
+    "name": "Ancient Leather Sleeves"
+  },
+  "24922": {
+    "name": "Ancient Silk Pantaloons"
+  },
+  "24926": {
+    "name": "Ancient Silk Turban"
+  },
+  "24900": {
+    "name": "Ancient Tarnished Breastplate"
+  },
+  "24909": {
+    "name": "Ancient Tarnished Chain Sleeves"
+  },
+  "24907": {
+    "name": "Ancient Tarnished Chain Tunic"
+  },
+  "24902": {
+    "name": "Ancient Tarnished Vambraces"
+  },
+  "31215": {
+    "name": "Shield of Dragonkind"
+  },
+  "31221": {
+    "name": "Silent Fang Necklace"
+  },
+  "24980": {
+    "name": "Tattered Silk Boots"
+  },
+  "24978": {
+    "name": "Tattered Silk Pantaloons"
+  },
+  "24977": {
+    "name": "Tattered Silk Robe"
+  },
+  "24979": {
+    "name": "Tattered Silk Sleeves"
+  },
+  "24982": {
+    "name": "Tattered Silk Turban"
+  },
+  "24973": {
+    "name": "Unadorned Leather Boots"
+  },
+  "24971": {
+    "name": "Unadorned Leather Leggings"
+  },
+  "24972": {
+    "name": "Unadorned Leather Sleeves"
+  },
+  "24970": {
+    "name": "Unadorned Leather Tunic"
+  },
+  "24956": {
+    "name": "Unadorned Breastplate"
+  },
+  "24960": {
+    "name": "Unadorned Plate Bracer"
+  },
+  "24962": {
+    "name": "Unadorned Plate Gauntlets"
+  },
+  "24957": {
+    "name": "Unadorned Plate Greaves"
+  },
+  "24961": {
+    "name": "Unadorned Plate Helmet"
+  },
+  "24958": {
+    "name": "Unadorned Plate Vambraces"
+  },
+  "24966": {
+    "name": "Unadorned Chain Boots"
+  },
+  "24969": {
+    "name": "Unadorned Chain Gauntlets"
+  },
+  "24964": {
+    "name": "Unadorned Chain Leggings"
+  },
+  "24965": {
+    "name": "Unadorned Chain Sleeves"
+  },
+  "24963": {
+    "name": "Unadorned Chain Tunic"
+  },
+  "25095": {
+    "name": "Bone Bracelet of Condemnation"
+  },
+  "25298": {
+    "name": "Bone Ring of Condemnation"
+  },
+  "25097": {
+    "name": "Boots of Bladecalling"
+  },
+  "25296": {
+    "name": "Crystal Rod of Confusion"
+  },
+  "25094": {
+    "name": "Vermilion Robe of Torrefaction"
+  },
+  "28959": {
+    "name": "Cloak of Maneuvering"
+  },
+  "28902": {
+    "name": "Dark Wind Shroud"
+  },
+  "28103": {
+    "name": "Great Bow of Slaughter"
+  },
+  "28968": {
+    "name": "Wand of Deflection"
+  },
+  "27141": {
+    "name": "Peerless Dragonleg Breeches"
+  },
+  "27244": {
+    "name": "Harla Dar's Talisman"
+  },
+  "27156": {
+    "name": "Matchless Dragonspine Vambraces"
+  },
+  "27255": {
+    "name": "Klandicar's Talisman"
+  },
+  "27148": {
+    "name": "Peerless Dragonhide Breastplate"
+  },
+  "27115": {
+    "name": "Worked Dragonhide Breastplate"
+  },
+  "27256": {
+    "name": "Sontalak's Talisman"
+  },
+  "20896": {
+    "name": "Air Fetish"
+  },
+  "22969": {
+    "name": "Sparkling Shortsword"
+  },
+  "24569": {
+    "name": "Rune Stamped Blade"
+  },
+  "24586": {
+    "name": "Akkapan's Tear"
+  },
+  "24587": {
+    "name": "Ivory Hilted Cleaver"
+  },
+  "25857": {
+    "name": "Gauntlets of Dragon Slaying"
+  },
+  "25858": {
+    "name": "Belt of Dwarf Slaying"
+  },
+  "26836": {
+    "name": "Horns of Frenzy"
+  },
+  "26849": {
+    "name": "Fist of Acrylia"
+  },
+  "27273": {
+    "name": "Bulwark of Shimmering Steel"
+  },
+  "27646": {
+    "name": "Ornate Abalone Recurve Bow"
+  },
+  "27950": {
+    "name": "Ring of Dreadful Dreams"
+  },
+  "27951": {
+    "name": "Pearl of Dread"
+  },
+  "27952": {
+    "name": "Dread Coronet"
+  },
+  "27953": {
+    "name": "Fright Imbued Battlestaff"
+  },
+  "27954": {
+    "name": "Mantle of Paralyzing Fright"
+  },
+  "27955": {
+    "name": "Talisman of Fright"
+  },
+  "27956": {
+    "name": "Frightful Shroud"
+  },
+  "27957": {
+    "name": "Terror Woven Wraps"
+  },
+  "27958": {
+    "name": "Boots of Hidden Terror"
+  },
+  "27959": {
+    "name": "Terror Forged Short Sword"
+  },
+  "27960": {
+    "name": "Trinket of Ancient Fears"
+  },
+  "27961": {
+    "name": "Feartouched Greatsword"
+  },
+  "27962": {
+    "name": "Bladed Thulian Eviscerator"
+  },
+  "27963": {
+    "name": "Fearsome Girdle"
+  },
+  "27964": {
+    "name": "Slime Crusted Shoes"
+  },
+  "27986": {
+    "name": "Alabaster Hilted Wind Bow"
+  },
+  "28856": {
+    "name": "Scepter of Channeled Lightning"
+  },
+  "28982": {
+    "name": "Gauntlets of View"
+  },
+  "29188": {
+    "name": "Signet of the Shrine"
+  },
+  "29189": {
+    "name": "Aegis of the Shrine"
+  },
+  "29190": {
+    "name": "Amulet of the Shrine"
+  },
+  "29191": {
+    "name": "Scepter of the Shrine"
+  },
+  "29192": {
+    "name": "Wurmscale Encrusted Armguards"
+  },
+  "29339": {
+    "name": "Mark of the Master"
+  },
+  "29340": {
+    "name": "Boots of the Savage"
+  },
+  "29345": {
+    "name": "Rod of the Healers"
+  },
+  "29433": {
+    "name": "Ancient Prismatic Bow"
+  },
+  "29434": {
+    "name": "Ancient Prismatic Lance"
+  },
+  "29435": {
+    "name": "Ancient Prismatic Spear"
+  },
+  "29436": {
+    "name": "Ancient Prismatic Claymore"
+  },
+  "29437": {
+    "name": "Ancient Prismatic Brawl Stick"
+  },
+  "29438": {
+    "name": "Ancient Prismatic Battlehammer"
+  },
+  "29439": {
+    "name": "Ancient Prismatic Warsword"
+  },
+  "29440": {
+    "name": "Ancient Prismatic Axe"
+  },
+  "29441": {
+    "name": "Ancient Prismatic Fist Wraps"
+  },
+  "29442": {
+    "name": "Ancient Prismatic Staff"
+  },
+  "29443": {
+    "name": "Ancient Prismatic Stiletto"
+  },
+  "29444": {
+    "name": "Ancient Prismatic Mace"
+  },
+  "29476": {
+    "name": "Fist of Pummeling Prowess"
+  },
+  "29477": {
+    "name": "Velium Fraught Shackles"
+  },
+  "29480": {
+    "name": "Tome of Innovation"
+  },
+  "29482": {
+    "name": "Sightless Velium Eye"
+  },
+  "29645": {
+    "name": "White Dragonscale Boots"
+  },
+  "29647": {
+    "name": "Clawed Griffin Sword"
+  },
+  "29648": {
+    "name": "White Dragon Helm"
+  },
+  "29686": {
+    "name": "Bracer of Benevolence"
+  },
+  "30380": {
+    "name": "Blade of the Swarm"
+  },
+  "30388": {
+    "name": "Rluas's Chromatic Ring"
+  },
+  "30393": {
+    "name": "Chromatic Gauntlets of the Ages"
+  },
+  "32180": {
+    "name": "Mind Worm Hide Mantle"
+  },
+  "32181": {
+    "name": "Mind Worm Hide Belt"
+  },
+  "32182": {
+    "name": "Insanity Crawler Fang"
+  },
+  "32183": {
+    "name": "Insanity Crawler Hide Shield"
+  },
+  "32184": {
+    "name": "Orb of Mental Energy"
+  },
+  "56018": {
+    "name": "(item 56018)"
+  },
+  "68195": {
+    "name": "(item 68195)"
+  },
+  "68196": {
+    "name": "(item 68196)"
+  },
+  "68197": {
+    "name": "(item 68197)"
+  },
+  "68199": {
+    "name": "(item 68199)"
+  },
+  "68217": {
+    "name": "Ossein of Limitless Time"
+  },
+  "79883": {
+    "name": "Circlet of the Struggle"
+  },
+  "79887": {
+    "name": "Signet of Fiel'Tian"
+  },
+  "79895": {
+    "name": "Pauldrons of the Eternal Storm"
   }
 }
