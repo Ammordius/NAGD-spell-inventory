@@ -991,6 +991,19 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 else:
                     focus_scores[category] = 0
         
+        # Beneficial / Detrimental Spell Haste: for classes in the generic path (Cleric, Shaman, Druid, Beastlord, etc.)
+        # best_focii only has 'Spell Haste', not these subcategories. Populate from char_spell_haste_cats so the
+        # UI shows the correct % when the character has e.g. 30% Beneficial Spell Haste from an item.
+        if char_spell_haste_cats and best_haste_by_cat:
+            if 'Beneficial Spell Haste' not in focus_scores:
+                best_bene = max(best_haste_by_cat.get('Bene', 0), best_haste_by_cat.get('All', 0)) or best_focii.get('Spell Haste', 33.0)
+                bene_pct = max(char_spell_haste_cats.get('Bene', 0), char_spell_haste_cats.get('All', 0))
+                focus_scores['Beneficial Spell Haste'] = (bene_pct / best_bene * 100) if best_bene > 0 and bene_pct > 0 else 0
+            if 'Detrimental Spell Haste' not in focus_scores:
+                best_det = max(best_haste_by_cat.get('Det', 0), best_haste_by_cat.get('All', 0)) or best_focii.get('Spell Haste', 33.0)
+                det_pct = max(char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
+                focus_scores['Detrimental Spell Haste'] = (det_pct / best_det * 100) if best_det > 0 and det_pct > 0 else 0
+        
         # Add haste binary check for all ATK classes (mnk, rog, war, pal, shd, bst, brd, rng)
         # Binary: 30% item haste (70% buff + 30% item = 100% total) = 100%, otherwise 0%
         if char_class in CLASSES_NEED_ATK:

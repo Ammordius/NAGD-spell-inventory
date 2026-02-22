@@ -2123,8 +2123,13 @@
                     if (!fw) return keys;
                     for (const [k, v] of Object.entries(fw)) {
                         if (typeof v === 'object' && v !== null) {
-                            for (const sub of Object.keys(v)) keys.push(k === 'Spell Damage' ? `Spell Damage (${sub})` : `${k} (${sub})`);
-                        } else keys.push(k);
+                            for (const sub of Object.keys(v)) {
+                                const w = (v[sub] != null && typeof v[sub] === 'number') ? v[sub] : 0;
+                                if (w > 0) keys.push(k === 'Spell Damage' ? `Spell Damage (${sub})` : `${k} (${sub})`);
+                            }
+                        } else if (typeof v === 'number' && v > 0) {
+                            keys.push(k);
+                        }
                     }
                     return keys;
                 }
@@ -2132,9 +2137,22 @@
                 if (scoredFocusKeys.length > 0) {
                     scoredFocusKeys.sort((a, b) => getWeightForFocusKey(b, focusWeights) - getWeightForFocusKey(a, focusWeights));
                     html += `<div class="focus-breakdown-section"><h3>Focus breakdown (what you're scored on)</h3>`;
+                    const focusDetails = scores.focus_details || {};
                     scoredFocusKeys.forEach(focusKey => {
                         let scorePct = focusScores[focusKey];
                         if (scorePct === undefined && focusKey === 'Spell Damage') scorePct = focusScores['Spell Damage'];
+                        // Resolve score for composite keys (e.g. "Spell Mana Efficiency (Bene)") from focus_details
+                        if (scorePct === undefined) {
+                            const match = focusKey.match(/^(.+)\s+\(([^)]+)\)$/);
+                            if (match) {
+                                const [, parent, sub] = match;
+                                const rows = focusDetails[parent];
+                                if (Array.isArray(rows)) {
+                                    const row = rows.find(r => (r.cat || r.label) === sub || (r.label && r.label.toLowerCase().startsWith(sub.toLowerCase())));
+                                    if (row != null && row.score_pct != null) scorePct = row.score_pct;
+                                }
+                            }
+                        }
                         if (scorePct === undefined) scorePct = 0;
                         const barClass = scorePct >= 80 ? 'high' : scorePct >= 40 ? 'mid' : scorePct > 0 ? 'low' : 'none';
                         let sources = focusSources[focusKey];
