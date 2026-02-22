@@ -335,8 +335,30 @@ def main() -> None:
     for iid, name in id_to_name_raid.items():
         if iid not in id_to_stats_merged:
             id_to_stats_merged[iid] = {"name": name}
-    if len(id_to_stats_merged) > len(id_to_stats):
-        print(f"  Merged {len(id_to_stats_merged) - len(id_to_stats)} raid/dkp-only items into stats")
+    n_raid_merged = len(id_to_stats_merged) - len(id_to_stats)
+    if n_raid_merged:
+        print(f"  Merged {n_raid_merged} raid/dkp-only items into stats")
+
+    # Also merge focus items that have id+name in spell_focii (covers items not in raid loot)
+    if args.focii.exists():
+        focii_data = json.loads(args.focii.read_text(encoding="utf-8"))
+        focii_list = focii_data.get("focii") if isinstance(focii_data, dict) else focii_data
+        if isinstance(focii_list, list):
+            n_focii_added = 0
+            for focus in focii_list:
+                for item in focus.get("items") or []:
+                    name = (item.get("name") or "").strip()
+                    iid = item.get("id")
+                    if name and iid is not None:
+                        try:
+                            iid = int(iid)
+                        except (TypeError, ValueError):
+                            continue
+                        if iid not in id_to_stats_merged:
+                            id_to_stats_merged[iid] = {"name": name}
+                            n_focii_added += 1
+            if n_focii_added:
+                print(f"  Merged {n_focii_added} focus-only items (from spell_focii) into stats")
 
     if not args.focii.exists():
         print(f"Missing focii file: {args.focii}", file=sys.stderr)
