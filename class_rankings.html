@@ -393,7 +393,28 @@
         let normalizedClassWeights = {}; // Backend-normalized weights (focus ~35%, FT in focus); use for card when no custom
         let customWeights = {}; // User-customized weights
         let originalClassWeights = {}; // Backup of original weights
-        let focusCandidates = {}; // focus_key -> list of { item_name, item_id, value } for items that could give that focus
+        let focusCandidates = {}; // focus_key -> list of { item_name, item_id, value, classes? } for items that could give that focus
+
+        // Full class name -> EQ class abbreviation (for filtering items by usable class)
+        const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
+
+        /** Filter focus candidates to upgrades only (value > current raw) and items usable by charClass. */
+        function filterFocusCandidates(candidates, currentRawValue, charClass) {
+            if (!candidates || candidates.length === 0) return [];
+            const abbrev = charClass ? CLASS_TO_ABBREV[charClass] : null;
+            const currentRaw = (currentRawValue != null && currentRawValue !== '') ? Number(currentRawValue) : 0;
+            return candidates.filter(s => {
+                const val = (s.value != null && s.value !== '') ? Number(s.value) : 0;
+                if (val <= currentRaw) return false; // downgrade or same – hide
+                if (abbrev && s.classes) {
+                    const classes = (s.classes || '').trim().toUpperCase();
+                    if (classes === 'ALL') return true;
+                    const list = classes.split(/\s+/);
+                    if (list.indexOf(abbrev) === -1) return false; // not usable by this class
+                }
+                return true;
+            });
+        }
 
         // Weight customization functions
         function loadCustomWeights() {
@@ -2079,15 +2100,18 @@
                     totalFocusPoints += focusPoints;
                     const focusPctOfTotal = (focusPoints / totalPoints * 100).toFixed(1);
                     let rowHtml = `<tr><td>${escapeHtml(focusCat === 'FT' ? 'FT (Flowing Thought)' : focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
-                    // When not at max for this focus, show upgrade options (items that could give it, with %)
-                    if (score < 100 && weight > 0 && focusCandidates[focusCat] && focusCandidates[focusCat].length > 0) {
+                    // When not at max for this focus, show upgrade options (items that could give it, with %) – upgrades only, and usable by class
+                    const focusSources = scores.focus_sources || {};
+                    const currentRaw = (focusSources[focusCat] && focusSources[focusCat].length) ? Math.max(0, ...focusSources[focusCat].map(s => (s.value != null ? Number(s.value) : 0))) : 0;
+                    const filteredCandidates = filterFocusCandidates(focusCandidates[focusCat], currentRaw, char.class);
+                    if (score < 100 && weight > 0 && filteredCandidates.length > 0) {
                         const maxShow = 50;
-                        const candidateLinks = focusCandidates[focusCat].slice(0, maxShow).map(s => {
+                        const candidateLinks = filteredCandidates.slice(0, maxShow).map(s => {
                             const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                             const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                             return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                         }).join(', ');
-                        const more = focusCandidates[focusCat].length > maxShow ? ` (+${focusCandidates[focusCat].length - maxShow} more)` : '';
+                        const more = filteredCandidates.length > maxShow ? ` (+${filteredCandidates.length - maxShow} more)` : '';
                         const label = score === 0 ? 'Items that could give this focus (with %):' : 'Upgrades (with %):';
                         rowHtml += `<tr><td colspan="6" class="focus-candidates-row">${label} ${candidateLinks}${more}</td></tr>`;
                     }
@@ -2167,15 +2191,17 @@
                             const fw = focusWeights[focusKey] ?? (focusKey.startsWith('Spell Damage (') ? (focusWeights['Spell Damage'] && Object.values(focusWeights['Spell Damage']).reduce((a, b) => a + b, 0)) : 0);
                             return typeof fw === 'number' ? fw : 0;
                         })();
-                        // When not at max for this category, show upgrade options (items that could give this focus, with %)
-                        if (scorePct < 100 && weightForFocus > 0 && focusCandidates[focusKey] && focusCandidates[focusKey].length > 0) {
+                        // When not at max for this category, show upgrade options (upgrades only, usable by class)
+                        const currentRawBreakdown = (sources && sources.length) ? Math.max(0, ...sources.map(s => (s.value != null ? Number(s.value) : 0))) : 0;
+                        const filteredBreakdown = filterFocusCandidates(focusCandidates[focusKey], currentRawBreakdown, char.class);
+                        if (scorePct < 100 && weightForFocus > 0 && filteredBreakdown.length > 0) {
                             const maxShow = 50;
-                            const candidateLinks = focusCandidates[focusKey].slice(0, maxShow).map(s => {
+                            const candidateLinks = filteredBreakdown.slice(0, maxShow).map(s => {
                                 const id = (s.item_id != null && s.item_id !== '') ? s.item_id : '';
                                 const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                                 return `<a href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank">${escapeHtml(s.item_name || '')}</a>${valStr}`;
                             }).join(', ');
-                            const more = focusCandidates[focusKey].length > maxShow ? ` (+${focusCandidates[focusKey].length - maxShow} more)` : '';
+                            const more = filteredBreakdown.length > maxShow ? ` (+${filteredBreakdown.length - maxShow} more)` : '';
                             const label = scorePct === 0 ? 'Items that could give this (with %):' : 'Upgrades (with %):';
                             sourceHtml = (sourceHtml ? sourceHtml + ' ' : '') + `<span class="focus-breakdown-candidates">${label} ${candidateLinks}${more}</span>`;
                         }

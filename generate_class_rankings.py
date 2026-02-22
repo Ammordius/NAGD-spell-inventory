@@ -288,9 +288,25 @@ def get_focus_sources(char_inventory, focus_lookup):
     return result
 
 
-def get_all_focus_candidates(focii_data):
-    """Build a map of focus_key -> list of {item_name, item_id, value} for all items that provide that focus.
-    Used in the UI to show 'items that could give this focus' when the character doesn't have it but weight > 0."""
+def load_item_stats():
+    """Load item_id -> classes from data/item_stats.json if present. Used to filter focus candidates by class."""
+    base_dir = os.path.dirname(__file__) if '__file__' in globals() else '.'
+    for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return {str(iid): (info.get('classes') or '').strip() for iid, info in data.items() if info.get('classes')}
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+    return {}
+
+
+def get_all_focus_candidates(focii_data, item_stats_lookup=None):
+    """Build a map of focus_key -> list of {item_name, item_id, value, classes?} for all items that provide that focus.
+    Used in the UI to show 'items that could give this focus' when the character doesn't have it but weight > 0.
+    If item_stats_lookup (item_id -> classes string) is provided, each candidate gets a 'classes' field for class filtering."""
+    if item_stats_lookup is None:
+        item_stats_lookup = {}
     candidates = defaultdict(list)
     for focus in focii_data:
         name = focus.get('name', '')
@@ -302,6 +318,10 @@ def get_all_focus_candidates(focii_data):
             if not item_name and not item_id:
                 continue
             entry = {'item_name': item_name or f'Item {item_id}', 'item_id': item_id, 'value': pct}
+            if item_id and item_stats_lookup:
+                cls_str = item_stats_lookup.get(item_id, '')
+                if cls_str:
+                    entry['classes'] = cls_str
             if cat == 'Spell Damage':
                 damage_type = SPELL_DAMAGE_TYPE_MAP.get(name, 'All')
                 key = f'Spell Damage ({damage_type})'
@@ -335,10 +355,13 @@ def get_all_focus_candidates(focii_data):
                 by_id[iid] = it
         result[key] = sorted(by_id.values(), key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', '')))
     # Pet Power: item-based, not in spell focii data
-    result['Pet Power'] = sorted(
-        [{'item_id': str(iid), 'item_name': PET_POWER_ITEM_NAMES.get(str(iid), f'Item {iid}'), 'value': pct} for iid, pct in PET_POWER_ITEMS.items()],
-        key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', ''))
-    )
+    pet_entries = []
+    for iid, pct in PET_POWER_ITEMS.items():
+        e = {'item_id': str(iid), 'item_name': PET_POWER_ITEM_NAMES.get(str(iid), f'Item {iid}'), 'value': pct}
+        if item_stats_lookup and str(iid) in item_stats_lookup:
+            e['classes'] = item_stats_lookup[str(iid)]
+        pet_entries.append(e)
+    result['Pet Power'] = sorted(pet_entries, key=lambda x: (0 - (x.get('value') or 0), x.get('item_name', '')))
     return result
 
 
@@ -2030,7 +2053,8 @@ def main():
     focus_lookup = create_focus_lookup(focii_data)
     best_focii = get_best_focii_by_category(focii_data)
     best_mana_by_cat, best_haste_by_cat, best_duration_by_cat = get_best_focii_by_subcategory(focii_data)
-    focus_candidates = get_all_focus_candidates(focii_data)
+    item_stats_lookup = load_item_stats()
+    focus_candidates = get_all_focus_candidates(focii_data, item_stats_lookup)
     bard_instrument_data = load_bard_instruments()
     
     print(f"Loaded {len(focii_data)} focus effects")
