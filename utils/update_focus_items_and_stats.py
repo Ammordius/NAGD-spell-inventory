@@ -196,6 +196,84 @@ def update_focii_with_ids_and_classes(
     return wrap, unmatched
 
 
+def normalize_focus_name_for_match(s: str) -> str:
+    """Strip Roman numeral suffix ( I through VII) for matching CSV focus to spell_focii focus name."""
+    if not s or not isinstance(s, str):
+        return ""
+    s = s.strip()
+    s = re.sub(r"['`\u2019]", "'", s)
+    # Strip trailing " III", " IV", " I", " II", " V", " VI", " VII"
+    s = re.sub(r"\s+(I{1,3}|IV|V|VI{0,3}|VII)$", "", s, flags=re.IGNORECASE)
+    return s.strip()
+
+
+def add_focus_items_from_csv(
+    focii_list: list,
+    id_to_stats: dict[int, dict],
+    focus_names_set: set[str],
+) -> int:
+    """Add any item_stats rows that have a focus but are not yet in that focus's items list. Returns count added."""
+    # Build focus name -> index in focii_list and existing (id, norm_name) per focus
+    focus_name_to_index: dict[str, int] = {}
+    existing_per_focus: list[set[tuple[int | None, str]]] = []
+    for i, focus in enumerate(focii_list):
+        name = focus.get("name", "")
+        if name:
+            focus_name_to_index[normalize_name(name)] = i
+            focus_name_to_index[normalize_focus_name_for_match(name)] = i
+        existing = set()
+        for item in focus.get("items") or []:
+            iname = (item.get("name") or "").strip()
+            iid = item.get("id")
+            if isinstance(iid, str):
+                try:
+                    iid = int(iid)
+                except ValueError:
+                    iid = None
+            existing.add((iid, normalize_name(iname)))
+        existing_per_focus.append(existing)
+
+    added = 0
+    for iid, stats in id_to_stats.items():
+        focus_str = (stats.get("focus") or "").strip()
+        if not focus_str:
+            continue
+        name = (stats.get("name") or "").strip()
+        if not name:
+            continue
+        norm_focus = normalize_focus_name_for_match(focus_str)  # e.g. "Anger of Druzzil"
+        norm_focus_key = normalize_name(norm_focus)  # e.g. "anger of druzzil"
+        idx = focus_name_to_index.get(norm_focus_key)
+        if idx is None:
+            # Try matching any focus name that normalizes to same
+            for fn in focus_names_set:
+                if normalize_name(fn) == norm_focus_key:
+                    for i, f in enumerate(focii_list):
+                        if (f.get("name") or "").strip() == fn:
+                            idx = i
+                            break
+                    break
+        if idx is None:
+            continue
+        norm_name = normalize_name(name)
+        existing = existing_per_focus[idx]
+        if (iid, norm_name) in existing:
+            continue
+        # Already in list by id?
+        if any((eid == iid and eid is not None) for eid, _ in existing):
+            continue
+        if any(en == norm_name for _, en in existing):
+            continue
+        # Add new item
+        new_item = {"name": name, "id": iid}
+        if stats.get("classes"):
+            new_item["classes"] = stats["classes"].strip()
+        focii_list[idx].setdefault("items", []).append(new_item)
+        existing_per_focus[idx].add((iid, norm_name))
+        added += 1
+    return added
+
+
 def write_item_stats_json(id_to_stats: dict[int, dict], out_path: Path) -> None:
     """Write data/item_stats.json keyed by item_id."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -251,6 +329,14 @@ def main() -> None:
             print(f"    - {fn}: {iname}")
         if len(unmatched) > 20:
             print(f"    ... and {len(unmatched) - 20} more")
+
+    # Add any items from item_stats that have a focus but are missing from the focus list
+    focus_names_set = {f.get("name", "").strip() for f in updated.get("focii") or [] if f.get("name")}
+    n_added = add_focus_items_from_csv(
+        updated["focii"], id_to_stats, focus_names_set
+    )
+    if n_added:
+        print(f"  Added {n_added} focus items from item_stats.csv (were missing from focus list)")
 
     if not args.no_write_focii:
         args.focii.write_text(json.dumps(updated, indent=2), encoding="utf-8")

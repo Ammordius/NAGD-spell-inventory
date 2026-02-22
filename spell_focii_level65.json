@@ -1911,6 +1911,11 @@
           "name": "Sharp Claw Ahlspiess",
           "zone": "The Plane of Nightmares",
           "mob": "Untel`Dak"
+        },
+        {
+          "name": "Festering Earlobe",
+          "id": 7132,
+          "classes": "NEC"
         }
       ]
     },
