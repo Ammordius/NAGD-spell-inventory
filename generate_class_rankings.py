@@ -68,15 +68,15 @@ def _row_get(row, preferred_key, default=''):
     return default
 
 
-# Normalize item name for matching (handle apostrophes, case, etc.)
+# Normalize item name for matching (handle apostrophes, case, etc.) — must match frontend normalizeItemNameForLookup
 def normalize_item_name(name):
-    """Normalize item name for matching"""
+    """Normalize item name for matching (same rules as class_rankings.html)"""
     if not name:
         return ''
-    # Convert to lowercase and remove apostrophes
     normalized = name.lower().strip()
-    normalized = normalized.replace("'", "").replace("'", "").replace("`", "")
-    # Remove extra spaces
+    # Apostrophe/backtick/Unicode right single quote (match frontend)
+    for c in ("'", "'", "`", "\u2019"):
+        normalized = normalized.replace(c, "")
     normalized = ' '.join(normalized.split())
     return normalized
 
@@ -302,23 +302,34 @@ def load_item_stats():
 
 
 def load_item_stats_name_to_id():
-    """Load data/item_stats.json and return normalized item name -> item_id (str). Used to backfill missing item_id in inventory."""
-    base_dir = os.path.dirname(__file__) if '__file__' in globals() else '.'
+    """Load data/item_stats.json and data/item_name_to_id.json; return normalized item name -> item_id (str).
+    Used to backfill missing item_id in inventory. item_name_to_id.json has full raid/DKP loot so more items resolve."""
+    base_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else '.'
+    name_to_id = {}
     for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            name_to_id = {}
             for iid, info in (data or {}).items():
                 name = (info.get('name') or '').strip()
                 if name:
                     norm = normalize_item_name(name)
                     if norm and norm not in name_to_id:
                         name_to_id[norm] = str(iid)
-            return name_to_id
+            break
         except (FileNotFoundError, json.JSONDecodeError):
             continue
-    return {}
+    for path in [os.path.join(base_dir, 'data', 'item_name_to_id.json'), 'data/item_name_to_id.json']:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            for norm, iid in (data or {}).items():
+                if norm and norm not in name_to_id:
+                    name_to_id[norm] = str(int(iid)) if iid is not None else ''
+            break
+        except (FileNotFoundError, json.JSONDecodeError, ValueError):
+            continue
+    return name_to_id
 
 
 def get_all_focus_candidates(focii_data, item_stats_lookup=None):
@@ -2258,6 +2269,18 @@ def main():
             })
     if backfilled:
         print(f"  Backfilled item_id for {backfilled} inventory rows from name lookup")
+    # Backfill item_id in focus_candidates so item cards work for "items that could give this focus"
+    if item_name_to_id and focus_candidates:
+        fc_backfilled = 0
+        for cat, items in focus_candidates.items():
+            for it in items:
+                if not it.get('item_id') and it.get('item_name'):
+                    resolved = item_name_to_id.get(normalize_item_name(it['item_name']), '')
+                    if resolved:
+                        it['item_id'] = resolved
+                        fc_backfilled += 1
+        if fc_backfilled:
+            print(f"  Backfilled item_id for {fc_backfilled} focus_candidates from name lookup")
     print(f"Loaded inventory for {len(inventory)} characters")
     
     # Group characters by class
