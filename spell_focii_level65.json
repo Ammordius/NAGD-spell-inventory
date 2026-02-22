@@ -854,6 +854,7 @@
           "mob": "Tallon Zek"
         },
         {
+          "id": 14818,
           "name": "Ring of Thunderous Forces",
           "zone": "Plane of Time Phase 5",
           "mob": "Rallos Zek"
@@ -919,11 +920,6 @@
       "category": "Spell Haste",
       "percentage": 33.0,
       "items": [
-        {
-          "name": "Crown of Below",
-          "zone": "The Echo Caverns",
-          "mob": "King Gomklin of Below"
-        },
         {
           "name": "Granite Bracer",
           "zone": "The Rathe Mountains",
