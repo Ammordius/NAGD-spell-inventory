@@ -448,11 +448,12 @@
         const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
 
         // Slot_id (1-22) -> EQ slot strings that can fill this slot (item_stats.slot may list multiple, e.g. "NECK WAIST")
+        // Matches magelo/generate_character_rankings: 13=Primary weapon, 14=Secondary (shield/offhand), 15=Ring 1, 16=Ring 2
         const SLOT_ID_TO_EQ_SLOTS = {
             1: ['EAR'], 2: ['HEAD'], 3: ['FACE'], 4: ['EAR'], 5: ['NECK'],
             6: ['SHOULDER', 'SHOULDERS'], 7: ['ARMS'], 8: ['BACK'], 9: ['WRIST'], 10: ['WRIST'],
             11: ['RANGE'], 12: ['HANDS'], 13: ['PRIMARY', 'MAIN'], 14: ['SECONDARY', 'OFF'],
-            15: ['PRIMARY', 'MAIN'], 16: ['SECONDARY', 'OFF'], 17: ['CHEST'], 18: ['LEGS'], 19: ['FEET'],
+            15: ['FINGER', 'FINGERS'], 16: ['FINGER', 'FINGERS'], 17: ['CHEST'], 18: ['LEGS'], 19: ['FEET'],
             20: ['WAIST'], 21: ['POWER'], 22: ['AMMO']
         };
 
@@ -598,7 +599,7 @@
             const focusWeights = norm.focus || {};
             const focusValuesByItem = buildFocusValuesByItem();
 
-            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Primary', 16: 'Secondary', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
             const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
             const bySlot = [];
             let anyMissing = false;
@@ -2314,7 +2315,7 @@
                 
                 // Focus breakdown: all focuses we're scored on, with bar and sources (uses same focusWeights as sliders, so updates when sliders change)
                 const focusSources = scores.focus_sources || {};
-                const slotNames = { 0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Primary', 16: 'Secondary', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+                const slotNames = { 0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
                 function getScoredFocusKeys(fw) {
                     const keys = [];
                     if (!fw) return keys;
@@ -2433,7 +2434,7 @@
                     0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck',
                     6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist',
                     11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand',
-                    15: 'Primary', 16: 'Secondary', 17: 'Chest', 18: 'Legs',
+                    15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs',
                     19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo'
                 };
                 equippedOnly.forEach(item => {
