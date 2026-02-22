@@ -228,6 +228,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 11323,Shimmering Sleeves of Flame,ARMS,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, AGI: 20, INT: 20, CHA: 10, HP: 100, MANA: 135",Cold: 35,Spell Haste IV,Spell Haste IV,62,NEC WIZ MAG ENC,1.4,MEDIUM
 11324,Fire Crested Rune,NECK ARMS RANGE WAIST,18,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, DEX: 15, INT: 15, CHA: 15, HP: 135, MANA: 135","Cold: 25, Magic: 15, Poison: 15, Disease: 15",Flowing Thought III,,65,NEC WIZ MAG ENC,1.0,MEDIUM
 11402,Leaf-twined Guards,ARMS WRIST,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, DEX: 25, WIS: 20, CHA: 15, HP: 135, MANA: 150","Magic: 15, Poison: 20, Disease: 20",Flowing Thought IV,Blaze of the Lightbringer,65,CLR PAL RNG SHD DRU SHM BST,0.8,MEDIUM
+11450,Dumul's Sleeves of the Brute,,,,,,,,,,,
 11585,Shield of the Red Dragon,SECONDARY,25,MAGIC ITEM | LORE ITEM,"STR: 10, CHA: 10","Fire: 40, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,WAR CLR PAL RNG SHD DRU BRD ROG SHM,5.0,MEDIUM
 11601,Runed Bolster Belt,WAIST,5,MAGIC ITEM,"STR: 10, STA: 10, DEX: 10",,Haste,,,ALL,0.1,SMALL
 11621,Cloak of Flames,BACK,10,MAGIC ITEM,"AGI: 9, DEX: 9, HP: 50",Fire: 15,Haste,,,ALL,0.1,MEDIUM
