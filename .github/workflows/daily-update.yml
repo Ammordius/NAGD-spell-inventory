@@ -724,7 +724,18 @@ jobs:
           git commit -m "Add historical delta JSONs from cached files" || echo "Commit failed"
           git push || echo "Push failed"
         fi
-    
+
+    # Regenerate item_name_to_id.json from raid_item_sources so item cards resolve on the live site
+    # (runs without dkp_mob_loot in CI; uses raid_item_sources only)
+    - name: Regenerate item_name_to_id.json for item cards
+      run: |
+        python merge_dkp_loot_into_raid_sources.py --write-name-to-id
+        if [ -f "data/item_name_to_id.json" ]; then
+          echo "✓ item_name_to_id.json ready for deploy ($(wc -l < data/item_name_to_id.json) lines)"
+        else
+          echo "⚠ data/item_name_to_id.json not found (item cards may not resolve on live site)"
+        fi
+
     - name: Prepare for deployment
       run: |
         # Create a clean directory with the HTML files
@@ -786,15 +797,18 @@ jobs:
           echo "✓ Copied class_rankings.json to deploy directory"
         fi
         # Copy item_stats.json and item_name_to_id.json for class rankings item card hover (data/ relative to site root)
+        mkdir -p deploy/data
         if [ -f "data/item_stats.json" ]; then
-          mkdir -p deploy/data
           cp data/item_stats.json deploy/data/item_stats.json
           echo "✓ Copied data/item_stats.json to deploy (for item cards)"
+        else
+          echo "⚠ data/item_stats.json missing - item cards may show without stats"
         fi
         if [ -f "data/item_name_to_id.json" ]; then
-          mkdir -p deploy/data
           cp data/item_name_to_id.json deploy/data/item_name_to_id.json
           echo "✓ Copied data/item_name_to_id.json to deploy (name→id resolution for item cards)"
+        else
+          echo "::warning::data/item_name_to_id.json missing - item cards (e.g. Cap of Flowing Time) will not resolve on live site"
         fi
         # Copy scoring explanation page
         if [ -f "scoring_explanation.html" ]; then

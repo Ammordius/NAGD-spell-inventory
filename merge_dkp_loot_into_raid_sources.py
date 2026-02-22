@@ -86,12 +86,15 @@ def main() -> int:
     if not raid_path.exists():
         print(f"Error: {raid_path} not found.")
         return 1
-    if not dkp_path.exists():
+    # When only --write-name-to-id is needed (e.g. CI), dkp can be missing
+    if not dkp_path.exists() and not args.write_name_to_id:
         print(f"Error: {dkp_path} not found. Run build_dkp_mob_loot.py or point --dkp-loot to dkp repo.")
         return 1
 
     raid_sources: dict = json.loads(raid_path.read_text(encoding="utf-8"))
-    dkp_loot: dict = json.loads(dkp_path.read_text(encoding="utf-8"))
+    dkp_loot: dict = {}
+    if dkp_path.exists():
+        dkp_loot = json.loads(dkp_path.read_text(encoding="utf-8"))
 
     # Build item_id -> real name from dkp_mob_loot (first occurrence wins)
     dkp_id_to_name: dict[str, str] = {}
