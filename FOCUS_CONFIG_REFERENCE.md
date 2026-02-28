@@ -70,8 +70,9 @@ Spell Damage uses the same subcategory system: each class lists only the subcate
 
 ## Category maps (which focus names → Bene/Det/All/etc.)
 
-- **Spell Mana Efficiency:** `SPELL_MANA_EFFICIENCY_CATEGORY_MAP` ~line 248 (Det, Bene, Nuke, Sanguine). Sanguine = self-only; weight 0 for most classes.
+- **Spell Mana Efficiency:** `SPELL_MANA_EFFICIENCY_CATEGORY_MAP` ~line 248 (Det, Bene, Nuke, Sanguine, **All**, **LDD**). Sanguine = self-only; weight 0 for most classes. **All** = general mana preservation (applies to all categories when scoring). **LDD** = Long Duration Debuff mana efficiency; same classes as Focus Affliction Haste (Necro, Shaman, Enchanter). Effective LDD = max(LDD, Det, All) so general detrimental applies. **Conservation of Xegony** → All (20% on items 26996, 7769). **Conservation of Bertoxxulous** → LDD (30% on item 5594). See `ITEM_FOCUS_OVERRIDES`.
 - **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 476 (Det, Bene, **Affliction**). **Affliction** = DoT/debuff-only haste (33% cap); `'Affliction Haste': 'Affliction'`. Scoring: Det/Bene use max(cat, All); **Focus Affliction Haste** uses max(Affliction, Det, All) with its own weight (0 for Wiz/Mag, 0.75 for Necro/Shaman/Enc, 0.5 for Druid/BST). Add `'Focus Name': 'All'` to have a focus count for both Bene and Det.
 - **Spell Duration:** Buff/Detrimental/All Spell Duration; “All Spell Duration” is tracked as `All` and counts for both Buff (Bene) and Detrimental (Det) in scoring.
-- **Spell Mana Efficiency weights per class:** `SPELL_MANA_EFFICIENCY_WEIGHTS` ~line 311 (e.g. Enchanter Det 1.0, Bene 0.25).
+- **Spell Mana Efficiency weights per class:** `SPELL_MANA_EFFICIENCY_WEIGHTS` ~line 311 (e.g. Enchanter Det 1.0, Bene 0.25, LDD 0.75 for Necro/Shaman/Enc).
 - **Pet Power:** Item-based focus for Magician (3.0), Beastlord (3.0), Necromancer (2.0). Items: 28144 = 20%, 20508 = 25%. Checked from **full inventory (including bags)** so swap-in is counted. See `PET_POWER_ITEMS` and `get_char_pet_power()`.
+- **Focus sources display:** `get_focus_sources()` returns **all** items that provide each focus (not just the best). Keys use "Spell Mana Efficiency (Long Duration Debuff)" for LDD.

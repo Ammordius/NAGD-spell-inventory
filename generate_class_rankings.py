@@ -84,7 +84,7 @@ def normalize_item_name(name):
 def create_focus_lookup(focii_data):
     """Create a lookup: item_name (normalized) or item_id (str) -> focus effects"""
     focus_by_item_name = defaultdict(list)
-    
+
     for focus in focii_data:
         for item in focus.get('items', []):
             effect = {
@@ -97,7 +97,16 @@ def create_focus_lookup(focii_data):
                 focus_by_item_name[item_name].append(effect)
             if item.get('id') is not None:
                 focus_by_item_name[str(item['id'])].append(effect)
-    
+
+    # Merge item-based overrides (e.g. Conservation of Bertoxxulous/Xegony on specific items)
+    for item_id, effects in ITEM_FOCUS_OVERRIDES.items():
+        for eff in effects:
+            focus_by_item_name[item_id].append({
+                'name': eff['name'],
+                'category': eff['category'],
+                'percentage': eff['percentage']
+            })
+
     print(f"Created focus lookup with {len(focus_by_item_name)} unique item names/ids")
     return focus_by_item_name
 
@@ -206,13 +215,13 @@ def get_focus_sources(char_inventory, focus_lookup):
     """Return per-focus item sources for equipped gear (slots 1-22 only).
     Pet Power is checked from full inventory (including bags) so swap-in is shown.
     Keys match focus_scores keys where possible. Skip attack haste (Haste/ATK) item listing.
-    Value is list of {item_name, slot_id, value, item_id} for the best item(s) providing that focus."""
+    Value is list of ALL items providing that focus (not just best), each {item_name, slot_id, value, item_id}."""
     EQUIPPED_SLOTS = set(range(1, 23))  # 1-22
-    best = {}  # focus_key -> (pct, item_name, slot_id, item_id)
+    # Collect ALL sources per key (list of (pct, item_name, slot_id, item_id)), then sort by pct desc
+    sources = defaultdict(list)  # focus_key -> [(pct, item_name, slot_id, item_id), ...]
 
-    def set_best(key, pct, item_name, slot_id, item_id=None):
-        if key not in best or pct > best[key][0]:
-            best[key] = (pct, item_name, slot_id, item_id)
+    def add_source(key, pct, item_name, slot_id, item_id=None):
+        sources[key].append((pct, item_name, slot_id, item_id))
 
     # Pet Power: check full inventory (including bags) so swap-in items are shown
     for item in char_inventory or []:
@@ -221,7 +230,7 @@ def get_focus_sources(char_inventory, focus_lookup):
             pct = PET_POWER_ITEMS[item_id]
             item_name = item.get('item_name', '') or item.get('name', '') or f'Item {item_id}'
             slot_id = item.get('slot_id', 0)
-            set_best('Pet Power', pct, item_name, slot_id, item_id)
+            add_source('Pet Power', pct, item_name, slot_id, item_id)
 
     for item in char_inventory or []:
         slot_id = item.get('slot_id', 0)
@@ -232,19 +241,19 @@ def get_focus_sources(char_inventory, focus_lookup):
 
         # Binary focus items (we don't list ATK/Haste sources per user request)
         if item_id == PALADIN_SK_FOCUS_ITEMS['shield']:
-            set_best('Shield of Strife', 100, item_name, slot_id, item_id)
+            add_source('Shield of Strife', 100, item_name, slot_id, item_id)
             continue
         if item_id == ENCHANTER_FOCUS_ITEMS['range']:
-            set_best('Serpent of Vindication', 100, item_name, slot_id, item_id)
+            add_source('Serpent of Vindication', 100, item_name, slot_id, item_id)
             continue
         if item_id == SHAMAN_FOCUS_ITEMS['range']:
-            set_best("Time's Antithesis", 100, item_name, slot_id, item_id)
+            add_source("Time's Antithesis", 100, item_name, slot_id, item_id)
             continue
         if item_id == WARRIOR_FOCUS_ITEMS['mh']:
-            set_best('Darkblade', 100, item_name, slot_id, item_id)
+            add_source('Darkblade', 100, item_name, slot_id, item_id)
             continue
         if item_id == WARRIOR_FOCUS_ITEMS['chest']:
-            set_best('Raex Chest', 100, item_name, slot_id, item_id)
+            add_source('Raex Chest', 100, item_name, slot_id, item_id)
             continue
 
         item_name_norm = normalize_item_name(item_name)
@@ -259,34 +268,36 @@ def get_focus_sources(char_inventory, focus_lookup):
 
             if cat == 'Spell Damage':
                 damage_type = SPELL_DAMAGE_TYPE_MAP.get(focus_name, 'All')
-                set_best(f'Spell Damage ({damage_type})', pct, item_name, slot_id, item_id)
+                add_source(f'Spell Damage ({damage_type})', pct, item_name, slot_id, item_id)
             elif cat == 'Spell Mana Efficiency':
                 sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(focus_name, 'Nuke')
-                set_best(f'Spell Mana Efficiency ({sub})', pct, item_name, slot_id, item_id)
+                key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
+                add_source(key, pct, item_name, slot_id, item_id)
             elif cat == 'Spell Haste':
                 sub = SPELL_HASTE_CATEGORY_MAP.get(focus_name, 'Bene')
                 if sub == 'Det':
-                    set_best('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
+                    add_source('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
                 elif sub == 'Affliction':
-                    set_best('Focus Affliction Haste', pct, item_name, slot_id, item_id)
+                    add_source('Focus Affliction Haste', pct, item_name, slot_id, item_id)
                 else:
-                    set_best('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
+                    add_source('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
             elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
                 if cat == 'All Spell Duration':
-                    set_best('Buff Spell Duration', pct, item_name, slot_id, item_id)
-                    set_best('Detrimental Spell Duration', pct, item_name, slot_id, item_id)
+                    add_source('Buff Spell Duration', pct, item_name, slot_id, item_id)
+                    add_source('Detrimental Spell Duration', pct, item_name, slot_id, item_id)
                 else:
                     dur_cat = SPELL_DURATION_CATEGORY_MAP.get(focus_name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
                     key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
-                    set_best(key, pct, item_name, slot_id, item_id)
+                    add_source(key, pct, item_name, slot_id, item_id)
             else:
                 # Healing Enhancement, Spell Range Extension, etc.
-                set_best(cat, pct, item_name, slot_id, item_id)
+                add_source(cat, pct, item_name, slot_id, item_id)
 
-    # Convert to list of dicts for JSON (include item_id for item links in UI)
+    # Convert to list of dicts for JSON, sorted by value descending so best is first
     result = {}
-    for key, (pct, name, sid, iid) in best.items():
-        result[key] = [{'item_name': name, 'slot_id': sid, 'value': pct, 'item_id': iid}]
+    for key, entries in sources.items():
+        sorted_entries = sorted(entries, key=lambda x: (0 - (x[0] or 0), x[1] or ''))
+        result[key] = [{'item_name': name, 'slot_id': sid, 'value': pct, 'item_id': iid or ''} for pct, name, sid, iid in sorted_entries]
     return result
 
 
@@ -361,7 +372,7 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 candidates[key].append(entry)
             elif cat == 'Spell Mana Efficiency':
                 sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(name, 'Nuke')
-                key = f'Spell Mana Efficiency ({sub})'
+                key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
                 candidates[key].append(entry)
             elif cat == 'Spell Haste':
                 sub = SPELL_HASTE_CATEGORY_MAP.get(name, 'Bene')
@@ -383,6 +394,17 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
             else:
                 # Healing Enhancement, Spell Range Extension, etc.
                 candidates[cat].append(entry)
+    # Add item-based overrides (Conservation of Bertoxxulous / Conservation of Xegony) so they appear in "items that could give this focus"
+    for item_id, effects in ITEM_FOCUS_OVERRIDES.items():
+        item_name = ITEM_FOCUS_OVERRIDE_NAMES.get(item_id, f'Item {item_id}')
+        for eff in effects:
+            if eff['category'] == 'Spell Mana Efficiency':
+                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(eff['name'], 'Nuke')
+                key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
+                entry = {'item_name': item_name, 'item_id': item_id, 'value': eff['percentage']}
+                if item_id in item_stats_lookup:
+                    entry['classes'] = item_stats_lookup[item_id]
+                candidates[key].append(entry)
     # Dedupe by item_id per key (keep highest value)
     result = {}
     for key, items in candidates.items():
@@ -445,12 +467,12 @@ SPELL_DAMAGE_TYPE_MAP = {
     "Gallenite's ____": 'All',
 }
 
-# Map Spell Mana Efficiency focii to categories (nuke, detrimental, beneficial, Sanguine)
+# Map Spell Mana Efficiency focii to categories (nuke, detrimental, beneficial, Sanguine, All, LDD)
 SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
     # Detrimental mana efficiency
     'Affliction Efficiency': 'Det',
     'Affliction Preservation': 'Det',
-    
+
     # Beneficial mana efficiency
     'Enhancement Efficiency': 'Bene',
     'Enhancement Preservation': 'Bene',
@@ -460,14 +482,21 @@ SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
     'Summoning Efficiency': 'Bene',
     'Summoning Preservation': 'Bene',
     'Alluring Preservation': 'Bene',
-    
+
     # Nuke mana efficiency (direct damage spells)
     'Mana Preservation': 'Nuke',  # Generic nuke focus
     'Preservation of Xegony': 'Nuke',
     'Preservation of Solusek': 'Nuke',
     'Preservation of Ro': 'Nuke',
     'Preservation of Druzzil': 'Nuke',
-    
+
+    # General mana preservation (applies to all: Bene, Det, Nuke, LDD)
+    'Conservation of Xegony': 'All',
+
+    # Long duration debuff mana efficiency (DoT/debuff; same classes as Focus Affliction Haste).
+    # General detrimental (Det) also applies to this category: effective = max(LDD, Det).
+    'Conservation of Bertoxxulous': 'LDD',
+
     # Sanguine Preservation (self only)
     'Sanguine Preservation': 'Sanguine',
     'Sanguine Enchantment': 'Sanguine',
@@ -515,17 +544,17 @@ SPELL_DURATION_CATEGORY_MAP = {
     'Extended Summoning': 'Bene',
 }
 
-# Per-class weights for Spell Mana Efficiency categories (Bene, Det, Nuke).
-# Consider each category separately; "All" (if present) counts for all of Bene/Det/Nuke.
-# Score = weighted sum of (effective_cat_pct/best*100) / sum(weights), where effective_cat = max(cat_pct, all_pct).
+# Per-class weights for Spell Mana Efficiency categories (Bene, Det, Nuke, LDD).
+# Consider each category separately; "All" (if present) counts for all of Bene/Det/Nuke/LDD.
+# LDD (Long Duration Debuff): effective = max(LDD, Det, All). Same classes as Focus Affliction Haste (SHM, ENC, NEC).
 SPELL_MANA_EFFICIENCY_WEIGHTS = {
-    'Enchanter': {'Det': 1.0, 'Bene': 0.25},           # primarily det (mez/charm), small bene (buffs)
+    'Enchanter': {'Det': 1.0, 'Bene': 0.25, 'LDD': 0.75},
     'Shadow Knight': {'Det': 1.0},
     'Paladin': {'Bene': 1.0},
     'Wizard': {'Det': 1.0, 'Bene': 0.25},              # large det (nukes), small bene
     'Cleric': {'Bene': 1.0, 'Det': 0.25},              # large bene (heals), small det
-    'Necromancer': {'Det': 1.0},
-    'Shaman': {'Bene': 0.5, 'Det': 0.5},
+    'Necromancer': {'Det': 1.0, 'LDD': 0.75},
+    'Shaman': {'Bene': 0.5, 'Det': 0.5, 'LDD': 0.75},
     'Druid': {'Bene': 0.5, 'Det': 0.5},
     'Magician': {'Nuke': 1.0, 'Bene': 0.25},           # nuke + summoning (bene)
     'Beastlord': {'Bene': 0.5, 'Det': 0.5},
@@ -534,8 +563,9 @@ SPELL_MANA_EFFICIENCY_WEIGHTS = {
 
 
 def calculate_spell_mana_efficiency_score(char_mana_efficiency_cats, char_class, best_mana_eff, best_mana_by_cat=None):
-    """Weighted Spell Mana Efficiency score (0-100). Each category (Bene/Det/Nuke/Sanguine) considered separately.
+    """Weighted Spell Mana Efficiency score (0-100). Each category (Bene/Det/Nuke/LDD) considered separately.
     All counts for all possible: effective_cat = max(cat_pct, all_pct).
+    LDD (Long Duration Debuff): effective = max(LDD, Det, All) so general detrimental applies.
     When best_mana_by_cat is provided, each category is compared to its own best; otherwise use best_mana_eff for all."""
     if not char_mana_efficiency_cats or best_mana_eff <= 0:
         return 0.0
@@ -548,7 +578,15 @@ def calculate_spell_mana_efficiency_score(char_mana_efficiency_cats, char_class,
     for cat, w in weights.items():
         if w <= 0:
             continue
-        effective_pct = max(char_mana_efficiency_cats.get(cat, 0), all_pct)
+        if cat == 'LDD':
+            # Long duration debuff: general Det and All also apply
+            effective_pct = max(
+                char_mana_efficiency_cats.get('LDD', 0),
+                char_mana_efficiency_cats.get('Det', 0),
+                all_pct
+            )
+        else:
+            effective_pct = max(char_mana_efficiency_cats.get(cat, 0), all_pct)
         best_for_cat = (best_mana_by_cat.get(cat, best_mana_eff)) if best_mana_by_cat else best_mana_eff
         if best_for_cat <= 0:
             continue
@@ -613,6 +651,20 @@ PET_POWER_ITEMS = {
 PET_POWER_ITEM_NAMES = {
     '20508': 'Symbol of Ancient Summoning',
     '28144': 'Gloves of Dark Summoning',
+}
+
+# Item-based Spell Mana Efficiency overrides (not in spell_focii JSON). item_id -> list of {name, category, percentage}.
+# Conservation of Bertoxxulous: 30% mana efficiency on long duration debuffs (item 5594 Earring of Temporal Solstice).
+# Conservation of Xegony: 20% general mana preservation (items 26996 Gloves of the Unseen, 7769 Talisman of the Elements).
+ITEM_FOCUS_OVERRIDES = {
+    '5594': [{'name': 'Conservation of Bertoxxulous', 'category': 'Spell Mana Efficiency', 'percentage': 30}],
+    '26996': [{'name': 'Conservation of Xegony', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
+    '7769': [{'name': 'Conservation of Xegony', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
+}
+ITEM_FOCUS_OVERRIDE_NAMES = {
+    '5594': 'Earring of Temporal Solstice',
+    '26996': 'Gloves of the Unseen',
+    '7769': 'Talisman of the Elements',
 }
 
 def get_char_pet_power(char_inventory):
@@ -1089,10 +1141,13 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     if char_mana_efficiency_cats and best_mana_by_cat:
         weights = SPELL_MANA_EFFICIENCY_WEIGHTS.get(char_class, {})
         all_pct = char_mana_efficiency_cats.get('All', 0)
-        cat_labels = {'Det': 'Detrimental', 'Bene': 'Beneficial', 'Nuke': 'Nuke', 'Sanguine': 'Self only'}
+        cat_labels = {'Det': 'Detrimental', 'Bene': 'Beneficial', 'Nuke': 'Nuke', 'Sanguine': 'Self only', 'LDD': 'Long duration debuff'}
         rows = []
-        for cat in ('Det', 'Bene', 'Nuke', 'Sanguine'):
-            raw = max(char_mana_efficiency_cats.get(cat, 0), all_pct)
+        for cat in ('Det', 'Bene', 'Nuke', 'Sanguine', 'LDD'):
+            if cat == 'LDD':
+                raw = max(char_mana_efficiency_cats.get('LDD', 0), char_mana_efficiency_cats.get('Det', 0), all_pct)
+            else:
+                raw = max(char_mana_efficiency_cats.get(cat, 0), all_pct)
             best = best_mana_by_cat.get(cat, 0)
             score_pct = (raw / best * 100) if best > 0 and raw > 0 else 0
             weight_share = weights.get(cat, 0)
@@ -2130,6 +2185,13 @@ def main():
     focus_lookup = create_focus_lookup(focii_data)
     best_focii = get_best_focii_by_category(focii_data)
     best_mana_by_cat, best_haste_by_cat, best_duration_by_cat = get_best_focii_by_subcategory(focii_data)
+    # Ensure item-based overrides contribute to best-in-slot (Conservation of Bertoxxulous 30% LDD, Conservation of Xegony 20% All)
+    for item_id, effects in ITEM_FOCUS_OVERRIDES.items():
+        for eff in effects:
+            if eff['category'] == 'Spell Mana Efficiency':
+                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(eff['name'], 'Nuke')
+                if eff['percentage'] > best_mana_by_cat.get(sub, 0):
+                    best_mana_by_cat[sub] = eff['percentage']
     item_stats_lookup = load_item_stats()
     focus_candidates = get_all_focus_candidates(focii_data, item_stats_lookup)
     bard_instrument_data = load_bard_instruments()
