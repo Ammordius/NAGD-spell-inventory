@@ -1530,7 +1530,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 2.0,
         'focus': {
             'ATK': 1.5,
-            'FT': 0.75,
+            'FT': 0.25,
             'Haste': 1.5,
         }
     },
