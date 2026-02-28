@@ -2282,8 +2282,28 @@
                     let rowHtml = `<tr><td>${escapeHtml(focusCat === 'FT' ? 'FT (Flowing Thought)' : focusCat)}</td><td>${rawDisplay}</td><td>${formatScore(score)}</td><td>${weight.toFixed(2)}</td><td>${focusPoints.toFixed(2)}</td><td>${focusPctOfTotal}%</td></tr>`;
                     // When not at max for this focus, show upgrade options (items that could give it, with %) – upgrades only, and usable by class
                     const focusSources = scores.focus_sources || {};
-                    const currentRaw = (focusSources[focusCat] && focusSources[focusCat].length) ? Math.max(0, ...focusSources[focusCat].map(s => (s.value != null ? Number(s.value) : 0))) : 0;
-                    const filteredCandidates = filterFocusCandidates(focusCandidates[focusCat], currentRaw, char.class);
+                    let sourcesForRow = focusSources[focusCat];
+                    let candidatesForRow = focusCandidates[focusCat];
+                    // Enchanter (and similar) have focus_scores['Spell Damage'] but sources/candidates are keyed by "Spell Damage (Magic)" etc.
+                    if (focusCat === 'Spell Damage' && (sourcesForRow == null || candidatesForRow == null)) {
+                        const sdWeights = focusWeights['Spell Damage'];
+                        if (sdWeights && typeof sdWeights === 'object') {
+                            sourcesForRow = [];
+                            candidatesForRow = [];
+                            for (const sub of Object.keys(sdWeights)) {
+                                const subKey = 'Spell Damage (' + sub + ')';
+                                if (focusSources[subKey]) sourcesForRow = sourcesForRow.concat(focusSources[subKey]);
+                                if (focusCandidates[subKey]) candidatesForRow = candidatesForRow.concat(focusCandidates[subKey]);
+                            }
+                            if (candidatesForRow.length) {
+                                const byId = {};
+                                candidatesForRow.forEach(c => { const id = c.item_id || c.item_name; if (!byId[id] || (c.value || 0) > (byId[id].value || 0)) byId[id] = c; });
+                                candidatesForRow = Object.values(byId).sort((a, b) => (b.value || 0) - (a.value || 0));
+                            }
+                        }
+                    }
+                    const currentRaw = (sourcesForRow && sourcesForRow.length) ? Math.max(0, ...sourcesForRow.map(s => (s.value != null ? Number(s.value) : 0))) : 0;
+                    const filteredCandidates = filterFocusCandidates(candidatesForRow || [], currentRaw, char.class);
                     if (score < 100 && weight > 0 && filteredCandidates.length > 0) {
                         const maxShow = 50;
                         const candidateLinks = filteredCandidates.slice(0, maxShow).map(s => {
@@ -2354,6 +2374,10 @@
                     scoredFocusKeys.forEach(focusKey => {
                         let scorePct = focusScores[focusKey];
                         if (scorePct === undefined && focusKey === 'Spell Damage') scorePct = focusScores['Spell Damage'];
+                        // Enchanter (and similar) send focus_scores['Spell Damage'] but UI expands to "Spell Damage (Magic)" etc.
+                        if (scorePct === undefined && focusKey.startsWith('Spell Damage (')) scorePct = focusScores['Spell Damage'];
+                        // ATK: backend may not put ATK in focus_scores for some code paths; use scores.atk_pct
+                        if (scorePct === undefined && focusKey === 'ATK' && scores.atk_pct != null) scorePct = scores.atk_pct;
                         // Resolve score for composite keys (e.g. "Spell Mana Efficiency (Bene)") from focus_details
                         if (scorePct === undefined) {
                             const match = focusKey.match(/^(.+)\s+\(([^)]+)\)$/);
