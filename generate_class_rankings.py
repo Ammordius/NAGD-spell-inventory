@@ -151,6 +151,14 @@ def get_best_focii_by_subcategory(focii_data):
         elif cat == 'All Spell Duration':
             if pct > best_duration['All']:
                 best_duration['All'] = pct
+    # Include item-based overrides so All/LDD from Conservation of Xegony/Bertoxxulous are in best_mana
+    for item_id, effects in ITEM_FOCUS_OVERRIDES.items():
+        for eff in effects:
+            if eff.get('category') == 'Spell Mana Efficiency':
+                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(eff['name'], 'Nuke')
+                pct = eff.get('percentage', 0)
+                if pct > best_mana[sub]:
+                    best_mana[sub] = pct
     return dict(best_mana), dict(best_haste), dict(best_duration)
 
 # Analyze character gear for focii
@@ -188,6 +196,10 @@ def analyze_character_focii(char_inventory, focus_lookup):
                     efficiency_cat = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(focus_name, 'Nuke')
                     if pct > char_mana_efficiency_cats[efficiency_cat]:
                         char_mana_efficiency_cats[efficiency_cat] = pct
+                    # Preservation of Xegony 15% (Kerasha's Sylvan Boots etc.) applies to all spell types in-game
+                    if focus_name == 'Preservation of Xegony' and pct == 15:
+                        if pct > char_mana_efficiency_cats['All']:
+                            char_mana_efficiency_cats['All'] = pct
                 
                 # Track Spell Haste categories
                 if cat == 'Spell Haste':
@@ -555,7 +567,7 @@ SPELL_MANA_EFFICIENCY_WEIGHTS = {
     'Cleric': {'Bene': 1.0, 'Det': 0.25},              # large bene (heals), small det
     'Necromancer': {'Det': 1.0, 'LDD': 0.75},
     'Shaman': {'Bene': 0.5, 'Det': 0.5, 'LDD': 0.75},
-    'Druid': {'Bene': 0.5, 'Det': 0.5},
+    'Druid': {'Bene': 0.5, 'Det': 0.5, 'Nuke': 0.5},
     'Magician': {'Nuke': 1.0, 'Bene': 0.25},           # nuke + summoning (bene)
     'Beastlord': {'Bene': 0.5, 'Det': 0.5},
     'Ranger': {'Bene': 0.5, 'Det': 0.5},
@@ -567,7 +579,15 @@ def calculate_spell_mana_efficiency_score(char_mana_efficiency_cats, char_class,
     All counts for all possible: effective_cat = max(cat_pct, all_pct).
     LDD (Long Duration Debuff): effective = max(LDD, Det, All) so general detrimental applies.
     When best_mana_by_cat is provided, each category is compared to its own best; otherwise use best_mana_eff for all."""
-    if not char_mana_efficiency_cats or best_mana_eff <= 0:
+    if not char_mana_efficiency_cats:
+        return 0.0
+    # When best_mana_by_cat is empty or all zeros, use fallback so we don't return 0 incorrectly
+    vals = list((best_mana_by_cat or {}).values())
+    if vals and max(vals) > 0:
+        pass  # best_mana_eff from caller is already set
+    elif best_mana_eff <= 0:
+        best_mana_eff = 40.0  # fallback so class-weighted score can still compute
+    if best_mana_eff <= 0:
         return 0.0
     weights = SPELL_MANA_EFFICIENCY_WEIGHTS.get(char_class)
     if not weights:
@@ -910,7 +930,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         else:
             focus_scores['Beneficial Spell Haste'] = 0
         # Spell Mana Efficiency - Paladin: beneficial
-        best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
+        best_mana_eff = (max(best_mana_by_cat.values()) if (best_mana_by_cat and len(best_mana_by_cat) > 0) else best_focii.get('Spell Mana Efficiency', 40.0))
         focus_scores['Spell Mana Efficiency'] = calculate_spell_mana_efficiency_score(
             char_mana_efficiency_cats or {}, 'Paladin', best_mana_eff, best_mana_by_cat
         )
@@ -922,7 +942,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         char_haste = char_data.get('stats', {}).get('haste', 0)
         focus_scores['Haste'] = 100.0 if (isinstance(char_haste, (int, float)) and char_haste >= 30) else 0.0
         # Spell Mana Efficiency - weighted by class (SHD: Det only)
-        best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
+        best_mana_eff = (max(best_mana_by_cat.values()) if (best_mana_by_cat and len(best_mana_by_cat) > 0) else best_focii.get('Spell Mana Efficiency', 40.0))
         focus_scores['Spell Mana Efficiency'] = calculate_spell_mana_efficiency_score(
             char_mana_efficiency_cats or {}, 'Shadow Knight', best_mana_eff, best_mana_by_cat
         )
@@ -936,7 +956,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         char_pct = char_damage_focii.get('Magic', 0)
         focus_scores['Spell Damage'] = (char_pct / best_dmg * 100) if best_dmg > 0 and char_pct > 0 else 0
         # Spell Mana Efficiency: weighted by category (Det, Bene; Sanguine/self-only not weighted)
-        best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
+        best_mana_eff = (max(best_mana_by_cat.values()) if (best_mana_by_cat and len(best_mana_by_cat) > 0) else best_focii.get('Spell Mana Efficiency', 40.0))
         focus_scores['Spell Mana Efficiency'] = calculate_spell_mana_efficiency_score(
             char_mana_efficiency_cats or {}, 'Enchanter', best_mana_eff, best_mana_by_cat
         ) if char_mana_efficiency_cats else 0
@@ -1063,7 +1083,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                         focus_scores[category] = 0
             elif category == 'Spell Mana Efficiency':
                 # Weighted by class (Bene/Det/Nuke separately; All counts for all)
-                best_mana_eff = max((best_mana_by_cat or {}).values()) if best_mana_by_cat else best_focii.get('Spell Mana Efficiency', 40.0)
+                best_mana_eff = (max(best_mana_by_cat.values()) if (best_mana_by_cat and len(best_mana_by_cat) > 0) else best_focii.get('Spell Mana Efficiency', 40.0))
                 focus_scores[category] = calculate_spell_mana_efficiency_score(
                     char_mana_efficiency_cats or {}, char_class, best_mana_eff, best_mana_by_cat
                 ) if char_mana_efficiency_cats else (
@@ -1138,9 +1158,11 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     # Build focus_details for display: per-category rows for Mana Efficiency (and optionally Haste/Duration)
     # so the UI can show Detrimental / Beneficial / Self-only separately with correct raw and score %
     focus_details = {}
-    if char_mana_efficiency_cats and best_mana_by_cat:
+    if char_mana_efficiency_cats:
         weights = SPELL_MANA_EFFICIENCY_WEIGHTS.get(char_class, {})
         all_pct = char_mana_efficiency_cats.get('All', 0)
+        # Fallback best when best_mana_by_cat is missing or has zeros (so display shows correct raw %)
+        best_mana_fallback = (max(best_mana_by_cat.values()) if (best_mana_by_cat and len(best_mana_by_cat) > 0) else 40.0)
         cat_labels = {'Det': 'Detrimental', 'Bene': 'Beneficial', 'Nuke': 'Nuke', 'Sanguine': 'Self only', 'LDD': 'Long duration debuff'}
         rows = []
         for cat in ('Det', 'Bene', 'Nuke', 'Sanguine', 'LDD'):
@@ -1148,7 +1170,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 raw = max(char_mana_efficiency_cats.get('LDD', 0), char_mana_efficiency_cats.get('Det', 0), all_pct)
             else:
                 raw = max(char_mana_efficiency_cats.get(cat, 0), all_pct)
-            best = best_mana_by_cat.get(cat, 0)
+            best = (best_mana_by_cat or {}).get(cat, 0) or best_mana_fallback
             score_pct = (raw / best * 100) if best > 0 and raw > 0 else 0
             weight_share = weights.get(cat, 0)
             rows.append({

@@ -1733,7 +1733,7 @@
                         return `<span class="focus-badge" title="${title}">${displayName} ${pct}%</span>`;
                     };
                     
-                    if (focii['Spell Mana Efficiency'] > 0 && getFocusWeight('Spell Mana Efficiency', focusWeights) > 0) {
+                    if (getFocusWeight('Spell Mana Efficiency', focusWeights) > 0 && ((focii['Spell Mana Efficiency'] || 0) > 0 || Object.values(char.mana_efficiency_cats || {}).some(v => (v || 0) > 0))) {
                         const manaEffCats = char.mana_efficiency_cats || {};
                         const weight = getFocusWeight('Spell Mana Efficiency', focusWeights);
                         Object.entries(manaEffCats).forEach(([cat, pct]) => {
@@ -2371,7 +2371,7 @@
                         let sources = focusSources[focusKey];
                         if (!sources && focusKey === 'Spell Mana Efficiency') {
                             sources = [];
-                            ['Det', 'Bene', 'Nuke', 'Sanguine', 'Long Duration Debuff'].forEach(sub => {
+                            ['Det', 'Bene', 'Nuke', 'Sanguine', 'All', 'Long Duration Debuff'].forEach(sub => {
                                 const s = focusSources['Spell Mana Efficiency (' + sub + ')'];
                                 if (s) sources = sources.concat(s);
                             });
