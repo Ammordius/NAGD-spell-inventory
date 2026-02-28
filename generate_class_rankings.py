@@ -1382,6 +1382,7 @@ CLASS_WEIGHTS = {
         'resists_pct': 2.0,
         'focus': {
             'ATK': 1.0,
+            'Haste': 0.75,
             'FT': 1.0,
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
@@ -1415,6 +1416,7 @@ CLASS_WEIGHTS = {
     },
     
     # Ranger - Hybrid melee/caster (HP 3x, Mana 1x, AC 2x, Resists 2x)
+    # Haste, ATK, FT weights so focus display and score agree
     'Ranger': {
         'hp_pct': 3.0,
         'mana_pct': 1.0,
@@ -1423,8 +1425,9 @@ CLASS_WEIGHTS = {
         'haste_pct': 1.0,
         'resists_pct': 2.0,
         'focus': {
-            'ATK': 1.0,
-            'FT': 1.0,
+            'ATK': 1.5,
+            'FT': 0.75,
+            'Haste': 1.5,
         }
     },
     
@@ -1574,48 +1577,39 @@ def calculate_resist_score(resist_value):
     - r = 0.35 (post-cap marginal credit)
     - p = 1.2 (controls how "progressive" the taper is)
     - t = (x - L) / (H - L) = (x - 220) / 280
-    
+
     S(x) = {
         x,                                    if x <= 220
         220 + (x - 220)(r + (1 - r)(1 - t)^p), if 220 < x < 500
         318 + r(x - 500),                      if x >= 500
     }
-    
+
     Score percentage = (S(x) / S(500)) * 100, where S(500) = 318
-    
+
     Returns: (score_percentage_with_curve, weight_always_1.0)
     """
     if resist_value <= 0:
         return (0.0, 1.0)
-    
+
     L = 220.0  # Start taper
     H = 500.0  # Hard-cap point
     r = 0.35   # Post-cap marginal credit
     p = 1.2    # Progressive taper control
-    
+
     x = float(resist_value)
-    
+
     if x <= L:
-        # No taper: S(x) = x
         S_x = x
     elif x < H:
-        # Progressive taper: S(x) = 220 + (x - 220)(r + (1 - r)(1 - t)^p)
-        t = (x - L) / (H - L)  # t = (x - 220) / 280
+        t = (x - L) / (H - L)
         S_x = L + (x - L) * (r + (1 - r) * ((1 - t) ** p))
     else:
-        # Post-cap: S(x) = 318 + r(x - 500)
-        S_500 = L + r * (H - L)  # = 220 + 0.35 * 280 = 318
+        S_500 = L + r * (H - L)
         S_x = S_500 + r * (x - H)
-    
-    # Normalize: S(500) = 318, so score percentage = (S(x) / 318) * 100
-    # But cap at 100% to match HP/AC normalization
+
     S_500 = L + r * (H - L)  # = 318
     score = min((S_x / S_500) * 100.0, 100.0) if S_500 > 0 else 0.0
-    
-    # Weight is always 1.0
-    weight = 1.0
-    
-    return (score, weight)
+    return (score, 1.0)
 
 def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, char=None):
     """Calculate overall score using class-specific weights with conversion rates"""

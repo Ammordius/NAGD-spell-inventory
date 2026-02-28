@@ -535,7 +535,25 @@
         /** Typical scales so raw stats contribute in a comparable way to normalized weights (0-1). */
         const ITEM_SCORE_SCALES = { hp: 5000, mana: 4000, ac: 1200, resists: 400 };
 
-        /** Stat-only score for one item using normalized weights. */
+        /** Resist curve score for one value (0-100). Must match calculateResistScore used for character scoring. */
+        function getResistCurveScoreForValue(resistValue) {
+            if (resistValue <= 0) return 0;
+            const L = 220.0, H = 500.0, r = 0.35, p = 1.2;
+            const x = parseFloat(resistValue);
+            let S_x;
+            if (x <= L) S_x = x;
+            else if (x < H) {
+                const t = (x - L) / (H - L);
+                S_x = L + (x - L) * (r + (1 - r) * Math.pow(1 - t, p));
+            } else {
+                const S_500 = L + r * (H - L);
+                S_x = S_500 + r * (x - H);
+            }
+            const S_500 = L + r * (H - L);
+            return (S_500 > 0) ? Math.min((S_x / S_500) * 100.0, 100.0) : 0;
+        }
+
+        /** Stat-only score for one item using normalized weights. Resists use same taper curve as character scoring (not linear). */
         function getStatScoreForItem(stats, norm) {
             if (!stats || !norm) return 0;
             const mods = stats.mods || [];
@@ -545,10 +563,16 @@
                 if ((m.label || '').toUpperCase() === 'MANA') mana += Number(m.value) || 0;
             });
             const ac = Number(stats.ac) || 0;
-            const resists = (stats.resists || []).reduce((s, r) => s + (Number(r.value) || 0), 0);
+            // Score resists with same taper curve as character scoring (L=220, H=500); sum curve score per resist type, max 5*100=500
+            let resistCurveSum = 0;
+            (stats.resists || []).forEach(r => {
+                const val = Number(r.value) || 0;
+                if (val > 0) resistCurveSum += getResistCurveScoreForValue(val);
+            });
             const scale = ITEM_SCORE_SCALES;
+            const resistContrib = (resistCurveSum / 500) * (norm.resists_pct || 0);
             return (hp / scale.hp) * (norm.hp_pct || 0) + (mana / scale.mana) * (norm.mana_pct || 0) +
-                (ac / scale.ac) * (norm.ac_pct || 0) + (resists / scale.resists) * (norm.resists_pct || 0);
+                (ac / scale.ac) * (norm.ac_pct || 0) + resistContrib;
         }
 
         /** Focus score for one item: sum over (value/100)*weight for each focus the item provides. */
@@ -2200,50 +2224,37 @@
                     let rawValue = bardInstrumentCats.includes(focusCat) && (scores.focus_items || {})[focusCat] != null
                         ? scores.focus_items[focusCat]
                         : getRawFocusValue(focusCat);
-                    
+
+                    // Use getWeightForFocusKey so nested keys (e.g. "Spell Damage (Fire)") get correct weight
+                    weight = getWeightForFocusKey(focusCat, focusWeights);
+
                     if (focusCat === 'Spell Damage') {
-                        // Spell Damage has nested weights
-                        const damageWeights = focusWeights['Spell Damage'] || {};
-                        weight = Object.values(damageWeights).reduce((a, b) => a + b, 0);
+                        // Spell Damage row uses total weight (already in weight from getWeightForFocusKey if flat key)
+                        if (typeof focusWeights['Spell Damage'] === 'object') {
+                            weight = Object.values(focusWeights['Spell Damage'] || {}).reduce((a, b) => a + b, 0);
+                        }
                     } else if (focusCat === 'Haste') {
-                        // Use normalized weight from focusWeights (which is already normalized)
-                        weight = focusWeights[focusCat] || 0;
+                        // Haste is binary, show the item haste value
+                        const hasteValue = char.stats?.haste || 0;
+                        rawValue = hasteValue >= 30 ? 30 : hasteValue;
                     } else if (focusCat === 'Darkblade' || focusCat === 'Raex Chest') {
-                        // Warrior focus items - use normalized weight from focusWeights
-                        weight = focusWeights[focusCat];
                         if (weight === undefined || weight === null) {
-                            // Debug: log what's in focusWeights and raw focus dict
                             const rawWeights = originalClassWeights[charClass] || classWeights[charClass] || {};
                             const rawFocus = rawWeights.focus || {};
                             console.warn(`Weight missing for ${focusCat}. Available normalized focus weights:`, Object.keys(focusWeights));
                             console.warn(`Raw focus dict for ${charClass}:`, rawFocus);
-                            console.warn(`Raw weights for ${charClass}:`, rawWeights);
                             weight = 0;
                         }
-                        // These are binary (100 or 0), so raw value is the score
                         rawValue = score === 100 ? 100 : 0;
-                    } else if (focusCat === 'Shield of Strife' || focusCat === 'Serpent of Vindication' || 
-                               focusCat === 'Healing Enhancement' || focusCat === 'Beneficial Spell Haste' || 
-                               focusCat === 'Detrimental Spell Haste' || focusCat === 'ATK') {
-                        // For specific focus items, use normalized weight from focusWeights
-                        weight = focusWeights[focusCat] || 0;
-                        
-                        if (focusCat === 'Shield of Strife' || focusCat === 'Serpent of Vindication') {
-                            // These are binary (100 or 0), so raw value is the score
-                            rawValue = score === 100 ? 100 : 0;
-                        } else if (focusCat === 'Haste') {
-                            // Haste is binary, show the item haste value
-                            const hasteValue = char.stats?.haste || 0;
-                            rawValue = hasteValue >= 30 ? 30 : hasteValue;
-                        }
+                    } else if (focusCat === 'Shield of Strife' || focusCat === 'Serpent of Vindication') {
+                        rawValue = score === 100 ? 100 : 0;
                     } else if (focusCat === 'FT') {
-                        weight = focusWeights['FT'] || 0;
                         if (weight > 0 && (scores.ft_capped !== undefined || scores.ft_current !== undefined)) {
                             rawValue = scores.ft_capped ? 100 : (scores.ft_pct != null ? scores.ft_pct : 0);
                         }
-                    } else {
-                        weight = focusWeights[focusCat] || 0;
                     }
+                    // Ensure weight is a number for display
+                    weight = Number(weight) || 0;
                     
                     // Format raw value
                     let rawDisplay = 'N/A';
@@ -2371,10 +2382,7 @@
                             }).join(', ');
                             sourceHtml = `<span class="focus-breakdown-sources">From: ${sourceHtml}</span>`;
                         }
-                        const weightForFocus = (() => {
-                            const fw = focusWeights[focusKey] ?? (focusKey.startsWith('Spell Damage (') ? (focusWeights['Spell Damage'] && Object.values(focusWeights['Spell Damage']).reduce((a, b) => a + b, 0)) : 0);
-                            return typeof fw === 'number' ? fw : 0;
-                        })();
+                        const weightForFocus = getWeightForFocusKey(focusKey, focusWeights);
                         // When not at max for this category, show upgrade options (upgrades only, usable by class)
                         const currentRawBreakdown = (sources && sources.length) ? Math.max(0, ...sources.map(s => (s.value != null ? Number(s.value) : 0))) : 0;
                         const filteredBreakdown = filterFocusCandidates(focusCandidates[focusKey], currentRawBreakdown, char.class);
