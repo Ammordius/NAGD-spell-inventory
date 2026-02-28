@@ -267,6 +267,8 @@ def get_focus_sources(char_inventory, focus_lookup):
                 sub = SPELL_HASTE_CATEGORY_MAP.get(focus_name, 'Bene')
                 if sub == 'Det':
                     set_best('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
+                elif sub == 'Affliction':
+                    set_best('Focus Affliction Haste', pct, item_name, slot_id, item_id)
                 else:
                     set_best('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
             elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
@@ -363,7 +365,12 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 candidates[key].append(entry)
             elif cat == 'Spell Haste':
                 sub = SPELL_HASTE_CATEGORY_MAP.get(name, 'Bene')
-                key = 'Detrimental Spell Haste' if sub == 'Det' else 'Beneficial Spell Haste'
+                if sub == 'Det':
+                    key = 'Detrimental Spell Haste'
+                elif sub == 'Affliction':
+                    key = 'Focus Affliction Haste'
+                else:
+                    key = 'Beneficial Spell Haste'
                 candidates[key].append(entry)
             elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
                 if cat == 'All Spell Duration':
@@ -470,15 +477,17 @@ SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
     # 'Mana Preservation': 'All',  # if generic preservation applies to all
 }
 
-# Map Spell Haste focii to categories (detrimental, beneficial, or All).
-# Scoring uses max(Bene, All) and max(Det, All), so 'All' counts for BOTH Beneficial and Detrimental.
-# Add e.g. 'All Spell Haste': 'All' here if a focus applies to both; then track best_haste['All'] in get_best_focii_by_subcategory.
+# Map Spell Haste focii to categories (detrimental, beneficial, Affliction, or All).
+# Det = general detrimental (nukes, debuffs); Affliction = DoT/debuff-only haste (33% cap, useless for Wiz/Mag).
+# Scoring uses max(Bene, All) and max(Det, All); Focus Affliction Haste uses max(Affliction, Det, All) with its own weight.
 SPELL_HASTE_CATEGORY_MAP = {
-    # Detrimental haste
-    'Affliction Haste': 'Det',
+    # Detrimental haste (general: nukes + debuffs)
     'Haste of Solusek': 'Det',
     'Quickening of Solusek': 'Det',  # Detrimental spell haste
-    
+
+    # Affliction haste (DoT/debuff only, 33% cap; does not affect nukes — useless for Wizard/Magician)
+    'Affliction Haste': 'Affliction',
+
     # Beneficial haste
     'Enhancement Haste': 'Bene',
     'Reanimation Haste': 'Bene',
@@ -565,13 +574,13 @@ CLASS_DAMAGE_TYPES = {
 
 # Class-specific focus priorities (updated with damage types)
 CLASS_FOCUS_PRIORITIES = {
-    'Necromancer': ['Spell Damage (DoT)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration', 'Pet Power'],
-    'Shaman': ['Spell Damage (Cold)', 'Spell Damage (DoT)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration'],
-    'Druid': ['Healing Enhancement', 'Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Mana Efficiency', 'Buff Spell Duration'],
+    'Necromancer': ['Spell Damage (DoT)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Duration', 'Focus Affliction Haste', 'Pet Power'],
+    'Shaman': ['Spell Damage (Cold)', 'Spell Damage (DoT)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration', 'Detrimental Spell Haste', 'Focus Affliction Haste'],
+    'Druid': ['Healing Enhancement', 'Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Mana Efficiency', 'Buff Spell Duration', 'Detrimental Spell Haste'],
     'Cleric': ['Healing Enhancement', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Beneficial Spell Haste', 'Buff Spell Duration'],
     'Wizard': ['Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
     'Magician': ['Spell Damage (Fire)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Haste'],
-    'Enchanter': ['Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Buff Spell Duration'],
+    'Enchanter': ['Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Buff Spell Duration', 'Detrimental Spell Haste', 'Focus Affliction Haste'],
     'Beastlord': ['ATK', 'FT', 'Spell Damage (Cold)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration', 'Beneficial Spell Haste', 'Detrimental Spell Haste'],
     'Bard': ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'],
 }
@@ -891,6 +900,10 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
             focus_scores['Detrimental Spell Haste'] = (det_pct / best_det * 100) if best_det > 0 and det_pct > 0 else 0
             # Composite for focus_overall_pct (CLASS_FOCUS_PRIORITIES has 'Spell Haste')
             focus_scores['Spell Haste'] = 0.5 * focus_scores.get('Beneficial Spell Haste', 0) + 0.5 * focus_scores.get('Detrimental Spell Haste', 0)
+            # Focus Affliction Haste (DoT/debuff-only; fallback to Det/All)
+            best_aff = max(best_haste_by_cat.get('Affliction', 0), best_haste_by_cat.get('Det', 0), best_all_haste) or best_focii.get('Spell Haste', 33.0)
+            eff_aff = max(char_spell_haste_cats.get('Affliction', 0), char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
+            focus_scores['Focus Affliction Haste'] = (eff_aff / best_aff * 100) if best_aff > 0 and eff_aff > 0 else 0
         else:
             char_pct = char_focii.get('Spell Haste', 0)
             best_pct = best_focii.get('Spell Haste', 33.0)
@@ -1014,6 +1027,10 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 det_pct = max(char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
                 focus_scores['Detrimental Spell Haste'] = (det_pct / best_det * 100) if best_det > 0 and det_pct > 0 else 0
                 focus_scores['Spell Haste'] = 0.5 * focus_scores.get('Beneficial Spell Haste', 0) + 0.5 * focus_scores.get('Detrimental Spell Haste', 0)
+                # Focus Affliction Haste (DoT/debuff-only; weight 0 for Magician — use fallback for display)
+                best_aff = max(best_haste_by_cat.get('Affliction', 0), best_haste_by_cat.get('Det', 0), best_haste_by_cat.get('All', 0)) or best_focii.get('Spell Haste', 33.0)
+                eff_aff = max(char_spell_haste_cats.get('Affliction', 0), char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
+                focus_scores['Focus Affliction Haste'] = (eff_aff / best_aff * 100) if best_aff > 0 and eff_aff > 0 else 0
             else:
                 # Other categories work normally
                 char_pct = char_focii.get(category, 0)
@@ -1034,6 +1051,11 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 best_det = max(best_haste_by_cat.get('Det', 0), best_haste_by_cat.get('All', 0)) or best_focii.get('Spell Haste', 33.0)
                 det_pct = max(char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
                 focus_scores['Detrimental Spell Haste'] = (det_pct / best_det * 100) if best_det > 0 and det_pct > 0 else 0
+
+            # Focus Affliction Haste: DoT/debuff-only (33% cap); use general Det/All if no Affliction value
+            best_aff = max(best_haste_by_cat.get('Affliction', 0), best_haste_by_cat.get('Det', 0), best_haste_by_cat.get('All', 0)) or best_focii.get('Spell Haste', 33.0)
+            eff_aff = max(char_spell_haste_cats.get('Affliction', 0), char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
+            focus_scores['Focus Affliction Haste'] = (eff_aff / best_aff * 100) if best_aff > 0 and eff_aff > 0 else 0
         
         # Add haste binary check for all ATK classes (mnk, rog, war, pal, shd, bst, brd, rng)
         # Binary: 30% item haste (70% buff + 30% item = 100% total) = 100%, otherwise 0%
@@ -1269,6 +1291,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Haste': 1.0,  # Required
             'Detrimental Spell Duration': 0.75,
             'Spell Range Extension': 0.5,  # Lower weight for all casters
+            'Focus Affliction Haste': 0.0,  # DoT/debuff-only; useless for Wizard
         }
     },
     
@@ -1307,6 +1330,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Duration': 0.75,
             'Spell Range Extension': 0.5,  # Lower weight for all casters
             'Pet Power': 3.0,
+            'Focus Affliction Haste': 0.0,  # DoT/debuff-only; useless for Magician
         }
     },
     
@@ -1326,6 +1350,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Haste': 1.0,  # det spell h
             'Spell Range Extension': 0.5,  # Lower weight for all casters
             'Pet Power': 2.0,
+            'Focus Affliction Haste': 0.75,  # DoT/debuff haste 33% cap; use Det/All if no Affliction
         }
     },
     
@@ -1349,6 +1374,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Duration': 1.0,  # DoT duration focus (All duration applies to both, no separate weight)
             'Spell Range Extension': 0.5,  # Lower weight for all casters
             "Time's Antithesis": 2.0,  # Item 24699, same weight as Serpent of Vindication for Enchanter
+            'Focus Affliction Haste': 0.75,  # DoT/debuff haste 33% cap
         }
     },
     
@@ -1369,6 +1395,7 @@ CLASS_WEIGHTS = {
             'Detrimental Spell Haste': 1.0,
             'Spell Range Extension': 0.75,
             'Serpent of Vindication': 2.0,
+            'Focus Affliction Haste': 0.75,  # DoT/debuff haste 33% cap
         }
     },
     
@@ -1611,7 +1638,7 @@ def calculate_resist_score(resist_value):
     score = min((S_x / S_500) * 100.0, 100.0) if S_500 > 0 else 0.0
     return (score, 1.0)
 
-def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, char=None):
+def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, char=None, best_haste_by_cat=None):
     """Calculate overall score using class-specific weights with conversion rates"""
     raw_weights = CLASS_WEIGHTS.get(char_class, {})
     # Normalize weights to target percentages
@@ -1970,9 +1997,9 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                                 focus_score = (char_pct / best_damage * 100) if char_pct > 0 else 0
                                 total_score += focus_score * weight
                                 total_weight += weight
-            elif focus_cat in ['Beneficial Spell Haste', 'Detrimental Spell Haste']:
+            elif focus_cat in ['Beneficial Spell Haste', 'Detrimental Spell Haste', 'Focus Affliction Haste']:
                 # Handle spell haste categories - look up from char_spell_haste_cats
-                # "All" categories count for both Bene and Det
+                # "All" categories count for both Bene and Det; Focus Affliction uses max(Affliction, Det, All)
                 if isinstance(weight_config, (int, float)) and weight_config > 0:
                     if char_spell_haste_cats is not None:
                         if focus_cat == 'Beneficial Spell Haste':
@@ -1985,7 +2012,7 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                                 best_focii.get('Spell Haste', 33.0),
                                 best_focii.get('All Spell Haste', 0)  # If "All Spell Haste" exists
                             )
-                        else:  # Detrimental Spell Haste
+                        elif focus_cat == 'Detrimental Spell Haste':
                             # Use max of Det and All (All counts for both)
                             char_pct = max(
                                 char_spell_haste_cats.get('Det', 0),
@@ -1995,6 +2022,18 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
                                 best_focii.get('Spell Haste', 33.0),
                                 best_focii.get('All Spell Haste', 0)  # If "All Spell Haste" exists
                             )
+                        else:  # Focus Affliction Haste
+                            # DoT/debuff-only; fallback to Det or All if no Affliction value
+                            char_pct = max(
+                                char_spell_haste_cats.get('Affliction', 0),
+                                char_spell_haste_cats.get('Det', 0),
+                                char_spell_haste_cats.get('All', 0)
+                            )
+                            best_haste = max(
+                                best_haste_by_cat.get('Affliction', 0) if best_haste_by_cat else 0,
+                                best_haste_by_cat.get('Det', 0) if best_haste_by_cat else 0,
+                                best_haste_by_cat.get('All', 0) if best_haste_by_cat else 0
+                            ) or best_focii.get('Spell Haste', 33.0)
                         
                         # For Beastlord detrimental spell haste: they get 1.5% per level (15 levels = 22.5% innate)
                         # Focus caps at 50% total, so focus item can only contribute 50% - 22.5% = 27.5%
@@ -2320,16 +2359,17 @@ def main():
         
         # Calculate overall score using class-specific weights with conversion rates
         overall_score = calculate_overall_score_with_weights(
-            char_class, 
-            scores, 
-            char_damage_focii, 
+            char_class,
+            scores,
+            char_damage_focii,
             scores.get('focus_scores', {}),
             best_focii,
             class_max_values.get(char_class, {}),
             char_spell_haste_cats,
             char_duration_cats,
             char_mana_efficiency_cats,
-            char_data  # Pass char_data for individual_resists
+            char_data,  # Pass char_data for individual_resists
+            best_haste_by_cat
         )
         
         output_data.append({

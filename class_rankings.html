@@ -1745,10 +1745,11 @@
                     if (focii['Spell Haste'] > 0) {
                         const hasteCats = char.spell_haste_cats || {};
                         Object.entries(hasteCats).forEach(([cat, pct]) => {
-                            const hasteWeightKey = cat === 'Bene' ? 'Beneficial Spell Haste' : 'Detrimental Spell Haste';
+                            const hasteWeightKey = cat === 'Bene' ? 'Beneficial Spell Haste' : (cat === 'Det' ? 'Detrimental Spell Haste' : 'Focus Affliction Haste');
                             const weight = focusWeights[hasteWeightKey] || 0;
                             if (weight <= 0) return;
-                            focusDisplay.push({ weight, html: formatFocusWithCategory('Spell Haste', cat, pct, weight) });
+                            const label = cat === 'Bene' ? 'Bene' : (cat === 'Det' ? 'Det' : 'Affliction');
+                            focusDisplay.push({ weight, html: formatFocusWithCategory('Spell Haste', label, pct, weight) });
                         });
                     }
                     
@@ -2176,6 +2177,9 @@
                     } else if (focusCat === 'Beneficial Spell Haste' || focusCat === 'Detrimental Spell Haste') {
                         const hasteCat = focusCat === 'Beneficial Spell Haste' ? 'Bene' : 'Det';
                         return charSpellHasteCats[hasteCat] || 0;
+                    } else if (focusCat === 'Focus Affliction Haste') {
+                        // DoT/debuff-only; raw = max(Affliction, Det, All)
+                        return Math.max(charSpellHasteCats['Affliction'] || 0, charSpellHasteCats['Det'] || 0, charSpellHasteCats['All'] || 0);
                     } else if (focusCat === 'Buff Spell Duration' || focusCat === 'Beneficial Spell Duration') {
                         // All Spell Duration counts for Buff at its %; use max(Bene, All)
                         return Math.max(charDurationCats['Bene'] || 0, charDurationCats['All'] || 0);

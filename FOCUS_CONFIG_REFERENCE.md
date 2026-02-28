@@ -13,7 +13,18 @@ Yes. Where Beneficial or Detrimental spell haste is scored we use:
 - **Beneficial:** `max(char_spell_haste_cats['Bene'], char_spell_haste_cats['All'])`
 - **Detrimental:** `max(char_spell_haste_cats['Det'], char_spell_haste_cats['All'])`
 
-So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **both** Beneficial and Detrimental. Right now no focus name is mapped to `'All'`; only Det/Bene are used. To support an “all spell haste” focus, add it in `SPELL_HASTE_CATEGORY_MAP` with value `'All'` and ensure `get_best_focii_by_subcategory` and `analyze_character_focii` handle the `'All'` haste category.
+So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **both** Beneficial and Detrimental. Right now no focus name is mapped to `'All'`; only Det/Bene/Affliction are used. To support an “all spell haste” focus, add it in `SPELL_HASTE_CATEGORY_MAP` with value `'All'` and ensure `get_best_focii_by_subcategory` and `analyze_character_focii` handle the `'All'` haste category.
+
+---
+
+## Focus Affliction Haste (DoT/debuff-only, separate from Detrimental Spell Haste)
+
+**Affliction Haste** is a separate spell-haste type: it only affects **DoTs and debuffs** (33% cap in-game). It does **not** affect nukes, so it is **useless for Wizard and Magician** (weight 0). It is useful for Necromancer, Shaman, Enchanter, Druid, Beastlord and is weighted there.
+
+- **Category in map:** `SPELL_HASTE_CATEGORY_MAP`: `'Affliction Haste': 'Affliction'` (no longer mapped to `'Det'`).
+- **Scoring:** Effective value = `max(Affliction, Det, All)` so general detrimental or “all” haste counts if the character has no Affliction focus. Best = `max(best_haste['Affliction'], best_haste['Det'], best_haste['All'])`.
+- **Weights:** Wizard/Magician 0; Necromancer/Shaman/Enchanter 0.75. (Beastlord/Druid do not use this category.)
+- **Display key:** `Focus Affliction Haste` (tracked in `get_focus_best_per_slot`, `get_all_focus_candidates`, `focus_scores`, `CLASS_WEIGHTS`).
 
 ---
 
@@ -21,13 +32,13 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 
 | Class       | Priorities (first = highest weight in average) |
 |------------|--------------------------------------------------|
-| Necromancer | Spell Damage (DoT), Spell Mana Efficiency, Spell Haste, Detrimental Spell Duration, Pet Power |
-| Shaman      | Spell Damage (Cold), (DoT), Healing Enhancement, Spell Mana Efficiency, Beneficial Spell Haste, Buff Spell Duration |
-| Druid       | Healing Enhancement, Spell Damage (Fire), (Cold), Spell Mana Efficiency, Buff Spell Duration |
+| Necromancer | Spell Damage (DoT), Spell Mana Efficiency, Spell Haste, Detrimental Spell Duration, Focus Affliction Haste, Pet Power |
+| Shaman      | Spell Damage (Cold), (DoT), Healing Enhancement, Spell Mana Efficiency, Beneficial Spell Haste, Buff Spell Duration, Detrimental Spell Haste, Focus Affliction Haste |
+| Druid       | Healing Enhancement, Spell Damage (Fire), (Cold), Spell Mana Efficiency, Buff Spell Duration, Detrimental Spell Haste |
 | Cleric      | Healing Enhancement, Spell Damage (Magic), Spell Mana Efficiency, Beneficial Spell Haste, Buff Spell Duration |
 | Wizard      | Spell Damage (Fire), (Cold), (Magic), Spell Mana Efficiency, Spell Haste |
 | Magician    | Spell Damage (Fire), (Magic), Spell Mana Efficiency, Spell Haste, Detrimental Spell Haste |
-| Enchanter   | Spell Damage (Magic), Spell Mana Efficiency, Spell Haste, Buff Spell Duration |
+| Enchanter   | Spell Damage (Magic), Spell Mana Efficiency, Spell Haste, Buff Spell Duration, Detrimental Spell Haste, Focus Affliction Haste |
 | Beastlord   | ATK, FT, Spell Damage (Cold), Healing Enhancement, Spell Mana Efficiency, Buff Spell Duration, Beneficial Spell Haste, Detrimental Spell Haste |
 | Bard        | Brass, Percussion, Singing, Strings, Wind |
 
@@ -42,12 +53,12 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 | **Rogue**   | ATK 1.0, Haste 1.0 |
 | **Shadow Knight** | Haste 0.75, ATK 0.75, Spell Mana Efficiency 0.5, Shield of Strife 2.0, FT 1.0 |
 | **Paladin** | ATK 0.5, FT 1.0, Haste 0.5, Beneficial Spell Haste 0.75, Healing Enhancement 0.5, Shield of Strife 2.0, Spell Mana Efficiency 0.5 |
-| **Wizard**  | FT 4.0, Spell Damage (Fire 1.0, Cold 1.0, Magic 0.5), Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5 |
+| **Wizard**  | FT 4.0, Spell Damage (Fire 1.0, Cold 1.0, Magic 0.5), Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5, **Focus Affliction Haste 0** (DoT/debuff-only; useless for Wiz) |
 | **Cleric**  | FT 4.0, Spell Damage (Magic 0.5), Healing Enhancement 2.0, Spell Mana Efficiency 1.0, Spell Range Extension 0.5, Buff Spell Duration 1.0, Beneficial Spell Haste 2.0 |
-| **Magician**| FT 4.0, Spell Damage (Fire 1.0, Magic 0.5), Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5, Pet Power 3.0 |
-| **Necromancer** | FT 4.0, Spell Damage (DoT 1.0), Spell Mana Efficiency 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.5, Pet Power 2.0 |
-| **Shaman**  | FT 4.0, Spell Damage (DoT 1.0, Cold 0.2), Healing Enhancement 1.0, Spell Mana Efficiency 1.0, Beneficial Spell Haste 2.0, Detrimental Spell Haste 0.75, Buff Spell Duration 1.0, Detrimental Spell Duration 1.0, Spell Range Extension 0.5, Time's Antithesis 2.0 |
-| **Enchanter** | FT 4.0, Spell Damage (Magic 0.5), Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.75, Serpent of Vindication 2.0 |
+| **Magician**| FT 4.0, Spell Damage (Fire 1.0, Magic 0.5), Spell Mana Efficiency 1.0, Detrimental Spell Haste 1.0, Detrimental Spell Duration 0.75, Spell Range Extension 0.5, Pet Power 3.0, **Focus Affliction Haste 0** (DoT/debuff-only; useless for Mag) |
+| **Necromancer** | FT 4.0, Spell Damage (DoT 1.0), Spell Mana Efficiency 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.5, Pet Power 2.0, **Focus Affliction Haste 0.75** |
+| **Shaman**  | FT 4.0, Spell Damage (DoT 1.0, Cold 0.2), Healing Enhancement 1.0, Spell Mana Efficiency 1.0, Beneficial Spell Haste 2.0, Detrimental Spell Haste 0.75, Buff Spell Duration 1.0, Detrimental Spell Duration 1.0, Spell Range Extension 0.5, Time's Antithesis 2.0, **Focus Affliction Haste 0.75** |
+| **Enchanter** | FT 4.0, Spell Damage (Magic 0.5), Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.75, Serpent of Vindication 2.0, **Focus Affliction Haste 0.75** |
 | **Beastlord** | ATK 1.0, FT 1.0, Spell Damage (Cold 0.5), Healing Enhancement 0.75, Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Beneficial Spell Haste 0.75, Detrimental Spell Haste 0.75, Pet Power 3.0 |
 | **Druid**   | FT 4.0, Spell Damage (Fire 1.0, Cold 1.0), Healing Enhancement 1.0, Spell Mana Efficiency 1.0, Beneficial Spell Haste 2.0, Detrimental Spell Haste 0.75, Detrimental Spell Duration 0.5, Buff Spell Duration 1.0, Spell Range Extension 0.5 |
 | **Ranger**  | ATK 1.0, FT 1.0 |
@@ -60,7 +71,7 @@ Spell Damage uses the same subcategory system: each class lists only the subcate
 ## Category maps (which focus names → Bene/Det/All/etc.)
 
 - **Spell Mana Efficiency:** `SPELL_MANA_EFFICIENCY_CATEGORY_MAP` ~line 248 (Det, Bene, Nuke, Sanguine). Sanguine = self-only; weight 0 for most classes.
-- **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 276 (Det, Bene). Add `'Focus Name': 'All'` to have a focus count for both.
+- **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 476 (Det, Bene, **Affliction**). **Affliction** = DoT/debuff-only haste (33% cap); `'Affliction Haste': 'Affliction'`. Scoring: Det/Bene use max(cat, All); **Focus Affliction Haste** uses max(Affliction, Det, All) with its own weight (0 for Wiz/Mag, 0.75 for Necro/Shaman/Enc, 0.5 for Druid/BST). Add `'Focus Name': 'All'` to have a focus count for both Bene and Det.
 - **Spell Duration:** Buff/Detrimental/All Spell Duration; “All Spell Duration” is tracked as `All` and counts for both Buff (Bene) and Detrimental (Det) in scoring.
 - **Spell Mana Efficiency weights per class:** `SPELL_MANA_EFFICIENCY_WEIGHTS` ~line 311 (e.g. Enchanter Det 1.0, Bene 0.25).
 - **Pet Power:** Item-based focus for Magician (3.0), Beastlord (3.0), Necromancer (2.0). Items: 28144 = 20%, 20508 = 25%. Checked from **full inventory (including bags)** so swap-in is counted. See `PET_POWER_ITEMS` and `get_char_pet_power()`.
