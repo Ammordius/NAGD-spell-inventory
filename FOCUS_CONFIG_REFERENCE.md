@@ -61,7 +61,7 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 | **Enchanter** | FT 4.0, Spell Damage (Magic 0.5), Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Detrimental Spell Duration 1.0, Detrimental Spell Haste 1.0, Spell Range Extension 0.75, Serpent of Vindication 2.0 |
 | **Beastlord** | ATK 1.0, FT 1.0, Spell Damage (Cold 0.5), Healing Enhancement 0.75, Spell Mana Efficiency 1.0, Buff Spell Duration 1.0, Beneficial Spell Haste 0.75, Detrimental Spell Haste 0.75, Pet Power 3.0 |
 | **Druid**   | FT 4.0, Spell Damage (Fire 1.0, Cold 1.0), Healing Enhancement 1.0, Spell Mana Efficiency 1.0, Beneficial Spell Haste 2.0, Detrimental Spell Haste 0.75, Detrimental Spell Duration 0.5, Buff Spell Duration 1.0, Spell Range Extension 0.5 |
-| **Ranger**  | ATK 1.5, FT 0.25, Haste 1.5 |
+| **Ranger**  | ATK 1.5, Haste 1.5 |
 | **Bard**    | ATK 4.0, FT 4.0, Haste 4.0, Brass 4.0, Percussion 4.0, Singing 4.0, Strings 4.0, Wind 4.0 |
 
 Spell Damage uses the same subcategory system: each class lists only the subcategories defined for that class. DoT is special (DoT-only focii); "All" (instant) applies to other subcategories and is not a separate weighted line. (e.g. Necromancer: DoT; Cleric: Magic; Beastlord: Cold).
