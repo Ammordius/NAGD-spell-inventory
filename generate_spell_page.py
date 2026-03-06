@@ -1100,6 +1100,32 @@ def compare_character_data(current_data, previous_data, character_list=None):
     
     return deltas
 
+# Equipment slots (1-22 = worn slots; used to detect "no items -> any items" = corpse loot across day boundary)
+EQUIPPED_SLOT_IDS = set(str(i) for i in range(1, 23))
+
+
+def count_equipped(items):
+    """Return number of items in equipped slots (1-22). Used to detect corpse-loot chars."""
+    if not items:
+        return 0
+    return sum(1 for it in items if it.get('slot_id') in EQUIPPED_SLOT_IDS)
+
+
+def chars_corpse_loot_excluded(current_inv, previous_inv):
+    """Characters who went from 0 equipped to any equipped (likely looting a corpse across day boundary).
+    Exclude them from delta, raid gear, and mob tracker."""
+    excluded = set()
+    all_chars = set(current_inv.keys()) | set(previous_inv.keys())
+    for char_name in all_chars:
+        prev_items = previous_inv.get(char_name, [])
+        curr_items = current_inv.get(char_name, [])
+        prev_equipped = count_equipped(prev_items)
+        curr_equipped = count_equipped(curr_items)
+        if prev_equipped == 0 and curr_equipped >= 1:
+            excluded.add(char_name)
+    return excluded
+
+
 def load_no_rent_items():
     """Load list of no-rent item IDs from JSON file."""
     base_dir = os.path.dirname(__file__)
@@ -1116,6 +1142,30 @@ def load_no_rent_items():
     else:
         # File doesn't exist, return empty set (no filtering)
         return set()
+
+
+def load_no_drop_tracked_item_ids():
+    """Load set of tracked item IDs that are NO DROP (from data/item_stats.json flags).
+    Used to only count mob kills from non-no-drop loot when serverwide net change is positive."""
+    base_dir = os.path.dirname(__file__)
+    no_drop = set()
+    for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            for item_id_str, entry in data.items():
+                flags = entry.get('flags') or []
+                if isinstance(flags, str):
+                    flags = [f.strip() for f in flags.split('|')]
+                if 'NO DROP' in flags:
+                    no_drop.add(str(item_id_str))
+            return no_drop
+        except Exception as e:
+            print(f"Warning: Could not load item_stats for no_drop: {e}")
+            return set()
+    return set()
 
 
 def load_tracked_item_ids():
@@ -1171,8 +1221,6 @@ def load_tracked_item_ids():
     return tracked, source_label, item_zone, item_mob
 
 
-# Threshold: if a character has this many items only added or only removed (not both), treat as anon/not-anon visibility change
-VISIBILITY_CHANGE_ITEM_THRESHOLD = 20
 # Character stats: if in both snapshots but one has 0 AA and the other has >= this, treat as anon flip (export includes anon with zeros)
 VISIBILITY_CHANGE_AA_THRESHOLD = 50
 # HP: if one side 0 and the other >= this, treat as anon flip (anon export often has 0 HP)
@@ -1266,16 +1314,9 @@ def compare_inventories(current_inv, previous_inv, character_list=None):
         if added_items or removed_items:
             in_current = char_name in current_inv
             in_previous = char_name in previous_inv
-            # Primary: character in one snapshot but not the other = anon toggle (went anon or came not-anon)
+            # Primary: character in one snapshot but not the other = anon toggle (went anon or came not-anon).
+            # We do not use arbitrary item-count thresholds; we have better mechanisms for anon detection.
             is_visibility_change = (not in_current and in_previous) or (in_current and not in_previous)
-            if not is_visibility_change:
-                # Fallback: many items only added or only removed when char in both (e.g. empty inv when anon)
-                num_added = sum(added_items.values())
-                num_removed = sum(removed_items.values())
-                is_visibility_change = (
-                    (num_added >= VISIBILITY_CHANGE_ITEM_THRESHOLD and num_removed == 0)
-                    or (num_removed >= VISIBILITY_CHANGE_ITEM_THRESHOLD and num_added == 0)
-                )
             item_deltas[char_name] = {
                 'added': added_items,
                 'removed': removed_items,
@@ -1681,15 +1722,33 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     'is_visibility_change': delta.get('is_visibility_change', False),
                 }
     
-    # Items by zone: only chars in BOTH snapshots (exclude visibility-change); only raid zones
+    # Characters who went 0 equipped -> any equipped (corpse loot across day boundary): exclude from delta/raid/mob tracker
+    corpse_loot_chars = chars_corpse_loot_excluded(current_inv, previous_inv)
+    # Tracked item IDs that are NO DROP (from item_stats); non-no-drop tracked loot needs net-change verification for mob kill
+    no_drop_tracked = load_no_drop_tracked_item_ids() & tracked_ids if tracked_ids else set()
+    # Serverwide net change per tracked item (excluding corpse-loot chars) for non-no-drop kill verification
+    net_change_tracked = defaultdict(int)
+    for char_name, delta in tracked_deltas.items():
+        if char_name in corpse_loot_chars:
+            continue
+        for item_id, c in (delta.get('added') or {}).items():
+            net_change_tracked[item_id] += c
+        for item_id, c in (delta.get('removed') or {}).items():
+            net_change_tracked[item_id] -= c
+    
+    # Items by zone: only chars in BOTH snapshots (exclude visibility-change and corpse-loot); only raid zones
+    # For non-no-drop tracked loot, only add (zone, mob) when serverwide net change for that item is positive
     # Structure: zone_entries[zone][mob] = [(char_name, item_id, item_name), ...]
     chars_in_both = set(current_inv.keys()) & set(previous_inv.keys())
     zone_entries = {}
     for char_name in tracked_deltas:
-        if char_name not in chars_in_both or tracked_deltas[char_name].get('is_visibility_change'):
+        if char_name not in chars_in_both or tracked_deltas[char_name].get('is_visibility_change') or char_name in corpse_loot_chars:
             continue
         delta = tracked_deltas[char_name]
         for item_id, count in (delta.get('added') or {}).items():
+            # Non-no-drop tracked loot: only count toward mob kill if serverwide net change is positive
+            if str(item_id) not in no_drop_tracked and net_change_tracked.get(item_id, 0) <= 0:
+                continue
             zone = item_zone.get(str(item_id))
             if not zone:
                 continue
@@ -1706,11 +1765,12 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         save_mob_deaths_from_delta(zone_entries, mob_tracker_deaths_path, observed_at=observed_at,
                                    raid_item_sources_path=raid_item_sources_path)
     
-    # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon: from inv or from char stats 0 vs large AA)
+    # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon: from inv or from char stats 0 vs large AA; plus corpse-loot chars)
     visibility_change_chars = {name for name, inv_d in inv_deltas.items() if inv_d.get('is_visibility_change')}
     for name, char_d in char_deltas.items():
         if char_d.get('is_visibility_change'):
             visibility_change_chars.add(name)
+    visibility_change_chars |= corpse_loot_chars
     
     # Calculate AA leaderboard (top gainers); exclude new/deleted and inv-based visibility change
     aa_leaderboard = []
@@ -1930,10 +1990,12 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             <div class="nav-links">
 """
     
-    # Split inventory deltas by level 1 (mules/traders) vs others
+    # Split inventory deltas by level 1 (mules/traders) vs others; exclude corpse-loot chars from display
     inv_deltas_level1 = {}
     inv_deltas_others = {}
     for char_name, delta in inv_deltas.items():
+        if char_name in corpse_loot_chars:
+            continue
         # Check if character is level 1 in current data
         char_level = current_char_data.get(char_name, {}).get('level', 0)
         if char_level == 1:
@@ -2317,7 +2379,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>
 """
         sorted_tracked = sorted(tracked_deltas.keys())
-        non_vis_tracked = [c for c in sorted_tracked if not tracked_deltas[c].get('is_visibility_change')]
+        non_vis_tracked = [c for c in sorted_tracked if not tracked_deltas[c].get('is_visibility_change') and c not in corpse_loot_chars]
         for char_name in non_vis_tracked:
             delta = tracked_deltas[char_name]
             char_level = current_char_data.get(char_name, {}).get('level', '?')
