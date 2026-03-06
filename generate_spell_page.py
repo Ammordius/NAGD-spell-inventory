@@ -2681,6 +2681,9 @@ def generate_delta_history(base_dir):
     tracked_source_json = json.dumps(tracked_source_label)
     tracked_item_zone_json = json.dumps(item_zone)
     tracked_item_mob_json = json.dumps(item_mob)
+    # Tracked item IDs that are NO DROP (for mob kill verification: non-no-drop only counts when net change > 0)
+    no_drop_tracked = load_no_drop_tracked_item_ids() & tracked_ids if tracked_ids else set()
+    no_drop_tracked_json = json.dumps(list(no_drop_tracked))
     
     # Find all daily delta JSON files
     delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
@@ -2908,11 +2911,13 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="tracked-source-label">""" + tracked_source_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="tracked-item-zone">""" + tracked_item_zone_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="tracked-item-mob">""" + tracked_item_mob_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="no-drop-tracked-ids">""" + no_drop_tracked_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
         const TRACKED_ITEM_ZONE = JSON.parse((document.getElementById('tracked-item-zone') || { textContent: '{}' }).textContent);
         const TRACKED_ITEM_MOB = JSON.parse((document.getElementById('tracked-item-mob') || { textContent: '{}' }).textContent);
+        const NO_DROP_TRACKED_IDS = new Set(JSON.parse((document.getElementById('no-drop-tracked-ids') || { textContent: '[]' }).textContent));
         // Set default dates (today and 7 days ago)
         const today = new Date().toISOString().split('T')[0];
         const weekAgo = new Date();
@@ -3252,11 +3257,6 @@ def generate_delta_history(base_dir):
                         if (!isVisibilityChange) {
                             isVisibilityChange = (inStart && !inEnd) || (!inStart && inEnd);
                         }
-                        if (!isVisibilityChange) {
-                            const numAdded = Object.values(addedItems).reduce((s, n) => s + n, 0);
-                            const numRemoved = Object.values(removedItems).reduce((s, n) => s + n, 0);
-                            isVisibilityChange = (numAdded >= 20 && numRemoved === 0) || (numRemoved >= 20 && numAdded === 0);
-                        }
                         invDeltas[charName] = { added: addedItems, removed: removedItems, item_names: itemNames, is_visibility_change: isVisibilityChange };
                     }
                 }
@@ -3306,12 +3306,22 @@ def generate_delta_history(base_dir):
                 }
                 
                 // Items by zone: only chars in BOTH snapshots (exclude visibility-change); only raid zones
-                // Structure: zoneEntries[zone][mob] = [{ charName, itemId, name }, ...]
+                // For non-no-drop tracked loot, only add (zone, mob) when serverwide net change for that item is positive
+                const netChangeTracked = {};
+                for (const [charName, delta] of Object.entries(trackedDeltas)) {
+                    for (const itemId of Object.keys(delta.added || {})) {
+                        netChangeTracked[itemId] = (netChangeTracked[itemId] || 0) + delta.added[itemId];
+                    }
+                    for (const itemId of Object.keys(delta.removed || {})) {
+                        netChangeTracked[itemId] = (netChangeTracked[itemId] || 0) - delta.removed[itemId];
+                    }
+                }
                 const zoneEntries = {};
                 if (TRACKED_ITEM_ZONE && typeof TRACKED_ITEM_ZONE === 'object') {
                     for (const [charName, delta] of Object.entries(trackedDeltas)) {
                         if (!startState[charName] || !endState[charName] || delta.is_visibility_change) continue;
                         for (const itemId of Object.keys(delta.added || {})) {
+                            if (!NO_DROP_TRACKED_IDS.has(String(itemId)) && (netChangeTracked[itemId] || 0) <= 0) continue;
                             const zone = TRACKED_ITEM_ZONE[String(itemId)];
                             if (!zone) continue;
                             const mob = (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[String(itemId)]) || '';
@@ -3404,6 +3414,7 @@ def generate_delta_history(base_dir):
                 
                 for (const [charName, changes] of Object.entries(charChanges)) {
                     if (changes.is_deleted || changes.is_new) continue;
+                    if (allVisNames.includes(charName)) continue;
                     
                     const currentLevel = changes.current_level;
                     const previousLevel = changes.previous_level;
@@ -3539,6 +3550,7 @@ def generate_delta_history(base_dir):
                     const sortedCharNames = Object.keys(charChanges).sort();
                     for (const charName of sortedCharNames) {
                         const changes = charChanges[charName];
+                        if (allVisNames.includes(charName)) continue;
                         const isDeleted = changes.is_deleted;
                         const isNew = changes.is_new;
                         const currentLevel = changes.current_level;

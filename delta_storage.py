@@ -535,9 +535,14 @@ def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str
     baseline_inv_data = baseline['inventories']
     
     # Calculate deltas from baseline
-    from generate_spell_page import compare_character_data, compare_inventories
+    from generate_spell_page import compare_character_data, compare_inventories, chars_corpse_loot_excluded
     char_deltas = compare_character_data(current_char_data, baseline_char_data, None)
     inv_deltas = compare_inventories(current_inv_data, baseline_inv_data, None)
+    # Exclude corpse-loot chars (0 equipped -> any equipped) so delta-history and other consumers don't see them
+    corpse_loot_chars = chars_corpse_loot_excluded(current_inv_data, baseline_inv_data)
+    for char_name in corpse_loot_chars:
+        char_deltas.pop(char_name, None)
+        inv_deltas.pop(char_name, None)
     
     # Get item names for inventory deltas
     all_item_ids = set()
