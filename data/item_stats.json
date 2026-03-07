@@ -70021,19 +70021,52 @@
     "slot": "SHOULDERS",
     "ac": 8,
     "mods": [
-      {"label": "STA", "value": 8},
-      {"label": "CHA", "value": 8},
-      {"label": "WIS", "value": 8},
-      {"label": "INT", "value": 8},
-      {"label": "HP", "value": 50},
-      {"label": "MANA", "value": 50}
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "CHA",
+        "value": 8
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
     ],
     "resists": [
-      {"label": "Fire", "value": 8},
-      {"label": "Disease", "value": 8},
-      {"label": "Cold", "value": 8},
-      {"label": "Magic", "value": 8},
-      {"label": "Poison", "value": 8}
+      {
+        "label": "Fire",
+        "value": 8
+      },
+      {
+        "label": "Disease",
+        "value": 8
+      },
+      {
+        "label": "Cold",
+        "value": 8
+      },
+      {
+        "label": "Magic",
+        "value": 8
+      },
+      {
+        "label": "Poison",
+        "value": 8
+      }
     ],
     "effectSpellId": 1300,
     "effectSpellName": "Flowing Thought III",
@@ -70056,18 +70089,48 @@
     "slot": "WRIST",
     "ac": 38,
     "mods": [
-      {"label": "STR", "value": 10},
-      {"label": "STA", "value": 10},
-      {"label": "WIS", "value": 10},
-      {"label": "INT", "value": 10},
-      {"label": "HP", "value": 100}
+      {
+        "label": "STR",
+        "value": 10
+      },
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "WIS",
+        "value": 10
+      },
+      {
+        "label": "INT",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 100
+      }
     ],
     "resists": [
-      {"label": "Fire", "value": 5},
-      {"label": "Disease", "value": 5},
-      {"label": "Cold", "value": 5},
-      {"label": "Magic", "value": 5},
-      {"label": "Poison", "value": 5}
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
     ],
     "effectSpellId": 998,
     "effectSpellName": "Haste",
@@ -70087,17 +70150,44 @@
     "slot": "FACE",
     "ac": 25,
     "mods": [
-      {"label": "STR", "value": 12},
-      {"label": "DEX", "value": 12},
-      {"label": "STA", "value": 12},
-      {"label": "HP", "value": 80}
+      {
+        "label": "STR",
+        "value": 12
+      },
+      {
+        "label": "DEX",
+        "value": 12
+      },
+      {
+        "label": "STA",
+        "value": 12
+      },
+      {
+        "label": "HP",
+        "value": 80
+      }
     ],
     "resists": [
-      {"label": "Fire", "value": 7},
-      {"label": "Disease", "value": 7},
-      {"label": "Cold", "value": 7},
-      {"label": "Magic", "value": 7},
-      {"label": "Poison", "value": 7}
+      {
+        "label": "Fire",
+        "value": 7
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      },
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Magic",
+        "value": 7
+      },
+      {
+        "label": "Poison",
+        "value": 7
+      }
     ],
     "effectSpellId": 1499,
     "effectSpellName": "Aura of Battle",
@@ -70117,15 +70207,36 @@
     "slot": "SHOULDERS",
     "ac": 35,
     "mods": [
-      {"label": "STA", "value": 15},
-      {"label": "HP", "value": 100}
+      {
+        "label": "STA",
+        "value": 15
+      },
+      {
+        "label": "HP",
+        "value": 100
+      }
     ],
     "resists": [
-      {"label": "Fire", "value": 20},
-      {"label": "Disease", "value": 20},
-      {"label": "Cold", "value": 20},
-      {"label": "Magic", "value": 20},
-      {"label": "Poison", "value": 20}
+      {
+        "label": "Fire",
+        "value": 20
+      },
+      {
+        "label": "Disease",
+        "value": 20
+      },
+      {
+        "label": "Cold",
+        "value": 20
+      },
+      {
+        "label": "Magic",
+        "value": 20
+      },
+      {
+        "label": "Poison",
+        "value": 20
+      }
     ],
     "weight": 0.5,
     "size": "TINY",
@@ -70141,19 +70252,52 @@
     "slot": "EAR",
     "ac": 25,
     "mods": [
-      {"label": "STR", "value": 25},
-      {"label": "STA", "value": 25},
-      {"label": "WIS", "value": 25},
-      {"label": "INT", "value": 25},
-      {"label": "HP", "value": 100},
-      {"label": "MANA", "value": 100}
+      {
+        "label": "STR",
+        "value": 25
+      },
+      {
+        "label": "STA",
+        "value": 25
+      },
+      {
+        "label": "WIS",
+        "value": 25
+      },
+      {
+        "label": "INT",
+        "value": 25
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
     ],
     "resists": [
-      {"label": "Fire", "value": 10},
-      {"label": "Disease", "value": 10},
-      {"label": "Cold", "value": 10},
-      {"label": "Magic", "value": 10},
-      {"label": "Poison", "value": 10}
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 10
+      },
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      }
     ],
     "effectSpellId": 2248,
     "effectSpellName": "Acumen",
@@ -70163,5 +70307,6426 @@
     "classes": "ALL",
     "races": "ALL",
     "name": "Sigil Earring of Veracity"
+  },
+  "5777": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM"
+    ],
+    "slot": "EAR",
+    "ac": 4,
+    "mods": [
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 8
+      },
+      {
+        "label": "Magic",
+        "value": 8
+      }
+    ],
+    "requiredLevel": 56,
+    "levelType": "recommended",
+    "weight": 0.3,
+    "size": "TINY",
+    "classes": "CLR DRU SHM NEC WIZ MAG ENC",
+    "gearScore": 33,
+    "name": "TAKP AllaClone  :: Earring of Thunder"
+  },
+  "9628": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 34,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "WAR",
+    "races": "ALL",
+    "tint": "(50, 50, 50)",
+    "gearScore": 69,
+    "name": "TAKP AllaClone  :: Kizrak's Helmet of Battle"
+  },
+  "9805": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 24,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 2
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 6
+      },
+      {
+        "label": "Poison",
+        "value": 2
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 5.0,
+    "size": "MEDIUM",
+    "classes": "ROG",
+    "races": "ALL",
+    "tint": "(88, 40, 40)",
+    "gearScore": 55,
+    "name": "TAKP AllaClone  :: Stanos' Wicked Helmet"
+  },
+  "9808": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 2
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 0.1,
+    "size": "MEDIUM",
+    "classes": "MNK",
+    "gearScore": 45,
+    "name": "TAKP AllaClone  :: Helm of Enlightenment"
+  },
+  "9811": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "PAL",
+    "races": "ALL",
+    "tint": "(41, 74, 129)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Jaylia's Helm of the Valiant"
+  },
+  "9814": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 2
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "SHD",
+    "races": "ALL",
+    "tint": "(114, 50, 52)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Helm of Emblazoned Souls"
+  },
+  "9817": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "CHA",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "BRD",
+    "races": "ALL",
+    "tint": "(4, 58, 74)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Composers Helmet"
+  },
+  "9820": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 24,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 2
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 2
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 5.0,
+    "size": "MEDIUM",
+    "classes": "RNG",
+    "races": "ALL",
+    "tint": "(30, 49, 17)",
+    "gearScore": 55,
+    "name": "TAKP AllaClone  :: Planestriders Helm"
+  },
+  "9823": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 0.1,
+    "size": "MEDIUM",
+    "classes": "BST",
+    "races": "ALL",
+    "tint": "(56, 149, 26)",
+    "gearScore": 44,
+    "name": "TAKP AllaClone  :: Headdress of the Khati Sha"
+  },
+  "9826": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "CLR",
+    "races": "ALL",
+    "tint": "(60, 25, 40)",
+    "gearScore": 56,
+    "name": "TAKP AllaClone  :: Helm of Vengeful Fury"
+  },
+  "9829": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 24,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 2
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 5.0,
+    "size": "MEDIUM",
+    "classes": "SHM",
+    "races": "ALL",
+    "tint": "(250, 250, 180)",
+    "gearScore": 54,
+    "name": "TAKP AllaClone  :: Scaled Avatar's Helm"
+  },
+  "9832": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 2
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "MEDIUM",
+    "classes": "DRU",
+    "races": "ALL",
+    "tint": "(128, 128, 128)",
+    "gearScore": 42,
+    "name": "TAKP AllaClone  :: Wanderer's Sylvan Cap"
+  },
+  "9835": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "CHA",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 0.3,
+    "size": "MEDIUM",
+    "classes": "ENC",
+    "gearScore": 39,
+    "name": "TAKP AllaClone  :: Silken Augmenter's Cap"
+  },
+  "9908": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "INT",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 0.3,
+    "size": "MEDIUM",
+    "classes": "MAG",
+    "gearScore": 39,
+    "name": "TAKP AllaClone  :: Elemental Cap of the Prime"
+  },
+  "9946": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 2
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 0.3,
+    "size": "MEDIUM",
+    "classes": "NEC",
+    "gearScore": 42,
+    "name": "TAKP AllaClone  :: Vorshar's Circlet of the Blight"
+  },
+  "9949": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HEAD",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Cold",
+        "value": 2
+      },
+      {
+        "label": "Poison",
+        "value": 2
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1632,
+    "effectSpellName": "Plainsight",
+    "effectNote": "",
+    "weight": 0.3,
+    "size": "MEDIUM",
+    "classes": "WIZ",
+    "gearScore": 39,
+    "name": "TAKP AllaClone  :: Arantir's Circlet of Discovery"
+  },
+  "11136": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "WAR",
+    "tint": "(50, 50, 50)",
+    "gearScore": 53,
+    "name": "TAKP AllaClone  :: Kizrak's Bracer of Battle"
+  },
+  "11140": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 19,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 2
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 3.0,
+    "size": "SMALL",
+    "classes": "ROG",
+    "tint": "(88, 40, 40)",
+    "gearScore": 42,
+    "name": "TAKP AllaClone  :: Stanos' Wicked Bracer"
+  },
+  "11144": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 12,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 2
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 0.1,
+    "size": "SMALL",
+    "classes": "MNK",
+    "gearScore": 35,
+    "name": "TAKP AllaClone  :: Bracer of Enlightenment"
+  },
+  "11159": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 23,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "PAL",
+    "tint": "(41, 74, 129)",
+    "gearScore": 46,
+    "name": "TAKP AllaClone  :: Jaylia's Valiant Bracer"
+  },
+  "11172": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 23,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "INT",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "SHD",
+    "tint": "(114, 50, 52)",
+    "gearScore": 46,
+    "name": "TAKP AllaClone  :: Bracer of Emblazoned Souls"
+  },
+  "11177": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 23,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "CHA",
+        "value": 2
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "BRD",
+    "tint": "(4, 58, 74)",
+    "gearScore": 46,
+    "name": "TAKP AllaClone  :: Composers Bracer"
+  },
+  "11180": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 19,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 2
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "WIS",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 2
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 3.0,
+    "size": "SMALL",
+    "classes": "RNG",
+    "tint": "(30, 49, 17)",
+    "gearScore": 42,
+    "name": "TAKP AllaClone  :: Planestriders Wristguard"
+  },
+  "11195": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 12,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "WIS",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 2
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 2192,
+    "effectSpellName": "Vengeance II",
+    "effectNote": "",
+    "weight": 0.1,
+    "size": "SMALL",
+    "classes": "BST",
+    "tint": "(56, 149, 26)",
+    "gearScore": 35,
+    "name": "TAKP AllaClone  :: Bracer of the Khati Sha"
+  },
+  "11198": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 23,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 2
+      },
+      {
+        "label": "WIS",
+        "value": 4
+      },
+      {
+        "label": "CHA",
+        "value": 2
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1299,
+    "effectSpellName": "Flowing Thought II",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "CLR",
+    "tint": "(60, 25, 40)",
+    "gearScore": 44,
+    "name": "TAKP AllaClone  :: Wristplates of Vengeful Fury"
+  },
+  "11273": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 19,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 2
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1299,
+    "effectSpellName": "Flowing Thought II",
+    "effectNote": "",
+    "weight": 3.0,
+    "size": "SMALL",
+    "classes": "SHM",
+    "tint": "(250, 250, 180)",
+    "gearScore": 40,
+    "name": "TAKP AllaClone  :: Scaled Avatar's Bracer"
+  },
+  "11280": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 12,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 2
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 2
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 2
+      }
+    ],
+    "effectSpellId": 1299,
+    "effectSpellName": "Flowing Thought II",
+    "effectNote": "",
+    "weight": 2.0,
+    "size": "SMALL",
+    "classes": "DRU",
+    "tint": "(128, 128, 128)",
+    "gearScore": 33,
+    "name": "TAKP AllaClone  :: Wanderer's Sylvan Bracer"
+  },
+  "11283": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 8,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1299,
+    "effectSpellName": "Flowing Thought II",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "SMALL",
+    "classes": "ENC",
+    "gearScore": 29,
+    "name": "TAKP AllaClone  :: Silken Augmenter's Bracelet"
+  },
+  "11302": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 8,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 2
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 2
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 1299,
+    "effectSpellName": "Flowing Thought II",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "SMALL",
+    "classes": "MAG",
+    "gearScore": 29,
+    "name": "TAKP AllaClone  :: Elemental Bracelet of the Prime"
+  },
+  "11305": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 8,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 2
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1299,
+    "effectSpellName": "Flowing Thought II",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "SMALL",
+    "classes": "NEC",
+    "gearScore": 31,
+    "name": "TAKP AllaClone  :: Vorshar's Manacle of the Blight"
+  },
+  "11308": {
+    "flags": [
+      "MAGIC ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 8,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "INT",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1299,
+    "effectSpellName": "Flowing Thought II",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "SMALL",
+    "classes": "WIZ",
+    "gearScore": 29,
+    "name": "TAKP AllaClone  :: Arantir's Bracelet of Discovery"
+  },
+  "11428": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 34,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "WAR",
+    "tint": "(50, 50, 50)",
+    "gearScore": 69,
+    "name": "TAKP AllaClone  :: Kizrak's Armband of Battle"
+  },
+  "11431": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 24,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 7
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 7
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 5.5,
+    "size": "MEDIUM",
+    "classes": "ROG",
+    "tint": "(88, 40, 40)",
+    "gearScore": 55,
+    "name": "TAKP AllaClone  :: Stanos' Wicked Sleeves"
+  },
+  "11434": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "MEDIUM",
+    "classes": "MNK",
+    "gearScore": 45,
+    "name": "TAKP AllaClone  :: Armguards of Enlightenment"
+  },
+  "11437": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 7
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "PAL",
+    "tint": "(41, 74, 129)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Jaylia's Valiant Vambraces"
+  },
+  "11440": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "SHD",
+    "tint": "(114, 50, 52)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Armplates of Emblazoned Souls"
+  },
+  "11443": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "CHA",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "BRD",
+    "tint": "(4, 58, 74)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Composers Vambraces"
+  },
+  "11446": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 24,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "WIS",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 5.5,
+    "size": "MEDIUM",
+    "classes": "RNG",
+    "tint": "(30, 49, 17)",
+    "gearScore": 55,
+    "name": "TAKP AllaClone  :: Planestriders Vambraces"
+  },
+  "11449": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 7
+      },
+      {
+        "label": "WIS",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3659,
+    "effectSpellName": "Refreshment",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "MEDIUM",
+    "classes": "BST",
+    "tint": "(56, 149, 26)",
+    "gearScore": 44,
+    "name": "TAKP AllaClone  :: Sleeves of the Khati Sha"
+  },
+  "11499": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 3501,
+    "effectSpellName": "Improved Healing IV",
+    "effectNote": "",
+    "focusSpellId": 3501,
+    "focusSpellName": "Improved Healing IV",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "CLR",
+    "tint": "(60, 25, 40)",
+    "gearScore": 56,
+    "name": "TAKP AllaClone  :: Vambraces of Vengeful Fury"
+  },
+  "11518": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 24,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 30
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3501,
+    "effectSpellName": "Improved Healing IV",
+    "effectNote": "",
+    "focusSpellId": 3501,
+    "focusSpellName": "Improved Healing IV",
+    "weight": 5.5,
+    "size": "MEDIUM",
+    "classes": "SHM",
+    "tint": "(250, 250, 180)",
+    "gearScore": 54,
+    "name": "TAKP AllaClone  :: Scaled Avatar's Sleeves"
+  },
+  "11549": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 3501,
+    "effectSpellName": "Improved Healing IV",
+    "effectNote": "",
+    "focusSpellId": 3501,
+    "focusSpellName": "Improved Healing IV",
+    "weight": 4.5,
+    "size": "MEDIUM",
+    "classes": "DRU",
+    "tint": "(128, 128, 128)",
+    "gearScore": 42,
+    "name": "TAKP AllaClone  :: Wanderer's Sylvan Sleeves"
+  },
+  "11577": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 7
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3537,
+    "effectSpellName": "Mana Preservation IV",
+    "effectNote": "",
+    "focusSpellId": 3537,
+    "focusSpellName": "Mana Preservation IV",
+    "weight": 0.4,
+    "size": "MEDIUM",
+    "classes": "ENC",
+    "gearScore": 39,
+    "name": "TAKP AllaClone  :: Silken Augmenter's Sleeves"
+  },
+  "11597": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 3537,
+    "effectSpellName": "Mana Preservation IV",
+    "effectNote": "",
+    "focusSpellId": 3537,
+    "focusSpellName": "Mana Preservation IV",
+    "weight": 0.4,
+    "size": "MEDIUM",
+    "classes": "MAG",
+    "gearScore": 39,
+    "name": "TAKP AllaClone  :: Elemental Sleeves of the Prime"
+  },
+  "11600": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 2
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3537,
+    "effectSpellName": "Mana Preservation IV",
+    "effectNote": "",
+    "focusSpellId": 3537,
+    "focusSpellName": "Mana Preservation IV",
+    "weight": 0.4,
+    "size": "MEDIUM",
+    "classes": "NEC",
+    "gearScore": 41,
+    "name": "TAKP AllaClone  :: Vorshar's Sleeves of the Blight"
+  },
+  "11620": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "ARMS",
+    "ac": 11,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 30
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 3537,
+    "effectSpellName": "Mana Preservation IV",
+    "effectNote": "",
+    "focusSpellId": 3537,
+    "focusSpellName": "Mana Preservation IV",
+    "weight": 0.4,
+    "size": "MEDIUM",
+    "classes": "WIZ",
+    "gearScore": 36,
+    "name": "TAKP AllaClone  :: Arantir's Sleeves of Discovery"
+  },
+  "12594": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 33,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 3710,
+    "effectSpellName": "Miraculous Visions",
+    "effectNote": "",
+    "weight": 5.0,
+    "size": "SMALL",
+    "classes": "WAR",
+    "tint": "(50, 50, 50)",
+    "gearScore": 68,
+    "name": "TAKP AllaClone  :: Kizrak's Gauntlets of Battle"
+  },
+  "12597": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 20,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Magic",
+        "value": 8
+      }
+    ],
+    "effectSpellId": 3710,
+    "effectSpellName": "Miraculous Visions",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "ROG",
+    "tint": "(88, 40, 40)",
+    "gearScore": 51,
+    "name": "TAKP AllaClone  :: Stanos' Wicked Gauntlets"
+  },
+  "12623": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 8
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 6
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 1940,
+    "effectSpellName": "Celestial Tranquility",
+    "effectNote": "",
+    "weight": 0.1,
+    "size": "SMALL",
+    "classes": "MNK",
+    "gearScore": 45,
+    "name": "TAKP AllaClone  :: Gauntlets of Enlightenment"
+  },
+  "12626": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Cold",
+        "value": 6
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 5.0,
+    "size": "SMALL",
+    "classes": "PAL",
+    "tint": "(41, 74, 129)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Jaylia's Valiant Gauntlets"
+  },
+  "12629": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 6
+      },
+      {
+        "label": "Disease",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 5.0,
+    "size": "SMALL",
+    "classes": "SHD",
+    "tint": "(114, 50, 52)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Gauntlets of Emblazoned Souls"
+  },
+  "12663": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 2
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 5
+      },
+      {
+        "label": "CHA",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 8
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 5.0,
+    "size": "SMALL",
+    "classes": "BRD",
+    "tint": "(4, 58, 74)",
+    "gearScore": 59,
+    "name": "TAKP AllaClone  :: Composer's Gauntlets"
+  },
+  "12666": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 20,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 6
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "RNG",
+    "tint": "(30, 49, 17)",
+    "gearScore": 51,
+    "name": "TAKP AllaClone  :: Planestriders Gauntlets"
+  },
+  "13545": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 0.1,
+    "size": "SMALL",
+    "classes": "BST",
+    "tint": "(56, 149, 26)",
+    "gearScore": 45,
+    "name": "TAKP AllaClone  :: Gloves of the Khati Sha"
+  },
+  "13557": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 7
+      },
+      {
+        "label": "CHA",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 3080,
+    "effectSpellName": "Condemnation of Time",
+    "effectNote": "",
+    "focusSpellId": 3080,
+    "focusSpellName": "Condemnation of Time",
+    "weight": 5.0,
+    "size": "SMALL",
+    "classes": "CLR",
+    "tint": "(60, 25, 40)",
+    "gearScore": 58,
+    "name": "TAKP AllaClone  :: Gauntlets of Vengeful Fury"
+  },
+  "13569": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 20,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3082,
+    "effectSpellName": "Saryrn's Venom",
+    "effectNote": "",
+    "focusSpellId": 3082,
+    "focusSpellName": "Saryrn's Venom",
+    "weight": 4.0,
+    "size": "SMALL",
+    "classes": "SHM",
+    "tint": "(10, 50, 10)",
+    "gearScore": 50,
+    "name": "TAKP AllaClone  :: Scaled Avatar's Gloves"
+  },
+  "13589": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3081,
+    "effectSpellName": "Summer's Anger",
+    "effectNote": "",
+    "focusSpellId": 3081,
+    "focusSpellName": "Summer's Anger",
+    "weight": 3.0,
+    "size": "SMALL",
+    "classes": "DRU",
+    "tint": "(128, 128, 128)",
+    "gearScore": 44,
+    "name": "TAKP AllaClone  :: Wanderer's Sylvan Gloves"
+  },
+  "13613": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "STA",
+        "value": 7
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 7
+      },
+      {
+        "label": "Cold",
+        "value": 8
+      }
+    ],
+    "effectSpellId": 3086,
+    "effectSpellName": "Insanity Storm",
+    "effectNote": "",
+    "focusSpellId": 3086,
+    "focusSpellName": "Insanity Storm",
+    "weight": 0.3,
+    "size": "SMALL",
+    "classes": "ENC",
+    "gearScore": 36,
+    "name": "TAKP AllaClone  :: Silken Augmenter's Gloves"
+  },
+  "13618": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Poison",
+        "value": 7
+      },
+      {
+        "label": "Disease",
+        "value": 8
+      }
+    ],
+    "effectSpellId": 3085,
+    "effectSpellName": "Chromosphere",
+    "effectNote": "",
+    "focusSpellId": 3085,
+    "focusSpellName": "Chromosphere",
+    "weight": 0.3,
+    "size": "SMALL",
+    "classes": "MAG",
+    "gearScore": 36,
+    "name": "TAKP AllaClone  :: Elemental Gloves of the Prime"
+  },
+  "13622": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3083,
+    "effectSpellName": "Neurocus",
+    "effectNote": "",
+    "focusSpellId": 3083,
+    "focusSpellName": "Neurocus",
+    "weight": 0.3,
+    "size": "SMALL",
+    "classes": "NEC",
+    "gearScore": 38,
+    "name": "TAKP AllaClone  :: Vorshar's Gloves of the Blight"
+  },
+  "13626": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "HANDS",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 50
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3084,
+    "effectSpellName": "Fires of Sol",
+    "effectNote": "",
+    "focusSpellId": 3084,
+    "focusSpellName": "Fires of Sol",
+    "weight": 0.3,
+    "size": "SMALL",
+    "classes": "WIZ",
+    "gearScore": 36,
+    "name": "TAKP AllaClone  :: Arantir's Gloves of Discovery"
+  },
+  "13646": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "SHOULDERS",
+    "ac": 12,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "AGI",
+        "value": 8
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "WIS",
+        "value": 12
+      },
+      {
+        "label": "HP",
+        "value": 65
+      },
+      {
+        "label": "MANA",
+        "value": 65
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      }
+    ],
+    "requiredLevel": 55,
+    "levelType": "recommended",
+    "effectSpellId": 3531,
+    "effectSpellName": "Haste of Mithaniel",
+    "effectNote": "",
+    "focusSpellId": 3531,
+    "focusSpellName": "Haste of Mithaniel",
+    "weight": 0.8,
+    "size": "MEDIUM",
+    "classes": "CLR DRU SHM",
+    "gearScore": 53,
+    "name": "TAKP AllaClone  :: Cog Encrusted Epaulets"
+  },
+  "15119": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 63,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 10
+      },
+      {
+        "label": "STA",
+        "value": 15
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 9
+      },
+      {
+        "label": "HP",
+        "value": 115
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 15
+      },
+      {
+        "label": "Disease",
+        "value": 15
+      }
+    ],
+    "effectSpellId": 3300,
+    "effectSpellName": "Shield of the Arcane",
+    "effectNote": "",
+    "weight": 20.0,
+    "size": "LARGE",
+    "classes": "WAR",
+    "tint": "(50, 50, 50)",
+    "gearScore": 141,
+    "name": "TAKP AllaClone  :: Kizrak's Chestplate of Battle"
+  },
+  "15474": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 50,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 8
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 10
+      },
+      {
+        "label": "DEX",
+        "value": 14
+      },
+      {
+        "label": "HP",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 15
+      },
+      {
+        "label": "Poison",
+        "value": 15
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3300,
+    "effectSpellName": "Shield of the Arcane",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "LARGE",
+    "classes": "ROG",
+    "tint": "(88, 40, 40)",
+    "gearScore": 123,
+    "name": "TAKP AllaClone  :: Stanos' Wicked Breastplate"
+  },
+  "15637": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 25,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 8
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 12
+      },
+      {
+        "label": "DEX",
+        "value": 12
+      },
+      {
+        "label": "HP",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 15
+      },
+      {
+        "label": "Magic",
+        "value": 15
+      }
+    ],
+    "effectSpellId": 3300,
+    "effectSpellName": "Shield of the Arcane",
+    "effectNote": "",
+    "weight": 0.5,
+    "size": "LARGE",
+    "classes": "MNK",
+    "tint": "(125, 150, 250)",
+    "gearScore": 98,
+    "name": "TAKP AllaClone  :: Chestwraps of Enlightenment"
+  },
+  "15751": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 57,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 11
+      },
+      {
+        "label": "STA",
+        "value": 9
+      },
+      {
+        "label": "DEX",
+        "value": 10
+      },
+      {
+        "label": "WIS",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 15
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3190,
+    "effectSpellName": "Crusader`s Touch",
+    "effectNote": "",
+    "weight": 15.0,
+    "size": "LARGE",
+    "classes": "PAL",
+    "tint": "(41, 74, 129)",
+    "gearScore": 130,
+    "name": "TAKP AllaClone  :: Jaylia's Valiant Chestplate"
+  },
+  "15758": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 57,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 9
+      },
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "DEX",
+        "value": 11
+      },
+      {
+        "label": "INT",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 14
+      },
+      {
+        "label": "Cold",
+        "value": 6
+      },
+      {
+        "label": "Magic",
+        "value": 6
+      },
+      {
+        "label": "Disease",
+        "value": 14
+      }
+    ],
+    "effectSpellId": 1459,
+    "effectSpellName": "Shroud of Death",
+    "effectNote": "",
+    "weight": 15.0,
+    "size": "LARGE",
+    "classes": "SHD",
+    "tint": "(114, 50, 52)",
+    "gearScore": 130,
+    "name": "TAKP AllaClone  :: Breastplate of Emblazoned Souls"
+  },
+  "15761": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 57,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 11
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 9
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "CHA",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 7
+      },
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Magic",
+        "value": 7
+      },
+      {
+        "label": "Poison",
+        "value": 9
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3374,
+    "effectSpellName": "Warsong of Zek",
+    "effectNote": "",
+    "weight": 15.0,
+    "size": "LARGE",
+    "classes": "BRD",
+    "tint": "(4, 58, 74)",
+    "gearScore": 130,
+    "name": "TAKP AllaClone  :: Composers Chestplate"
+  },
+  "15764": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 50,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 8
+      },
+      {
+        "label": "STA",
+        "value": 7
+      },
+      {
+        "label": "AGI",
+        "value": 7
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "WIS",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 8
+      },
+      {
+        "label": "Cold",
+        "value": 12
+      },
+      {
+        "label": "Poison",
+        "value": 8
+      },
+      {
+        "label": "Disease",
+        "value": 12
+      }
+    ],
+    "effectSpellId": 2600,
+    "effectSpellName": "Warder's Protection",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "LARGE",
+    "classes": "RNG",
+    "tint": "(30, 49, 17)",
+    "gearScore": 123,
+    "name": "TAKP AllaClone  :: Planestriders Hauberk"
+  },
+  "15767": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 25,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 9
+      },
+      {
+        "label": "AGI",
+        "value": 8
+      },
+      {
+        "label": "DEX",
+        "value": 10
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 13
+      },
+      {
+        "label": "Cold",
+        "value": 14
+      },
+      {
+        "label": "Magic",
+        "value": 13
+      }
+    ],
+    "effectSpellId": 171,
+    "effectSpellName": "Celerity",
+    "effectNote": "",
+    "weight": 0.5,
+    "size": "LARGE",
+    "classes": "BST",
+    "tint": "(56, 149, 26)",
+    "gearScore": 98,
+    "name": "TAKP AllaClone  :: Tunic of the Khati Sha"
+  },
+  "15770": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 57,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 7
+      },
+      {
+        "label": "STA",
+        "value": 11
+      },
+      {
+        "label": "DEX",
+        "value": 9
+      },
+      {
+        "label": "WIS",
+        "value": 13
+      },
+      {
+        "label": "HP",
+        "value": 85
+      },
+      {
+        "label": "MANA",
+        "value": 95
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 15
+      },
+      {
+        "label": "Poison",
+        "value": 8
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 3472,
+    "effectSpellName": "Blessing of Reverence",
+    "effectNote": "",
+    "weight": 15.0,
+    "size": "LARGE",
+    "classes": "CLR",
+    "tint": "(60, 25, 40)",
+    "gearScore": 125,
+    "name": "TAKP AllaClone  :: Breastplate of Vengeful Fury"
+  },
+  "15773": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 50,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 9
+      },
+      {
+        "label": "STA",
+        "value": 11
+      },
+      {
+        "label": "AGI",
+        "value": 7
+      },
+      {
+        "label": "WIS",
+        "value": 13
+      },
+      {
+        "label": "HP",
+        "value": 95
+      },
+      {
+        "label": "MANA",
+        "value": 85
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 9
+      },
+      {
+        "label": "Magic",
+        "value": 15
+      },
+      {
+        "label": "Poison",
+        "value": 8
+      },
+      {
+        "label": "Disease",
+        "value": 8
+      }
+    ],
+    "effectSpellId": 172,
+    "effectSpellName": "Swift like the Wind",
+    "effectNote": "",
+    "weight": 4.0,
+    "size": "LARGE",
+    "classes": "SHM",
+    "tint": "(250, 250, 180)",
+    "gearScore": 121,
+    "name": "TAKP AllaClone  :: Scaled Avatar's Hauberk"
+  },
+  "15776": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 25,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 8
+      },
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "AGI",
+        "value": 9
+      },
+      {
+        "label": "WIS",
+        "value": 13
+      },
+      {
+        "label": "CHA",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 85
+      },
+      {
+        "label": "MANA",
+        "value": 95
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 3441,
+    "effectSpellName": "Blessing of Replenishment",
+    "effectNote": "",
+    "weight": 9.0,
+    "size": "LARGE",
+    "classes": "DRU",
+    "tint": "(128, 128, 128)",
+    "gearScore": 93,
+    "name": "TAKP AllaClone  :: Wanderer's Sylvan Tunic"
+  },
+  "15779": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 15,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 9
+      },
+      {
+        "label": "AGI",
+        "value": 9
+      },
+      {
+        "label": "DEX",
+        "value": 9
+      },
+      {
+        "label": "INT",
+        "value": 13
+      },
+      {
+        "label": "CHA",
+        "value": 9
+      },
+      {
+        "label": "HP",
+        "value": 80
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 15
+      },
+      {
+        "label": "Cold",
+        "value": 15
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3302,
+    "effectSpellName": "Shield of Maelin",
+    "effectNote": "",
+    "weight": 1.0,
+    "size": "LARGE",
+    "classes": "ENC",
+    "tint": "(30, 250, 200)",
+    "gearScore": 81,
+    "name": "TAKP AllaClone  :: Silken Augmenter's Robe"
+  },
+  "15782": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 15,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 10
+      },
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "AGI",
+        "value": 7
+      },
+      {
+        "label": "INT",
+        "value": 13
+      },
+      {
+        "label": "HP",
+        "value": 80
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 12
+      },
+      {
+        "label": "Magic",
+        "value": 12
+      },
+      {
+        "label": "Poison",
+        "value": 8
+      },
+      {
+        "label": "Disease",
+        "value": 8
+      }
+    ],
+    "effectSpellId": 3302,
+    "effectSpellName": "Shield of Maelin",
+    "effectNote": "",
+    "weight": 1.0,
+    "size": "LARGE",
+    "classes": "MAG",
+    "tint": "(100, 100, 125)",
+    "gearScore": 81,
+    "name": "TAKP AllaClone  :: Elemental Shroud of the Prime"
+  },
+  "15785": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 15,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 11
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 11
+      },
+      {
+        "label": "CHA",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 85
+      },
+      {
+        "label": "MANA",
+        "value": 95
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 10
+      },
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3302,
+    "effectSpellName": "Shield of Maelin",
+    "effectNote": "",
+    "weight": 1.0,
+    "size": "LARGE",
+    "classes": "NEC",
+    "tint": "(0, 75, 125)",
+    "gearScore": 83,
+    "name": "TAKP AllaClone  :: Vorshar's Robe of the Blight"
+  },
+  "15788": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 15,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 9
+      },
+      {
+        "label": "DEX",
+        "value": 12
+      },
+      {
+        "label": "INT",
+        "value": 13
+      },
+      {
+        "label": "HP",
+        "value": 80
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 8
+      },
+      {
+        "label": "Cold",
+        "value": 12
+      },
+      {
+        "label": "Magic",
+        "value": 6
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      },
+      {
+        "label": "Disease",
+        "value": 8
+      }
+    ],
+    "effectSpellId": 3302,
+    "effectSpellName": "Shield of Maelin",
+    "effectNote": "",
+    "weight": 1.0,
+    "size": "LARGE",
+    "classes": "WIZ",
+    "tint": "(0, 200, 100)",
+    "gearScore": 81,
+    "name": "TAKP AllaClone  :: Arantir's Robe of Discovery"
+  },
+  "16691": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 45,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 9
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 90
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 161,
+    "effectSpellName": "Health",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "MEDIUM",
+    "classes": "WAR",
+    "tint": "(50, 50, 50)",
+    "gearScore": 95,
+    "name": "TAKP AllaClone  :: Kizrak's Greaves of Battle"
+  },
+  "16711": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 31,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 7
+      },
+      {
+        "label": "STA",
+        "value": 9
+      },
+      {
+        "label": "DEX",
+        "value": 9
+      },
+      {
+        "label": "HP",
+        "value": 75
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 7
+      },
+      {
+        "label": "Cold",
+        "value": 6
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 3661,
+    "effectSpellName": "Summon Scoriae Venom",
+    "effectNote": "",
+    "weight": 7.5,
+    "size": "MEDIUM",
+    "classes": "ROG",
+    "tint": "(88, 40, 40)",
+    "gearScore": 76,
+    "name": "TAKP AllaClone  :: Stanos' Wicked Leggings"
+  },
+  "16725": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 19,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 9
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 75
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 6
+      },
+      {
+        "label": "Poison",
+        "value": 7
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 161,
+    "effectSpellName": "Health",
+    "effectNote": "",
+    "weight": 0.3,
+    "size": "MEDIUM",
+    "classes": "MNK",
+    "gearScore": 64,
+    "name": "TAKP AllaClone  :: Leggings of Enlightenment"
+  },
+  "16755": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 40,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 7
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "WIS",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 7
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 3424,
+    "effectSpellName": "Pious Might",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "MEDIUM",
+    "classes": "PAL",
+    "tint": "(41, 74, 129)",
+    "gearScore": 85,
+    "name": "TAKP AllaClone  :: Jaylia's Legplates of the Valiant"
+  },
+  "16761": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 40,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 10
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 2580,
+    "effectSpellName": "Cloak of the Akheva",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "MEDIUM",
+    "classes": "SHD",
+    "tint": "(114, 50, 52)",
+    "gearScore": 85,
+    "name": "TAKP AllaClone  :: Greaves of Emblazoned Souls"
+  },
+  "16769": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 40,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 7
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 6
+      },
+      {
+        "label": "CHA",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Magic",
+        "value": 7
+      },
+      {
+        "label": "Poison",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 2605,
+    "effectSpellName": "Selo`s Accelerating Chorus",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "MEDIUM",
+    "classes": "BRD",
+    "tint": "(4, 58, 74)",
+    "gearScore": 85,
+    "name": "TAKP AllaClone  :: Composers Greaves"
+  },
+  "16775": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 31,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 7
+      },
+      {
+        "label": "DEX",
+        "value": 12
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3192,
+    "effectSpellName": "Earthen Roots",
+    "effectNote": "",
+    "weight": 7.5,
+    "size": "MEDIUM",
+    "classes": "RNG",
+    "tint": "(30, 49, 17)",
+    "gearScore": 76,
+    "name": "TAKP AllaClone  :: Planestriders Greaves"
+  },
+  "16783": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 19,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 7
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 2628,
+    "effectSpellName": "Sha's Ferocity",
+    "effectNote": "",
+    "weight": 0.3,
+    "size": "MEDIUM",
+    "classes": "BST",
+    "tint": "(56, 149, 26)",
+    "gearScore": 64,
+    "name": "TAKP AllaClone  :: Leggings of the Khati Sha"
+  },
+  "16795": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 40,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "AGI",
+        "value": 7
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "CHA",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 55
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Poison",
+        "value": 7
+      },
+      {
+        "label": "Disease",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 1721,
+    "effectSpellName": "Unswerving Hammer of Faith",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "MEDIUM",
+    "classes": "CLR",
+    "tint": "(60, 25, 40)",
+    "gearScore": 78,
+    "name": "TAKP AllaClone  :: Greaves of Vengeful Fury"
+  },
+  "16801": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 31,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 7
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "WIS",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 65
+      },
+      {
+        "label": "MANA",
+        "value": 70
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Magic",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 3195,
+    "effectSpellName": "Greater Immobilize",
+    "effectNote": "",
+    "weight": 10.0,
+    "size": "MEDIUM",
+    "classes": "SHM",
+    "tint": "(250, 250, 180)",
+    "gearScore": 72,
+    "name": "TAKP AllaClone  :: Scaled Avatar's Leggings"
+  },
+  "16809": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 19,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "WIS",
+        "value": 9
+      },
+      {
+        "label": "CHA",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 55
+      },
+      {
+        "label": "MANA",
+        "value": 80
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 6
+      },
+      {
+        "label": "Magic",
+        "value": 7
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 3447,
+    "effectSpellName": "Savage Roots",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "MEDIUM",
+    "classes": "DRU",
+    "tint": "(128, 128, 128)",
+    "gearScore": 57,
+    "name": "TAKP AllaClone  :: Wanderer's Sylvan Leggings"
+  },
+  "16815": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 8
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "CHA",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 85
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3350,
+    "effectSpellName": "Tranquility",
+    "effectNote": "",
+    "weight": 0.7,
+    "size": "MEDIUM",
+    "classes": "ENC",
+    "gearScore": 50,
+    "name": "TAKP AllaClone  :: Silken Augmenter's Pantaloons"
+  },
+  "19000": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "INT",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 85
+      }
+    ],
+    "resists": [
+      {
+        "label": "Poison",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3198,
+    "effectSpellName": "Flameshield of Ro",
+    "effectNote": "",
+    "weight": 0.7,
+    "size": "MEDIUM",
+    "classes": "MAG",
+    "gearScore": 50,
+    "name": "TAKP AllaClone  :: Elemental Leggings of the Prime"
+  },
+  "19023": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "CHA",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 85
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 10
+      },
+      {
+        "label": "Magic",
+        "value": 10
+      }
+    ],
+    "effectSpellId": 3305,
+    "effectSpellName": "Rune of Death",
+    "effectNote": "",
+    "weight": 0.7,
+    "size": "MEDIUM",
+    "classes": "NEC",
+    "gearScore": 50,
+    "name": "TAKP AllaClone  :: Vorshar's Pants of the Blight"
+  },
+  "19026": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "LEGS",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 10
+      },
+      {
+        "label": "INT",
+        "value": 9
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 85
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 7
+      },
+      {
+        "label": "Cold",
+        "value": 7
+      },
+      {
+        "label": "Magic",
+        "value": 6
+      }
+    ],
+    "effectSpellId": 2558,
+    "effectSpellName": "Decession",
+    "effectNote": "",
+    "weight": 0.7,
+    "size": "MEDIUM",
+    "classes": "WIZ",
+    "gearScore": 50,
+    "name": "TAKP AllaClone  :: Arantir's Leggings of Discovery"
+  },
+  "19439": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 33,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 7
+      },
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 55
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "SMALL",
+    "classes": "WAR",
+    "tint": "(50, 50, 50)",
+    "gearScore": 66,
+    "name": "TAKP AllaClone  :: Kizrak's Boots of Battle"
+  },
+  "19442": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 20,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 5.5,
+    "size": "SMALL",
+    "classes": "ROG",
+    "tint": "(88, 40, 40)",
+    "gearScore": 50,
+    "name": "TAKP AllaClone  :: Stanos' Wicked Boots"
+  },
+  "19445": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 6
+      },
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "SMALL",
+    "classes": "MNK",
+    "gearScore": 44,
+    "name": "TAKP AllaClone  :: Slippers of Enlightenment"
+  },
+  "19448": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "WIS",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 30
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1300,
+    "effectSpellName": "Flowing Thought III",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "SMALL",
+    "classes": "PAL",
+    "tint": "(41, 74, 129)",
+    "gearScore": 58,
+    "name": "TAKP AllaClone  :: Jaylia's Boots of the Valiant"
+  },
+  "19545": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "AGI",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 30
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1300,
+    "effectSpellName": "Flowing Thought III",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "SMALL",
+    "classes": "SHD",
+    "tint": "(114, 50, 52)",
+    "gearScore": 58,
+    "name": "TAKP AllaClone  :: Boots of Emblazoned Souls"
+  },
+  "19548": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 30
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 1300,
+    "effectSpellName": "Flowing Thought III",
+    "effectNote": "",
+    "weight": 6.5,
+    "size": "SMALL",
+    "classes": "BRD",
+    "tint": "(4, 58, 74)",
+    "gearScore": 58,
+    "name": "TAKP AllaClone  :: Composers Boots"
+  },
+  "19837": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 20,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 30
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1300,
+    "effectSpellName": "Flowing Thought III",
+    "effectNote": "",
+    "weight": 5.5,
+    "size": "SMALL",
+    "classes": "RNG",
+    "tint": "(30, 49, 17)",
+    "gearScore": 50,
+    "name": "TAKP AllaClone  :: Planestriders Boots"
+  },
+  "20000": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "WIS",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 45
+      },
+      {
+        "label": "MANA",
+        "value": 30
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 1300,
+    "effectSpellName": "Flowing Thought III",
+    "effectNote": "",
+    "weight": 0.2,
+    "size": "SMALL",
+    "classes": "BST",
+    "tint": "(56, 149, 26)",
+    "gearScore": 44,
+    "name": "TAKP AllaClone  :: Boots of the Khati Sha"
+  },
+  "20073": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 28,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "WIS",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3537,
+    "effectSpellName": "Mana Preservation IV",
+    "effectNote": "",
+    "focusSpellId": 3537,
+    "focusSpellName": "Mana Preservation IV",
+    "weight": 6.5,
+    "size": "SMALL",
+    "classes": "CLR",
+    "tint": "(60, 25, 40)",
+    "gearScore": 54,
+    "name": "TAKP AllaClone  :: Boots of Vengeful Fury"
+  },
+  "20077": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 20,
+    "mods": [
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "WIS",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 40
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3537,
+    "effectSpellName": "Mana Preservation IV",
+    "effectNote": "",
+    "focusSpellId": 3537,
+    "focusSpellName": "Mana Preservation IV",
+    "weight": 7.5,
+    "size": "SMALL",
+    "classes": "SHM",
+    "tint": "(250, 250, 180)",
+    "gearScore": 48,
+    "name": "TAKP AllaClone  :: Scaled Avatar's Boots"
+  },
+  "20152": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 14,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 4
+      },
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "WIS",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 3
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 3
+      },
+      {
+        "label": "Poison",
+        "value": 3
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 3537,
+    "effectSpellName": "Mana Preservation IV",
+    "effectNote": "",
+    "focusSpellId": 3537,
+    "focusSpellName": "Mana Preservation IV",
+    "weight": 4.5,
+    "size": "SMALL",
+    "classes": "DRU",
+    "tint": "(128, 128, 128)",
+    "gearScore": 40,
+    "name": "TAKP AllaClone  :: Wanderer's Sylvan Boots"
+  },
+  "20424": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 30
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Poison",
+        "value": 8
+      },
+      {
+        "label": "Disease",
+        "value": 7
+      }
+    ],
+    "effectSpellId": 3525,
+    "effectSpellName": "Spell Haste IV",
+    "effectNote": "",
+    "focusSpellId": 3525,
+    "focusSpellName": "Spell Haste IV",
+    "weight": 0.7,
+    "size": "SMALL",
+    "classes": "ENC",
+    "gearScore": 35,
+    "name": "TAKP AllaClone  :: Silken Augmenter's Shoes"
+  },
+  "20427": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 30
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 4
+      },
+      {
+        "label": "Poison",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 3
+      }
+    ],
+    "effectSpellId": 3525,
+    "effectSpellName": "Spell Haste IV",
+    "effectNote": "",
+    "focusSpellId": 3525,
+    "focusSpellName": "Spell Haste IV",
+    "weight": 0.7,
+    "size": "SMALL",
+    "classes": "MAG",
+    "gearScore": 35,
+    "name": "TAKP AllaClone  :: Elemental Slippers of the Prime"
+  },
+  "20430": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "DEX",
+        "value": 6
+      },
+      {
+        "label": "INT",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      }
+    ],
+    "effectSpellId": 3525,
+    "effectSpellName": "Spell Haste IV",
+    "effectNote": "",
+    "focusSpellId": 3525,
+    "focusSpellName": "Spell Haste IV",
+    "weight": 0.7,
+    "size": "SMALL",
+    "classes": "NEC",
+    "gearScore": 36,
+    "name": "TAKP AllaClone  :: Vorshar's Slippers of the Blight"
+  },
+  "20433": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FEET",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 6
+      },
+      {
+        "label": "DEX",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 5
+      },
+      {
+        "label": "HP",
+        "value": 30
+      },
+      {
+        "label": "MANA",
+        "value": 45
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 4
+      },
+      {
+        "label": "Cold",
+        "value": 3
+      },
+      {
+        "label": "Magic",
+        "value": 4
+      },
+      {
+        "label": "Disease",
+        "value": 4
+      }
+    ],
+    "effectSpellId": 3525,
+    "effectSpellName": "Spell Haste IV",
+    "effectNote": "",
+    "focusSpellId": 3525,
+    "focusSpellName": "Spell Haste IV",
+    "weight": 0.7,
+    "size": "SMALL",
+    "classes": "WIZ",
+    "gearScore": 35,
+    "name": "TAKP AllaClone  :: Arantir's Sandals of Discovery"
+  },
+  "20609": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "RANGE",
+    "ac": 12,
+    "mods": [
+      {
+        "label": "AGI",
+        "value": 15
+      },
+      {
+        "label": "DEX",
+        "value": 15
+      },
+      {
+        "label": "WIS",
+        "value": 15
+      },
+      {
+        "label": "INT",
+        "value": 15
+      },
+      {
+        "label": "HP",
+        "value": 110
+      },
+      {
+        "label": "MANA",
+        "value": 110
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 12
+      },
+      {
+        "label": "Cold",
+        "value": 12
+      },
+      {
+        "label": "Magic",
+        "value": 12
+      },
+      {
+        "label": "Poison",
+        "value": 12
+      },
+      {
+        "label": "Disease",
+        "value": 12
+      }
+    ],
+    "requiredLevel": 62,
+    "levelType": "recommended",
+    "effectSpellId": 1302,
+    "effectSpellName": "Flowing Thought V",
+    "effectNote": "",
+    "weight": 0.6,
+    "size": "SMALL",
+    "classes": "CLR DRU SHM NEC WIZ MAG ENC",
+    "gearScore": 108,
+    "name": "TAKP AllaClone  :: Radiant Feather"
+  },
+  "26588": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "PRIMARY",
+    "skill": "1H Blunt",
+    "atkDelay": 25,
+    "dmg": 14,
+    "dmgBonus": 13,
+    "dmgBonusNote": "(lvl 65)",
+    "mods": [
+      {
+        "label": "STA",
+        "value": 25
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 20
+      },
+      {
+        "label": "Cold",
+        "value": 20
+      },
+      {
+        "label": "Magic",
+        "value": 20
+      },
+      {
+        "label": "Poison",
+        "value": 20
+      },
+      {
+        "label": "Disease",
+        "value": 20
+      }
+    ],
+    "requiredLevel": 54,
+    "levelType": "required",
+    "effectSpellId": 2880,
+    "effectSpellName": "Remove Greater Curse",
+    "effectNote": "",
+    "weight": 2.0,
+    "size": "TINY",
+    "classes": "CLR",
+    "gearScore": 133,
+    "name": "TAKP AllaClone  :: Wand of Casual Blessings"
+  },
+  "29047": {
+    "flags": [
+      "MAGIC ITEM"
+    ],
+    "slot": "EAR",
+    "ac": 7,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 12
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 6
+      },
+      {
+        "label": "HP",
+        "value": 70
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 15
+      }
+    ],
+    "requiredLevel": 46,
+    "levelType": "required",
+    "weight": 0.3,
+    "size": "TINY",
+    "classes": "ALL",
+    "gearScore": 45,
+    "name": "TAKP AllaClone  :: Bloodmetal Earring of Engagement"
   }
 }
