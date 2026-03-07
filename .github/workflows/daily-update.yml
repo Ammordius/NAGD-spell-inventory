@@ -823,6 +823,13 @@ jobs:
         else
           echo "::warning::data/item_name_to_id.json missing - item cards (e.g. Cap of Flowing Time) will not resolve on live site"
         fi
+        # Copy dkp_prices.json for class_rankings.html?dkp_val=true (HP/DKP upgrade metrics)
+        if [ -f "data/dkp_prices.json" ]; then
+          cp data/dkp_prices.json deploy/data/dkp_prices.json
+          echo "✓ Copied data/dkp_prices.json to deploy (class rankings DKP values)"
+        else
+          echo "Optional: data/dkp_prices.json not found - ?dkp_val=true on class rankings will show no DKP data"
+        fi
         # Copy scoring explanation page
         if [ -f "scoring_explanation.html" ]; then
           cp scoring_explanation.html deploy/scoring_explanation.html

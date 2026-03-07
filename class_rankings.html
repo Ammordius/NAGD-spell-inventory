@@ -444,7 +444,11 @@
         let originalClassWeights = {}; // Backup of original weights
         let focusCandidates = {}; // focus_key -> list of { item_name, item_id, value, classes? } for items that could give that focus
 
-        // Full class name -> EQ class abbreviation (for filtering items by usable class)
+        // Hidden DKP feature: ?dkp_val=true shows last 3 DKP prices and HP/DKP on recommended upgrades
+        const dkpValEnabled = (() => { const p = new URLSearchParams(window.location.search); return p.get('dkp_val') === 'true'; })();
+        let dkpPricesCache = {}; // item_id (string) -> { dkp_prices: [ { date, cost }, ... ] }
+
+        // Full class name -> EQ class abbreviation (for filtering items by usable class) (for filtering items by usable class)
         const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
 
         // Slot_id (1-22) -> EQ slot strings that can fill this slot (item_stats.slot may list multiple, e.g. "NECK WAIST")
@@ -2606,13 +2610,17 @@
             modal.style.display = 'block';
 
             // Fill upgrade list from full item_stats (browser-only, so stat priority changes apply)
-            loadItemStats().then(() => {
+            const upgradePromise = dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices()]) : loadItemStats();
+            upgradePromise.then(() => {
                 const upgradeData = computeUpgradesForCharacter(char);
                 const placeholder = document.getElementById('upgradeSuggestionsPlaceholder');
                 if (!placeholder) return;
                 let section = `<h3 style="margin-top: 20px;">Upgrade suggestions (by your stat priorities)</h3>`;
                 if (upgradeData.anyMissing) {
                     section += `<p style="color: #856404; font-size: 0.9em;">Some equipped items were not in our database; those slots were ranked assuming current score = 0.</p>`;
+                }
+                if (dkpValEnabled) {
+                    section += `<p style="color: #6c757d; font-size: 0.85em;">DKP values: last 3 prices and HP/DKP (HP gain ÷ avg DKP) when available.</p>`;
                 }
                 let hasAny = false;
                 upgradeData.bySlot.forEach(({ slotName, currentItemName, currentInData, upgrades }) => {
@@ -2624,7 +2632,24 @@
                         const deltaStr = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                         const detail = deltaStr ? ` <span style="color: #28a745;">${escapeHtml(deltaStr)}</span>` : '';
                         const scoreNote = ` <span style="color: #6c757d; font-size: 0.9em;">(score +${(u.delta || 0).toFixed(2)})</span>`;
-                        section += `<li>${link}${detail}${scoreNote}</li>`;
+                        let dkpNote = '';
+                        if (dkpValEnabled) {
+                            const entry = dkpPricesCache[String(u.itemId)];
+                            const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+                            const last3 = prices.map(p => p.cost);
+                            const avgDkp = last3.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
+                            const hpDelta = (u.deltas && u.deltas.hpDelta != null) ? u.deltas.hpDelta : 0;
+                            if (last3.length) {
+                                dkpNote = ` <span style="color: #17a2b8; font-size: 0.9em;">Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})</span>`;
+                                if (avgDkp > 0 && hpDelta > 0) {
+                                    const hpPerDkp = (hpDelta / avgDkp).toFixed(2);
+                                    dkpNote += ` <span style="color: #138496;">HP/DKP: ${hpPerDkp}</span>`;
+                                }
+                            } else {
+                                dkpNote = ` <span style="color: #adb5bd; font-size: 0.85em;">(no DKP history)</span>`;
+                            }
+                        }
+                        section += `<li>${link}${detail}${scoreNote}${dkpNote}</li>`;
                     });
                     section += `</ul></div>`;
                 });
@@ -2765,6 +2790,38 @@
                 })();
             }
             return itemStatsLoadPromise;
+        }
+
+        /** Load data/dkp_prices.json when dkp_val=true. Populates dkpPricesCache. */
+        let dkpPricesLoadPromise = null;
+        function loadDkpPrices() {
+            if (!dkpValEnabled) return Promise.resolve({});
+            if (dkpPricesLoadPromise != null) return dkpPricesLoadPromise;
+            const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
+            const possiblePaths = [
+                baseDir + 'data/dkp_prices.json',
+                new URL('data/dkp_prices.json', document.baseURI).href,
+                'data/dkp_prices.json',
+                './data/dkp_prices.json',
+            ];
+            dkpPricesLoadPromise = (async () => {
+                for (const path of possiblePaths) {
+                    try {
+                        const r = await fetch(path);
+                        if (!r.ok) continue;
+                        const obj = await r.json();
+                        if (obj && typeof obj === 'object') {
+                            for (const [idStr, entry] of Object.entries(obj)) {
+                                if (entry && entry.dkp_prices && Array.isArray(entry.dkp_prices))
+                                    dkpPricesCache[idStr] = entry;
+                            }
+                            return obj;
+                        }
+                    } catch (e) { /* try next path */ }
+                }
+                return {};
+            })();
+            return dkpPricesLoadPromise;
         }
 
         function getItemStats(itemId) {
