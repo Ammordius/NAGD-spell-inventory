@@ -448,7 +448,10 @@
         const dkpValEnabled = (() => { const p = new URLSearchParams(window.location.search); return p.get('dkp_val') === 'true'; })();
         let dkpPricesCache = {}; // item_id (string) -> { dkp_prices: [ { date, cost }, ... ] }
 
-        // Full class name -> EQ class abbreviation (for filtering items by usable class) (for filtering items by usable class)
+        // How many upgrade suggestions to show per slot (5–25). Persisted in localStorage. When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool.
+        let upgradesPerSlot = 5;
+
+        // Full class name -> EQ class abbreviation (for filtering items by usable class)
         const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
 
         // Slot_id (1-22) -> EQ slot strings that can fill this slot (item_stats.slot may list multiple, e.g. "NECK WAIST")
@@ -681,8 +684,11 @@
         /**
          * Compute upgrade suggestions per slot using full item_stats list and char's current weights.
          * Returns { bySlot: [{ slotId, slotName, currentItem, currentScore, currentInData, upgrades }], anyMissing }.
+         * @param {Object} char - character object
+         * @param {number} [maxPerSlot=5] - max candidates per slot (use larger e.g. 25 when DKP filter will apply)
          */
-        function computeUpgradesForCharacter(char) {
+        function computeUpgradesForCharacter(char, maxPerSlot) {
+            if (maxPerSlot == null || maxPerSlot < 1) maxPerSlot = 5;
             const charClass = char.class;
             const classAbbrev = CLASS_TO_ABBREV[charClass] || '';
             const customWeight = customWeights[charClass] || {};
@@ -774,7 +780,7 @@
                     });
                 }
                 candidates.sort((a, b) => b.delta - a.delta);
-                const upgrades = candidates.slice(0, 5);
+                const upgrades = candidates.slice(0, maxPerSlot);
 
                 bySlot.push({ slotId, slotName, currentItemName, currentItemId, currentScore, currentInData, upgrades });
             }
@@ -794,6 +800,8 @@
                     console.error('Error loading custom weights:', e);
                 }
             }
+            const savedUpgrades = localStorage.getItem('upgradesPerSlot');
+            if (savedUpgrades) { const n = parseInt(savedUpgrades, 10); if (n >= 5 && n <= 25) upgradesPerSlot = n; }
         }
 
         function saveCustomWeights() {
@@ -2603,61 +2611,127 @@
             }
 
             // Placeholder for upgrade suggestions (filled async from item_stats, using current stat priorities)
-            html += `<div id="upgradeSuggestionsPlaceholder" style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 6px; color: #6c757d;">Loading upgrade suggestions…</div>`;
+            const savedUpgrades = localStorage.getItem('upgradesPerSlot');
+            if (savedUpgrades) { const n = parseInt(savedUpgrades, 10); if (n >= 5 && n <= 25) upgradesPerSlot = n; }
+            html += `<div style="margin-top: 16px; margin-bottom: 8px;"><label>Upgrades per slot:</label> <select id="upgradesPerSlotSelect" style="margin-left: 6px;">${[5, 10, 15, 20, 25].map(n => `<option value="${n}"${n === upgradesPerSlot ? ' selected' : ''}>${n}</option>`).join('')}</select> <small style="color: #6c757d;">per slot</small></div>`;
+            if (dkpValEnabled) {
+                html += `<div id="dkpUpgradeFilters" style="margin-top: 8px; margin-bottom: 8px;"><label>Min HP/DKP:</label> <input type="number" id="dkpMinHpPerDkp" min="0" step="0.1" placeholder="e.g. 1.0" style="width: 5em; margin-left: 6px;"> <small style="color: #6c757d;">Show up to N per slot meeting this minimum (searches deeper when N &lt; 25)</small></div>`;
+            }
+            html += `<div id="upgradeSuggestionsContainer"><div id="upgradeSuggestionsPlaceholder" style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 6px; color: #6c757d;">Loading upgrade suggestions…</div></div>`;
             
             html += `</div>`;
             modalContent.innerHTML = html;
             modal.style.display = 'block';
 
             // Fill upgrade list from full item_stats (browser-only, so stat priority changes apply)
+            // When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool; otherwise use user's upgradesPerSlot (default 5).
+            function getMaxPerSlot() { return dkpValEnabled ? Math.max(upgradesPerSlot, 25) : upgradesPerSlot; }
             const upgradePromise = dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices()]) : loadItemStats();
             upgradePromise.then(() => {
-                const upgradeData = computeUpgradesForCharacter(char);
-                const placeholder = document.getElementById('upgradeSuggestionsPlaceholder');
-                if (!placeholder) return;
-                let section = `<h3 style="margin-top: 20px;">Upgrade suggestions (by your stat priorities)</h3>`;
-                if (upgradeData.anyMissing) {
-                    section += `<p style="color: #856404; font-size: 0.9em;">Some equipped items were not in our database; those slots were ranked assuming current score = 0.</p>`;
+                const upgradeData = computeUpgradesForCharacter(char, getMaxPerSlot());
+                const container = document.getElementById('upgradeSuggestionsContainer');
+                if (!container) return;
+
+                /** HP/DKP for an upgrade (null if no DKP data or no HP gain). */
+                function getHpPerDkp(u) {
+                    const entry = dkpPricesCache[String(u.itemId)];
+                    const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+                    if (prices.length === 0) return null;
+                    const avgDkp = prices.reduce((a, p) => a + p.cost, 0) / prices.length;
+                    const hpDelta = (u.deltas && u.deltas.hpDelta != null) ? u.deltas.hpDelta : 0;
+                    if (avgDkp <= 0 || hpDelta <= 0) return null;
+                    return hpDelta / avgDkp;
                 }
-                if (dkpValEnabled) {
-                    section += `<p style="color: #6c757d; font-size: 0.85em;">DKP values: last 3 prices and HP/DKP (HP gain ÷ avg DKP) when available.</p>`;
-                }
-                let hasAny = false;
-                upgradeData.bySlot.forEach(({ slotName, currentItemName, currentInData, upgrades }) => {
-                    if (upgrades.length === 0) return;
-                    hasAny = true;
-                    section += `<div style="margin-bottom: 14px;"><strong>${escapeHtml(slotName)}</strong> (current: ${escapeHtml(currentItemName)}${!currentInData ? ' <em>— not in database</em>' : ''})<ul style="margin: 4px 0 0 18px; padding: 0;">`;
-                    upgrades.forEach(u => {
-                        const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${u.itemId}" target="_blank" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}">${escapeHtml(u.itemName || `Item ${u.itemId}`)}</a>`;
-                        const deltaStr = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
-                        const detail = deltaStr ? ` <span style="color: #28a745;">${escapeHtml(deltaStr)}</span>` : '';
-                        const scoreNote = ` <span style="color: #6c757d; font-size: 0.9em;">(score +${(u.delta || 0).toFixed(2)})</span>`;
-                        let dkpNote = '';
-                        if (dkpValEnabled) {
-                            const entry = dkpPricesCache[String(u.itemId)];
-                            const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
-                            const last3 = prices.map(p => p.cost);
-                            const avgDkp = last3.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
-                            const hpDelta = (u.deltas && u.deltas.hpDelta != null) ? u.deltas.hpDelta : 0;
-                            if (last3.length) {
-                                dkpNote = ` <span style="color: #17a2b8; font-size: 0.9em;">Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})</span>`;
-                                if (avgDkp > 0 && hpDelta > 0) {
-                                    const hpPerDkp = (hpDelta / avgDkp).toFixed(2);
-                                    dkpNote += ` <span style="color: #138496;">HP/DKP: ${hpPerDkp}</span>`;
-                                }
-                            } else {
-                                dkpNote = ` <span style="color: #adb5bd; font-size: 0.85em;">(no DKP history)</span>`;
-                            }
+
+                function buildUpgradeSection(upgradeData, minHpPerDkp) {
+                    let section = `<h3 style="margin-top: 20px;">Upgrade suggestions (by your stat priorities)</h3>`;
+                    if (upgradeData.anyMissing) {
+                        section += `<p style="color: #856404; font-size: 0.9em;">Some equipped items were not in our database; those slots were ranked assuming current score = 0.</p>`;
+                    }
+                    if (dkpValEnabled) {
+                        section += `<p style="color: #6c757d; font-size: 0.85em;">DKP values: last 3 prices and HP/DKP (HP gain ÷ avg DKP) when available. Slots sorted by best HP/DKP in slot.</p>`;
+                    }
+
+                    const showPerSlot = upgradesPerSlot;
+                    let slotsWithUpgrades = upgradeData.bySlot.map(slot => {
+                        let upgrades = slot.upgrades || [];
+                        if (dkpValEnabled && (minHpPerDkp != null && minHpPerDkp > 0)) {
+                            upgrades = upgrades.filter(u => {
+                                const hpPerDkp = getHpPerDkp(u);
+                                return hpPerDkp != null && hpPerDkp >= minHpPerDkp;
+                            }).slice(0, showPerSlot);
+                        } else {
+                            upgrades = upgrades.slice(0, showPerSlot);
                         }
-                        section += `<li>${link}${detail}${scoreNote}${dkpNote}</li>`;
+                        const maxHpPerDkp = dkpValEnabled && upgrades.length
+                            ? Math.max(...upgrades.map(u => getHpPerDkp(u)).filter(v => v != null), 0)
+                            : 0;
+                        return { ...slot, upgrades, maxHpPerDkp };
+                    }).filter(s => s.upgrades.length > 0);
+
+                    if (dkpValEnabled && slotsWithUpgrades.length) {
+                        slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
+                    }
+
+                    let hasAny = false;
+                    slotsWithUpgrades.forEach(({ slotName, currentItemName, currentInData, upgrades }) => {
+                        hasAny = true;
+                        section += `<div style="margin-bottom: 14px;"><strong>${escapeHtml(slotName)}</strong> (current: ${escapeHtml(currentItemName)}${!currentInData ? ' <em>— not in database</em>' : ''})<ul style="margin: 4px 0 0 18px; padding: 0;">`;
+                        upgrades.forEach(u => {
+                            const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${u.itemId}" target="_blank" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}">${escapeHtml(u.itemName || `Item ${u.itemId}`)}</a>`;
+                            const deltaStr = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                            const detail = deltaStr ? ` <span style="color: #28a745;">${escapeHtml(deltaStr)}</span>` : '';
+                            const scoreNote = ` <span style="color: #6c757d; font-size: 0.9em;">(score +${(u.delta || 0).toFixed(2)})</span>`;
+                            let dkpNote = '';
+                            if (dkpValEnabled) {
+                                const entry = dkpPricesCache[String(u.itemId)];
+                                const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+                                const last3 = prices.map(p => p.cost);
+                                const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
+                                const hpDelta = (u.deltas && u.deltas.hpDelta != null) ? u.deltas.hpDelta : 0;
+                                if (last3.length) {
+                                    dkpNote = ` <span style="color: #17a2b8; font-size: 0.9em;">Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})</span>`;
+                                    if (avgDkp > 0 && hpDelta > 0) {
+                                        const hpPerDkp = (hpDelta / avgDkp).toFixed(2);
+                                        dkpNote += ` <span style="color: #138496;">HP/DKP: ${hpPerDkp}</span>`;
+                                    }
+                                } else {
+                                    dkpNote = ` <span style="color: #adb5bd; font-size: 0.85em;">(no DKP history)</span>`;
+                                }
+                            }
+                            section += `<li>${link}${detail}${scoreNote}${dkpNote}</li>`;
+                        });
+                        section += `</ul></div>`;
                     });
-                    section += `</ul></div>`;
-                });
-                if (!hasAny) section += `<p style="color: #6c757d;">No upgrades found in item database for your equipped slots, or you already have top items.</p>`;
-                placeholder.outerHTML = section;
+                    if (!hasAny) section += `<p style="color: #6c757d;">No upgrades found${(minHpPerDkp != null && minHpPerDkp > 0) ? ' meeting the minimum HP/DKP threshold' : ''}.</p>`;
+                    return section;
+                }
+
+                const dkpMinInput = document.getElementById('dkpMinHpPerDkp');
+                const getMinVal = () => {
+                    if (!dkpMinInput || dkpMinInput.value === '') return null;
+                    const v = parseFloat(dkpMinInput.value);
+                    return isNaN(v) || v < 0 ? null : v;
+                };
+                container.innerHTML = buildUpgradeSection(upgradeData, getMinVal());
+
+                const upgradesPerSlotSelect = document.getElementById('upgradesPerSlotSelect');
+                if (upgradesPerSlotSelect) {
+                    upgradesPerSlotSelect.addEventListener('change', () => {
+                        upgradesPerSlot = parseInt(upgradesPerSlotSelect.value, 10);
+                        localStorage.setItem('upgradesPerSlot', String(upgradesPerSlot));
+                        const newData = computeUpgradesForCharacter(char, getMaxPerSlot());
+                        container.innerHTML = buildUpgradeSection(newData, getMinVal());
+                    });
+                }
+                if (dkpValEnabled && dkpMinInput) {
+                    dkpMinInput.addEventListener('input', () => {
+                        container.innerHTML = buildUpgradeSection(upgradeData, getMinVal());
+                    });
+                }
             }).catch(() => {
-                const placeholder = document.getElementById('upgradeSuggestionsPlaceholder');
-                if (placeholder) placeholder.outerHTML = `<p style="color: #6c757d;">Upgrade suggestions require item_stats.json.</p>`;
+                const container = document.getElementById('upgradeSuggestionsContainer');
+                if (container) container.innerHTML = `<p style="color: #6c757d;">Upgrade suggestions require item_stats.json.</p>`;
             });
         }
 
