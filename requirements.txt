@@ -1,0 +1,3 @@
+# For scripts/build_dkp_prices_json.py (pull DKP prices from Supabase)
+supabase
+python-dotenv

@@ -1,0 +1,254 @@
+#!/usr/bin/env python3
+"""
+Build a JSON file of the most recent 3 DKP prices per item, for items that exist
+in both magelo item_stats and Supabase raid_loot. Intended to be merged into
+magelo (e.g. data/dkp_prices.json) so item_stats can be augmented with DKP data.
+
+Workflow:
+  1) Cross-reference: only consider items that appear in item_stats (by name).
+  2) Pull from Supabase: one paginated query for raid_loot, one for raids (to get dates).
+  3) Filter loot rows to item names that exist in item_stats; for each item_id take last 3 by date.
+  4) Write JSON: { "item_id": { "dkp_prices": [ {"cost": N, "date": "YYYY-MM-DD"}, ... ] }, ... }
+
+Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY if RLS allows read).
+  export SUPABASE_URL=https://xxx.supabase.co
+  export SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+Usage:
+  python scripts/build_dkp_prices_json.py [--item-stats data/item_stats.json] [--out data/dkp_prices.json]
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+DEFAULT_ITEM_STATS = REPO_ROOT / "data" / "item_stats.json"
+DEFAULT_OUT = REPO_ROOT / "data" / "dkp_prices.json"
+PAGE_SIZE = 1000
+LAST_N_PRICES = 3
+
+
+def load_item_stats(path: Path) -> dict:
+    """Load item_stats.json and return dict id -> entry."""
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def build_name_to_item_id(item_stats: dict) -> dict[str, str]:
+    """
+    Build normalized (lowercase, stripped) item name -> item_id.
+    Only one id per name; if duplicates we keep the first.
+    """
+    out: dict[str, str] = {}
+    for item_id, entry in item_stats.items():
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("name")
+        if not name or not isinstance(name, str):
+            continue
+        key = name.strip().lower()
+        if key and key not in out:
+            out[key] = str(item_id)
+    return out
+
+
+def parse_cost(cost) -> int | None:
+    """Parse cost to int; return None if invalid."""
+    if cost is None:
+        return None
+    if isinstance(cost, int):
+        return cost
+    if isinstance(cost, str):
+        try:
+            return int(cost.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def date_iso_slice(date_iso) -> str | None:
+    """Get YYYY-MM-DD from date_iso string or None."""
+    if not date_iso:
+        return None
+    s = str(date_iso).strip()
+    if len(s) >= 10 and s[4] == "-" and s[7] == "-":
+        return s[:10]
+    return None
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(
+        description="Build DKP prices JSON from Supabase for items in item_stats."
+    )
+    ap.add_argument(
+        "--item-stats",
+        type=Path,
+        default=DEFAULT_ITEM_STATS,
+        help="Path to item_stats.json",
+    )
+    ap.add_argument(
+        "--out",
+        type=Path,
+        default=DEFAULT_OUT,
+        help="Output JSON path",
+    )
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Only print counts and item_ids that would get DKP data; do not write file.",
+    )
+    ap.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print which env and key type are used (no secrets).",
+    )
+    args = ap.parse_args()
+
+    # Load env from dkp/web/.env.local or .env if present (so we can use VITE_* vars)
+    try:
+        from dotenv import load_dotenv
+        dkp_web = REPO_ROOT.parent / "dkp" / "web"
+        for name in (".env", ".env.local"):
+            path = dkp_web / name
+            if path.is_file():
+                load_dotenv(path)
+                if getattr(args, "verbose", False):
+                    print(f"Loaded env from {path}", file=sys.stderr)
+                break
+    except ImportError:
+        pass
+
+    if not args.item_stats.is_file():
+        print(f"item_stats not found: {args.item_stats}", file=sys.stderr)
+        return 1
+
+    url = (
+        os.environ.get("SUPABASE_URL", "").strip()
+        or os.environ.get("VITE_SUPABASE_URL", "").strip()
+    )
+    key = (
+        os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        or os.environ.get("SUPABASE_ANON_KEY", "").strip()
+        or os.environ.get("VITE_SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        or os.environ.get("VITE_SUPABASE_ANON_KEY", "").strip()
+    )
+    if not url or not key:
+        print(
+            "Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY). "
+        "From dkp/web use VITE_SUPABASE_URL and VITE_SUPABASE_SERVICE_ROLE_KEY or VITE_SUPABASE_ANON_KEY.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if args.verbose:
+        key_type = "service_role" if (os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("VITE_SUPABASE_SERVICE_ROLE_KEY")) else "anon"
+        print(f"Using URL: {url[:50]}... key type: {key_type}", file=sys.stderr)
+
+    try:
+        from supabase import create_client
+    except ImportError:
+        print("Install supabase: pip install supabase", file=sys.stderr)
+        return 1
+
+    # 1) Cross-reference: build name -> item_id from item_stats
+    item_stats = load_item_stats(args.item_stats)
+    name_to_id = build_name_to_item_id(item_stats)
+    print(f"item_stats: {len(item_stats)} items, {len(name_to_id)} with names", file=sys.stderr)
+
+    client = create_client(url, key)
+
+    # 2) Fetch raid_loot (item_name, cost, raid_id) — single table, no join to minimize query shape
+    loot_rows: list[dict] = []
+    offset = 0
+    while True:
+        resp = (
+            client.table("raid_loot")
+            .select("item_name, cost, raid_id")
+            .range(offset, offset + PAGE_SIZE - 1)
+            .execute()
+        )
+        rows = resp.data or []
+        if not rows:
+            break
+        loot_rows.extend(rows)
+        if len(rows) < PAGE_SIZE:
+            break
+        offset += PAGE_SIZE
+    print(f"Fetched {len(loot_rows)} raid_loot rows", file=sys.stderr)
+
+    # Collect unique raid_ids and fetch raid dates
+    raid_ids = list({r["raid_id"] for r in loot_rows if r.get("raid_id")})
+    raids_by_id: dict[str, dict] = {}
+    if raid_ids:
+        # Fetch raids in chunks to avoid URL length limits
+        chunk = 200
+        for i in range(0, len(raid_ids), chunk):
+            batch = raid_ids[i : i + chunk]
+            resp = (
+                client.table("raids")
+                .select("raid_id, date_iso")
+                .in_("raid_id", batch)
+                .execute()
+            )
+            for row in resp.data or []:
+                raids_by_id[row["raid_id"]] = row
+    print(f"Fetched {len(raids_by_id)} raid dates", file=sys.stderr)
+
+    # 3) Filter to items in item_stats; attach date and item_id
+    by_item_id: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for row in loot_rows:
+        item_name = row.get("item_name")
+        if not item_name:
+            continue
+        key = str(item_name).strip().lower()
+        item_id = name_to_id.get(key)
+        if not item_id:
+            continue
+        raid_id = row.get("raid_id")
+        date_str = None
+        if raid_id:
+            r = raids_by_id.get(raid_id)
+            if r:
+                date_str = date_iso_slice(r.get("date_iso"))
+        if not date_str:
+            date_str = ""
+        cost = parse_cost(row.get("cost"))
+        if cost is None:
+            cost = 0
+        by_item_id[item_id].append((date_str, cost))
+
+    # 4) For each item_id: sort by date desc, take last 3
+    result: dict[str, dict] = {}
+    for item_id, pairs in by_item_id.items():
+        # Most recent first: sort by date desc, then take 3
+        pairs.sort(key=lambda p: (p[0] or "", -(p[1] or 0)), reverse=True)
+        last3 = pairs[:LAST_N_PRICES]
+        result[item_id] = {
+            "dkp_prices": [
+                {"date": d, "cost": c}
+                for d, c in last3
+            ]
+        }
+
+    if args.dry_run:
+        print(f"Would write {len(result)} items with DKP prices", file=sys.stderr)
+        for item_id in sorted(result.keys(), key=lambda x: int(x) if str(x).isdigit() else 0):
+            print(f"  {item_id}: {result[item_id]['dkp_prices']}", file=sys.stderr)
+        return 0
+
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with open(args.out, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2)
+    print(f"Wrote {len(result)} items to {args.out}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
