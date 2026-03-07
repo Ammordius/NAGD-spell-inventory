@@ -432,6 +432,51 @@ def _merge_elemental_dkp_names_into_name_to_id(name_to_id, base_dir):
             continue
 
 
+def _write_elemental_display_names(base_dir):
+    """Write data/elemental_display_names.json: magelo_id -> DKP purchase name for items missing name in item_stats."""
+    out_path = os.path.join(base_dir, 'data', 'elemental_display_names.json')
+    dkp_paths = [
+        os.path.join(base_dir, '..', 'dkp', 'dkp_elemental_to_magelo.json'),
+        os.path.join(base_dir, 'dkp_elemental_to_magelo.json'),
+        os.path.join(os.path.dirname(base_dir), 'dkp', 'dkp_elemental_to_magelo.json'),
+    ]
+    data = None
+    for path in dkp_paths:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            break
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+    if not data:
+        return
+    purchases = data.get('dkp_purchases') or {}
+    magelo_to_dkp = (data.get('magelo_item_to_dkp') or {})
+    # magelo_id -> dkp_purchase_id; then dkp_purchase_id -> name
+    display_names = {}
+    for magelo_id, entry in magelo_to_dkp.items():
+        if not isinstance(entry, dict):
+            continue
+        dkp_id = entry.get('dkp_purchase_id')
+        if not dkp_id:
+            continue
+        purchase = purchases.get(str(dkp_id))
+        if not isinstance(purchase, dict):
+            continue
+        name = (purchase.get('name') or '').strip()
+        if name:
+            display_names[str(magelo_id)] = name
+    if not display_names:
+        return
+    try:
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        with open(out_path, 'w', encoding='utf-8') as f:
+            json.dump(display_names, f, indent=2, ensure_ascii=False)
+        print(f"Wrote {out_path} ({len(display_names)} elemental display names)")
+    except OSError:
+        pass
+
+
 def get_all_focus_candidates(focii_data, item_stats_lookup=None):
     """Build a map of focus_key -> list of {item_name, item_id, value, classes?} for all items that provide that focus.
     Used in the UI to show 'items that could give this focus' when the character doesn't have it but weight > 0.
@@ -2727,6 +2772,8 @@ def main():
         json.dump(output, f, indent=2, ensure_ascii=False)
     
     print(f"\nGenerated {output_file}")
+    # Write elemental display names for items missing name in item_stats (e.g. 16693 -> "Elemental Greaves Mold")
+    _write_elemental_display_names(base_dir)
     print(f"Total characters: {len(output_data)}")
     
     # Print top 5 by class

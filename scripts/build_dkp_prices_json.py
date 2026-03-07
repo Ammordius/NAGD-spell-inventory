@@ -55,29 +55,34 @@ def normalize_item_name_for_lookup(name: str) -> str:
     return s
 
 
-def load_elemental_dkp_name_to_magelo_ids(path: Path) -> dict[str, list[str]]:
+def load_elemental_dkp_name_to_magelo_ids(path: Path) -> tuple[dict[str, list[str]], dict[str, list[str]], set[str]]:
     """
-    Load dkp_elemental_to_magelo.json and return normalized DKP purchase name -> list of Magelo item_ids.
-    So raid_loot rows with item_name "Timeless Leather Tunic Pattern" get (date, cost) attached to
-    each of 32131, 32139, 32136 etc.
+    Load dkp_elemental_to_magelo.json and return:
+    - normalized DKP purchase name -> list of Magelo item_ids
+    - dkp_purchase_id (e.g. "16373") -> list of Magelo item_ids (for when raid_loot stores id not name)
+    - set of all Magelo elemental piece ids (for when raid_loot stores magelo id as item_name)
     """
-    out: dict[str, list[str]] = {}
+    name_to_ids: dict[str, list[str]] = {}
+    dkp_id_to_magelo_ids: dict[str, list[str]] = {}
+    all_magelo_ids: set[str] = set()
     if not path.is_file():
-        return out
+        return (name_to_ids, dkp_id_to_magelo_ids, all_magelo_ids)
     data = json.loads(path.read_text(encoding="utf-8"))
     purchases = data.get("dkp_purchases") or {}
-    for _dkp_id, entry in purchases.items():
+    for dkp_id, entry in purchases.items():
         if not isinstance(entry, dict):
             continue
         name = (entry.get("name") or "").strip()
-        if not name:
-            continue
-        norm = normalize_item_name_for_lookup(name)
         by_class = entry.get("magelo_item_ids_by_class") or {}
         ids = list({str(v).strip() for v in by_class.values() if v})
-        if ids:
-            out[norm] = ids
-    return out
+        if not ids:
+            continue
+        dkp_id_to_magelo_ids[str(dkp_id).strip()] = ids
+        all_magelo_ids.update(ids)
+        if name:
+            norm = normalize_item_name_for_lookup(name)
+            name_to_ids[norm] = ids
+    return (name_to_ids, dkp_id_to_magelo_ids, all_magelo_ids)
 
 
 def load_item_stats(path: Path) -> dict:
@@ -208,10 +213,10 @@ def main() -> int:
         print("Install supabase: pip install supabase", file=sys.stderr)
         return 1
 
-    # 1) Cross-reference: build name -> item_id from item_stats; load elemental DKP name -> [magelo_ids]
+    # 1) Cross-reference: build name -> item_id from item_stats; load elemental DKP name -> [magelo_ids] and id-based maps
     item_stats = load_item_stats(args.item_stats)
     name_to_id = build_name_to_item_id(item_stats)
-    elemental_dkp_to_magelo = load_elemental_dkp_name_to_magelo_ids(args.elemental_json)
+    elemental_dkp_to_magelo, elemental_dkp_id_to_magelo_ids, elemental_all_magelo_ids = load_elemental_dkp_name_to_magelo_ids(args.elemental_json)
     if elemental_dkp_to_magelo:
         print(f"Elemental DKP names -> magelo ids: {len(elemental_dkp_to_magelo)} entries", file=sys.stderr)
     print(f"item_stats: {len(item_stats)} items, {len(name_to_id)} with names", file=sys.stderr)
@@ -274,7 +279,7 @@ def main() -> int:
         if cost is None:
             cost = 0
 
-        # Try item_stats name first; then elemental DKP name -> all magelo piece ids
+        # Try item_stats name first; then elemental DKP name -> all magelo piece ids; then numeric id (magelo or dkp purchase)
         item_id = name_to_id.get(norm)
         if item_id:
             by_item_id[item_id].append((date_str, cost))
@@ -283,6 +288,15 @@ def main() -> int:
             if magelo_ids:
                 for mid in magelo_ids:
                     by_item_id[mid].append((date_str, cost))
+            else:
+                # raid_loot may store item_name as numeric id: magelo piece id (e.g. "16693") or dkp purchase id (e.g. "16373")
+                if norm.isdigit():
+                    num_id = norm
+                    if num_id in elemental_all_magelo_ids:
+                        by_item_id[num_id].append((date_str, cost))
+                    elif num_id in elemental_dkp_id_to_magelo_ids:
+                        for mid in elemental_dkp_id_to_magelo_ids[num_id]:
+                            by_item_id[mid].append((date_str, cost))
 
     # 4) For each item_id: sort by date desc, take last 3
     result: dict[str, dict] = {}

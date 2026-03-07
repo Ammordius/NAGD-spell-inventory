@@ -447,6 +447,7 @@
         // Hidden DKP feature: ?dkp_val=true shows last 3 DKP prices and HP/DKP on recommended upgrades
         const dkpValEnabled = (() => { const p = new URLSearchParams(window.location.search); return p.get('dkp_val') === 'true'; })();
         let dkpPricesCache = {}; // item_id (string) -> { dkp_prices: [ { date, cost }, ... ] }
+        let elementalDisplayNames = {}; // item_id (string) -> display name for elemental pieces missing name in item_stats (e.g. "16693" -> "Elemental Greaves Mold")
 
         // How many upgrade suggestions to show per slot (5–25). Persisted in localStorage. When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool.
         let upgradesPerSlot = 5;
@@ -772,7 +773,7 @@
                     const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
                     candidates.push({
                         itemId: id,
-                        itemName: stats.name || `Item ${id}`,
+                        itemName: stats.name || elementalDisplayNames[String(id)] || `Item ${id}`,
                         score,
                         delta,
                         deltas,
@@ -2830,6 +2831,25 @@
             })();
         }
 
+        /** Load data/elemental_display_names.json for items missing name in item_stats (e.g. 16693 -> "Elemental Greaves Mold"). */
+        async function loadElementalDisplayNames() {
+            const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
+            const paths = [baseDir + 'data/elemental_display_names.json', new URL('data/elemental_display_names.json', document.baseURI).href, 'data/elemental_display_names.json', './data/elemental_display_names.json'];
+            for (const path of paths) {
+                try {
+                    const r = await fetch(path);
+                    if (!r.ok) continue;
+                    const obj = await r.json();
+                    if (obj && typeof obj === 'object') {
+                        for (const [idStr, name] of Object.entries(obj)) {
+                            if (idStr && name && typeof name === 'string') elementalDisplayNames[String(idStr)] = name;
+                        }
+                        return;
+                    }
+                } catch (e) { /* try next */ }
+            }
+        }
+
         function loadItemStats() {
             if (itemStatsLoadPromise == null) {
                 const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
@@ -2843,6 +2863,7 @@
 
                 itemStatsLoadPromise = (async () => {
                     await loadItemNameToId();
+                    await loadElementalDisplayNames();
                     for (const path of possiblePaths) {
                         try {
                             const r = await fetch(path);
