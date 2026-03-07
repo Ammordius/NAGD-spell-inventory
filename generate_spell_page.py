@@ -1776,12 +1776,14 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             visibility_change_chars.add(name)
     visibility_change_chars |= corpse_loot_chars
     
-    # Calculate AA leaderboard (top gainers); only chars present in both snapshots, exclude new/deleted and corpse-loot
+    # Calculate AA leaderboard (top gainers); only chars present in both snapshots, exclude new/deleted, visibility-change, and corpse-loot
     aa_leaderboard = []
     for char_name, delta in char_deltas.items():
         if char_name not in chars_eligible_leaderboard:
             continue
         if delta.get('is_deleted', False) or delta.get('is_new', False):
+            continue
+        if delta.get('is_visibility_change', False):
             continue
         current_level = delta['current_level']
         previous_level = delta['previous_level']
@@ -1801,12 +1803,14 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     aa_leaderboard.sort(key=lambda x: x['aa_gain'], reverse=True)
     aa_leaderboard = aa_leaderboard[:20]
     
-    # Calculate HP leaderboard (top gainers); only chars present in both snapshots
+    # Calculate HP leaderboard (top gainers); only chars present in both snapshots, exclude new/deleted, visibility-change
     hp_leaderboard = []
     for char_name, delta in char_deltas.items():
         if char_name not in chars_eligible_leaderboard:
             continue
         if delta.get('is_deleted', False) or delta.get('is_new', False):
+            continue
+        if delta.get('is_visibility_change', False):
             continue
         current_level = delta['current_level']
         hp_gain = delta['hp_change']
