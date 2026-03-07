@@ -452,6 +452,9 @@
         // How many upgrade suggestions to show per slot (5–25). Persisted in localStorage. When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool.
         let upgradesPerSlot = 5;
 
+        // When dkp_val=true: slot order for upgrade list. 'value' = default + value (natural slot order, sort by score delta), 'hp_dkp' = sort by HP/DKP, 'max_upgrade' = sort by max upgrade (delta) per slot.
+        let dkpSlotSortMode = 'hp_dkp';
+
         // Full class name -> EQ class abbreviation (for filtering items by usable class)
         const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
 
@@ -803,6 +806,8 @@
             }
             const savedUpgrades = localStorage.getItem('upgradesPerSlot');
             if (savedUpgrades) { const n = parseInt(savedUpgrades, 10); if (n >= 5 && n <= 25) upgradesPerSlot = n; }
+            const savedDkpSlotSort = localStorage.getItem('dkpSlotSortMode');
+            if (savedDkpSlotSort === 'value' || savedDkpSlotSort === 'hp_dkp' || savedDkpSlotSort === 'max_upgrade') dkpSlotSortMode = savedDkpSlotSort;
         }
 
         function saveCustomWeights() {
@@ -2617,6 +2622,7 @@
             html += `<div style="margin-top: 16px; margin-bottom: 8px;"><label>Upgrades per slot:</label> <select id="upgradesPerSlotSelect" style="margin-left: 6px;">${[5, 10, 15, 20, 25].map(n => `<option value="${n}"${n === upgradesPerSlot ? ' selected' : ''}>${n}</option>`).join('')}</select> <small style="color: #6c757d;">per slot</small></div>`;
             if (dkpValEnabled) {
                 html += `<div id="dkpUpgradeFilters" style="margin-top: 8px; margin-bottom: 8px;"><label>Min HP/DKP:</label> <input type="number" id="dkpMinHpPerDkp" min="0" step="0.1" placeholder="e.g. 1.0" style="width: 5em; margin-left: 6px;"> <small style="color: #6c757d;">Show up to N per slot meeting this minimum (searches deeper when N &lt; 25)</small></div>`;
+                html += `<div id="dkpSlotSortRow" style="margin-top: 6px; margin-bottom: 8px;"><label>Slot order:</label> <select id="dkpSlotSortSelect" style="margin-left: 6px;"><option value="value"${dkpSlotSortMode === 'value' ? ' selected' : ''}>Default + value</option><option value="hp_dkp"${dkpSlotSortMode === 'hp_dkp' ? ' selected' : ''}>Sort by HP/DKP</option><option value="max_upgrade"${dkpSlotSortMode === 'max_upgrade' ? ' selected' : ''}>Sort by max upgrade</option></select> <small style="color: #6c757d;">Order slots by value, best HP/DKP, or largest upgrade</small></div>`;
             }
             html += `<div id="upgradeSuggestionsContainer"><div id="upgradeSuggestionsPlaceholder" style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 6px; color: #6c757d;">Loading upgrade suggestions…</div></div>`;
             
@@ -2649,20 +2655,25 @@
                     if (upgradeData.anyMissing) {
                         section += `<p style="color: #856404; font-size: 0.9em;">Some equipped items were not in our database; those slots were ranked assuming current score = 0.</p>`;
                     }
+                    const mode = dkpValEnabled ? (document.getElementById('dkpSlotSortSelect')?.value || dkpSlotSortMode) : 'value';
                     if (dkpValEnabled) {
-                        section += `<p style="color: #6c757d; font-size: 0.85em;">DKP values: last 3 prices and HP/DKP (HP gain ÷ avg DKP) when available. Slots sorted by best HP/DKP in slot.</p>`;
+                        const modeLabel = mode === 'value' ? 'Default + value' : mode === 'hp_dkp' ? 'HP/DKP' : 'max upgrade';
+                        section += `<p style="color: #6c757d; font-size: 0.85em;">DKP values: last 3 prices and HP/DKP when available. Slots sorted by ${modeLabel}.</p>`;
                     }
 
                     const showPerSlot = upgradesPerSlot;
                     let slotsWithUpgrades = upgradeData.bySlot.map(slot => {
                         let upgrades = slot.upgrades || [];
                         if (dkpValEnabled) {
-                            // Always sort by HP/DKP descending when DKP mode is on; no-DKP-history items sort last (treated as -Infinity).
-                            upgrades = upgrades.slice().sort((a, b) => {
-                                const va = getHpPerDkp(a) ?? -Infinity;
-                                const vb = getHpPerDkp(b) ?? -Infinity;
-                                return vb - va;
-                            });
+                            if (mode === 'hp_dkp') {
+                                upgrades = upgrades.slice().sort((a, b) => {
+                                    const va = getHpPerDkp(a) ?? -Infinity;
+                                    const vb = getHpPerDkp(b) ?? -Infinity;
+                                    return vb - va;
+                                });
+                            } else {
+                                upgrades = upgrades.slice().sort((a, b) => (b.delta || 0) - (a.delta || 0));
+                            }
                             if (minHpPerDkp != null && minHpPerDkp > 0)
                                 upgrades = upgrades.filter(u => (getHpPerDkp(u) ?? 0) >= minHpPerDkp);
                             upgrades = upgrades.slice(0, showPerSlot);
@@ -2672,11 +2683,16 @@
                         const maxHpPerDkp = dkpValEnabled && upgrades.length
                             ? Math.max(...upgrades.map(u => getHpPerDkp(u)).filter(v => v != null), 0)
                             : 0;
-                        return { ...slot, upgrades, maxHpPerDkp };
+                        const maxDelta = upgrades.length ? Math.max(...upgrades.map(u => u.delta || 0), 0) : 0;
+                        return { ...slot, upgrades, maxHpPerDkp, maxDelta };
                     }).filter(s => s.upgrades.length > 0);
 
                     if (dkpValEnabled && slotsWithUpgrades.length) {
-                        slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
+                        if (mode === 'hp_dkp')
+                            slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
+                        else if (mode === 'max_upgrade')
+                            slotsWithUpgrades.sort((a, b) => b.maxDelta - a.maxDelta);
+                        // mode === 'value': keep natural slot order (no sort)
                     }
 
                     let hasAny = false;
@@ -2732,6 +2748,14 @@
                 }
                 if (dkpValEnabled && dkpMinInput) {
                     dkpMinInput.addEventListener('input', () => {
+                        container.innerHTML = buildUpgradeSection(upgradeData, getMinVal());
+                    });
+                }
+                const dkpSlotSortSelect = document.getElementById('dkpSlotSortSelect');
+                if (dkpValEnabled && dkpSlotSortSelect) {
+                    dkpSlotSortSelect.addEventListener('change', () => {
+                        dkpSlotSortMode = dkpSlotSortSelect.value;
+                        localStorage.setItem('dkpSlotSortMode', dkpSlotSortMode);
                         container.innerHTML = buildUpgradeSection(upgradeData, getMinVal());
                     });
                 }
