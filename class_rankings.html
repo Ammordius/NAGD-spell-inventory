@@ -531,6 +531,15 @@
             return isPrimarySlot && is2HSkill;
         }
 
+        /** True if item is lore (can only have one per character); used to avoid recommending same lore item for another slot. */
+        function isItemLore(stats) {
+            if (!stats) return false;
+            const flags = stats.flags;
+            if (Array.isArray(flags)) return flags.some(f => String(f).toUpperCase().includes('LORE'));
+            if (typeof flags === 'string' && flags.trim()) return flags.toUpperCase().includes('LORE');
+            return false;
+        }
+
         /** True if item is usable by this class (item_stats.classes "WAR CLR ..." or "ALL"). */
         function itemUsableByClass(itemClasses, classAbbrev) {
             if (!classAbbrev) return true;
@@ -750,6 +759,7 @@
                     }
                 }
 
+                const otherEquippedIds = new Set(equippedOnly.filter(i => i.slot_id !== slotId).map(i => i.item_id != null && i.item_id !== '' ? Number(i.item_id) : null).filter(n => n != null && !isNaN(n)));
                 const candidates = [];
                 for (const [idStr, stats] of Object.entries(itemStatsCache)) {
                     const id = Number(idStr);
@@ -758,6 +768,8 @@
                     if (!itemUsableByClass(stats.classes, classAbbrev)) continue;
                     // Two-handed items only appear under Main Hand (slot 13) with primary+offhand comparison; skip under Off Hand.
                     if (slotId === 14 && isItemTwoHanded(stats)) continue;
+                    // Lore items: don't recommend for another slot if already equipped elsewhere (can only have one per character).
+                    if (isItemLore(stats) && otherEquippedIds.has(id)) continue;
                     const score = scoreItemForUpgrade(stats, id, norm, focusWeights, focusValuesByItem);
 
                     const is2her = isItemTwoHanded(stats);
