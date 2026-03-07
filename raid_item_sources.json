@@ -6845,5 +6845,10 @@
     "mob": "Sontalak",
     "zone": "Western Wastes",
     "name": "Sontalak's Talisman"
+  },
+  "32605": {
+    "mob": "A_Deadly_Warboar",
+    "zone": "Plane of Time",
+    "name": "Ossein of Limitless Time"
   }
 }

@@ -4,18 +4,23 @@ Build a JSON file of the most recent 3 DKP prices per item, for items that exist
 in both magelo item_stats and Supabase raid_loot. Intended to be merged into
 magelo (e.g. data/dkp_prices.json) so item_stats can be augmented with DKP data.
 
+Elemental loot: raid_loot uses DKP purchase names (e.g. "Timeless Leather Tunic Pattern");
+the actual worn pieces are per-class (e.g. Ton Po's Chestguard). We load
+dkp_elemental_to_magelo.json (from DKP repo) and map each DKP name to all Magelo
+item_ids; DKP history is then attached to each of those IDs so the class_rankings
+upgrade finder shows DKP for elemental armor.
+
 Workflow:
-  1) Cross-reference: only consider items that appear in item_stats (by name).
-  2) Pull from Supabase: one paginated query for raid_loot, one for raids (to get dates).
-  3) Filter loot rows to item names that exist in item_stats; for each item_id take last 3 by date.
+  1) Cross-reference: item_stats name -> item_id; plus elemental DKP name -> [magelo_item_ids].
+  2) Pull from Supabase: raid_loot, raids (dates).
+  3) For each loot row: match by name (or elemental map); attach (date, cost) to resolved id(s).
   4) Write JSON: { "item_id": { "dkp_prices": [ {"cost": N, "date": "YYYY-MM-DD"}, ... ] }, ... }
 
 Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY if RLS allows read).
-  export SUPABASE_URL=https://xxx.supabase.co
-  export SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
 Usage:
   python scripts/build_dkp_prices_json.py [--item-stats data/item_stats.json] [--out data/dkp_prices.json]
+  python scripts/build_dkp_prices_json.py [--elemental-json ../dkp/dkp_elemental_to_magelo.json]
 """
 
 from __future__ import annotations
@@ -26,13 +31,53 @@ import os
 import sys
 from collections import defaultdict
 from pathlib import Path
+import re
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_ITEM_STATS = REPO_ROOT / "data" / "item_stats.json"
 DEFAULT_OUT = REPO_ROOT / "data" / "dkp_prices.json"
+# DKP repo (sibling of magelo) has the canonical elemental mapping
+DEFAULT_ELEMENTAL_JSON = REPO_ROOT.parent / "dkp" / "dkp_elemental_to_magelo.json"
 PAGE_SIZE = 1000
 LAST_N_PRICES = 3
+
+
+def normalize_item_name_for_lookup(name: str) -> str:
+    """Match DKP assign_loot / frontend: lowercase, strip, collapse spaces, remove apostrophes, hyphen->space."""
+    if not name or not isinstance(name, str):
+        return ""
+    s = name.strip()
+    for c in ("'", "'", "`", "\u2019", "\u2018"):
+        s = s.replace(c, "")
+    s = s.replace("-", " ")
+    s = " ".join(re.split(r"\s+", s.lower()))
+    return s
+
+
+def load_elemental_dkp_name_to_magelo_ids(path: Path) -> dict[str, list[str]]:
+    """
+    Load dkp_elemental_to_magelo.json and return normalized DKP purchase name -> list of Magelo item_ids.
+    So raid_loot rows with item_name "Timeless Leather Tunic Pattern" get (date, cost) attached to
+    each of 32131, 32139, 32136 etc.
+    """
+    out: dict[str, list[str]] = {}
+    if not path.is_file():
+        return out
+    data = json.loads(path.read_text(encoding="utf-8"))
+    purchases = data.get("dkp_purchases") or {}
+    for _dkp_id, entry in purchases.items():
+        if not isinstance(entry, dict):
+            continue
+        name = (entry.get("name") or "").strip()
+        if not name:
+            continue
+        norm = normalize_item_name_for_lookup(name)
+        by_class = entry.get("magelo_item_ids_by_class") or {}
+        ids = list({str(v).strip() for v in by_class.values() if v})
+        if ids:
+            out[norm] = ids
+    return out
 
 
 def load_item_stats(path: Path) -> dict:
@@ -43,8 +88,8 @@ def load_item_stats(path: Path) -> dict:
 
 def build_name_to_item_id(item_stats: dict) -> dict[str, str]:
     """
-    Build normalized (lowercase, stripped) item name -> item_id.
-    Only one id per name; if duplicates we keep the first.
+    Build normalized item name -> item_id from item_stats.
+    Uses same normalization as raid_loot lookup (apostrophe/hyphen) so names match.
     """
     out: dict[str, str] = {}
     for item_id, entry in item_stats.items():
@@ -53,7 +98,7 @@ def build_name_to_item_id(item_stats: dict) -> dict[str, str]:
         name = entry.get("name")
         if not name or not isinstance(name, str):
             continue
-        key = name.strip().lower()
+        key = normalize_item_name_for_lookup(name)
         if key and key not in out:
             out[key] = str(item_id)
     return out
@@ -98,6 +143,12 @@ def main() -> int:
         type=Path,
         default=DEFAULT_OUT,
         help="Output JSON path",
+    )
+    ap.add_argument(
+        "--elemental-json",
+        type=Path,
+        default=DEFAULT_ELEMENTAL_JSON,
+        help="Path to dkp_elemental_to_magelo.json (DKP repo) for elemental loot name -> magelo item_ids",
     )
     ap.add_argument(
         "--dry-run",
@@ -157,9 +208,12 @@ def main() -> int:
         print("Install supabase: pip install supabase", file=sys.stderr)
         return 1
 
-    # 1) Cross-reference: build name -> item_id from item_stats
+    # 1) Cross-reference: build name -> item_id from item_stats; load elemental DKP name -> [magelo_ids]
     item_stats = load_item_stats(args.item_stats)
     name_to_id = build_name_to_item_id(item_stats)
+    elemental_dkp_to_magelo = load_elemental_dkp_name_to_magelo_ids(args.elemental_json)
+    if elemental_dkp_to_magelo:
+        print(f"Elemental DKP names -> magelo ids: {len(elemental_dkp_to_magelo)} entries", file=sys.stderr)
     print(f"item_stats: {len(item_stats)} items, {len(name_to_id)} with names", file=sys.stderr)
 
     client = create_client(url, key)
@@ -201,16 +255,13 @@ def main() -> int:
                 raids_by_id[row["raid_id"]] = row
     print(f"Fetched {len(raids_by_id)} raid dates", file=sys.stderr)
 
-    # 3) Filter to items in item_stats; attach date and item_id
+    # 3) Filter to items in item_stats or elemental map; attach date and item_id(s)
     by_item_id: dict[str, list[tuple[str, int]]] = defaultdict(list)
     for row in loot_rows:
         item_name = row.get("item_name")
         if not item_name:
             continue
-        key = str(item_name).strip().lower()
-        item_id = name_to_id.get(key)
-        if not item_id:
-            continue
+        norm = normalize_item_name_for_lookup(str(item_name).strip())
         raid_id = row.get("raid_id")
         date_str = None
         if raid_id:
@@ -222,7 +273,16 @@ def main() -> int:
         cost = parse_cost(row.get("cost"))
         if cost is None:
             cost = 0
-        by_item_id[item_id].append((date_str, cost))
+
+        # Try item_stats name first; then elemental DKP name -> all magelo piece ids
+        item_id = name_to_id.get(norm)
+        if item_id:
+            by_item_id[item_id].append((date_str, cost))
+        else:
+            magelo_ids = elemental_dkp_to_magelo.get(norm)
+            if magelo_ids:
+                for mid in magelo_ids:
+                    by_item_id[mid].append((date_str, cost))
 
     # 4) For each item_id: sort by date desc, take last 3
     result: dict[str, dict] = {}

@@ -168,14 +168,48 @@ def main() -> int:
         raid_path.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Wrote {raid_path}")
 
-    if args.write_name_to_id:
-        _write_name_to_id(raid_sources, OUT_NAME_TO_ID, dry_run=False)
+        if args.write_name_to_id:
+            _write_name_to_id(raid_sources, OUT_NAME_TO_ID, dry_run=False)
 
     return 0
 
 
+def _merge_elemental_dkp_into_name_to_id(name_to_id: dict[str, int]) -> None:
+    """Add DKP elemental purchase names -> first Magelo piece id from dkp_elemental_to_magelo.json."""
+    for path in [
+        SCRIPT_DIR.parent / "dkp" / "dkp_elemental_to_magelo.json",
+        SCRIPT_DIR / "dkp_elemental_to_magelo.json",
+    ]:
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        purchases = data.get("dkp_purchases") or {}
+        for _dkp_id, entry in purchases.items():
+            if not isinstance(entry, dict):
+                continue
+            name = (entry.get("name") or "").strip()
+            if not name:
+                continue
+            norm = normalize_name(name)
+            if not norm or norm in name_to_id:
+                continue
+            by_class = entry.get("magelo_item_ids_by_class") or {}
+            ids = [v for v in by_class.values() if v]
+            if not ids:
+                continue
+            try:
+                name_to_id[norm] = int(ids[0])
+            except (ValueError, TypeError):
+                pass
+        return
+
+
 def _write_name_to_id(raid_sources: dict, out_path: Path, *, dry_run: bool) -> None:
-    """Build normalized name -> item_id from raid_sources and write JSON (or print if dry_run)."""
+    """Build normalized name -> item_id from raid_sources and write JSON (or print if dry_run).
+    Also merges elemental DKP purchase names from dkp_elemental_to_magelo.json."""
     name_to_id: dict[str, int] = {}
     for sid, ent in raid_sources.items():
         try:
@@ -188,6 +222,7 @@ def _write_name_to_id(raid_sources: dict, out_path: Path, *, dry_run: bool) -> N
         norm = normalize_name(name)
         if norm and norm not in name_to_id:
             name_to_id[norm] = iid
+    _merge_elemental_dkp_into_name_to_id(name_to_id)
     # JSON keys must be strings
     out_obj = {k: v for k, v in name_to_id.items()}
     if dry_run:

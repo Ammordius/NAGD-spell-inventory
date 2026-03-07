@@ -371,7 +371,9 @@ def _load_item_stats_full():
 
 def load_item_stats_name_to_id():
     """Load data/item_stats.json and data/item_name_to_id.json; return normalized item name -> item_id (str).
-    Used to backfill missing item_id in inventory. item_name_to_id.json has full raid/DKP loot so more items resolve."""
+    Used to backfill missing item_id in inventory. item_name_to_id.json has full raid/DKP loot so more items resolve.
+    Also merges elemental DKP purchase names from dkp_elemental_to_magelo.json so names like Timeless Leather Tunic
+    Pattern map to a Magelo piece id."""
     base_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else '.'
     name_to_id = {}
     for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
@@ -397,7 +399,37 @@ def load_item_stats_name_to_id():
             break
         except (FileNotFoundError, json.JSONDecodeError, ValueError):
             continue
+    # Elemental loot: DKP purchase names -> one Magelo piece id (from dkp_elemental_to_magelo.json)
+    _merge_elemental_dkp_names_into_name_to_id(name_to_id, base_dir)
     return name_to_id
+
+
+def _merge_elemental_dkp_names_into_name_to_id(name_to_id, base_dir):
+    """Load dkp_elemental_to_magelo.json and add normalized DKP purchase name -> first magelo item_id."""
+    for rel in ['../dkp/dkp_elemental_to_magelo.json', 'dkp_elemental_to_magelo.json',
+                os.path.join(os.path.dirname(base_dir), 'dkp', 'dkp_elemental_to_magelo.json')]:
+        path = os.path.join(base_dir, rel) if not os.path.isabs(rel) else rel
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            purchases = data.get('dkp_purchases') or {}
+            for _dkp_id, entry in (purchases or {}).items():
+                if not isinstance(entry, dict):
+                    continue
+                name = (entry.get('name') or '').strip()
+                if not name:
+                    continue
+                norm = normalize_item_name(name)
+                if not norm:
+                    continue
+                by_class = entry.get('magelo_item_ids_by_class') or {}
+                ids = [str(v).strip() for v in by_class.values() if v]
+                if not ids or norm in name_to_id:
+                    continue
+                name_to_id[norm] = ids[0]
+            return
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
 
 
 def get_all_focus_candidates(focii_data, item_stats_lookup=None):
