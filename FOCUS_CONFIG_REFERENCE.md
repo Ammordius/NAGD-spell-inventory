@@ -28,6 +28,17 @@ So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **bot
 
 ---
 
+## Enhancement Spell Haste (buff-casting only; default weight 0)
+
+**Enhancement Haste** (e.g. Enhancement Haste III) applies **only to casting buffs**, not general beneficial spell haste. It is a separate category so items like Yttrium Studded Veil are tracked correctly.
+
+- **Category in map:** `SPELL_HASTE_CATEGORY_MAP`: `'Enhancement Haste': 'Enhancement'` (tiered names like "Enhancement Haste III" normalize to base).
+- **Scoring:** Effective value = `max(Enhancement, Bene, All)` so All and Beneficial haste also grant this category; specific Enhancement Haste can be higher. Best = `max(best_haste['Enhancement'], best_haste['Bene'], best_haste['All'])`.
+- **Weights:** By default **not weighted** (not in `CLASS_WEIGHTS.focus` for any class); add to a class's focus dict to weight it.
+- **Display key:** `Enhancement Spell Haste`.
+
+---
+
 ## CLASS_FOCUS_PRIORITIES (order for focus_overall_pct)
 
 | Class       | Priorities (first = highest weight in average) |
@@ -71,7 +82,7 @@ Spell Damage uses the same subcategory system: each class lists only the subcate
 ## Category maps (which focus names → Bene/Det/All/etc.)
 
 - **Spell Mana Efficiency:** `SPELL_MANA_EFFICIENCY_CATEGORY_MAP` ~line 248 (Det, Bene, Nuke, Sanguine). Sanguine = self-only; weight 0 for most classes.
-- **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 276 (Det, Bene, Affliction, All). **Speeding Thought** = `'All'` (18% spell haste all; counts for both Bene and Det). Add `'Focus Name': 'All'` to have a focus count for both Beneficial and Detrimental.
+- **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 276 (Det, Bene, Affliction, All, **Enhancement**). **Speeding Thought** = `'All'` (18% spell haste all). **Enhancement Haste** = `'Enhancement'` (buff-casting only; default weight 0). Add `'Focus Name': 'All'` to have a focus count for both Beneficial and Detrimental.
 - **Spell Duration:** Buff/Detrimental/All Spell Duration; “All Spell Duration” is tracked as `All` and counts for both Buff (Bene) and Detrimental (Det) in scoring.
 - **Spell Mana Efficiency weights per class:** `SPELL_MANA_EFFICIENCY_WEIGHTS` ~line 311 (e.g. Enchanter Det 1.0, Bene 0.25).
 - **Pet Power:** Item-based focus for Magician (3.0), Beastlord (3.0), Necromancer (2.0). Items: 28144 = 20%, 20508 = 25%. Checked from **full inventory (including bags)** so swap-in is counted. See `PET_POWER_ITEMS` and `get_char_pet_power()`.

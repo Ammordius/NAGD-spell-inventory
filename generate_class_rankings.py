@@ -316,6 +316,8 @@ def get_focus_sources(char_inventory, focus_lookup):
                 elif sub == 'All':
                     add_source('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
                     add_source('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
+                elif sub == 'Enhancement':
+                    add_source('Enhancement Spell Haste', pct, item_name, slot_id, item_id)
                 else:
                     add_source('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
             elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
@@ -433,6 +435,8 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 candidates['Beneficial Spell Haste'].append(entry)
                 candidates['Detrimental Spell Haste'].append(entry)
                 continue
+            elif sub == 'Enhancement':
+                key = 'Enhancement Spell Haste'
             else:
                 key = 'Beneficial Spell Haste'
             candidates[key].append(entry)
@@ -578,9 +582,10 @@ SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
     # 'Mana Preservation': 'All',  # if generic preservation applies to all
 }
 
-# Map Spell Haste focii to categories (detrimental, beneficial, Affliction, or All).
+# Map Spell Haste focii to categories (detrimental, beneficial, Affliction, All, or Enhancement).
 # Det = general detrimental (nukes, debuffs); Affliction = DoT/debuff-only haste (33% cap, useless for Wiz/Mag).
-# Scoring uses max(Bene, All) and max(Det, All); Focus Affliction Haste uses max(Affliction, Det, All) with its own weight.
+# Enhancement = buff-casting-only (e.g. Enhancement Haste III); not general beneficial. All and Bene also grant this category.
+# Scoring uses max(Bene, All) and max(Det, All); Enhancement Spell Haste uses max(Enhancement, Bene, All); default weight 0.
 SPELL_HASTE_CATEGORY_MAP = {
     # Detrimental haste (general: nukes + debuffs)
     'Haste of Solusek': 'Det',
@@ -589,8 +594,10 @@ SPELL_HASTE_CATEGORY_MAP = {
     # Affliction haste (DoT/debuff only, 33% cap; does not affect nukes — useless for Wizard/Magician)
     'Affliction Haste': 'Affliction',
 
-    # Beneficial haste
-    'Enhancement Haste': 'Bene',
+    # Enhancement haste: buff-casting only (not general beneficial); tiered e.g. Enhancement Haste III
+    'Enhancement Haste': 'Enhancement',
+
+    # Beneficial haste (general)
     'Reanimation Haste': 'Bene',
     'Summoning Haste': 'Bene',
     'Haste of Mithaniel': 'Bene',  # Paladin beneficial
@@ -1214,6 +1221,11 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
             best_aff = max(best_haste_by_cat.get('Affliction', 0), best_haste_by_cat.get('Det', 0), best_haste_by_cat.get('All', 0)) or best_focii.get('Spell Haste', 33.0)
             eff_aff = max(char_spell_haste_cats.get('Affliction', 0), char_spell_haste_cats.get('Det', 0), char_spell_haste_cats.get('All', 0))
             focus_scores['Focus Affliction Haste'] = (eff_aff / best_aff * 100) if best_aff > 0 and eff_aff > 0 else 0
+
+            # Enhancement Spell Haste: buff-casting only (e.g. Enhancement Haste III); not general beneficial. All and Bene grant it too; default weight 0.
+            best_enh = max(best_haste_by_cat.get('Enhancement', 0), best_haste_by_cat.get('Bene', 0), best_haste_by_cat.get('All', 0)) or best_focii.get('Spell Haste', 33.0)
+            eff_enh = max(char_spell_haste_cats.get('Enhancement', 0), char_spell_haste_cats.get('Bene', 0), char_spell_haste_cats.get('All', 0))
+            focus_scores['Enhancement Spell Haste'] = (eff_enh / best_enh * 100) if best_enh > 0 and eff_enh > 0 else 0
         
         # Add haste binary check for all ATK classes (mnk, rog, war, pal, shd, bst, brd, rng)
         # Binary: 30% item haste (70% buff + 30% item = 100% total) = 100%, otherwise 0%
