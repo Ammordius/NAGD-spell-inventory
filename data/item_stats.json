@@ -76778,5 +76778,113 @@
     "classes": "ALL",
     "gearScore": 25,
     "name": "TAKP AllaClone  :: Ring of Thunderous Spirits"
+  },
+  "19719": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FINGERS",
+    "ac": 8,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "WIS",
+        "value": 4
+      },
+      {
+        "label": "INT",
+        "value": 4
+      },
+      {
+        "label": "HP",
+        "value": 80
+      },
+      {
+        "label": "MANA",
+        "value": 65
+      }
+    ],
+    "effectSpellId": 2359,
+    "effectSpellName": "Enhancement Haste III",
+    "effectNote": "",
+    "focusSpellId": 2359,
+    "focusSpellName": "Enhancement Haste III",
+    "weight": 0.1,
+    "size": "TINY",
+    "classes": "ALL",
+    "gearScore": 34,
+    "name": "TAKP AllaClone  :: Ring of the Shissar"
+  },
+  "30553": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FACE",
+    "ac": 18,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "AGI",
+        "value": 10
+      },
+      {
+        "label": "WIS",
+        "value": 12
+      },
+      {
+        "label": "INT",
+        "value": 12
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 12
+      },
+      {
+        "label": "Cold",
+        "value": 12
+      },
+      {
+        "label": "Magic",
+        "value": 12
+      },
+      {
+        "label": "Poison",
+        "value": 12
+      },
+      {
+        "label": "Disease",
+        "value": 12
+      }
+    ],
+    "requiredLevel": 55,
+    "levelType": "required",
+    "effectSpellId": 1301,
+    "effectSpellName": "Flowing Thought IV",
+    "effectNote": "",
+    "weight": 1.0,
+    "size": "SMALL",
+    "classes": "CLR DRU SHM NEC WIZ MAG ENC",
+    "gearScore": 111,
+    "name": "TAKP AllaClone  :: Yttrium Studded Veil"
   }
 }
