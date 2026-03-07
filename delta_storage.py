@@ -679,14 +679,26 @@ def list_available_delta_dates(base_dir='delta_snapshots'):
 
 def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta_snapshots'):
     """Compute AA/HP gains from start_date to end_date using daily delta JSONs (same data as delta-history).
+    Only includes characters present in BOTH start and end deltas (excludes anon flip / visibility change).
     Returns dict char_name -> {aa_gain, hp_gain, class, level} or None if either delta is missing."""
     delta_start = load_daily_delta_json(start_date, base_dir)
     delta_end = load_daily_delta_json(end_date, base_dir)
     if not delta_start or not delta_end:
         return None
+    # Only consider characters present in both snapshots (same rule as delta-history / general visibility)
+    start_chars = set(delta_start.get('char_deltas', {}).keys())
+    end_chars = set(delta_end.get('char_deltas', {}).keys())
+    chars_in_both = start_chars & end_chars
+    # Exclude anyone deleted in end delta
+    end_deltas = delta_end.get('char_deltas', {})
+    for char_name in list(chars_in_both):
+        if end_deltas.get(char_name, {}).get('is_deleted'):
+            chars_in_both.discard(char_name)
     result = compare_delta_to_delta(delta_start, delta_end)
     totals = {}
     for char_name, delta in result.get('char_deltas', {}).items():
+        if char_name not in chars_in_both:
+            continue
         if delta.get('is_deleted') or delta.get('is_new'):
             continue
         aa = delta.get('aa_total_change', 0)

@@ -1765,17 +1765,23 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         save_mob_deaths_from_delta(zone_entries, mob_tracker_deaths_path, observed_at=observed_at,
                                    raid_item_sources_path=raid_item_sources_path)
     
-    # Characters to exclude from AA/HP leaderboards (anon ↔ not-anon: from inv or from char stats 0 vs large AA; plus corpse-loot chars)
+    # Leaderboards: only consider characters present in BOTH snapshots (explicit presence), minus corpse-loot
+    chars_in_both = set(current_char_data.keys()) & set(previous_char_data.keys())
+    chars_eligible_leaderboard = chars_in_both - corpse_loot_chars
+    
+    # For display: still compute visibility-change set (anon ↔ not-anon) for character table and visibility note
     visibility_change_chars = {name for name, inv_d in inv_deltas.items() if inv_d.get('is_visibility_change')}
     for name, char_d in char_deltas.items():
         if char_d.get('is_visibility_change'):
             visibility_change_chars.add(name)
     visibility_change_chars |= corpse_loot_chars
     
-    # Calculate AA leaderboard (top gainers); exclude new/deleted and inv-based visibility change
+    # Calculate AA leaderboard (top gainers); only chars present in both snapshots, exclude new/deleted and corpse-loot
     aa_leaderboard = []
     for char_name, delta in char_deltas.items():
-        if delta.get('is_deleted', False) or delta.get('is_new', False) or char_name in visibility_change_chars:
+        if char_name not in chars_eligible_leaderboard:
+            continue
+        if delta.get('is_deleted', False) or delta.get('is_new', False):
             continue
         current_level = delta['current_level']
         previous_level = delta['previous_level']
@@ -1795,10 +1801,12 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     aa_leaderboard.sort(key=lambda x: x['aa_gain'], reverse=True)
     aa_leaderboard = aa_leaderboard[:20]
     
-    # Calculate HP leaderboard (top gainers)
+    # Calculate HP leaderboard (top gainers); only chars present in both snapshots
     hp_leaderboard = []
     for char_name, delta in char_deltas.items():
-        if delta.get('is_deleted', False) or delta.get('is_new', False) or char_name in visibility_change_chars:
+        if char_name not in chars_eligible_leaderboard:
+            continue
+        if delta.get('is_deleted', False) or delta.get('is_new', False):
             continue
         current_level = delta['current_level']
         hp_gain = delta['hp_change']
@@ -3359,6 +3367,8 @@ def generate_delta_history(base_dir):
                 const visTracked = sortedTracked.filter(c => trackedDeltas[c] && trackedDeltas[c].is_visibility_change === true);
                 const nonVisTracked = sortedTracked.filter(c => !trackedDeltas[c] || trackedDeltas[c].is_visibility_change !== true);
                 const allVisNames = [...new Set([...visLevel1, ...visOthers, ...visTracked])].sort();
+                // Leaderboards: only consider characters present in BOTH start and end state (explicit presence)
+                const charsInBoth = new Set(Object.keys(startState).filter(c => c in endState));
                 reportHTML += `<p style="margin: 10px 0;">${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}
                     <a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
                     <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
@@ -3414,7 +3424,7 @@ def generate_delta_history(base_dir):
                 
                 for (const [charName, changes] of Object.entries(charChanges)) {
                     if (changes.is_deleted || changes.is_new) continue;
-                    if (allVisNames.includes(charName)) continue;
+                    if (!charsInBoth.has(charName)) continue;
                     
                     const currentLevel = changes.current_level;
                     const previousLevel = changes.previous_level;
@@ -3550,7 +3560,7 @@ def generate_delta_history(base_dir):
                     const sortedCharNames = Object.keys(charChanges).sort();
                     for (const charName of sortedCharNames) {
                         const changes = charChanges[charName];
-                        if (allVisNames.includes(charName)) continue;
+                        if (!charsInBoth.has(charName)) continue;
                         const isDeleted = changes.is_deleted;
                         const isNew = changes.is_new;
                         const currentLevel = changes.current_level;
