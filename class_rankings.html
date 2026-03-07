@@ -575,6 +575,49 @@
                 (ac / scale.ac) * (norm.ac_pct || 0) + resistContrib;
         }
 
+        /** Extract raw HP, mana, AC, and total saves (MR+FR+CR+DR+PR) from item stats for delta display. */
+        function getItemRawStats(stats) {
+            if (!stats) return { hp: 0, mana: 0, ac: 0, svAll: 0 };
+            const mods = stats.mods || [];
+            let hp = 0, mana = 0;
+            mods.forEach(m => {
+                if ((m.label || '').toUpperCase() === 'HP') hp += Number(m.value) || 0;
+                if ((m.label || '').toUpperCase() === 'MANA') mana += Number(m.value) || 0;
+            });
+            const ac = Number(stats.ac) || 0;
+            let svAll = 0;
+            (stats.resists || []).forEach(r => {
+                const label = (r.label || '').toLowerCase();
+                if (['magic', 'fire', 'cold', 'poison', 'disease'].includes(label))
+                    svAll += Number(r.value) || 0;
+            });
+            return { hp, mana, ac, svAll };
+        }
+
+        /** Deltas (candidate minus current) for HP, mana, AC, and total saves. If currentStats is null, returns candidate's raw stats. */
+        function getItemStatDeltas(currentStats, candidateStats) {
+            const cur = getItemRawStats(currentStats);
+            const cand = getItemRawStats(candidateStats);
+            return {
+                hpDelta: cand.hp - cur.hp,
+                manaDelta: cand.mana - cur.mana,
+                acDelta: cand.ac - cur.ac,
+                svAllDelta: cand.svAll - cur.svAll
+            };
+        }
+
+        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +8 sv all  · Focus: Spell Haste III". */
+        function formatUpgradeDeltas(deltas, focusSpellName) {
+            const parts = [];
+            if (deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
+            if (deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
+            if (deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
+            if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv all');
+            let text = parts.join('  ');
+            if (focusSpellName && focusSpellName.trim()) text += (text ? '  · ' : '') + 'Focus: ' + focusSpellName.trim();
+            return text || '';
+        }
+
         /** Focus score for one item: sum over (value/100)*weight for each focus the item provides. */
         function getFocusScoreForItem(itemId, focusWeights, focusValuesByItem) {
             const vals = focusValuesByItem[itemId];
@@ -635,9 +678,11 @@
                 const currentItemName = inv.item_name || (currentItemId ? `Item ${currentItemId}` : '');
                 let currentScore = 0;
                 let currentInData = false;
-                if (currentItemId != null && !isNaN(currentItemId) && itemStatsCache[currentItemId]) {
+                const currentStats = (currentItemId != null && !isNaN(currentItemId) && itemStatsCache[currentItemId])
+                    ? itemStatsCache[currentItemId] : null;
+                if (currentStats) {
                     currentInData = true;
-                    currentScore = scoreItemForUpgrade(itemStatsCache[currentItemId], currentItemId, norm, focusWeights, focusValuesByItem);
+                    currentScore = scoreItemForUpgrade(currentStats, currentItemId, norm, focusWeights, focusValuesByItem);
                 } else {
                     anyMissing = true;
                 }
@@ -650,7 +695,16 @@
                     if (!itemUsableByClass(stats.classes, classAbbrev)) continue;
                     const score = scoreItemForUpgrade(stats, id, norm, focusWeights, focusValuesByItem);
                     if (score <= currentScore) continue;
-                    candidates.push({ itemId: id, itemName: stats.name || `Item ${id}`, score, delta: score - currentScore });
+                    const deltas = getItemStatDeltas(currentStats, stats);
+                    const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
+                    candidates.push({
+                        itemId: id,
+                        itemName: stats.name || `Item ${id}`,
+                        score,
+                        delta: score - currentScore,
+                        deltas,
+                        focusSpellName
+                    });
                 }
                 candidates.sort((a, b) => b.delta - a.delta);
                 const upgrades = candidates.slice(0, 5);
@@ -2504,7 +2558,10 @@
                     section += `<div style="margin-bottom: 14px;"><strong>${escapeHtml(slotName)}</strong> (current: ${escapeHtml(currentItemName)}${!currentInData ? ' <em>— not in database</em>' : ''})<ul style="margin: 4px 0 0 18px; padding: 0;">`;
                     upgrades.forEach(u => {
                         const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${u.itemId}" target="_blank" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}">${escapeHtml(u.itemName || `Item ${u.itemId}`)}</a>`;
-                        section += `<li>${link} <span style="color: #28a745;">+${u.delta.toFixed(2)}</span></li>`;
+                        const deltaStr = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                        const detail = deltaStr ? ` <span style="color: #28a745;">${escapeHtml(deltaStr)}</span>` : '';
+                        const scoreNote = ` <span style="color: #6c757d; font-size: 0.9em;">(score +${(u.delta || 0).toFixed(2)})</span>`;
+                        section += `<li>${link}${detail}${scoreNote}</li>`;
                     });
                     section += `</ul></div>`;
                 });
