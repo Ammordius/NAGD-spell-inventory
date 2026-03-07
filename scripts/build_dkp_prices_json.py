@@ -279,24 +279,21 @@ def main() -> int:
         if cost is None:
             cost = 0
 
-        # Try item_stats name first; then elemental DKP name -> all magelo piece ids; then numeric id (magelo or dkp purchase)
+        # Try item_stats name first; then exact elemental DKP name -> all magelo piece ids; then numeric id (DKP purchase id -> bridge to Magelo ids, or Magelo id directly)
         item_id = name_to_id.get(norm)
         if item_id:
             by_item_id[item_id].append((date_str, cost))
-        else:
-            magelo_ids = elemental_dkp_to_magelo.get(norm)
-            if magelo_ids:
-                for mid in magelo_ids:
+        elif norm in elemental_dkp_to_magelo:
+            for mid in elemental_dkp_to_magelo[norm]:
+                by_item_id[mid].append((date_str, cost))
+        elif norm.isdigit():
+            # raid_loot may store item_name as number: DKP purchase id (e.g. "16373") -> bridge to all Magelo ids; or Magelo piece id (e.g. "16693") -> that id. Stats come from Raex/Magelo; DKP uses its own ids, hence the bridge.
+            num_id = norm
+            if num_id in elemental_dkp_id_to_magelo_ids:
+                for mid in elemental_dkp_id_to_magelo_ids[num_id]:
                     by_item_id[mid].append((date_str, cost))
-            else:
-                # raid_loot may store item_name as numeric id: magelo piece id (e.g. "16693") or dkp purchase id (e.g. "16373")
-                if norm.isdigit():
-                    num_id = norm
-                    if num_id in elemental_all_magelo_ids:
-                        by_item_id[num_id].append((date_str, cost))
-                    elif num_id in elemental_dkp_id_to_magelo_ids:
-                        for mid in elemental_dkp_id_to_magelo_ids[num_id]:
-                            by_item_id[mid].append((date_str, cost))
+            elif num_id in elemental_all_magelo_ids:
+                by_item_id[num_id].append((date_str, cost))
 
     # 4) For each item_id: sort by date desc, take last 3
     result: dict[str, dict] = {}
