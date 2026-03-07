@@ -76728,5 +76728,55 @@
     "classes": "ALL",
     "gearScore": 45,
     "name": "TAKP AllaClone  :: Bloodmetal Earring of Engagement"
+  },
+  "21495": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM"
+    ],
+    "mods": [
+      {
+        "label": "STR",
+        "value": 3
+      },
+      {
+        "label": "AGI",
+        "value": 3
+      },
+      {
+        "label": "DEX",
+        "value": 3
+      },
+      {
+        "label": "WIS",
+        "value": 3
+      },
+      {
+        "label": "INT",
+        "value": 3
+      },
+      {
+        "label": "CHA",
+        "value": 3
+      },
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 75
+      }
+    ],
+    "requiredLevel": 56,
+    "levelType": "recommended",
+    "effectSpellId": 1975,
+    "effectSpellName": "Thorny Shield",
+    "effectNote": "",
+    "weight": 0.5,
+    "size": "TINY",
+    "classes": "ALL",
+    "gearScore": 25,
+    "name": "TAKP AllaClone  :: Ring of Thunderous Spirits"
   }
 }
