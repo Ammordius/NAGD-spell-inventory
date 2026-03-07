@@ -70011,5 +70011,126 @@
   "86930": {
     "gearScore": 0,
     "name": "Item 86930"
+  },
+  "1200": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "SHOULDERS",
+    "ac": 8,
+    "mods": [
+      {"label": "STA", "value": 8},
+      {"label": "CHA", "value": 8},
+      {"label": "WIS", "value": 8},
+      {"label": "INT", "value": 8},
+      {"label": "HP", "value": 50},
+      {"label": "MANA", "value": 50}
+    ],
+    "resists": [
+      {"label": "Fire", "value": 8},
+      {"label": "Disease", "value": 8},
+      {"label": "Cold", "value": 8},
+      {"label": "Magic", "value": 8},
+      {"label": "Poison", "value": 8}
+    ],
+    "effectSpellId": 1300,
+    "effectSpellName": "Flowing Thought III",
+    "effectNote": "",
+    "focusSpellId": 2305,
+    "focusSpellName": "Zephyr of Brell",
+    "weight": 2.0,
+    "size": "SMALL",
+    "classes": "ALL",
+    "races": "ALL",
+    "light": 5,
+    "name": "Blessed Coldain Prayer Shawl"
+  },
+  "31461": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "WRIST",
+    "ac": 38,
+    "mods": [
+      {"label": "STR", "value": 10},
+      {"label": "STA", "value": 10},
+      {"label": "WIS", "value": 10},
+      {"label": "INT", "value": 10},
+      {"label": "HP", "value": 100}
+    ],
+    "resists": [
+      {"label": "Fire", "value": 5},
+      {"label": "Disease", "value": 5},
+      {"label": "Cold", "value": 5},
+      {"label": "Magic", "value": 5},
+      {"label": "Poison", "value": 5}
+    ],
+    "effectSpellId": 998,
+    "effectSpellName": "Haste",
+    "effectNote": "(Worn) (41%)",
+    "weight": 0.0,
+    "size": "TINY",
+    "classes": "ALL",
+    "races": "ALL",
+    "name": "Silver Bracelet of Speed"
+  },
+  "31464": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "FACE",
+    "ac": 25,
+    "mods": [
+      {"label": "STR", "value": 12},
+      {"label": "DEX", "value": 12},
+      {"label": "STA", "value": 12},
+      {"label": "HP", "value": 80}
+    ],
+    "resists": [
+      {"label": "Fire", "value": 7},
+      {"label": "Disease", "value": 7},
+      {"label": "Cold", "value": 7},
+      {"label": "Magic", "value": 7},
+      {"label": "Poison", "value": 7}
+    ],
+    "effectSpellId": 1499,
+    "effectSpellName": "Aura of Battle",
+    "effectNote": "(Worn) (Lvl: 0)",
+    "weight": 0.0,
+    "size": "TINY",
+    "classes": "WAR PAL RNG SHD MNK BRD ROG",
+    "races": "ALL",
+    "name": "Silver Mask of the Slayer"
+  },
+  "31472": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "SHOULDERS",
+    "ac": 35,
+    "mods": [
+      {"label": "STA", "value": 15},
+      {"label": "HP", "value": 100}
+    ],
+    "resists": [
+      {"label": "Fire", "value": 20},
+      {"label": "Disease", "value": 20},
+      {"label": "Cold", "value": 20},
+      {"label": "Magic", "value": 20},
+      {"label": "Poison", "value": 20}
+    ],
+    "weight": 0.5,
+    "size": "TINY",
+    "classes": "WAR PAL RNG SHD MNK BRD ROG BST",
+    "races": "ALL",
+    "name": "Pauldrons of the Deep Flame"
   }
 }

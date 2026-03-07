@@ -159,6 +159,10 @@ def get_best_focii_by_subcategory(focii_data):
                 pct = eff.get('percentage', 0)
                 if pct > best_mana[sub]:
                     best_mana[sub] = pct
+            elif eff.get('category') == 'Buff Spell Duration':
+                pct = eff.get('percentage', 0)
+                if pct > best_duration['Bene']:
+                    best_duration['Bene'] = pct
     return dict(best_mana), dict(best_haste), dict(best_duration)
 
 # Analyze character gear for focii
@@ -417,6 +421,11 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 if item_id in item_stats_lookup:
                     entry['classes'] = item_stats_lookup[item_id]
                 candidates[key].append(entry)
+            elif eff['category'] == 'Buff Spell Duration':
+                entry = {'item_name': item_name, 'item_id': item_id, 'value': eff['percentage']}
+                if item_id in item_stats_lookup:
+                    entry['classes'] = item_stats_lookup[item_id]
+                candidates['Buff Spell Duration'].append(entry)
     # Dedupe by item_id per key (keep highest value)
     result = {}
     for key, items in candidates.items():
@@ -676,15 +685,18 @@ PET_POWER_ITEM_NAMES = {
 # Item-based Spell Mana Efficiency overrides (not in spell_focii JSON). item_id -> list of {name, category, percentage}.
 # Conservation of Bertoxxulous: 30% mana efficiency on long duration debuffs (item 5594 Earring of Temporal Solstice).
 # Conservation of Xegony: 20% general mana preservation (items 26996 Gloves of the Unseen, 7769 Talisman of the Elements).
+# Blessed Coldain Prayer Shawl (1200): Zephyr of Brell 20% beneficial spell duration.
 ITEM_FOCUS_OVERRIDES = {
     '5594': [{'name': 'Conservation of Bertoxxulous', 'category': 'Spell Mana Efficiency', 'percentage': 30}],
     '26996': [{'name': 'Conservation of Xegony', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
     '7769': [{'name': 'Conservation of Xegony', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
+    '1200': [{'name': 'Zephyr of Brell', 'category': 'Buff Spell Duration', 'percentage': 20}],
 }
 ITEM_FOCUS_OVERRIDE_NAMES = {
     '5594': 'Earring of Temporal Solstice',
     '26996': 'Gloves of the Unseen',
     '7769': 'Talisman of the Elements',
+    '1200': 'Blessed Coldain Prayer Shawl',
 }
 
 def get_char_pet_power(char_inventory):
