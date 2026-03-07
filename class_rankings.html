@@ -320,6 +320,49 @@
             from { opacity: 0; transform: translateY(-4px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Toon upgrades panel: horizontal strip of upgrade cards */
+        .toon-upgrade-strip {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 8px 0 16px;
+            align-items: flex-start;
+        }
+        .toon-upgrade-card {
+            flex: 0 0 auto;
+            min-width: 280px;
+            max-width: 320px;
+            padding: 12px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .toon-upgrade-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+        }
+        .toon-upgrade-card .card-name { font-weight: 600; color: #667eea; margin-bottom: 6px; }
+        .toon-upgrade-card .card-deltas { color: #28a745; font-size: 0.9em; margin-bottom: 4px; }
+        .toon-upgrade-card .card-score { color: #6c757d; font-size: 0.85em; margin-bottom: 4px; }
+        .toon-upgrade-card .card-dkp { color: #17a2b8; font-size: 0.85em; }
+        .toon-upgrade-tab {
+            padding: 8px 14px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .toon-upgrade-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .toon-upgrade-tab:hover:not(.active) { background: #f8f9fa; }
     </style>
 </head>
 <body>
@@ -357,6 +400,11 @@
                 <button id="toggleWeights" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
                     Customize Weights
                 </button>
+            </div>
+            <div id="toonListSection" class="control-group" style="display: none;">
+                <label>Toon list:</label>
+                <input type="text" id="toonListInput" placeholder="e.g. tandiyen, ammo*, iaminae, ezram (* = wildcard)" style="padding: 8px 12px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px; min-width: 200px;">
+                <button id="showToonUpgrades" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 8px;">Gear upgrades across toons</button>
             </div>
         </div>
 
@@ -428,6 +476,35 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Gear upgrades across toons (dkp_val only): horizontal view with character tabs -->
+    <div id="toonUpgradesPanel" style="display: none; position: fixed; inset: 0; z-index: 900; background: #f8f9fa; overflow: auto;">
+        <div style="padding: 16px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="margin: 0; font-size: 1.25rem;">Gear upgrades across toons</h2>
+            <button id="closeToonUpgradesPanel" style="padding: 8px 16px; background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 6px; cursor: pointer;">Close</button>
+        </div>
+        <div style="padding: 12px 20px; background: #e9ecef; border-bottom: 1px solid #dee2e6;">
+            <div style="margin-bottom: 8px;"><label>Slot order:</label>
+                <select id="toonPanelSlotSort" style="margin-left: 8px; padding: 6px 10px;">
+                    <option value="value">Default + value</option>
+                    <option value="hp_dkp" selected>Sort by HP/DKP</option>
+                    <option value="max_upgrade">Sort by max upgrade</option>
+                </select>
+            </div>
+            <div id="toonUpgradesTabs" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+        </div>
+        <div id="toonUpgradesContent" style="padding: 16px 20px; min-height: 200px;">
+            <p style="color: #6c757d;">Select a character tab above.</p>
+        </div>
+    </div>
+
+    <!-- Item comparison: one item across selected toons (from toon upgrades view) -->
+    <div id="itemComparisonModal" class="modal" style="z-index: 950;">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close" id="closeItemComparison">&times;</span>
+            <div id="itemComparisonContent"></div>
         </div>
     </div>
 
@@ -2116,7 +2193,225 @@
             if (event.target == modal) {
                 modal.style.display = 'none';
             }
+            if (event.target === itemComparisonModal) {
+                itemComparisonModal.style.display = 'none';
+            }
         };
+
+        // --- Toon list + Gear upgrades across toons (dkp_val only) ---
+        const toonListSection = document.getElementById('toonListSection');
+        const toonUpgradesPanel = document.getElementById('toonUpgradesPanel');
+        const toonUpgradesTabs = document.getElementById('toonUpgradesTabs');
+        const toonUpgradesContent = document.getElementById('toonUpgradesContent');
+        const toonPanelSlotSort = document.getElementById('toonPanelSlotSort');
+        const itemComparisonModal = document.getElementById('itemComparisonModal');
+        const itemComparisonContent = document.getElementById('itemComparisonContent');
+        if (dkpValEnabled && toonListSection) toonListSection.style.display = 'flex';
+        const toonListInput = document.getElementById('toonListInput');
+        (function initToonListFromUrl() {
+            const p = new URLSearchParams(window.location.search);
+            const charParam = p.get('char');
+            if (dkpValEnabled && charParam && toonListInput) toonListInput.value = charParam.trim();
+        })();
+
+        function matchCharactersByToonList(listStr) {
+            if (!listStr || typeof listStr !== 'string') return [];
+            const patterns = listStr.split(',').map(s => s.trim()).filter(Boolean);
+            if (patterns.length === 0) return [];
+            const matched = [];
+            const seen = new Set();
+            const lower = (s) => (s || '').toLowerCase();
+            for (const pattern of patterns) {
+                const p = lower(pattern);
+                if (p.includes('*')) {
+                    const reStr = '^' + p.split(/\*+/).map(part => part.replace(/[\\^$.|?+()[\]{}]/g, '\\$&')).join('.*') + '$';
+                    let re;
+                    try { re = new RegExp(reStr, 'i'); } catch (_) { continue; }
+                    characters.filter(c => re.test((c.name || '').trim()) && !seen.has(c.name)).forEach(c => {
+                        seen.add(c.name);
+                        matched.push(c);
+                    });
+                } else {
+                    const char = characters.find(c => {
+                        const name = lower(c.name);
+                        return name === p || name.includes(p);
+                    });
+                    if (char && !seen.has(char.name)) {
+                        seen.add(char.name);
+                        matched.push(char);
+                    }
+                }
+            }
+            return matched;
+        }
+
+        function getHpPerDkpForUpgrade(u) {
+            const entry = dkpPricesCache[String(u.itemId)];
+            const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+            if (prices.length === 0) return null;
+            const avgDkp = prices.reduce((a, p) => a + p.cost, 0) / prices.length;
+            const hpDelta = (u.deltas && u.deltas.hpDelta != null) ? u.deltas.hpDelta : 0;
+            if (avgDkp <= 0 || hpDelta <= 0) return null;
+            return hpDelta / avgDkp;
+        }
+
+        let toonUpgradesMatchedChars = [];
+        let toonUpgradesSelectedIndex = 0;
+
+        function buildToonUpgradesHorizontalStrip(char, mode, minHpPerDkp) {
+            const getMaxPerSlot = () => Math.max(upgradesPerSlot, 25);
+            const upgradeData = computeUpgradesForCharacter(char, getMaxPerSlot());
+            const slotsWithUpgrades = (upgradeData.bySlot || []).map(slot => {
+                let upgrades = (slot.upgrades || []).slice();
+                if (mode === 'hp_dkp') {
+                    upgrades.sort((a, b) => (getHpPerDkpForUpgrade(b) ?? -Infinity) - (getHpPerDkpForUpgrade(a) ?? -Infinity));
+                } else {
+                    upgrades.sort((a, b) => (b.delta || 0) - (a.delta || 0));
+                }
+                if (minHpPerDkp != null && minHpPerDkp > 0)
+                    upgrades = upgrades.filter(u => (getHpPerDkpForUpgrade(u) ?? 0) >= minHpPerDkp);
+                upgrades = upgrades.slice(0, upgradesPerSlot);
+                const maxHpPerDkp = upgrades.length ? Math.max(...upgrades.map(u => getHpPerDkpForUpgrade(u)).filter(v => v != null), 0) : 0;
+                const maxDelta = upgrades.length ? Math.max(...upgrades.map(u => u.delta || 0), 0) : 0;
+                return { ...slot, upgrades, maxHpPerDkp, maxDelta };
+            }).filter(s => s.upgrades.length > 0);
+
+            if (mode === 'hp_dkp') slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
+            else if (mode === 'max_upgrade') slotsWithUpgrades.sort((a, b) => b.maxDelta - a.maxDelta);
+
+            const flat = [];
+            slotsWithUpgrades.forEach(s => s.upgrades.forEach(u => flat.push({ ...u, slotName: s.slotName, slotId: s.slotId })));
+            return flat;
+        }
+
+        function formatUpgradeDeltasShort(deltas, focusSpellName) {
+            const parts = [];
+            if (deltas && deltas.hpDelta != null && deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
+            if (deltas && deltas.manaDelta != null && deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
+            if (deltas && deltas.acDelta != null && deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
+            if (focusSpellName) parts.push('Focus: ' + focusSpellName);
+            return parts.join(' ');
+        }
+
+        function renderToonUpgradesStrip(char) {
+            if (!char) {
+                toonUpgradesContent.innerHTML = '<p style="color: #6c757d;">Select a character tab.</p>';
+                return;
+            }
+            const mode = (toonPanelSlotSort && toonPanelSlotSort.value) || dkpSlotSortMode;
+            const flat = buildToonUpgradesHorizontalStrip(char, mode, null);
+            let html = `<p style="margin-bottom: 12px; color: #495057;"><strong>${escapeHtml(char.name)}</strong> (${escapeHtml(char.class)}) — upgrades left to right by ${mode === 'hp_dkp' ? 'HP/DKP' : mode === 'max_upgrade' ? 'max upgrade' : 'value'}</p>`;
+            html += '<div class="toon-upgrade-strip" id="toonUpgradeStrip">';
+            flat.forEach(u => {
+                const entry = dkpPricesCache[String(u.itemId)];
+                const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+                const last3 = prices.map(p => p.cost);
+                const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
+                const hpPerDkp = getHpPerDkpForUpgrade(u);
+                const deltaStr = formatUpgradeDeltasShort(u.deltas || {}, u.focusSpellName);
+                const dkpStr = last3.length ? `Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '(no DKP)';
+                const hpDkpStr = hpPerDkp != null ? ` HP/DKP: ${hpPerDkp.toFixed(2)}` : '';
+                html += `<div class="toon-upgrade-card" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}" data-slot-name="${escapeHtml(u.slotName || '')}" data-slot-id="${u.slotId != null ? u.slotId : ''}" data-delta="${(u.delta || 0).toFixed(2)}" data-hp-dkp="${hpPerDkp != null ? hpPerDkp.toFixed(2) : ''}" data-char-name="${escapeHtml(char.name)}">
+  <div class="card-name">${escapeHtml(u.itemName || 'Item ' + u.itemId)}</div>
+  <div class="card-deltas">${escapeHtml(deltaStr || '—')}</div>
+  <div class="card-score">(score +${(u.delta || 0).toFixed(2)}) ${escapeHtml(u.slotName || '')}</div>
+  <div class="card-dkp">${dkpStr}${hpDkpStr}</div>
+</div>`;
+            });
+            html += '</div>';
+            toonUpgradesContent.innerHTML = flat.length ? html : '<p style="color: #6c757d;">No upgrades found.</p>';
+
+            toonUpgradesContent.querySelectorAll('.toon-upgrade-card').forEach(el => {
+                el.addEventListener('click', () => {
+                    const itemId = el.getAttribute('data-item-id');
+                    const itemName = el.getAttribute('data-item-name');
+                    const slotName = el.getAttribute('data-slot-name');
+                    const slotId = el.getAttribute('data-slot-id');
+                    const delta = el.getAttribute('data-delta');
+                    const hpDkp = el.getAttribute('data-hp-dkp');
+                    openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp);
+                });
+            });
+        }
+
+        function openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp) {
+            let html = `<h3 style="margin-top: 0;">${escapeHtml(itemName || 'Item ' + itemId)}</h3>`;
+            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons. Close to return to upgrade list.</p>`;
+            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+
+            const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
+            toonUpgradesMatchedChars.forEach(char => {
+                let benefit = '—';
+                let otherOptions = [];
+                const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
+                const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
+                if (slot && slot.upgrades) {
+                    const u = slot.upgrades.find(x => String(x.itemId) === String(itemId));
+                    if (u) {
+                        const hpd = getHpPerDkpForUpgrade(u);
+                        benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? `, HP/DKP ${hpd.toFixed(2)}` : '');
+                    }
+                    otherOptions = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 4).map(x => x.itemName || 'Item ' + x.itemId);
+                }
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptions.length ? otherOptions.map(o => escapeHtml(o)).join(', ') : '—'}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
+            itemComparisonContent.innerHTML = html;
+            itemComparisonModal.style.display = 'block';
+            const closeBtn = document.getElementById('closeItemComparisonBtn');
+            if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
+        }
+
+        if (document.getElementById('showToonUpgrades')) {
+            document.getElementById('showToonUpgrades').addEventListener('click', () => {
+                const input = document.getElementById('toonListInput');
+                const listStr = (input && input.value) ? input.value.trim() : '';
+                const matched = matchCharactersByToonList(listStr);
+                if (matched.length === 0) {
+                    alert('Enter comma-separated character names that appear in the rankings (e.g. Mycleric, Mytank).');
+                    return;
+                }
+                toonUpgradesMatchedChars = matched;
+                toonUpgradesSelectedIndex = 0;
+                toonUpgradesPanel.style.display = 'block';
+
+                toonUpgradesTabs.innerHTML = '';
+                matched.forEach((char, i) => {
+                    const tab = document.createElement('button');
+                    tab.className = 'toon-upgrade-tab' + (i === 0 ? ' active' : '');
+                    tab.textContent = char.name;
+                    tab.addEventListener('click', () => {
+                        toonUpgradesSelectedIndex = i;
+                        toonUpgradesTabs.querySelectorAll('.toon-upgrade-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        renderToonUpgradesStrip(matched[i]);
+                    });
+                    toonUpgradesTabs.appendChild(tab);
+                });
+
+                const mode = (toonPanelSlotSort && toonPanelSlotSort.value) || dkpSlotSortMode;
+                (dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices()]) : loadItemStats()).then(() => {
+                    renderToonUpgradesStrip(matched[0]);
+                }).catch(() => {
+                    toonUpgradesContent.innerHTML = '<p style="color: #dc3545;">Failed to load item/DKP data.</p>';
+                });
+            });
+        }
+        if (toonPanelSlotSort) {
+            toonPanelSlotSort.addEventListener('change', () => {
+                if (toonUpgradesMatchedChars.length && toonUpgradesMatchedChars[toonUpgradesSelectedIndex])
+                    renderToonUpgradesStrip(toonUpgradesMatchedChars[toonUpgradesSelectedIndex]);
+            });
+        }
+        if (document.getElementById('closeToonUpgradesPanel')) {
+            document.getElementById('closeToonUpgradesPanel').addEventListener('click', () => {
+                toonUpgradesPanel.style.display = 'none';
+            });
+        }
+        if (document.getElementById('closeItemComparison')) {
+            document.getElementById('closeItemComparison').onclick = () => { itemComparisonModal.style.display = 'none'; };
+        }
 
         function showScoreBreakdown(char) {
             const modal = document.getElementById('scoreModal');
