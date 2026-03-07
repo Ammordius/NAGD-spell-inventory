@@ -637,13 +637,13 @@
             };
         }
 
-        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +8 sv all  · Focus: Spell Haste III". */
+        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +8 sv total  · Focus: Spell Haste III". */
         function formatUpgradeDeltas(deltas, focusSpellName) {
             const parts = [];
             if (deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
             if (deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
             if (deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
-            if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv all');
+            if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv total');
             let text = parts.join('  ');
             if (focusSpellName && focusSpellName.trim()) text += (text ? '  · ' : '') + 'Focus: ' + focusSpellName.trim();
             return text || '';
