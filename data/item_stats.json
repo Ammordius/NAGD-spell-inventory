@@ -70132,5 +70132,36 @@
     "classes": "WAR PAL RNG SHD MNK BRD ROG BST",
     "races": "ALL",
     "name": "Pauldrons of the Deep Flame"
+  },
+  "29861": {
+    "flags": [
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "EAR",
+    "ac": 25,
+    "mods": [
+      {"label": "STR", "value": 25},
+      {"label": "STA", "value": 25},
+      {"label": "WIS", "value": 25},
+      {"label": "INT", "value": 25},
+      {"label": "HP", "value": 100},
+      {"label": "MANA", "value": 100}
+    ],
+    "resists": [
+      {"label": "Fire", "value": 10},
+      {"label": "Disease", "value": 10},
+      {"label": "Cold", "value": 10},
+      {"label": "Magic", "value": 10},
+      {"label": "Poison", "value": 10}
+    ],
+    "effectSpellId": 2248,
+    "effectSpellName": "Acumen",
+    "effectNote": "(Casting Time: Instant) (Lvl 50)",
+    "weight": 0.1,
+    "size": "TINY",
+    "classes": "ALL",
+    "races": "ALL",
+    "name": "Sigil Earring of Veracity"
   }
 }
