@@ -507,11 +507,17 @@
             return eqSlots.some(eq => parts.some(p => p === eq || p.startsWith(eq)));
         }
 
-        /** True if item is two-handed (uses both primary and secondary slots, e.g. "PRIMARY SECONDARY" or "RANGE PRIMARY SECONDARY"). */
+        /** True if item is two-handed (uses both primary and secondary slots).
+         * Detects via: (1) slot contains both PRIMARY and SECONDARY, or (2) slot is primary and skill is 2H (e.g. "2H Blunt"). */
         function isItemTwoHanded(stats) {
             if (!stats || typeof stats.slot !== 'string') return false;
-            const parts = stats.slot.toUpperCase().split(/\s+/);
-            return parts.includes('PRIMARY') && parts.includes('SECONDARY');
+            const slotUpper = stats.slot.toUpperCase();
+            const parts = slotUpper.split(/\s+/);
+            if (parts.includes('PRIMARY') && parts.includes('SECONDARY')) return true;
+            const skill = (stats.skill && typeof stats.skill === 'string') ? stats.skill.toUpperCase() : '';
+            const isPrimarySlot = parts.includes('PRIMARY') || parts.includes('MAIN');
+            const is2HSkill = skill.startsWith('2H') || skill.includes('2H ');
+            return isPrimarySlot && is2HSkill;
         }
 
         /** True if item is usable by this class (item_stats.classes "WAR CLR ..." or "ALL"). */
