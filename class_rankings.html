@@ -2655,11 +2655,16 @@
                     const showPerSlot = upgradesPerSlot;
                     let slotsWithUpgrades = upgradeData.bySlot.map(slot => {
                         let upgrades = slot.upgrades || [];
-                        if (dkpValEnabled && (minHpPerDkp != null && minHpPerDkp > 0)) {
-                            upgrades = upgrades.filter(u => {
-                                const hpPerDkp = getHpPerDkp(u);
-                                return hpPerDkp != null && hpPerDkp >= minHpPerDkp;
-                            }).sort((a, b) => (getHpPerDkp(b) || 0) - (getHpPerDkp(a) || 0)).slice(0, showPerSlot);
+                        if (dkpValEnabled) {
+                            // Always sort by HP/DKP descending when DKP mode is on; no-DKP-history items sort last (treated as -Infinity).
+                            upgrades = upgrades.slice().sort((a, b) => {
+                                const va = getHpPerDkp(a) ?? -Infinity;
+                                const vb = getHpPerDkp(b) ?? -Infinity;
+                                return vb - va;
+                            });
+                            if (minHpPerDkp != null && minHpPerDkp > 0)
+                                upgrades = upgrades.filter(u => (getHpPerDkp(u) ?? 0) >= minHpPerDkp);
+                            upgrades = upgrades.slice(0, showPerSlot);
                         } else {
                             upgrades = upgrades.slice(0, showPerSlot);
                         }
