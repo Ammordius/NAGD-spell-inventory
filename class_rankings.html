@@ -507,6 +507,13 @@
             return eqSlots.some(eq => parts.some(p => p === eq || p.startsWith(eq)));
         }
 
+        /** True if item is two-handed (uses both primary and secondary slots, e.g. "PRIMARY SECONDARY" or "RANGE PRIMARY SECONDARY"). */
+        function isItemTwoHanded(stats) {
+            if (!stats || typeof stats.slot !== 'string') return false;
+            const parts = stats.slot.toUpperCase().split(/\s+/);
+            return parts.includes('PRIMARY') && parts.includes('SECONDARY');
+        }
+
         /** True if item is usable by this class (item_stats.classes "WAR CLR ..." or "ALL"). */
         function itemUsableByClass(itemClasses, classAbbrev) {
             if (!classAbbrev) return true;
@@ -606,6 +613,30 @@
             };
         }
 
+        /** Sum two raw stat objects (e.g. primary + offhand for fair 2her comparison). */
+        function mergeRawStats(rawA, rawB) {
+            const a = rawA || { hp: 0, mana: 0, ac: 0, svAll: 0 };
+            const b = rawB || { hp: 0, mana: 0, ac: 0, svAll: 0 };
+            return {
+                hp: (a.hp || 0) + (b.hp || 0),
+                mana: (a.mana || 0) + (b.mana || 0),
+                ac: (a.ac || 0) + (b.ac || 0),
+                svAll: (a.svAll || 0) + (b.svAll || 0)
+            };
+        }
+
+        /** Deltas when "current" is given as raw stats (e.g. merged primary+offhand for 2her). */
+        function getItemStatDeltasFromRaw(currentRaw, candidateStats) {
+            const cur = currentRaw || { hp: 0, mana: 0, ac: 0, svAll: 0 };
+            const cand = getItemRawStats(candidateStats);
+            return {
+                hpDelta: cand.hp - (cur.hp || 0),
+                manaDelta: cand.mana - (cur.mana || 0),
+                acDelta: cand.ac - (cur.ac || 0),
+                svAllDelta: cand.svAll - (cur.svAll || 0)
+            };
+        }
+
         /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +8 sv all  · Focus: Spell Haste III". */
         function formatUpgradeDeltas(deltas, focusSpellName) {
             const parts = [];
@@ -687,21 +718,47 @@
                     anyMissing = true;
                 }
 
+                // Main Hand (slot 13): for two-handed candidates, compare against primary + offhand combined (fair delta).
+                let offhandStats = null;
+                let offhandScore = 0;
+                if (slotId === 13) {
+                    const offhandInv = equippedOnly.find(i => i.slot_id === 14);
+                    const offhandItemId = (offhandInv && offhandInv.item_id != null && offhandInv.item_id !== '') ? Number(offhandInv.item_id) : null;
+                    if (offhandItemId != null && !isNaN(offhandItemId) && itemStatsCache[offhandItemId]) {
+                        offhandStats = itemStatsCache[offhandItemId];
+                        offhandScore = scoreItemForUpgrade(offhandStats, offhandItemId, norm, focusWeights, focusValuesByItem);
+                    }
+                }
+
                 const candidates = [];
                 for (const [idStr, stats] of Object.entries(itemStatsCache)) {
                     const id = Number(idStr);
                     if (isNaN(id) || !stats) continue;
                     if (!itemMatchesSlot(slotId, stats.slot)) continue;
                     if (!itemUsableByClass(stats.classes, classAbbrev)) continue;
+                    // Two-handed items only appear under Main Hand (slot 13) with primary+offhand comparison; skip under Off Hand.
+                    if (slotId === 14 && isItemTwoHanded(stats)) continue;
                     const score = scoreItemForUpgrade(stats, id, norm, focusWeights, focusValuesByItem);
-                    if (score <= currentScore) continue;
-                    const deltas = getItemStatDeltas(currentStats, stats);
+
+                    const is2her = isItemTwoHanded(stats);
+                    let baselineScore = currentScore;
+                    let deltas;
+                    if (slotId === 13 && is2her) {
+                        baselineScore = currentScore + offhandScore;
+                        const currentRaw = mergeRawStats(getItemRawStats(currentStats), getItemRawStats(offhandStats));
+                        deltas = getItemStatDeltasFromRaw(currentRaw, stats);
+                    } else {
+                        deltas = getItemStatDeltas(currentStats, stats);
+                    }
+                    if (score <= baselineScore) continue;
+
+                    const delta = score - baselineScore;
                     const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
                     candidates.push({
                         itemId: id,
                         itemName: stats.name || `Item ${id}`,
                         score,
-                        delta: score - currentScore,
+                        delta,
                         deltas,
                         focusSpellName
                     });
