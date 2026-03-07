@@ -2659,7 +2659,7 @@
                             upgrades = upgrades.filter(u => {
                                 const hpPerDkp = getHpPerDkp(u);
                                 return hpPerDkp != null && hpPerDkp >= minHpPerDkp;
-                            }).slice(0, showPerSlot);
+                            }).sort((a, b) => (getHpPerDkp(b) || 0) - (getHpPerDkp(a) || 0)).slice(0, showPerSlot);
                         } else {
                             upgrades = upgrades.slice(0, showPerSlot);
                         }
