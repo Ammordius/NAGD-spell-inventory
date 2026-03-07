@@ -491,6 +491,13 @@
             return typeof w === 'number' ? w : 0;
         }
 
+        /** Focus keys that can represent the same underlying item effect (e.g. "All" spell haste adds to both Bene and Det).
+         * When scoring an item we take max(weighted value) per group instead of sum, so we don't overvalue one focus that covers multiple subcategories. */
+        const FOCUS_OVERLAP_GROUPS = [
+            ['Beneficial Spell Haste', 'Detrimental Spell Haste', 'Enhancement Spell Haste', 'Focus Affliction Haste'],
+            ['Buff Spell Duration', 'Detrimental Spell Duration']
+        ];
+
         /** Filter focus candidates to upgrades only (value > current raw) and items usable by charClass. */
         function filterFocusCandidates(candidates, currentRawValue, charClass) {
             if (!candidates || candidates.length === 0) return [];
@@ -675,16 +682,34 @@
             return text || '';
         }
 
-        /** Focus score for one item: sum over (value/100)*weight for each focus the item provides. */
+        /** Focus score for one item: sum over (value/100)*weight for each focus the item provides.
+         * For overlap groups (e.g. Spell Haste subcategories, Spell Duration subcategories), a single
+         * effect can appear under multiple keys — we take max(weighted value) per group so we don't overvalue
+         * "All" haste/duration when the subcategories are already weighted. */
         function getFocusScoreForItem(itemId, focusWeights, focusValuesByItem) {
             const vals = focusValuesByItem[itemId];
             if (!vals) return 0;
-            let s = 0;
+            const keyToContrib = {};
             for (const [focusKey, value] of Object.entries(vals)) {
                 const w = getWeightForFocusKey(focusKey, focusWeights);
-                if (w > 0) s += (value / 100) * w;
+                if (w > 0) keyToContrib[focusKey] = (value / 100) * w;
             }
-            return s;
+            let total = 0;
+            const used = new Set();
+            for (const group of FOCUS_OVERLAP_GROUPS) {
+                let maxInGroup = 0;
+                for (const k of group) {
+                    if (keyToContrib[k] != null) {
+                        maxInGroup = Math.max(maxInGroup, keyToContrib[k]);
+                        used.add(k);
+                    }
+                }
+                total += maxInGroup;
+            }
+            for (const [k, contrib] of Object.entries(keyToContrib)) {
+                if (!used.has(k)) total += contrib;
+            }
+            return total;
         }
 
         /** Total score for an item (stats + focus) for upgrade ranking. */
