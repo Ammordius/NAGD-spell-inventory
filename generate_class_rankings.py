@@ -117,6 +117,10 @@ def create_focus_lookup(focii_data):
             cat, pct = _infer_focus_category(focus_name)
             if cat is None:
                 continue
+            # Prefer explicit focus percentage from item_stats when present (e.g. focusPct: 18 for Mask of Secrets)
+            raw_pct = entry.get('focusPct', entry.get('focusPercentage'))
+            if raw_pct is not None and isinstance(raw_pct, (int, float)):
+                pct = float(raw_pct)
             effect = {'name': focus_name, 'category': cat, 'percentage': pct}
             focus_by_item_name[str(iid)].append(effect)
             item_name = normalize_item_name((entry.get('name') or '').strip())
@@ -568,6 +572,10 @@ SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
 
     # General mana preservation (applies to all: Bene, Det, Nuke, LDD)
     'Conservation of Xegony': 'All',
+    'Preservation of the Akheva': 'All',  # 18% all (Mask of Secrets, Mask of Judgement)
+
+    # General detrimental mana efficiency (nukes + debuffs; not LDD-only like Bertoxxulous)
+    'Conservation of Solusek': 'Det',
 
     # Long duration debuff mana efficiency (DoT/debuff; same classes as Focus Affliction Haste).
     # General detrimental (Det) also applies to this category: effective = max(LDD, Det).
@@ -766,17 +774,22 @@ PET_POWER_ITEM_NAMES = {
 # Item-based Spell Mana Efficiency overrides (not in spell_focii JSON). item_id -> list of {name, category, percentage}.
 # Conservation of Bertoxxulous: 30% mana efficiency on long duration debuffs (item 5594 Earring of Temporal Solstice).
 # Conservation of Xegony: 20% general mana preservation (items 26996 Gloves of the Unseen, 7769 Talisman of the Elements).
+# Preservation of Solusek 20% detrimental/nuke (3542 Talisman of Tainted Energy, 15815 Cloak of the Falling Skies).
 # Blessed Coldain Prayer Shawl (1200): Zephyr of Brell 20% beneficial spell duration.
 ITEM_FOCUS_OVERRIDES = {
     '5594': [{'name': 'Conservation of Bertoxxulous', 'category': 'Spell Mana Efficiency', 'percentage': 30}],
     '26996': [{'name': 'Conservation of Xegony', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
     '7769': [{'name': 'Conservation of Xegony', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
+    '3542': [{'name': 'Preservation of Solusek', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
+    '15815': [{'name': 'Preservation of Solusek', 'category': 'Spell Mana Efficiency', 'percentage': 20}],
     '1200': [{'name': 'Zephyr of Brell', 'category': 'Buff Spell Duration', 'percentage': 20}],
 }
 ITEM_FOCUS_OVERRIDE_NAMES = {
     '5594': 'Earring of Temporal Solstice',
     '26996': 'Gloves of the Unseen',
     '7769': 'Talisman of the Elements',
+    '3542': 'Talisman of Tainted Energy',
+    '15815': 'Cloak of the Falling Skies',
     '1200': 'Blessed Coldain Prayer Shawl',
 }
 
