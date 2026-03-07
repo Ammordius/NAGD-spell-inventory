@@ -13,7 +13,7 @@ Yes. Where Beneficial or Detrimental spell haste is scored we use:
 - **Beneficial:** `max(char_spell_haste_cats['Bene'], char_spell_haste_cats['All'])`
 - **Detrimental:** `max(char_spell_haste_cats['Det'], char_spell_haste_cats['All'])`
 
-So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **both** Beneficial and Detrimental. Right now no focus name is mapped to `'All'`; only Det/Bene/Affliction are used. To support an “all spell haste” focus, add it in `SPELL_HASTE_CATEGORY_MAP` with value `'All'` and ensure `get_best_focii_by_subcategory` and `analyze_character_focii` handle the `'All'` haste category.
+So any focus tracked as **All** (in `SPELL_HASTE_CATEGORY_MAP`) counts for **both** Beneficial and Detrimental. **Speeding Thought** is mapped to `'All'` (18% spell haste all; ornate/elemental caster boots). `get_focus_sources` and `get_all_focus_candidates` add All-haste items to both Beneficial and Detrimental Spell Haste. To support an “all spell haste” focus, add it in `SPELL_HASTE_CATEGORY_MAP` with value `'All'` and ensure `get_best_focii_by_subcategory` and `analyze_character_focii` handle the `'All'` haste category.
 
 ---
 
@@ -71,7 +71,7 @@ Spell Damage uses the same subcategory system: each class lists only the subcate
 ## Category maps (which focus names → Bene/Det/All/etc.)
 
 - **Spell Mana Efficiency:** `SPELL_MANA_EFFICIENCY_CATEGORY_MAP` ~line 248 (Det, Bene, Nuke, Sanguine). Sanguine = self-only; weight 0 for most classes.
-- **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 276 (Det, Bene). Add `'Focus Name': 'All'` to have a focus count for both.
+- **Spell Haste:** `SPELL_HASTE_CATEGORY_MAP` ~line 276 (Det, Bene, Affliction, All). **Speeding Thought** = `'All'` (18% spell haste all; counts for both Bene and Det). Add `'Focus Name': 'All'` to have a focus count for both Beneficial and Detrimental.
 - **Spell Duration:** Buff/Detrimental/All Spell Duration; “All Spell Duration” is tracked as `All` and counts for both Buff (Bene) and Detrimental (Det) in scoring.
 - **Spell Mana Efficiency weights per class:** `SPELL_MANA_EFFICIENCY_WEIGHTS` ~line 311 (e.g. Enchanter Det 1.0, Bene 0.25).
 - **Pet Power:** Item-based focus for Magician (3.0), Beastlord (3.0), Necromancer (2.0). Items: 28144 = 20%, 20508 = 25%. Checked from **full inventory (including bags)** so swap-in is counted. See `PET_POWER_ITEMS` and `get_char_pet_power()`.

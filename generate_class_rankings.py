@@ -313,6 +313,9 @@ def get_focus_sources(char_inventory, focus_lookup):
                     add_source('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
                 elif sub == 'Affliction':
                     add_source('Focus Affliction Haste', pct, item_name, slot_id, item_id)
+                elif sub == 'All':
+                    add_source('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
+                    add_source('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
                 else:
                     add_source('Beneficial Spell Haste', pct, item_name, slot_id, item_id)
             elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
@@ -426,6 +429,10 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 key = 'Detrimental Spell Haste'
             elif sub == 'Affliction':
                 key = 'Focus Affliction Haste'
+            elif sub == 'All':
+                candidates['Beneficial Spell Haste'].append(entry)
+                candidates['Detrimental Spell Haste'].append(entry)
+                continue
             else:
                 key = 'Beneficial Spell Haste'
             candidates[key].append(entry)
@@ -589,7 +596,7 @@ SPELL_HASTE_CATEGORY_MAP = {
     'Haste of Mithaniel': 'Bene',  # Paladin beneficial
     'Haste of Druzzil': 'Bene',  # Usually beneficial
     'Spell Haste': 'Bene',  # Generic beneficial
-    'Speeding Thought': 'Det',  # Detrimental spell haste (ornate/elemental caster boots)
+    'Speeding Thought': 'All',  # 18% spell haste all (beneficial and detrimental); ornate/elemental caster boots
     
     # 'All Spell Haste': 'All',  # Uncomment if a focus applies to both Bene and Det
 }
@@ -616,17 +623,20 @@ def _infer_focus_category(focus_name):
     if not n:
         return None, 0
     n_lower = n.lower()
+    # Known percentage overrides when not in spell_focii (item_stats merge)
+    _pct_override = {'speeding thought': 18}  # 18% spell haste all
+    default_pct = _pct_override.get(n_lower, 15)
     if _focus_map_get(SPELL_DAMAGE_TYPE_MAP, focus_name, None) is not None:
-        return 'Spell Damage', 15
+        return 'Spell Damage', default_pct
     if _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, focus_name, None) is not None:
-        return 'Spell Mana Efficiency', 15
+        return 'Spell Mana Efficiency', default_pct
     if _focus_map_get(SPELL_HASTE_CATEGORY_MAP, focus_name, None) is not None:
-        return 'Spell Haste', 15
+        return 'Spell Haste', default_pct
     dur = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, focus_name, None)
     if dur is not None:
-        return ('Detrimental Spell Duration' if dur == 'Det' else 'Buff Spell Duration'), 15
+        return ('Detrimental Spell Duration' if dur == 'Det' else 'Buff Spell Duration'), default_pct
     if n_lower == 'improved healing':
-        return 'Healing Enhancement', 15
+        return 'Healing Enhancement', default_pct
     return None, 0
 
 # Per-class weights for Spell Mana Efficiency categories (Bene, Det, Nuke, LDD).
