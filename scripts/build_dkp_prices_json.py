@@ -44,7 +44,7 @@ LAST_N_PRICES = 3
 
 
 def normalize_item_name_for_lookup(name: str) -> str:
-    """Match DKP assign_loot / frontend: lowercase, strip, collapse spaces, remove apostrophes, hyphen->space."""
+    """Match DKP assign_loot / frontend: lowercase, strip, collapse spaces, remove apostrophes, hyphen->space. Strip trailing/leading punctuation so 'Elemental Greaves Mold.' matches."""
     if not name or not isinstance(name, str):
         return ""
     s = name.strip()
@@ -52,6 +52,8 @@ def normalize_item_name_for_lookup(name: str) -> str:
         s = s.replace(c, "")
     s = s.replace("-", " ")
     s = " ".join(re.split(r"\s+", s.lower()))
+    # Strip trailing/leading punctuation (e.g. "Elemental Greaves Mold." in raid_loot)
+    s = s.strip(".,;:!?")
     return s
 
 
@@ -82,6 +84,13 @@ def load_elemental_dkp_name_to_magelo_ids(path: Path) -> tuple[dict[str, list[st
         if name:
             norm = normalize_item_name_for_lookup(name)
             name_to_ids[norm] = ids
+            # Aliases: raid_loot sometimes has "Gloves" vs bridge "Glove", etc.
+            alias = norm.replace(" glove pattern", " gloves pattern")
+            if alias != norm and alias not in name_to_ids:
+                name_to_ids[alias] = ids
+            alias2 = norm.replace(" gloves pattern", " glove pattern")
+            if alias2 != norm and alias2 not in name_to_ids:
+                name_to_ids[alias2] = ids
     return (name_to_ids, dkp_id_to_magelo_ids, all_magelo_ids)
 
 
@@ -164,6 +173,11 @@ def main() -> int:
         "--verbose",
         action="store_true",
         help="Print which env and key type are used (no secrets).",
+    )
+    ap.add_argument(
+        "--debug",
+        action="store_true",
+        help="Print unmatched raid_loot item_name values that look elemental (for diagnosing missing DKP history).",
     )
     args = ap.parse_args()
 
@@ -279,21 +293,25 @@ def main() -> int:
         if cost is None:
             cost = 0
 
-        # Try item_stats name first; then exact elemental DKP name -> all magelo piece ids; then numeric id (DKP purchase id -> bridge to Magelo ids, or Magelo id directly)
-        item_id = name_to_id.get(norm)
-        if item_id:
-            by_item_id[item_id].append((date_str, cost))
-        elif norm in elemental_dkp_to_magelo:
+        # Prefer elemental DKP name -> all Magelo ids over item_stats name (item_stats may have DKP purchase id 16373 as "Elemental Greaves Mold"; UI needs history on Magelo ids 16693, 16797, ...).
+        if norm in elemental_dkp_to_magelo:
             for mid in elemental_dkp_to_magelo[norm]:
                 by_item_id[mid].append((date_str, cost))
-        elif norm.isdigit():
-            # raid_loot may store item_name as number: DKP purchase id (e.g. "16373") -> bridge to all Magelo ids; or Magelo piece id (e.g. "16693") -> that id. Stats come from Raex/Magelo; DKP uses its own ids, hence the bridge.
-            num_id = norm
-            if num_id in elemental_dkp_id_to_magelo_ids:
-                for mid in elemental_dkp_id_to_magelo_ids[num_id]:
-                    by_item_id[mid].append((date_str, cost))
-            elif num_id in elemental_all_magelo_ids:
-                by_item_id[num_id].append((date_str, cost))
+        else:
+            item_id = name_to_id.get(norm)
+            if item_id:
+                by_item_id[item_id].append((date_str, cost))
+            elif norm.isdigit():
+                # raid_loot may store item_name as number: DKP purchase id (e.g. "16373") -> bridge to all Magelo ids; or Magelo piece id (e.g. "16693") -> that id. Stats come from Raex/Magelo; DKP uses its own ids, hence the bridge.
+                num_id = norm
+                if num_id in elemental_dkp_id_to_magelo_ids:
+                    for mid in elemental_dkp_id_to_magelo_ids[num_id]:
+                        by_item_id[mid].append((date_str, cost))
+                elif num_id in elemental_all_magelo_ids:
+                    by_item_id[num_id].append((date_str, cost))
+            elif getattr(args, "debug", False) and "elemental" in norm:
+                # Diagnostic: raid_loot has something elemental-looking that didn't match (exact name or numeric id)
+                print(f"  [debug] unmatched elemental-like item_name: {item_name!r} -> norm={norm!r}", file=sys.stderr)
 
     # Ensure every elemental Magelo id from the DKP bridge is in output (even with no DKP history)
     for mid in elemental_all_magelo_ids:
