@@ -4189,9 +4189,9 @@ def main():
             
             # Generate weekly/monthly leaderboard pages
             
-            # Generate weekly leaderboard page (compare current vs weekly baseline)
-            weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, delta_snapshots_dir, current_char_data)
-            weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, delta_snapshots_dir, current_char_data)
+            # Generate weekly leaderboard page (compare current vs weekly baseline, or use daily delta JSONs when available)
+            weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, delta_snapshots_dir, current_char_data, end_date=date_str)
+            weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, delta_snapshots_dir, current_char_data, end_date=date_str)
             weekly_html = generate_leaderboard_html(
                 f"Week of {week_start}", weekly_aa, weekly_hp, 'weekly'
             )
@@ -4200,9 +4200,9 @@ def main():
                 f.write(weekly_html)
             print(f"Generated weekly leaderboard: {weekly_file}")
             
-            # Generate monthly leaderboard page (compare current vs monthly baseline)
-            monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, delta_snapshots_dir, current_char_data)
-            monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, delta_snapshots_dir, current_char_data)
+            # Generate monthly leaderboard page (compare current vs monthly baseline, or use daily delta JSONs when available)
+            monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, delta_snapshots_dir, current_char_data, end_date=date_str)
+            monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, delta_snapshots_dir, current_char_data, end_date=date_str)
             monthly_html = generate_leaderboard_html(
                 f"Month of {month_start}", monthly_aa, monthly_hp, 'monthly'
             )
@@ -4256,9 +4256,9 @@ def main():
             save_baseline_json(current_char_data_for_lb, 'monthly', date_str, delta_snapshots_dir)
             print(f"Saved monthly baseline for month starting {month_start}")
         
-        # Generate weekly leaderboard (compare current vs weekly baseline in delta_snapshots)
-        weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, delta_snapshots_dir, current_char_data_for_lb)
-        weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, delta_snapshots_dir, current_char_data_for_lb)
+        # Generate weekly leaderboard (use daily delta JSONs when available, else current vs baseline)
+        weekly_aa = get_weekly_leaderboard(week_start, 'aa', 20, delta_snapshots_dir, current_char_data_for_lb, end_date=date_str)
+        weekly_hp = get_weekly_leaderboard(week_start, 'hp', 20, delta_snapshots_dir, current_char_data_for_lb, end_date=date_str)
         weekly_html = generate_leaderboard_html(
             f"Week of {week_start}", weekly_aa, weekly_hp, 'weekly'
         )
@@ -4267,9 +4267,9 @@ def main():
             f.write(weekly_html)
         print(f"Generated weekly leaderboard: {weekly_file}")
         
-        # Generate monthly leaderboard (compare current vs monthly baseline in delta_snapshots)
-        monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, delta_snapshots_dir, current_char_data_for_lb)
-        monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, delta_snapshots_dir, current_char_data_for_lb)
+        # Generate monthly leaderboard (use daily delta JSONs when available, else current vs baseline)
+        monthly_aa = get_monthly_leaderboard(month_start, 'aa', 20, delta_snapshots_dir, current_char_data_for_lb, end_date=date_str)
+        monthly_hp = get_monthly_leaderboard(month_start, 'hp', 20, delta_snapshots_dir, current_char_data_for_lb, end_date=date_str)
         monthly_html = generate_leaderboard_html(
             f"Month of {month_start}", monthly_aa, monthly_hp, 'monthly'
         )

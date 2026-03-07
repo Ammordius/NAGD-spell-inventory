@@ -167,14 +167,16 @@ def load_delta_snapshot(snapshot_type, date_str, base_dir='delta_snapshots'):
     with open(filepath, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def accumulate_weekly_deltas(week_start_date, current_char_data, base_dir='delta_snapshots'):
+def accumulate_weekly_deltas(week_start_date, current_char_data, base_dir='delta_snapshots', end_date=None):
     """Accumulate all deltas for a week to get weekly totals.
-    Compares current data against weekly baseline.
+    When end_date is provided and both daily deltas exist, uses historical delta JSONs (same as delta-history).
+    Otherwise compares current data against weekly baseline.
     
     Args:
-        week_start_date: Week start date (YYYY-MM-DD)
+        week_start_date: Week start date (YYYY-MM-DD, Monday)
         current_char_data: Current character data dict
         base_dir: Base directory for snapshots and baselines
+        end_date: Optional end date (YYYY-MM-DD); if set and deltas exist, use date-range from daily JSONs
     
     Returns:
         Dict with accumulated AA/HP gains per character
@@ -185,6 +187,12 @@ def accumulate_weekly_deltas(week_start_date, current_char_data, base_dir='delta
         'class': '',
         'level': 0
     })
+    
+    # Prefer historical daily deltas when end_date given (same data as delta-history)
+    if end_date and end_date >= week_start_date:
+        range_totals = get_leaderboard_totals_from_date_range(week_start_date, end_date, base_dir)
+        if range_totals is not None:
+            return dict(range_totals)
     
     # Try to load weekly baseline JSON (much smaller than text file)
     baseline_data = load_baseline_json('weekly', week_start_date, base_dir)
@@ -232,14 +240,16 @@ def accumulate_weekly_deltas(week_start_date, current_char_data, base_dir='delta
     
     return weekly_totals
 
-def accumulate_monthly_deltas(month_start_date, current_char_data, base_dir='delta_snapshots'):
+def accumulate_monthly_deltas(month_start_date, current_char_data, base_dir='delta_snapshots', end_date=None):
     """Accumulate all deltas for a month to get monthly totals.
-    Compares current data against monthly baseline.
+    When end_date is provided and both daily deltas exist, uses historical delta JSONs (same as delta-history).
+    Otherwise compares current data against monthly baseline.
     
     Args:
         month_start_date: Month start date (YYYY-MM-DD)
         current_char_data: Current character data dict
         base_dir: Base directory for snapshots and baselines
+        end_date: Optional end date (YYYY-MM-DD); if set and deltas exist, use date-range from daily JSONs
     
     Returns:
         Dict with accumulated AA/HP gains per character
@@ -250,6 +260,12 @@ def accumulate_monthly_deltas(month_start_date, current_char_data, base_dir='del
         'class': '',
         'level': 0
     })
+    
+    # Prefer historical daily deltas when end_date given (same data as delta-history)
+    if end_date and end_date >= month_start_date:
+        range_totals = get_leaderboard_totals_from_date_range(month_start_date, end_date, base_dir)
+        if range_totals is not None:
+            return dict(range_totals)
     
     # Try to load monthly baseline JSON (much smaller than text file)
     baseline_data = load_baseline_json('monthly', month_start_date, base_dir)
@@ -299,22 +315,24 @@ def accumulate_monthly_deltas(month_start_date, current_char_data, base_dir='del
     
     return monthly_totals
 
-def get_weekly_leaderboard(week_start_date, stat_type='aa', top_n=20, base_dir='delta_snapshots', current_char_data=None):
+def get_weekly_leaderboard(week_start_date, stat_type='aa', top_n=20, base_dir='delta_snapshots', current_char_data=None, end_date=None):
     """Get weekly leaderboard for AA or HP gains.
+    Uses historical daily delta JSONs when end_date is provided and both deltas exist (same as delta-history).
     
     Args:
         week_start_date: Week start date (YYYY-MM-DD)
         stat_type: 'aa' or 'hp'
         top_n: Number of top entries to return
         base_dir: Base directory for snapshots
-        current_char_data: Current character data (required for baseline comparison)
+        current_char_data: Current character data (required for baseline fallback)
+        end_date: End date for period (e.g. today); when set, uses daily delta JSONs if available
     
     Returns:
         List of dicts with leaderboard entries
     """
-    if current_char_data is None:
+    if current_char_data is None and not end_date:
         return []
-    totals = accumulate_weekly_deltas(week_start_date, current_char_data, base_dir)
+    totals = accumulate_weekly_deltas(week_start_date, current_char_data or {}, base_dir, end_date=end_date)
     
     leaderboard = []
     for char_name, data in totals.items():
@@ -343,22 +361,24 @@ def get_weekly_leaderboard(week_start_date, stat_type='aa', top_n=20, base_dir='
     leaderboard.sort(key=lambda x: x['gain'], reverse=True)
     return leaderboard[:top_n]
 
-def get_monthly_leaderboard(month_start_date, stat_type='aa', top_n=20, base_dir='delta_snapshots', current_char_data=None):
+def get_monthly_leaderboard(month_start_date, stat_type='aa', top_n=20, base_dir='delta_snapshots', current_char_data=None, end_date=None):
     """Get monthly leaderboard for AA or HP gains.
+    Uses historical daily delta JSONs when end_date is provided and both deltas exist (same as delta-history).
     
     Args:
         month_start_date: Month start date (YYYY-MM-DD)
         stat_type: 'aa' or 'hp'
         top_n: Number of top entries to return
         base_dir: Base directory for snapshots
-        current_char_data: Current character data (required for baseline comparison)
+        current_char_data: Current character data (required for baseline fallback)
+        end_date: End date for period (e.g. today); when set, uses daily delta JSONs if available
     
     Returns:
         List of dicts with leaderboard entries
     """
-    if current_char_data is None:
+    if current_char_data is None and not end_date:
         return []
-    totals = accumulate_monthly_deltas(month_start_date, current_char_data, base_dir)
+    totals = accumulate_monthly_deltas(month_start_date, current_char_data or {}, base_dir, end_date=end_date)
     
     leaderboard = []
     for char_name, data in totals.items():
@@ -639,6 +659,47 @@ def load_daily_delta_json(date_str, base_dir='delta_snapshots'):
             return json.load(f)
     
     return None
+
+
+def list_available_delta_dates(base_dir='delta_snapshots'):
+    """Return sorted list of date strings (YYYY-MM-DD) for which we have a daily delta JSON."""
+    import glob
+    import re
+    dates = set()
+    for pattern in ('delta_daily_*.json.gz', 'delta_daily_*.json'):
+        for path in glob.glob(os.path.join(base_dir, pattern)):
+            name = os.path.basename(path)
+            if name.endswith('.gz'):
+                name = name[:-3]
+            m = re.match(r'delta_daily_(\d{4}-\d{2}-\d{2})\.json', name)
+            if m:
+                dates.add(m.group(1))
+    return sorted(dates)
+
+
+def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta_snapshots'):
+    """Compute AA/HP gains from start_date to end_date using daily delta JSONs (same data as delta-history).
+    Returns dict char_name -> {aa_gain, hp_gain, class, level} or None if either delta is missing."""
+    delta_start = load_daily_delta_json(start_date, base_dir)
+    delta_end = load_daily_delta_json(end_date, base_dir)
+    if not delta_start or not delta_end:
+        return None
+    result = compare_delta_to_delta(delta_start, delta_end)
+    totals = {}
+    for char_name, delta in result.get('char_deltas', {}).items():
+        if delta.get('is_deleted') or delta.get('is_new'):
+            continue
+        aa = delta.get('aa_total_change', 0)
+        hp = delta.get('hp_change', 0)
+        if aa > 0 or hp > 0:
+            totals[char_name] = {
+                'aa_gain': aa,
+                'hp_gain': hp,
+                'class': delta.get('class', ''),
+                'level': delta.get('current_level', 0)
+            }
+    return totals
+
 
 def compare_delta_to_delta(delta_a, delta_b):
     """Compare two deltas (from baseline) to get changes between Day A and Day B.
