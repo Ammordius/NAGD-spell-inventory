@@ -1369,7 +1369,12 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
             scores['focus_overall_pct'] = sum(focus_scores.values()) / len(focus_scores)
         else:
             scores['focus_overall_pct'] = 0
-    
+
+    # Raw focus total points (weighted sum using CLASS_WEIGHTS.focus) for class-relative score
+    # focus_overall_pct will be overwritten as (focus_total_points / max_in_class * 100) in post-pass
+    focus_weights = CLASS_WEIGHTS.get(char_class, {}).get('focus', {})
+    scores['focus_total_points'] = compute_focus_total_points(char_class, scores, focus_scores, focus_weights)
+
     return scores
 
 # Class-specific weight configuration
@@ -1812,6 +1817,38 @@ def calculate_resist_score(resist_value):
     S_500 = L + r * (H - L)  # = 318
     score = min((S_x / S_500) * 100.0, 100.0) if S_500 > 0 else 0.0
     return (score, 1.0)
+
+
+def compute_focus_total_points(char_class, scores, focus_scores, focus_weights):
+    """Compute raw weighted focus points (sum of weight * score/100) using CLASS_WEIGHTS.focus.
+    Used so focus_overall_pct can be (this_value / max_in_class * 100), i.e. score = focus total points / top total focus points in class."""
+    if not focus_weights:
+        return 0.0
+    points = 0.0
+    for focus_cat, weight_config in focus_weights.items():
+        if focus_cat == 'ATK':
+            w = weight_config if isinstance(weight_config, (int, float)) else 0.0
+            if w > 0:
+                points += w * (scores.get('atk_pct') or 0) / 100.0
+        elif focus_cat == 'Haste':
+            w = weight_config if isinstance(weight_config, (int, float)) else 0.0
+            if w > 0:
+                points += w * (scores.get('haste_pct') or 0) / 100.0
+        elif focus_cat == 'FT':
+            w = weight_config if isinstance(weight_config, (int, float)) else 0.0
+            if w > 0:
+                ft_pct = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
+                points += w * ft_pct / 100.0
+        elif isinstance(weight_config, dict):
+            for subcat, w in weight_config.items():
+                if w > 0:
+                    score = focus_scores.get(f'Spell Damage ({subcat})', focus_scores.get('Spell Damage', 0))
+                    points += w * (score / 100.0)
+        elif isinstance(weight_config, (int, float)) and weight_config > 0:
+            score = focus_scores.get(focus_cat, 0)
+            points += weight_config * (score / 100.0)
+    return points
+
 
 def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, focus_scores, best_focii, class_max_values=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, char=None, best_haste_by_cat=None):
     """Calculate overall score using class-specific weights with conversion rates"""
@@ -2572,6 +2609,38 @@ def main():
             'inventory': char_inventory  # Inventory items for item links
         })
     
+    # Normalize focus score to (focus total points / top total focus points in class) so it reflects class-relative focus, not a weighted average that overweights spell damage
+    class_max_focus_points = {}
+    for char in output_data:
+        c = char['class']
+        pt = char['scores'].get('focus_total_points', 0)
+        class_max_focus_points[c] = max(class_max_focus_points.get(c, 0), pt)
+    for char in output_data:
+        scores = char['scores']
+        cls = char['class']
+        top = class_max_focus_points.get(cls, 1)
+        if top > 0:
+            scores['focus_overall_pct'] = round((scores.get('focus_total_points', 0) / top) * 100.0, 2)
+        else:
+            scores['focus_overall_pct'] = 0.0
+        # Recompute overall score so ranking uses class-relative focus
+        char_class = char['class']
+        char_data = characters.get(char['id'], {})
+        new_overall = calculate_overall_score_with_weights(
+            char_class,
+            scores,
+            char.get('damage_focii', {}),
+            scores.get('focus_scores', {}),
+            best_focii,
+            class_max_values.get(char_class, {}),
+            char.get('spell_haste_cats'),
+            char.get('duration_cats'),
+            char.get('mana_efficiency_cats'),
+            char_data,
+            best_haste_by_cat
+        )
+        char['overall_score'] = round(new_overall, 2)
+
     # Sort by overall score (descending)
     output_data.sort(key=lambda x: x['overall_score'], reverse=True)
     
