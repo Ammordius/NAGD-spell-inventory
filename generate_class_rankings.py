@@ -107,6 +107,24 @@ def create_focus_lookup(focii_data):
                 'percentage': eff['percentage']
             })
 
+    # Merge focus items from item_stats (ornate/elemental armor with focusSpellName; tiered names normalized in maps)
+    try:
+        item_stats_full = _load_item_stats_full()
+        for iid, entry in (item_stats_full or {}).items():
+            focus_name = (entry.get('focusSpellName') or entry.get('focus') or '').strip()
+            if not focus_name:
+                continue
+            cat, pct = _infer_focus_category(focus_name)
+            if cat is None:
+                continue
+            effect = {'name': focus_name, 'category': cat, 'percentage': pct}
+            focus_by_item_name[str(iid)].append(effect)
+            item_name = normalize_item_name((entry.get('name') or '').strip())
+            if item_name:
+                focus_by_item_name[item_name].append(effect)
+    except Exception:
+        pass
+
     print(f"Created focus lookup with {len(focus_by_item_name)} unique item names/ids")
     return focus_by_item_name
 
@@ -135,11 +153,11 @@ def get_best_focii_by_subcategory(focii_data):
         cat = focus.get('category', '')
         pct = focus.get('percentage', 0)
         if cat == 'Spell Mana Efficiency':
-            sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(name, 'Nuke')
+            sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
             if pct > best_mana[sub]:
                 best_mana[sub] = pct
         elif cat == 'Spell Haste':
-            sub = SPELL_HASTE_CATEGORY_MAP.get(name, 'Bene')
+            sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, name, 'Bene')
             if pct > best_haste[sub]:
                 best_haste[sub] = pct
         elif cat == 'Buff Spell Duration':
@@ -155,7 +173,7 @@ def get_best_focii_by_subcategory(focii_data):
     for item_id, effects in ITEM_FOCUS_OVERRIDES.items():
         for eff in effects:
             if eff.get('category') == 'Spell Mana Efficiency':
-                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(eff['name'], 'Nuke')
+                sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, eff['name'], 'Nuke')
                 pct = eff.get('percentage', 0)
                 if pct > best_mana[sub]:
                     best_mana[sub] = pct
@@ -191,13 +209,13 @@ def analyze_character_focii(char_inventory, focus_lookup):
                 
                 # For spell damage, also track by damage type
                 if cat == 'Spell Damage':
-                    damage_type = SPELL_DAMAGE_TYPE_MAP.get(focus_name, 'All')
+                    damage_type = _focus_map_get(SPELL_DAMAGE_TYPE_MAP, focus_name, 'All')
                     if pct > char_damage_focii[damage_type]:
                         char_damage_focii[damage_type] = pct
                 
                 # Track Mana Efficiency categories
                 if cat == 'Spell Mana Efficiency':
-                    efficiency_cat = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(focus_name, 'Nuke')
+                    efficiency_cat = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, focus_name, 'Nuke')
                     if pct > char_mana_efficiency_cats[efficiency_cat]:
                         char_mana_efficiency_cats[efficiency_cat] = pct
                     # Preservation of Xegony 15% (Kerasha's Sylvan Boots etc.) applies to all spell types in-game
@@ -207,7 +225,7 @@ def analyze_character_focii(char_inventory, focus_lookup):
                 
                 # Track Spell Haste categories
                 if cat == 'Spell Haste':
-                    haste_cat = SPELL_HASTE_CATEGORY_MAP.get(focus_name, 'Bene')
+                    haste_cat = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, focus_name, 'Bene')
                     if pct > char_spell_haste_cats[haste_cat]:
                         char_spell_haste_cats[haste_cat] = pct
                 
@@ -218,7 +236,7 @@ def analyze_character_focii(char_inventory, focus_lookup):
                         if pct > char_duration_cats['All']:
                             char_duration_cats['All'] = pct
                     else:
-                        duration_cat = SPELL_DURATION_CATEGORY_MAP.get(focus_name, 
+                        duration_cat = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, focus_name, 
                             'Bene' if cat == 'Buff Spell Duration' else 'Det')
                         if pct > char_duration_cats[duration_cat]:
                             char_duration_cats[duration_cat] = pct
@@ -283,14 +301,14 @@ def get_focus_sources(char_inventory, focus_lookup):
             pct = focus_effect['percentage']
 
             if cat == 'Spell Damage':
-                damage_type = SPELL_DAMAGE_TYPE_MAP.get(focus_name, 'All')
+                damage_type = _focus_map_get(SPELL_DAMAGE_TYPE_MAP, focus_name, 'All')
                 add_source(f'Spell Damage ({damage_type})', pct, item_name, slot_id, item_id)
             elif cat == 'Spell Mana Efficiency':
-                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(focus_name, 'Nuke')
+                sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, focus_name, 'Nuke')
                 key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
                 add_source(key, pct, item_name, slot_id, item_id)
             elif cat == 'Spell Haste':
-                sub = SPELL_HASTE_CATEGORY_MAP.get(focus_name, 'Bene')
+                sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, focus_name, 'Bene')
                 if sub == 'Det':
                     add_source('Detrimental Spell Haste', pct, item_name, slot_id, item_id)
                 elif sub == 'Affliction':
@@ -302,7 +320,7 @@ def get_focus_sources(char_inventory, focus_lookup):
                     add_source('Buff Spell Duration', pct, item_name, slot_id, item_id)
                     add_source('Detrimental Spell Duration', pct, item_name, slot_id, item_id)
                 else:
-                    dur_cat = SPELL_DURATION_CATEGORY_MAP.get(focus_name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
+                    dur_cat = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, focus_name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
                     key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
                     add_source(key, pct, item_name, slot_id, item_id)
             else:
@@ -325,6 +343,18 @@ def load_item_stats():
             with open(path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             return {str(iid): (info.get('classes') or '').strip() for iid, info in data.items() if info.get('classes')}
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+    return {}
+
+
+def _load_item_stats_full():
+    """Load full item_stats.json (id -> {name, focusSpellName, ...}) for merging focus items into lookup."""
+    base_dir = os.path.dirname(__file__) if '__file__' in globals() else '.'
+    for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             continue
     return {}
@@ -382,34 +412,34 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 cls_str = item_stats_lookup.get(item_id, '')
                 if cls_str:
                     entry['classes'] = cls_str
-            if cat == 'Spell Damage':
-                damage_type = SPELL_DAMAGE_TYPE_MAP.get(name, 'All')
-                key = f'Spell Damage ({damage_type})'
-                candidates[key].append(entry)
-            elif cat == 'Spell Mana Efficiency':
-                sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(name, 'Nuke')
-                key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
-                candidates[key].append(entry)
-            elif cat == 'Spell Haste':
-                sub = SPELL_HASTE_CATEGORY_MAP.get(name, 'Bene')
-                if sub == 'Det':
-                    key = 'Detrimental Spell Haste'
-                elif sub == 'Affliction':
-                    key = 'Focus Affliction Haste'
-                else:
-                    key = 'Beneficial Spell Haste'
-                candidates[key].append(entry)
-            elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
-                if cat == 'All Spell Duration':
-                    candidates['Buff Spell Duration'].append(entry)
-                    candidates['Detrimental Spell Duration'].append(entry)
-                else:
-                    dur_cat = SPELL_DURATION_CATEGORY_MAP.get(name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
-                    key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
-                    candidates[key].append(entry)
+        if cat == 'Spell Damage':
+            damage_type = _focus_map_get(SPELL_DAMAGE_TYPE_MAP, name, 'All')
+            key = f'Spell Damage ({damage_type})'
+            candidates[key].append(entry)
+        elif cat == 'Spell Mana Efficiency':
+            sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
+            key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
+            candidates[key].append(entry)
+        elif cat == 'Spell Haste':
+            sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, name, 'Bene')
+            if sub == 'Det':
+                key = 'Detrimental Spell Haste'
+            elif sub == 'Affliction':
+                key = 'Focus Affliction Haste'
             else:
-                # Healing Enhancement, Spell Range Extension, etc.
-                candidates[cat].append(entry)
+                key = 'Beneficial Spell Haste'
+            candidates[key].append(entry)
+        elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
+            if cat == 'All Spell Duration':
+                candidates['Buff Spell Duration'].append(entry)
+                candidates['Detrimental Spell Duration'].append(entry)
+            else:
+                dur_cat = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
+                key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
+                candidates[key].append(entry)
+        else:
+            # Healing Enhancement, Spell Range Extension, etc.
+            candidates[cat].append(entry)
     # Add item-based overrides (Conservation of Bertoxxulous / Conservation of Xegony) so they appear in "items that could give this focus"
     for item_id, effects in ITEM_FOCUS_OVERRIDES.items():
         item_name = ITEM_FOCUS_OVERRIDE_NAMES.get(item_id, f'Item {item_id}')
@@ -447,6 +477,20 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
 
 
 # Map spell damage focii to damage types
+def _normalize_focus_name_for_map(name):
+    """Strip Roman numeral suffix ( I through VII) so tiered TAKP names match base focus names."""
+    if not name or not isinstance(name, str):
+        return name
+    import re
+    return re.sub(r'\s+(?:I{1,3}|IV|V|VI{0,3}|VII)$', '', name.strip(), flags=re.IGNORECASE).strip() or name
+
+def _focus_map_get(m, name, default):
+    """Look up focus name in map; try as-is then normalized (e.g. 'Mana Preservation IV' -> 'Mana Preservation')."""
+    if name in m:
+        return m[name]
+    n = _normalize_focus_name_for_map(name)
+    return m.get(n, default)
+
 SPELL_DAMAGE_TYPE_MAP = {
     # Magic damage focii (Druzzil is the god of magic)
     'Anger of Druzzil': 'Magic',
@@ -545,6 +589,7 @@ SPELL_HASTE_CATEGORY_MAP = {
     'Haste of Mithaniel': 'Bene',  # Paladin beneficial
     'Haste of Druzzil': 'Bene',  # Usually beneficial
     'Spell Haste': 'Bene',  # Generic beneficial
+    'Speeding Thought': 'Det',  # Detrimental spell haste (ornate/elemental caster boots)
     
     # 'All Spell Haste': 'All',  # Uncomment if a focus applies to both Bene and Det
 }
@@ -564,6 +609,25 @@ SPELL_DURATION_CATEGORY_MAP = {
     'Extended Reanimation': 'Bene',
     'Extended Summoning': 'Bene',
 }
+
+def _infer_focus_category(focus_name):
+    """Infer spell_focii category from focus name (e.g. from item_stats focusSpellName). Returns (category, pct) or (None, 0)."""
+    n = _normalize_focus_name_for_map(focus_name)
+    if not n:
+        return None, 0
+    n_lower = n.lower()
+    if _focus_map_get(SPELL_DAMAGE_TYPE_MAP, focus_name, None) is not None:
+        return 'Spell Damage', 15
+    if _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, focus_name, None) is not None:
+        return 'Spell Mana Efficiency', 15
+    if _focus_map_get(SPELL_HASTE_CATEGORY_MAP, focus_name, None) is not None:
+        return 'Spell Haste', 15
+    dur = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, focus_name, None)
+    if dur is not None:
+        return ('Detrimental Spell Duration' if dur == 'Det' else 'Buff Spell Duration'), 15
+    if n_lower == 'improved healing':
+        return 'Healing Enhancement', 15
+    return None, 0
 
 # Per-class weights for Spell Mana Efficiency categories (Bene, Det, Nuke, LDD).
 # Consider each category separately; "All" (if present) counts for all of Bene/Det/Nuke/LDD.

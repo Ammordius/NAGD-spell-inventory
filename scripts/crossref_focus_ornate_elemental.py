@@ -31,6 +31,13 @@ def normalize_focus_name(s: str) -> str:
     return s
 
 
+def strip_roman_numeral(s: str) -> str:
+    """Strip Roman numeral suffix ( I through VII) so tiered names match base."""
+    if not s or not isinstance(s, str):
+        return s
+    return re.sub(r"\s+(?:I{1,3}|IV|V|VI{0,3}|VII)$", "", s.strip(), flags=re.IGNORECASE).strip() or s
+
+
 def load_canonical_focus_names() -> dict[str, str]:
     """Load focus name -> category from spell_focii_level65.json. Returns dict of normalized_name -> category."""
     if not SPELL_FOCII.exists():
@@ -129,7 +136,8 @@ def main() -> int:
             continue
         item_name = (entry.get("name") or f"Item {iid}").strip()
         norm = normalize_focus_name(focus_name)
-        cat = canonical.get(norm)
+        norm_base = normalize_focus_name(strip_roman_numeral(focus_name))
+        cat = canonical.get(norm) or canonical.get(norm_base)
         kind = "ornate" if iid in ornate_ids else "elemental"
         if cat:
             print(f"  [{kind}] id={iid}  {item_name[:45]}")
