@@ -295,6 +295,12 @@ def main() -> int:
             elif num_id in elemental_all_magelo_ids:
                 by_item_id[num_id].append((date_str, cost))
 
+    # Ensure every elemental Magelo id from the DKP bridge is in output (even with no DKP history)
+    for mid in elemental_all_magelo_ids:
+        if mid not in by_item_id:
+            by_item_id[mid] = []
+    print(f"Elemental bridge: {len(elemental_all_magelo_ids)} Magelo ids (all included in output)", file=sys.stderr)
+
     # 4) For each item_id: sort by date desc, take last 3
     result: dict[str, dict] = {}
     for item_id, pairs in by_item_id.items():
