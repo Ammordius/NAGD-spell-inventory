@@ -761,13 +761,13 @@
             };
         }
 
-        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +8 sv total  · Focus: Spell Haste III". */
+        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +8 sv  · Focus: Spell Haste III". */
         function formatUpgradeDeltas(deltas, focusSpellName) {
             const parts = [];
             if (deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
             if (deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
             if (deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
-            if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv total');
+            if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
             let text = parts.join('  ');
             if (focusSpellName && focusSpellName.trim()) text += (text ? '  · ' : '') + 'Focus: ' + focusSpellName.trim();
             return text || '';
@@ -2364,25 +2364,33 @@
         }
 
         function openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp) {
-            let html = `<h3 style="margin-top: 0;">${escapeHtml(itemName || 'Item ' + itemId)}</h3>`;
+            const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
+            let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
             html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons. Close to return to upgrade list.</p>`;
-            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
             const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
             toonUpgradesMatchedChars.forEach(char => {
                 let benefit = '—';
-                let otherOptions = [];
+                let otherOptionsHtml = '—';
                 const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
                 const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
                 if (slot && slot.upgrades) {
                     const u = slot.upgrades.find(x => String(x.itemId) === String(itemId));
                     if (u) {
                         const hpd = getHpPerDkpForUpgrade(u);
-                        benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? `, HP/DKP ${hpd.toFixed(2)}` : '');
+                        const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                        benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
+                        if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
                     }
-                    otherOptions = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 4).map(x => x.itemName || 'Item ' + x.itemId);
+                    const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 5);
+                    otherOptionsHtml = others.length ? others.map(o => {
+                        const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
+                        const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
+                        return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                    }).join(', ') : '—';
                 }
-                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptions.length ? otherOptions.map(o => escapeHtml(o)).join(', ') : '—'}</td></tr>`;
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
             });
             html += '</tbody></table>';
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
@@ -2430,13 +2438,14 @@
         function openItemComparisonByItemId(itemId, itemName) {
             const slotIds = getSlotIdsForItem(itemId);
             const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
-            let html = `<h3 style="margin-top: 0;">${escapeHtml(itemName || 'Item ' + itemId)}</h3>`;
+            const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
+            let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
             html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons. Close to return to upgrade list.</p>`;
-            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
             toonUpgradesMatchedChars.forEach(char => {
                 let benefit = '—';
-                let otherOptions = [];
+                let otherOptionsHtml = '—';
                 let slotName = '—';
                 const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
                 let slot = null;
@@ -2447,8 +2456,15 @@
                             slot = s;
                             slotName = s.slotName || slotNames[s.slotId] || 'Slot ' + s.slotId;
                             const hpd = getHpPerDkpForUpgrade(u);
-                            benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? `, HP/DKP ${hpd.toFixed(2)}` : '');
-                            otherOptions = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 4).map(x => x.itemName || 'Item ' + x.itemId);
+                            const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                            benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
+                            if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 5);
+                            otherOptionsHtml = others.length ? others.map(o => {
+                                const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
+                                const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
+                                return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            }).join(', ') : '—';
                             break;
                         }
                     }
@@ -2457,9 +2473,16 @@
                     const sid = slotIds[0];
                     slotName = slotNames[sid] || 'Slot ' + sid;
                     slot = upgradeData.bySlot && upgradeData.bySlot.find(s => s.slotId === sid);
-                    if (slot && slot.upgrades) otherOptions = slot.upgrades.slice(0, 4).map(x => x.itemName || 'Item ' + x.itemId);
+                    if (slot && slot.upgrades) {
+                        const others = slot.upgrades.slice(0, 5);
+                        otherOptionsHtml = others.length ? others.map(o => {
+                            const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
+                            const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
+                            return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                        }).join(', ') : '—';
+                    }
                 }
-                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${slotName}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptions.length ? otherOptions.map(o => escapeHtml(o)).join(', ') : '—'}</td></tr>`;
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${slotName}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
             });
             html += '</tbody></table>';
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
