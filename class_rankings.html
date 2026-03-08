@@ -363,6 +363,16 @@
             border-color: #667eea;
         }
         .toon-upgrade-tab:hover:not(.active) { background: #f8f9fa; }
+        .toon-panel-slot-toggle { padding: 4px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 12px; border: 1px solid #dee2e6; background: #667eea; color: white; }
+        .toon-panel-slot-toggle.off { background: #adb5bd; color: #495057; border-color: #adb5bd; opacity: 0.85; }
+        .toon-panel-slot-toggle.off:hover { opacity: 1; }
+        .toon-upgrade-slot-section { margin-bottom: 20px; }
+        .toon-upgrade-slot-section.slot-disabled { opacity: 0.5; background: #f1f3f5; padding: 8px; border-radius: 8px; pointer-events: none; }
+        .toon-upgrade-slot-header { font-weight: 600; color: #495057; margin-bottom: 6px; font-size: 1rem; }
+        .toon-upgrade-current { font-size: 0.9em; color: #6c757d; margin-bottom: 8px; }
+        .toon-upgrade-current .item-link { color: #667eea; }
+        .char-stats-link { color: #667eea; text-decoration: none; font-weight: 500; }
+        .char-stats-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -492,16 +502,9 @@
                     <option value="hp_dkp" selected>Sort by HP/DKP</option>
                     <option value="max_upgrade">Sort by max upgrade</option>
                 </select>
-                <label style="margin-left: 16px;">Filter slot:</label>
-                <select id="toonPanelSlotFilter" style="margin-left: 8px; padding: 6px 10px;">
-                    <option value="">All slots</option>
-                    <option value="1">Ear</option><option value="2">Head</option><option value="3">Face</option><option value="4">Ear</option><option value="5">Neck</option>
-                    <option value="6">Shoulder</option><option value="7">Arms</option><option value="8">Back</option><option value="9">Wrist</option><option value="10">Wrist</option>
-                    <option value="11">Range</option><option value="12">Hands</option><option value="13">Main Hand</option><option value="14">Off Hand</option>
-                    <option value="15">Ring 1</option><option value="16">Ring 2</option><option value="17">Chest</option><option value="18">Legs</option>
-                    <option value="19">Feet</option><option value="20">Waist</option><option value="21">Power Source</option><option value="22">Ammo</option>
-                </select>
+                <span style="margin-left: 16px;">Slots (click to enable/disable):</span>
             </div>
+            <div id="toonPanelSlotToggles" style="display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: 10px; align-items: center;"></div>
             <div style="margin-bottom: 8px;">
                 <label>Look up item:</label>
                 <input type="text" id="toonPanelItemSearch" placeholder="Type item name (e.g. Pulsing Emerald Hoop)" style="margin-left: 8px; padding: 6px 10px; min-width: 220px;">
@@ -558,6 +561,7 @@
             15: ['FINGER', 'FINGERS'], 16: ['FINGER', 'FINGERS'], 17: ['CHEST'], 18: ['LEGS'], 19: ['FEET'],
             20: ['WAIST'], 21: ['POWER'], 22: ['AMMO']
         };
+        const SLOT_NAMES_FOR_UI = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
 
         /** Return numeric weight for a focus category (handles nested e.g. Spell Damage). */
         function getFocusWeight(cat, focusWeights) {
@@ -2218,7 +2222,7 @@
         const toonUpgradesTabs = document.getElementById('toonUpgradesTabs');
         const toonUpgradesContent = document.getElementById('toonUpgradesContent');
         const toonPanelSlotSort = document.getElementById('toonPanelSlotSort');
-        const toonPanelSlotFilter = document.getElementById('toonPanelSlotFilter');
+        const toonPanelSlotToggles = document.getElementById('toonPanelSlotToggles');
         const toonPanelItemSearch = document.getElementById('toonPanelItemSearch');
         const toonPanelItemLookup = document.getElementById('toonPanelItemLookup');
         const itemComparisonModal = document.getElementById('itemComparisonModal');
@@ -2279,8 +2283,10 @@
 
         let toonUpgradesMatchedChars = [];
         let toonUpgradesSelectedIndex = 0;
+        const toonPanelSlotEnabled = {};
+        (function initSlotEnabled() { for (let i = 1; i <= 22; i++) toonPanelSlotEnabled[i] = true; })();
 
-        function buildToonUpgradesHorizontalStrip(char, mode, minHpPerDkp, filterSlotId) {
+        function buildToonUpgradesBySlot(char, mode, minHpPerDkp, enabledSlots) {
             const getMaxPerSlot = () => Math.max(upgradesPerSlot, 25);
             const upgradeData = computeUpgradesForCharacter(char, getMaxPerSlot());
             let slotsWithUpgrades = (upgradeData.bySlot || []).map(slot => {
@@ -2298,17 +2304,14 @@
                 return { ...slot, upgrades, maxHpPerDkp, maxDelta };
             }).filter(s => s.upgrades.length > 0);
 
-            if (filterSlotId != null && filterSlotId !== '') {
-                const sid = parseInt(filterSlotId, 10);
-                if (!isNaN(sid)) slotsWithUpgrades = slotsWithUpgrades.filter(s => s.slotId === sid);
+            if (enabledSlots && typeof enabledSlots === 'object') {
+                slotsWithUpgrades = slotsWithUpgrades.filter(s => enabledSlots[s.slotId] !== false);
             }
 
             if (mode === 'hp_dkp') slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
             else if (mode === 'max_upgrade') slotsWithUpgrades.sort((a, b) => b.maxDelta - a.maxDelta);
 
-            const flat = [];
-            slotsWithUpgrades.forEach(s => s.upgrades.forEach(u => flat.push({ ...u, slotName: s.slotName, slotId: s.slotId })));
-            return flat;
+            return slotsWithUpgrades;
         }
 
         function formatUpgradeDeltasShort(deltas, focusSpellName) {
@@ -2326,30 +2329,47 @@
                 toonUpgradesContent.innerHTML = '<p style="color: #6c757d;">Select a character tab.</p>';
                 return;
             }
+            ensureSlotToggles(char);
             const mode = (toonPanelSlotSort && toonPanelSlotSort.value) || dkpSlotSortMode;
-            const filterSlotId = (toonPanelSlotFilter && toonPanelSlotFilter.value) || '';
-            const flat = buildToonUpgradesHorizontalStrip(char, mode, null, filterSlotId);
-            const slotLabel = filterSlotId && toonPanelSlotFilter ? (toonPanelSlotFilter.options[toonPanelSlotFilter.selectedIndex].textContent || '') : 'all slots';
-            let html = `<p style="margin-bottom: 12px; color: #495057;"><strong>${escapeHtml(char.name)}</strong> (${escapeHtml(char.class)}) — ${slotLabel}, sorted by ${mode === 'hp_dkp' ? 'HP/DKP' : mode === 'max_upgrade' ? 'max upgrade' : 'value'}</p>`;
-            html += '<div class="toon-upgrade-strip" id="toonUpgradeStrip">';
-            flat.forEach(u => {
-                const entry = dkpPricesCache[String(u.itemId)];
-                const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
-                const last3 = prices.map(p => p.cost);
-                const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
-                const hpPerDkp = getHpPerDkpForUpgrade(u);
-                const deltaStr = formatUpgradeDeltasShort(u.deltas || {}, u.focusSpellName);
-                const dkpStr = last3.length ? `Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '(no DKP)';
-                const hpDkpStr = hpPerDkp != null ? ` HP/DKP: ${hpPerDkp.toFixed(2)}` : '';
-                html += `<div class="toon-upgrade-card" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}" data-slot-name="${escapeHtml(u.slotName || '')}" data-slot-id="${u.slotId != null ? u.slotId : ''}" data-delta="${(u.delta || 0).toFixed(2)}" data-hp-dkp="${hpPerDkp != null ? hpPerDkp.toFixed(2) : ''}" data-char-name="${escapeHtml(char.name)}">
+            const slots = buildToonUpgradesBySlot(char, mode, null, toonPanelSlotEnabled);
+            const slotLabel = 'slots enabled/disabled above';
+            const charNameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
+            let html = `<p style="margin-bottom: 12px; color: #495057;"><strong>${charNameLink}</strong> (${escapeHtml(char.class)}) — ${slotLabel}, sorted by ${mode === 'hp_dkp' ? 'HP/DKP' : mode === 'max_upgrade' ? 'max upgrade' : 'value'}</p>`;
+            if (slots.length === 0) {
+                html += '<p style="color: #6c757d;">No upgrades found for enabled slots.</p>';
+                toonUpgradesContent.innerHTML = html;
+                bindCharStatsLinks(toonUpgradesContent);
+                return;
+            }
+            slots.forEach(slot => {
+                html += `<div class="toon-upgrade-slot-section" data-slot-id="${slot.slotId}"><div class="toon-upgrade-slot-header">${escapeHtml(slot.slotName || SLOT_NAMES_FOR_UI[slot.slotId] || 'Slot ' + slot.slotId)}</div>`;
+                const curId = slot.currentItemId;
+                const curName = slot.currentItemName || (curId ? 'Item ' + curId : '');
+                if (curId != null && curName) {
+                    html += `<div class="toon-upgrade-current">Current: <a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${curId}" target="_blank" rel="noopener" data-item-id="${curId}" data-item-name="${escapeHtml(curName)}">${escapeHtml(curName)}</a></div>`;
+                } else {
+                    html += `<div class="toon-upgrade-current">Current: —</div>`;
+                }
+                html += '<div class="toon-upgrade-strip">';
+                slot.upgrades.forEach(u => {
+                    const entry = dkpPricesCache[String(u.itemId)];
+                    const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+                    const last3 = prices.map(p => p.cost);
+                    const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
+                    const hpPerDkp = getHpPerDkpForUpgrade(u);
+                    const deltaStr = formatUpgradeDeltasShort(u.deltas || {}, u.focusSpellName);
+                    const dkpStr = last3.length ? `Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '(no DKP)';
+                    const hpDkpStr = hpPerDkp != null ? ` HP/DKP: ${hpPerDkp.toFixed(2)}` : '';
+                    html += `<div class="toon-upgrade-card" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}" data-slot-name="${escapeHtml(slot.slotName || '')}" data-slot-id="${slot.slotId != null ? slot.slotId : ''}" data-delta="${(u.delta || 0).toFixed(2)}" data-hp-dkp="${hpPerDkp != null ? hpPerDkp.toFixed(2) : ''}" data-char-name="${escapeHtml(char.name)}">
   <div class="card-name">${escapeHtml(u.itemName || 'Item ' + u.itemId)}</div>
   <div class="card-deltas">${escapeHtml(deltaStr || '—')}</div>
-  <div class="card-score">(score +${(u.delta || 0).toFixed(2)}) ${escapeHtml(u.slotName || '')}</div>
+  <div class="card-score">(score +${(u.delta || 0).toFixed(2)}) ${escapeHtml(slot.slotName || '')}</div>
   <div class="card-dkp">${dkpStr}${hpDkpStr}</div>
 </div>`;
+                });
+                html += '</div></div>';
             });
-            html += '</div>';
-            toonUpgradesContent.innerHTML = flat.length ? html : '<p style="color: #6c757d;">No upgrades found.</p>';
+            toonUpgradesContent.innerHTML = html;
 
             toonUpgradesContent.querySelectorAll('.toon-upgrade-card').forEach(el => {
                 el.addEventListener('click', () => {
@@ -2360,6 +2380,40 @@
                     const delta = el.getAttribute('data-delta');
                     const hpDkp = el.getAttribute('data-hp-dkp');
                     openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp);
+                });
+            });
+            bindCharStatsLinks(toonUpgradesContent);
+        }
+
+        function ensureSlotToggles() {
+            if (!toonPanelSlotToggles || toonPanelSlotToggles.children.length > 0) return;
+            for (let slotId = 1; slotId <= 22; slotId++) {
+                const label = SLOT_NAMES_FOR_UI[slotId] || 'Slot ' + slotId;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'toon-panel-slot-toggle' + (toonPanelSlotEnabled[slotId] === false ? ' off' : '');
+                btn.textContent = label;
+                btn.dataset.slotId = String(slotId);
+                btn.addEventListener('click', () => {
+                    toonPanelSlotEnabled[slotId] = !toonPanelSlotEnabled[slotId];
+                    btn.classList.toggle('off', toonPanelSlotEnabled[slotId] === false);
+                    const activeTab = toonUpgradesTabs && toonUpgradesTabs.querySelector('.toon-upgrade-tab.active');
+                    const idx = activeTab ? parseInt(activeTab.dataset.index, 10) : 0;
+                    const char = toonUpgradesMatchedChars[idx];
+                    if (char) renderToonUpgradesStrip(char);
+                });
+                toonPanelSlotToggles.appendChild(btn);
+            }
+        }
+
+        function bindCharStatsLinks(container) {
+            if (!container) return;
+            container.querySelectorAll('.char-stats-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const name = link.getAttribute('data-char-name');
+                    const char = (toonUpgradesMatchedChars || []).find(c => (c.name || '').trim() === (name || '').trim());
+                    if (char && typeof showScoreBreakdown === 'function') showScoreBreakdown(char);
                 });
             });
         }
@@ -2398,12 +2452,14 @@
             });
             rows.sort((a, b) => b.sortKey - a.sortKey);
             rows.forEach(({ char, benefit, otherOptionsHtml }) => {
-                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
+                const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
             });
             html += '</tbody></table>';
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
             itemComparisonContent.innerHTML = html;
             itemComparisonModal.style.display = 'block';
+            bindCharStatsLinks(itemComparisonContent);
             const closeBtn = document.getElementById('closeItemComparisonBtn');
             if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
@@ -2497,12 +2553,14 @@
             });
             rows.sort((a, b) => b.sortKey - a.sortKey);
             rows.forEach(({ char, slotName, benefit, otherOptionsHtml }) => {
-                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${slotName}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
+                const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${slotName}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
             });
             html += '</tbody></table>';
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
             itemComparisonContent.innerHTML = html;
             itemComparisonModal.style.display = 'block';
+            bindCharStatsLinks(itemComparisonContent);
             const closeBtn = document.getElementById('closeItemComparisonBtn');
             if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
@@ -2544,12 +2602,6 @@
         }
         if (toonPanelSlotSort) {
             toonPanelSlotSort.addEventListener('change', () => {
-                if (toonUpgradesMatchedChars.length && toonUpgradesMatchedChars[toonUpgradesSelectedIndex])
-                    renderToonUpgradesStrip(toonUpgradesMatchedChars[toonUpgradesSelectedIndex]);
-            });
-        }
-        if (toonPanelSlotFilter) {
-            toonPanelSlotFilter.addEventListener('change', () => {
                 if (toonUpgradesMatchedChars.length && toonUpgradesMatchedChars[toonUpgradesSelectedIndex])
                     renderToonUpgradesStrip(toonUpgradesMatchedChars[toonUpgradesSelectedIndex]);
             });
