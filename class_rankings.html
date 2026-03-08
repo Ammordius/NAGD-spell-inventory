@@ -2316,6 +2316,7 @@
             if (deltas && deltas.hpDelta != null && deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
             if (deltas && deltas.manaDelta != null && deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
             if (deltas && deltas.acDelta != null && deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
+            if (deltas && deltas.svAllDelta != null && deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
             if (focusSpellName) parts.push('Focus: ' + focusSpellName);
             return parts.join(' ');
         }
