@@ -2308,8 +2308,8 @@
                 slotsWithUpgrades = slotsWithUpgrades.filter(s => enabledSlots[s.slotId] !== false);
             }
 
-            // Slots always in natural order (1–22); sort mode only affects order of items within each slot
-            slotsWithUpgrades.sort((a, b) => a.slotId - b.slotId);
+            if (mode === 'hp_dkp') slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
+            else if (mode === 'max_upgrade') slotsWithUpgrades.sort((a, b) => b.maxDelta - a.maxDelta);
 
             return slotsWithUpgrades;
         }
