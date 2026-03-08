@@ -2385,8 +2385,16 @@
                     const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
                     const dkpStr = last3.length ? `Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '(no DKP)';
                     const stats = itemStatsCache[Number(mageloId)];
-                    const upgrade = (slot.upgrades || []).find(u => u.itemId === Number(mageloId));
-                    const statsShort = upgrade ? (formatUpgradeDeltasShort(upgrade.deltas || {}, upgrade.focusSpellName) || '—') : (stats ? formatItemStatsAbsolute(stats) : '—');
+                    const currentStats = (slot.currentItemId != null && !isNaN(slot.currentItemId)) ? itemStatsCache[slot.currentItemId] : null;
+                    let statsShort = '—';
+                    if (currentStats && stats) {
+                        const deltas = getItemStatDeltas(currentStats, stats);
+                        statsShort = formatUpgradeDeltasShort(deltas, stats.focusSpellName || '') || '—';
+                    } else {
+                        const upgrade = (slot.upgrades || []).find(u => u.itemId === Number(mageloId));
+                        if (upgrade) statsShort = formatUpgradeDeltasShort(upgrade.deltas || {}, upgrade.focusSpellName) || '—';
+                        else if (stats) statsShort = formatItemStatsAbsolute(stats);
+                    }
                     html += `<div class="toon-upgrade-card toon-upgrade-card-elemental" data-item-id="${mageloId}" data-item-name="${escapeHtml(opt.pattern_name)}" data-slot-name="${escapeHtml(slot.slotName || '')}" data-slot-id="${slot.slotId != null ? slot.slotId : ''}" data-char-name="${escapeHtml(char.name)}">
   <div class="card-name">${escapeHtml(opt.pattern_name)}</div>
   <div class="card-deltas">${escapeHtml(statsShort)}</div>
