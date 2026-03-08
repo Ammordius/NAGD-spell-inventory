@@ -2607,8 +2607,27 @@
 
         /** Open item comparison by item id/name (e.g. from typed search). Finds per-toon slot from upgrades or uses item's slot. */
         function openItemComparisonByItemId(itemId, itemName) {
-            const slotIds = getSlotIdsForItem(itemId);
             const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+            if (itemName && elementalSlotOptions && elementalSlotOptions.by_slot_id) {
+                const searchNorm = normalizeItemNameForLookup(itemName);
+                if (searchNorm) {
+                    for (const slotId of Object.keys(elementalSlotOptions.by_slot_id)) {
+                        const opts = elementalSlotOptions.by_slot_id[slotId] || [];
+                        for (const opt of opts) {
+                            if (normalizeItemNameForLookup(opt.pattern_name) === searchNorm) {
+                                const byClass = opt.by_class || {};
+                                const firstKey = Object.keys(byClass).sort()[0];
+                                const firstId = firstKey ? (byClass[firstKey] || '').trim() : '';
+                                if (firstId) {
+                                    openItemComparison(firstId, opt.pattern_name, slotNames[slotId] || ('Slot ' + slotId), String(slotId), null, null);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            const slotIds = getSlotIdsForItem(itemId);
             const elementalInfo = elementalMageloToPattern[String(itemId)];
             if (elementalInfo && slotIds.length > 0) {
                 const sid = slotIds[0];
