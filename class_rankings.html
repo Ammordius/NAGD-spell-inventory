@@ -2517,11 +2517,13 @@
                     }
                     rows.push({ char, benefit, otherOptionsHtml, sortKey });
                 });
+                rows = rows.filter(r => r.sortKey > 0);
                 rows.sort((a, b) => b.sortKey - a.sortKey);
                 rows.forEach(({ char, benefit, otherOptionsHtml }) => {
                     const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
                     html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
                 });
+                if (rows.length === 0) html += '<tr><td colspan="3" style="padding: 12px; color: #6c757d;">No toons in your list have this as an upgrade (current item or downgrade are hidden).</td></tr>';
                 html += '</tbody></table>';
                 html += '<p style="margin-top: 12px; font-size: 0.9em; color: #6c757d;"><strong>Per-class item stats:</strong></p>';
                 html += '<table style="width: 100%; border-collapse: collapse; margin-top: 4px;"><thead><tr><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Class</th><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Item</th><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Stats</th></tr></thead><tbody>';
@@ -2565,11 +2567,13 @@
                     }
                     rows.push({ char, benefit, otherOptionsHtml, sortKey });
                 });
+                rows = rows.filter(r => r.sortKey > 0);
                 rows.sort((a, b) => b.sortKey - a.sortKey);
                 rows.forEach(({ char, benefit, otherOptionsHtml }) => {
                     const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
                     html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
                 });
+                if (rows.length === 0) html += '<tr><td colspan="3" style="padding: 12px; color: #6c757d;">No toons in your list have this as an upgrade (current item or downgrade are hidden).</td></tr>';
                 html += '</tbody></table>';
             }
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
