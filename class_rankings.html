@@ -2376,18 +2376,17 @@
                 html += '<div class="toon-upgrade-strip">';
                 slotElementalOpts.forEach(opt => {
                     const byClass = opt.by_class || {};
-                    const firstKey = Object.keys(byClass).sort()[0];
-                    const firstId = firstKey ? (byClass[firstKey] || '').trim() : '';
-                    if (!firstId) return;
+                    const mageloId = classAbbrev ? (byClass[classAbbrev] || '').trim() : '';
+                    if (!mageloId) return;
                     const classListStr = Object.keys(byClass).sort().join(', ');
-                    const entry = dkpPricesCache[firstId];
+                    const entry = dkpPricesCache[mageloId];
                     const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
                     const last3 = prices.map(p => p.cost);
                     const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
                     const dkpStr = last3.length ? `Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '(no DKP)';
-                    const stats = itemStatsCache[Number(firstId)];
+                    const stats = itemStatsCache[Number(mageloId)];
                     const statsShort = stats ? formatItemStatsAbsolute(stats) : '—';
-                    html += `<div class="toon-upgrade-card toon-upgrade-card-elemental" data-item-id="${firstId}" data-item-name="${escapeHtml(opt.pattern_name)}" data-slot-name="${escapeHtml(slot.slotName || '')}" data-slot-id="${slot.slotId != null ? slot.slotId : ''}" data-char-name="${escapeHtml(char.name)}">
+                    html += `<div class="toon-upgrade-card toon-upgrade-card-elemental" data-item-id="${mageloId}" data-item-name="${escapeHtml(opt.pattern_name)}" data-slot-name="${escapeHtml(slot.slotName || '')}" data-slot-id="${slot.slotId != null ? slot.slotId : ''}" data-char-name="${escapeHtml(char.name)}">
   <div class="card-name">${escapeHtml(opt.pattern_name)}</div>
   <div class="card-deltas">${escapeHtml(statsShort)}</div>
   <div class="card-score">${escapeHtml(classListStr)} — ${escapeHtml(slot.slotName || '')}</div>
