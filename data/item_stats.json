@@ -18002,7 +18002,6 @@
     "effectNote": "",
     "focusSpellId": 3542,
     "focusSpellName": "Preservation of Solusek",
-    "focusPct": 20,
     "weight": 1.5,
     "size": "MEDIUM",
     "classes": "CLR DRU SHM NEC WIZ MAG ENC",
@@ -36724,7 +36723,6 @@
     "effectNote": "",
     "focusSpellId": 3114,
     "focusSpellName": "Preservation of the Akheva",
-    "focusPct": 18,
     "weight": 1.0,
     "size": "TINY",
     "classes": "NEC WIZ MAG ENC",
@@ -37140,7 +37138,6 @@
     "effectNote": "",
     "focusSpellId": 3114,
     "focusSpellName": "Preservation of the Akheva",
-    "focusPct": 18,
     "weight": 0.0,
     "size": "TINY",
     "classes": "CLR DRU SHM",
@@ -76690,140 +76687,6 @@
     "gearScore": 133,
     "name": "TAKP AllaClone  :: Wand of Casual Blessings"
   },
-  "29044": {
-    "flags": [
-      "MAGIC ITEM"
-    ],
-    "slot": "FINGERS",
-    "ac": 12,
-    "mods": [
-      {
-        "label": "STR",
-        "value": 10
-      },
-      {
-        "label": "STA",
-        "value": 10
-      },
-      {
-        "label": "HP",
-        "value": 90
-      },
-      {
-        "label": "MANA",
-        "value": 60
-      }
-    ],
-    "resists": [
-      {
-        "label": "Disease",
-        "value": 12
-      },
-      {
-        "label": "Poison",
-        "value": 12
-      }
-    ],
-    "requiredLevel": 46,
-    "levelType": "required",
-    "weight": 0.8,
-    "size": "TINY",
-    "classes": "ALL",
-    "gearScore": 62,
-    "name": "Steel Ring of Earthen Resilience"
-  },
-  "29045": {
-    "flags": [
-      "MAGIC ITEM"
-    ],
-    "slot": "FINGERS",
-    "ac": 9,
-    "mods": [
-      {
-        "label": "DEX",
-        "value": 15
-      },
-      {
-        "label": "WIS",
-        "value": 10
-      },
-      {
-        "label": "AGI",
-        "value": 15
-      },
-      {
-        "label": "HP",
-        "value": 75
-      },
-      {
-        "label": "MANA",
-        "value": 75
-      }
-    ],
-    "resists": [
-      {
-        "label": "Magic",
-        "value": 20
-      }
-    ],
-    "requiredLevel": 46,
-    "levelType": "required",
-    "weight": 0.4,
-    "size": "TINY",
-    "classes": "ALL",
-    "gearScore": 58,
-    "name": "Cloudy Ring of Pneumatic Force"
-  },
-  "29046": {
-    "flags": [
-      "MAGIC ITEM"
-    ],
-    "slot": "FINGERS",
-    "ac": 5,
-    "mods": [
-      {
-        "label": "STR",
-        "value": 8
-      },
-      {
-        "label": "DEX",
-        "value": 8
-      },
-      {
-        "label": "STA",
-        "value": 8
-      },
-      {
-        "label": "AGI",
-        "value": 8
-      },
-      {
-        "label": "HP",
-        "value": 65
-      },
-      {
-        "label": "MANA",
-        "value": 40
-      }
-    ],
-    "resists": [
-      {
-        "label": "Fire",
-        "value": 5
-      },
-      {
-        "label": "Cold",
-        "value": 5
-      }
-    ],
-    "requiredLevel": 46,
-    "levelType": "required",
-    "weight": 0.4,
-    "size": "TINY",
-    "classes": "ALL",
-    "gearScore": 47,
-    "name": "Valorium Ring of Gallantry"
-  },
   "29047": {
     "flags": [
       "MAGIC ITEM"
@@ -77024,354 +76887,160 @@
     "gearScore": 111,
     "name": "TAKP AllaClone  :: Yttrium Studded Veil"
   },
-  "30552": {
-    "flags": [
-      "MAGIC ITEM",
-      "LORE ITEM",
-      "NO DROP"
-    ],
-    "slot": "EAR WRIST",
-    "ac": 10,
-    "mods": [
-      {
-        "label": "STR",
-        "value": 5
-      },
-      {
-        "label": "WIS",
-        "value": 10
-      },
-      {
-        "label": "INT",
-        "value": 10
-      },
-      {
-        "label": "HP",
-        "value": 100
-      },
-      {
-        "label": "MANA",
-        "value": 100
-      }
-    ],
-    "resists": [
-      {
-        "label": "Fire",
-        "value": 15
-      },
-      {
-        "label": "Disease",
-        "value": 15
-      },
-      {
-        "label": "Cold",
-        "value": 15
-      },
-      {
-        "label": "Magic",
-        "value": 15
-      },
-      {
-        "label": "Poison",
-        "value": 15
-      }
-    ],
-    "requiredLevel": 55,
-    "focusSpellName": "Extended Range III",
-    "weight": 1.0,
-    "size": "SMALL",
-    "classes": "CLR DRU SHM NEC WIZ MAG ENC",
-    "name": "Glowing Amber Band"
+  "19726": {
+    "name": "Item 19726",
+    "gearScore": 0
   },
-  "9413": {
-    "flags": [
-      "MAGIC ITEM",
-      "ARTIFACT",
-      "NO DROP"
-    ],
-    "slot": "CHEST",
-    "ac": 30,
-    "mods": [
-      {
-        "label": "STR",
-        "value": 15
-      },
-      {
-        "label": "DEX",
-        "value": 15
-      },
-      {
-        "label": "STA",
-        "value": 15
-      },
-      {
-        "label": "WIS",
-        "value": 15
-      },
-      {
-        "label": "AGI",
-        "value": 15
-      },
-      {
-        "label": "HP",
-        "value": 100
-      },
-      {
-        "label": "MANA",
-        "value": 100
-      }
-    ],
-    "resists": [
-      {
-        "label": "Fire",
-        "value": 10
-      },
-      {
-        "label": "Disease",
-        "value": 10
-      },
-      {
-        "label": "Cold",
-        "value": 10
-      },
-      {
-        "label": "Magic",
-        "value": 10
-      },
-      {
-        "label": "Poison",
-        "value": 10
-      }
-    ],
-    "effectSpellName": "Flowing Thought III",
-    "weight": 1.0,
-    "size": "MEDIUM",
-    "classes": "DRU MNK BST",
-    "name": "Tunic of the Disciple"
+  "9960": {
+    "name": "Item 9960",
+    "gearScore": 0
   },
-  "5779": {
-    "flags": [
-      "MAGIC ITEM",
-      "LORE ITEM"
-    ],
-    "slot": "BACK",
-    "ac": 10,
-    "mods": [
-      {
-        "label": "HP",
-        "value": 75
-      },
-      {
-        "label": "MANA",
-        "value": 75
-      }
-    ],
-    "resists": [
-      {
-        "label": "Poison",
-        "value": 15
-      },
-      {
-        "label": "Disease",
-        "value": 15
-      }
-    ],
-    "weight": 3.0,
-    "size": "SMALL",
-    "classes": "ALL",
-    "gearScore": 65,
-    "name": "Iksar Hide Cape"
+  "11408": {
+    "name": "Item 11408",
+    "gearScore": 0
   },
-  "27167": {
-    "flags": [
-      "MAGIC ITEM",
-      "LORE ITEM",
-      "NO DROP"
-    ],
-    "slot": "SECONDARY",
-    "ac": 55,
-    "mods": [
-      {
-        "label": "STA",
-        "value": 15
-      },
-      {
-        "label": "DEX",
-        "value": 20
-      },
-      {
-        "label": "WIS",
-        "value": 15
-      },
-      {
-        "label": "INT",
-        "value": 15
-      },
-      {
-        "label": "HP",
-        "value": 100
-      },
-      {
-        "label": "MANA",
-        "value": 100
-      }
-    ],
-    "resists": [
-      {
-        "label": "Magic",
-        "value": 20
-      },
-      {
-        "label": "Poison",
-        "value": 10
-      }
-    ],
-    "requiredLevel": 62,
-    "levelType": "recommended",
-    "weight": 12.5,
-    "size": "LARGE",
-    "classes": "WAR PAL RNG SHD BRD ROG",
-    "gearScore": 118,
-    "name": "Basalt Bulwark"
+  "16257": {
+    "name": "Signet of the Arcane",
+    "focusSpellName": "Preservation of Xegony",
+    "focusPct": 15,
+    "gearScore": 0
   },
-  "28798": {
-    "flags": [
-      "MAGIC ITEM",
-      "LORE ITEM",
-      "NO DROP"
-    ],
-    "slot": "RANGE SECONDARY",
-    "ac": 20,
-    "mods": [
-      {
-        "label": "STR",
-        "value": 15
-      },
-      {
-        "label": "STA",
-        "value": 15
-      },
-      {
-        "label": "AGI",
-        "value": 15
-      },
-      {
-        "label": "DEX",
-        "value": 15
-      },
-      {
-        "label": "WIS",
-        "value": 15
-      },
-      {
-        "label": "INT",
-        "value": 15
-      },
-      {
-        "label": "HP",
-        "value": 100
-      },
-      {
-        "label": "MANA",
-        "value": 100
-      }
-    ],
-    "resists": [
-      {
-        "label": "Fire",
-        "value": 10
-      },
-      {
-        "label": "Cold",
-        "value": 10
-      },
-      {
-        "label": "Magic",
-        "value": 10
-      },
-      {
-        "label": "Poison",
-        "value": 10
-      },
-      {
-        "label": "Disease",
-        "value": 10
-      }
-    ],
-    "requiredLevel": 60,
-    "levelType": "recommended",
-    "effectSpellId": 2193,
-    "effectSpellName": "Vengeance III",
-    "effectNote": "",
-    "focusSpellId": 3541,
-    "focusSpellName": "Conservation of Solusek",
-    "weight": 2.0,
-    "size": "SMALL",
-    "classes": "ALL",
-    "gearScore": 103,
-    "name": "Secrets of the Planes"
+  "16255": {
+    "name": "Item 16255",
+    "gearScore": 0
   },
-  "29035": {
-    "flags": [
-      "MAGIC ITEM"
-    ],
-    "mods": [
-      {
-        "label": "MANA",
-        "value": 30
-      }
-    ],
-    "requiredLevel": 46,
-    "levelType": "required",
-    "effectSpellId": 3534,
-    "effectSpellName": "Affliction Haste IV",
-    "effectNote": "",
-    "focusSpellId": 3534,
-    "focusSpellName": "Affliction Haste IV",
-    "weight": 2.5,
-    "size": "SMALL",
-    "classes": "ALL",
-    "gearScore": 0,
-    "name": "Ceramic Skull of Decay"
+  "9489": {
+    "name": "Item 9489",
+    "focusSpellName": "Improved Healing IV",
+    "focusPct": 20,
+    "gearScore": 0
   },
-  "29038": {
-    "flags": [
-      "MAGIC ITEM"
-    ],
-    "slot": "RANGE SECONDARY",
-    "mods": [
-      {
-        "label": "STA",
-        "value": 8
-      },
-      {
-        "label": "AGI",
-        "value": 8
-      },
-      {
-        "label": "WIS",
-        "value": 8
-      },
-      {
-        "label": "HP",
-        "value": 25
-      },
-      {
-        "label": "MANA",
-        "value": 25
-      }
-    ],
-    "requiredLevel": 46,
-    "levelType": "required",
-    "effectSpellId": 3504,
-    "effectSpellName": "Extended Enhancement IV",
-    "effectNote": "",
-    "focusSpellId": 3504,
-    "focusSpellName": "Extended Enhancement IV",
-    "weight": 5.5,
-    "size": "SMALL",
-    "classes": "ALL",
-    "gearScore": 8,
-    "name": "Ceramic Shield of Valor"
+  "30369": {
+    "name": "Item 30369",
+    "gearScore": 0
+  },
+  "30164": {
+    "name": "Item 30164",
+    "gearScore": 0
+  },
+  "30385": {
+    "name": "Item 30385",
+    "gearScore": 0
+  },
+  "5723": {
+    "name": "Item 5723",
+    "gearScore": 0
+  },
+  "6508": {
+    "name": "Item 6508",
+    "gearScore": 0
+  },
+  "29597": {
+    "name": "Item 29597",
+    "gearScore": 0
+  },
+  "1557": {
+    "name": "Item 1557",
+    "gearScore": 0
+  },
+  "2611": {
+    "name": "Item 2611",
+    "gearScore": 0
+  },
+  "30928": {
+    "name": "Item 30928",
+    "gearScore": 0
+  },
+  "30926": {
+    "name": "Item 30926",
+    "gearScore": 0
+  },
+  "30921": {
+    "name": "Item 30921",
+    "gearScore": 0
+  },
+  "30927": {
+    "name": "Item 30927",
+    "gearScore": 0
+  },
+  "30925": {
+    "name": "Item 30925",
+    "gearScore": 0
+  },
+  "30924": {
+    "name": "Item 30924",
+    "gearScore": 0
+  },
+  "30923": {
+    "name": "Item 30923",
+    "gearScore": 0
+  },
+  "31299": {
+    "name": "Item 31299",
+    "gearScore": 0
+  },
+  "31297": {
+    "name": "Item 31297",
+    "gearScore": 0
+  },
+  "31248": {
+    "name": "Item 31248",
+    "gearScore": 0
+  },
+  "31298": {
+    "name": "Item 31298",
+    "gearScore": 0
+  },
+  "31296": {
+    "name": "Item 31296",
+    "gearScore": 0
+  },
+  "31247": {
+    "name": "Item 31247",
+    "gearScore": 0
+  },
+  "31249": {
+    "name": "Item 31249",
+    "gearScore": 0
+  },
+  "30468": {
+    "name": "Item 30468",
+    "gearScore": 0
+  },
+  "30469": {
+    "name": "Item 30469",
+    "gearScore": 0
+  },
+  "30467": {
+    "name": "Item 30467",
+    "gearScore": 0
+  },
+  "30466": {
+    "name": "Item 30466",
+    "gearScore": 0
+  },
+  "30465": {
+    "name": "Item 30465",
+    "gearScore": 0
+  },
+  "30470": {
+    "name": "Item 30470",
+    "gearScore": 0
+  },
+  "14733": {
+    "name": "Item 14733",
+    "gearScore": 0
+  },
+  "29044": {
+    "name": "Steel Ring of Earthen Resilience"
+  },
+  "29045": {
+    "name": "Cloudy Ring of Pneumatic Force"
+  },
+  "29046": {
+    "name": "Valorium Ring of Gallantry"
+  },
+  "32605": {
+    "name": "Ossein of Limitless Time"
   }
 }
