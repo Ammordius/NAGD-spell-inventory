@@ -371,7 +371,7 @@
         .toon-upgrade-slot-header { font-weight: 600; color: #495057; margin-bottom: 6px; font-size: 1rem; }
         .toon-upgrade-current { font-size: 0.9em; color: #6c757d; margin-bottom: 8px; }
         .toon-upgrade-current .item-link { color: #667eea; }
-        .toon-upgrade-current.toon-upgrade-elemental { margin-top: 4px; padding: 6px 8px; background: rgba(102, 126, 234, 0.08); border-radius: 6px; font-size: 0.9em; }
+        .toon-upgrade-card-elemental { border-left: 3px solid #667eea; }
         .char-stats-link { color: #667eea; text-decoration: none; font-weight: 500; }
         .char-stats-link:hover { text-decoration: underline; }
     </style>
@@ -2373,33 +2373,27 @@
                 }
                 const classAbbrev = char.class ? (CLASS_TO_ABBREV[char.class] || '') : '';
                 const slotElementalOpts = (elementalSlotOptions && elementalSlotOptions.by_slot_id && elementalSlotOptions.by_slot_id[String(slot.slotId)]) || [];
-                slotElementalOpts.forEach(opt => {
-                    const mageloId = opt.by_class && classAbbrev ? (opt.by_class[classAbbrev] || '').trim() : '';
-                    if (!mageloId) return;
-                    const mageloNum = Number(mageloId);
-                    const upgrade = (slot.upgrades || []).find(u => u.itemId === mageloNum);
-                    const stats = itemStatsCache[mageloNum];
-                    const itemName = (stats && stats.name) ? stats.name : (elementalDisplayNames[mageloId] || opt.pattern_name || 'Item ' + mageloId);
-                    if (upgrade) {
-                        const entry = dkpPricesCache[mageloId];
-                        const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
-                        const last3 = prices.map(p => p.cost);
-                        const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
-                        const hpPerDkp = getHpPerDkpForUpgrade(upgrade);
-                        const deltaStr = formatUpgradeDeltasShort(upgrade.deltas || {}, upgrade.focusSpellName);
-                        const dkpStr = last3.length ? `Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '(no DKP)';
-                        const hpDkpStr = hpPerDkp != null ? ` HP/DKP: ${hpPerDkp.toFixed(2)}` : '';
-                        html += `<div class="toon-upgrade-current toon-upgrade-elemental"><strong>Elemental</strong> (from ${escapeHtml(opt.pattern_name)}): <a class="item-link item-link-elemental" href="https://www.takproject.net/allaclone/item.php?id=${mageloId}" target="_blank" rel="noopener" data-item-id="${mageloId}" data-item-name="${escapeHtml(itemName)}">${escapeHtml(itemName)}</a> — score +${(upgrade.delta || 0).toFixed(2)}; ${escapeHtml(deltaStr || '—')}; ${dkpStr}${hpDkpStr}</div>`;
-                    } else {
-                        const entry = dkpPricesCache[mageloId];
-                        const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
-                        const last3 = prices.map(p => p.cost);
-                        const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
-                        const dkpStr = last3.length ? ` — Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '';
-                        html += `<div class="toon-upgrade-current toon-upgrade-elemental"><strong>Elemental</strong> (from ${escapeHtml(opt.pattern_name)}): <a class="item-link item-link-elemental" href="https://www.takproject.net/allaclone/item.php?id=${mageloId}" target="_blank" rel="noopener" data-item-id="${mageloId}" data-item-name="${escapeHtml(itemName)}">${escapeHtml(itemName)}</a>${dkpStr}</div>`;
-                    }
-                });
                 html += '<div class="toon-upgrade-strip">';
+                slotElementalOpts.forEach(opt => {
+                    const byClass = opt.by_class || {};
+                    const firstKey = Object.keys(byClass).sort()[0];
+                    const firstId = firstKey ? (byClass[firstKey] || '').trim() : '';
+                    if (!firstId) return;
+                    const classListStr = Object.keys(byClass).sort().join(', ');
+                    const entry = dkpPricesCache[firstId];
+                    const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+                    const last3 = prices.map(p => p.cost);
+                    const avgDkp = prices.length ? (last3.reduce((a, b) => a + b, 0) / last3.length) : 0;
+                    const dkpStr = last3.length ? `Last 3 DKP: ${last3.join(', ')} (avg ${avgDkp.toFixed(1)})` : '(no DKP)';
+                    const stats = itemStatsCache[Number(firstId)];
+                    const statsShort = stats ? formatItemStatsAbsolute(stats) : '—';
+                    html += `<div class="toon-upgrade-card toon-upgrade-card-elemental" data-item-id="${firstId}" data-item-name="${escapeHtml(opt.pattern_name)}" data-slot-name="${escapeHtml(slot.slotName || '')}" data-slot-id="${slot.slotId != null ? slot.slotId : ''}" data-char-name="${escapeHtml(char.name)}">
+  <div class="card-name">${escapeHtml(opt.pattern_name)}</div>
+  <div class="card-deltas">${escapeHtml(statsShort)}</div>
+  <div class="card-score">${escapeHtml(classListStr)} — ${escapeHtml(slot.slotName || '')}</div>
+  <div class="card-dkp">${dkpStr}</div>
+</div>`;
+                });
                 slot.upgrades.forEach(u => {
                     const entry = dkpPricesCache[String(u.itemId)];
                     const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
@@ -2428,18 +2422,7 @@
                     const slotId = el.getAttribute('data-slot-id');
                     const delta = el.getAttribute('data-delta');
                     const hpDkp = el.getAttribute('data-hp-dkp');
-                    openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp);
-                });
-            });
-            toonUpgradesContent.querySelectorAll('.item-link-elemental').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const itemId = link.getAttribute('data-item-id');
-                    const itemName = link.getAttribute('data-item-name');
-                    const section = link.closest('.toon-upgrade-slot-section');
-                    const slotId = section ? section.getAttribute('data-slot-id') : '';
-                    const slotName = (slotId && SLOT_NAMES_FOR_UI[parseInt(slotId, 10)]) ? SLOT_NAMES_FOR_UI[parseInt(slotId, 10)] : (slotId ? 'Slot ' + slotId : '');
-                    openItemComparison(itemId, itemName, slotName, slotId || null, null, null);
+                    openItemComparison(itemId, itemName, slotName, slotId, delta || null, hpDkp || null);
                 });
             });
             bindCharStatsLinks(toonUpgradesContent);
@@ -2491,8 +2474,49 @@
                     const name = (stats && stats.name) ? stats.name : (elementalDisplayNames[mid] || 'Item ' + mid);
                     return `${escapeHtml(cls)} — <a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${mid}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
                 }).filter(Boolean).join(' · ');
-                html += `<p class="elemental-classes-block" style="margin: 10px 0; padding: 10px 12px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border-left: 4px solid #667eea;"><strong>From ${escapeHtml(elementalInfo.pattern_name)}.</strong> Classes that can benefit from this upgrade: ${classLinks}</p>`;
-                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Class</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Item</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Stats</th></tr></thead><tbody>';
+                html += `<p class="elemental-classes-block" style="margin: 10px 0; padding: 10px 12px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border-left: 4px solid #667eea;"><strong>From ${escapeHtml(elementalInfo.pattern_name)}.</strong> Only these classes can benefit: ${classLinks}</p>`;
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison to your toons' actual gear in this slot (only toons whose class can use this pattern). Close to return to upgrade list.</p>`;
+                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+
+                const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
+                const benefitingAbbrevs = Object.keys(byClass);
+                const rows = [];
+                toonUpgradesMatchedChars.forEach(char => {
+                    const classAbbrev = char.class ? (CLASS_TO_ABBREV[char.class] || '') : '';
+                    if (!benefitingAbbrevs.includes(classAbbrev)) return;
+                    const elementalItemId = (byClass[classAbbrev] || '').trim();
+                    if (!elementalItemId) return;
+                    let benefit = '—';
+                    let otherOptionsHtml = '—';
+                    let sortKey = -Infinity;
+                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
+                    const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
+                    if (slot && slot.upgrades) {
+                        const u = slot.upgrades.find(x => String(x.itemId) === String(elementalItemId));
+                        if (u) {
+                            const hpd = getHpPerDkpForUpgrade(u);
+                            const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                            benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
+                            if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
+                        }
+                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(elementalItemId)).slice(0, 5);
+                        otherOptionsHtml = others.length ? others.map(o => {
+                            const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
+                            const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
+                            return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                        }).join(', ') : '—';
+                    }
+                    rows.push({ char, benefit, otherOptionsHtml, sortKey });
+                });
+                rows.sort((a, b) => b.sortKey - a.sortKey);
+                rows.forEach(({ char, benefit, otherOptionsHtml }) => {
+                    const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
+                    html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
+                });
+                html += '</tbody></table>';
+                html += '<p style="margin-top: 12px; font-size: 0.9em; color: #6c757d;"><strong>Per-class item stats:</strong></p>';
+                html += '<table style="width: 100%; border-collapse: collapse; margin-top: 4px;"><thead><tr><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Class</th><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Item</th><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Stats</th></tr></thead><tbody>';
                 Object.keys(byClass).sort().forEach(cls => {
                     const mid = (byClass[cls] || '').trim();
                     if (!mid) return;
@@ -2500,7 +2524,7 @@
                     const name = (stats && stats.name) ? stats.name : (elementalDisplayNames[mid] || 'Item ' + mid);
                     const fullClassName = ABBREV_TO_CLASS[cls] || cls;
                     const statsStr = formatItemStatsAbsolute(stats);
-                    html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(fullClassName)}</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${mid}" target="_blank" rel="noopener">${escapeHtml(name)}</a></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(statsStr)}</td></tr>`;
+                    html += `<tr><td style="padding: 6px; border-bottom: 1px solid #eee;">${escapeHtml(fullClassName)}</td><td style="padding: 6px; border-bottom: 1px solid #eee;"><a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${mid}" target="_blank" rel="noopener">${escapeHtml(name)}</a></td><td style="padding: 6px; border-bottom: 1px solid #eee;">${escapeHtml(statsStr)}</td></tr>`;
                 });
                 html += '</tbody></table>';
             } else {
@@ -2586,9 +2610,14 @@
         function openItemComparisonByItemId(itemId, itemName) {
             const slotIds = getSlotIdsForItem(itemId);
             const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+            const elementalInfo = elementalMageloToPattern[String(itemId)];
+            if (elementalInfo && slotIds.length > 0) {
+                const sid = slotIds[0];
+                openItemComparison(itemId, elementalInfo.pattern_name, slotNames[sid] || ('Slot ' + sid), String(sid), null, null);
+                return;
+            }
             const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
             let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
-            const elementalInfo = elementalMageloToPattern[String(itemId)];
             if (elementalInfo) {
                 const byClass = elementalInfo.by_class || {};
                 const classLinks = Object.keys(byClass).sort().map(cls => {
