@@ -26,7 +26,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 1554,Brain of Cazic Thule,RANGE,10,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, WIS: 10, INT: 10, HP: 100, MANA: 100","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",Flowing Thought I,,,ALL,10.0,LARGE
 1555,Fearsome Shield,SECONDARY,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15","Poison: 15, Disease: 15",Aura of Battle,,,WAR CLR PAL SHD,0.1,LARGE
 1556,Grotesque Girdle,WAIST,8,MAGIC ITEM | LORE ITEM | NO DROP,"WIS: 10, INT: 10, HP: 100, MANA: 100",,Reanimation Haste III,Reanimation Haste III,,CLR DRU SHM NEC WIZ MAG ENC,0.0,SMALL
-1557,Item 1557,SHOULDERS,10,MAGIC ITEM | LORE ITEM | NO DROP,,"Fire: 35, Cold: 35, Magic: 35, Poison: 35, Disease: 35",,,,ALL,0.0,SMALL
+1557,Shawl of Protection,SHOULDERS,10,MAGIC ITEM | LORE ITEM | NO DROP,,"Fire: 35, Cold: 35, Magic: 35, Poison: 35, Disease: 35",,,,ALL,0.0,SMALL
 1558,Berserkers Ring,FINGERS,,MAGIC ITEM | LORE ITEM | NO DROP,STR: 25,,Firefist,,,WAR PAL RNG SHD MNK BRD ROG BST,0.0,TINY
 1559,Zombie Flesh Bracer,WRIST,6,MAGIC ITEM | LORE ITEM | NO DROP,"INT: 5, HP: 65, MANA: 65",,Breath of the Dead,,,NEC WIZ MAG ENC,0.0,TINY
 1628,Shroud of Veeshan,BACK,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 8, AGI: 8, DEX: 8, WIS: 12, INT: 12, CHA: 8, HP: 55, MANA: 110",,Improved Healing III,Improved Healing III,,ALL,1.0,MEDIUM
@@ -39,7 +39,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 2580,Petrified Heartwood Flamberge,PRIMARY,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, WIS: 25, INT: 25, HP: 100, MANA: 100","Fire: 15, Cold: 15, Magic: 15",Engulfing Roots,,51,PAL SHD,10.0,LARGE
 2581,Golden Leaf Earring,EAR,10,LORE ITEM | NO DROP,"STR: 10, STA: 10, WIS: 15, HP: 80, MANA: 100","Fire: 12, Poison: 12, Disease: 12",Flowing Thought III,,,CLR DRU SHM,0.1,TINY
 2582,Sap Encrusted Branch,PRIMARY SECONDARY,5,MAGIC ITEM | LORE ITEM | NO DROP,STA: 16,"Fire: 12, Poison: 12, Disease: 12",Ensnare,,,CLR RNG DRU MNK SHM BST,0.5,MEDIUM
-2611,Item 2611,HEAD,35,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, WIS: 10, INT: 10, HP: 100","Fire: 10, Cold: 10, Magic: 25, Poison: 10, Disease: 10",Truesight,,,ALL,1.0,TINY
+2611,Custom Crown of the Kromzek Kings,HEAD,35,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, WIS: 10, INT: 10, HP: 100","Fire: 10, Cold: 10, Magic: 25, Poison: 10, Disease: 10",Truesight,,,ALL,1.0,TINY
 2629,Flame Encased Earring,EAR,5,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 12, DEX: 12, WIS: 12, INT: 12, HP: 90, MANA: 90","Cold: 18, Magic: 12",Focus of Solusek,Focus of Solusek,58,ALL,0.4,TINY
 2630,Whispering Air Bangle,EAR,8,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 18, STA: 25, AGI: 18, WIS: 12, INT: 12, CHA: 10, HP: 140, MANA: 140","Fire: 25, Magic: 25",Aura of Daring,,62,ALL,0.1,TINY
 2698,Essence Lens,RANGE,15,MAGIC ITEM | LORE ITEM | NO DROP,"HP: 75, MANA: 75","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Spell Haste III,Spell Haste III,,ALL,0.0,TINY
@@ -63,7 +63,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 5461,Wild Lord's Tunic,CHEST,14,MAGIC ITEM,"STR: 5, STA: 8, AGI: 5, DEX: 5, WIS: 9, HP: 60, MANA: 20",,Bramblecoat,,,BST,0.5,LARGE
 5468,Bestial Tunic,CHEST,16,MAGIC ITEM | NO DROP,"STR: 5, STA: 6, AGI: 5, WIS: 5, HP: 50, MANA: 90","Fire: 2, Cold: 2, Magic: 2, Poison: 2, Disease: 2",Bramblecoat,,,BST,0.5,LARGE
 5594,Earring of Temporal Solstice,EAR,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 15, DEX: 25, INT: 25, CHA: 10, HP: 165, MANA: 180","Magic: 20, Poison: 15, Disease: 20",Conservation of Bertoxxulous,Conservation of Bertoxxulous,65,SHD DRU SHM NEC ENC BST,0.3,TINY
-5723,Item 5723,SHOULDERS ARMS WRIST,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, HP: 100","Cold: 10, Magic: 5",Aura of Battle,,,ALL,0.5,SMALL
+5723,Spirit Wracked Cord,SHOULDERS ARMS WRIST,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, HP: 100","Cold: 10, Magic: 5",Aura of Battle,,,ALL,0.5,SMALL
 5760,Earring of Xaoth Kor,EAR,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 15, DEX: 15, WIS: 25, CHA: 15, HP: 160, MANA: 155","Cold: 20, Poison: 20, Disease: 15",Vengeance III,,65,ALL,0.4,TINY
 5772,Mask of Secrets,FACE,7,MAGIC ITEM | LORE ITEM,"INT: 5, CHA: 5, MANA: 20",Poison: 5,,,,NEC WIZ MAG ENC,3.0,SMALL
 5776,Fist of Nature,PRIMARY SECONDARY,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 15, HP: 100","Fire: 10, Cold: 10, Magic: 10, Poison: 7, Disease: 7",Engulfing Roots,,55,MNK BST,0.6,TINY
@@ -75,11 +75,11 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 5839,Wurmscale Fistwraps,PRIMARY SECONDARY,5,MAGIC ITEM | NO DROP,"STA: 10, HP: 75","Fire: 20, Magic: 5",,,,MNK BST,0.5,SMALL
 5842,Dragonspine Rapier,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 10, DEX: 10, HP: 25","Poison: 30, Disease: 20",Kylie's Venom,,55,ROG,0.5,TINY
 5843,Frosted Ice Spike,PRIMARY SECONDARY,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, HP: 50",Cold: 35,,,,BRD ROG,1.0,SMALL
-5854,,,,MAGIC ITEM | LORE ITEM,,,,,,None,0.1,TINY
+5854,Mark of Shadows,,,MAGIC ITEM | LORE ITEM,,,,,,None,0.1,TINY
 5975,War Charm of Crossed Blades,EAR,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, DEX: 15, WIS: 20, INT: 20, HP: 100, MANA: 125","Fire: 20, Cold: 20",Druzzil's Distance,Druzzil's Distance,61,CLR DRU SHM NEC WIZ MAG ENC,0.5,TINY
 6200,Bo Staff of Trorsmang,PRIMARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10",,,,,MNK,5.0,MEDIUM
 6441,Carved Bone Ring,FINGERS,10,MAGIC ITEM | LORE ITEM,"STR: 12, DEX: 5",,,,,WAR PAL RNG SHD MNK BRD ROG BST,0.1,MEDIUM
-6508,Item 6508,EAR,7,MAGIC ITEM | LORE ITEM,"STR: 5, AGI: 5, DEX: 5, HP: 80, MANA: 30","Fire: 6, Cold: 6, Magic: 6, Poison: 6, Disease: 6",,,56,WAR PAL RNG SHD MNK BRD ROG BST,0.2,TINY
+6508,Tear of the Rainmaker,EAR,7,MAGIC ITEM | LORE ITEM,"STR: 5, AGI: 5, DEX: 5, HP: 80, MANA: 30","Fire: 6, Cold: 6, Magic: 6, Poison: 6, Disease: 6",,,56,WAR PAL RNG SHD MNK BRD ROG BST,0.2,TINY
 6512,Crystallized Rain,EAR,13,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, HP: 125, MANA: 75","Fire: 18, Magic: 18",Aura of Regeneration,,61,WAR PAL RNG SHD MNK BRD ROG BST,0.5,TINY
 6670,Hammer of the Dragonborn,PRIMARY,,MAGIC ITEM | NO DROP,"STR: 6, STA: 6, WIS: 12, MANA: 60",,Primal Essence,,,SHM,9.8,LARGE
 6672,Atrebe's Diabolic Sprinkler,PRIMARY,,MAGIC ITEM | NO DROP,"WIS: 11, MANA: 50",,Divine Wrath,,,CLR,8.0,LARGE
@@ -91,8 +91,8 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 7277,Nature's Melody,PRIMARY SECONDARY,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 15, AGI: 5, CHA: 10, HP: 100","Fire: 13, Cold: 13, Magic: 13",Nature's Melody,,,BRD,1.0,TINY
 7363,Robe of the Enslaved Soul,CHEST,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 5, DEX: 10, INT: 5, HP: 50","Cold: 5, Magic: 5",Regeneration,,,MNK NEC WIZ MAG ENC,7.5,MEDIUM
 7389,Seer's Orb of Power,RANGE PRIMARY SECONDARY,5,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, WIS: 10, INT: 10, CHA: 10, MANA: 100","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",Flowing Thought III,,55,CLR DRU SHM NEC WIZ MAG ENC,0.1,TINY
-7544,Vius Short Sword,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 5, AGI: 4, DEX: 6, CHA: 4, HP: 75, MANA: 10",Magic: 15,,,,WAR PAL RNG SHD BRD ROG,3.0,MEDIUM
-7558,Shadow Flame Staff,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 6, DEX: 6, INT: 6, CHA: 3, HP: 35, MANA: 25",Fire: 10,,,,WAR CLR PAL RNG SHD DRU MNK BRD ROG SHM NEC WIZ MAG ENC,3.5,MEDIUM
+7544,Vius short sword,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 5, AGI: 4, DEX: 6, CHA: 4, HP: 75, MANA: 10",Magic: 15,,,,WAR PAL RNG SHD BRD ROG,3.0,MEDIUM
+7558,Shadow Flame staff,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 6, DEX: 6, INT: 6, CHA: 3, HP: 35, MANA: 25",Fire: 10,,,,WAR CLR PAL RNG SHD DRU MNK BRD ROG SHM NEC WIZ MAG ENC,3.5,MEDIUM
 7767,Necklace of Reflected Flames,NECK,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, DEX: 20, WIS: 15, INT: 15, HP: 135, MANA: 135","Cold: 25, Magic: 25",Vengeance VI,,62,ALL,0.5,SMALL
 7768,Pendant of the Triumphant Victor,NECK,15,MAGIC ITEM | LORE ITEM | NO DROP,"DEX: 10, WIS: 10, INT: 10, HP: 100, MANA: 100","Fire: 18, Cold: 18, Magic: 18, Poison: 18, Disease: 18",Mana Preservation IV,Mana Preservation IV,61,ALL,0.8,SMALL
 7769,Talisman of the Elements,NECK,30,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 18, DEX: 18, WIS: 20, INT: 20, CHA: 20, HP: 220, MANA: 200","Fire: 30, Cold: 30, Magic: 30",Aura of Resolution,Conservation of Xegony,65,ALL,0.8,SMALL
@@ -109,7 +109,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 7869,Heavy Yttrium Chestplate,CHEST,75,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, WIS: 20, INT: 20, HP: 125, MANA: 125","Fire: 30, Cold: 15, Magic: 15, Poison: 30, Disease: 15",Yttric Ventus,,,WAR CLR PAL SHD BRD,10.0,LARGE
 7870,Starred Yttrium Ring,FINGERS,10,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 10, DEX: 10, WIS: 10, INT: 10, CHA: 10, HP: 100, MANA: 100","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",Flowing Thought V,,,ALL,0.1,SMALL
 7871,Yttrium Studded Leather Boots,FEET,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 30, HP: 100, MANA: 100","Poison: 20, Disease: 20",Spirit of Wolf,,,ALL,2.0,MEDIUM
-7886,,,,,,,,,,ALL,0.1,SMALL
+7886,Essence of Fire,,,,,,,,,ALL,0.1,SMALL
 7902,Darkblood Sword,PRIMARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 5, WIS: 5, INT: 5",,,,,WAR PAL RNG SHD,5.6,MEDIUM
 7903,Mithril Edged Short Sword,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 8, HP: 35","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,WAR PAL RNG SHD BRD ROG,2.5,SMALL
 7904,Bow of Shadows,RANGE,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, WIS: 10, HP: 25, MANA: 25","Fire: 3, Cold: 3, Magic: 3",,,,WAR PAL RNG SHD ROG,4.5,MEDIUM
@@ -196,46 +196,46 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 9485,Grimfaced Visor,FACE,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, DEX: 20, HP: 125, MANA: 100",Magic: 25,Aura of Daring,,61,WAR PAL RNG SHD MNK BRD ROG BST,1.0,SMALL
 9487,Burning Mask of Terror,FACE,18,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 15, WIS: 15, INT: 15, HP: 115, MANA: 85",Cold: 25,Flowing Thought IV,,62,PAL RNG SHD BRD BST,1.5,SMALL
 9488,Abalone Engraved Tribal Mask,FACE,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 12, DEX: 20, INT: 12, CHA: 25, HP: 150, MANA: 125","Fire: 12, Cold: 12, Poison: 12, Disease: 12",Flowing Thought III,,65,PAL RNG SHD BRD BST,1.0,SMALL
-9489,Item 9489,FACE,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 7, DEX: 8, WIS: 8, HP: 65, MANA: 65","Fire: 10, Poison: 10",Improved Healing IV,Improved Healing IV,56,CLR PAL RNG DRU SHM BST,0.8,SMALL
+9489,Veil of War Wise Eyes,FACE,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 7, DEX: 8, WIS: 8, HP: 65, MANA: 65","Fire: 10, Poison: 10",Improved Healing IV,Improved Healing IV,56,CLR PAL RNG DRU SHM BST,0.8,SMALL
 9490,Primal Mask of the Earthcrafter,FACE,11,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, DEX: 12, WIS: 15, HP: 75, MANA: 100","Poison: 15, Disease: 15",Improved Healing IV,Improved Healing IV,62,CLR PAL RNG DRU SHM BST,1.3,SMALL
 9495,Circlet of the Victor,HEAD,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, AGI: 10, DEX: 12, INT: 15, HP: 75, MANA: 75","Fire: 15, Cold: 15, Magic: 15",Flowing Thought II,,58,NEC WIZ MAG ENC,2.0,MEDIUM
 9497,Cap of Drowned Souls,HEAD,18,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 13, DEX: 13, WIS: 15, HP: 100, MANA: 85","Fire: 15, Magic: 20",Flowing Thought II,,61,CLR DRU SHM,0.8,MEDIUM
 9498,Coil of Twisted Platinum Wire,HEAD,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 14, AGI: 6, WIS: 12, CHA: 5, HP: 85, MANA: 85","Poison: 15, Disease: 15",Flowing Thought II,,55,CLR DRU SHM,1.5,MEDIUM
 9574,Eye of Dreams,RANGE,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 30, DEX: 10, WIS: 15, INT: 15, CHA: 20, HP: 185, MANA: 185","Magic: 20, Poison: 20, Disease: 20",Maelin's Meditation,,65,ALL,1.0,MEDIUM
 9628,TAKP AllaClone  :: Kizrak's Helmet of Battle,HEAD,34,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 8, DEX: 6, HP: 60","Fire: 3, Cold: 3, Magic: 4, Poison: 5",Plainsight,,,WAR,6.5,MEDIUM
-9629,,HEAD,60,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, AGI: 10, DEX: 15, HP: 160","Fire: 5, Cold: 20, Magic: 20, Disease: 5",Faerune,,65,WAR,6.5,MEDIUM
+9629,Raex's Helm of Destruction,HEAD,60,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, AGI: 10, DEX: 15, HP: 160","Fire: 5, Cold: 20, Magic: 20, Disease: 5",Faerune,,65,WAR,6.5,MEDIUM
 9805,TAKP AllaClone  :: Stanos' Wicked Helmet,HEAD,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 2, AGI: 6, DEX: 8, HP: 50","Cold: 3, Magic: 6, Poison: 2, Disease: 4",Plainsight,,,ROG,5.0,MEDIUM
-9806,,HEAD,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, AGI: 15, DEX: 25, HP: 145","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,ROG,5.0,MEDIUM
+9806,Bidilis' Helm of the Elusive,HEAD,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, AGI: 15, DEX: 25, HP: 145","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,ROG,5.0,MEDIUM
 9808,TAKP AllaClone  :: Helm of Enlightenment,HEAD,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 5, AGI: 4, DEX: 7, HP: 50","Fire: 5, Cold: 5, Poison: 3, Disease: 2",Plainsight,,,MNK,0.1,MEDIUM
-9809,,HEAD,22,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 18, AGI: 20, DEX: 12, HP: 145","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,MNK,0.3,MEDIUM
+9809,Ton Po's Helm of Composure,HEAD,22,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 18, AGI: 20, DEX: 12, HP: 145","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,MNK,0.3,MEDIUM
 9811,TAKP AllaClone  :: Jaylia's Helm of the Valiant,HEAD,28,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 4, AGI: 5, WIS: 6, HP: 50, MANA: 40","Fire: 4, Cold: 3, Magic: 4, Poison: 4",Plainsight,,,PAL,6.5,MEDIUM
-9812,,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, DEX: 18, WIS: 12, HP: 145, MANA: 130","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,PAL,6.5,MEDIUM
+9812,Trydan's Helm of Nobility,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, DEX: 18, WIS: 12, HP: 145, MANA: 130","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,PAL,6.5,MEDIUM
 9814,TAKP AllaClone  :: Helm of Emblazoned Souls,HEAD,28,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 5, AGI: 3, DEX: 2, INT: 6, HP: 50, MANA: 40","Fire: 6, Cold: 4, Poison: 5",Plainsight,,,SHD,6.5,MEDIUM
-9815,,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 20, AGI: 10, DEX: 12, INT: 12, HP: 145, MANA: 130","Fire: 5, Cold: 20, Magic: 20, Disease: 5",Faerune,,65,SHD,6.5,MEDIUM
+9815,Grimror's Helm of the Plagues,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 20, AGI: 10, DEX: 12, INT: 12, HP: 145, MANA: 130","Fire: 5, Cold: 20, Magic: 20, Disease: 5",Faerune,,65,SHD,6.5,MEDIUM
 9817,TAKP AllaClone  :: Composers Helmet,HEAD,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, DEX: 8, INT: 4, CHA: 4, HP: 50, MANA: 40","Fire: 3, Cold: 3, Magic: 3, Poison: 3, Disease: 3",Plainsight,,,BRD,6.5,MEDIUM
-9818,,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, DEX: 18, INT: 12, CHA: 10, HP: 145, MANA: 130","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,BRD,6.5,MEDIUM
+9818,Rizlona's Fiery Helm,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, DEX: 18, INT: 12, CHA: 10, HP: 145, MANA: 130","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,BRD,6.5,MEDIUM
 9820,TAKP AllaClone  :: Planestriders Helm,HEAD,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 4, AGI: 2, DEX: 3, WIS: 6, HP: 50, MANA: 40","Cold: 5, Magic: 4, Poison: 4, Disease: 2",Plainsight,,,RNG,5.0,MEDIUM
-9821,,HEAD,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 15, AGI: 12, DEX: 18, WIS: 12, HP: 145, MANA: 130","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,RNG,5.0,MEDIUM
+9821,Askr's Thunderous Helm,HEAD,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 15, AGI: 12, DEX: 18, WIS: 12, HP: 145, MANA: 130","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,RNG,5.0,MEDIUM
 9823,TAKP AllaClone  :: Headdress of the Khati Sha,HEAD,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 3, AGI: 4, DEX: 4, WIS: 6, HP: 45, MANA: 45","Fire: 3, Cold: 4, Magic: 4, Poison: 4",Plainsight,,,BST,0.1,MEDIUM
-9824,,HEAD,22,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 10, AGI: 18, DEX: 12, WIS: 15, HP: 145, MANA: 130","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,BST,0.1,MEDIUM
+9824,Dumul's Cap of the Brute,HEAD,22,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 10, AGI: 18, DEX: 12, WIS: 15, HP: 145, MANA: 130","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,BST,0.1,MEDIUM
 9826,TAKP AllaClone  :: Helm of Vengeful Fury,HEAD,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 3, AGI: 3, DEX: 6, WIS: 8, HP: 40, MANA: 50","Fire: 5, Magic: 5, Poison: 5",Plainsight,,,CLR,6.5,MEDIUM
-9827,,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 15, AGI: 8, DEX: 15, WIS: 20, HP: 135, MANA: 140","Fire: 5, Cold: 20, Magic: 20, Disease: 5",Faerune,,65,CLR,6.5,MEDIUM
+9827,Ultor's Helm of Faith,HEAD,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 15, AGI: 8, DEX: 15, WIS: 20, HP: 135, MANA: 140","Fire: 5, Cold: 20, Magic: 20, Disease: 5",Faerune,,65,CLR,6.5,MEDIUM
 9829,TAKP AllaClone  :: Scaled Avatar's Helm,HEAD,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 6, AGI: 2, WIS: 8, HP: 45, MANA: 45","Fire: 4, Magic: 5, Poison: 6",Plainsight,,,SHM,5.0,MEDIUM
-9830,,HEAD,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 18, AGI: 10, DEX: 12, WIS: 20, HP: 135, MANA: 140","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,SHM,5.0,MEDIUM
+9830,Rosrak's Helm of the Primal,HEAD,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 18, AGI: 10, DEX: 12, WIS: 20, HP: 135, MANA: 140","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,SHM,5.0,MEDIUM
 9832,TAKP AllaClone  :: Wanderer's Sylvan Cap,HEAD,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 4, AGI: 4, WIS: 8, HP: 40, MANA: 50","Fire: 3, Cold: 2, Magic: 5, Disease: 5",Plainsight,,,DRU,4.0,MEDIUM
-9833,,HEAD,22,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 15, AGI: 15, DEX: 12, WIS: 20, HP: 135, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,DRU,4.0,MEDIUM
+9833,Kerasha's Sylvan Cap,HEAD,22,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 15, AGI: 15, DEX: 12, WIS: 20, HP: 135, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,DRU,4.0,MEDIUM
 9835,TAKP AllaClone  :: Silken Augmenter's Cap,HEAD,11,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, AGI: 3, INT: 8, CHA: 5, HP: 40, MANA: 50","Fire: 3, Cold: 3, Poison: 6, Disease: 3",Plainsight,,,ENC,0.3,MEDIUM
-9836,,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 18, DEX: 18, INT: 20, CHA: 10, HP: 135, MANA: 140","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,ENC,0.3,MEDIUM
+9836,Romar's Circlet of Visions,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 18, DEX: 18, INT: 20, CHA: 10, HP: 135, MANA: 140","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,ENC,0.3,MEDIUM
 9908,TAKP AllaClone  :: Elemental Cap of the Prime,HEAD,11,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 4, AGI: 6, INT: 7, HP: 40, MANA: 50","Cold: 5, Magic: 5, Disease: 5",Plainsight,,,MAG,0.3,MEDIUM
-9944,,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 18, STA: 10, AGI: 10, DEX: 12, INT: 20, HP: 135, MANA: 140","Cold: 25, Magic: 25",Faerune,,65,MAG,0.3,MEDIUM
+9944,Magi`Kot's Tiara of Convergence,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 18, STA: 10, AGI: 10, DEX: 12, INT: 20, HP: 135, MANA: 140","Cold: 25, Magic: 25",Faerune,,65,MAG,0.3,MEDIUM
 9946,TAKP AllaClone  :: Vorshar's Circlet of the Blight,HEAD,11,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 5, DEX: 4, INT: 8, HP: 50, MANA: 40","Fire: 4, Cold: 4, Magic: 2, Poison: 5",Plainsight,,,NEC,0.3,MEDIUM
-9947,,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 18, AGI: 12, DEX: 6, INT: 20, CHA: 8, HP: 135, MANA: 135","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,NEC,0.3,MEDIUM
+9947,Miragul's Crown of Risen Souls,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 18, AGI: 12, DEX: 6, INT: 20, CHA: 8, HP: 135, MANA: 135","Fire: 5, Magic: 5, Poison: 20, Disease: 20",Faerune,,65,NEC,0.3,MEDIUM
 9949,TAKP AllaClone  :: Arantir's Circlet of Discovery,HEAD,11,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 3, DEX: 5, INT: 8, HP: 40, MANA: 50","Fire: 6, Cold: 2, Poison: 2, Disease: 5",Plainsight,,,WIZ,0.3,MEDIUM
-9950,,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 12, AGI: 8, DEX: 20, INT: 20, HP: 135, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,WIZ,0.3,MEDIUM
+9950,Maelin's Skullcap of Lore,HEAD,16,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 12, AGI: 8, DEX: 20, INT: 20, HP: 135, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Faerune,,65,WIZ,0.3,MEDIUM
 9959,Band of Swirling Air,FINGERS,9,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 30, DEX: 30, HP: 135, MANA: 145","Poison: 20, Disease: 20",Haste,,62,ALL,0.6,TINY
-9960,Item 9960,FINGERS,9,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, DEX: 8, WIS: 8, INT: 8, HP: 85, MANA: 85",Cold: 20,Aura of Healing,,62,ALL,0.5,TINY
+9960,Circle of Blue Flame,FINGERS,9,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, DEX: 8, WIS: 8, INT: 8, HP: 85, MANA: 85",Cold: 20,Aura of Healing,,62,ALL,0.5,TINY
 10074,Glowing Steel Shim,FINGERS,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, WIS: 10, INT: 10, HP: 100, MANA: 100","Poison: 15, Disease: 15",Anger of Druzzil,Anger of Druzzil,55,ALL,1.0,TINY
-10127,Nightmarish Bone Ring,FINGERS,10,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 10, WIS: 10, INT: 10, CHA: 20, HP: 90, MANA: 90",Magic: 25,Mana Preservation IV,Mana Preservation IV,55,ALL,0.8,TINY
+10127,Carved Bone Ring,FINGERS,10,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 10, WIS: 10, INT: 10, CHA: 20, HP: 90, MANA: 90",Magic: 25,Mana Preservation IV,Mana Preservation IV,55,ALL,0.8,TINY
 10137,Ring of Flowing Stones,FINGERS,30,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, WIS: 20, INT: 20, CHA: 15, HP: 150, MANA: 150","Poison: 25, Disease: 25",Regeneration,,65,ALL,1.0,TINY
 10229,Essence of Wind,,,MAGIC ITEM,,,,,,ALL,0.1,TINY
 10231,Puremetal Band,EAR FINGERS,8,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 12, DEX: 12, INT: 18, CHA: 8, HP: 130, MANA: 150","Poison: 18, Disease: 18",Flowing Thought III,,62,CLR DRU SHM NEC WIZ MAG ENC,0.6,TINY
@@ -264,68 +264,68 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 11096,Clay Bracers of the Golem,WRIST,30,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, DEX: 10, WIS: 10, HP: 135, MANA: 125","Magic: 20, Poison: 20, Disease: 20",Haste,Druzzil's Distance,65,RNG ROG SHM,1.8,SMALL
 11103,Bracers of Earthen Energy,WRIST,38,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, DEX: 10, WIS: 10, INT: 10, CHA: 10, HP: 135, MANA: 125","Fire: 20, Cold: 20, Disease: 20",Haste,Druzzil's Distance,65,WAR CLR PAL SHD BRD,3.0,SMALL
 11136,TAKP AllaClone  :: Kizrak's Bracer of Battle,WRIST,28,MAGIC ITEM | NO DROP,"STR: 4, STA: 6, DEX: 5, HP: 45","Cold: 3, Poison: 4, Disease: 3",Vengeance II,,,WAR,4.0,SMALL
-11138,,WRIST,46,MAGIC ITEM | NO DROP,"STR: 15, STA: 12, AGI: 13, DEX: 15, HP: 145","Magic: 15, Poison: 15, Disease: 15",Vengeance III,,65,WAR,4.0,SMALL
+11138,Raex's Bracer of Destruction,WRIST,46,MAGIC ITEM | NO DROP,"STR: 15, STA: 12, AGI: 13, DEX: 15, HP: 145","Magic: 15, Poison: 15, Disease: 15",Vengeance III,,65,WAR,4.0,SMALL
 11140,TAKP AllaClone  :: Stanos' Wicked Bracer,WRIST,19,MAGIC ITEM | NO DROP,"STR: 3, STA: 4, AGI: 5, DEX: 3, HP: 40","Fire: 3, Magic: 5, Poison: 2",Vengeance II,,,ROG,3.0,SMALL
-11141,,WRIST,31,MAGIC ITEM | NO DROP,"STR: 18, STA: 11, AGI: 15, DEX: 11, HP: 135","Cold: 15, Magic: 15, Poison: 15",Vengeance III,,65,ROG,3.0,SMALL
+11141,Bidilis' Bracer of the Elusive,WRIST,31,MAGIC ITEM | NO DROP,"STR: 18, STA: 11, AGI: 15, DEX: 11, HP: 135","Cold: 15, Magic: 15, Poison: 15",Vengeance III,,65,ROG,3.0,SMALL
 11144,TAKP AllaClone  :: Bracer of Enlightenment,WRIST,12,MAGIC ITEM | NO DROP,"STR: 4, STA: 3, AGI: 3, DEX: 5, HP: 40","Cold: 5, Magic: 2, Disease: 3",Vengeance II,,,MNK,0.1,SMALL
-11146,,WRIST,20,MAGIC ITEM | NO DROP,"STR: 13, STA: 11, AGI: 15, DEX: 16, HP: 135","Cold: 15, Magic: 15, Poison: 15",Vengeance III,,65,MNK,0.2,SMALL
+11146,Ton Po's Wristwraps of Composure,WRIST,20,MAGIC ITEM | NO DROP,"STR: 13, STA: 11, AGI: 15, DEX: 16, HP: 135","Cold: 15, Magic: 15, Poison: 15",Vengeance III,,65,MNK,0.2,SMALL
 11159,TAKP AllaClone  :: Jaylia's Valiant Bracer,WRIST,23,MAGIC ITEM | NO DROP,"STR: 4, STA: 3, AGI: 5, WIS: 3, HP: 40, MANA: 35","Cold: 4, Magic: 3, Disease: 3",Vengeance II,,,PAL,4.0,SMALL
-11163,,WRIST,42,MAGIC ITEM | NO DROP,"STR: 16, STA: 13, DEX: 16, WIS: 10, HP: 135, MANA: 130","Fire: 15, Poison: 15, Disease: 15",Vengeance III,,65,PAL,4.0,SMALL
+11163,Trydan's Bracer of Nobility,WRIST,42,MAGIC ITEM | NO DROP,"STR: 16, STA: 13, DEX: 16, WIS: 10, HP: 135, MANA: 130","Fire: 15, Poison: 15, Disease: 15",Vengeance III,,65,PAL,4.0,SMALL
 11172,TAKP AllaClone  :: Bracer of Emblazoned Souls,WRIST,23,MAGIC ITEM | NO DROP,"STR: 6, STA: 3, DEX: 3, INT: 3, HP: 40, MANA: 35","Fire: 3, Cold: 3, Disease: 4",Vengeance II,,,SHD,4.0,SMALL
-11173,,WRIST,42,MAGIC ITEM | NO DROP,"STR: 8, STA: 12, AGI: 10, DEX: 15, INT: 10, HP: 135, MANA: 130","Fire: 15, Magic: 15, Poison: 15",Vengeance III,,65,SHD,4.0,SMALL
+11173,Grimror's Bracer of the Plagues,WRIST,42,MAGIC ITEM | NO DROP,"STR: 8, STA: 12, AGI: 10, DEX: 15, INT: 10, HP: 135, MANA: 130","Fire: 15, Magic: 15, Poison: 15",Vengeance III,,65,SHD,4.0,SMALL
 11177,TAKP AllaClone  :: Composers Bracer,WRIST,23,MAGIC ITEM | NO DROP,"STR: 5, STA: 3, DEX: 3, INT: 4, CHA: 2, HP: 40, MANA: 35","Fire: 3, Cold: 4, Magic: 3",Vengeance II,,,BRD,4.0,SMALL
-11178,,WRIST,42,MAGIC ITEM | NO DROP,"STR: 15, STA: 12, DEX: 15, INT: 10, CHA: 5, HP: 135, MANA: 130","Fire: 15, Magic: 15, Poison: 15",Vengeance III,,65,BRD,4.0,SMALL
+11178,Rizlona's Fiery Bracer,WRIST,42,MAGIC ITEM | NO DROP,"STR: 15, STA: 12, DEX: 15, INT: 10, CHA: 5, HP: 135, MANA: 130","Fire: 15, Magic: 15, Poison: 15",Vengeance III,,65,BRD,4.0,SMALL
 11180,TAKP AllaClone  :: Planestriders Wristguard,WRIST,19,MAGIC ITEM | NO DROP,"STA: 2, AGI: 3, DEX: 6, WIS: 4, HP: 40, MANA: 35","Fire: 5, Poison: 2, Disease: 3",Vengeance II,,,RNG,3.0,SMALL
-11193,,WRIST,31,MAGIC ITEM | NO DROP,"STR: 12, STA: 11, AGI: 6, DEX: 16, WIS: 10, HP: 135, MANA: 130","Fire: 15, Poison: 15, Disease: 15",Vengeance III,,65,RNG,3.0,SMALL
+11193,Askr's Thunderous Bracer,WRIST,31,MAGIC ITEM | NO DROP,"STR: 12, STA: 11, AGI: 6, DEX: 16, WIS: 10, HP: 135, MANA: 130","Fire: 15, Poison: 15, Disease: 15",Vengeance III,,65,RNG,3.0,SMALL
 11195,TAKP AllaClone  :: Bracer of the Khati Sha,WRIST,12,MAGIC ITEM | NO DROP,"STR: 5, STA: 3, DEX: 4, WIS: 3, HP: 40, MANA: 35","Cold: 2, Poison: 3, Disease: 5",Vengeance II,,,BST,0.1,SMALL
-11196,,WRIST,20,MAGIC ITEM | NO DROP,"STR: 17, STA: 11, AGI: 17, WIS: 10, HP: 135, MANA: 130","Magic: 15, Poison: 15, Disease: 15",Vengeance III,,65,BST,0.1,SMALL
+11196,Dumul's Bracer of the Brute,WRIST,20,MAGIC ITEM | NO DROP,"STR: 17, STA: 11, AGI: 17, WIS: 10, HP: 135, MANA: 130","Magic: 15, Poison: 15, Disease: 15",Vengeance III,,65,BST,0.1,SMALL
 11198,TAKP AllaClone  :: Wristplates of Vengeful Fury,WRIST,23,MAGIC ITEM | NO DROP,"STA: 3, AGI: 6, DEX: 2, WIS: 4, CHA: 2, HP: 35, MANA: 40","Fire: 4, Cold: 3, Disease: 3",Flowing Thought II,,,CLR,4.0,SMALL
-11199,,WRIST,42,MAGIC ITEM | NO DROP,"STA: 9, AGI: 15, DEX: 15, WIS: 13, CHA: 5, HP: 130, MANA: 135","Fire: 15, Cold: 15, Disease: 15",Flowing Thought IV,,65,CLR,4.0,SMALL
+11199,Ultor's Bracer of Faith,WRIST,42,MAGIC ITEM | NO DROP,"STA: 9, AGI: 15, DEX: 15, WIS: 13, CHA: 5, HP: 130, MANA: 135","Fire: 15, Cold: 15, Disease: 15",Flowing Thought IV,,65,CLR,4.0,SMALL
 11273,TAKP AllaClone  :: Scaled Avatar's Bracer,WRIST,19,MAGIC ITEM | NO DROP,"STA: 5, DEX: 5, WIS: 5, HP: 35, MANA: 40","Fire: 5, Cold: 2, Disease: 3",Flowing Thought II,,,SHM,3.0,SMALL
-11278,,WRIST,31,MAGIC ITEM | NO DROP,"STR: 10, STA: 10, AGI: 13, DEX: 9, WIS: 13, HP: 130, MANA: 135","Fire: 15, Cold: 15, Disease: 15",Flowing Thought IV,,65,SHM,3.0,SMALL
+11278,Rosrak's Bracer of the Primal,WRIST,31,MAGIC ITEM | NO DROP,"STR: 10, STA: 10, AGI: 13, DEX: 9, WIS: 13, HP: 130, MANA: 135","Fire: 15, Cold: 15, Disease: 15",Flowing Thought IV,,65,SHM,3.0,SMALL
 11280,TAKP AllaClone  :: Wanderer's Sylvan Bracer,WRIST,12,MAGIC ITEM | NO DROP,"STR: 4, STA: 3, AGI: 2, WIS: 6, CHA: 2, HP: 35, MANA: 40","Magic: 3, Poison: 5, Disease: 2",Flowing Thought II,,,DRU,2.0,SMALL
-11281,,WRIST,20,MAGIC ITEM | NO DROP,"STR: 15, STA: 9, DEX: 14, WIS: 13, CHA: 4, HP: 130, MANA: 135","Fire: 15, Magic: 15, Poison: 15",Flowing Thought IV,,65,DRU,2.0,SMALL
+11281,Kerasha's Sylvan Bracer,WRIST,20,MAGIC ITEM | NO DROP,"STR: 15, STA: 9, DEX: 14, WIS: 13, CHA: 4, HP: 130, MANA: 135","Fire: 15, Magic: 15, Poison: 15",Flowing Thought IV,,65,DRU,2.0,SMALL
 11283,TAKP AllaClone  :: Silken Augmenter's Bracelet,WRIST,8,MAGIC ITEM | NO DROP,"STA: 4, AGI: 5, INT: 6, CHA: 3, HP: 35, MANA: 40","Fire: 3, Cold: 4, Poison: 3",Flowing Thought II,,,ENC,0.2,SMALL
-11298,,WRIST,15,MAGIC ITEM | NO DROP,"STR: 10, STA: 8, AGI: 10, DEX: 12, INT: 13, CHA: 7, HP: 130, MANA: 135","Cold: 15, Poison: 15, Disease: 15",Flowing Thought IV,,65,ENC,0.2,SMALL
+11298,Romar's Bracer of Visions,WRIST,15,MAGIC ITEM | NO DROP,"STR: 10, STA: 8, AGI: 10, DEX: 12, INT: 13, CHA: 7, HP: 130, MANA: 135","Cold: 15, Poison: 15, Disease: 15",Flowing Thought IV,,65,ENC,0.2,SMALL
 11302,TAKP AllaClone  :: Elemental Bracelet of the Prime,WRIST,8,MAGIC ITEM | NO DROP,"STA: 2, AGI: 3, DEX: 5, INT: 5, HP: 35, MANA: 40","Fire: 2, Magic: 4, Disease: 4",Flowing Thought II,,,MAG,0.2,SMALL
-11303,,WRIST,15,MAGIC ITEM | NO DROP,"STA: 10, AGI: 16, DEX: 16, INT: 13, HP: 130, MANA: 135","Fire: 15, Poison: 15, Disease: 15",Flowing Thought IV,,65,MAG,0.2,SMALL
+11303,Magi`Kot's Bangle of Convergence,WRIST,15,MAGIC ITEM | NO DROP,"STA: 10, AGI: 16, DEX: 16, INT: 13, HP: 130, MANA: 135","Fire: 15, Poison: 15, Disease: 15",Flowing Thought IV,,65,MAG,0.2,SMALL
 11305,TAKP AllaClone  :: Vorshar's Manacle of the Blight,WRIST,8,MAGIC ITEM | NO DROP,"STA: 3, AGI: 6, INT: 6, CHA: 2, HP: 40, MANA: 35","Fire: 4, Cold: 3, Poison: 3",Flowing Thought II,,,NEC,0.2,SMALL
-11306,,WRIST,15,MAGIC ITEM | NO DROP,"STR: 11, STA: 7, AGI: 11, DEX: 11, INT: 13, CHA: 4, HP: 135, MANA: 135","Cold: 15, Magic: 15, Disease: 15",Flowing Thought IV,,65,NEC,0.2,SMALL
+11306,Miragul's Bracelet of Risen Souls,WRIST,15,MAGIC ITEM | NO DROP,"STR: 11, STA: 7, AGI: 11, DEX: 11, INT: 13, CHA: 4, HP: 135, MANA: 135","Cold: 15, Magic: 15, Disease: 15",Flowing Thought IV,,65,NEC,0.2,SMALL
 11308,TAKP AllaClone  :: Arantir's Bracelet of Discovery,WRIST,8,MAGIC ITEM | NO DROP,"STA: 3, AGI: 4, DEX: 3, INT: 5, HP: 35, MANA: 40","Fire: 3, Magic: 4, Disease: 3",Flowing Thought II,,,WIZ,0.2,SMALL
-11309,,WRIST,15,MAGIC ITEM | NO DROP,"STR: 8, STA: 10, AGI: 12, DEX: 12, INT: 13, HP: 130, MANA: 135","Magic: 15, Poison: 15, Disease: 15",Flowing Thought IV,,65,WIZ,0.2,SMALL
+11309,Maelin's Bracelet of Lore,WRIST,15,MAGIC ITEM | NO DROP,"STR: 8, STA: 10, AGI: 12, DEX: 12, INT: 13, HP: 130, MANA: 135","Magic: 15, Poison: 15, Disease: 15",Flowing Thought IV,,65,WIZ,0.2,SMALL
 11323,Shimmering Sleeves of Flame,ARMS,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, AGI: 20, INT: 20, CHA: 10, HP: 100, MANA: 135",Cold: 35,Spell Haste IV,Spell Haste IV,62,NEC WIZ MAG ENC,1.4,MEDIUM
 11324,Fire Crested Rune,NECK ARMS RANGE WAIST,18,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, DEX: 15, INT: 15, CHA: 15, HP: 135, MANA: 135","Cold: 25, Magic: 15, Poison: 15, Disease: 15",Flowing Thought III,,65,NEC WIZ MAG ENC,1.0,MEDIUM
 11402,Leaf-twined Guards,ARMS WRIST,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, DEX: 25, WIS: 20, CHA: 15, HP: 135, MANA: 150","Magic: 15, Poison: 20, Disease: 20",Flowing Thought IV,Blaze of the Lightbringer,65,CLR PAL RNG SHD DRU SHM BST,0.8,MEDIUM
-11408,Item 11408,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 12, AGI: 12, INT: 12, HP: 85, MANA: 85",Fire: 25,Flowing Thought III,,65,NEC WIZ MAG ENC,0.6,MEDIUM
+11408,Phosphorescent Sleeves,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 12, AGI: 12, INT: 12, HP: 85, MANA: 85",Fire: 25,Flowing Thought III,,65,NEC WIZ MAG ENC,0.6,MEDIUM
 11428,TAKP AllaClone  :: Kizrak's Armband of Battle,ARMS,34,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 6, AGI: 4, DEX: 4, HP: 60","Cold: 3, Magic: 3, Poison: 5, Disease: 4",Refreshment,,,WAR,6.5,MEDIUM
-11429,,ARMS,60,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 18, AGI: 12, DEX: 15, HP: 160","Fire: 10, Cold: 10, Poison: 20, Disease: 20",Aura of Bravery,,65,WAR,6.5,MEDIUM
+11429,Raex's Armplates of Destruction,ARMS,60,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 18, AGI: 12, DEX: 15, HP: 160","Fire: 10, Cold: 10, Poison: 20, Disease: 20",Aura of Bravery,,65,WAR,6.5,MEDIUM
 11431,TAKP AllaClone  :: Stanos' Wicked Sleeves,ARMS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 7, STA: 3, AGI: 7, DEX: 3, HP: 50","Fire: 5, Magic: 5, Disease: 5",Refreshment,,,ROG,5.5,MEDIUM
-11432,,ARMS,43,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 13, AGI: 20, DEX: 22, HP: 145","Fire: 10, Cold: 20, Magic: 20, Disease: 10",Aura of Bravery,,65,ROG,5.5,MEDIUM
+11432,Bidilis' Sleeves of the Elusive,ARMS,43,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 13, AGI: 20, DEX: 22, HP: 145","Fire: 10, Cold: 20, Magic: 20, Disease: 10",Aura of Bravery,,65,ROG,5.5,MEDIUM
 11434,TAKP AllaClone  :: Armguards of Enlightenment,ARMS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 4, AGI: 5, DEX: 5, HP: 50","Fire: 5, Cold: 5, Magic: 5",Refreshment,,,MNK,0.2,MEDIUM
-11435,,ARMS,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 13, AGI: 17, DEX: 20, HP: 145","Fire: 20, Cold: 10, Poison: 20, Disease: 10",Aura of Bravery,,65,MNK,0.3,MEDIUM
+11435,Ton Po's Sleeves of Composure,ARMS,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 13, AGI: 17, DEX: 20, HP: 145","Fire: 20, Cold: 10, Poison: 20, Disease: 10",Aura of Bravery,,65,MNK,0.3,MEDIUM
 11437,TAKP AllaClone  :: Jaylia's Valiant Vambraces,ARMS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 7, STA: 4, DEX: 5, WIS: 4, HP: 50, MANA: 35","Magic: 5, Poison: 5, Disease: 5",Refreshment,,,PAL,6.5,MEDIUM
-11438,,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 20, WIS: 15, HP: 145, MANA: 130","Cold: 10, Magic: 20, Poison: 10, Disease: 20",Vengeance V,Improved Healing IV,65,PAL,6.5,MEDIUM
+11438,Trydan's Armplates of Nobility,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 20, WIS: 15, HP: 145, MANA: 130","Cold: 10, Magic: 20, Poison: 10, Disease: 20",Vengeance V,Improved Healing IV,65,PAL,6.5,MEDIUM
 11440,TAKP AllaClone  :: Armplates of Emblazoned Souls,ARMS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, AGI: 5, DEX: 6, INT: 4, HP: 50, MANA: 35","Fire: 3, Magic: 4, Poison: 4, Disease: 4",Refreshment,,,SHD,6.5,MEDIUM
-11441,,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 22, STA: 15, AGI: 18, INT: 15, HP: 145, MANA: 130","Fire: 20, Magic: 20, Poison: 10, Disease: 10",Vengeance V,Burning Affliction IV,65,SHD,6.5,MEDIUM
+11441,Grimror's Sleeves of the Plagues,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 22, STA: 15, AGI: 18, INT: 15, HP: 145, MANA: 130","Fire: 20, Magic: 20, Poison: 10, Disease: 10",Vengeance V,Burning Affliction IV,65,SHD,6.5,MEDIUM
 11443,TAKP AllaClone  :: Composers Vambraces,ARMS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 3, AGI: 5, DEX: 5, INT: 4, CHA: 3, HP: 50, MANA: 35","Fire: 3, Cold: 4, Poison: 4, Disease: 4",Refreshment,,,BRD,6.5,MEDIUM
-11444,,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 15, DEX: 20, INT: 15, CHA: 10, HP: 145, MANA: 130","Cold: 20, Magic: 20, Poison: 10, Disease: 10",Vengeance V,,65,BRD,6.5,MEDIUM
+11444,Rizlona's Fiery Vambraces,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 15, DEX: 20, INT: 15, CHA: 10, HP: 145, MANA: 130","Cold: 20, Magic: 20, Poison: 10, Disease: 10",Vengeance V,,65,BRD,6.5,MEDIUM
 11446,TAKP AllaClone  :: Planestriders Vambraces,ARMS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 6, DEX: 4, WIS: 4, HP: 50, MANA: 35","Fire: 4, Cold: 4, Poison: 4, Disease: 3",Refreshment,,,RNG,5.5,MEDIUM
-11447,,ARMS,43,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 19, STA: 13, AGI: 18, WIS: 20, HP: 145, MANA: 130","Fire: 10, Magic: 20, Poison: 10, Disease: 20",Vengeance V,Improved Damage IV,65,RNG,5.5,MEDIUM
+11447,Askr's Thunderous Armplates,ARMS,43,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 19, STA: 13, AGI: 18, WIS: 20, HP: 145, MANA: 130","Fire: 10, Magic: 20, Poison: 10, Disease: 20",Vengeance V,Improved Damage IV,65,RNG,5.5,MEDIUM
 11449,TAKP AllaClone  :: Sleeves of the Khati Sha,ARMS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, AGI: 4, DEX: 7, WIS: 4, HP: 45, MANA: 40","Fire: 5, Poison: 5, Disease: 5",Refreshment,,,BST,0.2,MEDIUM
 11450,Dumul's Sleeves of the Brute,ARMS,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 13, AGI: 18, DEX: 19, WIS: 20, HP: 145, MANA: 130","Fire: 20, Magic: 20, Poison: 10, Disease: 10",Vengeance V,Spell Haste IV,65,BST,0.2,MEDIUM
 11499,TAKP AllaClone  :: Vambraces of Vengeful Fury,ARMS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 5, DEX: 5, WIS: 6, HP: 40, MANA: 45","Cold: 3, Magic: 4, Poison: 5, Disease: 3",Improved Healing IV,Improved Healing IV,,CLR,6.5,MEDIUM
 11518,TAKP AllaClone  :: Scaled Avatar's Sleeves,ARMS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 5, AGI: 3, DEX: 3, WIS: 6, HP: 45, MANA: 30","Fire: 5, Magic: 5, Disease: 5",Improved Healing IV,Improved Healing IV,,SHM,5.5,MEDIUM
-11529,,ARMS,43,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, DEX: 15, WIS: 20, HP: 135, MANA: 140","Fire: 10, Cold: 20, Poison: 10, Disease: 20",Marr's Gift,Marr's Gift,65,SHM,5.5,MEDIUM
+11529,Rosrak's Sleeves of the Primal,ARMS,43,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, DEX: 15, WIS: 20, HP: 135, MANA: 140","Fire: 10, Cold: 20, Poison: 10, Disease: 20",Marr's Gift,Marr's Gift,65,SHM,5.5,MEDIUM
 11549,TAKP AllaClone  :: Wanderer's Sylvan Sleeves,ARMS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, AGI: 5, DEX: 5, WIS: 6, CHA: 3, HP: 40, MANA: 45","Fire: 4, Cold: 5, Magic: 3, Disease: 3",Improved Healing IV,Improved Healing IV,,DRU,4.5,MEDIUM
-11575,,ARMS,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, DEX: 15, WIS: 20, CHA: 5, HP: 135, MANA: 140","Fire: 10, Cold: 10, Magic: 20, Poison: 20",Marr's Gift,Marr's Gift,65,DRU,4.5,MEDIUM
+11575,Kerasha's Sylvan Sleeves,ARMS,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, DEX: 15, WIS: 20, CHA: 5, HP: 135, MANA: 140","Fire: 10, Cold: 10, Magic: 20, Poison: 20",Marr's Gift,Marr's Gift,65,DRU,4.5,MEDIUM
 11577,TAKP AllaClone  :: Silken Augmenter's Sleeves,ARMS,11,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, AGI: 7, DEX: 3, INT: 6, CHA: 4, HP: 40, MANA: 45","Fire: 5, Cold: 5, Disease: 5",Mana Preservation IV,Mana Preservation IV,,ENC,0.4,MEDIUM
-11578,,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 11, STA: 18, DEX: 18, INT: 20, CHA: 10, HP: 140, MANA: 135","Fire: 20, Cold: 10, Poison: 20, Disease: 10",Preservation of Xegony,Preservation of Xegony,65,ENC,0.4,MEDIUM
+11578,Romar's Sleeves of Visions,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 11, STA: 18, DEX: 18, INT: 20, CHA: 10, HP: 140, MANA: 135","Fire: 20, Cold: 10, Poison: 20, Disease: 10",Preservation of Xegony,Preservation of Xegony,65,ENC,0.4,MEDIUM
 11585,Shield of the Red Dragon,SECONDARY,25,MAGIC ITEM | LORE ITEM,"STR: 10, CHA: 10","Fire: 40, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,WAR CLR PAL RNG SHD DRU BRD ROG SHM,5.0,MEDIUM
 11597,TAKP AllaClone  :: Elemental Sleeves of the Prime,ARMS,11,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 6, AGI: 4, INT: 6, HP: 40, MANA: 45","Fire: 4, Cold: 4, Magic: 4, Poison: 3",Mana Preservation IV,Mana Preservation IV,,MAG,0.4,MEDIUM
-11598,,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 11, AGI: 21, DEX: 18, INT: 20, HP: 135, MANA: 140","Fire: 10, Cold: 10, Poison: 20, Disease: 20",Preservation of Xegony,Preservation of Xegony,65,MAG,0.4,MEDIUM
+11598,Magi`Kot's Sleeves of Convergence,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 11, AGI: 21, DEX: 18, INT: 20, HP: 135, MANA: 140","Fire: 10, Cold: 10, Poison: 20, Disease: 20",Preservation of Xegony,Preservation of Xegony,65,MAG,0.4,MEDIUM
 11600,TAKP AllaClone  :: Vorshar's Sleeves of the Blight,ARMS,11,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 3, AGI: 6, DEX: 5, INT: 6, CHA: 2, HP: 45, MANA: 40","Fire: 3, Cold: 4, Magic: 3, Disease: 5",Mana Preservation IV,Mana Preservation IV,,NEC,0.4,MEDIUM
 11601,Runed Bolster Belt,WAIST,5,MAGIC ITEM,"STR: 10, STA: 10, DEX: 10",,Haste,,,ALL,0.1,SMALL
-11618,,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 15, DEX: 15, INT: 20, CHA: 5, HP: 135, MANA: 140","Fire: 20, Cold: 10, Magic: 20, Poison: 10",Preservation of Xegony,Preservation of Xegony,65,NEC,0.4,MEDIUM
+11618,Miragul's Sleeves of Risen Souls,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 15, DEX: 15, INT: 20, CHA: 5, HP: 135, MANA: 140","Fire: 20, Cold: 10, Magic: 20, Poison: 10",Preservation of Xegony,Preservation of Xegony,65,NEC,0.4,MEDIUM
 11620,TAKP AllaClone  :: Arantir's Sleeves of Discovery,ARMS,11,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, AGI: 6, DEX: 4, INT: 6, HP: 30, MANA: 45","Fire: 3, Cold: 5, Poison: 4, Disease: 3",Mana Preservation IV,Mana Preservation IV,,WIZ,0.4,MEDIUM
 11621,Cloak of Flames,BACK,10,MAGIC ITEM,"AGI: 9, DEX: 9, HP: 50",Fire: 15,Haste,,,ALL,0.1,MEDIUM
 11641,Crimson Robe of Alendine,CHEST,12,MAGIC ITEM,"DEX: 15, INT: 15, HP: 50, MANA: 50",,,,,NEC WIZ MAG ENC,1.0,MEDIUM
@@ -335,7 +335,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 11648,"DawnFire, Morning Star of Light",PRIMARY,,MAGIC ITEM,WIS: 7,"Poison: 10, Disease: 10",Banish Undead,,,CLR,6.5,MEDIUM
 11649,Staff of the Earthcrafter,PRIMARY,,MAGIC ITEM,"WIS: 15, HP: 100, MANA: 50",,Drones of Doom,,,DRU,7.5,LARGE
 11666,Bone-Clasped Girdle,WAIST,4,MAGIC ITEM,"STR: 7, STA: 7, DEX: 7, HP: 75, MANA: 75",,Burning Affliction III,Burning Affliction III,,CLR DRU BRD SHM NEC WIZ MAG ENC,0.1,SMALL
-11876,,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 11, AGI: 18, DEX: 21, INT: 20, HP: 135, MANA: 140","Fire: 20, Cold: 10, Magic: 20, Disease: 10",Preservation of Xegony,Preservation of Xegony,65,WIZ,0.4,MEDIUM
+11876,Maelin's Sleeves of Lore,ARMS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 11, AGI: 18, DEX: 21, INT: 20, HP: 135, MANA: 140","Fire: 20, Cold: 10, Magic: 20, Disease: 10",Preservation of Xegony,Preservation of Xegony,65,WIZ,0.4,MEDIUM
 11878,Gauntlets of the Burning Prince,HANDS,18,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 15, WIS: 18, INT: 18, CHA: 10, HP: 100, MANA: 125","Cold: 30, Poison: 10",Speed of Solusek,Speed of Solusek,62,CLR DRU SHM NEC WIZ MAG ENC,0.5,SMALL
 11879,Stormriders Gauntlets,HANDS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 10, DEX: 15, WIS: 10, INT: 10, HP: 115, MANA: 100","Fire: 20, Magic: 20",Vengeance III,,61,WAR PAL RNG SHD MNK BRD ROG BST,0.5,SMALL
 11899,Soft Tooled Gloves,HANDS,11,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 5, DEX: 6, INT: 7, CHA: 5, HP: 50, MANA: 50","Fire: 7, Cold: 7, Poison: 7",,,53,NEC WIZ MAG ENC,0.3,SMALL
@@ -344,36 +344,36 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 12510,Gleaming Mesh Girdle,WAIST,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 20, DEX: 25, WIS: 25, HP: 150, MANA: 150","Cold: 35, Magic: 10, Poison: 10, Disease: 10",Quickening of Mithaniel,Quickening of Mithaniel,65,CLR DRU SHM,1.5,SMALL
 12592,Great Mask of Flame,FACE,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, DEX: 35, WIS: 15, INT: 15, HP: 150, MANA: 140","Cold: 35, Magic: 20",Aura of Bravery,,65,WAR PAL RNG SHD MNK BRD ROG BST,2.5,SMALL
 12594,TAKP AllaClone  :: Kizrak's Gauntlets of Battle,HANDS,33,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 8, AGI: 3, DEX: 5, HP: 60","Fire: 6, Cold: 3, Poison: 6",Miraculous Visions,,,WAR,5.0,SMALL
-12595,,HANDS,55,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 13, AGI: 17, DEX: 15, HP: 155","Magic: 25, Disease: 25",Aura of Bravery,,65,WAR,5.0,SMALL
+12595,Raex's Gauntlets of Destruction,HANDS,55,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 13, AGI: 17, DEX: 15, HP: 155","Magic: 25, Disease: 25",Aura of Bravery,,65,WAR,5.0,SMALL
 12597,TAKP AllaClone  :: Stanos' Wicked Gauntlets,HANDS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 4, AGI: 6, DEX: 4, HP: 50","Cold: 7, Magic: 8",Miraculous Visions,,,ROG,4.0,SMALL
-12598,,HANDS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 20, DEX: 10, HP: 145","Fire: 25, Poison: 25",Aura of Bravery,,65,ROG,4.0,SMALL
+12598,Bidilis' Gauntlet of the Elusive,HANDS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 20, DEX: 10, HP: 145","Fire: 25, Poison: 25",Aura of Bravery,,65,ROG,4.0,SMALL
 12623,TAKP AllaClone  :: Gauntlets of Enlightenment,HANDS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 5, DEX: 7, HP: 50","Cold: 6, Magic: 3, Poison: 6",Celestial Tranquility,,,MNK,0.1,SMALL
-12624,,HANDS,21,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 19, STA: 11, AGI: 15, DEX: 25, HP: 145","Magic: 25, Poison: 25",Aura of Bravery,,65,MNK,0.3,SMALL
+12624,Ton Po's Gloves of Composure,HANDS,21,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 19, STA: 11, AGI: 15, DEX: 25, HP: 145","Magic: 25, Poison: 25",Aura of Bravery,,65,MNK,0.3,SMALL
 12626,TAKP AllaClone  :: Jaylia's Valiant Gauntlets,HANDS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 6, AGI: 4, DEX: 5, WIS: 5, HP: 50, MANA: 35","Fire: 6, Cold: 6, Disease: 3",Vengeance III,,,PAL,5.0,SMALL
-12627,,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 12, DEX: 25, WIS: 13, HP: 145, MANA: 130","Cold: 25, Poison: 25",Aura of Bravery,,65,PAL,5.0,SMALL
+12627,Trydan's Gauntlets of Nobility,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 12, DEX: 25, WIS: 13, HP: 145, MANA: 130","Cold: 25, Poison: 25",Aura of Bravery,,65,PAL,5.0,SMALL
 12629,TAKP AllaClone  :: Gauntlets of Emblazoned Souls,HANDS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 6, AGI: 5, INT: 4, HP: 50, MANA: 35","Cold: 3, Magic: 6, Disease: 6",Vengeance III,,,SHD,5.0,SMALL
-12637,,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 12, AGI: 25, DEX: 8, INT: 13, HP: 145, MANA: 130","Cold: 25, Disease: 25",Aura of Bravery,,65,SHD,5.0,SMALL
+12637,Grimror's Gauntlets of the Plagues,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 12, AGI: 25, DEX: 8, INT: 13, HP: 145, MANA: 130","Cold: 25, Disease: 25",Aura of Bravery,,65,SHD,5.0,SMALL
 12663,TAKP AllaClone  :: Composer's Gauntlets,HANDS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, AGI: 2, DEX: 8, INT: 5, CHA: 4, HP: 50, MANA: 35","Fire: 8, Disease: 7",Vengeance III,,,BRD,5.0,SMALL
-12664,,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 10, AGI: 22, DEX: 15, INT: 10, CHA: 5, HP: 145, MANA: 130","Cold: 25, Poison: 25",Aura of Bravery,,65,BRD,5.0,SMALL
+12664,Rizlona's Fiery Gauntlets,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 10, AGI: 22, DEX: 15, INT: 10, CHA: 5, HP: 145, MANA: 130","Cold: 25, Poison: 25",Aura of Bravery,,65,BRD,5.0,SMALL
 12666,TAKP AllaClone  :: Planestriders Gauntlets,HANDS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 6, AGI: 5, WIS: 5, HP: 50, MANA: 35","Cold: 6, Magic: 3, Poison: 6",Vengeance III,,,RNG,4.0,SMALL
-12816,,HANDS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 25, WIS: 13, HP: 145, MANA: 130","Magic: 25, Disease: 25",Aura of Bravery,,65,RNG,4.0,SMALL
+12816,Askr's Thunderous Gauntlets,HANDS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 25, WIS: 13, HP: 145, MANA: 130","Magic: 25, Disease: 25",Aura of Bravery,,65,RNG,4.0,SMALL
 13545,TAKP AllaClone  :: Gloves of the Khati Sha,HANDS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 3, AGI: 5, WIS: 6, HP: 50, MANA: 35","Cold: 5, Magic: 5, Poison: 5",Vengeance III,,,BST,0.1,SMALL
-13553,,HANDS,21,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 21, STA: 11, AGI: 25, WIS: 13, HP: 145, MANA: 130","Fire: 25, Disease: 25",Aura of Bravery,,65,BST,0.1,SMALL
+13553,Dumul's Gloves of the Brute,HANDS,21,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 21, STA: 11, AGI: 25, WIS: 13, HP: 145, MANA: 130","Fire: 25, Disease: 25",Aura of Bravery,,65,BST,0.1,SMALL
 13557,TAKP AllaClone  :: Gauntlets of Vengeful Fury,HANDS,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, AGI: 4, DEX: 5, WIS: 7, CHA: 3, HP: 45, MANA: 40","Fire: 6, Poison: 3, Disease: 6",Condemnation of Time,Condemnation of Time,,CLR,5.0,SMALL
-13563,,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 9, DEX: 20, WIS: 18, CHA: 6, HP: 140, MANA: 135","Magic: 25, Poison: 25",Condemnation of the Ages,Condemnation of the Ages,65,CLR,5.0,SMALL
+13563,Ultor's Gauntlets of Faith,HANDS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 9, DEX: 20, WIS: 18, CHA: 6, HP: 140, MANA: 135","Magic: 25, Poison: 25",Condemnation of the Ages,Condemnation of the Ages,65,CLR,5.0,SMALL
 13569,TAKP AllaClone  :: Scaled Avatar's Gloves,HANDS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, AGI: 5, DEX: 5, WIS: 6, HP: 45, MANA: 40","Fire: 5, Cold: 5, Poison: 5",Saryrn's Venom,Saryrn's Venom,,SHM,4.0,SMALL
-13579,,HANDS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 20, WIS: 18, HP: 135, MANA: 140","Fire: 25, Poison: 25",Saryrn's Torment,Saryrn's Torment,65,SHM,4.0,SMALL
+13579,Rosrak's Gauntlets of the Primal,HANDS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 20, WIS: 18, HP: 135, MANA: 140","Fire: 25, Poison: 25",Saryrn's Torment,Saryrn's Torment,65,SHM,4.0,SMALL
 13589,TAKP AllaClone  :: Wanderer's Sylvan Gloves,HANDS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 5, DEX: 5, WIS: 6, CHA: 4, HP: 45, MANA: 40","Cold: 5, Magic: 5, Disease: 5",Summer's Anger,Summer's Anger,,DRU,3.0,SMALL
-13603,,HANDS,21,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 17, DEX: 25, WIS: 18, CHA: 3, HP: 135, MANA: 140","Fire: 25, Disease: 25",Summer's Vengeance,Summer's Vengeance,62,DRU,3.0,SMALL
+13603,Kerasha's Sylvan Gloves,HANDS,21,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 17, DEX: 25, WIS: 18, CHA: 3, HP: 135, MANA: 140","Fire: 25, Disease: 25",Summer's Vengeance,Summer's Vengeance,62,DRU,3.0,SMALL
 13613,TAKP AllaClone  :: Silken Augmenter's Gloves,HANDS,10,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 3, STA: 7, DEX: 4, INT: 6, CHA: 5, HP: 35, MANA: 50","Fire: 7, Cold: 8",Insanity Storm,Insanity Storm,,ENC,0.3,SMALL
-13614,,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 25, DEX: 17, INT: 18, CHA: 5, HP: 135, MANA: 140","Cold: 25, Poison: 25",Insanity Sphere,Insanity Sphere,65,ENC,0.3,SMALL
+13614,Romar's Gloves of Visions,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 25, DEX: 17, INT: 18, CHA: 5, HP: 135, MANA: 140","Cold: 25, Poison: 25",Insanity Sphere,Insanity Sphere,65,ENC,0.3,SMALL
 13618,TAKP AllaClone  :: Elemental Gloves of the Prime,HANDS,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, AGI: 5, DEX: 5, INT: 6, HP: 35, MANA: 50","Poison: 7, Disease: 8",Chromosphere,Chromosphere,,MAG,0.3,SMALL
-13619,,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 9, DEX: 8, INT: 18, HP: 135, MANA: 140","Fire: 25, Magic: 25",Chromospheric,Chromospheric,65,MAG,0.3,SMALL
+13619,Magi`Kot's Gloves of Convergence,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 9, DEX: 8, INT: 18, HP: 135, MANA: 140","Fire: 25, Magic: 25",Chromospheric,Chromospheric,65,MAG,0.3,SMALL
 13622,TAKP AllaClone  :: Vorshar's Gloves of the Blight,HANDS,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, AGI: 5, DEX: 4, INT: 6, CHA: 5, HP: 40, MANA: 45","Fire: 5, Magic: 5, Disease: 5",Neurocus,Neurocus,,NEC,0.3,SMALL
-13623,,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 15, INT: 18, CHA: 8, HP: 135, MANA: 140","Fire: 25, Cold: 25",Neurocism,Neurocism,65,NEC,0.3,SMALL
+13623,Miragul's Gloves of Risen Souls,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 15, INT: 18, CHA: 8, HP: 135, MANA: 140","Fire: 25, Cold: 25",Neurocism,Neurocism,65,NEC,0.3,SMALL
 13626,TAKP AllaClone  :: Arantir's Gloves of Discovery,HANDS,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, AGI: 5, DEX: 4, INT: 6, HP: 35, MANA: 50","Fire: 5, Magic: 5, Poison: 5",Fires of Sol,Fires of Sol,,WIZ,0.3,SMALL
-13627,,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 8, AGI: 14, DEX: 20, INT: 18, HP: 140, MANA: 135","Cold: 25, Magic: 25",Inferno of Sol,Inferno of Sol,65,WIZ,0.3,SMALL
-13634,Kelp-Lined Mantle,SHOULDERS,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, DEX: 12, WIS: 18, INT: 18, CHA: 20, HP: 135, MANA: 160","Fire: 30, Magic: 10",Timeburn,Timeburn,65,CLR DRU SHM NEC WIZ MAG ENC,0.8,MEDIUM
+13627,Maelin's Gloves of Lore,HANDS,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 8, AGI: 14, DEX: 20, INT: 18, HP: 140, MANA: 135","Cold: 25, Magic: 25",Inferno of Sol,Inferno of Sol,65,WIZ,0.3,SMALL
+13634,Kelp-lined Mantle,SHOULDERS,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, DEX: 12, WIS: 18, INT: 18, CHA: 20, HP: 135, MANA: 160","Fire: 30, Magic: 10",Timeburn,Timeburn,65,CLR DRU SHM NEC WIZ MAG ENC,0.8,MEDIUM
 13638,Pauldrons of Purity,SHOULDERS,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 18, DEX: 18, INT: 20, CHA: 10, HP: 150, MANA: 165","Fire: 12, Cold: 12, Poison: 12, Disease: 12",Flowing Thought III,Timeburn,65,NEC WIZ MAG ENC,0.8,MEDIUM
 13646,TAKP AllaClone  :: Cog Encrusted Epaulets,SHOULDERS,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 8, DEX: 8, WIS: 12, HP: 65, MANA: 65","Cold: 10, Poison: 10",Haste of Mithaniel,Haste of Mithaniel,55,CLR DRU SHM,0.8,MEDIUM
 13647,Mantle of Pure Spirit,SHOULDERS,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, DEX: 20, WIS: 25, CHA: 15, HP: 170, MANA: 200","Magic: 25, Poison: 10, Disease: 25",Marr's Blessing,Marr's Blessing,65,CLR PAL RNG DRU SHM BST,0.8,MEDIUM
@@ -391,7 +391,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 13690,Puresteel Mantle,SHOULDERS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, DEX: 15, HP: 135","Cold: 20, Magic: 20, Poison: 10",Shield of Pain,,62,WAR,2.2,MEDIUM
 13694,Sharkbone Plated Shoulderpads,SHOULDERS,31,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 20, WIS: 12, INT: 12, HP: 140, MANA: 155","Fire: 25, Magic: 10",Aura of Daring,Preservation of Solusek,65,WAR PAL RNG SHD BRD ROG,1.3,MEDIUM
 13767,Spiked Skull Shoulderpads,SHOULDERS,13,MAGIC ITEM | LORE ITEM | NO DROP,"DEX: 25, HP: 135","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Aura of Health,,50,WAR MNK ROG,0.3,MEDIUM
-14733,Item 14733,,28,MAGIC ITEM | NO DROP,"STR: 18, AGI: 20, CHA: 18, HP: 185","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",,,65,WAR MNK BRD ROG BST,0.3,TINY
+14733,Shuriken of Eternity,,28,MAGIC ITEM | NO DROP,"STR: 18, AGI: 20, CHA: 18, HP: 185","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",,,65,WAR MNK BRD ROG BST,0.3,TINY
 14747,Vest of Phoenix Feathers,CHEST,36,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 20, DEX: 20, INT: 25, CHA: 15, HP: 150, MANA: 150","Cold: 30, Magic: 30",Aura of Regeneration,Preservation of Xegony,65,NEC WIZ MAG ENC,1.5,LARGE
 14754,Pulsating Gem,NECK PRIMARY SECONDARY,7,LORE ITEM | NO DROP,"STR: 9, STA: 9, AGI: 9, DEX: 9, WIS: 9, INT: 9, CHA: 9",,,,,ALL,0.4,TINY
 14760,Essence of Earth,,4,MAGIC ITEM | LORE ITEM,"STR: 5, STA: 5",Fire: 2,Illusion: Earth Elemental,,,ALL,1.0,MEDIUM
@@ -446,9 +446,9 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 16154,Girdle of Earthen Stability,WAIST,18,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, DEX: 15, WIS: 18, INT: 18, HP: 140, MANA: 100","Poison: 25, Disease: 25",Aura of Daring,,65,WAR PAL RNG SHD MNK BRD ROG BST,1.0,MEDIUM
 16156,Cord of Temporal Weavings,WAIST,30,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, AGI: 25, WIS: 18, INT: 18, HP: 220, MANA: 190","Cold: 25, Magic: 25, Disease: 25",Time Distortion,,65,WAR PAL RNG SHD MNK BRD ROG BST,1.0,MEDIUM
 16158,Bands of Earthen Energy,HEAD NECK WAIST,15,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, WIS: 20, INT: 20, CHA: 10, HP: 145, MANA: 145","Magic: 15, Poison: 15, Disease: 15",Haste of Druzzil,Haste of Druzzil,65,CLR DRU SHM NEC WIZ MAG ENC,1.0,MEDIUM
-16255,Item 16255,EAR,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, AGI: 25, DEX: 25, WIS: 25, INT: 25, HP: 145","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Aura of Bravery,,,ALL,2.0,TINY
-16257,Signet of the Arcane,EAR,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, AGI: 25, DEX: 25, WIS: 25, INT: 25, HP: 130, MANA: 150","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Flowing Thought III,Preservation of Xegony,,ALL,1.5,TINY
-16262,,,,LORE ITEM | NO DROP,,,,,,None,0.0,TINY
+16255,Signet of Might,EAR,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, AGI: 25, DEX: 25, WIS: 25, INT: 25, HP: 145","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Aura of Bravery,,,ALL,2.0,TINY
+16257,Signet of  the Arcane,EAR,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, AGI: 25, DEX: 25, WIS: 25, INT: 25, HP: 130, MANA: 150","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Flowing Thought III,Preservation of Xegony,,ALL,1.5,TINY
+16262,Essence of Fire,,,LORE ITEM | NO DROP,,,,,,None,0.0,TINY
 16265,Essence of Water,,,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,None,0.0,TINY
 16291,Ornate Chain Tunic Pattern,,,MAGIC ITEM | LORE ITEM,,,,,,RNG ROG SHM,0.1,TINY
 16298,Ornate Boot Mold,,,MAGIC ITEM | LORE ITEM,,,,,,WAR CLR PAL SHD BRD,1.0,SMALL
@@ -489,75 +489,75 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 16637,Leaf-jointed Cloak,BACK,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, DEX: 18, WIS: 15, INT: 15, HP: 140, MANA: 130","Fire: 8, Cold: 8, Magic: 8, Poison: 8, Disease: 8",Vengeance IV,,65,WAR PAL RNG SHD MNK BRD ROG BST,1.0,MEDIUM
 16679,Earring of Eternal Flame,EAR,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, DEX: 25, INT: 25, CHA: 20, HP: 140, MANA: 155","Fire: 8, Cold: 35, Magic: 8, Poison: 8, Disease: 8",Blaze of the Lightbringer,Blaze of the Lightbringer,65,NEC WIZ MAG ENC,0.5,MEDIUM
 16691,TAKP AllaClone  :: Kizrak's Greaves of Battle,LEGS,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 9, STA: 8, AGI: 8, HP: 90","Magic: 10, Disease: 10",Health,,,WAR,10.0,MEDIUM
-16693,,LEGS,70,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 10, DEX: 20, HP: 165","Fire: 5, Cold: 5, Magic: 30, Poison: 30, Disease: 5",Aura of Valor,,65,WAR,10.0,MEDIUM
+16693,Raex's Greaves of Destruction,LEGS,70,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 10, DEX: 20, HP: 165","Fire: 5, Cold: 5, Magic: 30, Poison: 30, Disease: 5",Aura of Valor,,65,WAR,10.0,MEDIUM
 16711,TAKP AllaClone  :: Stanos' Wicked Leggings,LEGS,31,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 7, STA: 9, DEX: 9, HP: 75","Fire: 7, Cold: 6, Disease: 7",Summon Scoriae Venom,,,ROG,7.5,MEDIUM
-16717,,LEGS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 10, AGI: 25, DEX: 15, HP: 155","Fire: 5, Cold: 5, Magic: 30, Poison: 30, Disease: 5",Aura of Valor,,65,ROG,7.5,MEDIUM
+16717,Bidilis' Greaves of the Elusive,LEGS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 10, AGI: 25, DEX: 15, HP: 155","Fire: 5, Cold: 5, Magic: 30, Poison: 30, Disease: 5",Aura of Valor,,65,ROG,7.5,MEDIUM
 16725,TAKP AllaClone  :: Leggings of Enlightenment,LEGS,19,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 8, AGI: 9, DEX: 8, HP: 75","Magic: 6, Poison: 7, Disease: 7",Health,,,MNK,0.3,MEDIUM
-16727,,LEGS,29,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 15, DEX: 15, HP: 155","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 30",Aura of Valor,,65,MNK,0.5,MEDIUM
+16727,Ton Po's Leggings of Composure,LEGS,29,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 15, DEX: 15, HP: 155","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 30",Aura of Valor,,65,MNK,0.5,MEDIUM
 16755,TAKP AllaClone  :: Jaylia's Legplates of the Valiant,LEGS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 7, AGI: 6, WIS: 7, HP: 75, MANA: 60","Fire: 7, Poison: 6, Disease: 7",Pious Might,,,PAL,10.0,MEDIUM
-16757,,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 13, AGI: 14, WIS: 18, HP: 155, MANA: 140","Fire: 30, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Aura of Valor,,65,PAL,10.0,MEDIUM
+16757,Trydan's Greaves of Nobility,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 13, AGI: 14, WIS: 18, HP: 155, MANA: 140","Fire: 30, Cold: 30, Magic: 5, Poison: 5, Disease: 5",Aura of Valor,,65,PAL,10.0,MEDIUM
 16761,TAKP AllaClone  :: Greaves of Emblazoned Souls,LEGS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 8, INT: 7, HP: 75, MANA: 60","Fire: 10, Poison: 10",Cloak of the Akheva,,,SHD,10.0,MEDIUM
-16763,,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 13, AGI: 15, DEX: 14, INT: 18, HP: 155, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 30, Disease: 5",Aura of Valor,,65,SHD,10.0,MEDIUM
+16763,Grimror's Greaves of the Plagues,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 13, AGI: 15, DEX: 14, INT: 18, HP: 155, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 30, Disease: 5",Aura of Valor,,65,SHD,10.0,MEDIUM
 16769,TAKP AllaClone  :: Composers Greaves,LEGS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 7, AGI: 4, DEX: 8, INT: 6, CHA: 5, HP: 75, MANA: 60","Cold: 7, Magic: 7, Poison: 6",Selo`s Accelerating Chorus,,,BRD,10.0,MEDIUM
-16771,,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 20, INT: 15, CHA: 10, HP: 155, MANA: 140","Fire: 5, Cold: 30, Magic: 30, Poison: 5, Disease: 5",Aura of Valor,,65,BRD,10.0,MEDIUM
+16771,Rizlona's Fiery Greaves,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 20, INT: 15, CHA: 10, HP: 155, MANA: 140","Fire: 5, Cold: 30, Magic: 30, Poison: 5, Disease: 5",Aura of Valor,,65,BRD,10.0,MEDIUM
 16775,TAKP AllaClone  :: Planestriders Greaves,LEGS,31,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 7, DEX: 12, WIS: 6, HP: 75, MANA: 60","Magic: 10, Poison: 10",Earthen Roots,,,RNG,7.5,MEDIUM
-16777,,LEGS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 15, DEX: 20, WIS: 18, HP: 155, MANA: 140","Fire: 5, Cold: 30, Magic: 30, Poison: 5, Disease: 5",Aura of Valor,,65,RNG,7.5,MEDIUM
+16777,Askr's Thunderous Greaves,LEGS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 15, DEX: 20, WIS: 18, HP: 155, MANA: 140","Fire: 5, Cold: 30, Magic: 30, Poison: 5, Disease: 5",Aura of Valor,,65,RNG,7.5,MEDIUM
 16783,TAKP AllaClone  :: Leggings of the Khati Sha,LEGS,19,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 7, AGI: 5, WIS: 7, HP: 75, MANA: 60","Fire: 10, Disease: 10",Sha's Ferocity,,,BST,0.3,MEDIUM
-16787,,LEGS,29,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 17, DEX: 20, WIS: 18, HP: 155, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 30",Aura of Valor,,65,BST,0.3,MEDIUM
+16787,Dumul's Leggings of the Brute,LEGS,29,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 17, DEX: 20, WIS: 18, HP: 155, MANA: 140","Fire: 30, Cold: 5, Magic: 5, Poison: 5, Disease: 30",Aura of Valor,,65,BST,0.3,MEDIUM
 16795,TAKP AllaClone  :: Greaves of Vengeful Fury,LEGS,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 7, WIS: 8, CHA: 3, HP: 55, MANA: 80","Cold: 7, Poison: 7, Disease: 6",Unswerving Hammer of Faith,,,CLR,10.0,MEDIUM
-16797,,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 20, DEX: 12, WIS: 23, HP: 145, MANA: 150","Fire: 30, Cold: 5, Magic: 30, Poison: 5, Disease: 5",Mark of the Righteous,,65,CLR,10.0,MEDIUM
+16797,Ultor's Greaves of Faith,LEGS,63,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 20, DEX: 12, WIS: 23, HP: 145, MANA: 150","Fire: 30, Cold: 5, Magic: 30, Poison: 5, Disease: 5",Mark of the Righteous,,65,CLR,10.0,MEDIUM
 16801,TAKP AllaClone  :: Scaled Avatar's Leggings,LEGS,31,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 7, AGI: 5, DEX: 6, WIS: 7, HP: 65, MANA: 70","Fire: 6, Cold: 7, Magic: 7",Greater Immobilize,,,SHM,10.0,MEDIUM
-16803,,LEGS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 20, DEX: 17, WIS: 23, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 30",Pox of Bertoxxulous,,65,SHM,7.5,MEDIUM
+16803,Rosrak's Greaves of the Primal,LEGS,50,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 20, DEX: 17, WIS: 23, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 30",Pox of Bertoxxulous,,65,SHM,7.5,MEDIUM
 16809,TAKP AllaClone  :: Wanderer's Sylvan Leggings,LEGS,19,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, AGI: 5, DEX: 6, WIS: 9, CHA: 4, HP: 55, MANA: 80","Fire: 6, Magic: 7, Disease: 7",Savage Roots,,,DRU,6.5,MEDIUM
-16811,,LEGS,29,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 12, DEX: 15, WIS: 23, CHA: 10, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 30",Legacy of Bracken,,65,DRU,6.5,MEDIUM
+16811,Kerasha's Sylvan Leggings,LEGS,29,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 12, DEX: 15, WIS: 23, CHA: 10, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 5, Poison: 5, Disease: 30",Legacy of Bracken,,65,DRU,6.5,MEDIUM
 16815,TAKP AllaClone  :: Silken Augmenter's Pantaloons,LEGS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 6, AGI: 8, DEX: 3, INT: 8, CHA: 6, HP: 50, MANA: 85","Fire: 10, Cold: 10",Tranquility,,,ENC,0.7,MEDIUM
-16931,,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 12, DEX: 15, INT: 23, CHA: 10, HP: 145, MANA: 150","Fire: 30, Cold: 5, Magic: 5, Poison: 30, Disease: 5",Speed of Vallon,,65,ENC,0.7,MEDIUM
+16931,Romar's Pantaloons of Visions,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 12, DEX: 15, INT: 23, CHA: 10, HP: 145, MANA: 150","Fire: 30, Cold: 5, Magic: 5, Poison: 30, Disease: 5",Speed of Vallon,,65,ENC,0.7,MEDIUM
 17207,Very Large Coin Purse,,,LORE ITEM,,,,,,,0.1,
 17587,Feather Lined Box,,,LORE ITEM,,,,,,,2.5,
 17701,Kavruul`s Mystic Pouch,,,MAGIC ITEM | LORE ITEM,,,,,,,0.4,
 19000,TAKP AllaClone  :: Elemental Leggings of the Prime,LEGS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 4, AGI: 4, DEX: 6, INT: 7, HP: 50, MANA: 85","Poison: 10, Disease: 10",Flameshield of Ro,,,MAG,0.7,MEDIUM
-19021,,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 12, DEX: 20, INT: 23, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 30, Poison: 5, Disease: 5",Rod of Mystical Transvergance,,65,MAG,0.7,MEDIUM
+19021,Magi`Kot's Pants of Convergence,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 12, DEX: 20, INT: 23, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 30, Poison: 5, Disease: 5",Rod of Mystical Transvergance,,65,MAG,0.7,MEDIUM
 19023,TAKP AllaClone  :: Vorshar's Pants of the Blight,LEGS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 6, AGI: 6, DEX: 5, INT: 8, CHA: 5, HP: 50, MANA: 85","Cold: 10, Magic: 10",Rune of Death,,,NEC,0.7,MEDIUM
-19024,,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 10, AGI: 15, DEX: 10, INT: 23, CHA: 10, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 5, Poison: 30, Disease: 5",Pyrocruor,,65,NEC,0.7,MEDIUM
+19024,Miragul's Greaves of Risen Souls,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 10, AGI: 15, DEX: 10, INT: 23, CHA: 10, HP: 145, MANA: 150","Fire: 5, Cold: 30, Magic: 5, Poison: 30, Disease: 5",Pyrocruor,,65,NEC,0.7,MEDIUM
 19026,TAKP AllaClone  :: Arantir's Leggings of Discovery,LEGS,14,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 6, DEX: 10, INT: 9, HP: 50, MANA: 85","Fire: 7, Cold: 7, Magic: 6",Decession,,,WIZ,0.7,MEDIUM
-19027,,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 20, DEX: 17, INT: 23, HP: 145, MANA: 150","Fire: 5, Cold: 5, Magic: 5, Poison: 30, Disease: 30",Concussion,,65,WIZ,0.7,MEDIUM
+19027,Maelin's Leggings of Lore,LEGS,24,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 20, DEX: 17, INT: 23, HP: 145, MANA: 150","Fire: 5, Cold: 5, Magic: 5, Poison: 30, Disease: 30",Concussion,,65,WIZ,0.7,MEDIUM
 19074,Sanguine Slippers,FEET,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, WIS: 12, INT: 12, CHA: 8, HP: 75, MANA: 75",Cold: 20,Sanguine Preservation,Sanguine Preservation,58,CLR DRU SHM NEC WIZ MAG ENC,0.4,SMALL
 19079,Decayed Shoes of the Plaguebringer,FEET,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 8, DEX: 8, WIS: 15, INT: 15, HP: 115, MANA: 115",Disease: 25,Conservation of Solusek,Conservation of Solusek,58,CLR DRU SHM NEC WIZ MAG ENC,0.8,SMALL
 19082,Boots of the Warmaster,FEET,18,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, DEX: 20, WIS: 10, INT: 10, HP: 125, MANA: 100","Fire: 15, Cold: 15, Magic: 15",Vengeance IV,,61,WAR PAL RNG SHD MNK BRD ROG BST,0.5,SMALL
 19094,Sable Shoes of Flame,FEET,23,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 12, AGI: 18, DEX: 18, WIS: 12, INT: 12, HP: 135, MANA: 135","Cold: 20, Magic: 20",Haste,,65,WAR CLR PAL RNG SHD DRU MNK BRD ROG SHM BST,1.5,SMALL
 19144,Flowing Moss Mantle,SHOULDERS,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 18, DEX: 18, WIS: 12, INT: 12, HP: 135, MANA: 125","Fire: 20, Magic: 20",Haste,,65,ALL,2.0,SMALL
 19439,TAKP AllaClone  :: Kizrak's Boots of Battle,FEET,33,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 7, STA: 3, AGI: 5, HP: 55","Fire: 3, Cold: 4, Poison: 4, Disease: 4",Vengeance III,,,WAR,6.5,SMALL
-19440,,FEET,55,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 10, DEX: 20, HP: 155","Fire: 15, Poison: 15, Disease: 15",Aura of Daring,,65,WAR,6.5,SMALL
+19440,Raex's Boots of Destruction,FEET,55,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 10, DEX: 20, HP: 155","Fire: 15, Poison: 15, Disease: 15",Aura of Daring,,65,WAR,6.5,SMALL
 19442,TAKP AllaClone  :: Stanos' Wicked Boots,FEET,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 6, DEX: 5, HP: 45","Cold: 5, Poison: 5, Disease: 5",Vengeance III,,,ROG,5.5,SMALL
-19443,,FEET,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, DEX: 25, HP: 145","Fire: 15, Cold: 15, Magic: 15",Aura of Daring,,65,ROG,5.5,SMALL
+19443,Bidilis' Boots of the Elusive,FEET,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, DEX: 25, HP: 145","Fire: 15, Cold: 15, Magic: 15",Aura of Daring,,65,ROG,5.5,SMALL
 19445,TAKP AllaClone  :: Slippers of Enlightenment,FEET,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 6, STA: 5, DEX: 4, HP: 45","Cold: 5, Magic: 5, Poison: 5",Vengeance III,,,MNK,0.2,SMALL
-19446,,FEET,21,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 18, STA: 12, AGI: 12, DEX: 23, HP: 145","Magic: 15, Poison: 15, Disease: 15",Aura of Daring,,65,MNK,0.3,SMALL
+19446,Ton Po's Sandals of Composure,FEET,21,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 18, STA: 12, AGI: 12, DEX: 23, HP: 145","Magic: 15, Poison: 15, Disease: 15",Aura of Daring,,65,MNK,0.3,SMALL
 19448,TAKP AllaClone  :: Jaylia's Boots of the Valiant,FEET,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, DEX: 6, WIS: 5, HP: 45, MANA: 30","Fire: 4, Cold: 4, Magic: 4, Poison: 3",Flowing Thought III,,,PAL,6.5,SMALL
-19449,,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 18, WIS: 15, HP: 145, MANA: 130","Fire: 15, Cold: 15, Poison: 15",Vengeance IV,Mana Preservation IV,65,PAL,6.5,SMALL
+19449,Trydan's Boots of Nobility,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 20, DEX: 18, WIS: 15, HP: 145, MANA: 130","Fire: 15, Cold: 15, Poison: 15",Vengeance IV,Mana Preservation IV,65,PAL,6.5,SMALL
 19545,TAKP AllaClone  :: Boots of Emblazoned Souls,FEET,28,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 5, DEX: 6, INT: 4, HP: 45, MANA: 30","Fire: 5, Poison: 5, Disease: 5",Flowing Thought III,,,SHD,6.5,SMALL
-19546,,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 21, STA: 11, DEX: 18, INT: 15, HP: 145, MANA: 130","Cold: 15, Poison: 15, Disease: 15",Vengeance IV,Mana Preservation IV,65,SHD,6.5,SMALL
+19546,Grimror's Boots of the Plagues,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 21, STA: 11, DEX: 18, INT: 15, HP: 145, MANA: 130","Cold: 15, Poison: 15, Disease: 15",Vengeance IV,Mana Preservation IV,65,SHD,6.5,SMALL
 19548,TAKP AllaClone  :: Composers Boots,FEET,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 5, DEX: 6, INT: 4, HP: 45, MANA: 30","Fire: 5, Cold: 5, Poison: 5",Flowing Thought III,,,BRD,6.5,SMALL
-19549,,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 13, AGI: 18, INT: 15, CHA: 8, HP: 145, MANA: 130","Cold: 15, Magic: 15, Disease: 15",Vengeance IV,,65,BRD,6.5,SMALL
+19549,Rizlona's Fiery Boots,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 13, AGI: 18, INT: 15, CHA: 8, HP: 145, MANA: 130","Cold: 15, Magic: 15, Disease: 15",Vengeance IV,,65,BRD,6.5,SMALL
 19719,TAKP AllaClone  :: Ring of the Shissar,FINGERS,8,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, WIS: 4, INT: 4, HP: 80, MANA: 65",,Enhancement Haste III,Enhancement Haste III,,ALL,0.1,TINY
-19726,Item 19726,SHOULDERS,5,MAGIC ITEM,"STA: 5, HP: 25","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",,,,ALL,0.2,SMALL
+19726,Cloak of Fading Hues,SHOULDERS,5,MAGIC ITEM,"STA: 5, HP: 25","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",,,,ALL,0.2,SMALL
 19837,TAKP AllaClone  :: Planestriders Boots,FEET,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 6, AGI: 4, HP: 45, MANA: 30","Cold: 4, Magic: 4, Poison: 4, Disease: 3",Flowing Thought III,,,RNG,5.5,SMALL
-19838,,FEET,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, DEX: 20, WIS: 15, HP: 145, MANA: 130","Cold: 15, Magic: 15, Poison: 15",Vengeance IV,Mana Preservation IV,65,RNG,5.5,SMALL
+19838,Askr's Thunderous Boots,FEET,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, DEX: 20, WIS: 15, HP: 145, MANA: 130","Cold: 15, Magic: 15, Poison: 15",Vengeance IV,Mana Preservation IV,65,RNG,5.5,SMALL
 20000,TAKP AllaClone  :: Boots of the Khati Sha,FEET,14,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 6, DEX: 3, WIS: 6, HP: 45, MANA: 30","Fire: 4, Cold: 4, Magic: 4, Disease: 3",Flowing Thought III,,,BST,0.2,SMALL
-20032,,FEET,21,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 12, DEX: 18, WIS: 15, HP: 145, MANA: 130","Fire: 15, Cold: 15, Poison: 15",Vengeance IV,Mana Preservation IV,65,BST,0.2,SMALL
+20032,Dumul's Boots of the Brute,FEET,21,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 12, DEX: 18, WIS: 15, HP: 145, MANA: 130","Fire: 15, Cold: 15, Poison: 15",Vengeance IV,Mana Preservation IV,65,BST,0.2,SMALL
 20073,TAKP AllaClone  :: Boots of Vengeful Fury,FEET,28,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 3, AGI: 3, DEX: 3, WIS: 5, HP: 35, MANA: 40","Fire: 5, Magic: 5, Disease: 5",Mana Preservation IV,Mana Preservation IV,,CLR,6.5,SMALL
-20074,,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 16, STA: 15, DEX: 13, WIS: 20, CHA: 6, HP: 140, MANA: 135","Fire: 15, Magic: 15, Disease: 15",Preservation of Xegony,Preservation of Xegony,65,CLR,6.5,SMALL
+20074,Ultor's Boots of Faith,FEET,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 16, STA: 15, DEX: 13, WIS: 20, CHA: 6, HP: 140, MANA: 135","Fire: 15, Magic: 15, Disease: 15",Preservation of Xegony,Preservation of Xegony,65,CLR,6.5,SMALL
 20077,TAKP AllaClone  :: Scaled Avatar's Boots,FEET,20,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 4, DEX: 4, WIS: 7, HP: 40, MANA: 35","Fire: 5, Cold: 5, Disease: 5",Mana Preservation IV,Mana Preservation IV,,SHM,7.5,SMALL
-20078,,FEET,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 25, WIS: 20, HP: 135, MANA: 140","Fire: 15, Magic: 15, Disease: 15",Preservation of Xegony,Preservation of Xegony,65,SHM,5.5,SMALL
+20078,Rosrak's Boots of the Primal,FEET,40,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, AGI: 25, WIS: 20, HP: 135, MANA: 140","Fire: 15, Magic: 15, Disease: 15",Preservation of Xegony,Preservation of Xegony,65,SHM,5.5,SMALL
 20152,TAKP AllaClone  :: Wanderer's Sylvan Boots,FEET,14,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 4, STA: 6, WIS: 5, HP: 35, MANA: 40","Fire: 3, Cold: 3, Magic: 3, Poison: 3, Disease: 3",Mana Preservation IV,Mana Preservation IV,,DRU,4.5,SMALL
-20422,,FEET,21,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 13, AGI: 20, DEX: 12, WIS: 20, HP: 135, MANA: 140","Cold: 15, Poison: 15, Disease: 15",Preservation of Xegony,Preservation of Xegony,65,DRU,4.5,SMALL
+20422,Kerasha's Sylvan Boots,FEET,21,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 13, AGI: 20, DEX: 12, WIS: 20, HP: 135, MANA: 140","Cold: 15, Poison: 15, Disease: 15",Preservation of Xegony,Preservation of Xegony,65,DRU,4.5,SMALL
 20424,TAKP AllaClone  :: Silken Augmenter's Shoes,FEET,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 3, DEX: 4, HP: 30, MANA: 45","Poison: 8, Disease: 7",Spell Haste IV,Spell Haste IV,,ENC,0.7,SMALL
-20425,,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 18, STA: 12, AGI: 12, INT: 20, CHA: 10, HP: 135, MANA: 140","Fire: 15, Magic: 15, Poison: 15",Speeding Thought,Speeding Thought,62,ENC,0.7,SMALL
+20425,Romar's Slippers of Visions,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 18, STA: 12, AGI: 12, INT: 20, CHA: 10, HP: 135, MANA: 140","Fire: 15, Magic: 15, Poison: 15",Speeding Thought,Speeding Thought,62,ENC,0.7,SMALL
 20427,TAKP AllaClone  :: Elemental Slippers of the Prime,FEET,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 6, AGI: 4, INT: 5, HP: 30, MANA: 45","Fire: 4, Cold: 4, Poison: 4, Disease: 3",Spell Haste IV,Spell Haste IV,,MAG,0.7,SMALL
-20428,,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 11, AGI: 17, DEX: 17, INT: 20, HP: 135, MANA: 140","Fire: 15, Cold: 15, Disease: 15",Speeding Thought,Speeding Thought,65,MAG,0.7,SMALL
+20428,Magi`Kot's Shoes of Convergence,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 11, AGI: 17, DEX: 17, INT: 20, HP: 135, MANA: 140","Fire: 15, Cold: 15, Disease: 15",Speeding Thought,Speeding Thought,65,MAG,0.7,SMALL
 20430,TAKP AllaClone  :: Vorshar's Slippers of the Blight,FEET,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 4, DEX: 6, INT: 5, HP: 35, MANA: 40","Fire: 5, Cold: 5, Magic: 5",Spell Haste IV,Spell Haste IV,,NEC,0.7,SMALL
-20431,,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 18, DEX: 15, INT: 20, CHA: 8, HP: 135, MANA: 140","Fire: 15, Magic: 15, Disease: 15",Speeding Thought,Speeding Thought,65,NEC,0.7,SMALL
+20431,Miragul's Shoes of Risen Souls,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, AGI: 18, DEX: 15, INT: 20, CHA: 8, HP: 135, MANA: 140","Fire: 15, Magic: 15, Disease: 15",Speeding Thought,Speeding Thought,65,NEC,0.7,SMALL
 20433,TAKP AllaClone  :: Arantir's Sandals of Discovery,FEET,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 6, DEX: 4, INT: 5, HP: 30, MANA: 45","Fire: 4, Cold: 3, Magic: 4, Disease: 4",Spell Haste IV,Spell Haste IV,,WIZ,0.7,SMALL
-20434,,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 11, STA: 16, DEX: 18, INT: 20, HP: 140, MANA: 135","Cold: 15, Magic: 15, Poison: 15",Speeding Thought,Speeding Thought,65,WIZ,0.7,SMALL
+20434,Maelin's Shoes of Lore,FEET,17,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 11, STA: 16, DEX: 18, INT: 20, HP: 140, MANA: 135","Cold: 15, Magic: 15, Poison: 15",Speeding Thought,Speeding Thought,65,WIZ,0.7,SMALL
 20438,Tormented Stone of Souls,RANGE,8,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 5, DEX: 5, INT: 8, HP: 65, MANA: 45","Fire: 10, Magic: 10",Focus of Solusek,Focus of Solusek,53,NEC WIZ MAG ENC,0.2,SMALL
 20453,Bone Sliver Ornament,RANGE,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 20, INT: 20, CHA: 15, HP: 130, MANA: 145","Fire: 15, Cold: 15, Magic: 15",Speed of Solusek,Speed of Solusek,50,ALL,0.8,SMALL
 20454,Stone Etched Mallet,PRIMARY SECONDARY,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 10, DEX: 15, WIS: 15, HP: 135, MANA: 135","Magic: 25, Disease: 25",Rune II,,,WAR PAL RNG SHD MNK BRD ROG BST,0.1,SMALL
@@ -613,7 +613,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 22972,Clawed Earthcrafter's Hoop,EAR,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, DEX: 15, WIS: 12, INT: 12, HP: 140, MANA: 135","Magic: 20, Poison: 20, Disease: 20",Aura of Daring,,65,WAR PAL RNG SHD MNK BRD ROG BST,0.8,MEDIUM
 22975,Double Edged Stormblade,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 10, AGI: 15, WIS: 13, INT: 13, HP: 125, MANA: 75","Fire: 15, Cold: 10",Wrath of Wind,,55,WAR RNG BRD ROG,2.5,MEDIUM
 22980,Whip of the Earthcrafter,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 12, DEX: 16, WIS: 10, CHA: 10, HP: 100, MANA: 75","Poison: 12, Disease: 12",Call of the Mistwalker,,62,RNG,1.5,MEDIUM
-22982,Twin-Blade of Sorrow,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, DEX: 10, WIS: 8, INT: 8, HP: 100, MANA: 75","Fire: 8, Cold: 8, Poison: 8, Disease: 8",Flamesong,,55,WAR RNG BRD ROG,1.5,MEDIUM
+22982,Twin-blade of Sorrow,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, DEX: 10, WIS: 8, INT: 8, HP: 100, MANA: 75","Fire: 8, Cold: 8, Poison: 8, Disease: 8",Flamesong,,55,WAR RNG BRD ROG,1.5,MEDIUM
 22985,Jagged Shard of Frozen Flame,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 10, AGI: 15, HP: 125, MANA: 100","Fire: 7, Cold: 20, Magic: 7, Poison: 7, Disease: 7",Ember Strike,,55,WAR RNG BRD ROG,2.0,MEDIUM
 22986,Edge of Eternity,PRIMARY SECONDARY,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, AGI: 18, DEX: 25, WIS: 10, INT: 10, HP: 180, MANA: 165","Fire: 18, Cold: 18, Poison: 18",Time Snap,,65,WAR RNG BRD ROG,1.0,MEDIUM
 22990,Gem Encrusted Axe,PRIMARY,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 15, DEX: 12, WIS: 15, INT: 15, HP: 135, MANA: 145",Fire: 25,Runic,,65,PAL SHD,3.0,MEDIUM
@@ -785,7 +785,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 26553,Mace of Confusion,PRIMARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, WIS: 25, HP: 100, MANA: 100","Poison: 25, Disease: 25",Desperation,,,CLR DRU SHM,2.0,TINY
 26555,Sleeves of Elemental Auras,ARMS,15,MAGIC ITEM | NO DROP,"STR: 35, STA: 20, HP: 55, MANA: 100","Fire: 15, Cold: 15, Magic: 15",,,,NEC WIZ MAG ENC,0.1,TINY
 26556,Belt of Mystical Protection,WAIST,28,MAGIC ITEM | NO DROP,"STR: 10, STA: 15, AGI: 10, DEX: 10, HP: 100, MANA: 100","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",,,,WAR PAL RNG SHD MNK BRD ROG BST,0.1,TINY
-26557,Jenniy's Two-Tone Cuirass,CHEST,60,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 7, DEX: 6, WIS: 30, INT: 9, CHA: 5, HP: 50, MANA: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,WAR CLR PAL SHD BRD,20.0,SMALL
+26557,Jenniy's Two-tone Cuirass,CHEST,60,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 7, DEX: 6, WIS: 30, INT: 9, CHA: 5, HP: 50, MANA: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,WAR CLR PAL SHD BRD,20.0,SMALL
 26558,Earring of Dissention,EAR,18,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 8, AGI: 8, DEX: 8, HP: 55, MANA: 100",Cold: 25,,,,WAR PAL RNG SHD MNK BRD ROG BST,0.1,TINY
 26559,Veil of Hidden Thought,FACE,15,MAGIC ITEM | NO DROP,"WIS: 10, INT: 10, MANA: 25","Cold: 10, Disease: 10",Flowing Thought II,,,NEC WIZ MAG ENC,0.1,TINY
 26560,Crys`Va Mask,FACE,10,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 15, DEX: 20, HP: 90, MANA: 90","Fire: 8, Cold: 8, Magic: 8, Poison: 8, Disease: 8",Truesight,,,WAR PAL RNG SHD MNK BRD ROG BST,0.1,TINY
@@ -985,7 +985,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 28148,Slippers of Dark Whispers,FEET,15,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 25, DEX: 25, INT: 15, HP: 85, MANA: 115","Magic: 30, Disease: 30",Wind of the Nightcrawler,Wind of the Nightcrawler,60,NEC WIZ MAG ENC,0.5,SMALL
 28149,Denon's Drums of Declivity,RANGE PRIMARY SECONDARY,20,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 12, DEX: 12, CHA: 12, HP: 125, MANA: 125","Poison: 25, Disease: 25",Occlusion of Sound,,60,BRD,2.0,SMALL
 28246,Gloves of Airy Mists,HANDS,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 10, AGI: 18, WIS: 20, INT: 20, CHA: 15, HP: 195, MANA: 175","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Aura of Bravery,,65,WAR CLR PAL RNG SHD BRD ROG SHM,1.0,TINY
-28296,,NECK,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, AGI: 15, WIS: 15, INT: 15, HP: 75, MANA: 75","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Talisman Gate,,,ALL,1.0,SMALL
+28296,The Binden Concerrentia,NECK,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 15, AGI: 15, WIS: 15, INT: 15, HP: 75, MANA: 75","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Talisman Gate,,,ALL,1.0,SMALL
 28605,Coif of Flowing Time,HEAD,43,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 10, DEX: 18, WIS: 18, CHA: 20, HP: 175, MANA: 170","Fire: 15, Cold: 15, Poison: 15, Disease: 15",Timespin,,65,WAR CLR PAL RNG SHD BRD ROG SHM,2.0,TINY
 28647,Helm of Flowing Time,HEAD,57,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 20, AGI: 18, WIS: 18, INT: 18, CHA: 8, HP: 185, MANA: 160","Fire: 15, Magic: 15, Poison: 15, Disease: 15",Timespin,,65,WAR CLR PAL SHD BRD,5.0,TINY
 28648,Cap of Flowing Time,HEAD,27,MAGIC ITEM | LORE ITEM | NO DROP,"AGI: 15, DEX: 20, WIS: 20, INT: 20, CHA: 15, HP: 175, MANA: 170","Cold: 20, Magic: 20, Poison: 20",Timespin,,65,WAR CLR PAL RNG SHD DRU MNK BRD ROG SHM BST,1.5,TINY
@@ -1149,10 +1149,10 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 28986,Helmet of Shadow,HEAD,50,MAGIC ITEM | NO DROP,"STA: 35, HP: 125, MANA: 75","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,60,WAR CLR PAL SHD BRD,3.5,MEDIUM
 28987,Thorny Chain Sleeves,ARMS,38,MAGIC ITEM | NO DROP,"STR: 25, STA: 15, DEX: 10, WIS: 8, INT: 8, HP: 90, MANA: 90","Fire: 7, Cold: 7, Magic: 7, Poison: 7, Disease: 7",Vengeance III,,60,WAR CLR PAL RNG SHD BRD ROG SHM,3.5,MEDIUM
 28989,Bow of Shadows,RANGE,10,MAGIC ITEM | NO DROP,"AGI: 10, DEX: 15, HP: 125, MANA: 75","Fire: 10, Magic: 10, Disease: 20",Spirit Curse,,60,WAR PAL RNG SHD ROG,1.0,SMALL
-28991,Rune of Judgment,SHOULDERS ARMS WRIST HANDS,30,MAGIC ITEM | LORE ITEM | NO DROP,"WIS: 25, HP: 100, MANA: 100","Fire: 12, Cold: 12, Magic: 12, Poison: 12, Disease: 12",Flowing Thought I,,60,CLR DRU SHM,1.0,TINY
+28991,Rune of Judgement,SHOULDERS ARMS WRIST HANDS,30,MAGIC ITEM | LORE ITEM | NO DROP,"WIS: 25, HP: 100, MANA: 100","Fire: 12, Cold: 12, Magic: 12, Poison: 12, Disease: 12",Flowing Thought I,,60,CLR DRU SHM,1.0,TINY
 28992,Cloak of Glowing Embers,BACK,15,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, DEX: 10, WIS: 15, HP: 125, MANA: 125","Magic: 35, Disease: 35",Flowing Thought IV,,60,CLR DRU SHM NEC WIZ MAG ENC,1.0,MEDIUM
 28993,Silver Band of Secrets,FINGERS,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, DEX: 10, INT: 10, HP: 125, MANA: 125","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",Koadic's Expansive Mind,,60,NEC WIZ MAG ENC,1.0,SMALL
-28994,Crimson Ring of Judgment,FINGERS,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, DEX: 10, WIS: 10, HP: 125, MANA: 125","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",Koadic's Expansive Mind,,60,CLR DRU SHM,1.0,SMALL
+28994,Crimson Ring of Judgement,FINGERS,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, DEX: 10, WIS: 10, HP: 125, MANA: 125","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",Koadic's Expansive Mind,,60,CLR DRU SHM,1.0,SMALL
 28995,Thorny Chain Helm,HEAD,25,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 20, DEX: 15, WIS: 10, HP: 85, MANA: 85","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 15",Vengeance IV,,60,RNG ROG SHM,2.0,MEDIUM
 28996,Bracer of Black Blood,WRIST,13,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, AGI: 15, DEX: 10, WIS: 8, HP: 70, MANA: 70","Fire: 10, Magic: 10, Disease: 15",Vengeance IV,,60,DRU MNK BST,0.8,MEDIUM
 28997,Pauldrons of Seething Darkness,SHOULDERS,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 10, DEX: 10, WIS: 10, INT: 10, HP: 85, MANA: 85","Fire: 15, Poison: 10, Disease: 10",Vengeance IV,,60,WAR CLR PAL SHD BRD,3.0,MEDIUM
@@ -1210,7 +1210,7 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 29456,Lungi of the Forbidden,CHEST,22,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, AGI: 10, DEX: 10, HP: 100","Fire: 12, Cold: 12, Magic: 12, Poison: 12, Disease: 12",Haste,,55,MNK BST,1.0,LARGE
 29457,Clawed Coat of Tyro,CHEST,52,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, AGI: 10, DEX: 15, HP: 100","Fire: 12, Cold: 12, Magic: 12, Poison: 12, Disease: 12",Haste,,55,WAR PAL SHD BRD,5.0,LARGE
 29458,Fascia Secundae,FACE,12,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, WIS: 15, CHA: 5, HP: 40, MANA: 40","Fire: 8, Cold: 8, Magic: 8",Extended Enhancement III,Extended Enhancement III,55,CLR DRU SHM,0.5,SMALL
-29459,Surreptitious Brooch,NECK,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 5, WIS: 5, INT: 5, HP: 75, MANA: 75","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Affliction Haste III,Affliction Haste III,55,ALL,0.1,TINY
+29459,Surreptitious Broach,NECK,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 5, WIS: 5, INT: 5, HP: 75, MANA: 75","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Affliction Haste III,Affliction Haste III,55,ALL,0.1,TINY
 29460,Sharpened Dragon's Scale,RANGE,5,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 5, WIS: 5, INT: 5, CHA: 5, HP: 35, MANA: 35","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Truesight,,55,CLR DRU SHM NEC WIZ MAG ENC,0.1,TINY
 29462,Eye of Tjudawos,RANGE,10,MAGIC ITEM | LORE ITEM | NO DROP,"HP: 55, MANA: 55","Fire: 3, Cold: 3, Magic: 25, Poison: 3, Disease: 3",,,55,ALL,0.1,TINY
 29476,Fist of Pummeling Prowess,PRIMARY SECONDARY,5,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, AGI: 15, HP: 50","Fire: 1, Cold: 1, Magic: 1, Poison: 1, Disease: 1",,,55,MNK BST,0.1,SMALL
@@ -1218,24 +1218,24 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 29480,Tome of Innovation,PRIMARY SECONDARY,5,MAGIC ITEM | LORE ITEM | NO DROP,"WIS: 10, INT: 10, CHA: 10, MANA: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,55,NEC WIZ MAG ENC BST,3.5,SMALL
 29481,Besmirched Mask of Conception,FACE,12,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, AGI: 10, DEX: 10, HP: 50",,Illusion: Dwarf,,55,BRD ROG,1.5,SMALL
 29482,Sightless Velium Eye,NECK,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 5, AGI: 5, DEX: 5, WIS: 5, INT: 5, CHA: 5, HP: 50, MANA: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Plainsight,,55,ALL,0.1,TINY
-29597,Item 29597,RANGE,10,MAGIC ITEM,"STR: 15, STA: 10, INT: 15, HP: 100, MANA: 100",Disease: 35,Aura of Battle,,61,WAR PAL RNG SHD ROG,3.0,LARGE
+29597,Stonewood Compound Bow,RANGE,10,MAGIC ITEM,"STR: 15, STA: 10, INT: 15, HP: 100, MANA: 100",Disease: 35,Aura of Battle,,61,WAR PAL RNG SHD ROG,3.0,LARGE
 29645,White Dragonscale Boots,FEET,15,MAGIC ITEM | LORE ITEM | NO DROP,"WIS: 17, INT: 17, HP: 85, MANA: 110","Fire: 5, Cold: 20, Magic: 10, Poison: 5, Disease: 5",Flowing Thought II,,,CLR DRU SHM NEC WIZ MAG ENC,1.5,SMALL
 29647,Clawed Griffin Sword,PRIMARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, DEX: 15, HP: 70","Cold: 15, Magic: 15",Frost Strike,,,WAR PAL RNG SHD,1.5,MEDIUM
 29648,White Dragon Helm,HEAD,22,MAGIC ITEM | LORE ITEM,"STR: 10, STA: 12, DEX: 15, HP: 100, MANA: 60","Fire: 10, Cold: 10, Magic: 30, Poison: 10, Disease: 10",,,,ALL,1.5,SMALL
 29686,Bracer of Benevolence,WRIST,17,MAGIC ITEM | NO DROP,"STR: 8, STA: 8, HP: 30","Fire: 5, Cold: 12, Magic: 12",,,,WAR PAL RNG SHD MNK BRD ROG BST,0.1,SMALL
 29861,Sigil Earring of Veracity,EAR,25,LORE ITEM | NO DROP,"STR: 25, STA: 25, WIS: 25, INT: 25, HP: 100, MANA: 100","Fire: 10, Disease: 10, Cold: 10, Magic: 10, Poison: 10",Acumen,,,ALL,0.1,TINY
-30164,Item 30164,FINGERS,8,MAGIC ITEM | LORE ITEM | NO DROP,STR: 8,Magic: 8,Shield of the Eighth,,,ALL,1.0,MEDIUM
-30369,Item 30369,FINGERS,9,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 9, STA: 9, HP: 50",Magic: 9,Shield of the Eighth,,,ALL,1.0,MEDIUM
+30164,Velium Coldain Insignia Ring,FINGERS,8,MAGIC ITEM | LORE ITEM | NO DROP,STR: 8,Magic: 8,Shield of the Eighth,,,ALL,1.0,MEDIUM
+30369,Coldain Hero's Insignia Ring,FINGERS,9,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 9, STA: 9, HP: 50",Magic: 9,Shield of the Eighth,,,ALL,1.0,MEDIUM
 30380,Blade of the Swarm,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, HP: 40",,Swarming Pain,,,WAR SHD BRD ROG,2.5,MEDIUM
-30385,Item 30385,FINGERS,10,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, HP: 100",Magic: 10,Frostreaver's Blessing,,,ALL,0.1,SMALL
+30385,Ring of Dain Frostreaver IV,FINGERS,10,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, HP: 100",Magic: 10,Frostreaver's Blessing,,,ALL,0.1,SMALL
 30388,Rluas's Chromatic Ring,FINGERS,15,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 10, AGI: 10, DEX: 10, HP: 80, MANA: 80","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Chromatic Chaos,,55,WAR PAL SHD BRD,0.0,TINY
-30393,Chromatic Gauntlets of the Ages,,,,,,,,,,,
-30465,Item 30465,ARMS,14,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,NEC WIZ MAG ENC,0.8,MEDIUM
-30466,Item 30466,LEGS,17,MAGIC ITEM,"STR: 10, STA: 6, DEX: 8, INT: 6, HP: 100, MANA: 40","Poison: 12, Disease: 12",,,46,NEC WIZ MAG ENC,1.2,MEDIUM
-30467,Item 30467,HANDS,13,MAGIC ITEM,"STR: 8, STA: 4, DEX: 6, INT: 4, HP: 80, MANA: 30","Poison: 8, Disease: 8",,,46,NEC WIZ MAG ENC,0.5,MEDIUM
-30468,Item 30468,FEET,13,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,NEC WIZ MAG ENC,1.0,MEDIUM
-30469,Item 30469,HEAD,14,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,NEC WIZ MAG ENC,0.5,MEDIUM
-30470,Item 30470,WRIST,11,MAGIC ITEM,"STR: 7, STA: 3, DEX: 5, INT: 4, HP: 70, MANA: 25","Poison: 6, Disease: 6",,,46,NEC WIZ MAG ENC,0.2,MEDIUM
+30393,Item Search,,,,,,,,,,,
+30465,Earthweave Sleeves,ARMS,14,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,NEC WIZ MAG ENC,0.8,MEDIUM
+30466,Earthweave Pantaloons,LEGS,17,MAGIC ITEM,"STR: 10, STA: 6, DEX: 8, INT: 6, HP: 100, MANA: 40","Poison: 12, Disease: 12",,,46,NEC WIZ MAG ENC,1.2,MEDIUM
+30467,Earthweave Gloves,HANDS,13,MAGIC ITEM,"STR: 8, STA: 4, DEX: 6, INT: 4, HP: 80, MANA: 30","Poison: 8, Disease: 8",,,46,NEC WIZ MAG ENC,0.5,MEDIUM
+30468,Earthweave Boots,FEET,13,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,NEC WIZ MAG ENC,1.0,MEDIUM
+30469,Earthweave Cap,HEAD,14,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,NEC WIZ MAG ENC,0.5,MEDIUM
+30470,Earthweave Wristband,WRIST,11,MAGIC ITEM,"STR: 7, STA: 3, DEX: 5, INT: 4, HP: 70, MANA: 25","Poison: 6, Disease: 6",,,46,NEC WIZ MAG ENC,0.2,MEDIUM
 30502,Tri-Plated Golden Hackle Hammer,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, WIS: 13, INT: 13, MANA: 25","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Arch Shielding,,,ALL,2.0,TINY
 30503,Frostreaver,PRIMARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 5, DEX: 10, HP: 50","Fire: 8, Cold: 7, Magic: 9, Poison: 5, Disease: 6",Judgement of Ice,,,WAR PAL SHD,12.0,LARGE
 30504,Aegis of Ice,SECONDARY,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, WIS: 8, INT: 8",Cold: 50,,,,CLR PAL SHD,5.0,MEDIUM
@@ -1285,13 +1285,13 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 30569,Envenomed Moccasins,FEET,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, AGI: 10, DEX: 10, HP: 100, MANA: 100","Magic: 15, Poison: 25, Disease: 15",Haste,,55,WAR PAL RNG SHD MNK BRD ROG BST,1.0,SMALL
 30570,Velvet Slippers of Harmony,FEET,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 8, STA: 8, WIS: 8, INT: 8, CHA: 8, HP: 100, MANA: 125","Fire: 12, Cold: 12, Magic: 12, Poison: 12, Disease: 12",Flowing Thought IV,,55,CLR DRU SHM NEC WIZ MAG ENC,1.0,SMALL
 30571,Platinum Mesh Guard,ARMS WRIST,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 7, DEX: 10, WIS: 8, HP: 75, MANA: 75","Magic: 12, Poison: 12, Disease: 12",,,55,WAR CLR PAL RNG SHD BRD ROG SHM,3.0,LARGE
-30921,Item 30921,HEAD,28,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,RNG ROG SHM,3.5,MEDIUM
-30923,Item 30923,CHEST,52,MAGIC ITEM,"STR: 12, STA: 8, DEX: 10, WIS: 8, HP: 120, MANA: 50","Poison: 15, Disease: 15",,,46,RNG ROG SHM,6.5,MEDIUM
-30924,Item 30924,ARMS,28,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,RNG ROG SHM,2.5,MEDIUM
-30925,Item 30925,LEGS,35,MAGIC ITEM,"STR: 10, STA: 6, DEX: 8, WIS: 6, HP: 100, MANA: 40","Poison: 12, Disease: 12",,,46,RNG ROG SHM,4.5,MEDIUM
-30926,Item 30926,WRIST,22,MAGIC ITEM,"STR: 7, STA: 3, DEX: 5, WIS: 4, HP: 70, MANA: 25","Poison: 6, Disease: 6",,,46,RNG ROG SHM,1.0,MEDIUM
-30927,Item 30927,HANDS,26,MAGIC ITEM,"STR: 8, STA: 4, DEX: 6, WIS: 4, HP: 80, MANA: 30","Poison: 8, Disease: 8",,,46,RNG ROG SHM,3.0,MEDIUM
-30928,Item 30928,FEET,26,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,RNG ROG SHM,4.0,MEDIUM
+30921,Farwater Scale Coif,HEAD,28,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,RNG ROG SHM,3.5,MEDIUM
+30923,Farwater Scale Tunic,CHEST,52,MAGIC ITEM,"STR: 12, STA: 8, DEX: 10, WIS: 8, HP: 120, MANA: 50","Poison: 15, Disease: 15",,,46,RNG ROG SHM,6.5,MEDIUM
+30924,Farwater Scale Sleeves,ARMS,28,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,RNG ROG SHM,2.5,MEDIUM
+30925,Farwater Scale Leggings,LEGS,35,MAGIC ITEM,"STR: 10, STA: 6, DEX: 8, WIS: 6, HP: 100, MANA: 40","Poison: 12, Disease: 12",,,46,RNG ROG SHM,4.5,MEDIUM
+30926,Farwater Scale Bracer,WRIST,22,MAGIC ITEM,"STR: 7, STA: 3, DEX: 5, WIS: 4, HP: 70, MANA: 25","Poison: 6, Disease: 6",,,46,RNG ROG SHM,1.0,MEDIUM
+30927,Farwater Scale Gloves,HANDS,26,MAGIC ITEM,"STR: 8, STA: 4, DEX: 6, WIS: 4, HP: 80, MANA: 30","Poison: 8, Disease: 8",,,46,RNG ROG SHM,3.0,MEDIUM
+30928,Farwater Scale Boots,FEET,26,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,RNG ROG SHM,4.0,MEDIUM
 31201,White Bear Pelt Cloak,BACK,11,MAGIC ITEM | LORE ITEM,"STR: 5, WIS: 5, HP: 75, MANA: 50",Magic: 3,,,,PAL,0.0,TINY
 31211,Shield of Fury,SECONDARY,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, INT: 15, HP: 75","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,SHD,1.0,SMALL
 31212,Shield of the Protector,SECONDARY,40,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, WIS: 15, HP: 75","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,PAL,1.0,SMALL
@@ -1329,13 +1329,13 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 31244,Ssra's Bloodstone Eyepatch,FACE,35,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, WIS: 15, INT: 15, HP: 75, MANA: 75","Fire: 8, Cold: 8, Magic: 8, Poison: 8, Disease: 8",Truesight,,,ALL,0.0,TINY
 31245,Sirran's Boots of Insanity,FEET,20,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 14, WIS: 14, INT: 14, HP: 100, MANA: 100","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",,,,CLR DRU SHM NEC WIZ MAG ENC,0.0,TINY
 31246,Camii's Bracer of Vigor,WRIST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 20, WIS: 15, INT: 15, HP: 50, MANA: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Invigor,,,ALL,0.0,TINY
-31247,Item 31247,HEAD,35,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,WAR CLR PAL SHD BRD,5.0,MEDIUM
-31248,Item 31248,CHEST,65,MAGIC ITEM,"STR: 12, STA: 8, DEX: 10, WIS: 8, INT: 8, HP: 120, MANA: 50","Poison: 15, Disease: 15",,,46,WAR CLR PAL SHD BRD,8.0,MEDIUM
-31249,Item 31249,ARMS,35,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,WAR CLR PAL SHD BRD,5.5,MEDIUM
-31296,Item 31296,LEGS,43,MAGIC ITEM,"STR: 10, STA: 6, DEX: 8, WIS: 6, INT: 6, HP: 100, MANA: 40","Poison: 12, Disease: 12",,,46,WAR CLR PAL SHD BRD,6.5,MEDIUM
-31297,Item 31297,WRIST,27,MAGIC ITEM,"STR: 7, STA: 3, DEX: 5, WIS: 4, INT: 4, HP: 70, MANA: 25","Poison: 6, Disease: 6",,,46,WAR CLR PAL SHD BRD,3.0,MEDIUM
-31298,Item 31298,HANDS,33,MAGIC ITEM,"STR: 8, STA: 4, DEX: 6, WIS: 4, INT: 4, HP: 80, MANA: 30","Poison: 8, Disease: 8",,,46,WAR CLR PAL SHD BRD,4.0,MEDIUM
-31299,Item 31299,FEET,33,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,WAR CLR PAL SHD BRD,5.5,MEDIUM
+31247,Farwater Plate Helm,HEAD,35,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,WAR CLR PAL SHD BRD,5.0,MEDIUM
+31248,Farwater Plate Breastplate,CHEST,65,MAGIC ITEM,"STR: 12, STA: 8, DEX: 10, WIS: 8, INT: 8, HP: 120, MANA: 50","Poison: 15, Disease: 15",,,46,WAR CLR PAL SHD BRD,8.0,MEDIUM
+31249,Farwater Plate Vambraces,ARMS,35,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,WAR CLR PAL SHD BRD,5.5,MEDIUM
+31296,Farwater Plate Greaves,LEGS,43,MAGIC ITEM,"STR: 10, STA: 6, DEX: 8, WIS: 6, INT: 6, HP: 100, MANA: 40","Poison: 12, Disease: 12",,,46,WAR CLR PAL SHD BRD,6.5,MEDIUM
+31297,Farwater Plate Bracer,WRIST,27,MAGIC ITEM,"STR: 7, STA: 3, DEX: 5, WIS: 4, INT: 4, HP: 70, MANA: 25","Poison: 6, Disease: 6",,,46,WAR CLR PAL SHD BRD,3.0,MEDIUM
+31298,Farwater Plate Gauntlets,HANDS,33,MAGIC ITEM,"STR: 8, STA: 4, DEX: 6, WIS: 4, INT: 4, HP: 80, MANA: 30","Poison: 8, Disease: 8",,,46,WAR CLR PAL SHD BRD,4.0,MEDIUM
+31299,Farwater Plate Boots,FEET,33,MAGIC ITEM,"STR: 9, STA: 5, DEX: 7, WIS: 5, INT: 5, HP: 90, MANA: 35","Poison: 9, Disease: 9",,,46,WAR CLR PAL SHD BRD,5.5,MEDIUM
 31300,Silver Whip of Rage,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,,Magic: 25,Silver Skin,,,WAR PAL RNG SHD BRD ROG,0.0,TINY
 31301,Vyemm's Fang,RANGE PRIMARY SECONDARY,35,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, AGI: 15, HP: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,SHD BRD ROG BST,0.0,TINY
 31302,Vyemm's Right Eye,RANGE PRIMARY SECONDARY,20,MAGIC ITEM | LORE ITEM | NO DROP,"WIS: 10, INT: 10, HP: 25, MANA: 75","Magic: 10, Disease: 25",,,,ALL,0.0,TINY
@@ -1448,51 +1448,51 @@ item_id,name,slot,ac,flags,mods,resists,effect,focus,required_level,classes,weig
 31464,Silver Mask of the Slayer,FACE,25,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, DEX: 12, STA: 12, HP: 80","Fire: 7, Disease: 7, Cold: 7, Magic: 7, Poison: 7",Aura of Battle,,,WAR PAL RNG SHD MNK BRD ROG,0.0,TINY
 31472,Pauldrons of the Deep Flame,SHOULDERS,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, HP: 100","Fire: 20, Disease: 20, Cold: 20, Magic: 20, Poison: 20",,,,WAR PAL RNG SHD MNK BRD ROG BST,0.5,TINY
 31603,Girdle of Stability,WAIST,38,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, STA: 20, AGI: 20, WIS: 18, INT: 18, HP: 190, MANA: 180","Fire: 20, Cold: 20, Disease: 20",Aura of Bravery,,65,WAR CLR PAL RNG SHD BRD ROG SHM,2.5,MEDIUM
-32012,,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 13, AGI: 20, WIS: 20, CHA: 5, HP: 130, MANA: 145","Cold: 20, Magic: 10, Poison: 10, Disease: 20",Marr's Gift,Marr's Gift,65,CLR,6.5,MEDIUM
+32012,Ultor's Vambraces of Faith,ARMS,54,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 17, STA: 13, AGI: 20, WIS: 20, CHA: 5, HP: 130, MANA: 145","Cold: 20, Magic: 10, Poison: 10, Disease: 20",Marr's Gift,Marr's Gift,65,CLR,6.5,MEDIUM
 32100,Earthen Bracer of Fortitude,WRIST,50,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 15, AGI: 20, DEX: 20, WIS: 18, INT: 18, CHA: 15, HP: 210, MANA: 200","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Regeneration,Quickening of Druzzil,65,WAR CLR PAL SHD BRD,4.5,SMALL
 32110,Wristband of Icy Vengeance,WRIST,30,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 15, AGI: 25, WIS: 18, CHA: 10, HP: 210, MANA: 200","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Regeneration,Quickening of Druzzil,65,DRU MNK BST,0.5,SMALL
-32129,,CHEST,100,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 30, STA: 30, AGI: 25, DEX: 25, HP: 250","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Echo of Anger,,65,WAR,20.0,LARGE
-32130,,CHEST,69,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 30, STA: 25, AGI: 25, DEX: 30, HP: 210","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",,,65,ROG,10.0,LARGE
-32131,,CHEST,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, AGI: 30, DEX: 30, HP: 210","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",,,65,MNK,0.5,LARGE
-32132,,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 30, STA: 30, DEX: 25, WIS: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Marr's Blessing,Marr's Blessing,65,PAL,15.0,LARGE
-32134,,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, AGI: 10, DEX: 30, INT: 20, CHA: 20, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",,,65,BRD,15.0,LARGE
-32136,,CHEST,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 25, AGI: 30, DEX: 20, WIS: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of E`ci,Wrath of E`ci,65,BST,0.5,LARGE
-32138,,CHEST,69,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 30, AGI: 25, DEX: 25, WIS: 30, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Chronoburn,Chronoburn,65,SHM,10.0,LARGE
-32139,,CHEST,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, AGI: 25, DEX: 10, WIS: 30, CHA: 15, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of E`ci,Wrath of E`ci,65,DRU,9.0,LARGE
-32140,,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 35, DEX: 20, INT: 30, CHA: 20, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Chronoburn,Chronoburn,65,ENC,1.0,LARGE
-32141,,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 30, DEX: 25, INT: 30, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of Ro,Wrath of Ro,65,MAG,1.0,LARGE
-32142,,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 30, AGI: 25, DEX: 25, INT: 30, CHA: 15, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Vengeance of Eternity,Vengeance of Eternity,65,NEC,1.0,LARGE
-32143,,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 20, DEX: 35, INT: 30, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of Ro,Wrath of Ro,65,WIZ,1.0,LARGE
+32129,Raex's Chestplate of Destruction,CHEST,100,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 30, STA: 30, AGI: 25, DEX: 25, HP: 250","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Echo of Anger,,65,WAR,20.0,LARGE
+32130,Bidilis' Hauberk of the Elusive,CHEST,69,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 30, STA: 25, AGI: 25, DEX: 30, HP: 210","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",,,65,ROG,10.0,LARGE
+32131,Ton Po's Chestwraps of Composure,CHEST,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 25, AGI: 30, DEX: 30, HP: 210","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",,,65,MNK,0.5,LARGE
+32132,Trydan's Chestplate of Nobility,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 30, STA: 30, DEX: 25, WIS: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Marr's Blessing,Marr's Blessing,65,PAL,15.0,LARGE
+32134,Rizlona's Fiery Chestplate,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, AGI: 10, DEX: 30, INT: 20, CHA: 20, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",,,65,BRD,15.0,LARGE
+32136,Dumul's Chestwraps of the Brute,CHEST,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 25, AGI: 30, DEX: 20, WIS: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of E`ci,Wrath of E`ci,65,BST,0.5,LARGE
+32138,Rosrak's Hauberk of the Primal,CHEST,69,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 30, AGI: 25, DEX: 25, WIS: 30, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Chronoburn,Chronoburn,65,SHM,10.0,LARGE
+32139,Kerasha's Sylvan Tunic,CHEST,45,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 20, STA: 25, AGI: 25, DEX: 10, WIS: 30, CHA: 15, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of E`ci,Wrath of E`ci,65,DRU,9.0,LARGE
+32140,Romar's Robe of Visions,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 35, DEX: 20, INT: 30, CHA: 20, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Chronoburn,Chronoburn,65,ENC,1.0,LARGE
+32141,Magi`Kot's Robe of Convergence,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 30, DEX: 25, INT: 30, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of Ro,Wrath of Ro,65,MAG,1.0,LARGE
+32142,Miragul's Shroud of Risen Souls,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 30, AGI: 25, DEX: 25, INT: 30, CHA: 15, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Vengeance of Eternity,Vengeance of Eternity,65,NEC,1.0,LARGE
+32143,Maelin's Robe of Lore,CHEST,35,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 20, DEX: 35, INT: 30, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of Ro,Wrath of Ro,65,WIZ,1.0,LARGE
 32159,Shaded cloak,BACK,5,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,ALL,1.0,SMALL
-32161,Shaded Boots,FEET,5,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,ALL,1.0,SMALL
+32161,Shaded boots,FEET,5,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,ALL,1.0,SMALL
 32166,Shaded amice,SHOULDERS,4,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,ALL,0.0,SMALL
 32176,Temariel Vex,RANGE,,MAGIC ITEM | LORE ITEM | NO DROP,"WIS: 10, HP: 50, MANA: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,WAR CLR PAL RNG SHD DRU MNK BRD ROG SHM BST,4.5,MEDIUM
 32178,Shaderock Crown,HEAD,20,LORE ITEM | NO DROP,"INT: 4, HP: 50, MANA: 50","Fire: 10, Cold: 10, Magic: 10, Poison: 10, Disease: 10",,,,ALL,2.0,MEDIUM
 32179,Shaderock Robe,CHEST,15,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, STA: 5, AGI: 10, DEX: 10, INT: 12, HP: 40, MANA: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",Shadow Fog,,,NEC WIZ MAG ENC,0.8,MEDIUM
-32180,Mind Worm Hide Mantle,SHOULDERS,12,LORE ITEM | NO DROP,"STR: 15, STA: 15, HP: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,ALL,0.4,MEDIUM
-32181,Mind Worm Hide Belt,WAIST,15,LORE ITEM | NO DROP,"STR: 10, STA: 10","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,ALL,0.3,MEDIUM
-32182,Insanity Crawler Fang,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, INT: 10, MANA: 50",,Sieve,,,WAR RNG SHD BRD ROG NEC WIZ MAG ENC,2.0,SMALL
-32183,Insanity Crawler Hide Shield,SECONDARY,25,LORE ITEM | NO DROP,"WIS: 5, INT: 5","Cold: 10, Magic: 5, Poison: 5, Disease: 5",,,,CLR DRU SHM NEC WIZ MAG ENC,6.5,MEDIUM
-32184,Orb of Mental Energy,,,MAGIC ITEM | LORE ITEM | NO DROP,MANA: 100,,Flowing Thought II,,,CLR PAL RNG SHD DRU SHM NEC WIZ MAG ENC BST,4.0,SMALL
-32185,Shaderock Girdle,WAIST,26,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,WAR CLR PAL SHD BRD,8.0,LARGE
-32186,Shaderock Bracer,WRIST,28,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,WAR CLR PAL SHD BRD,8.0,LARGE
+32180,Mind Worm hide mantle,SHOULDERS,12,LORE ITEM | NO DROP,"STR: 15, STA: 15, HP: 50","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,ALL,0.4,MEDIUM
+32181,Mind Worm hide belt,WAIST,15,LORE ITEM | NO DROP,"STR: 10, STA: 10","Fire: 5, Cold: 5, Magic: 5, Poison: 5, Disease: 5",,,,ALL,0.3,MEDIUM
+32182,An Insanity Crawler Fang,PRIMARY SECONDARY,,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 5, INT: 10, MANA: 50",,Sieve,,,WAR RNG SHD BRD ROG NEC WIZ MAG ENC,2.0,SMALL
+32183,Insanity Crawler hide shield,SECONDARY,25,LORE ITEM | NO DROP,"WIS: 5, INT: 5","Cold: 10, Magic: 5, Poison: 5, Disease: 5",,,,CLR DRU SHM NEC WIZ MAG ENC,6.5,MEDIUM
+32184,An orb of mental energy,,,MAGIC ITEM | LORE ITEM | NO DROP,MANA: 100,,Flowing Thought II,,,CLR PAL RNG SHD DRU SHM NEC WIZ MAG ENC BST,4.0,SMALL
+32185,Shaderock girdle,WAIST,26,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,WAR CLR PAL SHD BRD,8.0,LARGE
+32186,Shaderock bracer,WRIST,28,MAGIC ITEM | LORE ITEM | NO DROP,,,,,,WAR CLR PAL SHD BRD,8.0,LARGE
 32187,Shaderock Amulet,NECK,3,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 5, HP: 100",,,,,ALL,0.2,SMALL
-32602,,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 30, DEX: 30, INT: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Fury of Bertoxxulous,Fury of Bertoxxulous,65,SHD,15.0,LARGE
-32603,,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 25, AGI: 20, DEX: 25, WIS: 30, CHA: 15, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Marr's Blessing,Marr's Blessing,65,CLR,15.0,LARGE
-32604,,CHEST,69,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 30, DEX: 30, WIS: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of Ro,Wrath of Ro,65,RNG,10.0,LARGE
+32602,Grimror's Guard of the Plagues,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 30, DEX: 30, INT: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Fury of Bertoxxulous,Fury of Bertoxxulous,65,SHD,15.0,LARGE
+32603,Ultor's Chestguard of Faith,CHEST,87,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 25, AGI: 20, DEX: 25, WIS: 30, CHA: 15, HP: 185, MANA: 200","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Marr's Blessing,Marr's Blessing,65,CLR,15.0,LARGE
+32604,Askr's Thunderous Chainmail,CHEST,69,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 25, AGI: 30, DEX: 30, WIS: 25, HP: 210, MANA: 175","Fire: 20, Cold: 20, Magic: 20, Poison: 20, Disease: 20",Wrath of Ro,Wrath of Ro,65,RNG,10.0,LARGE
 32605,Ossein of Limitless Time,RANGE PRIMARY,15,MAGIC ITEM | LORE ITEM | NO DROP,"STA: 15, AGI: 20, INT: 25, HP: 145, MANA: 160","Fire: 15, Cold: 15, Magic: 15, Poison: 15, Disease: 15",Embracing Darkness,,65,NEC,1.5,SMALL
 32606,Timeless Coral Greatsword,PRIMARY,30,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 25, STA: 15, AGI: 10, WIS: 18, INT: 18, HP: 200, MANA: 200","Fire: 30, Poison: 30",Invigorate,,65,WAR PAL RNG SHD,5.0,
 32607,Circlet of Flowing Time,HEAD,23,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 13, STA: 13, AGI: 25, INT: 25, HP: 165, MANA: 180","Cold: 15, Magic: 15, Poison: 15, Disease: 15",Wrath of Druzzil,Wrath of Druzzil,65,NEC WIZ MAG ENC,0.7,MEDIUM
 32608,Temporal Chainmail Sleeves,ARMS,48,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 10, AGI: 20, DEX: 20, WIS: 20, HP: 175, MANA: 170","Cold: 35, Poison: 35",Corporeal Fury,Quickening of Mithaniel,65,RNG ROG SHM,2.7,MEDIUM
 32609,Bracer of Timeless Rage,WRIST,18,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 12, STA: 20, DEX: 12, WIS: 24, INT: 24, CHA: 15, HP: 165, MANA: 180","Fire: 18, Magic: 18, Poison: 18",Aura of Daring,Quickening of Solusek,65,DRU MNK NEC WIZ MAG ENC BST,0.7,MEDIUM
 32610,Sandals of Empowerment,FEET,19,MAGIC ITEM | LORE ITEM | NO DROP,"STR: 10, STA: 20, WIS: 30, INT: 30, CHA: 15, HP: 180, MANA: 190","Fire: 25, Cold: 25, Disease: 25",Faerune,,65,NEC WIZ MAG ENC,1.3,MEDIUM
-56018,(item 56018),,,,,,,,,,,
-68195,(item 68195),,,,,,,,,,,
-68196,(item 68196),,,,,,,,,,,
-68197,(item 68197),,,,,,,,,,,
-68199,(item 68199),,,,,,,,,,,
-68217,Ossein of Limitless Time,,,,,,,,,,,
-79883,Circlet of the Struggle,,,,,,,,,,,
-79887,Signet of Fiel'Tian,,,,,,,,,,,
-79895,Pauldrons of the Eternal Storm,,,,,,,,,,,
-86930,Item 86930,,,,,,,,,,,
+56018,Item Search,,,,,,,,,,,
+68195,Item Search,,,,,,,,,,,
+68196,Item Search,,,,,,,,,,,
+68197,Item Search,,,,,,,,,,,
+68199,Item Search,,,,,,,,,,,
+68217,Item Search,,,,,,,,,,,
+79883,Item Search,,,,,,,,,,,
+79887,Item Search,,,,,,,,,,,
+79895,Item Search,,,,,,,,,,,
+86930,Item Search,,,,,,,,,,,
