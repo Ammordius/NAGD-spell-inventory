@@ -2494,9 +2494,11 @@
                         const u = slot.upgrades.find(x => String(x.itemId) === String(elementalItemId));
                         if (u) {
                             const hpd = getHpPerDkpForUpgrade(u);
-                            const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                            const statsFocus = slot.currentInData ? formatUpgradeDeltas(u.deltas || {}, u.focusSpellName) : '';
+                            const statsNote = !slot.currentInData && (u.deltas || u.focusSpellName) ? ' (current item not in database)' : '';
                             benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
                             if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            if (statsNote) benefit += escapeHtml(statsNote);
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                         }
                         const others = slot.upgrades.filter(x => String(x.itemId) !== String(elementalItemId)).slice(0, 5);
@@ -2542,9 +2544,11 @@
                         const u = slot.upgrades.find(x => String(x.itemId) === String(itemId));
                         if (u) {
                             const hpd = getHpPerDkpForUpgrade(u);
-                            const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                            const statsFocus = slot.currentInData ? formatUpgradeDeltas(u.deltas || {}, u.focusSpellName) : '';
+                            const statsNote = !slot.currentInData && (u.deltas || u.focusSpellName) ? ' (current item not in database)' : '';
                             benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
                             if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            if (statsNote) benefit += escapeHtml(statsNote);
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                         }
                         const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 5);
