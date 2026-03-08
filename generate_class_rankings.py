@@ -160,6 +160,9 @@ def get_best_focii_by_subcategory(focii_data):
             sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
             if pct > best_mana[sub]:
                 best_mana[sub] = pct
+        elif cat == 'Long Duration Detrimental Mana Preservation':
+            if pct > best_mana['LDD']:
+                best_mana['LDD'] = pct
         elif cat == 'Spell Haste':
             sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, name, 'Bene')
             if pct > best_haste[sub]:
@@ -226,6 +229,9 @@ def analyze_character_focii(char_inventory, focus_lookup):
                     if focus_name == 'Preservation of Xegony' and pct == 15:
                         if pct > char_mana_efficiency_cats['All']:
                             char_mana_efficiency_cats['All'] = pct
+                elif cat == 'Long Duration Detrimental Mana Preservation':
+                    if pct > char_mana_efficiency_cats['LDD']:
+                        char_mana_efficiency_cats['LDD'] = pct
                 
                 # Track Spell Haste categories
                 if cat == 'Spell Haste':
@@ -311,6 +317,8 @@ def get_focus_sources(char_inventory, focus_lookup):
                 sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, focus_name, 'Nuke')
                 key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
                 add_source(key, pct, item_name, slot_id, item_id)
+            elif cat == 'Long Duration Detrimental Mana Preservation':
+                add_source('Spell Mana Efficiency (Long Duration Debuff)', pct, item_name, slot_id, item_id)
             elif cat == 'Spell Haste':
                 sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, focus_name, 'Bene')
                 if sub == 'Det':
@@ -506,6 +514,8 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
             sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
             key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
             candidates[key].append(entry)
+        elif cat == 'Long Duration Detrimental Mana Preservation':
+            candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry)
         elif cat == 'Spell Haste':
             sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, name, 'Bene')
             if sub == 'Det':

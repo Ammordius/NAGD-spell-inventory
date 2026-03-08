@@ -76690,6 +76690,140 @@
     "gearScore": 133,
     "name": "TAKP AllaClone  :: Wand of Casual Blessings"
   },
+  "29044": {
+    "flags": [
+      "MAGIC ITEM"
+    ],
+    "slot": "FINGERS",
+    "ac": 12,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 10
+      },
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 90
+      },
+      {
+        "label": "MANA",
+        "value": 60
+      }
+    ],
+    "resists": [
+      {
+        "label": "Disease",
+        "value": 12
+      },
+      {
+        "label": "Poison",
+        "value": 12
+      }
+    ],
+    "requiredLevel": 46,
+    "levelType": "required",
+    "weight": 0.8,
+    "size": "TINY",
+    "classes": "ALL",
+    "gearScore": 62,
+    "name": "Steel Ring of Earthen Resilience"
+  },
+  "29045": {
+    "flags": [
+      "MAGIC ITEM"
+    ],
+    "slot": "FINGERS",
+    "ac": 9,
+    "mods": [
+      {
+        "label": "DEX",
+        "value": 15
+      },
+      {
+        "label": "WIS",
+        "value": 10
+      },
+      {
+        "label": "AGI",
+        "value": 15
+      },
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 75
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 20
+      }
+    ],
+    "requiredLevel": 46,
+    "levelType": "required",
+    "weight": 0.4,
+    "size": "TINY",
+    "classes": "ALL",
+    "gearScore": 58,
+    "name": "Cloudy Ring of Pneumatic Force"
+  },
+  "29046": {
+    "flags": [
+      "MAGIC ITEM"
+    ],
+    "slot": "FINGERS",
+    "ac": 5,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 8
+      },
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 65
+      },
+      {
+        "label": "MANA",
+        "value": 40
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      }
+    ],
+    "requiredLevel": 46,
+    "levelType": "required",
+    "weight": 0.4,
+    "size": "TINY",
+    "classes": "ALL",
+    "gearScore": 47,
+    "name": "Valorium Ring of Gallantry"
+  },
   "29047": {
     "flags": [
       "MAGIC ITEM"

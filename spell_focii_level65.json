@@ -1984,7 +1984,7 @@
     },
     {
       "name": "Conservation of Bertoxxulous",
-      "category": "Spell Mana Efficiency",
+      "category": "Long Duration Detrimental Mana Preservation",
       "percentage": 30.0,
       "items": [
         {
@@ -1993,12 +1993,6 @@
           "mob": "Vallon Zek",
           "id": 5594,
           "classes": "SHD DRU SHM NEC ENC BST"
-        },
-        {
-          "name": "Bracelet of Darkness",
-          "zone": "Vex Thal",
-          "mob": "Kaas Thox Xi Aten Ha Ra",
-          "id": 26752
         }
       ]
     },
@@ -2434,6 +2428,19 @@
           "zone": "Vex Thall",
           "mob": "Diabo Xi Xin Thall",
           "id": 28911
+        }
+      ]
+    },
+    {
+      "name": "Pernicious Focus",
+      "category": "Long Duration Detrimental Mana Preservation",
+      "percentage": 30.0,
+      "items": [
+        {
+          "name": "Bracelet of Darkness",
+          "zone": "Vex Thal",
+          "mob": "Kaas Thox Xi Aten Ha Ra",
+          "id": 26752
         }
       ]
     },

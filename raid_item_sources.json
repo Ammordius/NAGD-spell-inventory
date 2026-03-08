@@ -5951,6 +5951,15 @@
     "zone": "Plane of Time",
     "name": "Girdle of Restoration"
   },
+  "29044": {
+    "name": "Steel Ring of Earthen Resilience"
+  },
+  "29045": {
+    "name": "Cloudy Ring of Pneumatic Force"
+  },
+  "29046": {
+    "name": "Valorium Ring of Gallantry"
+  },
   "10248": {
     "mob": "Halgoz_Rellinic",
     "zone": "Halls of Honor",
