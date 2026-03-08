@@ -2305,7 +2305,7 @@
             }).filter(s => s.upgrades.length > 0);
 
             if (enabledSlots && typeof enabledSlots === 'object') {
-                slotsWithUpgrades = slotsWithUpgrades.filter(s => enabledSlots[s.slotId] !== false);
+                slotsWithUpgrades = slotsWithUpgrades.filter(s => enabledSlots[Number(s.slotId)] !== false);
             }
 
             if (mode === 'hp_dkp') slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
@@ -2582,6 +2582,7 @@
                 matched.forEach((char, i) => {
                     const tab = document.createElement('button');
                     tab.className = 'toon-upgrade-tab' + (i === 0 ? ' active' : '');
+                    tab.dataset.index = String(i);
                     tab.textContent = char.name;
                     tab.addEventListener('click', () => {
                         toonUpgradesSelectedIndex = i;
