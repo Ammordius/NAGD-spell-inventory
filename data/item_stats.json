@@ -76889,5 +76889,64 @@
     "classes": "CLR DRU SHM NEC WIZ MAG ENC",
     "gearScore": 111,
     "name": "TAKP AllaClone  :: Yttrium Studded Veil"
+  },
+  "30552": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "EAR WRIST",
+    "ac": 10,
+    "mods": [
+      { "label": "STR", "value": 5 },
+      { "label": "WIS", "value": 10 },
+      { "label": "INT", "value": 10 },
+      { "label": "HP", "value": 100 },
+      { "label": "MANA", "value": 100 }
+    ],
+    "resists": [
+      { "label": "Fire", "value": 15 },
+      { "label": "Disease", "value": 15 },
+      { "label": "Cold", "value": 15 },
+      { "label": "Magic", "value": 15 },
+      { "label": "Poison", "value": 15 }
+    ],
+    "requiredLevel": 55,
+    "focusSpellName": "Extended Range III",
+    "weight": 1.0,
+    "size": "SMALL",
+    "classes": "CLR DRU SHM NEC WIZ MAG ENC",
+    "name": "Glowing Amber Band"
+  },
+  "9413": {
+    "flags": [
+      "MAGIC ITEM",
+      "ARTIFACT",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 30,
+    "mods": [
+      { "label": "STR", "value": 15 },
+      { "label": "DEX", "value": 15 },
+      { "label": "STA", "value": 15 },
+      { "label": "WIS", "value": 15 },
+      { "label": "AGI", "value": 15 },
+      { "label": "HP", "value": 100 },
+      { "label": "MANA", "value": 100 }
+    ],
+    "resists": [
+      { "label": "Fire", "value": 10 },
+      { "label": "Disease", "value": 10 },
+      { "label": "Cold", "value": 10 },
+      { "label": "Magic", "value": 10 },
+      { "label": "Poison", "value": 10 }
+    ],
+    "effectSpellName": "Flowing Thought III",
+    "weight": 1.0,
+    "size": "MEDIUM",
+    "classes": "DRU MNK BST",
+    "name": "Tunic of the Disciple"
   }
 }
