@@ -22,10 +22,10 @@ Tools for [TAKP](https://www.takproject.net/) magelo/export data: spell inventor
 - **Class rankings** — Gear and focus rankings: `class_rankings.html`, `class_rankings.json`, `class_rankings.txt`. Data is JSON-driven (`class_rankings.json`, `data/item_stats.json`, `data/elemental_slot_options.json`); the UI supports user-customizable stat/focus weights with client-side persistence (localStorage). Per-class priorities and focus lists are configurable in code; all relevant spell foci are tracked. See `FOCUS_CONFIG_REFERENCE.md`.
 - **Historical snapshots** — Baseline snapshot plus compact incremental change artifacts; stored as one full snapshot (~50 MB) and daily diffs (~300 KB). Change reports support audit and debugging of upstream/data drift. Date-range views load two deltas and diff them (no full reconstruction).
 
-**Live site** (after deploy to GitHub Pages):
+**Live site** (GitHub Pages):
 
-- `https://<username>.github.io/<repo>/` (index / spell inventory)
-- `https://<username>.github.io/<repo>/class_rankings.html`
+- [Spell inventory (index)](https://ammordius.github.io/NAGD-spell-inventory/)
+- [Class rankings](https://ammordius.github.io/NAGD-spell-inventory/class_rankings)
 
 ## Setup
 
@@ -33,7 +33,7 @@ Tools for [TAKP](https://www.takproject.net/) magelo/export data: spell inventor
 2. Enable GitHub Pages: Settings → Pages → deploy from branch `gh-pages` (or root).
 3. The workflow runs daily and on push to the generator scripts; trigger manually from Actions → “Daily Spell Inventory Update” → Run workflow.
 
-Generated HTML/JSON are deployed to `gh-pages`. Use the Live site URLs above with your username and repo name.
+Generated HTML/JSON are deployed to `gh-pages`. See **Live site** above for links.
 
 ## Local run
 
