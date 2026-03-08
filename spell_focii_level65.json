@@ -177,7 +177,8 @@
         {
           "name": "Rosrak's Hauberk of the Primal",
           "zone": "The Plane of Time",
-          "mob": "Innoruuk"
+          "mob": "Innoruuk",
+          "id": 32138
         }
       ]
     },
