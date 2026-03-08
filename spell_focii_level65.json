@@ -1993,6 +1993,12 @@
           "mob": "Vallon Zek",
           "id": 5594,
           "classes": "SHD DRU SHM NEC ENC BST"
+        },
+        {
+          "name": "Bracelet of Darkness",
+          "zone": "Vex Thal",
+          "mob": "Kaas Thox Xi Aten Ha Ra",
+          "id": 26752
         }
       ]
     },
@@ -2428,19 +2434,6 @@
           "zone": "Vex Thall",
           "mob": "Diabo Xi Xin Thall",
           "id": 28911
-        }
-      ]
-    },
-    {
-      "name": "Pernicious Focus",
-      "category": "Spell Mana Efficiency",
-      "percentage": 30.0,
-      "items": [
-        {
-          "name": "Bracelet of Darkness",
-          "zone": "Vex Thall",
-          "mob": "Kaas Thox Xi Aten Ha Ra",
-          "id": 26752
         }
       ]
     },
