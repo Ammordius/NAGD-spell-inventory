@@ -2221,18 +2221,23 @@
             const matched = [];
             const seen = new Set();
             const lower = (s) => (s || '').toLowerCase();
+            const list = characters || [];
             for (const pattern of patterns) {
                 const p = lower(pattern);
                 if (p.includes('*')) {
                     const reStr = '^' + p.split(/\*+/).map(part => part.replace(/[\\^$.|?+()[\]{}]/g, '\\$&')).join('.*') + '$';
-                    let re;
-                    try { re = new RegExp(reStr, 'i'); } catch (_) { continue; }
-                    characters.filter(c => re.test((c.name || '').trim()) && !seen.has(c.name)).forEach(c => {
-                        seen.add(c.name);
-                        matched.push(c);
-                    });
+                    try {
+                        for (const c of list) {
+                            const name = (c.name || '').trim();
+                            if (!name || seen.has(c.name)) continue;
+                            if (new RegExp(reStr, 'i').test(name)) {
+                                seen.add(c.name);
+                                matched.push(c);
+                            }
+                        }
+                    } catch (_) { /* invalid regex */ }
                 } else {
-                    const char = characters.find(c => {
+                    const char = list.find(c => {
                         const name = lower(c.name);
                         return name === p || name.includes(p);
                     });
