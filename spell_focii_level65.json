@@ -918,6 +918,19 @@
       ]
     },
     {
+      "name": "Vengeance of Time",
+      "category": "Spell Damage",
+      "percentage": 25.0,
+      "items": [
+        {
+          "name": "Wand of the Firestorm",
+          "zone": "Bastion of Thunder",
+          "mob": "Auliffe Chaoswind",
+          "id": 26748
+        }
+      ]
+    },
+    {
       "name": "Wrath of Druzzil",
       "category": "Spell Damage",
       "percentage": 35.0,
@@ -3016,7 +3029,7 @@
           "name": "Wand of the Ice Storm",
           "zone": "Bastion of Thunder",
           "mob": "Auliffe Chaoswind",
-          "id": 26748
+          "id": 26747
         },
         {
           "name": "Wind Worn Luckstone",

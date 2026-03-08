@@ -726,7 +726,11 @@ def _infer_focus_category(focus_name):
         return None, 0
     n_lower = n.lower()
     # Known percentage overrides when not in spell_focii (item_stats merge)
-    _pct_override = {'speeding thought': 18}  # 18% spell haste all
+    _pct_override = {
+        'speeding thought': 18,       # 18% spell haste all
+        'vengeance of time': 25,       # 25% DoT (Wand of the Firestorm 26748)
+        'vengeance of eternity': 30,   # 30% DoT (Symbol of the Planemasters 20898, etc.)
+    }
     default_pct = _pct_override.get(n_lower, 15)
     if _focus_map_get(SPELL_DAMAGE_TYPE_MAP, focus_name, None) is not None:
         return 'Spell Damage', default_pct
