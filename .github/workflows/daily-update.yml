@@ -828,6 +828,13 @@ jobs:
           cp data/elemental_display_names.json deploy/data/elemental_display_names.json
           echo "✓ Copied data/elemental_display_names.json to deploy (elemental upgrade labels)"
         fi
+        # Copy elemental_slot_options.json for class rankings Gear upgrades (slot -> pattern -> by_class; click shows class stats)
+        if [ -f "data/elemental_slot_options.json" ]; then
+          cp data/elemental_slot_options.json deploy/data/elemental_slot_options.json
+          echo "✓ Copied data/elemental_slot_options.json to deploy (elemental loot by class on comparison card)"
+        else
+          echo "Optional: data/elemental_slot_options.json not found - run scripts/build_elemental_slot_options.py and commit"
+        fi
         # Copy dkp_prices.json for class_rankings.html?dkp_val=true (HP/DKP upgrade metrics)
         if [ -f "data/dkp_prices.json" ]; then
           cp data/dkp_prices.json deploy/data/dkp_prices.json
