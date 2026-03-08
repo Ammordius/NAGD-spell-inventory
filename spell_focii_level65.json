@@ -2039,7 +2039,8 @@
         {
           "name": "Secrets of the Planes",
           "zone": "Plane of Knowledge",
-          "mob": "Quest: Three Manuals"
+          "mob": "Quest: Three Manuals",
+          "id": 28798
         }
       ]
     },
