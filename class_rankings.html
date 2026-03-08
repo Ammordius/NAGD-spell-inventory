@@ -492,6 +492,20 @@
                     <option value="hp_dkp" selected>Sort by HP/DKP</option>
                     <option value="max_upgrade">Sort by max upgrade</option>
                 </select>
+                <label style="margin-left: 16px;">Filter slot:</label>
+                <select id="toonPanelSlotFilter" style="margin-left: 8px; padding: 6px 10px;">
+                    <option value="">All slots</option>
+                    <option value="1">Ear</option><option value="2">Head</option><option value="3">Face</option><option value="4">Ear</option><option value="5">Neck</option>
+                    <option value="6">Shoulder</option><option value="7">Arms</option><option value="8">Back</option><option value="9">Wrist</option><option value="10">Wrist</option>
+                    <option value="11">Range</option><option value="12">Hands</option><option value="13">Main Hand</option><option value="14">Off Hand</option>
+                    <option value="15">Ring 1</option><option value="16">Ring 2</option><option value="17">Chest</option><option value="18">Legs</option>
+                    <option value="19">Feet</option><option value="20">Waist</option><option value="21">Power Source</option><option value="22">Ammo</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 8px;">
+                <label>Look up item:</label>
+                <input type="text" id="toonPanelItemSearch" placeholder="Type item name (e.g. Pulsing Emerald Hoop)" style="margin-left: 8px; padding: 6px 10px; min-width: 220px;">
+                <button id="toonPanelItemLookup" style="margin-left: 8px; padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Look up</button>
             </div>
             <div id="toonUpgradesTabs" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
         </div>
@@ -2204,6 +2218,9 @@
         const toonUpgradesTabs = document.getElementById('toonUpgradesTabs');
         const toonUpgradesContent = document.getElementById('toonUpgradesContent');
         const toonPanelSlotSort = document.getElementById('toonPanelSlotSort');
+        const toonPanelSlotFilter = document.getElementById('toonPanelSlotFilter');
+        const toonPanelItemSearch = document.getElementById('toonPanelItemSearch');
+        const toonPanelItemLookup = document.getElementById('toonPanelItemLookup');
         const itemComparisonModal = document.getElementById('itemComparisonModal');
         const itemComparisonContent = document.getElementById('itemComparisonContent');
         if (dkpValEnabled && toonListSection) toonListSection.style.display = 'flex';
@@ -2263,10 +2280,10 @@
         let toonUpgradesMatchedChars = [];
         let toonUpgradesSelectedIndex = 0;
 
-        function buildToonUpgradesHorizontalStrip(char, mode, minHpPerDkp) {
+        function buildToonUpgradesHorizontalStrip(char, mode, minHpPerDkp, filterSlotId) {
             const getMaxPerSlot = () => Math.max(upgradesPerSlot, 25);
             const upgradeData = computeUpgradesForCharacter(char, getMaxPerSlot());
-            const slotsWithUpgrades = (upgradeData.bySlot || []).map(slot => {
+            let slotsWithUpgrades = (upgradeData.bySlot || []).map(slot => {
                 let upgrades = (slot.upgrades || []).slice();
                 if (mode === 'hp_dkp') {
                     upgrades.sort((a, b) => (getHpPerDkpForUpgrade(b) ?? -Infinity) - (getHpPerDkpForUpgrade(a) ?? -Infinity));
@@ -2280,6 +2297,11 @@
                 const maxDelta = upgrades.length ? Math.max(...upgrades.map(u => u.delta || 0), 0) : 0;
                 return { ...slot, upgrades, maxHpPerDkp, maxDelta };
             }).filter(s => s.upgrades.length > 0);
+
+            if (filterSlotId != null && filterSlotId !== '') {
+                const sid = parseInt(filterSlotId, 10);
+                if (!isNaN(sid)) slotsWithUpgrades = slotsWithUpgrades.filter(s => s.slotId === sid);
+            }
 
             if (mode === 'hp_dkp') slotsWithUpgrades.sort((a, b) => b.maxHpPerDkp - a.maxHpPerDkp);
             else if (mode === 'max_upgrade') slotsWithUpgrades.sort((a, b) => b.maxDelta - a.maxDelta);
@@ -2304,8 +2326,10 @@
                 return;
             }
             const mode = (toonPanelSlotSort && toonPanelSlotSort.value) || dkpSlotSortMode;
-            const flat = buildToonUpgradesHorizontalStrip(char, mode, null);
-            let html = `<p style="margin-bottom: 12px; color: #495057;"><strong>${escapeHtml(char.name)}</strong> (${escapeHtml(char.class)}) — upgrades left to right by ${mode === 'hp_dkp' ? 'HP/DKP' : mode === 'max_upgrade' ? 'max upgrade' : 'value'}</p>`;
+            const filterSlotId = (toonPanelSlotFilter && toonPanelSlotFilter.value) || '';
+            const flat = buildToonUpgradesHorizontalStrip(char, mode, null, filterSlotId);
+            const slotLabel = filterSlotId && toonPanelSlotFilter ? (toonPanelSlotFilter.options[toonPanelSlotFilter.selectedIndex].textContent || '') : 'all slots';
+            let html = `<p style="margin-bottom: 12px; color: #495057;"><strong>${escapeHtml(char.name)}</strong> (${escapeHtml(char.class)}) — ${slotLabel}, sorted by ${mode === 'hp_dkp' ? 'HP/DKP' : mode === 'max_upgrade' ? 'max upgrade' : 'value'}</p>`;
             html += '<div class="toon-upgrade-strip" id="toonUpgradeStrip">';
             flat.forEach(u => {
                 const entry = dkpPricesCache[String(u.itemId)];
@@ -2368,6 +2392,83 @@
             if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
 
+        /** Return slotIds (1-22) that this item can fill, from item_stats.slot. */
+        function getSlotIdsForItem(itemId) {
+            const stats = itemStatsCache[Number(itemId)];
+            if (!stats || typeof stats.slot !== 'string') return [];
+            const slotIds = [];
+            for (let slotId = 1; slotId <= 22; slotId++) {
+                if (itemMatchesSlot(slotId, stats.slot)) slotIds.push(slotId);
+            }
+            return slotIds;
+        }
+
+        /** Resolve item name (exact or partial) to { itemId, itemName }. Requires loadItemStats/itemNameToId. */
+        function resolveItemNameToIdAndSlot(searchStr) {
+            if (!searchStr || typeof searchStr !== 'string') return null;
+            const trim = searchStr.trim();
+            if (!trim) return null;
+            let itemId = resolveItemIdByName(trim);
+            let itemName = null;
+            if (itemId != null) {
+                const stats = itemStatsCache[Number(itemId)];
+                itemName = (stats && stats.name) ? stats.name : (elementalDisplayNames[String(itemId)] || 'Item ' + itemId);
+                return { itemId, itemName };
+            }
+            const norm = normalizeItemNameForLookup(trim);
+            for (const [key, id] of Object.entries(itemNameToId)) {
+                if (key.indexOf(norm) !== -1 || norm.indexOf(key) !== -1) {
+                    const stats = itemStatsCache[Number(id)];
+                    itemName = (stats && stats.name) ? stats.name : (elementalDisplayNames[String(id)] || 'Item ' + id);
+                    return { itemId: id, itemName };
+                }
+            }
+            return null;
+        }
+
+        /** Open item comparison by item id/name (e.g. from typed search). Finds per-toon slot from upgrades or uses item's slot. */
+        function openItemComparisonByItemId(itemId, itemName) {
+            const slotIds = getSlotIdsForItem(itemId);
+            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+            let html = `<h3 style="margin-top: 0;">${escapeHtml(itemName || 'Item ' + itemId)}</h3>`;
+            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons. Close to return to upgrade list.</p>`;
+            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+
+            toonUpgradesMatchedChars.forEach(char => {
+                let benefit = '—';
+                let otherOptions = [];
+                let slotName = '—';
+                const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
+                let slot = null;
+                if (upgradeData.bySlot) {
+                    for (const s of upgradeData.bySlot) {
+                        const u = (s.upgrades || []).find(x => String(x.itemId) === String(itemId));
+                        if (u) {
+                            slot = s;
+                            slotName = s.slotName || slotNames[s.slotId] || 'Slot ' + s.slotId;
+                            const hpd = getHpPerDkpForUpgrade(u);
+                            benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? `, HP/DKP ${hpd.toFixed(2)}` : '');
+                            otherOptions = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 4).map(x => x.itemName || 'Item ' + x.itemId);
+                            break;
+                        }
+                    }
+                }
+                if (!slot && slotIds.length > 0) {
+                    const sid = slotIds[0];
+                    slotName = slotNames[sid] || 'Slot ' + sid;
+                    slot = upgradeData.bySlot && upgradeData.bySlot.find(s => s.slotId === sid);
+                    if (slot && slot.upgrades) otherOptions = slot.upgrades.slice(0, 4).map(x => x.itemName || 'Item ' + x.itemId);
+                }
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${slotName}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptions.length ? otherOptions.map(o => escapeHtml(o)).join(', ') : '—'}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
+            itemComparisonContent.innerHTML = html;
+            itemComparisonModal.style.display = 'block';
+            const closeBtn = document.getElementById('closeItemComparisonBtn');
+            if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
+        }
+
         if (document.getElementById('showToonUpgrades')) {
             document.getElementById('showToonUpgrades').addEventListener('click', () => {
                 const input = document.getElementById('toonListInput');
@@ -2409,6 +2510,12 @@
                     renderToonUpgradesStrip(toonUpgradesMatchedChars[toonUpgradesSelectedIndex]);
             });
         }
+        if (toonPanelSlotFilter) {
+            toonPanelSlotFilter.addEventListener('change', () => {
+                if (toonUpgradesMatchedChars.length && toonUpgradesMatchedChars[toonUpgradesSelectedIndex])
+                    renderToonUpgradesStrip(toonUpgradesMatchedChars[toonUpgradesSelectedIndex]);
+            });
+        }
         if (document.getElementById('closeToonUpgradesPanel')) {
             document.getElementById('closeToonUpgradesPanel').addEventListener('click', () => {
                 toonUpgradesPanel.style.display = 'none';
@@ -2416,6 +2523,21 @@
         }
         if (document.getElementById('closeItemComparison')) {
             document.getElementById('closeItemComparison').onclick = () => { itemComparisonModal.style.display = 'none'; };
+        }
+
+        function doItemLookup() {
+            const search = toonPanelItemSearch && toonPanelItemSearch.value ? toonPanelItemSearch.value.trim() : '';
+            if (!search) return;
+            const resolved = resolveItemNameToIdAndSlot(search);
+            if (!resolved) {
+                alert('Item not found. Load item data first (open a character tab), and try exact or partial name.');
+                return;
+            }
+            openItemComparisonByItemId(resolved.itemId, resolved.itemName);
+        }
+        if (toonPanelItemLookup) toonPanelItemLookup.addEventListener('click', doItemLookup);
+        if (toonPanelItemSearch) {
+            toonPanelItemSearch.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doItemLookup(); } });
         }
 
         function showScoreBreakdown(char) {
