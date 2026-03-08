@@ -2367,13 +2367,15 @@
         function openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp) {
             const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
             let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
-            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons. Close to return to upgrade list.</p>`;
+            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best first). Close to return to upgrade list.</p>`;
             html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
             const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
+            const rows = [];
             toonUpgradesMatchedChars.forEach(char => {
                 let benefit = '—';
                 let otherOptionsHtml = '—';
+                let sortKey = -Infinity;
                 const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
                 const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
                 if (slot && slot.upgrades) {
@@ -2383,6 +2385,7 @@
                         const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                         benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
                         if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                        sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                     }
                     const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 5);
                     otherOptionsHtml = others.length ? others.map(o => {
@@ -2391,6 +2394,10 @@
                         return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
                     }).join(', ') : '—';
                 }
+                rows.push({ char, benefit, otherOptionsHtml, sortKey });
+            });
+            rows.sort((a, b) => b.sortKey - a.sortKey);
+            rows.forEach(({ char, benefit, otherOptionsHtml }) => {
                 html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
             });
             html += '</tbody></table>';
@@ -2441,13 +2448,15 @@
             const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
             const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
             let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
-            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons. Close to return to upgrade list.</p>`;
+            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best first). Close to return to upgrade list.</p>`;
             html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
+            const rows = [];
             toonUpgradesMatchedChars.forEach(char => {
                 let benefit = '—';
                 let otherOptionsHtml = '—';
                 let slotName = '—';
+                let sortKey = -Infinity;
                 const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
                 let slot = null;
                 if (upgradeData.bySlot) {
@@ -2460,6 +2469,7 @@
                             const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                             benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
                             if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                             const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 5);
                             otherOptionsHtml = others.length ? others.map(o => {
                                 const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
@@ -2483,6 +2493,10 @@
                         }).join(', ') : '—';
                     }
                 }
+                rows.push({ char, slotName, benefit, otherOptionsHtml, sortKey });
+            });
+            rows.sort((a, b) => b.sortKey - a.sortKey);
+            rows.forEach(({ char, slotName, benefit, otherOptionsHtml }) => {
                 html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(char.name)} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${slotName}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
             });
             html += '</tbody></table>';
