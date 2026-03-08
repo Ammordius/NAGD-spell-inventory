@@ -76899,18 +76899,48 @@
     "slot": "EAR WRIST",
     "ac": 10,
     "mods": [
-      { "label": "STR", "value": 5 },
-      { "label": "WIS", "value": 10 },
-      { "label": "INT", "value": 10 },
-      { "label": "HP", "value": 100 },
-      { "label": "MANA", "value": 100 }
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 10
+      },
+      {
+        "label": "INT",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
     ],
     "resists": [
-      { "label": "Fire", "value": 15 },
-      { "label": "Disease", "value": 15 },
-      { "label": "Cold", "value": 15 },
-      { "label": "Magic", "value": 15 },
-      { "label": "Poison", "value": 15 }
+      {
+        "label": "Fire",
+        "value": 15
+      },
+      {
+        "label": "Disease",
+        "value": 15
+      },
+      {
+        "label": "Cold",
+        "value": 15
+      },
+      {
+        "label": "Magic",
+        "value": 15
+      },
+      {
+        "label": "Poison",
+        "value": 15
+      }
     ],
     "requiredLevel": 55,
     "focusSpellName": "Extended Range III",
@@ -76928,25 +76958,286 @@
     "slot": "CHEST",
     "ac": 30,
     "mods": [
-      { "label": "STR", "value": 15 },
-      { "label": "DEX", "value": 15 },
-      { "label": "STA", "value": 15 },
-      { "label": "WIS", "value": 15 },
-      { "label": "AGI", "value": 15 },
-      { "label": "HP", "value": 100 },
-      { "label": "MANA", "value": 100 }
+      {
+        "label": "STR",
+        "value": 15
+      },
+      {
+        "label": "DEX",
+        "value": 15
+      },
+      {
+        "label": "STA",
+        "value": 15
+      },
+      {
+        "label": "WIS",
+        "value": 15
+      },
+      {
+        "label": "AGI",
+        "value": 15
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
     ],
     "resists": [
-      { "label": "Fire", "value": 10 },
-      { "label": "Disease", "value": 10 },
-      { "label": "Cold", "value": 10 },
-      { "label": "Magic", "value": 10 },
-      { "label": "Poison", "value": 10 }
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 10
+      },
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      }
     ],
     "effectSpellName": "Flowing Thought III",
     "weight": 1.0,
     "size": "MEDIUM",
     "classes": "DRU MNK BST",
     "name": "Tunic of the Disciple"
+  },
+  "5779": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM"
+    ],
+    "slot": "BACK",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "HP",
+        "value": 75
+      },
+      {
+        "label": "MANA",
+        "value": 75
+      }
+    ],
+    "resists": [
+      {
+        "label": "Poison",
+        "value": 15
+      },
+      {
+        "label": "Disease",
+        "value": 15
+      }
+    ],
+    "weight": 3.0,
+    "size": "SMALL",
+    "classes": "ALL",
+    "gearScore": 65,
+    "name": "Iksar Hide Cape"
+  },
+  "27167": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "SECONDARY",
+    "ac": 55,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 15
+      },
+      {
+        "label": "DEX",
+        "value": 20
+      },
+      {
+        "label": "WIS",
+        "value": 15
+      },
+      {
+        "label": "INT",
+        "value": 15
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Magic",
+        "value": 20
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      }
+    ],
+    "requiredLevel": 62,
+    "levelType": "recommended",
+    "weight": 12.5,
+    "size": "LARGE",
+    "classes": "WAR PAL RNG SHD BRD ROG",
+    "gearScore": 118,
+    "name": "Basalt Bulwark"
+  },
+  "28798": {
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "RANGE SECONDARY",
+    "ac": 20,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 15
+      },
+      {
+        "label": "STA",
+        "value": 15
+      },
+      {
+        "label": "AGI",
+        "value": 15
+      },
+      {
+        "label": "DEX",
+        "value": 15
+      },
+      {
+        "label": "WIS",
+        "value": 15
+      },
+      {
+        "label": "INT",
+        "value": 15
+      },
+      {
+        "label": "HP",
+        "value": 100
+      },
+      {
+        "label": "MANA",
+        "value": 100
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 10
+      },
+      {
+        "label": "Cold",
+        "value": 10
+      },
+      {
+        "label": "Magic",
+        "value": 10
+      },
+      {
+        "label": "Poison",
+        "value": 10
+      },
+      {
+        "label": "Disease",
+        "value": 10
+      }
+    ],
+    "requiredLevel": 60,
+    "levelType": "recommended",
+    "effectSpellId": 2193,
+    "effectSpellName": "Vengeance III",
+    "effectNote": "",
+    "focusSpellId": 3541,
+    "focusSpellName": "Conservation of Solusek",
+    "weight": 2.0,
+    "size": "SMALL",
+    "classes": "ALL",
+    "gearScore": 103,
+    "name": "Secrets of the Planes"
+  },
+  "29035": {
+    "flags": [
+      "MAGIC ITEM"
+    ],
+    "mods": [
+      {
+        "label": "MANA",
+        "value": 30
+      }
+    ],
+    "requiredLevel": 46,
+    "levelType": "required",
+    "effectSpellId": 3534,
+    "effectSpellName": "Affliction Haste IV",
+    "effectNote": "",
+    "focusSpellId": 3534,
+    "focusSpellName": "Affliction Haste IV",
+    "weight": 2.5,
+    "size": "SMALL",
+    "classes": "ALL",
+    "gearScore": 0,
+    "name": "Ceramic Skull of Decay"
+  },
+  "29038": {
+    "flags": [
+      "MAGIC ITEM"
+    ],
+    "slot": "RANGE SECONDARY",
+    "mods": [
+      {
+        "label": "STA",
+        "value": 8
+      },
+      {
+        "label": "AGI",
+        "value": 8
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 25
+      },
+      {
+        "label": "MANA",
+        "value": 25
+      }
+    ],
+    "requiredLevel": 46,
+    "levelType": "required",
+    "effectSpellId": 3504,
+    "effectSpellName": "Extended Enhancement IV",
+    "effectNote": "",
+    "focusSpellId": 3504,
+    "focusSpellName": "Extended Enhancement IV",
+    "weight": 5.5,
+    "size": "SMALL",
+    "classes": "ALL",
+    "gearScore": 8,
+    "name": "Ceramic Shield of Valor"
   }
 }

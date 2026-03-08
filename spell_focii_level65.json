@@ -128,7 +128,8 @@
         {
           "name": "Ceramic Shield of Valor",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Shield Of Valor"
+          "mob": "Recipe\u00a0: Ceramic Shield Of Valor",
+          "id": 29038
         },
         {
           "name": "Cloak of the Wrulons",
@@ -1061,7 +1062,8 @@
         {
           "name": "Ceramic Skull of Decay",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Skull Of Decay"
+          "mob": "Recipe\u00a0: Ceramic Skull Of Decay",
+          "id": 29035
         },
         {
           "name": "Torch of Lxvanvom",
