@@ -68,8 +68,7 @@
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } },
         { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 50 } },
-        { "id": "PunishingBlade", "label": "Punishing Blade", "bonuses": { "ExtraAttackChance": 8 } },
-        { "id": "PrecisionPathfinder", "label": "Precision of the Pathfinder", "bonuses": { "AccuracyAll": 30 } }
+        { "id": "PunishingBlade", "label": "Punishing Blade", "bonuses": { "ExtraAttackChance": 8 } }
       ]
     },
     "Paladin": {
