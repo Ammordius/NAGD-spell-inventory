@@ -143,6 +143,10 @@
                         <label>Worn ATK</label>
                         <input type="number" id="wornATK" value="255" min="0" max="400" placeholder="250" title="Item ATK from gear (e.g. 250)" />
                     </div>
+                    <div class="field">
+                        <label>Spell ATK (other)</label>
+                        <input type="number" id="spellATK" value="0" min="0" max="400" placeholder="e.g. Avatar, songs" title="Additional spell-based ATK beyond the named buffs (e.g. Avatar, shaman/bard songs)." />
+                    </div>
                     <div class="field backstab-option">
                         <label><input type="checkbox" id="atkFerineAvatar" /> Ferine Avatar (+140 ATK)</label>
                     </div>
@@ -179,6 +183,7 @@
                     <tr><th>Expected damage per hit (MH)</th><td id="outDmgPerHit"></td></tr>
                     <tr><th>Min hit (MH)</th><td id="outMinHit"></td></tr>
                     <tr><th>Max hit (MH)</th><td id="outMaxHit"></td></tr>
+                    <tr><th>Max crit (MH, approx)</th><td id="outMaxCritMH"></td></tr>
                     <tr><th>Melee DPS</th><td id="outMeleeDPS"></td></tr>
                     <tr><th>Kick DPS (Monk)</th><td id="outKickDPS"></td></tr>
                     <tr><th>Backstab DPS (if used)</th><td id="outBackstabDPS"></td></tr>
@@ -217,6 +222,7 @@
     let itemStats = {};
     let dpsConfig = {};
     let weaponsBySlot = { PRIMARY: [], SECONDARY: [], RANGE: [] };
+    let precomputedWeaponDps = {};
 
     function getDamageBonus1H(level) {
         if (level < 28) return 0;
@@ -283,18 +289,48 @@
         if (isRanged && baseDamage > 1) baseDamage = Math.floor(baseDamage / 2);
         const roll = expectedRollD20(offense, mitigation);
         let dmg = Math.floor((roll * baseDamage + 5) / 10);
-        const minHit = Math.floor(baseDamage * 0);
+        // On TAKP, with no melee disciplines running, minHit is effectively
+        // baseDamage * GetMeleeMinDamageMod_SE(skill) / 100, which is baseDamage
+        // for normal swings. Clamp to that instead of 0 so 1H/2H warriors
+        // don't roll tiny hits that never occur on the server.
+        const minHit = baseDamage;
         if (dmg < minHit) dmg = minHit;
         if (dmg < 1) dmg = 1;
         return dmg;
     }
+    // Server: Client::RollDamageMultiplier applies to ALL client melee (not just monks).
+    // When it procs, damage *= (100 + rand(0, baseBonus)) / 100, capped at maxExtra/100.
     function rollDamageMultiplierExpected(offense, level, isMonk) {
-        if (!isMonk || level < 65) return 1;
-        let rollChance = 83, maxExtra = 300, minusFactor = 50;
+        let rollChance = 51, maxExtra = 210, minusFactor = 105;
+        if (isMonk && level >= 65) {
+            rollChance = 83; maxExtra = 300; minusFactor = 50;
+        } else if (level >= 65 || (isMonk && level >= 63)) {
+            rollChance = 81; maxExtra = 295; minusFactor = 55;
+        } else if (level >= 63 || (isMonk && level >= 60)) {
+            rollChance = 79; maxExtra = 290; minusFactor = 60;
+        } else if (level >= 60 || (isMonk && level >= 56)) {
+            rollChance = 77; maxExtra = 285; minusFactor = 65;
+        } else if (level >= 56) {
+            rollChance = 72; maxExtra = 265; minusFactor = 70;
+        } else if (level >= 51 || isMonk) {
+            rollChance = 65; maxExtra = 245; minusFactor = 80;
+        } else {
+            return 1;
+        }
         const baseBonus = Math.max(10, Math.floor((offense - minusFactor) / 2));
         const expectedRollWhenProc = 100 + baseBonus / 2;
         const multWhenProc = Math.min(maxExtra / 100, expectedRollWhenProc / 100);
         return (rollChance / 100) * multWhenProc + (1 - rollChance / 100) * 1;
+    }
+    // Max multiplier for display (server caps proc at maxExtra).
+    function rollDamageMultiplierMax(level, isMonk) {
+        if (isMonk && level >= 65) return 300 / 100;
+        if (level >= 65 || (isMonk && level >= 63)) return 295 / 100;
+        if (level >= 63 || (isMonk && level >= 60)) return 290 / 100;
+        if (level >= 60 || (isMonk && level >= 56)) return 285 / 100;
+        if (level >= 56) return 265 / 100;
+        if (level >= 51 || isMonk) return 245 / 100;
+        return 1;
     }
     function getSkillBaseDamageKick(skillLevel) {
         let base = 3;
@@ -342,6 +378,44 @@
         return 10 / effDelay;
     }
 
+    function buildAAMapForClass(cls) {
+        const cfg = dpsConfig.classes && dpsConfig.classes[cls];
+        if (!cfg || !cfg.aas) return {};
+        const out = {};
+        cfg.aas.forEach(aa => {
+            if (aa.bonuses) {
+                Object.entries(aa.bonuses).forEach(([k, v]) => {
+                    out[k] = (out[k] || 0) + v;
+                });
+            }
+        });
+        return out;
+    }
+
+    function baselineEnv() {
+        const level = dpsConfig.levelCap || 65;
+        const mobLevel = level;
+        const mobAC = 200;
+        const hastePct = 70;
+        const overhastePct = 0;
+        const combinedHaste = Math.min(100, hastePct) + overhastePct;
+        return {
+            level,
+            mobLevel,
+            mobAC,
+            hastePct,
+            overhastePct,
+            combinedHaste,
+            wornATK: 255,
+            spellATK: 0,
+            atkFerineAvatar: true,
+            atkFerocity: true,
+            atkPredTunare: true,
+            avoidanceOverride: null,
+            mitigationOverride: null
+        };
+    }
+
     function itemUsableByClass(item, cls) {
         const abbr = CLASS_ABBR[cls];
         if (!abbr) return true;
@@ -355,33 +429,183 @@
         return skill.indexOf('2H') === 0 || skill.indexOf(' 2H') >= 0;
     }
 
+    function computePrimaryWeaponDps(cls, weapon, use2H, aas, env) {
+        const cfg = (dpsConfig.classes && dpsConfig.classes[cls]) || {};
+        const level = env.level;
+        const mobLevel = env.mobLevel;
+        const mobAC = env.mobAC;
+        const mitigation = Math.max(1, env.mitigationOverride != null ? env.mitigationOverride : npcMitigation(mobLevel, mobAC));
+        let avoidance = npcAvoidance(mobLevel);
+        if (env.avoidanceOverride && env.avoidanceOverride > 0) {
+            avoidance = env.avoidanceOverride;
+        }
+
+        let str = cfg.str || 255;
+        let dex = cfg.dex || 255;
+        if (aas.StatBonus) {
+            str = Math.min(305, str + aas.StatBonus);
+            dex = Math.min(305, dex + aas.StatBonus);
+        }
+
+        const offenseSkill = (cfg.skills && cfg.skills.offense) || 252;
+        const defenseSkill = (cfg.skills && cfg.skills.defense) || 252;
+        const isRanger = cls === 'Ranger';
+
+        const skillKey = weapon && weapon.skill ? weapon.skill.replace(/\s/g, '') : (isRanger ? 'archery' : '1HSlash');
+        const ws = (cfg.skills && cfg.skills[skillKey]) || 252;
+
+        const accuracy = aas.AccuracyAll || 0;
+        const toHit = getToHit(offenseSkill, ws, accuracy);
+        const hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, 0, 0)));
+
+        const isRangedAttack = false;
+        const offenseBase = getOffense(ws, str, dex, isRangedAttack, isRanger && level > 54);
+        const wornATKVal = env.wornATK || 0;
+        const spellATKVal = env.spellATK || 0;
+        const offense = offenseBase + wornATKVal + spellATKVal +
+            (env.atkFerineAvatar ? 140 : 0) +
+            (env.atkFerocity ? 140 : 0) +
+            (env.atkPredTunare ? 140 : 0);
+
+        let baseDmgMH = weapon.dmg || 0;
+        let delayMH = weapon.atkDelay || 40;
+        let itemDmgBonus = weapon.dmgBonus || 0;
+        let damageBonusMH = 0;
+        if (isWarriorClass(cls)) {
+            damageBonusMH = use2H ? getDamageBonus2H(level, delayMH) : getDamageBonus1H(level);
+        }
+
+        let dmgPerSwingMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
+        const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
+        dmgPerSwingMH = Math.floor(dmgPerSwingMH * monkMult) + damageBonusMH + itemDmgBonus;
+
+        const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
+
+        const effDelayMH = effectiveDelay(delayMH, env.combinedHaste);
+        let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
+        if ((cls === 'Warrior' || cls === 'Monk') && level >= 60) {
+            const tripleExtra = 0.135;
+            const flurryExtra = (cls === 'Warrior' && aas.FlurryChance) ? 0.135 * (aas.FlurryChance / 100) * 1.1 : 0;
+            swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100 + tripleExtra + flurryExtra);
+        }
+        if (use2H && weapon && (weapon.skill || '').indexOf('2H') >= 0 && aas.ExtraAttackChance) {
+            swingsMH += swingsPerSecond(effDelayMH) * (aas.ExtraAttackChance / 100);
+        }
+
+        let meleeDPS = hitPct * (dmgPerSwingMH * swingsMH);
+
+        let kickDPS = 0;
+        if (cls === 'Monk') {
+            const kickSkill = (cfg.skills && cfg.skills.kick) || 252;
+            const kickBase = getSkillBaseDamageKick(kickSkill);
+            const offenseKick = getOffense(kickSkill, str, dex, false, false) + wornATKVal + spellATKVal +
+                (env.atkFerineAvatar ? 140 : 0) +
+                (env.atkFerocity ? 140 : 0) +
+                (env.atkPredTunare ? 140 : 0);
+            let kickDmg = calcMeleeDamage(kickBase, offenseKick, mitigation, false);
+            kickDmg = Math.floor(kickDmg * rollDamageMultiplierExpected(offenseKick, level, true));
+            const kickRate = 1 / 6;
+            kickDPS = hitPct * kickDmg * kickRate;
+        }
+
+        let backstabDPS = 0;
+        if (cls === 'Rogue' && weapon && (weapon.skill || '').indexOf('Piercing') >= 0) {
+            const backstabSkill = (cfg.skills && cfg.skills.backstab) || 252;
+            const backstabBase = ((backstabSkill * 0.02) + 2) * (weapon.dmg || 1);
+            const minHit = level >= 60 ? level * 2 : level > 50 ? level * 3 / 2 : level;
+            const backstabDmg = Math.max(minHit, calcMeleeDamage(Math.floor(backstabBase), offense, mitigation, false));
+            const backstabHitsPerSec = 1 / 3;
+            const stabs = level > 54 ? 2 : 1;
+            backstabDPS = hitPct * backstabDmg * backstabHitsPerSec * stabs;
+        }
+
+        const critChance = getCritChance(cls, aas);
+        const totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance);
+        return totalDPS;
+    }
+
+    function computeSecondaryWeaponDps(cls, weapon, aas, env) {
+        const cfg = (dpsConfig.classes && dpsConfig.classes[cls]) || {};
+        const level = env.level;
+        const mobLevel = env.mobLevel;
+        const mobAC = env.mobAC;
+        const mitigation = Math.max(1, env.mitigationOverride != null ? env.mitigationOverride : npcMitigation(mobLevel, mobAC));
+        let avoidance = npcAvoidance(mobLevel);
+        if (env.avoidanceOverride && env.avoidanceOverride > 0) {
+            avoidance = env.avoidanceOverride;
+        }
+
+        let str = cfg.str || 255;
+        let dex = cfg.dex || 255;
+        if (aas.StatBonus) {
+            str = Math.min(305, str + aas.StatBonus);
+            dex = Math.min(305, dex + aas.StatBonus);
+        }
+
+        const offenseSkill = (cfg.skills && cfg.skills.offense) || 252;
+        const isRanger = cls === 'Ranger';
+
+        const skillKey = weapon && weapon.skill ? weapon.skill.replace(/\s/g, '') : (isRanger ? 'archery' : '1HSlash');
+        const ws = (cfg.skills && cfg.skills[skillKey]) || 252;
+
+        const accuracy = aas.AccuracyAll || 0;
+        const toHit = getToHit(offenseSkill, ws, accuracy);
+        const hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, 0, 0)));
+
+        const isRangedAttack = false;
+        const offenseBase = getOffense(ws, str, dex, isRangedAttack, isRanger && level > 54);
+        const wornATKVal = env.wornATK || 0;
+        const spellATKVal = env.spellATK || 0;
+        const offense = offenseBase + wornATKVal + spellATKVal +
+            (env.atkFerineAvatar ? 140 : 0) +
+            (env.atkFerocity ? 140 : 0) +
+            (env.atkPredTunare ? 140 : 0);
+
+        const baseOH = weapon.dmg || 0;
+        const delayOH = weapon.atkDelay || 40;
+        const effOH = effectiveDelay(delayOH, env.combinedHaste);
+        const dwChance = getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas);
+        const swingsOH = (10 / effOH) * (dwChance / 100);
+        const dmgPerSwingOH = calcMeleeDamage(baseOH, offense, mitigation, false);
+
+        let meleeDPS = hitPct * dmgPerSwingOH * swingsOH;
+        const critChance = getCritChance(cls, aas);
+        meleeDPS = meleeDPS * (1 + critChance);
+        return meleeDPS;
+    }
+
     function buildWeaponListForClass(cls, use2H) {
         const list = { PRIMARY: [], SECONDARY: [], RANGE: [] };
         for (const [id, item] of Object.entries(itemStats)) {
             if (item.dmg == null || item.atkDelay == null) continue;
-            const slot = item.slot || '';
+            const slotRaw = item.slot || '';
+            const slots = String(slotRaw).split(/\s+/);
+            const canPrimary = slots.includes('PRIMARY');
+            const canSecondary = slots.includes('SECONDARY');
             if (!itemUsableByClass(item, cls)) continue;
             const twoHander = isTwoHander(item);
-            if (slot === 'PRIMARY') {
+            if (canPrimary) {
                 // MH: when 2H is selected, only show 2H; otherwise only 1H.
                 if (use2H && twoHander) {
                     list.PRIMARY.push({ id, ...item });
                 } else if (!use2H && !twoHander) {
                     list.PRIMARY.push({ id, ...item });
                 }
-            } else if (slot === 'SECONDARY') {
+            }
+            if (canSecondary) {
                 // OH list should only ever contain 1H weapons.
                 if (!twoHander) {
                     list.SECONDARY.push({ id, ...item });
                 }
-            } else if (slot === 'RANGE') {
+            }
+            if (slots.includes('RANGE')) {
                 list.RANGE.push({ id, ...item });
             }
         }
-        const sortByDps = (a, b) => (b.dmg / b.atkDelay) - (a.dmg / a.atkDelay);
-        list.PRIMARY.sort(sortByDps);
-        list.SECONDARY.sort(sortByDps);
-        list.RANGE.sort(sortByDps);
+        const sortByWeaponRatio = (a, b) => (b.dmg / b.atkDelay) - (a.dmg / a.atkDelay);
+        list.PRIMARY.sort(sortByWeaponRatio);
+        list.SECONDARY.sort(sortByWeaponRatio);
+        list.RANGE.sort(sortByWeaponRatio);
         return list;
     }
 
@@ -472,22 +696,22 @@
         const isRangedAttack = isRanger && weaponRange;
         const offenseBase = getOffense(ws, str, dex, isRangedAttack, isRanger && level > 54);
         const wornATKVal = parseInt(document.getElementById('wornATK').value, 10) || 0;
+        const spellATKVal = parseInt(document.getElementById('spellATK').value, 10) || 0;
         const atkFerineAvatar = document.getElementById('atkFerineAvatar') && document.getElementById('atkFerineAvatar').checked;
         const atkFerocity = document.getElementById('atkFerocity') && document.getElementById('atkFerocity').checked;
         const atkPredTunare = document.getElementById('atkPredTunare') && document.getElementById('atkPredTunare').checked;
-        const offense = offenseBase + wornATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
-        let dmgPerSwingMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack) + damageBonusMH;
+        const offense = offenseBase + wornATKVal + spellATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
+        const rollPartMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
         const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
-        dmgPerSwingMH = Math.floor(dmgPerSwingMH * monkMult) + itemDmgBonus;
+        let dmgPerSwingMH = Math.floor(rollPartMH * monkMult) + damageBonusMH + itemDmgBonus;
 
         let minHitMH = 1, maxHitMH = 1;
         if (baseDmgMH > 0) {
-            const rollMin = Math.max(1, Math.floor((1 * baseDmgMH + 5) / 10) + damageBonusMH);
-            const rollMax = Math.floor((20 * baseDmgMH + 5) / 10) + damageBonusMH;
-            const multMin = 1;
-            const multMax = (cls === 'Monk' && level >= 65) ? 3 : 1;
-            minHitMH = Math.max(1, Math.floor(rollMin * multMin) + itemDmgBonus);
-            maxHitMH = Math.floor(rollMax * multMax) + itemDmgBonus;
+            const rollMinRaw = Math.max(baseDmgMH, Math.floor((1 * baseDmgMH + 5) / 10));
+            const rollMaxRaw = Math.floor((20 * baseDmgMH + 5) / 10);
+            const multMax = rollDamageMultiplierMax(level, cls === 'Monk');
+            minHitMH = Math.max(1, Math.floor(rollMinRaw * 1) + damageBonusMH + itemDmgBonus);
+            maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgBonus;
         }
 
         const effDelayMH = effectiveDelay(delayMH, combinedHaste);
@@ -507,7 +731,9 @@
         if (weaponOH && !use2H) {
             const baseOH = weaponOH.dmg || 0;
             const delayOH = weaponOH.atkDelay || 40;
-            dmgPerSwingOH = calcMeleeDamage(baseOH, offense, mitigation, false);
+            const rollPartOH = calcMeleeDamage(baseOH, offense, mitigation, false);
+            const multOH = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
+            dmgPerSwingOH = Math.floor(rollPartOH * multOH);
             const effOH = effectiveDelay(delayOH, combinedHaste);
             swingsOH = (10 / effOH) * (dwChance / 100);
         }
@@ -518,7 +744,7 @@
         if (cls === 'Monk') {
             const kickSkill = (cfg.skills && cfg.skills.kick) || 252;
             const kickBase = getSkillBaseDamageKick(kickSkill);
-            const offenseKick = getOffense(kickSkill, str, dex, false, false) + wornATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
+            const offenseKick = getOffense(kickSkill, str, dex, false, false) + wornATKVal + spellATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
             let kickDmg = calcMeleeDamage(kickBase, offenseKick, mitigation, false);
             kickDmg = Math.floor(kickDmg * rollDamageMultiplierExpected(offenseKick, level, true));
             const kickRate = 1 / 6;
@@ -547,6 +773,8 @@
         document.getElementById('outDmgPerHit').textContent = dmgPerSwingMH.toFixed(0);
         document.getElementById('outMinHit').textContent = baseDmgMH > 0 ? minHitMH : '—';
         document.getElementById('outMaxHit').textContent = baseDmgMH > 0 ? maxHitMH : '—';
+        const approxMaxCritMH = baseDmgMH > 0 ? Math.floor(maxHitMH * 2) : 0;
+        document.getElementById('outMaxCritMH').textContent = baseDmgMH > 0 ? approxMaxCritMH : '—';
         document.getElementById('outMeleeDPS').textContent = meleeDPS.toFixed(1);
         document.getElementById('outKickDPS').textContent = kickDPS > 0 ? kickDPS.toFixed(1) : '—';
         document.getElementById('outBackstabDPS').textContent = backstabDPS > 0 ? backstabDPS.toFixed(1) : '—';
@@ -677,6 +905,39 @@
             warnEl.style.display = 'block';
             warnEl.textContent = 'No weapon data loaded. Serve this folder with a local server (e.g. python -m http.server 8080) and open http://localhost:8080/dps_calculator.html';
         }
+        // Precompute per-class weapon DPS rankings (max AAs, baseline mob/buff setup) for better initial list ordering.
+        (function precomputeAllWeaponDps() {
+            precomputedWeaponDps = {};
+            const env = baselineEnv();
+            CLASSES.forEach(cls => {
+                const aas = buildAAMapForClass(cls);
+                const classMap = { primary1H: {}, primary2H: {}, secondary: {}, range: {} };
+                for (const [id, item] of Object.entries(itemStats)) {
+                    if (item.dmg == null || item.atkDelay == null) continue;
+                    if (!itemUsableByClass(item, cls)) continue;
+                    const slotRaw = item.slot || '';
+                    const slots = String(slotRaw).split(/\s+/);
+                    const canPrimary = slots.includes('PRIMARY');
+                    const canSecondary = slots.includes('SECONDARY');
+                    const is2H = isTwoHander(item);
+                    if (canPrimary) {
+                        if (is2H) {
+                            classMap.primary2H[id] = computePrimaryWeaponDps(cls, item, true, aas, env);
+                        } else {
+                            classMap.primary1H[id] = computePrimaryWeaponDps(cls, item, false, aas, env);
+                        }
+                    }
+                    if (canSecondary && !is2H) {
+                        classMap.secondary[id] = computeSecondaryWeaponDps(cls, item, aas, env);
+                    }
+                    if (slots.includes('RANGE')) {
+                        // Treat range weapons as primary for DPS ordering purposes (archery).
+                        classMap.range[id] = computePrimaryWeaponDps(cls, item, false, aas, env);
+                    }
+                }
+                precomputedWeaponDps[cls] = classMap;
+            });
+        })();
         fillClassSelect();
         onClassChange();
         use2HChange();
