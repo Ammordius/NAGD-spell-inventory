@@ -173,6 +173,9 @@
                     <div class="field backstab-option">
                         <label><input type="checkbox" id="atkPredTunare" checked /> Predator's / Tunare (+140)</label>
                     </div>
+                    <div class="field backstab-option">
+                        <label><input type="checkbox" id="atkVallonsQuickening" checked /> Vallon's Quickening (+41)</label>
+                    </div>
                 </div>
             </div>
             <div class="section">
@@ -481,6 +484,7 @@
             atkFerineAvatar: true,
             atkFerocity: true,
             atkPredTunare: true,
+            atkVallonsQuickening: true,
             avoidanceOverride: null,
             mitigationOverride: null
         };
@@ -535,7 +539,8 @@
         const offense = offenseBase + wornATKVal + spellATKVal +
             (env.atkFerineAvatar ? 140 : 0) +
             (env.atkFerocity ? 140 : 0) +
-            (env.atkPredTunare ? 140 : 0);
+            (env.atkPredTunare ? 140 : 0) +
+            (env.atkVallonsQuickening ? 41 : 0);
 
         let baseDmgMH = weapon.dmg || 0;
         let delayMH = weapon.atkDelay || 40;
@@ -636,7 +641,8 @@
         const offense = offenseBase + wornATKVal + spellATKVal +
             (env.atkFerineAvatar ? 140 : 0) +
             (env.atkFerocity ? 140 : 0) +
-            (env.atkPredTunare ? 140 : 0);
+            (env.atkPredTunare ? 140 : 0) +
+            (env.atkVallonsQuickening ? 41 : 0);
 
         const baseOH = weapon.dmg || 0;
         const delayOH = weapon.atkDelay || 40;
@@ -803,7 +809,12 @@
         const atkFerineAvatar = document.getElementById('atkFerineAvatar') && document.getElementById('atkFerineAvatar').checked;
         const atkFerocity = document.getElementById('atkFerocity') && document.getElementById('atkFerocity').checked;
         const atkPredTunare = document.getElementById('atkPredTunare') && document.getElementById('atkPredTunare').checked;
-        const offense = offenseBase + wornATKVal + spellATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
+        const atkVallonsQuickening = document.getElementById('atkVallonsQuickening') && document.getElementById('atkVallonsQuickening').checked;
+        const offense = offenseBase + wornATKVal + spellATKVal +
+            (atkFerineAvatar ? 140 : 0) +
+            (atkFerocity ? 140 : 0) +
+            (atkPredTunare ? 140 : 0) +
+            (atkVallonsQuickening ? 41 : 0);
         let rollPartMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
         // Archery Mastery and stationary target double-damage (Ranger ranged only).
         if (isRangedAttack && cls === 'Ranger') {
@@ -884,7 +895,11 @@
         if (cls === 'Monk') {
             const kickSkill = (cfg.skills && cfg.skills.kick) || 252;
             const kickBase = getSkillBaseDamageKick(kickSkill);
-            const offenseKick = getOffense(kickSkill, str, dex, false, false) + wornATKVal + spellATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
+            const offenseKick = getOffense(kickSkill, str, dex, false, false) + wornATKVal + spellATKVal +
+                (atkFerineAvatar ? 140 : 0) +
+                (atkFerocity ? 140 : 0) +
+                (atkPredTunare ? 140 : 0) +
+                (atkVallonsQuickening ? 41 : 0);
             let kickDmg = calcMeleeDamage(kickBase, offenseKick, mitigation, false);
             kickDmg = Math.floor(kickDmg * rollDamageMultiplierExpected(offenseKick, level, true));
             const kickRate = 1 / 6;
