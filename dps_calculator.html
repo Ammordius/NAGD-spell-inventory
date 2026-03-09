@@ -122,7 +122,7 @@
                     <div class="field backstab-option" id="rangerStationaryWrap" style="display:none;">
                         <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (2× bow dmg)</label>
                     </div>
-                    <div class="field backstab-option" id="attackFromFrontWrap" style="display:none;">
+                    <div class="field backstab-option" id="attackFromFrontWrap">
                         <label><input type="checkbox" id="attackFromFront" /> Attacking from front (tank position)</label>
                         <span style="font-size:0.8em; color:#666;" title="Uses server logic: mob parry/riposte/dodge (zone/attack.cpp AvoidDamage) reduce effective hit rate by mob level.">Lowers hit rate (parry/riposte/dodge)</span>
                     </div>
@@ -1048,7 +1048,7 @@
         if (rangerStationaryWrap) rangerStationaryWrap.style.display = useBow ? '' : 'none';
         const attackFromFrontWrap = document.getElementById('attackFromFrontWrap');
         if (attackFromFrontWrap) {
-            attackFromFrontWrap.style.display = useBow ? 'none' : '';
+            attackFromFrontWrap.style.display = '';
             const attackFromFrontCb = document.getElementById('attackFromFront');
             if (attackFromFrontCb) {
                 if (cls === 'Warrior' || cls === 'Paladin' || cls === 'Shadow Knight')
