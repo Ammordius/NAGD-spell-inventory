@@ -52,8 +52,6 @@
         .backstab-option { margin-top: 8px; }
         .backstab-option label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
         .collapsible { cursor: pointer; user-select: none; }
-        .collapsible::after { content: ' \u25BC'; font-size: 0.8em; }
-        .collapsible.open::after { content: ' \u25B2'; }
         .collapse-content { display: none; padding-top: 12px; }
         .collapse-content.open { display: block; }
         .results-note { margin-top: 12px; font-size: 0.85em; color: #666; }
@@ -63,7 +61,7 @@
     <div class="container">
         <header>
             <h1>TAKP DPS Calculator</h1>
-            <p>Per-class, maxed AA. Compare weapons and toggles. Formulas from server.</p>
+            <p>Compare weapons and buffs by class. Server-based formulas.</p>
             <a href="class_rankings.html">Class Rankings</a>
             <div id="loadWarning" style="display:none; margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; font-size:0.9em;"></div>
         </header>
@@ -76,11 +74,11 @@
                         <select id="classSelect"></select>
                     </div>
                     <div class="field" id="weaponPrimaryWrap">
-                        <label>Primary / MH</label>
+                        <label>Main hand</label>
                         <select id="weaponPrimary"></select>
                     </div>
                     <div class="field" id="weaponSecondaryWrap">
-                        <label>Secondary / OH</label>
+                        <label>Off hand</label>
                         <select id="weaponSecondary"></select>
                     </div>
                     <div class="field" id="weaponRangeWrap" style="display:none;">
@@ -101,80 +99,78 @@
                         </select>
                     </div>
                     <div class="field">
-                        <label>Use 2H (no OH)</label>
+                        <label>Use 2H</label>
                         <select id="use2H">
                             <option value="0">No (dual wield)</option>
                             <option value="1">Yes</option>
                         </select>
                     </div>
                     <div class="field backstab-option" id="backstabWrap" style="display:none;">
-                        <label><input type="checkbox" id="useBackstab" checked /> Use backstab (Rogue)</label>
-                        <label><input type="checkbox" id="backstabBehind" checked /> Assume behind (double stab when &gt;54)</label>
+                        <label><input type="checkbox" id="useBackstab" checked /> Backstab</label>
+                        <label><input type="checkbox" id="backstabBehind" checked /> Assume behind target</label>
                     </div>
                     <div class="field backstab-option" id="fleetingWrap" style="display:none;">
-                        <label><input type="checkbox" id="useFleeting" /> Fleeting Quiver (Ranger bow, +30% haste)</label>
+                        <label><input type="checkbox" id="useFleeting" checked /> Fleeting Quiver (+30% haste)</label>
                     </div>
                     <div class="field backstab-option" id="rangerStationaryWrap" style="display:none;">
-                        <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (Ranger double bow dmg)</label>
+                        <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (2× bow dmg)</label>
                     </div>
                 </div>
             </div>
             <div class="section">
-                <h2>Mob &amp; environment</h2>
+                <h2>Target &amp; buffs</h2>
                 <div class="row">
                     <div class="field">
                         <label>Mob level</label>
                         <input type="number" id="mobLevel" value="65" min="1" max="75" />
                     </div>
                     <div class="field">
-                        <label>Mob AC (NPC)</label>
+                        <label>Mob AC</label>
                         <input type="number" id="mobAC" value="200" min="0" max="500" />
                     </div>
                     <div class="field">
-                        <label>Haste % (spell, cap 100)</label>
-                        <input type="number" id="hastePct" value="100" min="0" max="100" title="Spell/buff haste; caps at 100%." />
+                        <label>Haste %</label>
+                        <input type="number" id="hastePct" value="100" min="0" max="100" title="Spell/buff haste (cap 100%)." />
                     </div>
                     <div class="field">
                         <label>Overhaste %</label>
-                        <input type="number" id="overhastePct" value="0" min="0" max="35" title="Stacks above spell cap (e.g. 30% = 100% spell + 30% overhaste = 130% total)." />
+                        <input type="number" id="overhastePct" value="0" min="0" max="35" title="Stacks above spell haste cap." />
                     </div>
                     <div class="field">
-                        <label>Avoidance override (optional)</label>
-                        <input type="number" id="avoidanceOverride" placeholder="e.g. 212" min="0" max="600" title="If set, used instead of level-based avoidance (e.g. 212 ≈ 82.4% hit for parse)" />
+                        <label>Avoidance</label>
+                        <input type="number" id="avoidanceOverride" placeholder="auto" min="0" max="600" title="Override level-based avoidance; leave empty for auto." />
                     </div>
                     <div class="field">
-                        <label>Mitigation override (optional)</label>
-                        <input type="number" id="mitigationOverride" placeholder="e.g. 100" min="0" max="500" title="If set, used instead of level-based mitigation (lower = debuffed mob, higher avg hit)" />
+                        <label>Mitigation</label>
+                        <input type="number" id="mitigationOverride" placeholder="auto" min="0" max="500" title="Override level-based mitigation; leave empty for auto." />
                     </div>
                 </div>
             </div>
             <div class="section">
-                <h2>ATK buffs (add to offense)</h2>
-                <p class="results-note" style="margin-bottom:8px;">Worn and spell ATK add directly to offense (higher E[roll] → higher avg damage).</p>
+                <h2>ATK</h2>
                 <div class="row">
                     <div class="field">
                         <label>Worn ATK</label>
-                        <input type="number" id="wornATK" value="255" min="0" max="400" placeholder="250" title="Item ATK from gear (e.g. 250)" />
+                        <input type="number" id="wornATK" value="255" min="0" max="400" title="Item ATK from gear." />
                     </div>
                     <div class="field">
-                        <label>Spell ATK (other)</label>
-                        <input type="number" id="spellATK" value="0" min="0" max="400" placeholder="e.g. Avatar, songs" title="Additional spell-based ATK beyond the named buffs (e.g. Avatar, shaman/bard songs)." />
+                        <label>Spell ATK</label>
+                        <input type="number" id="spellATK" value="0" min="0" max="400" placeholder="Avatar, songs…" title="Spell/buff ATK beyond named toggles." />
                     </div>
                     <div class="field backstab-option">
-                        <label><input type="checkbox" id="atkFerineAvatar" /> Ferine Avatar (+140 ATK)</label>
+                        <label><input type="checkbox" id="atkFerineAvatar" /> Ferine Avatar (+140)</label>
                     </div>
                     <div class="field backstab-option">
-                        <label><input type="checkbox" id="atkFerocity" /> Ferocity (+140 ATK)</label>
+                        <label><input type="checkbox" id="atkFerocity" /> Ferocity (+140)</label>
                     </div>
                     <div class="field backstab-option">
-                        <label><input type="checkbox" id="atkPredTunare" checked /> Predator's / Tunare (+140 ATK)</label>
+                        <label><input type="checkbox" id="atkPredTunare" checked /> Predator's / Tunare (+140)</label>
                     </div>
                 </div>
             </div>
             <div class="section">
-                <h2 class="collapsible open" id="aaSectionHeader">Combat AAs (all on). Toggle off to compare.</h2>
+                <h2 class="collapsible open" id="aaSectionHeader">Combat AAs</h2>
                 <div class="collapse-content open" id="aaSection">
-                    <p id="aaClassLabel" class="results-note" style="margin-bottom:8px;"></p>
                     <div class="row">
                         <button type="button" class="btn btn-sm" id="aaAllOn">All on</button>
                         <button type="button" class="btn btn-sm" id="aaAllOff">All off</button>
@@ -189,32 +185,31 @@
                 <h3>Results</h3>
                 <table>
                     <tr><th>Hit chance</th><td id="outHitChance"></td></tr>
-                    <tr><th>Double attack %</th><td id="outDoubleAttack"></td></tr>
-                    <tr><th>Dual wield %</th><td id="outDualWield"></td></tr>
+                    <tr><th>Double attack</th><td id="outDoubleAttack"></td></tr>
+                    <tr><th>Dual wield</th><td id="outDualWield"></td></tr>
                     <tr><th>Swings/sec (MH)</th><td id="outSwingsMH"></td></tr>
-                    <tr><th>Swings/sec (OH)</th><td id="outSwingsOH"></td></tr>
-                    <tr><th>Expected damage per hit (MH)</th><td id="outDmgPerHit"></td></tr>
-                    <tr><th>Min hit (MH)</th><td id="outMinHit"></td></tr>
-                    <tr><th>Max hit (MH)</th><td id="outMaxHit"></td></tr>
-                    <tr><th>Max crit (MH, approx)</th><td id="outMaxCritMH"></td></tr>
-                    <tr><th>Min hit (OH)</th><td id="outMinHitOH"></td></tr>
-                    <tr><th>Max hit (OH)</th><td id="outMaxHitOH"></td></tr>
-                    <tr><th>Max crit (OH, approx)</th><td id="outMaxCritOH"></td></tr>
+                    <tr id="rowSwingsOH"><th>Swings/sec (OH)</th><td id="outSwingsOH"></td></tr>
+                    <tr><th>Avg hit (MH)</th><td id="outDmgPerHit"></td></tr>
+                    <tr><th>Min hit</th><td id="outMinHit"></td></tr>
+                    <tr><th>Max hit</th><td id="outMaxHit"></td></tr>
+                    <tr><th>Max crit</th><td id="outMaxCritMH"></td></tr>
+                    <tr id="rowMinOH"><th>Min hit (OH)</th><td id="outMinHitOH"></td></tr>
+                    <tr id="rowMaxOH"><th>Max hit (OH)</th><td id="outMaxHitOH"></td></tr>
+                    <tr id="rowCritOH"><th>Max crit (OH)</th><td id="outMaxCritOH"></td></tr>
                     <tr><th>Melee DPS</th><td id="outMeleeDPS"></td></tr>
-                    <tr><th>Kick DPS (Monk)</th><td id="outKickDPS"></td></tr>
-                    <tr><th>Backstab DPS (if used)</th><td id="outBackstabDPS"></td></tr>
+                    <tr id="rowKickDPS"><th>Kick DPS</th><td id="outKickDPS"></td></tr>
+                    <tr id="rowBackstabDPS"><th>Backstab DPS</th><td id="outBackstabDPS"></td></tr>
                     <tr><th class="total-dps">Total DPS</th><td class="total-dps" id="outTotalDPS"></td></tr>
                 </table>
-                <p class="results-note">DPS depends on mob AC and level. Parses on low-AC or easier mobs (e.g. CT) often show ~100% hit and higher average damage, so total DPS can be much higher than this estimate.</p>
+                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage.</p>
                 <div class="parse-validation section" style="margin-top:20px;">
-                    <h3 class="collapsible" id="parseHeader">Parse validation (ground truth)</h3>
+                    <h3 class="collapsible" id="parseHeader">Compare to parse</h3>
                     <div class="collapse-content" id="parseSection">
-                        <p class="results-note">Enter parse numbers to back out hit %, swings/sec, and avg hit. Compare to calculator min/max/avg.</p>
                         <div class="row" style="margin-top:8px;">
-                            <div class="field"><label>Time on mob (s)</label><input type="number" id="parseTime" placeholder="374" min="1" /></div>
+                            <div class="field"><label>Time (s)</label><input type="number" id="parseTime" placeholder="374" min="1" /></div>
                             <div class="field"><label>Crush damage</label><input type="number" id="parseCrushDmg" placeholder="75230" min="0" /></div>
                             <div class="field"><label>Crush hits</label><input type="number" id="parseCrushHits" placeholder="300" min="0" /></div>
-                            <div class="field"><label>Hit % (observed)</label><input type="number" id="parseHitPct" placeholder="82.4" min="0" max="100" step="0.1" title="e.g. 82.4 if 82.4% of swings hit" /></div>
+                            <div class="field"><label>Hit %</label><input type="number" id="parseHitPct" placeholder="82.4" min="0" max="100" step="0.1" /></div>
                         </div>
                         <div id="parseBackout" style="margin-top:12px; font-size:0.9em;"></div>
                     </div>
@@ -639,11 +634,18 @@
                 }
             }
         }
-        const sortByWeaponRatio = (a, b) => (b.dmg / (b.atkDelay || 40)) - (a.dmg / (a.atkDelay || 40));
-        list.PRIMARY.sort(sortByWeaponRatio);
-        list.SECONDARY.sort(sortByWeaponRatio);
-        list.RANGE.sort(sortByWeaponRatio);
+        sortWeaponListsByDps(list, cls, use2H);
         return list;
+    }
+
+    function sortWeaponListsByDps(list, cls, use2H) {
+        const dps = precomputedWeaponDps[cls];
+        if (!dps) return;
+        const primaryKey = use2H ? 'primary2H' : 'primary1H';
+        const getDps = (slot, id) => (dps[slot] && dps[slot][id]) || 0;
+        list.PRIMARY.sort((a, b) => getDps(primaryKey, b.id) - getDps(primaryKey, a.id));
+        list.SECONDARY.sort((a, b) => getDps('secondary', b.id) - getDps('secondary', a.id));
+        list.RANGE.sort((a, b) => getDps('range', b.id) - getDps('range', a.id));
     }
 
     function getEffectiveAAs() {
@@ -857,6 +859,18 @@
         document.getElementById('outKickDPS').textContent = kickDPS > 0 ? kickDPS.toFixed(1) : '—';
         document.getElementById('outBackstabDPS').textContent = backstabDPS > 0 ? backstabDPS.toFixed(1) : '—';
         document.getElementById('outTotalDPS').textContent = totalDPS.toFixed(1);
+        const rowSwingsOH = document.getElementById('rowSwingsOH');
+        const rowMinOH = document.getElementById('rowMinOH');
+        const rowMaxOH = document.getElementById('rowMaxOH');
+        const rowCritOH = document.getElementById('rowCritOH');
+        const rowKickDPS = document.getElementById('rowKickDPS');
+        const rowBackstabDPS = document.getElementById('rowBackstabDPS');
+        if (rowSwingsOH) rowSwingsOH.style.display = (weaponOH && !use2H) ? '' : 'none';
+        if (rowMinOH) rowMinOH.style.display = (weaponOH && !use2H) ? '' : 'none';
+        if (rowMaxOH) rowMaxOH.style.display = (weaponOH && !use2H) ? '' : 'none';
+        if (rowCritOH) rowCritOH.style.display = (weaponOH && !use2H) ? '' : 'none';
+        if (rowKickDPS) rowKickDPS.style.display = cls === 'Monk' ? '' : 'none';
+        if (rowBackstabDPS) rowBackstabDPS.style.display = cls === 'Rogue' ? '' : 'none';
         document.getElementById('results').style.display = 'block';
 
         const parseTimeVal = parseFloat(document.getElementById('parseTime').value);
@@ -867,18 +881,15 @@
         if (parseTimeVal > 0 && parseCrushDmgVal >= 0 && parseCrushHitsVal > 0) {
             const crushDPS = parseCrushDmgVal / parseTimeVal;
             const avgHit = parseCrushDmgVal / parseCrushHitsVal;
-            let html = '<p><strong>From parse:</strong> Crush DPS = ' + crushDPS.toFixed(1) + ', Avg Crush hit = ' + avgHit.toFixed(1);
+            let html = '<p><strong>Parse:</strong> ' + crushDPS.toFixed(1) + ' DPS, ' + avgHit.toFixed(0) + ' avg hit';
             if (parseHitPctVal > 0 && parseHitPctVal <= 100) {
                 const impliedSwings = parseCrushHitsVal / (parseHitPctVal / 100);
                 const swingsPerSec = impliedSwings / parseTimeVal;
-                html += ', Hit % = ' + parseHitPctVal + '%, Implied swings = ' + Math.round(impliedSwings) + ', Swings/sec = ' + swingsPerSec.toFixed(2);
+                html += ' &middot; ' + parseHitPctVal + '% hit &middot; ' + swingsPerSec.toFixed(2) + ' swings/sec';
             }
+            html += '</p><p><strong>Calculator:</strong> ' + meleeDPS.toFixed(1) + ' DPS, ' + dmgPerSwingMH + ' avg hit &middot; ' + (hitPct * 100).toFixed(1) + '% hit &middot; ' + swingsMH.toFixed(2) + ' swings/sec';
+            if (baseDmgMH > 0) html += ' &middot; min ' + minHitMH + ' / max ' + maxHitMH;
             html += '</p>';
-            html += '<p><strong>Calculator (this setup):</strong> Melee DPS = ' + meleeDPS.toFixed(1) + ', Avg hit = ' + dmgPerSwingMH + ', Hit % = ' + (hitPct * 100).toFixed(1) + '%, Swings/sec = ' + swingsMH.toFixed(2) + ', Min = ' + (baseDmgMH > 0 ? minHitMH : '—') + ', Max = ' + (baseDmgMH > 0 ? maxHitMH : '—') + '</p>';
-            if (parseCrushDmgVal > 0 && parseCrushHitsVal > 0) {
-                html += '<p class="results-note"><strong>Why is calculator lower?</strong> Parse had ~82.4% hit and ~251 avg hit (likely debuffed mob). To match: set <strong>Avoidance override = 212</strong> (82.4% hit) and <strong>Mitigation override = 100</strong> (or lower) to raise avg hit toward 251. Min/Max: parse min 52 / max 597 — our max is non-crit; 597 is likely a crit.</p>';
-            }
-            html += '<p class="results-note">If parse min/max (e.g. 52 / 597) differ from calculator min/max, formulas may need adjustment. Parse avg can be higher due to crits or different buffs.</p>';
             parseBackoutEl.innerHTML = html;
         } else {
             parseBackoutEl.innerHTML = '';
@@ -930,9 +941,7 @@
 
         const cfg = dpsConfig.classes && dpsConfig.classes[cls];
         const container = document.getElementById('aaToggles');
-        const labelEl = document.getElementById('aaClassLabel');
         container.innerHTML = '';
-        if (labelEl) labelEl.textContent = cfg && cfg.aas ? 'AAs for ' + cls + ':' : '';
         if (cfg && cfg.aas) {
             cfg.aas.forEach(aa => {
                 if (aa.id === 'CombatAgility')
@@ -995,11 +1004,11 @@
             itemStats = {};
             dpsConfig = window.DPS_CONFIG_FALLBACK || { classes: {}, levelCap: 65 };
             warnEl.style.display = 'block';
-            warnEl.textContent = 'Weapon data could not be loaded (use a local server to load JSON). Run in a terminal from the magelo folder: python -m http.server 8080 — then open http://localhost:8080/dps_calculator.html';
+            warnEl.textContent = 'Data could not be loaded. Serve this folder (e.g. python -m http.server 8080) and open http://localhost:8080/dps_calculator.html';
         }
         if (Object.keys(itemStats).length === 0 && warnEl.style.display !== 'block') {
             warnEl.style.display = 'block';
-            warnEl.textContent = 'No weapon data loaded. Serve this folder with a local server (e.g. python -m http.server 8080) and open http://localhost:8080/dps_calculator.html';
+            warnEl.textContent = 'No weapon data. Serve this folder with a local server (e.g. python -m http.server 8080).';
         }
         // Inject common arrow ammo options that may not exist in the exported JSON.
         // Shardwing Arrow (id 8330): DMG 12, Dmg Bonus 27.
