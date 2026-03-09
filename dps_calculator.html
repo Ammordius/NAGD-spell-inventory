@@ -57,6 +57,10 @@
         .results-note { margin-top: 12px; font-size: 0.85em; color: #666; }
         .results-group { background: #f0f0f5; font-weight: 600; color: #555; }
         .results-group th { padding: 10px 12px 4px; border-bottom: none; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }
+        .results-summary { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 16px; }
+        .results-summary .result-item { font-size: 1.1em; }
+        .results-summary .result-item strong { display: block; font-size: 0.85em; color: #555; margin-bottom: 2px; }
+        .results-summary .result-item .value { font-size: 1.5em; font-weight: 700; color: #667eea; }
     </style>
 </head>
 <body>
@@ -186,6 +190,18 @@
             </div>
             <div class="results" id="results" style="display:none;">
                 <h3>Results</h3>
+                <div class="results-summary">
+                    <div class="result-item">
+                        <strong>Total DPS (melee + proc)</strong>
+                        <span class="value" id="outTotalDPSSummary">—</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Total HPS</strong>
+                        <span class="value" id="outTotalHPSSummary">—</span>
+                    </div>
+                </div>
+                <h3 class="collapsible" id="detailsHeader">Details</h3>
+                <div class="collapse-content" id="detailsSection">
                 <table>
                     <tr class="results-group"><th colspan="2">Attack rate</th></tr>
                     <tr><th>Hit chance</th><td id="outHitChance"></td></tr>
@@ -213,6 +229,7 @@
                     <tr><th>Proc (MH + OH)</th><td id="outProcHate"></td></tr>
                     <tr><th>Total hate/sec</th><td id="outTotalHate"></td></tr>
                 </table>
+                </div>
                 <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. Proc DPS and proc hate from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a>.</p>
                 <div class="parse-validation section" style="margin-top:20px;">
                     <h3 class="collapsible" id="parseHeader">Compare to parse</h3>
@@ -917,6 +934,8 @@
         document.getElementById('outMeleeHate').textContent = (meleeHateTotal + procHateTotal) > 0 ? meleeHateTotal.toFixed(2) : '—';
         document.getElementById('outProcHate').textContent = procHateTotal > 0 ? procHateTotal.toFixed(2) : '—';
         document.getElementById('outTotalHate').textContent = totalHatePerSec > 0 ? totalHatePerSec.toFixed(2) : '—';
+        document.getElementById('outTotalDPSSummary').textContent = totalDPS.toFixed(1);
+        document.getElementById('outTotalHPSSummary').textContent = totalHatePerSec > 0 ? totalHatePerSec.toFixed(2) : '—';
         const rowSwingsOH = document.getElementById('rowSwingsOH');
         const rowKickDPS = document.getElementById('rowKickDPS');
         const rowBackstabDPS = document.getElementById('rowBackstabDPS');
@@ -1033,16 +1052,25 @@
         this.classList.toggle('open');
         document.getElementById('aaSection').classList.toggle('open');
     });
+    document.getElementById('detailsHeader').addEventListener('click', function() {
+        this.classList.toggle('open');
+        document.getElementById('detailsSection').classList.toggle('open');
+    });
     document.getElementById('parseHeader').addEventListener('click', function() {
         this.classList.toggle('open');
         document.getElementById('parseSection').classList.toggle('open');
     });
-    document.getElementById('aaAllOn').addEventListener('click', () => document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = true));
-    document.getElementById('aaAllOff').addEventListener('click', () => document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = false));
-    document.getElementById('use2H').addEventListener('change', use2HChange);
+    document.getElementById('aaAllOn').addEventListener('click', () => { document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = true); compute(); });
+    document.getElementById('aaAllOff').addEventListener('click', () => { document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = false); compute(); });
+    document.getElementById('use2H').addEventListener('change', function() { use2HChange(); compute(); });
     const rangerModeEl = document.getElementById('rangerMode');
-    if (rangerModeEl) rangerModeEl.addEventListener('change', onClassChange);
-    document.getElementById('classSelect').addEventListener('change', onClassChange);
+    if (rangerModeEl) rangerModeEl.addEventListener('change', function() { onClassChange(); compute(); });
+    document.getElementById('classSelect').addEventListener('change', function() { onClassChange(); compute(); });
+    document.getElementById('weaponPrimary').addEventListener('change', compute);
+    document.getElementById('weaponSecondary').addEventListener('change', compute);
+    document.getElementById('weaponRange').addEventListener('change', compute);
+    document.getElementById('weaponAmmo').addEventListener('change', compute);
+    document.getElementById('aaToggles').addEventListener('change', function(e) { if (e.target.type === 'checkbox') compute(); });
     document.getElementById('btnCompute').addEventListener('click', compute);
 
     async function init() {
@@ -1125,6 +1153,7 @@
         fillClassSelect();
         onClassChange();
         use2HChange();
+        compute();
     }
     init();
 })();
