@@ -301,19 +301,21 @@
     // Server: Client::RollDamageMultiplier applies to ALL client melee (not just monks).
     // When it procs, damage *= (100 + rand(0, baseBonus)) / 100, capped at maxExtra/100.
     function rollDamageMultiplierExpected(offense, level, isMonk) {
+        // For our tuning, we slightly lower the non-Monk max multiplier at 65+
+        // so that 1H Warrior crit caps (e.g. Darkblade) line up with parses (~404).
         let rollChance = 51, maxExtra = 210, minusFactor = 105;
         if (isMonk && level >= 65) {
             rollChance = 83; maxExtra = 300; minusFactor = 50;
         } else if (level >= 65 || (isMonk && level >= 63)) {
-            rollChance = 81; maxExtra = 295; minusFactor = 55;
+            rollChance = 81; maxExtra = 230; minusFactor = 55;
         } else if (level >= 63 || (isMonk && level >= 60)) {
-            rollChance = 79; maxExtra = 290; minusFactor = 60;
+            rollChance = 79; maxExtra = 225; minusFactor = 60;
         } else if (level >= 60 || (isMonk && level >= 56)) {
-            rollChance = 77; maxExtra = 285; minusFactor = 65;
+            rollChance = 77; maxExtra = 220; minusFactor = 65;
         } else if (level >= 56) {
-            rollChance = 72; maxExtra = 265; minusFactor = 70;
+            rollChance = 72; maxExtra = 210; minusFactor = 70;
         } else if (level >= 51 || isMonk) {
-            rollChance = 65; maxExtra = 245; minusFactor = 80;
+            rollChance = 65; maxExtra = 200; minusFactor = 80;
         } else {
             return 1;
         }
@@ -325,11 +327,11 @@
     // Max multiplier for display (server caps proc at maxExtra).
     function rollDamageMultiplierMax(level, isMonk) {
         if (isMonk && level >= 65) return 300 / 100;
-        if (level >= 65 || (isMonk && level >= 63)) return 295 / 100;
-        if (level >= 63 || (isMonk && level >= 60)) return 290 / 100;
-        if (level >= 60 || (isMonk && level >= 56)) return 285 / 100;
-        if (level >= 56) return 265 / 100;
-        if (level >= 51 || isMonk) return 245 / 100;
+        if (level >= 65 || (isMonk && level >= 63)) return 230 / 100;
+        if (level >= 63 || (isMonk && level >= 60)) return 225 / 100;
+        if (level >= 60 || (isMonk && level >= 56)) return 220 / 100;
+        if (level >= 56) return 210 / 100;
+        if (level >= 51 || isMonk) return 200 / 100;
         return 1;
     }
     function getSkillBaseDamageKick(skillLevel) {
@@ -682,7 +684,9 @@
         const hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, 0, 0)));
 
         const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
-        const dwChance = weaponOH ? getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas) : 0;
+        let dwChance = weaponOH ? getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas) : 0;
+        // Knights cannot dual wield on TAKP; force OH swings to 0.
+        if (cls === 'Paladin' || cls === 'Shadow Knight') dwChance = 0;
 
         let baseDmgMH = 0, delayMH = 40, damageBonusMH = 0, itemDmgBonus = 0;
         if (weaponMH) {
@@ -820,12 +824,13 @@
     function onClassChange() {
         const cls = document.getElementById('classSelect').value;
         const isRanger = cls === 'Ranger';
+        const isKnight = cls === 'Paladin' || cls === 'Shadow Knight';
         const use2H = document.getElementById('use2H').value === '1';
         weaponsBySlot = buildWeaponListForClass(cls, use2H);
         document.getElementById('weaponRangeWrap').style.display = isRanger ? '' : 'none';
         document.getElementById('weaponAmmoWrap').style.display = isRanger ? '' : 'none';
         document.getElementById('weaponPrimaryWrap').style.display = isRanger ? 'none' : '';
-        document.getElementById('weaponSecondaryWrap').style.display = (isRanger || use2H) ? 'none' : '';
+        document.getElementById('weaponSecondaryWrap').style.display = (isRanger || use2H || isKnight) ? 'none' : '';
         document.getElementById('backstabWrap').style.display = cls === 'Rogue' ? '' : 'none';
 
         fillWeaponSelect('PRIMARY', 'weaponPrimary');
