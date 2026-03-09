@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPS Calculator — How It Works</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        header h1 { font-size: 1.75em; margin-bottom: 8px; }
+        header p { font-size: 0.9em; opacity: 0.95; }
+        header a { color: white; text-decoration: underline; margin: 0 8px; display: inline-block; margin-top: 8px; }
+        .content { padding: 28px; }
+        h2 { font-size: 1.25em; color: #667eea; margin: 24px 0 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        h2:first-child { margin-top: 0; }
+        h3 { font-size: 1.05em; color: #555; margin: 16px 0 8px; }
+        p, li { margin-bottom: 10px; line-height: 1.55; }
+        ul { margin-left: 20px; margin-bottom: 12px; }
+        code, .formula { font-family: 'Consolas', 'Monaco', monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        .formula { display: block; padding: 10px 12px; margin: 10px 0; white-space: pre-wrap; }
+        .note { font-size: 0.9em; color: #666; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>How the DPS Calculator Works</h1>
+            <p>Formulas and logic used by the TAKP DPS Calculator (mirroring server behavior).</p>
+            <a href="dps_calculator.html">← DPS Calculator</a>
+            <a href="class_rankings.html">Class Rankings</a>
+        </header>
+        <div class="content">
+
+            <h2>Overview</h2>
+            <p>Total DPS is:</p>
+            <code class="formula">(Melee DPS + Kick DPS + Backstab DPS) × (1 + Crit chance)</code>
+            <p>Melee DPS = Hit chance × (MH damage per swing × MH swings/sec + OH damage per swing × OH swings/sec). Each component is derived from server-style formulas for offense, mitigation, hit chance, damage bonus, haste, and special attacks.</p>
+
+            <h2>Target: Mitigation &amp; Avoidance</h2>
+            <p>NPCs have <strong>mitigation</strong> (reduces your damage roll) and <strong>avoidance</strong> (reduces your hit chance). Both are derived from mob level; mitigation also uses mob AC when it matters.</p>
+            <h3>Mitigation</h3>
+            <code class="formula">Level &lt; 15:  mit = level×3  (+2 if level&lt;3)
+Level ≥ 15:  mit = min(200, floor(level×41/10 − 15));  if mit=200 and AC&gt;200 then mit=AC
+Result: max(1, mit)</code>
+            <p class="note">Higher mitigation lowers the expected damage roll (see below). You can override this in the calculator with the Mitigation field.</p>
+            <h3>Avoidance</h3>
+            <code class="formula">a = level×9 + 5
+If level≤50 and a&gt;400 then a=400
+If a&gt;460 then a=460
+Avoidance = max(1, a)</code>
+            <p class="note">Higher avoidance lowers hit chance. You can override with the Avoidance field to match a parse.</p>
+
+            <h2>Offense &amp; To-Hit</h2>
+            <p><strong>Offense</strong> is used for both damage (higher offense → higher roll) and is part of To-Hit. It is computed from weapon skill, STR or DEX, and all ATK sources.</p>
+            <h3>Base offense (by skill)</h3>
+            <code class="formula">Stat = DEX for archery, STR otherwise
+Stat bonus = floor((2×stat − 150)/3) if stat≥75, else 0
+Offense base = weapon_skill + stat_bonus</code>
+            <p>Rangers 55+ using archery get an extra <code>65×4 − 216</code> added to offense base.</p>
+            <h3>Total offense</h3>
+            <p>Offense = Offense base + Worn ATK + Spell ATK + (Ferine Avatar 140 if on) + (Ferocity 140 if on) + (Predator's/Tunare 140 if on).</p>
+            <h3>To-Hit</h3>
+            <code class="formula">ToHit = 7 + Offense_skill + Weapon_skill + Accuracy_AA</code>
+            <p>Hit chance is then computed from ToHit vs Avoidance (see below).</p>
+
+            <h2>Hit chance</h2>
+            <p>Server-style hit chance (before any modifiers):</p>
+            <code class="formula">toHit' = toHit + 10
+avoidance' = avoidance + 10
+If toHit'×1.21 &gt; avoidance':
+  Hit chance = 1 − avoidance' / (toHit'×1.21×2)
+Else:
+  Hit chance = (toHit'×1.21) / (avoidance'×2)</code>
+            <p>Result is clamped to [0, 1]. Higher ToHit or lower Avoidance increases hit chance.</p>
+
+            <h2>Damage per swing (melee)</h2>
+            <p>Damage is built in stages: a d20-style roll from offense vs mitigation, then optional multiplier, then additive bonuses.</p>
+            <h3>Expected roll (d20)</h3>
+            <p>The server rolls attack and defense; the effective “roll” is 1–20. The calculator uses the expected value:</p>
+            <code class="formula">E[roll] = 1 + 20×(offense+5) / (offense + mitigation + 10)
+Clamped to [1, 20]</code>
+            <h3>Base damage from roll</h3>
+            <code class="formula">damage = floor((roll × baseDamage + 5) / 10)
+Min hit = baseDamage (for normal swings; server uses GetMeleeMinDamageMod)
+If damage &lt; minHit then damage = minHit
+If damage &lt; 1 then damage = 1</code>
+            <p><code>baseDamage</code> is the weapon’s DMG (for ranger bow, base is halved for the roll; ammo DMG is added to base before that).</p>
+            <h3>Roll damage multiplier (all classes)</h3>
+            <p>On the server, <em>Client::RollDamageMultiplier</em> can proc on any client melee. When it procs, damage is multiplied by <code>(100 + rand(0, baseBonus))/100</code>, capped at a level/class-dependent max. The calculator uses an <strong>expected</strong> multiplier (probability × average multiplier when it procs + (1−prob)×1). Tiers depend on level and whether the class is Monk (Monks get better tiers). Warriors using 2H use a 0.92× scale on this multiplier to align with parses (e.g. Vanazir max 652).</p>
+            <h3>Damage bonus (warriors only)</h3>
+            <p>Warriors (and knights) get an additive <strong>damage bonus</strong> from level and, for 2H, weapon delay.</p>
+            <p><strong>1H:</strong> If level ≥ 28: <code>bonus = 1 + floor((level−28)/3)</code>. Otherwise 0.</p>
+            <p><strong>2H:</strong> Same base; then if delay ≤ 27 return base+1. If level &gt; 29, add level-based bonus; if level &gt; 50, add extra from (level−50) and delay. If delay ≥ 40, add delay-based bonus (e.g. (delay−40)/3 + 1, with extra at 43 and 45).</p>
+            <h3>Item damage bonus</h3>
+            <p>Weapon “Dmg Bonus” (and off-hand Dmg Bonus) is added directly to the swing damage after the roll multiplier.</p>
+            <h3>Final damage per swing (MH)</h3>
+            <code class="formula">rollPart = calcMeleeDamage(baseDamage, offense, mitigation, isRanged)
+[Archery: rollPart × archery modifier for Ranger if applicable]
+damagePerSwing = floor(rollPart × rollMultiplierExpected) + damageBonus + itemDmgBonus</code>
+            <p>Off-hand uses the same roll + multiplier + item bonus (no warrior damage bonus on OH).</p>
+
+            <h2>Haste &amp; attack speed</h2>
+            <p>Weapon delay is in <strong>tenths of a second</strong> (e.g. 40 = 4.0 s). Haste reduces delay; the server enforces a minimum delay.</p>
+            <code class="formula">reduced = delay × 100 / (100 + hastePct)
+Melee min delay = 4 (0.4 s)
+Ranged (archery) min delay = 10 (1.0 s)
+Effective delay = max(minDelay, floor(reduced))</code>
+            <p>Combined haste = spell haste (cap 100%) + overhaste. Rangers with <strong>Fleeting Quiver</strong> get +30% haste for bow attacks only.</p>
+            <code class="formula">Swings per second = 10 / effectiveDelay</code>
+
+            <h2>Double attack, dual wield, triple attack</h2>
+            <h3>Double attack</h3>
+            <p>Chance from skill, level, and AAs (e.g. Give Double Attack, Double Attack Chance). Formula: <code>chance = (skill + level + AA terms) / 5</code>, capped at 100. Applied as extra MH swings: <code>swings × (1 + doubleAttack%/100)</code>.</p>
+            <h3>Dual wield</h3>
+            <p>Off-hand swing chance: <code>(skill + level + Ambidexterity) × 100 / 375</code>. Knights cannot dual wield (0% OH). OH swings per second = <code>(10/effDelayOH) × (dwChance/100)</code>.</p>
+            <h3>Triple attack (Warrior, Monk 60+)</h3>
+            <p>13.5% extra primary swing from triple attack. Warriors with Flurry AA get an additional 13.5% × Flurry% × 1.1.</p>
+            <h3>Extra 2H attack (Warrior)</h3>
+            <p>Punishing Blade / Speed of the Knight: ExtraAttackChance% chance per round for one extra 2H primary swing.</p>
+
+            <h2>Kick (Monk)</h2>
+            <p>Kick uses a skill-based base damage (3–6 by tier), then the same melee roll and RollDamageMultiplier. Kick rate = 1/6 per second. Kick DPS = hit% × kickDamage × (1/6).</p>
+
+            <h2>Backstab (Rogue)</h2>
+            <p>Backstab base = <code>((skill×0.02)+2) × weaponDMG</code>. Min hit by level (e.g. level×2 at 60+). Damage uses the same offense/mitigation roll. Backstab rate 1/3 per second; if “behind target” and level &gt; 54, two stabs per cycle. Backstab DPS = hit% × backstabDamage × (1/3) × stabs.</p>
+
+            <h2>Critical hits</h2>
+            <p>Warriors: 6.6% crit with Critical Hit AA, 2.8% without. Other classes: 2.8% with the AA, 0% without. Crits double damage; the calculator applies <code>totalDPS × (1 + critChance)</code>.</p>
+
+            <h2>Ranger-specific</h2>
+            <ul>
+                <li><strong>Bow base damage:</strong> Roll uses half of (bow DMG + ammo DMG) for the d20 roll; bonuses and multiplier apply to the result.</li>
+                <li><strong>Archery Mastery AA:</strong> Adds a % damage modifier.</li>
+                <li><strong>Stationary target:</strong> When checked, doubles bow damage (simulates standing still).</li>
+                <li><strong>Fleeting Quiver:</strong> +30% haste for bow attacks only; ranged delay floor remains 1.0 s.</li>
+            </ul>
+
+            <h2>Summary</h2>
+            <p>Inputs (class, weapons, mob level/AC, haste, ATK, AAs) drive offense, mitigation, avoidance, hit chance, damage per swing, and swings per second. Melee DPS plus Kick and Backstab when applicable, multiplied by (1 + crit chance), gives the reported Total DPS. Formulas match TAKP server logic where documented; some caps (e.g. RollDamageMultiplier for non-monks, 2H warrior scale) are tuned to align with parses.</p>
+
+        </div>
+    </div>
+</body>
+</html>
