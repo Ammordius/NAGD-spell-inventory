@@ -448,11 +448,28 @@
         chance += chance * (aas.DoubleAttackChance || 0) / 100;
         return Math.min(100, chance / 5);
     }
-    function getCritChance(cls, aas) {
-        const hasCritAA = !!aas.CriticalHitChance;
-        if (cls === 'Warrior')
-            return hasCritAA ? 0.066 : 0.028;
-        return hasCritAA ? 0.028 : 0;
+    function getCritChance(cls, aas, level, dex, useBow) {
+        // Server: zone/attack.cpp AvoidDamage/melee crit. ClientBaseCritChance=0.
+        // Warrior 12+: base += 0.5 + min(DEX,255)/90 + overCap; non-Warrior with AA: base += 0.275 + min(DEX,255)/150 + overCap;
+        // Ranger archery 17+: base += 1.35 + min(DEX,255)/34 + overCap*2 (does not require AA).
+        // Then if critChanceMult: base *= (1 + critChanceMult/100). Without the crit AAs, non-warriors cannot crit (base stays 0).
+        const clientBaseCritChance = 0;
+        const dexCap = Math.min(dex || 255, 255);
+        const overCap = dex > 255 ? (dex - 255) / 400 : 0;
+        const critMult = aas.CriticalHitChance || 0;
+
+        let base = clientBaseCritChance;
+        if (cls === 'Warrior' && level >= 12) {
+            base += 0.5 + dexCap / 90 + overCap;
+        } else if (cls === 'Ranger' && useBow && level > 16) {
+            base += 1.35 + dexCap / 34 + overCap * 2;
+        } else if (cls !== 'Warrior') {
+            if (!critMult) return 0;
+            base += 0.275 + dexCap / 150 + overCap;
+        }
+        if (critMult)
+            base *= (1 + critMult / 100);
+        return Math.min(1, base / 100);
     }
     function getDualWieldChance(skill, level, aas) {
         let chance = skill + level;
@@ -481,7 +498,10 @@
         cfg.aas.forEach(aa => {
             if (aa.bonuses) {
                 Object.entries(aa.bonuses).forEach(([k, v]) => {
-                    out[k] = (out[k] || 0) + v;
+                    if (k === 'CriticalHitChance')
+                        out[k] = Math.max(out[k] || 0, v);
+                    else
+                        out[k] = (out[k] || 0) + v;
                 });
             }
         });
@@ -609,6 +629,9 @@
             kickDmg = Math.floor(kickDmg * rollDamageMultiplierExpected(offenseKick, level, true));
             const kickRate = 1 / 6;
             kickDPS = hitPct * kickDmg * kickRate;
+            // Technique of Master Wu: chance for 1 extra special, and wuchance/4 for a 2nd extra (server: special_attacks.cpp)
+            const wu = (aas.DoubleSpecialAttack || 0) / 100;
+            if (wu > 0) kickDPS *= 1 + wu * (1 + wu / 4);
         }
 
         let backstabDPS = 0;
@@ -622,7 +645,7 @@
             backstabDPS = hitPct * backstabDmg * backstabHitsPerSec * stabs;
         }
 
-        const critChance = getCritChance(cls, aas);
+        const critChance = getCritChance(cls, aas, level, dex, false);
         let totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance);
         const procData = getProcData(weapon, false);
         if (procData && procData.procDps) totalDPS += procData.procDps;
@@ -675,7 +698,7 @@
         const dmgPerSwingOH = calcMeleeDamage(baseOH, offense, mitigation, false);
 
         let meleeDPS = hitPct * dmgPerSwingOH * swingsOH;
-        const critChance = getCritChance(cls, aas);
+        const critChance = getCritChance(cls, aas, level, dex, false);
         meleeDPS = meleeDPS * (1 + critChance);
         const procData = getProcData(weapon, true);
         if (procData && procData.procDps) meleeDPS += procData.procDps;
@@ -739,7 +762,12 @@
         cfg.aas.forEach(aa => {
             const cb = document.getElementById('aa_' + aa.id);
             if (cb && cb.checked && aa.bonuses)
-                Object.entries(aa.bonuses).forEach(([k, v]) => { out[k] = (out[k] || 0) + v; });
+                Object.entries(aa.bonuses).forEach(([k, v]) => {
+                    if (k === 'CriticalHitChance')
+                        out[k] = Math.max(out[k] || 0, v);
+                    else
+                        out[k] = (out[k] || 0) + v;
+                });
         });
         return out;
     }
@@ -931,6 +959,9 @@
             kickDmg = Math.floor(kickDmg * rollDamageMultiplierExpected(offenseKick, level, true));
             const kickRate = 1 / 6;
             kickDPS = hitPct * kickDmg * kickRate;
+            // Technique of Master Wu: chance for 1 extra special, and wuchance/4 for a 2nd extra (server: special_attacks.cpp)
+            const wu = (aas.DoubleSpecialAttack || 0) / 100;
+            if (wu > 0) kickDPS *= 1 + wu * (1 + wu / 4);
         }
 
         let backstabDPS = 0;
@@ -944,7 +975,7 @@
             backstabDPS = hitPct * backstabDmg * backstabHitsPerSec * stabs;
         }
 
-        const critChance = getCritChance(cls, aas);
+        const critChance = getCritChance(cls, aas, level, dex, useBow);
         const totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance) + procDpsMH + procDpsOH;
 
         document.getElementById('outHitChance').textContent = (hitPct * 100).toFixed(1) + '%';
