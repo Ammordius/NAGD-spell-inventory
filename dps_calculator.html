@@ -114,6 +114,9 @@
                     <div class="field backstab-option" id="fleetingWrap" style="display:none;">
                         <label><input type="checkbox" id="useFleeting" /> Fleeting Quiver (Ranger bow, +30% haste)</label>
                     </div>
+                    <div class="field backstab-option" id="rangerStationaryWrap" style="display:none;">
+                        <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (Ranger double bow dmg)</label>
+                    </div>
                 </div>
             </div>
             <div class="section">
@@ -129,7 +132,7 @@
                     </div>
                     <div class="field">
                         <label>Haste % (spell, cap 100)</label>
-                        <input type="number" id="hastePct" value="70" min="0" max="100" title="Spell/buff haste; caps at 100%." />
+                        <input type="number" id="hastePct" value="100" min="0" max="100" title="Spell/buff haste; caps at 100%." />
                     </div>
                     <div class="field">
                         <label>Overhaste %</label>
@@ -619,9 +622,13 @@
                 }
             }
             if (canRange) {
-                // Some bows lack atkDelay in the JSON; include them anyway and
-                // fall back to a reasonable default delay when sorting/using.
-                list.RANGE.push({ id, ...item });
+                const name = (item.name || '').toLowerCase();
+                // Keep arrows out of the bow list; they are used only as ammo.
+                if (name.indexOf('arrow') === -1) {
+                    // Some bows lack atkDelay in the JSON; include them anyway and
+                    // fall back to a reasonable default delay when sorting/using.
+                    list.RANGE.push({ id, ...item });
+                }
             }
         }
         const sortByWeaponRatio = (a, b) => (b.dmg / (b.atkDelay || 40)) - (a.dmg / (a.atkDelay || 40));
@@ -733,14 +740,30 @@
         const atkFerocity = document.getElementById('atkFerocity') && document.getElementById('atkFerocity').checked;
         const atkPredTunare = document.getElementById('atkPredTunare') && document.getElementById('atkPredTunare').checked;
         const offense = offenseBase + wornATKVal + spellATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
-        const rollPartMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
+        let rollPartMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
+        // Archery Mastery and stationary target double-damage (Ranger ranged only).
+        if (isRangedAttack && cls === 'Ranger') {
+            let archeryMult = 1;
+            if (aas.ArcheryDamageModifier) archeryMult += aas.ArcheryDamageModifier / 100;
+            const rangerStationary = document.getElementById('rangerStationary') && document.getElementById('rangerStationary').checked;
+            if (rangerStationary) archeryMult += 1;
+            rollPartMH = Math.floor(rollPartMH * archeryMult);
+        }
         const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
         let dmgPerSwingMH = Math.floor(rollPartMH * monkMult) + damageBonusMH + itemDmgBonus;
 
         let minHitMH = 1, maxHitMH = 1;
         if (baseDmgMH > 0) {
-            const rollMinRaw = Math.max(baseDmgMH, Math.floor((1 * baseDmgMH + 5) / 10));
-            const rollMaxRaw = Math.floor((20 * baseDmgMH + 5) / 10);
+            let rollMinRaw = Math.max(baseDmgMH, Math.floor((1 * baseDmgMH + 5) / 10));
+            let rollMaxRaw = Math.floor((20 * baseDmgMH + 5) / 10);
+            if (isRangedAttack && cls === 'Ranger') {
+                let archeryMult = 1;
+                if (aas.ArcheryDamageModifier) archeryMult += aas.ArcheryDamageModifier / 100;
+                const rangerStationary = document.getElementById('rangerStationary') && document.getElementById('rangerStationary').checked;
+                if (rangerStationary) archeryMult += 1;
+                rollMinRaw = Math.floor(rollMinRaw * archeryMult);
+                rollMaxRaw = Math.floor(rollMaxRaw * archeryMult);
+            }
             const multMax = rollDamageMultiplierMax(level, cls === 'Monk');
             minHitMH = Math.max(1, Math.floor(rollMinRaw * 1) + damageBonusMH + itemDmgBonus);
             maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgBonus;
@@ -860,7 +883,10 @@
     function fillWeaponSelect(slot, selectId) {
         const list = weaponsBySlot[slot] || [];
         const sel = document.getElementById(selectId);
-        sel.innerHTML = '<option value="">— None —</option>' + list.map(w => '<option value="' + w.id + '">' + (w.name || w.id) + ' (' + w.dmg + '/' + w.atkDelay + ')</option>').join('');
+        sel.innerHTML = '<option value="">— None —</option>' + list.map(w => {
+            const delay = (w.atkDelay != null) ? w.atkDelay : '?';
+            return '<option value=\"' + w.id + '\">' + (w.name || w.id) + ' (' + w.dmg + '/' + delay + ')</option>';
+        }).join('');
     }
     function onClassChange() {
         const cls = document.getElementById('classSelect').value;
@@ -880,6 +906,8 @@
         document.getElementById('backstabWrap').style.display = cls === 'Rogue' ? '' : 'none';
         const fleetingWrap = document.getElementById('fleetingWrap');
         if (fleetingWrap) fleetingWrap.style.display = useBow ? '' : 'none';
+        const rangerStationaryWrap = document.getElementById('rangerStationaryWrap');
+        if (rangerStationaryWrap) rangerStationaryWrap.style.display = useBow ? '' : 'none';
 
         fillWeaponSelect('PRIMARY', 'weaponPrimary');
         fillWeaponSelect('SECONDARY', 'weaponSecondary');
@@ -941,6 +969,8 @@
     document.getElementById('aaAllOn').addEventListener('click', () => document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = true));
     document.getElementById('aaAllOff').addEventListener('click', () => document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = false));
     document.getElementById('use2H').addEventListener('change', use2HChange);
+    const rangerModeEl = document.getElementById('rangerMode');
+    if (rangerModeEl) rangerModeEl.addEventListener('change', onClassChange);
     document.getElementById('classSelect').addEventListener('change', onClassChange);
     document.getElementById('btnCompute').addEventListener('click', compute);
 
