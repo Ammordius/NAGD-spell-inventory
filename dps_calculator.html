@@ -595,7 +595,9 @@
         }
 
         const critChance = getCritChance(cls, aas);
-        const totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance);
+        let totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance);
+        const procData = getProcData(weapon, false);
+        if (procData && procData.procDps) totalDPS += procData.procDps;
         return totalDPS;
     }
 
@@ -646,6 +648,8 @@
         let meleeDPS = hitPct * dmgPerSwingOH * swingsOH;
         const critChance = getCritChance(cls, aas);
         meleeDPS = meleeDPS * (1 + critChance);
+        const procData = getProcData(weapon, true);
+        if (procData && procData.procDps) meleeDPS += procData.procDps;
         return meleeDPS;
     }
 
