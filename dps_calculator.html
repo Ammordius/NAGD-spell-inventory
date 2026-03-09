@@ -386,14 +386,18 @@
         const level = dpsConfig.levelCap || 65;
         const offenseSkill = (cfg.skills && cfg.skills.offense) || 252;
         const defenseSkill = (cfg.skills && cfg.skills.defense) || 252;
-        const str = cfg.str || 255;
-        const dex = cfg.dex || 255;
+        let str = cfg.str || 255;
+        let dex = cfg.dex || 255;
         const avoidanceOverrideVal = document.getElementById('avoidanceOverride').value.trim();
         const mitigationOverrideVal = document.getElementById('mitigationOverride').value.trim();
         const mitigation = Math.max(1, mitigationOverrideVal !== '' && parseInt(mitigationOverrideVal, 10) >= 0 ? parseInt(mitigationOverrideVal, 10) : npcMitigation(mobLevel, mobAC));
         let avoidance = npcAvoidance(mobLevel);
         if (avoidanceOverrideVal !== '' && parseInt(avoidanceOverrideVal, 10) > 0)
             avoidance = parseInt(avoidanceOverrideVal, 10);
+        if (aas.StatBonus) {
+            str = Math.min(305, str + aas.StatBonus);
+            dex = Math.min(305, dex + aas.StatBonus);
+        }
 
         let weaponMH = null, weaponOH = null, weaponRange = null, weaponAmmo = null;
         const pid = document.getElementById('weaponPrimary').value;

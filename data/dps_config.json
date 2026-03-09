@@ -10,12 +10,13 @@
   "classes": {
     "Warrior": {
       "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HBlunt": 252, "2HBlunt": 252, "1HPiercing": 252, "2HPiercing": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "Ferocity", "label": "Ferocity", "bonuses": { "DoubleAttackChance": 9 } },
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } },
         { "id": "Flurry", "label": "Flurry", "bonuses": { "FlurryChance": 30 } },
         { "id": "RagingFlurry", "label": "Raging Flurry", "bonuses": { "FlurryChance": 7 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
@@ -27,11 +28,12 @@
     },
     "Rogue": {
       "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HPiercing": 252, "backstab": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } },
         { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 50 } },
@@ -41,11 +43,12 @@
     },
     "Monk": {
       "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "handToHand": 252, "1HBlunt": 252, "2HBlunt": 252, "kick": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } },
         { "id": "ReturnKick", "label": "Return Kick", "bonuses": { "RiposteChance": 60 } },
@@ -55,12 +58,13 @@
     },
     "Ranger": {
       "skills": { "offense": 252, "defense": 240, "doubleAttack": 252, "dualWield": 252, "archery": 252, "1HSlash": 252, "2HSlash": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "ArcheryMastery", "label": "Archery Mastery", "bonuses": { "ArcheryDamageModifier": 100 } },
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } },
         { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 50 } },
@@ -70,12 +74,13 @@
     },
     "Paladin": {
       "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HBlunt": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "KnightsAdvantage", "label": "Knight's Advantage", "bonuses": { "DoubleAttackChance": 9 } },
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } },
         { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 50 } },
@@ -85,12 +90,13 @@
     },
     "Shadow Knight": {
       "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HPiercing": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "KnightsAdvantage", "label": "Knight's Advantage", "bonuses": { "DoubleAttackChance": 9 } },
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } },
         { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 50 } },
@@ -100,25 +106,27 @@
     },
     "Bard": {
       "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "1HPiercing": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } }
       ]
     },
     "Beastlord": {
       "skills": { "offense": 252, "defense": 240, "doubleAttack": 252, "dualWield": 252, "handToHand": 252, "1HBlunt": 252 },
-      "str": 255,
-      "dex": 255,
-      "agi": 255,
+      "str": 280,
+      "dex": 280,
+      "agi": 280,
       "aas": [
         { "id": "BestialFrenzy", "label": "Bestial Frenzy", "bonuses": { "GiveDoubleAttack": 15 } },
         { "id": "HarmoniousAttack", "label": "Harmonious Attack", "bonuses": { "GiveDoubleAttack": 15 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
-        { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } }
+        { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
+        { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } }
       ]
     }
   }
