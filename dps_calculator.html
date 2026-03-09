@@ -123,7 +123,7 @@
                     </div>
                     <div class="field">
                         <label>Overhaste %</label>
-                        <input type="number" id="overhastePct" value="30" min="0" max="35" title="Stacks above spell cap (e.g. 30% = 100% spell + 30% overhaste = 130% total)." />
+                        <input type="number" id="overhastePct" value="0" min="0" max="35" title="Stacks above spell cap (e.g. 30% = 100% spell + 30% overhaste = 130% total)." />
                     </div>
                     <div class="field">
                         <label>Avoidance override (optional)</label>
@@ -141,7 +141,7 @@
                 <div class="row">
                     <div class="field">
                         <label>Worn ATK</label>
-                        <input type="number" id="wornATK" value="0" min="0" max="400" placeholder="250" title="Item ATK from gear (e.g. 250)" />
+                        <input type="number" id="wornATK" value="255" min="0" max="400" placeholder="250" title="Item ATK from gear (e.g. 250)" />
                     </div>
                     <div class="field backstab-option">
                         <label><input type="checkbox" id="atkFerineAvatar" /> Ferine Avatar (+140 ATK)</label>
@@ -204,6 +204,16 @@
     <script>
 (function() {
     const CLASSES = ['Warrior','Rogue','Monk','Ranger','Paladin','Shadow Knight','Bard','Beastlord'];
+    const CLASS_ABBR = {
+        'Warrior': 'WAR',
+        'Rogue': 'ROG',
+        'Monk': 'MNK',
+        'Ranger': 'RNG',
+        'Paladin': 'PAL',
+        'Shadow Knight': 'SHD',
+        'Bard': 'BRD',
+        'Beastlord': 'BST'
+    };
     let itemStats = {};
     let dpsConfig = {};
     let weaponsBySlot = { PRIMARY: [], SECONDARY: [], RANGE: [] };
@@ -332,18 +342,46 @@
         return 10 / effDelay;
     }
 
-    function buildWeaponList() {
+    function itemUsableByClass(item, cls) {
+        const abbr = CLASS_ABBR[cls];
+        if (!abbr) return true;
+        if (!item.classes) return true;
+        const tokens = String(item.classes).split(/\s+/);
+        return tokens.includes(abbr);
+    }
+
+    function isTwoHander(item) {
+        const skill = (item.skill || '').toString();
+        return skill.indexOf('2H') === 0 || skill.indexOf(' 2H') >= 0;
+    }
+
+    function buildWeaponListForClass(cls, use2H) {
         const list = { PRIMARY: [], SECONDARY: [], RANGE: [] };
         for (const [id, item] of Object.entries(itemStats)) {
             if (item.dmg == null || item.atkDelay == null) continue;
             const slot = item.slot || '';
-            if (slot === 'PRIMARY') list.PRIMARY.push({ id, ...item });
-            else if (slot === 'SECONDARY') list.SECONDARY.push({ id, ...item });
-            else if (slot === 'RANGE') list.RANGE.push({ id, ...item });
+            if (!itemUsableByClass(item, cls)) continue;
+            const twoHander = isTwoHander(item);
+            if (slot === 'PRIMARY') {
+                // MH: when 2H is selected, only show 2H; otherwise only 1H.
+                if (use2H && twoHander) {
+                    list.PRIMARY.push({ id, ...item });
+                } else if (!use2H && !twoHander) {
+                    list.PRIMARY.push({ id, ...item });
+                }
+            } else if (slot === 'SECONDARY') {
+                // OH list should only ever contain 1H weapons.
+                if (!twoHander) {
+                    list.SECONDARY.push({ id, ...item });
+                }
+            } else if (slot === 'RANGE') {
+                list.RANGE.push({ id, ...item });
+            }
         }
-        list.PRIMARY.sort((a,b) => (b.dmg/b.atkDelay) - (a.dmg/a.atkDelay));
-        list.SECONDARY.sort((a,b) => (b.dmg/b.atkDelay) - (a.dmg/a.atkDelay));
-        list.RANGE.sort((a,b) => (b.dmg/b.atkDelay) - (a.dmg/a.atkDelay));
+        const sortByDps = (a, b) => (b.dmg / b.atkDelay) - (a.dmg / a.atkDelay);
+        list.PRIMARY.sort(sortByDps);
+        list.SECONDARY.sort(sortByDps);
+        list.RANGE.sort(sortByDps);
         return list;
     }
 
@@ -554,10 +592,12 @@
     function onClassChange() {
         const cls = document.getElementById('classSelect').value;
         const isRanger = cls === 'Ranger';
+        const use2H = document.getElementById('use2H').value === '1';
+        weaponsBySlot = buildWeaponListForClass(cls, use2H);
         document.getElementById('weaponRangeWrap').style.display = isRanger ? '' : 'none';
         document.getElementById('weaponAmmoWrap').style.display = isRanger ? '' : 'none';
         document.getElementById('weaponPrimaryWrap').style.display = isRanger ? 'none' : '';
-        document.getElementById('weaponSecondaryWrap').style.display = (isRanger || document.getElementById('use2H').value === '1') ? 'none' : '';
+        document.getElementById('weaponSecondaryWrap').style.display = (isRanger || use2H) ? 'none' : '';
         document.getElementById('backstabWrap').style.display = cls === 'Rogue' ? '' : 'none';
 
         fillWeaponSelect('PRIMARY', 'weaponPrimary');
@@ -593,8 +633,17 @@
         }
     }
     function use2HChange() {
+        const cls = document.getElementById('classSelect').value;
         const use2H = document.getElementById('use2H').value === '1';
-        document.getElementById('weaponSecondaryWrap').style.display = (use2H || document.getElementById('classSelect').value === 'Ranger') ? 'none' : '';
+        const isRanger = cls === 'Ranger';
+        document.getElementById('weaponSecondaryWrap').style.display = (use2H || isRanger) ? 'none' : '';
+        weaponsBySlot = buildWeaponListForClass(cls, use2H);
+        if (!isRanger) {
+            fillWeaponSelect('PRIMARY', 'weaponPrimary');
+            fillWeaponSelect('SECONDARY', 'weaponSecondary');
+        } else {
+            fillWeaponSelect('RANGE', 'weaponRange');
+        }
     }
 
     document.getElementById('aaSectionHeader').addEventListener('click', function() {
@@ -628,8 +677,8 @@
             warnEl.style.display = 'block';
             warnEl.textContent = 'No weapon data loaded. Serve this folder with a local server (e.g. python -m http.server 8080) and open http://localhost:8080/dps_calculator.html';
         }
-        weaponsBySlot = buildWeaponList();
         fillClassSelect();
+        onClassChange();
         use2HChange();
     }
     init();
