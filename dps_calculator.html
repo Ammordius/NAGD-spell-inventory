@@ -778,7 +778,7 @@
             weaponMH = weaponsBySlot.PRIMARY.find(w => w.id === pid) || itemStats[pid];
         }
         const sid = document.getElementById('weaponSecondary').value;
-        if (!isRanger && !use2H && sid && weaponsBySlot.SECONDARY) {
+        if (!useBow && !use2H && sid && weaponsBySlot.SECONDARY) {
             weaponOH = weaponsBySlot.SECONDARY.find(w => w.id === sid) || itemStats[sid];
         }
 
@@ -1066,6 +1066,10 @@
             fillWeaponSelect('SECONDARY', 'weaponSecondary');
         } else {
             fillWeaponSelect('RANGE', 'weaponRange');
+            if (!useBow) {
+                fillWeaponSelect('PRIMARY', 'weaponPrimary');
+                fillWeaponSelect('SECONDARY', 'weaponSecondary');
+            }
         }
     }
 
