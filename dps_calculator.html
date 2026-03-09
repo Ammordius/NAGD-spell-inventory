@@ -122,6 +122,10 @@
                     <div class="field backstab-option" id="rangerStationaryWrap" style="display:none;">
                         <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (2× bow dmg)</label>
                     </div>
+                    <div class="field backstab-option" id="attackFromFrontWrap" style="display:none;">
+                        <label><input type="checkbox" id="attackFromFront" /> Attacking from front (tank position)</label>
+                        <span style="font-size:0.8em; color:#666;" title="Uses server logic: mob parry/riposte/dodge (zone/attack.cpp AvoidDamage) reduce effective hit rate by mob level.">Lowers hit rate (parry/riposte/dodge)</span>
+                    </div>
                 </div>
             </div>
             <div class="section">
@@ -334,6 +338,23 @@
         if (level <= 50 && a > 400) a = 400;
         else if (a > 460) a = 460;
         return Math.max(1, a);
+    }
+    // Server: zone/attack.cpp AvoidDamage() — when attacker is in front, mob can block/parry/riposte/dodge.
+    // Roll(chance) is Int(0,99) < chance → P = min(100, chance)/100. Checks are sequential; each uses defender's skill.
+    // If attacker has StrikeThrough AA (Warrior Tactical Mastery), Roll(StrikeThrough) bypasses each avoid (attack.cpp ~957).
+    // NPC skills from zone/npc.cpp: parrySkill = min(level*5, 230), riposteSkill = min(level*5, 225).
+    // Dodge default = min(level*5, 190). Block only Monk. Typical tank mob (WAR/PAL/SHD) has parry, riposte, dodge (no block).
+    function mobFrontAvoidanceFactor(mobLevel, strikeThroughPct) {
+        const level = Math.max(1, mobLevel);
+        const parrySkill = level > 6 ? Math.min(level * 5, 230) : 0;
+        const riposteSkill = level > 11 ? Math.min(level * 5, 225) : 0;
+        const dodgeSkill = level > 10 ? Math.min(level * 5, 190) : 0;
+        const st = Math.min(100, Math.max(0, strikeThroughPct || 0)) / 100;
+        const pParry = parrySkill ? Math.min(100, Math.floor((parrySkill + 100) / 50)) / 100 : 0;
+        const pRiposte = riposteSkill ? Math.min(100, Math.floor((riposteSkill + 100) / 55)) / 100 : 0;
+        const pDodge = dodgeSkill ? Math.min(100, Math.floor((dodgeSkill + 100) / 45)) / 100 : 0;
+        const bypass = 1 - st;
+        return (1 - pParry * bypass) * (1 - pRiposte * bypass) * (1 - pDodge * bypass);
     }
     function hitChance(toHit, avoidance, toHitPct, avoidancePct) {
         toHit = toHit * (100 + (toHitPct || 0)) / 100;
@@ -749,6 +770,7 @@
         const rangerMode = rangerModeSel ? rangerModeSel.value : 'bow';
         const useBow = isRanger && rangerMode === 'bow';
         const useFleeting = document.getElementById('useFleeting') && document.getElementById('useFleeting').checked;
+        const attackFromFront = !useBow && document.getElementById('attackFromFront') && document.getElementById('attackFromFront').checked;
 
         const level = dpsConfig.levelCap || 65;
         const offenseSkill = (cfg.skills && cfg.skills.offense) || 252;
@@ -788,7 +810,10 @@
 
         const accuracy = aas.AccuracyAll || 0;
         const toHit = getToHit(offenseSkill, ws, accuracy);
-        const hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, 0, 0)));
+        let hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, 0, 0)));
+        // When attacking from front (tank position), mob can block/parry/riposte/dodge per server AvoidDamage().
+        // Warrior Strike Through (Tactical Mastery) bypasses each avoid per server; assume general enemies are warriors (parry/riposte/dodge, no block).
+        if (attackFromFront) hitPct = hitPct * mobFrontAvoidanceFactor(mobLevel, cls === 'Warrior' ? (aas.StrikeThrough || 0) : 0);
 
         const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
         let dwChance = weaponOH ? getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas) : 0;
@@ -1021,6 +1046,17 @@
         if (fleetingWrap) fleetingWrap.style.display = useBow ? '' : 'none';
         const rangerStationaryWrap = document.getElementById('rangerStationaryWrap');
         if (rangerStationaryWrap) rangerStationaryWrap.style.display = useBow ? '' : 'none';
+        const attackFromFrontWrap = document.getElementById('attackFromFrontWrap');
+        if (attackFromFrontWrap) {
+            attackFromFrontWrap.style.display = useBow ? 'none' : '';
+            const attackFromFrontCb = document.getElementById('attackFromFront');
+            if (attackFromFrontCb) {
+                if (cls === 'Warrior' || cls === 'Paladin' || cls === 'Shadow Knight')
+                    attackFromFrontCb.checked = true;
+                else
+                    attackFromFrontCb.checked = false;
+            }
+        }
 
         fillWeaponSelect('PRIMARY', 'weaponPrimary');
         fillWeaponSelect('SECONDARY', 'weaponSecondary');
@@ -1096,6 +1132,8 @@
     document.getElementById('weaponRange').addEventListener('change', compute);
     document.getElementById('weaponAmmo').addEventListener('change', compute);
     document.getElementById('aaToggles').addEventListener('change', function(e) { if (e.target.type === 'checkbox') compute(); });
+    const attackFromFrontEl = document.getElementById('attackFromFront');
+    if (attackFromFrontEl) attackFromFrontEl.addEventListener('change', compute);
     document.getElementById('btnCompute').addEventListener('click', compute);
 
     async function init() {
