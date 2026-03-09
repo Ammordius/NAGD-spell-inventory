@@ -382,11 +382,15 @@
         chance += aas.Ambidexterity || 0;
         return chance * 100 / 375;
     }
-    function effectiveDelay(delay, hastePct) {
-        // delay is in tenths of a second (delay 10 = 1 second)
+    function effectiveDelay(delay, hastePct, isRanged) {
+        // delay is in tenths of a second (delay 10 = 1 second).
+        // The server enforces different haste floors:
+        // - Melee: 0.4s (4 deciseconds)
+        // - Archery: 1.0s (10 deciseconds)
         const deciseconds = delay;
         const reduced = deciseconds * 100 / (100 + hastePct);
-        return Math.max(10, Math.floor(reduced));
+        const minDelay = isRanged ? 10 : 4;
+        return Math.max(minDelay, Math.floor(reduced));
     }
     function swingsPerSecond(effDelay) {
         // effDelay in tenths of second → swings/sec = 10 / effDelay
@@ -496,7 +500,7 @@
 
         const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
 
-        const effDelayMH = effectiveDelay(delayMH, env.combinedHaste);
+        const effDelayMH = effectiveDelay(delayMH, env.combinedHaste, false);
         let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
         if ((cls === 'Warrior' || cls === 'Monk') && level >= 60) {
             const tripleExtra = 0.135;
@@ -578,7 +582,7 @@
 
         const baseOH = weapon.dmg || 0;
         const delayOH = weapon.atkDelay || 40;
-        const effOH = effectiveDelay(delayOH, env.combinedHaste);
+        const effOH = effectiveDelay(delayOH, env.combinedHaste, false);
         const dwChance = getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas);
         const swingsOH = (10 / effOH) * (dwChance / 100);
         const dmgPerSwingOH = calcMeleeDamage(baseOH, offense, mitigation, false);
@@ -744,7 +748,7 @@
 
         // Fleeting Quiver applies only to bow attacks (archery): extra 30% haste.
         const effectiveHasteMH = (isRangedAttack && useFleeting) ? (combinedHaste + 30) : combinedHaste;
-        const effDelayMH = effectiveDelay(delayMH, effectiveHasteMH);
+        const effDelayMH = effectiveDelay(delayMH, effectiveHasteMH, !!isRangedAttack);
         let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
         // Triple Attack: Warrior and Monk 60+ get 13.5% extra primary swing (skill/innate, not AA). Flurry AA (Warrior only) adds extra after triple.
         if ((cls === 'Warrior' || cls === 'Monk') && level >= 60) {
@@ -771,7 +775,7 @@
             const multMaxOH = rollDamageMultiplierMax(level, false);
             minHitOH = Math.max(1, Math.floor(rollMinRawOH * 1) + itemDmgBonusOH);
             maxHitOH = Math.floor(rollMaxRawOH * multMaxOH) + itemDmgBonusOH;
-            const effOH = effectiveDelay(delayOH, combinedHaste);
+            const effOH = effectiveDelay(delayOH, combinedHaste, false);
             swingsOH = (10 / effOH) * (dwChance / 100);
         }
 
@@ -956,6 +960,28 @@
         if (Object.keys(itemStats).length === 0 && warnEl.style.display !== 'block') {
             warnEl.style.display = 'block';
             warnEl.textContent = 'No weapon data loaded. Serve this folder with a local server (e.g. python -m http.server 8080) and open http://localhost:8080/dps_calculator.html';
+        }
+        // Inject common arrow ammo options that may not exist in the exported JSON.
+        // Shardwing Arrow (id 8330): DMG 12, Dmg Bonus 27.
+        if (!itemStats['8330']) {
+            itemStats['8330'] = {
+                name: 'Shardwing Arrow',
+                slot: 'RANGE',
+                dmg: 12,
+                dmgBonus: 27,
+                classes: 'WAR PAL RNG SHD ROG'
+            };
+        }
+        // Blessed Champion Arrows (id 24493): DMG 11 + 4 fire, DB 27.
+        // Treat total effective damage as 15 for generic targets.
+        if (!itemStats['24493']) {
+            itemStats['24493'] = {
+                name: 'Blessed Champion Arrows',
+                slot: 'RANGE',
+                dmg: 15,
+                dmgBonus: 27,
+                classes: 'WAR PAL RNG'
+            };
         }
         // Precompute per-class weapon DPS rankings (max AAs, baseline mob/buff setup) for better initial list ordering.
         (function precomputeAllWeaponDps() {
