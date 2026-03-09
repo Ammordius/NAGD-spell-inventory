@@ -37,7 +37,6 @@
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 10 } },
         { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 50 } },
-        { "id": "SinisterStrikes", "label": "Sinister Strikes", "bonuses": { "BackstabCritChance": 50 } },
         { "id": "ChaoticStab", "label": "Chaotic Stab", "bonuses": { "FrontalBackstabMinDmg": 1 } }
       ]
     },
@@ -122,7 +121,6 @@
       "agi": 280,
       "aas": [
         { "id": "BestialFrenzy", "label": "Bestial Frenzy", "bonuses": { "GiveDoubleAttack": 15 } },
-        { "id": "HarmoniousAttack", "label": "Harmonious Attack", "bonuses": { "GiveDoubleAttack": 15 } },
         { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 32 } },
         { "id": "CombatFury", "label": "Combat Fury", "bonuses": { "CriticalHitChance": 1 } },
         { "id": "PlanarPower", "label": "Planar Power", "bonuses": { "StatBonus": 25 } }
