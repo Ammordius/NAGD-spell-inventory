@@ -7,20 +7,27 @@
 
 ## AAs currently in `dps_config.json` (per class)
 
+Only DPS-relevant AAs are included. Combat Stability (mitigation) is omitted. Return Kick is Monk-only (DB classes=128).
+
 | Class        | AAs in config |
 |-------------|----------------|
-| **Warrior** | Ferocity, Flurry, Ambidexterity, Combat Agility, Combat Stability, Return Kick, Double Riposte, Strikethrough |
-| **Rogue**   | Ambidexterity, Combat Agility, Return Kick, Double Riposte, Sinister Strikes, Chaotic Stab |
+| **Warrior** | Ferocity, Flurry, Raging Flurry, Ambidexterity, Combat Agility, Double Riposte, Tactical Mastery (Strikethrough) |
+| **Rogue**   | Ambidexterity, Combat Agility, Double Riposte, Sinister Strikes, Chaotic Stab |
 | **Monk**    | Ambidexterity, Combat Agility, Return Kick, Double Riposte |
-| **Ranger**  | Archery Mastery, Ambidexterity, Combat Agility, Precision of the Pathfinder |
-| **Paladin** | Knight's Advantage, Ambidexterity, Combat Agility, Return Kick, Double Riposte |
-| **Shadow Knight** | Knight's Advantage, Ambidexterity, Combat Agility, Return Kick, Double Riposte |
+| **Ranger**  | Archery Mastery, Ambidexterity, Combat Agility, Double Riposte, Precision of the Pathfinder |
+| **Paladin** | Knight's Advantage, Ambidexterity, Combat Agility, Double Riposte |
+| **Shadow Knight** | Knight's Advantage, Ambidexterity, Combat Agility, Double Riposte |
 | **Bard**    | Ambidexterity, Combat Agility |
 | **Beastlord** | Bestial Frenzy, Harmonious Attack, Ambidexterity, Combat Agility |
+
+## Still to verify / investigate
+
+- Per-class AA list vs DB `classes` bitmask for all melee DPS AAs (e.g. Sinister Strikes, Flash of Steel, other class-specific).
+- Whether any other AAs (e.g. Punishing Blade, Speed of the Knight) should be included for knights.
 
 ## Source of truth
 
 - **Server**: `zone/client_process.cpp` (Triple Attack 13.5%, Flurry after triple), `zone/aa.h` (AA IDs), `zone/common.h` (bonus names, e.g. `FlurryChance`).
-- **TAKP DB**: `altadv_vars` and spell effects for exact per-AA, per-rank values.
+- **TAKP DB**: `altadv_vars` + `aa_effects` via `Server/utils/sql/aa_list_canonical.sql` (run `run_aa_canonical.ps1`). Values in `dps_config.json` are from this canonical export.
 
-If you have a canonical list of AAs per class (e.g. from TAKP DB or a wiki), we can align the config and add any missing AAs or correct bonus values.
+**Canonical values (max rank, from DB):** FlurryChance 30 (+ Raging Flurry 7), DoubleAttackChance (Ferocity/Knight's Advantage) 9, Ambidexterity 32, Combat Agility 10, RiposteChance (Return Kick, Monk only) 60, GiveDoubleRiposte0 50, StrikeThrough (Tactical Mastery) 45, ArcheryDamageModifier 100, AccuracyAll (Precision Pathfinder) 30, GiveDoubleAttack (Bestial/Harmonious) 15. Combat Stability omitted (not DPS).
