@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "levelCap": 65,
+  "damageBonus1H": {
+    "_comment": "Warrior only, level 28+. bonus = 1 + (level - 28) / 3."
+  },
+  "damageBonus2H": {
+    "_comment": "Warrior 2H: formula in code. delay 1-70, level 28-65."
+  },
+  "classes": {
+    "Warrior": {
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HBlunt": 252, "2HBlunt": 252, "1HPiercing": 252, "2HPiercing": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "Ferocity", "label": "Ferocity", "bonuses": { "DoubleAttackChance": 67 } },
+        { "id": "Flurry", "label": "Flurry", "bonuses": { "FlurryChance": 20 } },
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } },
+        { "id": "CombatStability", "label": "Combat Stability", "bonuses": { "CombatStability": 15 } },
+        { "id": "ReturnKick", "label": "Return Kick", "bonuses": { "RiposteChance": 3 } },
+        { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 15 } },
+        { "id": "Strikethrough", "label": "Strikethrough", "bonuses": { "StrikeThrough": 3 } }
+      ]
+    },
+    "Rogue": {
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HPiercing": 252, "backstab": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } },
+        { "id": "ReturnKick", "label": "Return Kick", "bonuses": { "RiposteChance": 3 } },
+        { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 15 } },
+        { "id": "SinisterStrikes", "label": "Sinister Strikes", "bonuses": { "CriticalHitChance": 50 } },
+        { "id": "ChaoticStab", "label": "Chaotic Stab", "bonuses": { "FrontalBackstabMinDmg": 1 } }
+      ]
+    },
+    "Monk": {
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "handToHand": 252, "1HBlunt": 252, "2HBlunt": 252, "kick": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } },
+        { "id": "ReturnKick", "label": "Return Kick", "bonuses": { "RiposteChance": 3 } },
+        { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 15 } }
+      ]
+    },
+    "Ranger": {
+      "skills": { "offense": 252, "defense": 240, "doubleAttack": 252, "dualWield": 252, "archery": 252, "1HSlash": 252, "2HSlash": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "ArcheryMastery", "label": "Archery Mastery", "bonuses": { "ArcheryDamageModifier": 10 } },
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } },
+        { "id": "PrecisionPathfinder", "label": "Precision of the Pathfinder", "bonuses": { "AccuracyAll": 15 } }
+      ]
+    },
+    "Paladin": {
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HBlunt": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "KnightsAdvantage", "label": "Knight's Advantage", "bonuses": { "DoubleAttackChance": 33 } },
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } },
+        { "id": "ReturnKick", "label": "Return Kick", "bonuses": { "RiposteChance": 3 } },
+        { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 15 } }
+      ]
+    },
+    "Shadow Knight": {
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HPiercing": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "KnightsAdvantage", "label": "Knight's Advantage", "bonuses": { "DoubleAttackChance": 33 } },
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } },
+        { "id": "ReturnKick", "label": "Return Kick", "bonuses": { "RiposteChance": 3 } },
+        { "id": "DoubleRiposte", "label": "Double Riposte", "bonuses": { "GiveDoubleRiposte0": 15 } }
+      ]
+    },
+    "Bard": {
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "1HPiercing": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } }
+      ]
+    },
+    "Beastlord": {
+      "skills": { "offense": 252, "defense": 240, "doubleAttack": 252, "dualWield": 252, "handToHand": 252, "1HBlunt": 252 },
+      "str": 255,
+      "dex": 255,
+      "agi": 255,
+      "aas": [
+        { "id": "BestialFrenzy", "label": "Bestial Frenzy", "bonuses": { "GiveDoubleAttack": 3 } },
+        { "id": "HarmoniousAttack", "label": "Harmonious Attack", "bonuses": { "GiveDoubleAttack": 3 } },
+        { "id": "Ambidexterity", "label": "Ambidexterity", "bonuses": { "Ambidexterity": 40 } },
+        { "id": "CombatAgility", "label": "Combat Agility", "bonuses": { "CombatAgility": 15 } }
+      ]
+    }
+  }
+}

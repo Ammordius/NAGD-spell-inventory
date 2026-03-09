@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP DPS Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        header h1 { font-size: 2em; margin-bottom: 8px; }
+        header p { font-size: 0.9em; opacity: 0.95; }
+        header a { color: white; text-decoration: underline; margin-top: 8px; display: inline-block; }
+        .content { padding: 24px; }
+        .section { margin-bottom: 24px; }
+        .section h2 { font-size: 1.2em; color: #667eea; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin-bottom: 12px; }
+        .field { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+        .field label { font-weight: 600; font-size: 0.9em; }
+        .field select, .field input[type="number"] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95em; }
+        .aa-toggles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+        .aa-toggles label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: normal; }
+        .aa-toggles input[type="checkbox"] { width: 18px; height: 18px; }
+        .results { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 20px; }
+        .results h3 { color: #764ba2; margin-bottom: 12px; }
+        .results table { width: 100%; border-collapse: collapse; }
+        .results th, .results td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
+        .results th { font-weight: 600; color: #555; }
+        .results .total-dps { font-size: 1.4em; font-weight: 700; color: #667eea; }
+        .btn { padding: 10px 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn:hover { opacity: 0.9; }
+        .btn-sm { padding: 6px 12px; font-size: 0.85em; }
+        .backstab-option { margin-top: 8px; }
+        .backstab-option label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .collapsible { cursor: pointer; user-select: none; }
+        .collapsible::after { content: ' \u25BC'; font-size: 0.8em; }
+        .collapsible.open::after { content: ' \u25B2'; }
+        .collapse-content { display: none; padding-top: 12px; }
+        .collapse-content.open { display: block; }
+        .results-note { margin-top: 12px; font-size: 0.85em; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TAKP DPS Calculator</h1>
+            <p>Per-class, maxed AA. Compare weapons and toggles. Formulas from server.</p>
+            <a href="class_rankings.html">Class Rankings</a>
+            <div id="loadWarning" style="display:none; margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; font-size:0.9em;"></div>
+        </header>
+        <div class="content">
+            <div class="section">
+                <h2>Class &amp; weapons</h2>
+                <div class="row">
+                    <div class="field">
+                        <label>Class</label>
+                        <select id="classSelect"></select>
+                    </div>
+                    <div class="field" id="weaponPrimaryWrap">
+                        <label>Primary / MH</label>
+                        <select id="weaponPrimary"></select>
+                    </div>
+                    <div class="field" id="weaponSecondaryWrap">
+                        <label>Secondary / OH</label>
+                        <select id="weaponSecondary"></select>
+                    </div>
+                    <div class="field" id="weaponRangeWrap" style="display:none;">
+                        <label>Bow</label>
+                        <select id="weaponRange"></select>
+                    </div>
+                    <div class="field" id="weaponAmmoWrap" style="display:none;">
+                        <label>Ammo</label>
+                        <select id="weaponAmmo"></select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label>Use 2H (no OH)</label>
+                        <select id="use2H">
+                            <option value="0">No (dual wield)</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                    <div class="field backstab-option" id="backstabWrap" style="display:none;">
+                        <label><input type="checkbox" id="useBackstab" /> Use backstab (Rogue)</label>
+                        <label><input type="checkbox" id="backstabBehind" checked /> Assume behind (double stab when &gt;54)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Mob &amp; environment</h2>
+                <div class="row">
+                    <div class="field">
+                        <label>Mob level</label>
+                        <input type="number" id="mobLevel" value="65" min="1" max="75" />
+                    </div>
+                    <div class="field">
+                        <label>Mob AC (NPC)</label>
+                        <input type="number" id="mobAC" value="200" min="0" max="500" />
+                    </div>
+                    <div class="field">
+                        <label>Haste % (spell, cap 100)</label>
+                        <input type="number" id="hastePct" value="70" min="0" max="100" title="Spell/buff haste; caps at 100%." />
+                    </div>
+                    <div class="field">
+                        <label>Overhaste %</label>
+                        <input type="number" id="overhastePct" value="30" min="0" max="35" title="Stacks above spell cap (e.g. 30% = 100% spell + 30% overhaste = 130% total)." />
+                    </div>
+                    <div class="field">
+                        <label>Avoidance override (optional)</label>
+                        <input type="number" id="avoidanceOverride" placeholder="e.g. 212" min="0" max="600" title="If set, used instead of level-based avoidance (e.g. 212 ≈ 82.4% hit for parse)" />
+                    </div>
+                    <div class="field">
+                        <label>Mitigation override (optional)</label>
+                        <input type="number" id="mitigationOverride" placeholder="e.g. 100" min="0" max="500" title="If set, used instead of level-based mitigation (lower = debuffed mob, higher avg hit)" />
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2>ATK buffs (add to offense)</h2>
+                <p class="results-note" style="margin-bottom:8px;">Worn and spell ATK add directly to offense (higher E[roll] → higher avg damage).</p>
+                <div class="row">
+                    <div class="field">
+                        <label>Worn ATK</label>
+                        <input type="number" id="wornATK" value="0" min="0" max="400" placeholder="250" title="Item ATK from gear (e.g. 250)" />
+                    </div>
+                    <div class="field backstab-option">
+                        <label><input type="checkbox" id="atkFerineAvatar" /> Ferine Avatar (+140 ATK)</label>
+                    </div>
+                    <div class="field backstab-option">
+                        <label><input type="checkbox" id="atkFerocity" /> Ferocity (+140 ATK)</label>
+                    </div>
+                    <div class="field backstab-option">
+                        <label><input type="checkbox" id="atkPredTunare" /> Predator's / Tunare (+140 ATK)</label>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2 class="collapsible open" id="aaSectionHeader">Combat AAs (all on). Toggle off to compare.</h2>
+                <div class="collapse-content open" id="aaSection">
+                    <p id="aaClassLabel" class="results-note" style="margin-bottom:8px;"></p>
+                    <div class="row">
+                        <button type="button" class="btn btn-sm" id="aaAllOn">All on</button>
+                        <button type="button" class="btn btn-sm" id="aaAllOff">All off</button>
+                    </div>
+                    <div class="aa-toggles" id="aaToggles"></div>
+                </div>
+            </div>
+            <div class="section">
+                <button type="button" class="btn" id="btnCompute">Compute DPS</button>
+            </div>
+            <div class="results" id="results" style="display:none;">
+                <h3>Results</h3>
+                <table>
+                    <tr><th>Hit chance</th><td id="outHitChance"></td></tr>
+                    <tr><th>Double attack %</th><td id="outDoubleAttack"></td></tr>
+                    <tr><th>Dual wield %</th><td id="outDualWield"></td></tr>
+                    <tr><th>Swings/sec (MH)</th><td id="outSwingsMH"></td></tr>
+                    <tr><th>Swings/sec (OH)</th><td id="outSwingsOH"></td></tr>
+                    <tr><th>Expected damage per hit (MH)</th><td id="outDmgPerHit"></td></tr>
+                    <tr><th>Min hit (MH)</th><td id="outMinHit"></td></tr>
+                    <tr><th>Max hit (MH)</th><td id="outMaxHit"></td></tr>
+                    <tr><th>Melee DPS</th><td id="outMeleeDPS"></td></tr>
+                    <tr><th>Kick DPS (Monk)</th><td id="outKickDPS"></td></tr>
+                    <tr><th>Backstab DPS (if used)</th><td id="outBackstabDPS"></td></tr>
+                    <tr><th class="total-dps">Total DPS</th><td class="total-dps" id="outTotalDPS"></td></tr>
+                </table>
+                <p class="results-note">DPS depends on mob AC and level. Parses on low-AC or easier mobs (e.g. CT) often show ~100% hit and higher average damage, so total DPS can be much higher than this estimate.</p>
+                <div class="parse-validation section" style="margin-top:20px;">
+                    <h3 class="collapsible" id="parseHeader">Parse validation (ground truth)</h3>
+                    <div class="collapse-content" id="parseSection">
+                        <p class="results-note">Enter parse numbers to back out hit %, swings/sec, and avg hit. Compare to calculator min/max/avg.</p>
+                        <div class="row" style="margin-top:8px;">
+                            <div class="field"><label>Time on mob (s)</label><input type="number" id="parseTime" placeholder="374" min="1" /></div>
+                            <div class="field"><label>Crush damage</label><input type="number" id="parseCrushDmg" placeholder="75230" min="0" /></div>
+                            <div class="field"><label>Crush hits</label><input type="number" id="parseCrushHits" placeholder="300" min="0" /></div>
+                            <div class="field"><label>Hit % (observed)</label><input type="number" id="parseHitPct" placeholder="82.4" min="0" max="100" step="0.1" title="e.g. 82.4 if 82.4% of swings hit" /></div>
+                        </div>
+                        <div id="parseBackout" style="margin-top:12px; font-size:0.9em;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+(function() {
+    const CLASSES = ['Warrior','Rogue','Monk','Ranger','Paladin','Shadow Knight','Bard','Beastlord'];
+    let itemStats = {};
+    let dpsConfig = {};
+    let weaponsBySlot = { PRIMARY: [], SECONDARY: [], RANGE: [] };
+
+    function getDamageBonus1H(level) {
+        if (level < 28) return 0;
+        return 1 + Math.floor((level - 28) / 3);
+    }
+    function getDamageBonus2H(level, delay) {
+        if (level < 28) return 0;
+        let bonus = 1 + Math.floor((level - 28) / 3);
+        if (delay <= 27) return bonus + 1;
+        if (level <= 29) return bonus;
+        let levelBonus = Math.floor((level - 30) / 5) + 1;
+        if (level > 50) {
+            let levelBonus2 = level - 50;
+            if (level > 67) levelBonus2 += 5;
+            else if (level > 59) levelBonus2 += 4;
+            else if (level > 58) levelBonus2 += 3;
+            else if (level > 56) levelBonus2 += 2;
+            else if (level > 54) levelBonus2 += 1;
+            levelBonus += Math.floor(levelBonus2 * delay / 40);
+        }
+        bonus += levelBonus;
+        if (delay >= 40) {
+            let delayBonus = Math.floor((delay - 40) / 3) + 1;
+            if (delay >= 45) delayBonus += 2;
+            else if (delay >= 43) delayBonus += 1;
+            bonus += delayBonus;
+        }
+        return bonus;
+    }
+    function npcMitigation(level, ac) {
+        let mit;
+        if (level < 15) {
+            mit = level * 3;
+            if (level < 3) mit += 2;
+        } else {
+            mit = Math.min(200, Math.floor(level * 41 / 10 - 15));
+            if (mit === 200 && ac > 200) mit = ac;
+        }
+        return Math.max(1, mit);
+    }
+    function npcAvoidance(level) {
+        let a = level * 9 + 5;
+        if (level <= 50 && a > 400) a = 400;
+        else if (a > 460) a = 460;
+        return Math.max(1, a);
+    }
+    function hitChance(toHit, avoidance, toHitPct, avoidancePct) {
+        toHit = toHit * (100 + (toHitPct || 0)) / 100;
+        avoidance = avoidance * (100 + (avoidancePct || 0)) / 100;
+        toHit += 10;
+        avoidance += 10;
+        if (toHit * 1.21 > avoidance)
+            return 1 - avoidance / (toHit * 1.21 * 2);
+        return (toHit * 1.21) / (avoidance * 2);
+    }
+    function expectedRollD20(offense, mitigation) {
+        // Server: atkRoll uniform [0, offense+4], defRoll [0, mitigation+4], index = clamp((atkRoll-defRoll+avg/2)*20/avg, 0, 19), roll = index+1.
+        // E[roll] = 1 + 20*(offense+5)/(offense+mitigation+10). Clamp to [1, 20].
+        const avg = offense + mitigation + 10;
+        const e = 1 + (20 * (offense + 5)) / avg;
+        return Math.max(1, Math.min(20, e));
+    }
+    function calcMeleeDamage(baseDamage, offense, mitigation, isRanged) {
+        if (isRanged && baseDamage > 1) baseDamage = Math.floor(baseDamage / 2);
+        const roll = expectedRollD20(offense, mitigation);
+        let dmg = Math.floor((roll * baseDamage + 5) / 10);
+        const minHit = Math.floor(baseDamage * 0);
+        if (dmg < minHit) dmg = minHit;
+        if (dmg < 1) dmg = 1;
+        return dmg;
+    }
+    function rollDamageMultiplierExpected(offense, level, isMonk) {
+        if (!isMonk || level < 65) return 1;
+        let rollChance = 83, maxExtra = 300, minusFactor = 50;
+        const baseBonus = Math.max(10, Math.floor((offense - minusFactor) / 2));
+        const expectedRollWhenProc = 100 + baseBonus / 2;
+        const multWhenProc = Math.min(maxExtra / 100, expectedRollWhenProc / 100);
+        return (rollChance / 100) * multWhenProc + (1 - rollChance / 100) * 1;
+    }
+    function getSkillBaseDamageKick(skillLevel) {
+        let base = 3;
+        if (skillLevel >= 25) base++;
+        if (skillLevel >= 75) base++;
+        if (skillLevel >= 125) base++;
+        if (skillLevel >= 175) base++;
+        return base;
+    }
+    function getOffense(skill, str, dex, isArchery, isRanger55) {
+        const stat = isArchery ? dex : str;
+        const statBonus = stat >= 75 ? Math.floor((2 * stat - 150) / 3) : 0;
+        let off = skill + statBonus;
+        if (isRanger55) off += 65 * 4 - 216;
+        return Math.max(1, off);
+    }
+    function getToHit(offenseSkill, weaponSkill, accuracy) {
+        return 7 + offenseSkill + weaponSkill + (accuracy || 0);
+    }
+    function getDoubleAttackChance(skill, level, aas) {
+        let chance = skill + level;
+        chance += (aas.GiveDoubleAttack || 0) * 5;
+        chance += chance * (aas.DoubleAttackChance || 0) / 100;
+        return Math.min(100, chance / 5);
+    }
+    function getDualWieldChance(skill, level, aas) {
+        let chance = skill + level;
+        chance += aas.Ambidexterity || 0;
+        return chance * 100 / 375;
+    }
+    function effectiveDelay(delay, hastePct) {
+        // delay is in tenths of a second (delay 10 = 1 second)
+        const deciseconds = delay;
+        const reduced = deciseconds * 100 / (100 + hastePct);
+        return Math.max(10, Math.floor(reduced));
+    }
+    function swingsPerSecond(effDelay) {
+        // effDelay in tenths of second → swings/sec = 10 / effDelay
+        return 10 / effDelay;
+    }
+
+    function buildWeaponList() {
+        const list = { PRIMARY: [], SECONDARY: [], RANGE: [] };
+        for (const [id, item] of Object.entries(itemStats)) {
+            if (item.dmg == null || item.atkDelay == null) continue;
+            const slot = item.slot || '';
+            if (slot === 'PRIMARY') list.PRIMARY.push({ id, ...item });
+            else if (slot === 'SECONDARY') list.SECONDARY.push({ id, ...item });
+            else if (slot === 'RANGE') list.RANGE.push({ id, ...item });
+        }
+        list.PRIMARY.sort((a,b) => (b.dmg/b.atkDelay) - (a.dmg/a.atkDelay));
+        list.SECONDARY.sort((a,b) => (b.dmg/b.atkDelay) - (a.dmg/a.atkDelay));
+        list.RANGE.sort((a,b) => (b.dmg/b.atkDelay) - (a.dmg/a.atkDelay));
+        return list;
+    }
+
+    function getEffectiveAAs() {
+        const cls = document.getElementById('classSelect').value;
+        const cfg = dpsConfig.classes && dpsConfig.classes[cls];
+        if (!cfg || !cfg.aas) return {};
+        const out = {};
+        cfg.aas.forEach(aa => {
+            const cb = document.getElementById('aa_' + aa.id);
+            if (cb && cb.checked && aa.bonuses)
+                Object.entries(aa.bonuses).forEach(([k, v]) => { out[k] = (out[k] || 0) + v; });
+        });
+        return out;
+    }
+
+    function getClassConfig() {
+        const cls = document.getElementById('classSelect').value;
+        return (dpsConfig.classes && dpsConfig.classes[cls]) || {};
+    }
+
+    function isWarriorClass(cls) {
+        return cls === 'Warrior' || cls === 'Paladin' || cls === 'Shadow Knight';
+    }
+
+    function compute() {
+        const cls = document.getElementById('classSelect').value;
+        const cfg = getClassConfig();
+        const aas = getEffectiveAAs();
+        const mobLevel = parseInt(document.getElementById('mobLevel').value, 10) || 65;
+        const mobAC = parseInt(document.getElementById('mobAC').value, 10) || 200;
+        const hastePct = parseInt(document.getElementById('hastePct').value, 10) || 0;
+        const overhastePct = parseInt(document.getElementById('overhastePct').value, 10) || 0;
+        const combinedHaste = Math.min(100, hastePct) + overhastePct;
+        const use2H = document.getElementById('use2H').value === '1';
+        const useBackstab = document.getElementById('useBackstab') && document.getElementById('useBackstab').checked;
+        const backstabBehind = document.getElementById('backstabBehind') && document.getElementById('backstabBehind').checked;
+        const isRanger = cls === 'Ranger';
+
+        const level = dpsConfig.levelCap || 65;
+        const offenseSkill = (cfg.skills && cfg.skills.offense) || 252;
+        const defenseSkill = (cfg.skills && cfg.skills.defense) || 252;
+        const str = cfg.str || 255;
+        const dex = cfg.dex || 255;
+        const avoidanceOverrideVal = document.getElementById('avoidanceOverride').value.trim();
+        const mitigationOverrideVal = document.getElementById('mitigationOverride').value.trim();
+        const mitigation = Math.max(1, mitigationOverrideVal !== '' && parseInt(mitigationOverrideVal, 10) >= 0 ? parseInt(mitigationOverrideVal, 10) : npcMitigation(mobLevel, mobAC));
+        let avoidance = npcAvoidance(mobLevel);
+        if (avoidanceOverrideVal !== '' && parseInt(avoidanceOverrideVal, 10) > 0)
+            avoidance = parseInt(avoidanceOverrideVal, 10);
+
+        let weaponMH = null, weaponOH = null, weaponRange = null, weaponAmmo = null;
+        const pid = document.getElementById('weaponPrimary').value;
+        if (isRanger) {
+            const rid = document.getElementById('weaponRange').value;
+            const aid = document.getElementById('weaponAmmo').value;
+            if (rid) weaponRange = itemStats[rid];
+            if (aid) weaponAmmo = itemStats[aid];
+            if (weaponRange) weaponMH = weaponRange;
+        } else if (pid && weaponsBySlot.PRIMARY) {
+            weaponMH = weaponsBySlot.PRIMARY.find(w => w.id === pid) || itemStats[pid];
+        }
+
+        const weaponSkill = weaponMH ? (cfg.skills && (cfg.skills['1HSlash'] || cfg.skills['1HBlunt'] || cfg.skills['1HPiercing'] || cfg.skills['2HSlash'] || cfg.skills['2HBlunt'] || cfg.skills['2HPiercing'] || cfg.skills.archery || cfg.skills.handToHand)) || 252 : 252;
+        const skillKey = weaponMH && weaponMH.skill ? weaponMH.skill.replace(/\s/g, '') : (isRanger ? 'archery' : '1HSlash');
+        const ws = (cfg.skills && cfg.skills[skillKey]) || 252;
+
+        const accuracy = aas.AccuracyAll || 0;
+        const toHit = getToHit(offenseSkill, ws, accuracy);
+        const hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, 0, 0)));
+
+        const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
+        const dwChance = weaponOH ? getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas) : 0;
+
+        let baseDmgMH = 0, delayMH = 40, damageBonusMH = 0, itemDmgBonus = 0;
+        if (weaponMH) {
+            baseDmgMH = weaponMH.dmg || 0;
+            if (isRanger && weaponAmmo && weaponAmmo.dmg) baseDmgMH += weaponAmmo.dmg;
+            delayMH = weaponMH.atkDelay || 40;
+            itemDmgBonus = weaponMH.dmgBonus || 0;
+            if (isWarriorClass(cls))
+                damageBonusMH = (weaponMH.atkDelay && (weaponMH.skill || '').indexOf('2H') >= 0) ? getDamageBonus2H(level, delayMH) : getDamageBonus1H(level);
+        }
+        const isRangedAttack = isRanger && weaponRange;
+        const offenseBase = getOffense(ws, str, dex, isRangedAttack, isRanger && level > 54);
+        const wornATKVal = parseInt(document.getElementById('wornATK').value, 10) || 0;
+        const atkFerineAvatar = document.getElementById('atkFerineAvatar') && document.getElementById('atkFerineAvatar').checked;
+        const atkFerocity = document.getElementById('atkFerocity') && document.getElementById('atkFerocity').checked;
+        const atkPredTunare = document.getElementById('atkPredTunare') && document.getElementById('atkPredTunare').checked;
+        const offense = offenseBase + wornATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
+        let dmgPerSwingMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack) + damageBonusMH;
+        const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
+        dmgPerSwingMH = Math.floor(dmgPerSwingMH * monkMult) + itemDmgBonus;
+
+        let minHitMH = 1, maxHitMH = 1;
+        if (baseDmgMH > 0) {
+            const rollMin = Math.max(1, Math.floor((1 * baseDmgMH + 5) / 10) + damageBonusMH);
+            const rollMax = Math.floor((20 * baseDmgMH + 5) / 10) + damageBonusMH;
+            const multMin = 1;
+            const multMax = (cls === 'Monk' && level >= 65) ? 3 : 1;
+            minHitMH = Math.max(1, Math.floor(rollMin * multMin) + itemDmgBonus);
+            maxHitMH = Math.floor(rollMax * multMax) + itemDmgBonus;
+        }
+
+        const effDelayMH = effectiveDelay(delayMH, combinedHaste);
+        let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
+        // Triple Attack: Warrior and Monk 60+ get 13.5% extra primary swing (skill/innate, not AA). Flurry AA (Warrior only) adds extra after triple.
+        if ((cls === 'Warrior' || cls === 'Monk') && level >= 60) {
+          const tripleExtra = 0.135;
+          const flurryExtra = (cls === 'Warrior' && aas.FlurryChance) ? 0.135 * (aas.FlurryChance / 100) * 1.1 : 0;
+          swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100 + tripleExtra + flurryExtra);
+        }
+        let swingsOH = 0;
+        let dmgPerSwingOH = 0;
+        if (weaponOH && !use2H) {
+            const baseOH = weaponOH.dmg || 0;
+            const delayOH = weaponOH.atkDelay || 40;
+            dmgPerSwingOH = calcMeleeDamage(baseOH, offense, mitigation, false);
+            const effOH = effectiveDelay(delayOH, combinedHaste);
+            swingsOH = (10 / effOH) * (dwChance / 100);
+        }
+
+        let meleeDPS = hitPct * (dmgPerSwingMH * swingsMH + dmgPerSwingOH * swingsOH);
+
+        let kickDPS = 0;
+        if (cls === 'Monk') {
+            const kickSkill = (cfg.skills && cfg.skills.kick) || 252;
+            const kickBase = getSkillBaseDamageKick(kickSkill);
+            const offenseKick = getOffense(kickSkill, str, dex, false, false) + wornATKVal + (atkFerineAvatar ? 140 : 0) + (atkFerocity ? 140 : 0) + (atkPredTunare ? 140 : 0);
+            let kickDmg = calcMeleeDamage(kickBase, offenseKick, mitigation, false);
+            kickDmg = Math.floor(kickDmg * rollDamageMultiplierExpected(offenseKick, level, true));
+            const kickRate = 1 / 6;
+            kickDPS = hitPct * kickDmg * kickRate;
+        }
+
+        let backstabDPS = 0;
+        if (cls === 'Rogue' && useBackstab && weaponMH && (weaponMH.skill || '').indexOf('Piercing') >= 0) {
+            const backstabSkill = (cfg.skills && cfg.skills.backstab) || 252;
+            const backstabBase = ((backstabSkill * 0.02) + 2) * (weaponMH.dmg || 1);
+            const minHit = level >= 60 ? level * 2 : level > 50 ? level * 3 / 2 : level;
+            const backstabDmg = Math.max(minHit, calcMeleeDamage(Math.floor(backstabBase), offense, mitigation, false));
+            const backstabHitsPerSec = 1 / 3;
+            const stabs = (backstabBehind && level > 54) ? 2 : 1;
+            backstabDPS = hitPct * backstabDmg * backstabHitsPerSec * stabs;
+        }
+
+        const totalDPS = meleeDPS + kickDPS + backstabDPS;
+
+        document.getElementById('outHitChance').textContent = (hitPct * 100).toFixed(1) + '%';
+        document.getElementById('outDoubleAttack').textContent = daChance.toFixed(1) + '%';
+        document.getElementById('outDualWield').textContent = dwChance.toFixed(1) + '%';
+        document.getElementById('outSwingsMH').textContent = swingsMH.toFixed(2);
+        document.getElementById('outSwingsOH').textContent = swingsOH.toFixed(2);
+        document.getElementById('outDmgPerHit').textContent = dmgPerSwingMH.toFixed(0);
+        document.getElementById('outMinHit').textContent = baseDmgMH > 0 ? minHitMH : '—';
+        document.getElementById('outMaxHit').textContent = baseDmgMH > 0 ? maxHitMH : '—';
+        document.getElementById('outMeleeDPS').textContent = meleeDPS.toFixed(1);
+        document.getElementById('outKickDPS').textContent = kickDPS > 0 ? kickDPS.toFixed(1) : '—';
+        document.getElementById('outBackstabDPS').textContent = backstabDPS > 0 ? backstabDPS.toFixed(1) : '—';
+        document.getElementById('outTotalDPS').textContent = totalDPS.toFixed(1);
+        document.getElementById('results').style.display = 'block';
+
+        const parseTimeVal = parseFloat(document.getElementById('parseTime').value);
+        const parseCrushDmgVal = parseFloat(document.getElementById('parseCrushDmg').value);
+        const parseCrushHitsVal = parseFloat(document.getElementById('parseCrushHits').value);
+        const parseHitPctVal = parseFloat(document.getElementById('parseHitPct').value);
+        const parseBackoutEl = document.getElementById('parseBackout');
+        if (parseTimeVal > 0 && parseCrushDmgVal >= 0 && parseCrushHitsVal > 0) {
+            const crushDPS = parseCrushDmgVal / parseTimeVal;
+            const avgHit = parseCrushDmgVal / parseCrushHitsVal;
+            let html = '<p><strong>From parse:</strong> Crush DPS = ' + crushDPS.toFixed(1) + ', Avg Crush hit = ' + avgHit.toFixed(1);
+            if (parseHitPctVal > 0 && parseHitPctVal <= 100) {
+                const impliedSwings = parseCrushHitsVal / (parseHitPctVal / 100);
+                const swingsPerSec = impliedSwings / parseTimeVal;
+                html += ', Hit % = ' + parseHitPctVal + '%, Implied swings = ' + Math.round(impliedSwings) + ', Swings/sec = ' + swingsPerSec.toFixed(2);
+            }
+            html += '</p>';
+            html += '<p><strong>Calculator (this setup):</strong> Melee DPS = ' + meleeDPS.toFixed(1) + ', Avg hit = ' + dmgPerSwingMH + ', Hit % = ' + (hitPct * 100).toFixed(1) + '%, Swings/sec = ' + swingsMH.toFixed(2) + ', Min = ' + (baseDmgMH > 0 ? minHitMH : '—') + ', Max = ' + (baseDmgMH > 0 ? maxHitMH : '—') + '</p>';
+            if (parseCrushDmgVal > 0 && parseCrushHitsVal > 0) {
+                html += '<p class="results-note"><strong>Why is calculator lower?</strong> Parse had ~82.4% hit and ~251 avg hit (likely debuffed mob). To match: set <strong>Avoidance override = 212</strong> (82.4% hit) and <strong>Mitigation override = 100</strong> (or lower) to raise avg hit toward 251. Min/Max: parse min 52 / max 597 — our max is non-crit; 597 is likely a crit.</p>';
+            }
+            html += '<p class="results-note">If parse min/max (e.g. 52 / 597) differ from calculator min/max, formulas may need adjustment. Parse avg can be higher due to crits or different buffs.</p>';
+            parseBackoutEl.innerHTML = html;
+        } else {
+            parseBackoutEl.innerHTML = '';
+        }
+    }
+
+    function fillClassSelect() {
+        const sel = document.getElementById('classSelect');
+        sel.innerHTML = CLASSES.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+        onClassChange();
+    }
+    function fillWeaponSelect(slot, selectId) {
+        const list = weaponsBySlot[slot] || [];
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = '<option value="">— None —</option>' + list.map(w => '<option value="' + w.id + '">' + (w.name || w.id) + ' (' + w.dmg + '/' + w.atkDelay + ')</option>').join('');
+    }
+    function onClassChange() {
+        const cls = document.getElementById('classSelect').value;
+        const isRanger = cls === 'Ranger';
+        document.getElementById('weaponRangeWrap').style.display = isRanger ? '' : 'none';
+        document.getElementById('weaponAmmoWrap').style.display = isRanger ? '' : 'none';
+        document.getElementById('weaponPrimaryWrap').style.display = isRanger ? 'none' : '';
+        document.getElementById('weaponSecondaryWrap').style.display = (isRanger || document.getElementById('use2H').value === '1') ? 'none' : '';
+        document.getElementById('backstabWrap').style.display = cls === 'Rogue' ? '' : 'none';
+
+        fillWeaponSelect('PRIMARY', 'weaponPrimary');
+        fillWeaponSelect('SECONDARY', 'weaponSecondary');
+        if (isRanger) {
+            fillWeaponSelect('RANGE', 'weaponRange');
+            const ammo = Object.entries(itemStats).filter(([k,v]) => v.slot === 'RANGE' && v.name && v.name.toLowerCase().indexOf('arrow') >= 0);
+            const ammoSel = document.getElementById('weaponAmmo');
+            ammoSel.innerHTML = '<option value="">— None —</option>' + (ammo.length ? ammo.map(([id,v]) => '<option value="' + id + '">' + (v.name || id) + '</option>').join('') : '');
+        }
+
+        const cfg = dpsConfig.classes && dpsConfig.classes[cls];
+        const container = document.getElementById('aaToggles');
+        const labelEl = document.getElementById('aaClassLabel');
+        container.innerHTML = '';
+        if (labelEl) labelEl.textContent = cfg && cfg.aas ? 'AAs for ' + cls + ':' : '';
+        if (cfg && cfg.aas) {
+            cfg.aas.forEach(aa => {
+                const id = 'aa_' + aa.id;
+                const label = document.createElement('label');
+                label.htmlFor = id;
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.id = id;
+                cb.checked = true;
+                cb.setAttribute('data-aa-id', aa.id);
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(aa.label || aa.id));
+                container.appendChild(label);
+            });
+        }
+    }
+    function use2HChange() {
+        const use2H = document.getElementById('use2H').value === '1';
+        document.getElementById('weaponSecondaryWrap').style.display = (use2H || document.getElementById('classSelect').value === 'Ranger') ? 'none' : '';
+    }
+
+    document.getElementById('aaSectionHeader').addEventListener('click', function() {
+        this.classList.toggle('open');
+        document.getElementById('aaSection').classList.toggle('open');
+    });
+    document.getElementById('parseHeader').addEventListener('click', function() {
+        this.classList.toggle('open');
+        document.getElementById('parseSection').classList.toggle('open');
+    });
+    document.getElementById('aaAllOn').addEventListener('click', () => document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = true));
+    document.getElementById('aaAllOff').addEventListener('click', () => document.querySelectorAll('#aaToggles input[type=checkbox]').forEach(cb => cb.checked = false));
+    document.getElementById('use2H').addEventListener('change', use2HChange);
+    document.getElementById('classSelect').addEventListener('change', onClassChange);
+    document.getElementById('btnCompute').addEventListener('click', compute);
+
+    async function init() {
+        const warnEl = document.getElementById('loadWarning');
+        try {
+            const base = window.location.pathname.replace(/\/[^/]*$/, '') || '';
+            const dataPath = (base ? base + '/' : '') + 'data/';
+            itemStats = await (await fetch(dataPath + 'item_stats.json')).json();
+            dpsConfig = await (await fetch(dataPath + 'dps_config.json')).json();
+        } catch (e) {
+            itemStats = {};
+            dpsConfig = window.DPS_CONFIG_FALLBACK || { classes: {}, levelCap: 65 };
+            warnEl.style.display = 'block';
+            warnEl.textContent = 'Weapon data could not be loaded (use a local server to load JSON). Run in a terminal from the magelo folder: python -m http.server 8080 — then open http://localhost:8080/dps_calculator.html';
+        }
+        if (Object.keys(itemStats).length === 0 && warnEl.style.display !== 'block') {
+            warnEl.style.display = 'block';
+            warnEl.textContent = 'No weapon data loaded. Serve this folder with a local server (e.g. python -m http.server 8080) and open http://localhost:8080/dps_calculator.html';
+        }
+        weaponsBySlot = buildWeaponList();
+        fillClassSelect();
+        use2HChange();
+    }
+    init();
+})();
+    </script>
+</body>
+</html>
