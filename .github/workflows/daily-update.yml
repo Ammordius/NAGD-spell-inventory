@@ -842,6 +842,23 @@ jobs:
         else
           echo "Optional: data/dkp_prices.json not found - ?dkp_val=true on class rankings will show no DKP data"
         fi
+        # Copy DPS calculator pages and data (weapon procs from Meriadoc; dps_config for AAs)
+        if [ -f "dps_calculator.html" ]; then
+          cp dps_calculator.html deploy/dps_calculator.html
+          echo "✓ Copied dps_calculator.html to deploy directory"
+        fi
+        if [ -f "dps_calculator_guide.html" ]; then
+          cp dps_calculator_guide.html deploy/dps_calculator_guide.html
+          echo "✓ Copied dps_calculator_guide.html to deploy directory"
+        fi
+        if [ -f "data/dps_config.json" ]; then
+          cp data/dps_config.json deploy/data/dps_config.json
+          echo "✓ Copied data/dps_config.json to deploy (DPS calculator AAs)"
+        fi
+        if [ -f "data/weapon_procs.json" ]; then
+          cp data/weapon_procs.json deploy/data/weapon_procs.json
+          echo "✓ Copied data/weapon_procs.json to deploy (DPS calculator proc/hate from Meriadoc)"
+        fi
         # Copy scoring explanation page
         if [ -f "scoring_explanation.html" ]; then
           cp scoring_explanation.html deploy/scoring_explanation.html
