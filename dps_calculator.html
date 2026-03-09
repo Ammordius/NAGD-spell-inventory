@@ -101,7 +101,7 @@
                         </select>
                     </div>
                     <div class="field backstab-option" id="backstabWrap" style="display:none;">
-                        <label><input type="checkbox" id="useBackstab" /> Use backstab (Rogue)</label>
+                        <label><input type="checkbox" id="useBackstab" checked /> Use backstab (Rogue)</label>
                         <label><input type="checkbox" id="backstabBehind" checked /> Assume behind (double stab when &gt;54)</label>
                     </div>
                 </div>
@@ -184,6 +184,9 @@
                     <tr><th>Min hit (MH)</th><td id="outMinHit"></td></tr>
                     <tr><th>Max hit (MH)</th><td id="outMaxHit"></td></tr>
                     <tr><th>Max crit (MH, approx)</th><td id="outMaxCritMH"></td></tr>
+                    <tr><th>Min hit (OH)</th><td id="outMinHitOH"></td></tr>
+                    <tr><th>Max hit (OH)</th><td id="outMaxHitOH"></td></tr>
+                    <tr><th>Max crit (OH, approx)</th><td id="outMaxCritOH"></td></tr>
                     <tr><th>Melee DPS</th><td id="outMeleeDPS"></td></tr>
                     <tr><th>Kick DPS (Monk)</th><td id="outKickDPS"></td></tr>
                     <tr><th>Backstab DPS (if used)</th><td id="outBackstabDPS"></td></tr>
@@ -674,6 +677,10 @@
         } else if (pid && weaponsBySlot.PRIMARY) {
             weaponMH = weaponsBySlot.PRIMARY.find(w => w.id === pid) || itemStats[pid];
         }
+        const sid = document.getElementById('weaponSecondary').value;
+        if (!isRanger && !use2H && sid && weaponsBySlot.SECONDARY) {
+            weaponOH = weaponsBySlot.SECONDARY.find(w => w.id === sid) || itemStats[sid];
+        }
 
         const weaponSkill = weaponMH ? (cfg.skills && (cfg.skills['1HSlash'] || cfg.skills['1HBlunt'] || cfg.skills['1HPiercing'] || cfg.skills['2HSlash'] || cfg.skills['2HBlunt'] || cfg.skills['2HPiercing'] || cfg.skills.archery || cfg.skills.handToHand)) || 252 : 252;
         const skillKey = weaponMH && weaponMH.skill ? weaponMH.skill.replace(/\s/g, '') : (isRanger ? 'archery' : '1HSlash');
@@ -732,12 +739,19 @@
         }
         let swingsOH = 0;
         let dmgPerSwingOH = 0;
+        let minHitOH = 0, maxHitOH = 0;
         if (weaponOH && !use2H) {
             const baseOH = weaponOH.dmg || 0;
             const delayOH = weaponOH.atkDelay || 40;
             const rollPartOH = calcMeleeDamage(baseOH, offense, mitigation, false);
             const multOH = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
-            dmgPerSwingOH = Math.floor(rollPartOH * multOH);
+            const itemDmgBonusOH = weaponOH.dmgBonus || 0;
+            dmgPerSwingOH = Math.floor(rollPartOH * multOH) + itemDmgBonusOH;
+            const rollMinRawOH = Math.max(baseOH, Math.floor((1 * baseOH + 5) / 10));
+            const rollMaxRawOH = Math.floor((20 * baseOH + 5) / 10);
+            const multMaxOH = rollDamageMultiplierMax(level, false);
+            minHitOH = Math.max(1, Math.floor(rollMinRawOH * 1) + itemDmgBonusOH);
+            maxHitOH = Math.floor(rollMaxRawOH * multMaxOH) + itemDmgBonusOH;
             const effOH = effectiveDelay(delayOH, combinedHaste);
             swingsOH = (10 / effOH) * (dwChance / 100);
         }
@@ -779,6 +793,10 @@
         document.getElementById('outMaxHit').textContent = baseDmgMH > 0 ? maxHitMH : '—';
         const approxMaxCritMH = baseDmgMH > 0 ? Math.floor(maxHitMH * 2) : 0;
         document.getElementById('outMaxCritMH').textContent = baseDmgMH > 0 ? approxMaxCritMH : '—';
+        document.getElementById('outMinHitOH').textContent = weaponOH && !use2H ? minHitOH : '—';
+        document.getElementById('outMaxHitOH').textContent = weaponOH && !use2H ? maxHitOH : '—';
+        const approxMaxCritOH = weaponOH && !use2H ? Math.floor(maxHitOH * 2) : 0;
+        document.getElementById('outMaxCritOH').textContent = weaponOH && !use2H ? approxMaxCritOH : '—';
         document.getElementById('outMeleeDPS').textContent = meleeDPS.toFixed(1);
         document.getElementById('outKickDPS').textContent = kickDPS > 0 ? kickDPS.toFixed(1) : '—';
         document.getElementById('outBackstabDPS').textContent = backstabDPS > 0 ? backstabDPS.toFixed(1) : '—';
