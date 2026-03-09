@@ -44,6 +44,7 @@ def load_proc_info(path: Path) -> dict[str, dict]:
                     "procName": proc_name or None,
                     "procDps": round(dmg_ps, 2),
                     "hatePerSec": round(hate_ps, 2),
+                    "meleeHatePerSec": 0,
                 }
     return out
 
@@ -60,16 +61,18 @@ def find_col(header_row: list[str], want: str) -> int:
 def load_weapon_sheet(
     path: Path,
     proc_dps_header: str = "Proc DPS",
-    hate_sec_header: str = "PHate/ Sec",  # proc hate only; Hate/ Sec = total
+    phate_header: str = "PHate/ Sec",
+    mhate_header: str = "MHate/ Sec",
 ) -> dict[str, dict]:
-    """Parse a weapon CSV; return normalized name -> { procName?, procDps, hatePerSec }."""
+    """Parse a weapon CSV; return normalized name -> { procDps, hatePerSec, meleeHatePerSec }."""
     out = {}
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.reader(f)
         header = next(reader)
         idx_weapon = find_col(header, "Weapon")
         idx_proc_dps = find_col(header, proc_dps_header)
-        idx_hate_sec = find_col(header, hate_sec_header)
+        idx_phate = find_col(header, phate_header)
+        idx_mhate = find_col(header, mhate_header)
         if idx_weapon < 0:
             return out
         for row in reader:
@@ -86,12 +89,17 @@ def load_weapon_sheet(
             except (ValueError, IndexError):
                 proc_dps = 0
             try:
-                hate_sec = float(row[idx_hate_sec].strip() or 0) if idx_hate_sec >= 0 and len(row) > idx_hate_sec else 0
+                phate = float(row[idx_phate].strip() or 0) if idx_phate >= 0 and len(row) > idx_phate else 0
             except (ValueError, IndexError):
-                hate_sec = 0
+                phate = 0
+            try:
+                mhate = float(row[idx_mhate].strip() or 0) if idx_mhate >= 0 and len(row) > idx_mhate else 0
+            except (ValueError, IndexError):
+                mhate = 0
             entry = {
                 "procDps": round(proc_dps, 2),
-                "hatePerSec": round(hate_sec, 2),
+                "hatePerSec": round(phate, 2),
+                "meleeHatePerSec": round(mhate, 2),
             }
             out[key] = entry
     return out
@@ -111,11 +119,11 @@ def main() -> None:
     else:
         print(f"Warning: {proc_info_path} not found")
 
-    # 2) Weapon sheets override (prefer 1H Primary, then 1H Secondary, then 2H)
-    for sheet_name, path_suffix in [
-        ("1H Primary", "Meriadoc's TAKP Weapon Chart - 1H Primary.csv"),
-        ("1H Secondary", "Meriadoc's TAKP Weapon Chart - 1H Secondary.csv"),
-        ("2H Weapons", "Meriadoc's TAKP Weapon Chart - 2H Weapons.csv"),
+    # 2) Weapon sheets: Primary gives MH values; Secondary gives OH values (add _OH fields when same weapon exists).
+    for sheet_name, path_suffix, slot in [
+        ("1H Primary", "Meriadoc's TAKP Weapon Chart - 1H Primary.csv", "mh"),
+        ("1H Secondary", "Meriadoc's TAKP Weapon Chart - 1H Secondary.csv", "oh"),
+        ("2H Weapons", "Meriadoc's TAKP Weapon Chart - 2H Weapons.csv", "mh"),
     ]:
         path = sheets_dir / path_suffix
         if not path.exists():
@@ -123,13 +131,30 @@ def main() -> None:
             continue
         sheet_data = load_weapon_sheet(path)
         for key, entry in sheet_data.items():
-            existing = combined.get(key, {})
+            existing = combined.get(key, {}) or {}
             proc_name = existing.get("procName") if isinstance(existing, dict) else None
-            combined[key] = {
-                "procName": proc_name,
-                "procDps": entry.get("procDps", 0),
-                "hatePerSec": entry.get("hatePerSec", 0),
-            }
+            if slot == "oh":
+                # Add OH-specific fields; keep existing MH fields if present
+                combined[key] = {
+                    "procName": proc_name or existing.get("procName"),
+                    "procDps": existing.get("procDps", 0),
+                    "hatePerSec": existing.get("hatePerSec", 0),
+                    "meleeHatePerSec": existing.get("meleeHatePerSec", 0),
+                    "procDpsOH": entry.get("procDps", 0),
+                    "hatePerSecOH": entry.get("hatePerSec", 0),
+                    "meleeHatePerSecOH": entry.get("meleeHatePerSec", 0),
+                }
+            else:
+                # MH or 2H: set or overwrite main fields
+                combined[key] = {
+                    "procName": proc_name,
+                    "procDps": entry.get("procDps", 0),
+                    "hatePerSec": entry.get("hatePerSec", 0),
+                    "meleeHatePerSec": entry.get("meleeHatePerSec", 0),
+                    "procDpsOH": existing.get("procDpsOH", 0),
+                    "hatePerSecOH": existing.get("hatePerSecOH", 0),
+                    "meleeHatePerSecOH": existing.get("meleeHatePerSecOH", 0),
+                }
         print(f"Loaded {sheet_name}: {len(sheet_data)} weapons")
 
     # Keep all entries so calculator can show proc/hate for any weapon that appears in sheets

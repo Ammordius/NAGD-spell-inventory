@@ -55,6 +55,8 @@
         .collapse-content { display: none; padding-top: 12px; }
         .collapse-content.open { display: block; }
         .results-note { margin-top: 12px; font-size: 0.85em; color: #666; }
+        .results-group { background: #f0f0f5; font-weight: 600; color: #555; }
+        .results-group th { padding: 10px 12px 4px; border-bottom: none; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.05em; }
     </style>
 </head>
 <body>
@@ -185,27 +187,31 @@
             <div class="results" id="results" style="display:none;">
                 <h3>Results</h3>
                 <table>
+                    <tr class="results-group"><th colspan="2">Attack rate</th></tr>
                     <tr><th>Hit chance</th><td id="outHitChance"></td></tr>
                     <tr><th>Double attack</th><td id="outDoubleAttack"></td></tr>
                     <tr><th>Dual wield</th><td id="outDualWield"></td></tr>
                     <tr><th>Swings/sec (MH)</th><td id="outSwingsMH"></td></tr>
                     <tr id="rowSwingsOH"><th>Swings/sec (OH)</th><td id="outSwingsOH"></td></tr>
-                    <tr><th>Avg hit (MH)</th><td id="outDmgPerHit"></td></tr>
-                    <tr><th>Min hit</th><td id="outMinHit"></td></tr>
-                    <tr><th>Max hit</th><td id="outMaxHit"></td></tr>
+                    <tr class="results-group"><th colspan="2">Main hand</th></tr>
+                    <tr><th>Avg hit</th><td id="outDmgPerHit"></td></tr>
+                    <tr><th>Min – Max</th><td id="outMinMaxHit"></td></tr>
                     <tr><th>Max crit</th><td id="outMaxCritMH"></td></tr>
-                    <tr id="rowMinOH"><th>Min hit (OH)</th><td id="outMinHitOH"></td></tr>
-                    <tr id="rowMaxOH"><th>Max hit (OH)</th><td id="outMaxHitOH"></td></tr>
-                    <tr id="rowCritOH"><th>Max crit (OH)</th><td id="outMaxCritOH"></td></tr>
-                    <tr><th>Melee DPS</th><td id="outMeleeDPS"></td></tr>
-                    <tr id="rowKickDPS"><th>Kick DPS</th><td id="outKickDPS"></td></tr>
-                    <tr id="rowBackstabDPS"><th>Backstab DPS</th><td id="outBackstabDPS"></td></tr>
-                    <tr id="rowProcDPSMH"><th>Proc DPS (MH)</th><td id="outProcDPSMH"></td></tr>
-                    <tr id="rowProcDPSOH"><th>Proc DPS (OH)</th><td id="outProcDPSOH"></td></tr>
+                    <tr class="results-group" id="rowGroupOH"><th colspan="2">Off hand</th></tr>
+                    <tr id="rowMinOH"><th>Avg hit</th><td id="outDmgPerHitOH"></td></tr>
+                    <tr id="rowMaxOH"><th>Min – Max</th><td id="outMinMaxHitOH"></td></tr>
+                    <tr id="rowCritOH"><th>Max crit</th><td id="outMaxCritOH"></td></tr>
+                    <tr class="results-group"><th colspan="2">DPS</th></tr>
+                    <tr><th>Melee</th><td id="outMeleeDPS"></td></tr>
+                    <tr id="rowKickDPS"><th>Kick</th><td id="outKickDPS"></td></tr>
+                    <tr id="rowBackstabDPS"><th>Backstab</th><td id="outBackstabDPS"></td></tr>
+                    <tr><th>Proc (MH)</th><td id="outProcDPSMH"></td></tr>
+                    <tr><th>Proc (OH)</th><td id="outProcDPSOH"></td></tr>
                     <tr><th class="total-dps">Total DPS</th><td class="total-dps" id="outTotalDPS"></td></tr>
-                    <tr id="rowProcHateMH"><th>Proc hate/sec (MH)</th><td id="outProcHateMH"></td></tr>
-                    <tr id="rowProcHateOH"><th>Proc hate/sec (OH)</th><td id="outProcHateOH"></td></tr>
-                    <tr id="rowTotalHate"><th>Total hate/sec</th><td id="outTotalHate"></td></tr>
+                    <tr class="results-group"><th colspan="2">Hate (Meriadoc)</th></tr>
+                    <tr><th>Melee (MH + OH)</th><td id="outMeleeHate"></td></tr>
+                    <tr><th>Proc (MH + OH)</th><td id="outProcHate"></td></tr>
+                    <tr><th>Total hate/sec</th><td id="outTotalHate"></td></tr>
                 </table>
                 <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. Proc DPS and proc hate from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a>.</p>
                 <div class="parse-validation section" style="margin-top:20px;">
@@ -246,10 +252,20 @@
         if (!s || typeof s !== 'string') return '';
         return s.trim().toLowerCase().replace(/\s+/g, ' ');
     }
-    function getProcData(item) {
+    function getProcData(item, isOffhand) {
         if (!item || !item.name) return null;
         const key = normalizeProcName(item.name);
-        return weaponProcs[key] || null;
+        const data = weaponProcs[key] || null;
+        if (!data) return null;
+        if (isOffhand && (data.hatePerSecOH != null || data.procDpsOH != null || data.meleeHatePerSecOH != null)) {
+            return {
+                procName: data.procName,
+                procDps: data.procDpsOH != null ? data.procDpsOH : data.procDps,
+                hatePerSec: data.hatePerSecOH != null ? data.hatePerSecOH : data.hatePerSec,
+                meleeHatePerSec: data.meleeHatePerSecOH != null ? data.meleeHatePerSecOH : data.meleeHatePerSec,
+            };
+        }
+        return data;
     }
 
     function getDamageBonus1H(level) {
@@ -833,13 +849,15 @@
 
         let meleeDPS = hitPct * (dmgPerSwingMH * swingsMH + dmgPerSwingOH * swingsOH);
 
-        const procDataMH = getProcData(weaponMH);
-        const procDataOH = weaponOH ? getProcData(weaponOH) : null;
+        const procDataMH = getProcData(weaponMH, false);
+        const procDataOH = weaponOH ? getProcData(weaponOH, true) : null;
         const procDpsMH = procDataMH ? (procDataMH.procDps || 0) : 0;
         const procDpsOH = procDataOH ? (procDataOH.procDps || 0) : 0;
         const procHateMH = procDataMH ? (procDataMH.hatePerSec || 0) : 0;
         const procHateOH = procDataOH ? (procDataOH.hatePerSec || 0) : 0;
-        const totalHatePerSec = procHateMH + procHateOH;
+        const meleeHateMH = procDataMH ? (procDataMH.meleeHatePerSec || 0) : 0;
+        const meleeHateOH = procDataOH ? (procDataOH.meleeHatePerSec || 0) : 0;
+        const totalHatePerSec = meleeHateMH + meleeHateOH + procHateMH + procHateOH;
 
         let kickDPS = 0;
         if (cls === 'Monk') {
@@ -871,34 +889,38 @@
         document.getElementById('outDualWield').textContent = dwChance.toFixed(1) + '%';
         document.getElementById('outSwingsMH').textContent = swingsMH.toFixed(2);
         document.getElementById('outSwingsOH').textContent = swingsOH.toFixed(2);
-        document.getElementById('outDmgPerHit').textContent = dmgPerSwingMH.toFixed(0);
-        document.getElementById('outMinHit').textContent = baseDmgMH > 0 ? minHitMH : '—';
-        document.getElementById('outMaxHit').textContent = baseDmgMH > 0 ? maxHitMH : '—';
+        document.getElementById('outDmgPerHit').textContent = baseDmgMH > 0 ? dmgPerSwingMH.toFixed(0) : '—';
+        document.getElementById('outMinMaxHit').textContent = baseDmgMH > 0 ? (minHitMH + ' – ' + maxHitMH) : '—';
         const approxMaxCritMH = baseDmgMH > 0 ? Math.floor(maxHitMH * 2) : 0;
         document.getElementById('outMaxCritMH').textContent = baseDmgMH > 0 ? approxMaxCritMH : '—';
-        document.getElementById('outMinHitOH').textContent = weaponOH && !use2H ? minHitOH : '—';
-        document.getElementById('outMaxHitOH').textContent = weaponOH && !use2H ? maxHitOH : '—';
-        const approxMaxCritOH = weaponOH && !use2H ? Math.floor(maxHitOH * 2) : 0;
-        document.getElementById('outMaxCritOH').textContent = weaponOH && !use2H ? approxMaxCritOH : '—';
+        const hasOH = weaponOH && !use2H;
+        const rowGroupOH = document.getElementById('rowGroupOH');
+        const rowMinOH = document.getElementById('rowMinOH');
+        const rowMaxOH = document.getElementById('rowMaxOH');
+        const rowCritOH = document.getElementById('rowCritOH');
+        if (rowGroupOH) rowGroupOH.style.display = hasOH ? '' : 'none';
+        if (rowMinOH) rowMinOH.style.display = hasOH ? '' : 'none';
+        document.getElementById('outDmgPerHitOH').textContent = hasOH ? dmgPerSwingOH.toFixed(0) : '—';
+        if (rowMaxOH) rowMaxOH.style.display = hasOH ? '' : 'none';
+        document.getElementById('outMinMaxHitOH').textContent = hasOH ? (minHitOH + ' – ' + maxHitOH) : '—';
+        const approxMaxCritOH = hasOH ? Math.floor(maxHitOH * 2) : 0;
+        if (rowCritOH) rowCritOH.style.display = hasOH ? '' : 'none';
+        document.getElementById('outMaxCritOH').textContent = hasOH ? approxMaxCritOH : '—';
         document.getElementById('outMeleeDPS').textContent = meleeDPS.toFixed(1);
         document.getElementById('outKickDPS').textContent = kickDPS > 0 ? kickDPS.toFixed(1) : '—';
         document.getElementById('outBackstabDPS').textContent = backstabDPS > 0 ? backstabDPS.toFixed(1) : '—';
         document.getElementById('outProcDPSMH').textContent = procDpsMH > 0 ? procDpsMH.toFixed(2) : '—';
         document.getElementById('outProcDPSOH').textContent = procDpsOH > 0 ? procDpsOH.toFixed(2) : '—';
         document.getElementById('outTotalDPS').textContent = totalDPS.toFixed(1);
-        document.getElementById('outProcHateMH').textContent = procHateMH !== 0 ? procHateMH.toFixed(2) : '—';
-        document.getElementById('outProcHateOH').textContent = procHateOH !== 0 ? procHateOH.toFixed(2) : '—';
-        document.getElementById('outTotalHate').textContent = totalHatePerSec !== 0 ? totalHatePerSec.toFixed(2) : '—';
+        const meleeHateTotal = meleeHateMH + meleeHateOH;
+        const procHateTotal = procHateMH + procHateOH;
+        document.getElementById('outMeleeHate').textContent = (meleeHateTotal + procHateTotal) > 0 ? meleeHateTotal.toFixed(2) : '—';
+        document.getElementById('outProcHate').textContent = procHateTotal > 0 ? procHateTotal.toFixed(2) : '—';
+        document.getElementById('outTotalHate').textContent = totalHatePerSec > 0 ? totalHatePerSec.toFixed(2) : '—';
         const rowSwingsOH = document.getElementById('rowSwingsOH');
-        const rowMinOH = document.getElementById('rowMinOH');
-        const rowMaxOH = document.getElementById('rowMaxOH');
-        const rowCritOH = document.getElementById('rowCritOH');
         const rowKickDPS = document.getElementById('rowKickDPS');
         const rowBackstabDPS = document.getElementById('rowBackstabDPS');
-        if (rowSwingsOH) rowSwingsOH.style.display = (weaponOH && !use2H) ? '' : 'none';
-        if (rowMinOH) rowMinOH.style.display = (weaponOH && !use2H) ? '' : 'none';
-        if (rowMaxOH) rowMaxOH.style.display = (weaponOH && !use2H) ? '' : 'none';
-        if (rowCritOH) rowCritOH.style.display = (weaponOH && !use2H) ? '' : 'none';
+        if (rowSwingsOH) rowSwingsOH.style.display = hasOH ? '' : 'none';
         if (rowKickDPS) rowKickDPS.style.display = cls === 'Monk' ? '' : 'none';
         if (rowBackstabDPS) rowBackstabDPS.style.display = cls === 'Rogue' ? '' : 'none';
         document.getElementById('results').style.display = 'block';
