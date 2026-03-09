@@ -93,6 +93,13 @@
                     </div>
                 </div>
                 <div class="row">
+                    <div class="field" id="rangerModeWrap" style="display:none;">
+                        <label>Ranger attack</label>
+                        <select id="rangerMode">
+                            <option value="bow">Bow (archery)</option>
+                            <option value="melee">Melee (MH/OH/2H)</option>
+                        </select>
+                    </div>
                     <div class="field">
                         <label>Use 2H (no OH)</label>
                         <select id="use2H">
@@ -103,6 +110,9 @@
                     <div class="field backstab-option" id="backstabWrap" style="display:none;">
                         <label><input type="checkbox" id="useBackstab" checked /> Use backstab (Rogue)</label>
                         <label><input type="checkbox" id="backstabBehind" checked /> Assume behind (double stab when &gt;54)</label>
+                    </div>
+                    <div class="field backstab-option" id="fleetingWrap" style="display:none;">
+                        <label><input type="checkbox" id="useFleeting" /> Fleeting Quiver (Ranger bow, +30% haste)</label>
                     </div>
                 </div>
             </div>
@@ -582,14 +592,15 @@
     function buildWeaponListForClass(cls, use2H) {
         const list = { PRIMARY: [], SECONDARY: [], RANGE: [] };
         for (const [id, item] of Object.entries(itemStats)) {
-            if (item.dmg == null || item.atkDelay == null) continue;
+            if (item.dmg == null) continue;
             const slotRaw = item.slot || '';
             const slots = String(slotRaw).split(/\s+/);
             const canPrimary = slots.includes('PRIMARY');
             const canSecondary = slots.includes('SECONDARY');
+            const canRange = slots.includes('RANGE');
             if (!itemUsableByClass(item, cls)) continue;
             const twoHander = isTwoHander(item);
-            if (canPrimary) {
+            if (canPrimary && item.atkDelay != null) {
                 // MH: when 2H is selected, only show 2H; otherwise only 1H.
                 if (use2H && twoHander) {
                     list.PRIMARY.push({ id, ...item });
@@ -597,17 +608,19 @@
                     list.PRIMARY.push({ id, ...item });
                 }
             }
-            if (canSecondary) {
+            if (canSecondary && item.atkDelay != null) {
                 // OH list should only ever contain 1H weapons.
                 if (!twoHander) {
                     list.SECONDARY.push({ id, ...item });
                 }
             }
-            if (slots.includes('RANGE')) {
+            if (canRange) {
+                // Some bows lack atkDelay in the JSON; include them anyway and
+                // fall back to a reasonable default delay when sorting/using.
                 list.RANGE.push({ id, ...item });
             }
         }
-        const sortByWeaponRatio = (a, b) => (b.dmg / b.atkDelay) - (a.dmg / a.atkDelay);
+        const sortByWeaponRatio = (a, b) => (b.dmg / (b.atkDelay || 40)) - (a.dmg / (a.atkDelay || 40));
         list.PRIMARY.sort(sortByWeaponRatio);
         list.SECONDARY.sort(sortByWeaponRatio);
         list.RANGE.sort(sortByWeaponRatio);
@@ -644,11 +657,15 @@
         const mobAC = parseInt(document.getElementById('mobAC').value, 10) || 200;
         const hastePct = parseInt(document.getElementById('hastePct').value, 10) || 0;
         const overhastePct = parseInt(document.getElementById('overhastePct').value, 10) || 0;
-        const combinedHaste = Math.min(100, hastePct) + overhastePct;
+        let combinedHaste = Math.min(100, hastePct) + overhastePct;
         const use2H = document.getElementById('use2H').value === '1';
         const useBackstab = document.getElementById('useBackstab') && document.getElementById('useBackstab').checked;
         const backstabBehind = document.getElementById('backstabBehind') && document.getElementById('backstabBehind').checked;
         const isRanger = cls === 'Ranger';
+        const rangerModeSel = document.getElementById('rangerMode');
+        const rangerMode = rangerModeSel ? rangerModeSel.value : 'bow';
+        const useBow = isRanger && rangerMode === 'bow';
+        const useFleeting = document.getElementById('useFleeting') && document.getElementById('useFleeting').checked;
 
         const level = dpsConfig.levelCap || 65;
         const offenseSkill = (cfg.skills && cfg.skills.offense) || 252;
@@ -668,7 +685,7 @@
 
         let weaponMH = null, weaponOH = null, weaponRange = null, weaponAmmo = null;
         const pid = document.getElementById('weaponPrimary').value;
-        if (isRanger) {
+        if (useBow) {
             const rid = document.getElementById('weaponRange').value;
             const aid = document.getElementById('weaponAmmo').value;
             if (rid) weaponRange = itemStats[rid];
@@ -704,7 +721,7 @@
             if (isWarriorClass(cls))
                 damageBonusMH = (weaponMH.atkDelay && (weaponMH.skill || '').indexOf('2H') >= 0) ? getDamageBonus2H(level, delayMH) : getDamageBonus1H(level);
         }
-        const isRangedAttack = isRanger && weaponRange;
+        const isRangedAttack = useBow && weaponRange;
         const offenseBase = getOffense(ws, str, dex, isRangedAttack, isRanger && level > 54);
         const wornATKVal = parseInt(document.getElementById('wornATK').value, 10) || 0;
         const spellATKVal = parseInt(document.getElementById('spellATK').value, 10) || 0;
@@ -725,7 +742,9 @@
             maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgBonus;
         }
 
-        const effDelayMH = effectiveDelay(delayMH, combinedHaste);
+        // Fleeting Quiver applies only to bow attacks (archery): extra 30% haste.
+        const effectiveHasteMH = (isRangedAttack && useFleeting) ? (combinedHaste + 30) : combinedHaste;
+        const effDelayMH = effectiveDelay(delayMH, effectiveHasteMH);
         let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
         // Triple Attack: Warrior and Monk 60+ get 13.5% extra primary swing (skill/innate, not AA). Flurry AA (Warrior only) adds extra after triple.
         if ((cls === 'Warrior' || cls === 'Monk') && level >= 60) {
@@ -843,13 +862,20 @@
         const cls = document.getElementById('classSelect').value;
         const isRanger = cls === 'Ranger';
         const isKnight = cls === 'Paladin' || cls === 'Shadow Knight';
+        const rangerModeSel = document.getElementById('rangerMode');
+        const rangerMode = rangerModeSel ? rangerModeSel.value : 'bow';
+        const useBow = isRanger && rangerMode === 'bow';
         const use2H = document.getElementById('use2H').value === '1';
         weaponsBySlot = buildWeaponListForClass(cls, use2H);
-        document.getElementById('weaponRangeWrap').style.display = isRanger ? '' : 'none';
-        document.getElementById('weaponAmmoWrap').style.display = isRanger ? '' : 'none';
-        document.getElementById('weaponPrimaryWrap').style.display = isRanger ? 'none' : '';
-        document.getElementById('weaponSecondaryWrap').style.display = (isRanger || use2H || isKnight) ? 'none' : '';
+        const rangerModeWrap = document.getElementById('rangerModeWrap');
+        if (rangerModeWrap) rangerModeWrap.style.display = isRanger ? '' : 'none';
+        document.getElementById('weaponRangeWrap').style.display = useBow ? '' : 'none';
+        document.getElementById('weaponAmmoWrap').style.display = useBow ? '' : 'none';
+        document.getElementById('weaponPrimaryWrap').style.display = useBow ? 'none' : '';
+        document.getElementById('weaponSecondaryWrap').style.display = (useBow || use2H || isKnight) ? 'none' : '';
         document.getElementById('backstabWrap').style.display = cls === 'Rogue' ? '' : 'none';
+        const fleetingWrap = document.getElementById('fleetingWrap');
+        if (fleetingWrap) fleetingWrap.style.display = useBow ? '' : 'none';
 
         fillWeaponSelect('PRIMARY', 'weaponPrimary');
         fillWeaponSelect('SECONDARY', 'weaponSecondary');
@@ -887,7 +913,10 @@
         const cls = document.getElementById('classSelect').value;
         const use2H = document.getElementById('use2H').value === '1';
         const isRanger = cls === 'Ranger';
-        document.getElementById('weaponSecondaryWrap').style.display = (use2H || isRanger) ? 'none' : '';
+        const rangerModeSel = document.getElementById('rangerMode');
+        const rangerMode = rangerModeSel ? rangerModeSel.value : 'bow';
+        const useBow = isRanger && rangerMode === 'bow';
+        document.getElementById('weaponSecondaryWrap').style.display = (use2H || useBow || cls === 'Paladin' || cls === 'Shadow Knight') ? 'none' : '';
         weaponsBySlot = buildWeaponListForClass(cls, use2H);
         if (!isRanger) {
             fillWeaponSelect('PRIMARY', 'weaponPrimary');
