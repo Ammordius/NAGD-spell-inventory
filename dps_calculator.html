@@ -576,6 +576,8 @@
         if (labelEl) labelEl.textContent = cfg && cfg.aas ? 'AAs for ' + cls + ':' : '';
         if (cfg && cfg.aas) {
             cfg.aas.forEach(aa => {
+                if (aa.id === 'CombatAgility')
+                    return;
                 const id = 'aa_' + aa.id;
                 const label = document.createElement('label');
                 label.htmlFor = id;
