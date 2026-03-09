@@ -200,9 +200,14 @@
                     <tr><th>Melee DPS</th><td id="outMeleeDPS"></td></tr>
                     <tr id="rowKickDPS"><th>Kick DPS</th><td id="outKickDPS"></td></tr>
                     <tr id="rowBackstabDPS"><th>Backstab DPS</th><td id="outBackstabDPS"></td></tr>
+                    <tr id="rowProcDPSMH"><th>Proc DPS (MH)</th><td id="outProcDPSMH"></td></tr>
+                    <tr id="rowProcDPSOH"><th>Proc DPS (OH)</th><td id="outProcDPSOH"></td></tr>
                     <tr><th class="total-dps">Total DPS</th><td class="total-dps" id="outTotalDPS"></td></tr>
+                    <tr id="rowProcHateMH"><th>Proc hate/sec (MH)</th><td id="outProcHateMH"></td></tr>
+                    <tr id="rowProcHateOH"><th>Proc hate/sec (OH)</th><td id="outProcHateOH"></td></tr>
+                    <tr id="rowTotalHate"><th>Total hate/sec</th><td id="outTotalHate"></td></tr>
                 </table>
-                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage.</p>
+                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. Proc DPS and proc hate from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a>.</p>
                 <div class="parse-validation section" style="margin-top:20px;">
                     <h3 class="collapsible" id="parseHeader">Compare to parse</h3>
                     <div class="collapse-content" id="parseSection">
@@ -233,8 +238,19 @@
     };
     let itemStats = {};
     let dpsConfig = {};
+    let weaponProcs = {};
     let weaponsBySlot = { PRIMARY: [], SECONDARY: [], RANGE: [] };
     let precomputedWeaponDps = {};
+
+    function normalizeProcName(s) {
+        if (!s || typeof s !== 'string') return '';
+        return s.trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+    function getProcData(item) {
+        if (!item || !item.name) return null;
+        const key = normalizeProcName(item.name);
+        return weaponProcs[key] || null;
+    }
 
     function getDamageBonus1H(level) {
         if (level < 28) return 0;
@@ -817,6 +833,14 @@
 
         let meleeDPS = hitPct * (dmgPerSwingMH * swingsMH + dmgPerSwingOH * swingsOH);
 
+        const procDataMH = getProcData(weaponMH);
+        const procDataOH = weaponOH ? getProcData(weaponOH) : null;
+        const procDpsMH = procDataMH ? (procDataMH.procDps || 0) : 0;
+        const procDpsOH = procDataOH ? (procDataOH.procDps || 0) : 0;
+        const procHateMH = procDataMH ? (procDataMH.hatePerSec || 0) : 0;
+        const procHateOH = procDataOH ? (procDataOH.hatePerSec || 0) : 0;
+        const totalHatePerSec = procHateMH + procHateOH;
+
         let kickDPS = 0;
         if (cls === 'Monk') {
             const kickSkill = (cfg.skills && cfg.skills.kick) || 252;
@@ -840,7 +864,7 @@
         }
 
         const critChance = getCritChance(cls, aas);
-        const totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance);
+        const totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance) + procDpsMH + procDpsOH;
 
         document.getElementById('outHitChance').textContent = (hitPct * 100).toFixed(1) + '%';
         document.getElementById('outDoubleAttack').textContent = daChance.toFixed(1) + '%';
@@ -859,7 +883,12 @@
         document.getElementById('outMeleeDPS').textContent = meleeDPS.toFixed(1);
         document.getElementById('outKickDPS').textContent = kickDPS > 0 ? kickDPS.toFixed(1) : '—';
         document.getElementById('outBackstabDPS').textContent = backstabDPS > 0 ? backstabDPS.toFixed(1) : '—';
+        document.getElementById('outProcDPSMH').textContent = procDpsMH > 0 ? procDpsMH.toFixed(2) : '—';
+        document.getElementById('outProcDPSOH').textContent = procDpsOH > 0 ? procDpsOH.toFixed(2) : '—';
         document.getElementById('outTotalDPS').textContent = totalDPS.toFixed(1);
+        document.getElementById('outProcHateMH').textContent = procHateMH !== 0 ? procHateMH.toFixed(2) : '—';
+        document.getElementById('outProcHateOH').textContent = procHateOH !== 0 ? procHateOH.toFixed(2) : '—';
+        document.getElementById('outTotalHate').textContent = totalHatePerSec !== 0 ? totalHatePerSec.toFixed(2) : '—';
         const rowSwingsOH = document.getElementById('rowSwingsOH');
         const rowMinOH = document.getElementById('rowMinOH');
         const rowMaxOH = document.getElementById('rowMaxOH');
@@ -1001,6 +1030,11 @@
             const dataPath = (base ? base + '/' : '') + 'data/';
             itemStats = await (await fetch(dataPath + 'item_stats.json')).json();
             dpsConfig = await (await fetch(dataPath + 'dps_config.json')).json();
+            try {
+                weaponProcs = await (await fetch(dataPath + 'weapon_procs.json')).json();
+            } catch (e2) {
+                weaponProcs = {};
+            }
         } catch (e) {
             itemStats = {};
             dpsConfig = window.DPS_CONFIG_FALLBACK || { classes: {}, levelCap: 65 };

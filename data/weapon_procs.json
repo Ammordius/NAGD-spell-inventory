@@ -1,0 +1,682 @@
+{
+  "darkblade of the warlord": {
+    "procName": "Anger",
+    "procDps": 3.52,
+    "hatePerSec": 40.43
+  },
+  "ethereal destroyer": {
+    "procName": "Time Lapse",
+    "procDps": 8.62,
+    "hatePerSec": 8.62
+  },
+  "bloodfrenzy": {
+    "procName": "Enraging Blow",
+    "procDps": 0.0,
+    "hatePerSec": 14.67
+  },
+  "frostbite, cold blade of dread": {
+    "procName": "Chill Bones",
+    "procDps": 13.93,
+    "hatePerSec": 24.74
+  },
+  "blasphemous blade of the exiled": {
+    "procName": "Sanity Warp",
+    "procDps": 2.12,
+    "hatePerSec": 11.04
+  },
+  "furious hammer of zek": {
+    "procName": "Hand of the Gods",
+    "procDps": 21.3,
+    "hatePerSec": 21.3
+  },
+  "blade of war": {
+    "procName": "Enraging Blow",
+    "procDps": 0.0,
+    "hatePerSec": 18.93
+  },
+  "hategiver": {
+    "procName": "Enraging Blow",
+    "procDps": 0.0,
+    "hatePerSec": 9.46
+  },
+  "blade of carnage": {
+    "procName": "Enraging Blow",
+    "procDps": 0.0,
+    "hatePerSec": 9.46
+  },
+  "sceptre of destruction": {
+    "procName": "Anarchy",
+    "procDps": 3.89,
+    "hatePerSec": 9.3
+  },
+  "jagged blade of war": {
+    "procName": "Rage of Zek",
+    "procDps": 4.73,
+    "hatePerSec": 18.25
+  },
+  "edge of eternity": {
+    "procName": "Time Snap",
+    "procDps": 2.03,
+    "hatePerSec": 7.44
+  },
+  "vanazir, dreamer's despair": {
+    "procName": "Nightmares",
+    "procDps": 2.7,
+    "hatePerSec": 13.52
+  },
+  "club of slime": {
+    "procName": "Waves of the Deep Sea",
+    "procDps": 0.27,
+    "hatePerSec": 5.68
+  },
+  "hammer of hours": {
+    "procName": "Time Lapse",
+    "procDps": 20.28,
+    "hatePerSec": 20.28
+  },
+  "greatstaff of thunder": {
+    "procName": "Planar Stun",
+    "procDps": 0.0,
+    "hatePerSec": 10.82
+  },
+  "greatblade of chaos": {
+    "procName": "Tendrils of Fire",
+    "procDps": 6.76,
+    "hatePerSec": 6.76
+  },
+  "stone etched war sword": {
+    "procName": "Rune III",
+    "procDps": 0.0,
+    "hatePerSec": 6.22
+  },
+  "hammer of crushing waves": {
+    "procName": "Wrath of Ice",
+    "procDps": 2.03,
+    "hatePerSec": 2.03
+  },
+  "hammer of the timeweaver": {
+    "procName": "Timestrike",
+    "procDps": 2.03,
+    "hatePerSec": 2.03
+  },
+  "fiery staff of zha": {
+    "procName": "Flame of the Efreeti",
+    "procDps": 4.06,
+    "hatePerSec": 4.06
+  },
+  "double edged stormblade": {
+    "procName": "Wrath of Wind",
+    "procDps": 2.03,
+    "hatePerSec": 2.03
+  },
+  "stone etched mallet": {
+    "procName": "Rune II",
+    "procDps": 0.0,
+    "hatePerSec": 1.6
+  },
+  "the sword of ssraeshza": {
+    "procName": "Serpent's Bite",
+    "procDps": 2.84,
+    "hatePerSec": 2.84
+  },
+  "ifir, dagger of fire": {
+    "procName": "Flame of the Efreeti",
+    "procDps": 1.35,
+    "hatePerSec": 1.35
+  },
+  "acrylia handled broadsword": {
+    "procName": "Serpent's Bite",
+    "procDps": 1.39,
+    "hatePerSec": 1.39
+  },
+  "sword of primordial power": {
+    "procName": "Runic",
+    "procDps": 0.0,
+    "hatePerSec": 1.69
+  },
+  "cudgel of wrecking": {
+    "procName": "Soul Leech",
+    "procDps": 1.01,
+    "hatePerSec": 1.01
+  },
+  "vyzh`dra's render of souls": {
+    "procName": "Soul Leech",
+    "procDps": 1.01,
+    "hatePerSec": 1.01
+  },
+  "obsidian scimitar of war": {
+    "procName": "Obsidian Shatter",
+    "procDps": 0.51,
+    "hatePerSec": 7.27
+  },
+  "dagger of distraction": {
+    "procName": "Confusing Whisper",
+    "procDps": 0.0,
+    "hatePerSec": -2.03
+  },
+  "hammer of holy vengeance": {
+    "procName": "Hand of Retribution",
+    "procDps": 21.3,
+    "hatePerSec": 21.3
+  },
+  "infestation": {
+    "procName": "Poison",
+    "procDps": 1.18,
+    "hatePerSec": 6.58
+  },
+  "steel hilted flint dagger": {
+    "procName": "Conflagration",
+    "procDps": 8.45,
+    "hatePerSec": 8.45
+  },
+  "waning light katar": {
+    "procName": "Smolder",
+    "procDps": 1.14,
+    "hatePerSec": 1.14
+  },
+  "keen edged cleaver": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "blade of strategy": {
+    "procName": "Rage of Tallon",
+    "procDps": 0.0,
+    "hatePerSec": 0.12
+  },
+  "blade of tactics": {
+    "procName": "Rage of Vallon",
+    "procDps": 1.35,
+    "hatePerSec": 6.76
+  },
+  "wind-worn handblade": {
+    "procName": "Shards of Sorrow",
+    "procDps": 0.81,
+    "hatePerSec": 0.81
+  },
+  "jagged timeforged blade": {
+    "procName": "Assassin's Blood",
+    "procDps": 2.03,
+    "hatePerSec": 0.0
+  },
+  "primal velium knight's sword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "sledge of smashing": {
+    "procName": "Wrath",
+    "procDps": 5.9,
+    "hatePerSec": 5.9
+  },
+  "horror shard blade": {
+    "procName": "Frostcall",
+    "procDps": 1.62,
+    "hatePerSec": 1.62
+  },
+  "kelp hilted mace": {
+    "procName": "Lotus Spines",
+    "procDps": 20.69,
+    "hatePerSec": 21.0
+  },
+  "shortblade of lightning": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "blade of angles": {
+    "procName": "Wrathful Strike",
+    "procDps": 5.41,
+    "hatePerSec": 5.41
+  },
+  "gaudralek, sword of the sky": {
+    "procName": "Rage of the Sky",
+    "procDps": 4.84,
+    "hatePerSec": 4.84
+  },
+  "flameforge hammer": {
+    "procName": "Planar Strike",
+    "procDps": 1.01,
+    "hatePerSec": 6.42
+  },
+  "staff of transcendence": {
+    "procName": "Time Rend",
+    "procDps": 4.06,
+    "hatePerSec": 14.87
+  },
+  "primal velium brawl stick": {
+    "procName": "Avatar",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "whip of the earthcrafter": {
+    "procName": "Call of the Mistwalker",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "short sword of the ykesha": {
+    "procName": "Ykesha",
+    "procDps": 1.01,
+    "hatePerSec": 6.42
+  },
+  "an executioners axe": {
+    "procName": "Haste",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "obsidian shard": {
+    "procName": "Obsidian Shatter",
+    "procDps": 0.41,
+    "hatePerSec": 5.81
+  },
+  "enameled black mace": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "a mithril two-handed sword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "shield of the slain unicorn": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "bladed thulian claws": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "blackened iron bastard sword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "minotaur battle axe": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "entwood mace": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "gem encrusted axe": {
+    "procName": "Runic",
+    "procDps": 0.0,
+    "hatePerSec": 3.38
+  },
+  "great blade of storms": {
+    "procName": "Force Shock",
+    "procDps": 2.42,
+    "hatePerSec": 7.83
+  },
+  "windblade": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "honorable longsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "swiftblade of zek": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "great lance of stone": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "crescent blades of luclin": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "gold inlaid ulak": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "claw of the savage spirit (p)": {
+    "procName": "Sha's Vengeance",
+    "procDps": 0.64,
+    "hatePerSec": 11.78
+  },
+  "claw of the savage spirit (s)": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "khashek's katar": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "wand of temporal power": {
+    "procName": "Time Lapse",
+    "procDps": 20.28,
+    "hatePerSec": 20.0
+  },
+  "hammer of the sun": {
+    "procName": "Dawncall",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "timeless coral greatsword": {
+    "procName": "Invigorate",
+    "procDps": 0.0,
+    "hatePerSec": 0.9
+  },
+  "heavy windriders lance": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "tri-plated golden hackle hammer": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "earthspined staff": {
+    "procName": "Bite of Bertoxxulous",
+    "procDps": 4.06,
+    "hatePerSec": 4.06
+  },
+  "crow footed lance": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "war marshall's bladed staff": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "great sword of slaughter": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "dark mace of thought": {
+    "procName": "Theft of Thought",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "resplendent war maul": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "greatstaff of the four winds": {
+    "procName": "Lightning Surge",
+    "procDps": 2.64,
+    "hatePerSec": 2.64
+  },
+  "yttrium war axe": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "ornate greatblade": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "basalt greatsword of protector": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "bloodied berserker's blade": {
+    "procName": "Rune III",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "spear of fire": {
+    "procName": "Call of Faith",
+    "procDps": 2.7,
+    "hatePerSec": 0.0
+  },
+  "greater poleaxe of sorrow": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "great blade of malise": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "greatsword of the disciple": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "runed lance of gryme": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "kavilis mosquito lance": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "double-edged greatsword of visions": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "obsidian greatblade": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "plankton laced greatsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "norge`tal": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "ironbound quarterstaff": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "corrupted shissar claidhmore": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "dathor great hammer": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "razing sword of skarlon": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "hopebringer": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "ornate broadsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "knight's gleaming mace": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "songblade of the eternal": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "reinforced mephit talon": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "braided strands of corrupted mana": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "lava infused bludgeon": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "obsidian battle sword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "coral hilted shortsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "ribcracker": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "toetwister": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "siren song, dagger of the sea": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "corrupted shissar warsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "blam stick": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "swiftwind": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "disembowler": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "singing short sword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "defenders lightblade": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "earthcaller": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "stronghorns horn": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "wavecrasher": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "shard of night": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "staff of flowing water": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "mace of the fallen crusader": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "aegis of the earth": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "primal velium warsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "twisted steel bastard sword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "widebladed greatsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "primal velium fist wraps": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "skybreaker": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "adjutant's saber": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "scimitar of the emerald dawn": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "feartouched greatsword": {
+    "procName": "None",
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  },
+  "shield": {
+    "procName": null,
+    "procDps": 0.0,
+    "hatePerSec": 0.0
+  }
+}

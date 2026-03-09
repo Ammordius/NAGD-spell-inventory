@@ -53,8 +53,9 @@
 
             <h2>Overview</h2>
             <p>Total DPS is:</p>
-            <code class="formula">(Melee DPS + Kick DPS + Backstab DPS) × (1 + Crit chance)</code>
+            <code class="formula">(Melee DPS + Kick DPS + Backstab DPS) × (1 + Crit chance) + Proc DPS (MH) + Proc DPS (OH)</code>
             <p>Melee DPS = Hit chance × (MH damage per swing × MH swings/sec + OH damage per swing × OH swings/sec). Each component is derived from server-style formulas for offense, mitigation, hit chance, damage bonus, haste, and special attacks.</p>
+            <p><strong>Proc DPS and proc hate</strong> (per second) are taken from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a> (Google Sheets). We use his Proc DPS and PHate/Sec (proc hate per second) as ground truth; the calculator looks up values by weapon name from CSV exports of his sheets. Credit: <strong>Meriadoc</strong> for weapon proc and hate data.</p>
 
             <h2>Target: Mitigation &amp; Avoidance</h2>
             <p>NPCs have <strong>mitigation</strong> (reduces your damage roll) and <strong>avoidance</strong> (reduces your hit chance). Both are derived from mob level; mitigation also uses mob AC when it matters.</p>
@@ -156,7 +157,7 @@ Effective delay = max(minDelay, floor(reduced))</code>
             </ul>
 
             <h2>Summary</h2>
-            <p>Inputs (class, weapons, mob level/AC, haste, ATK, AAs) drive offense, mitigation, avoidance, hit chance, damage per swing, and swings per second. Melee DPS plus Kick and Backstab when applicable, multiplied by (1 + crit chance), gives the reported Total DPS. Formulas match TAKP server logic where documented; some caps (e.g. RollDamageMultiplier for non-monks, 2H warrior scale) are tuned to align with parses.</p>
+            <p>Inputs (class, weapons, mob level/AC, haste, ATK, AAs) drive offense, mitigation, avoidance, hit chance, damage per swing, and swings per second. Melee DPS plus Kick and Backstab when applicable, multiplied by (1 + crit chance), plus <strong>proc DPS</strong> from main hand and off hand (from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a>), gives the reported Total DPS. The results table also shows <strong>proc hate/sec</strong> (Meriadoc’s PHate/Sec) per weapon and total. Formulas match TAKP server logic where documented; some caps (e.g. RollDamageMultiplier for non-monks, 2H warrior scale) are tuned to align with parses.</p>
 
         </div>
     </div>
