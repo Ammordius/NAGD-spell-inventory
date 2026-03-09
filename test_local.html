@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Local Server</title>
+</head>
+<body>
+    <h1>Testing Character Rankings Locally</h1>
+    <p>If you're seeing this, your local server is working.</p>
+    <p><a href="character_rankings.html">Open Character Rankings</a></p>
+    
+    <h2>Instructions:</h2>
+    <ol>
+        <li>Open a terminal in this directory</li>
+        <li>Run: <code>python -m http.server 8000</code></li>
+        <li>Visit: <code>http://localhost:8000/character_rankings.html</code></li>
+    </ol>
+    
+    <h2>Check if JSON file exists:</h2>
+    <button onclick="testJSON()">Test JSON Load</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testJSON() {
+            const result = document.getElementById('result');
+            try {
+                const response = await fetch('character_rankings.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `<p style="color: green;">✓ JSON loaded successfully! Found ${data.length} characters.</p>`;
+                } else {
+                    result.innerHTML = `<p style="color: red;">✗ HTTP Error: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p style="color: red;">✗ Error: ${error.message}</p><p>Make sure you're running a local web server (python -m http.server 8000)</p>`;
+            }
+        }
+    </script>
+    <script data-goatcounter="https://ammordius.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

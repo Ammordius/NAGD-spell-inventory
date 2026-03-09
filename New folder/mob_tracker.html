@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Raid Mob Repop Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px; }
+        .sub { color: #666; margin-bottom: 16px; }
+        a { color: #2196F3; }
+        table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+        th { background: #2196F3; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .in-window { background: #e8f5e9 !important; font-weight: bold; }
+        .passed { color: #999; }
+        .bar { height: 12px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: #4CAF50; }
+        .no-data { color: #999; padding: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Raid Mob Repop Tracker</h1>
+    <p class="sub">All mobs with observed loot (from delta); sorted by <strong>time to repop</strong> (soonest first).</p>
+    <p class="sub"><a href="delta.html">Delta report</a></p>
+    <details class="sub" style="margin-bottom: 12px; padding: 8px; background: #fff8e1; border-radius: 4px;" id="respawn-help">
+        <summary style="cursor: pointer;">Respawn timers showing "—"?</summary>
+        <p style="margin: 8px 0 0 0; font-size: 0.9em;">Repop data comes from <code>raid_item_sources.json</code>. Run <code>python update_raid_item_sources_from_db.py</code> (with DB connection or <code>--from-file</code>) to fill <code>respawn_seconds</code> from spawn2 and <code>respawn_note</code> for overrides (Emperor, Cursed, PoEarth, PoAir, Statue). Then commit and push the updated JSON so the deployed site has it.</p>
+    </details>
+    <div id="content">
+        <p class="no-data">Loading…</p>
+    </div>
+    <p class="sub" id="updated" style="margin-top: 20px; font-size: 0.9em; color: #666;"></p>
+</div>
+<script>
+(function() {
+    function parseRespawnNote(note) {
+        if (!note) return { baseSec: null, varianceSec: 0 };
+        const pm = note.match(/([0-9.]+)\s*±\s*([0-9.]+)\s*day/i);
+        if (pm) return { baseSec: parseFloat(pm[1]) * 86400, varianceSec: parseFloat(pm[2]) * 86400 };
+        const single = note.match(/([0-9.]+)\s*day/i);
+        if (single) return { baseSec: parseFloat(single[1]) * 86400, varianceSec: 0 };
+        return { baseSec: null, varianceSec: 0 };
+    }
+    const OBSERVATION_WINDOW_MS = 24 * 3600 * 1000;  // Death could have been anytime in last 24h before we saw loot
+    const DEFAULT_RESPAWN_VARIANCE_PCT = 0.10;      // ±10% when DB gives only base time (no note variance)
+    const NEXT_HOURS_MS = 6 * 3600 * 1000;          // Chance to spawn in next 6 hours
+    function buildRespawnMap(raidItemSources) {
+        const map = {};
+        for (const [itemId, entry] of Object.entries(raidItemSources)) {
+            const zone = (entry.zone || "").trim();
+            const mob = (entry.mob || "").trim();
+            if (!zone && !mob) continue;
+            const key = zone + "|" + mob;
+            if (map[key]) continue;
+            const baseSec = entry.respawn_seconds != null ? entry.respawn_seconds : null;
+            const fromNote = parseRespawnNote(entry.respawn_note || "");
+            const base = baseSec != null ? baseSec : fromNote.baseSec;
+            let varianceSec = fromNote.varianceSec;
+            if (base != null && varianceSec === 0) varianceSec = base * DEFAULT_RESPAWN_VARIANCE_PCT;
+            map[key] = {
+                respawn_seconds: baseSec,
+                respawn_note: entry.respawn_note || "",
+                baseSec: base,
+                varianceSec: varianceSec
+            };
+        }
+        return map;
+    }
+    function formatTime(ms) {
+        const d = new Date(ms);
+        return d.toISOString().replace("T", " ").slice(0, 19) + "Z";
+    }
+    function formatDuration(sec) {
+        if (sec == null) return "—";
+        if (sec < 3600) return (sec / 60).toFixed(0) + "m";
+        if (sec < 86400) return (sec / 3600).toFixed(1) + "h";
+        return (sec / 86400).toFixed(1) + "d";
+    }
+    Promise.all([
+        fetch("mob_tracker_deaths.json").then(r => r.ok ? r.json() : { updated: "", deaths: [] }),
+        fetch("raid_item_sources.json").then(r => r.ok ? r.json() : {})
+    ]).then(([deathsData, raidItemSources]) => {
+        const respawnMap = buildRespawnMap(raidItemSources);
+        const now = Date.now();
+        const deaths = deathsData.deaths || [];
+        document.getElementById("updated").textContent = "Deaths data updated: " + (deathsData.updated || "—") + " (up to 14 days; sorted by time to repop). Status and % use your browser time (now: " + new Date().toISOString().slice(0, 19) + "Z).";
+        if (deaths.length === 0) {
+            document.getElementById("content").innerHTML = "<p class=\"no-data\">No mob deaths recorded yet. Run the delta to populate.</p>";
+            return;
+        }
+        const rows = deaths.map(d => {
+            const key = (d.zone || "") + "|" + (d.mob || "");
+            const resp = respawnMap[key] || {};
+            const observedMs = new Date(d.observed_at || 0).getTime();
+            const baseSec = resp.baseSec;
+            const varianceSec = resp.varianceSec || 0;
+            let status = "—";
+            let pct = null;
+            let windowStart = null;
+            let windowEnd = null;
+            let chanceNext6h = null;
+            if (baseSec != null) {
+                // Death happened sometime in the 24h before we observed loot; respawn has natural variance
+                const earliestDeathMs = observedMs - OBSERVATION_WINDOW_MS;
+                const latestDeathMs = observedMs;
+                windowStart = earliestDeathMs + (baseSec - varianceSec) * 1000;
+                windowEnd = latestDeathMs + (baseSec + varianceSec) * 1000;
+                if (now < windowStart) status = "Not yet";
+                else if (now > windowEnd) status = "Passed";
+                else {
+                    status = "In window";
+                    pct = ((now - windowStart) / (windowEnd - windowStart)) * 100;
+                }
+                // Chance repop falls in [now, now+6h]: uniform over [windowStart, windowEnd], so overlap/windowLength
+                if (windowStart != null && windowEnd != null && windowEnd > windowStart) {
+                    const overlapStart = Math.max(now, windowStart);
+                    const overlapEnd = Math.min(now + NEXT_HOURS_MS, windowEnd);
+                    const overlap = Math.max(0, overlapEnd - overlapStart);
+                    chanceNext6h = (overlap / (windowEnd - windowStart)) * 100;
+                } else {
+                    chanceNext6h = 0;
+                }
+            } else if (resp.respawn_note) {
+                status = resp.respawn_note;
+            }
+            return {
+                zone: d.zone || "—",
+                mob: d.mob || "—",
+                observed_at: d.observed_at,
+                respawn_note: resp.respawn_note || (resp.respawn_seconds != null ? formatDuration(resp.respawn_seconds) + " (DB)" : "—"),
+                window_start: windowStart,
+                window_end: windowEnd,
+                status,
+                pct,
+                chanceNext6h
+            };
+        });
+        const rank = (r) => r.status === "Not yet" ? 0 : r.status === "In window" ? 1 : 2;
+        const sortTime = (r) => r.status === "Not yet" ? (r.window_start || 0) : (r.window_end || r.window_start || 0);
+        const sorted = [...rows].sort((a, b) => {
+            const ra = rank(a), rb = rank(b);
+            if (ra !== rb) return ra - rb;
+            return sortTime(a) - sortTime(b);
+        });
+        let html = "<table><thead><tr><th>Zone</th><th>Mob</th><th>Died (observed)</th><th>Respawn</th><th>Window start</th><th>Window end</th><th>Status</th><th>% elapsed</th><th>Chance next 6h</th></tr></thead><tbody>";
+        sorted.forEach(r => {
+            const trClass = r.status === "In window" ? " class=\"in-window\"" : (r.status === "Passed" ? " class=\"passed\"" : "");
+            html += "<tr" + trClass + ">";
+            html += "<td>" + escapeHtml(r.zone) + "</td><td>" + escapeHtml(r.mob) + "</td>";
+            html += "<td>" + escapeHtml(r.observed_at ? r.observed_at.slice(0, 19) + "Z" : "—") + "</td>";
+            html += "<td>" + escapeHtml(r.respawn_note) + "</td>";
+            html += "<td>" + (r.window_start ? formatTime(r.window_start) : "—") + "</td>";
+            html += "<td>" + (r.window_end ? formatTime(r.window_end) : "—") + "</td>";
+            html += "<td>" + escapeHtml(r.status) + "</td>";
+            if (r.pct != null) {
+                html += "<td><div class=\"bar\"><div class=\"bar-fill\" style=\"width:" + Math.round(r.pct) + "%\"></div></div> " + Math.round(r.pct) + "%</td>";
+            } else {
+                html += "<td>—</td>";
+            }
+            if (r.chanceNext6h != null) {
+                html += "<td>" + (r.chanceNext6h < 0.5 ? "&lt;1" : Math.round(r.chanceNext6h)) + "%</td>";
+            } else {
+                html += "<td>—</td>";
+            }
+            html += "</tr>";
+        });
+        html += "</tbody></table>";
+        document.getElementById("content").innerHTML = html;
+    });
+    function escapeHtml(s) {
+        if (s == null) return "";
+        return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+})();
+</script>
+<script data-goatcounter="https://ammordius.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

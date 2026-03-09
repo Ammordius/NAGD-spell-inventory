@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Character Rankings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        select, input[type="text"] {
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats-toggle {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .toggle-btn:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            background: #667eea;
+            color: white;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr.expanded {
+            background-color: #fff3cd;
+        }
+
+        td {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+
+        .rank {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .name {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .name a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .name a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .guild {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .class-race {
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .stat {
+            text-align: right;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+
+        .gear-detail {
+            display: none;
+            padding: 20px;
+            background: #fff;
+            border-top: 2px solid #667eea;
+        }
+
+        .gear-detail.show {
+            display: block;
+        }
+
+        .gear-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .gear-item {
+            display: inline-flex;
+            align-items: center;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .gear-item:hover {
+            background: #e7f3ff;
+            border-color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+        }
+
+        .gear-item-slot {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-right: 8px;
+            min-width: 70px;
+        }
+
+        .gear-item-name {
+            color: #212529;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .gear-item-id {
+            color: #6c757d;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 18px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+            font-size: 18px;
+        }
+
+        .stats-header {
+            display: flex;
+            gap: 5px;
+        }
+
+        .sort-indicator {
+            color: #fff;
+            opacity: 0.7;
+            font-size: 12px;
+        }
+
+        .sort-indicator.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TAKP Character Rankings</h1>
+            <p>Level 65 Character Statistics & Gear</p>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Sort by:</label>
+                <select id="sortBy">
+                    <option value="hp">HP</option>
+                    <option value="aa">AA Points</option>
+                    <option value="atk">Attack</option>
+                    <option value="resists">Total Resists</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Filter Class:</label>
+                <select id="filterClass">
+                    <option value="">All Classes</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Filter Guild:</label>
+                <select id="filterGuild">
+                    <option value="">All Guilds</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Search:</label>
+                <input type="text" id="search" placeholder="Character name...">
+            </div>
+
+            <div class="control-group">
+                <label>Show Stats:</label>
+                <div class="stats-toggle">
+                    <button class="toggle-btn active" data-stat="hp">HP</button>
+                    <button class="toggle-btn active" data-stat="aa">AA</button>
+                    <button class="toggle-btn active" data-stat="ac">AC</button>
+                    <button class="toggle-btn active" data-stat="mr">MR</button>
+                    <button class="toggle-btn active" data-stat="fr">FR</button>
+                    <button class="toggle-btn active" data-stat="cr">CR</button>
+                    <button class="toggle-btn active" data-stat="dr">DR</button>
+                    <button class="toggle-btn active" data-stat="pr">PR</button>
+                    <button class="toggle-btn active" data-stat="atk">ATK</button>
+                    <button class="toggle-btn active" data-stat="regen">Regen</button>
+                    <button class="toggle-btn active" data-stat="ft">FT</button>
+                    <button class="toggle-btn active" data-stat="atk_item">ATK Item</button>
+                    <button class="toggle-btn active" data-stat="ds">DS</button>
+                    <button class="toggle-btn active" data-stat="haste">Haste</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">Loading character data...</div>
+            <div id="error" class="error" style="display: none;"></div>
+            <table id="rankingsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Guild</th>
+                        <th>Class / Race</th>
+                        <th class="stat-col" data-stat="hp">HP</th>
+                        <th class="stat-col" data-stat="aa">AA</th>
+                        <th class="stat-col" data-stat="ac">AC</th>
+                        <th class="stat-col" data-stat="mr">MR</th>
+                        <th class="stat-col" data-stat="fr">FR</th>
+                        <th class="stat-col" data-stat="cr">CR</th>
+                        <th class="stat-col" data-stat="dr">DR</th>
+                        <th class="stat-col" data-stat="pr">PR</th>
+                        <th class="stat-col" data-stat="atk">ATK</th>
+                        <th class="stat-col" data-stat="regen">Regen</th>
+                        <th class="stat-col" data-stat="ft">FT</th>
+                        <th class="stat-col" data-stat="atk_item">ATK Item</th>
+                        <th class="stat-col" data-stat="ds">DS</th>
+                        <th class="stat-col" data-stat="haste">Haste</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let characters = [];
+        let filteredCharacters = [];
+        let sortBy = 'hp';
+        let filterClass = '';
+        let filterGuild = '';
+        let searchTerm = '';
+        let visibleStats = new Set(['hp', 'aa', 'ac', 'mr', 'fr', 'cr', 'dr', 'pr', 'atk', 'regen', 'ft', 'atk_item', 'ds', 'haste']);
+
+        // Load character data
+        async function loadData() {
+            try {
+                // Try multiple possible paths for different GitHub Pages setups
+                // Get the directory of the current HTML file
+                const currentPath = window.location.pathname;
+                const htmlDir = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+                
+                const possiblePaths = [
+                    'character_rankings.json',  // Same directory (most common)
+                    htmlDir + 'character_rankings.json', // Same directory as HTML (calculated)
+                    './character_rankings.json', // Same directory (explicit relative)
+                    '/character_rankings.json',  // Root of site
+                    '../character_rankings.json' // Parent directory
+                ];
+                
+                // Remove duplicates
+                const uniquePaths = [...new Set(possiblePaths)];
+                
+                let response = null;
+                let successfulPath = null;
+                let lastError = null;
+                
+                console.log('Current location:', window.location.href);
+                console.log('Current pathname:', window.location.pathname);
+                
+                // Try each path
+                for (const path of uniquePaths) {
+                    try {
+                        console.log('Trying path:', path);
+                        response = await fetch(path);
+                        if (response.ok) {
+                            successfulPath = path;
+                            console.log('✓ Successfully loaded from:', path);
+                            break;
+                        } else {
+                            console.log('✗ Path failed:', path, 'Status:', response.status);
+                        }
+                    } catch (e) {
+                        console.log('✗ Path error:', path, e.message);
+                        lastError = e;
+                        continue;
+                    }
+                }
+                
+                if (!response || !response.ok) {
+                    const errorMsg = lastError ? lastError.message : `HTTP ${response ? response.status : 'not found'}`;
+                    throw new Error(`Could not find character_rankings.json. Tried paths: ${uniquePaths.join(', ')}. Error: ${errorMsg}`);
+                }
+                
+                characters = await response.json();
+                filteredCharacters = [...characters];
+                
+                console.log(`✓ Loaded ${characters.length} characters from: ${successfulPath}`);
+                
+                // Populate filter dropdowns
+                populateFilters();
+                
+                // Render table
+                renderTable();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('rankingsTable').style.display = 'table';
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').innerHTML = `
+                    <div style="margin-bottom: 15px;"><strong style="color: #dc3545;">Error loading data:</strong> ${error.message}</div>
+                    <div style="font-size: 14px; color: #6c757d; text-align: left; max-width: 600px; margin: 0 auto;">
+                        <p style="margin-bottom: 10px;"><strong>Troubleshooting:</strong></p>
+                        <ul style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>The file <code>character_rankings.json</code> must be in the same directory as this HTML file</li>
+                            <li>Both files must be uploaded to your GitHub repository</li>
+                            <li>GitHub Pages must be enabled (Settings → Pages → Source: main branch or gh-pages branch)</li>
+                            <li>Check the browser console (F12) for detailed path attempts</li>
+                        </ul>
+                        <p style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                            <strong>GitHub Pages Setup:</strong><br>
+                            1. Upload both <code>character_rankings.html</code> and <code>character_rankings.json</code> to your repo<br>
+                            2. They should be in the same directory (root or a subdirectory)<br>
+                            3. Enable GitHub Pages in Settings → Pages<br>
+                            4. Wait a few minutes for the site to build
+                        </p>
+                        <p style="margin-top: 10px; padding: 10px; background: #d1ecf1; border-radius: 4px;">
+                            <strong>Local Testing:</strong><br>
+                            Run: <code>python -m http.server 8000</code> then visit <code>http://localhost:8000/character_rankings.html</code>
+                        </p>
+                    </div>
+                `;
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function populateFilters() {
+            const classes = new Set();
+            const guilds = new Set();
+            
+            characters.forEach(char => {
+                if (char.class) classes.add(char.class);
+                if (char.guild) guilds.add(char.guild);
+            });
+            
+            const classSelect = document.getElementById('filterClass');
+            const guildSelect = document.getElementById('filterGuild');
+            
+            [...classes].sort().forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls;
+                option.textContent = cls;
+                classSelect.appendChild(option);
+            });
+            
+            [...guilds].sort().forEach(guild => {
+                const option = document.createElement('option');
+                option.value = guild;
+                option.textContent = guild;
+                guildSelect.appendChild(option);
+            });
+        }
+
+        function filterAndSort() {
+            filteredCharacters = characters.filter(char => {
+                if (filterClass && char.class !== filterClass) return false;
+                if (filterGuild && char.guild !== filterGuild) return false;
+                if (searchTerm && !char.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+                return true;
+            });
+            
+            // Sort
+            filteredCharacters.sort((a, b) => {
+                if (sortBy === 'hp') return b.stats.hp - a.stats.hp;
+                if (sortBy === 'aa') return b.stats.aa - a.stats.aa;
+                if (sortBy === 'atk') return b.stats.atk - a.stats.atk;
+                if (sortBy === 'resists') {
+                    const aResists = a.stats.mr + a.stats.fr + a.stats.cr + a.stats.dr + a.stats.pr;
+                    const bResists = b.stats.mr + b.stats.fr + b.stats.cr + b.stats.dr + b.stats.pr;
+                    return bResists - aResists;
+                }
+                return 0;
+            });
+            
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('rankingsBody');
+            tbody.innerHTML = '';
+            
+            filteredCharacters.forEach((char, index) => {
+                const row = document.createElement('tr');
+                row.dataset.charId = char.id;
+                
+                const rank = index + 1;
+                const stats = char.stats;
+                
+                // Create character name with Magelo link
+                const charNameLink = `<a href="https://www.takproject.net/magelo/character.php?char=${encodeURIComponent(char.name)}" target="_blank">${escapeHtml(char.name)}</a>`;
+                
+                let html = `
+                    <td class="rank">#${rank}</td>
+                    <td class="name">${charNameLink}</td>
+                    <td class="guild">${escapeHtml(char.guild || '')}</td>
+                    <td class="class-race">${escapeHtml(char.class || '')} / ${escapeHtml(char.race || '')}</td>
+                `;
+                
+                // Add stat columns
+                ['hp', 'aa', 'ac', 'mr', 'fr', 'cr', 'dr', 'pr', 'atk', 'regen', 'ft', 'atk_item', 'ds', 'haste'].forEach(stat => {
+                    if (visibleStats.has(stat)) {
+                        let value = stats[stat];
+                        // Stats that are already formatted as "X / Y" strings
+                        if (typeof value === 'string' && value.includes(' / ')) {
+                            // Already formatted, use as-is
+                        } else if (stat === 'haste') {
+                            // Haste is a percentage
+                            value = `${formatNumber(value)}%`;
+                        } else {
+                            // Regular number formatting
+                            value = formatNumber(value);
+                        }
+                        html += `<td class="stat">${value}</td>`;
+                    }
+                });
+                
+                row.innerHTML = html;
+                
+                // Add gear detail row
+                const gearRow = document.createElement('tr');
+                gearRow.className = 'gear-detail';
+                gearRow.id = `gear-${char.id}`;
+                
+                const gearCols = ['hp', 'aa', 'ac', 'mr', 'fr', 'cr', 'dr', 'pr', 'atk', 'regen', 'ft', 'atk_item', 'ds', 'haste'].filter(s => visibleStats.has(s)).length;
+                gearRow.innerHTML = `
+                    <td colspan="${4 + gearCols}">
+                        <div class="gear-display">
+                            ${char.gear.map(item => `
+                                <a href="https://www.takproject.net/allaclone/item.php?id=${item.item_id}" target="_blank" class="gear-item">
+                                    <span class="gear-item-slot">${escapeHtml(item.slot_name)}</span>
+                                    <span class="gear-item-name">${escapeHtml(item.item_name)}</span>
+                                    <span class="gear-item-id">#${item.item_id}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </td>
+                `;
+                
+                // Toggle gear on row click
+                row.addEventListener('click', () => {
+                    const isExpanded = row.classList.contains('expanded');
+                    if (isExpanded) {
+                        row.classList.remove('expanded');
+                        gearRow.classList.remove('show');
+                    } else {
+                        // Close other expanded rows
+                        document.querySelectorAll('tbody tr.expanded').forEach(r => {
+                            r.classList.remove('expanded');
+                            const gearId = r.dataset.charId;
+                            document.getElementById(`gear-${gearId}`).classList.remove('show');
+                        });
+                        row.classList.add('expanded');
+                        gearRow.classList.add('show');
+                    }
+                });
+                
+                tbody.appendChild(row);
+                tbody.appendChild(gearRow);
+            });
+            
+            // Update column visibility
+            updateColumnVisibility();
+        }
+
+        function updateColumnVisibility() {
+            document.querySelectorAll('.stat-col').forEach(col => {
+                const stat = col.dataset.stat;
+                if (visibleStats.has(stat)) {
+                    col.style.display = '';
+                } else {
+                    col.style.display = 'none';
+                }
+            });
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('sortBy').addEventListener('change', (e) => {
+            sortBy = e.target.value;
+            filterAndSort();
+        });
+
+        document.getElementById('filterClass').addEventListener('change', (e) => {
+            filterClass = e.target.value;
+            filterAndSort();
+        });
+
+        document.getElementById('filterGuild').addEventListener('change', (e) => {
+            filterGuild = e.target.value;
+            filterAndSort();
+        });
+
+        document.getElementById('search').addEventListener('input', (e) => {
+            searchTerm = e.target.value;
+            filterAndSort();
+        });
+
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const stat = btn.dataset.stat;
+                if (visibleStats.has(stat)) {
+                    visibleStats.delete(stat);
+                    btn.classList.remove('active');
+                } else {
+                    visibleStats.add(stat);
+                    btn.classList.add('active');
+                }
+                renderTable();
+            });
+        });
+
+        // Load data on page load
+        loadData();
+    </script>
+    <script data-goatcounter="https://ammordius.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
