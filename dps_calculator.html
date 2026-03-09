@@ -310,6 +310,12 @@
         chance += chance * (aas.DoubleAttackChance || 0) / 100;
         return Math.min(100, chance / 5);
     }
+    function getCritChance(cls, aas) {
+        const hasCritAA = !!aas.CriticalHitChance;
+        if (cls === 'Warrior')
+            return hasCritAA ? 0.066 : 0.028;
+        return hasCritAA ? 0.028 : 0;
+    }
     function getDualWieldChance(skill, level, aas) {
         let chance = skill + level;
         chance += aas.Ambidexterity || 0;
@@ -450,6 +456,10 @@
           const flurryExtra = (cls === 'Warrior' && aas.FlurryChance) ? 0.135 * (aas.FlurryChance / 100) * 1.1 : 0;
           swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100 + tripleExtra + flurryExtra);
         }
+        // ExtraAttackChance (Punishing Blade, Speed of the Knight): % chance for one extra 2H primary swing per round
+        if (use2H && weaponMH && (weaponMH.skill || '').indexOf('2H') >= 0 && aas.ExtraAttackChance) {
+          swingsMH += swingsPerSecond(effDelayMH) * (aas.ExtraAttackChance / 100);
+        }
         let swingsOH = 0;
         let dmgPerSwingOH = 0;
         if (weaponOH && !use2H) {
@@ -484,7 +494,8 @@
             backstabDPS = hitPct * backstabDmg * backstabHitsPerSec * stabs;
         }
 
-        const totalDPS = meleeDPS + kickDPS + backstabDPS;
+        const critChance = getCritChance(cls, aas);
+        const totalDPS = (meleeDPS + kickDPS + backstabDPS) * (1 + critChance);
 
         document.getElementById('outHitChance').textContent = (hitPct * 100).toFixed(1) + '%';
         document.getElementById('outDoubleAttack').textContent = daChance.toFixed(1) + '%';
