@@ -341,14 +341,17 @@
         return (rollChance / 100) * multWhenProc + (1 - rollChance / 100) * 1;
     }
     // Max multiplier for display (server caps proc at maxExtra).
-    function rollDamageMultiplierMax(level, isMonk) {
-        if (isMonk && level >= 65) return 300 / 100;
-        if (level >= 65 || (isMonk && level >= 63)) return 230 / 100;
-        if (level >= 63 || (isMonk && level >= 60)) return 225 / 100;
-        if (level >= 60 || (isMonk && level >= 56)) return 220 / 100;
-        if (level >= 56) return 210 / 100;
-        if (level >= 51 || isMonk) return 200 / 100;
-        return 1;
+    // 2H warrior parses (e.g. Vanazir max 652) run ~8% below 1H caps; scale down when use2H.
+    function rollDamageMultiplierMax(level, isMonk, use2HWarrior) {
+        let mult = 1;
+        if (isMonk && level >= 65) mult = 300 / 100;
+        else if (level >= 65 || (isMonk && level >= 63)) mult = 230 / 100;
+        else if (level >= 63 || (isMonk && level >= 60)) mult = 225 / 100;
+        else if (level >= 60 || (isMonk && level >= 56)) mult = 220 / 100;
+        else if (level >= 56) mult = 210 / 100;
+        else if (level >= 51 || isMonk) mult = 200 / 100;
+        if (use2HWarrior) mult = 1 + (mult - 1) * 0.92;
+        return mult;
     }
     function getSkillBaseDamageKick(skillLevel) {
         let base = 3;
@@ -499,7 +502,12 @@
 
         let dmgPerSwingMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
         const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
-        dmgPerSwingMH = Math.floor(dmgPerSwingMH * monkMult) + damageBonusMH + itemDmgBonus;
+        if (use2H && cls === 'Warrior') {
+            const scaled = 1 + (monkMult - 1) * 0.92;
+            dmgPerSwingMH = Math.floor(dmgPerSwingMH * scaled) + damageBonusMH + itemDmgBonus;
+        } else {
+            dmgPerSwingMH = Math.floor(dmgPerSwingMH * monkMult) + damageBonusMH + itemDmgBonus;
+        }
 
         const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
 
@@ -750,7 +758,9 @@
             rollPartMH = Math.floor(rollPartMH * archeryMult);
         }
         const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
-        let dmgPerSwingMH = Math.floor(rollPartMH * monkMult) + damageBonusMH + itemDmgBonus;
+        let monkMultMH = monkMult;
+        if (use2H && cls === 'Warrior') monkMultMH = 1 + (monkMult - 1) * 0.92;
+        let dmgPerSwingMH = Math.floor(rollPartMH * monkMultMH) + damageBonusMH + itemDmgBonus;
 
         let minHitMH = 1, maxHitMH = 1;
         if (baseDmgMH > 0) {
@@ -764,7 +774,7 @@
                 rollMinRaw = Math.floor(rollMinRaw * archeryMult);
                 rollMaxRaw = Math.floor(rollMaxRaw * archeryMult);
             }
-            const multMax = rollDamageMultiplierMax(level, cls === 'Monk');
+            const multMax = rollDamageMultiplierMax(level, cls === 'Monk', use2H && cls === 'Warrior');
             minHitMH = Math.max(1, Math.floor(rollMinRaw * 1) + damageBonusMH + itemDmgBonus);
             maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgBonus;
         }
@@ -795,7 +805,7 @@
             dmgPerSwingOH = Math.floor(rollPartOH * multOH) + itemDmgBonusOH;
             const rollMinRawOH = Math.max(baseOH, Math.floor((1 * baseOH + 5) / 10));
             const rollMaxRawOH = Math.floor((20 * baseOH + 5) / 10);
-            const multMaxOH = rollDamageMultiplierMax(level, false);
+            const multMaxOH = rollDamageMultiplierMax(level, false, false);
             minHitOH = Math.max(1, Math.floor(rollMinRawOH * 1) + itemDmgBonusOH);
             maxHitOH = Math.floor(rollMaxRawOH * multMaxOH) + itemDmgBonusOH;
             const effOH = effectiveDelay(delayOH, combinedHaste, false);
