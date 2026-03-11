@@ -9,7 +9,7 @@
   },
   "classes": {
     "Warrior": {
-      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HBlunt": 252, "2HBlunt": 252, "1HPiercing": 252, "2HPiercing": 252 },
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 245, "1HSlash": 250, "2HSlash": 250, "1HBlunt": 250, "2HBlunt": 250, "1HPiercing": 250, "2HPiercing": 250 },
       "str": 280,
       "dex": 280,
       "agi": 280,
@@ -28,7 +28,7 @@
       ]
     },
     "Rogue": {
-      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HPiercing": 252, "backstab": 252 },
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 245, "1HPiercing": 250, "backstab": 252 },
       "str": 280,
       "dex": 280,
       "agi": 280,
@@ -76,7 +76,7 @@
       ]
     },
     "Paladin": {
-      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HBlunt": 252 },
+      "skills": { "offense": 225, "defense": 225, "doubleAttack": 225, "dualWield": 225, "1HSlash": 225, "2HSlash": 225, "1HBlunt": 225 },
       "str": 280,
       "dex": 280,
       "agi": 280,
@@ -93,7 +93,7 @@
       ]
     },
     "Shadow Knight": {
-      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "2HSlash": 252, "1HPiercing": 252 },
+      "skills": { "offense": 225, "defense": 225, "doubleAttack": 225, "dualWield": 225, "1HSlash": 225, "2HSlash": 225, "1HPiercing": 225 },
       "str": 280,
       "dex": 280,
       "agi": 280,
@@ -110,7 +110,7 @@
       ]
     },
     "Bard": {
-      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 252, "1HSlash": 252, "1HPiercing": 252 },
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 245, "1HSlash": 250, "1HPiercing": 250 },
       "str": 280,
       "dex": 280,
       "agi": 280,
@@ -123,7 +123,7 @@
       ]
     },
     "Beastlord": {
-      "skills": { "offense": 252, "defense": 240, "doubleAttack": 252, "dualWield": 252, "handToHand": 252, "1HBlunt": 252 },
+      "skills": { "offense": 252, "defense": 240, "doubleAttack": 252, "dualWield": 245, "handToHand": 250, "1HBlunt": 225, "2HBlunt": 225 },
       "str": 280,
       "dex": 280,
       "agi": 280,
