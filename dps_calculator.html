@@ -442,6 +442,17 @@
     function getToHit(offenseSkill, weaponSkill, accuracy) {
         return 7 + offenseSkill + weaponSkill + (accuracy || 0);
     }
+    // Map weapon.skill (item_stats) to dps_config skill keys. Item uses "1H Slashing", config uses "1HSlash".
+    function weaponSkillToConfigKey(weaponSkill, isRanger) {
+        if (!weaponSkill) return isRanger ? 'archery' : '1HSlash';
+        const raw = String(weaponSkill).replace(/\s/g, '');
+        const map = {
+            '1HSlashing': '1HSlash', '2HSlashing': '2HSlash',
+            'HandtoHand': 'handToHand',
+            'Piercing': '1HPiercing'
+        };
+        return map[raw] || raw;
+    }
     function getDoubleAttackChance(skill, level, aas) {
         let chance = skill + level;
         chance += (aas.GiveDoubleAttack || 0) * 5;
@@ -568,7 +579,7 @@
         const defenseSkill = (cfg.skills && cfg.skills.defense) || 252;
         const isRanger = cls === 'Ranger';
 
-        const skillKey = weapon && weapon.skill ? weapon.skill.replace(/\s/g, '') : (isRanger ? 'archery' : '1HSlash');
+        const skillKey = weaponSkillToConfigKey(weapon && weapon.skill, isRanger);
         const ws = (cfg.skills && cfg.skills[skillKey]) || 252;
 
         const accuracy = aas.AccuracyAll || 0;
@@ -673,7 +684,7 @@
         const offenseSkill = (cfg.skills && cfg.skills.offense) || 252;
         const isRanger = cls === 'Ranger';
 
-        const skillKey = weapon && weapon.skill ? weapon.skill.replace(/\s/g, '') : (isRanger ? 'archery' : '1HSlash');
+        const skillKey = weaponSkillToConfigKey(weapon && weapon.skill, isRanger);
         const ws = (cfg.skills && cfg.skills[skillKey]) || 252;
 
         const accuracy = aas.AccuracyAll || 0;
@@ -832,8 +843,7 @@
             weaponOH = weaponsBySlot.SECONDARY.find(w => w.id === sid) || itemStats[sid];
         }
 
-        const weaponSkill = weaponMH ? (cfg.skills && (cfg.skills['1HSlash'] || cfg.skills['1HBlunt'] || cfg.skills['1HPiercing'] || cfg.skills['2HSlash'] || cfg.skills['2HBlunt'] || cfg.skills['2HPiercing'] || cfg.skills.archery || cfg.skills.handToHand)) || 252 : 252;
-        const skillKey = weaponMH && weaponMH.skill ? weaponMH.skill.replace(/\s/g, '') : (isRanger ? 'archery' : '1HSlash');
+        const skillKey = weaponSkillToConfigKey(weaponMH && weaponMH.skill, isRanger);
         const ws = (cfg.skills && cfg.skills[skillKey]) || 252;
 
         const accuracy = aas.AccuracyAll || 0;
