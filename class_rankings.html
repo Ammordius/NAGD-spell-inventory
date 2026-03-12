@@ -2491,7 +2491,7 @@
 
                 const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
                 const benefitingAbbrevs = Object.keys(byClass);
-                const rows = [];
+                let rows = [];
                 toonUpgradesMatchedChars.forEach(char => {
                     const classAbbrev = char.class ? (CLASS_TO_ABBREV[char.class] || '') : '';
                     if (!benefitingAbbrevs.includes(classAbbrev)) return;
@@ -2545,7 +2545,7 @@
                 html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
                 const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
-                const rows = [];
+                let rows = [];
                 toonUpgradesMatchedChars.forEach(char => {
                     let benefit = '—';
                     let otherOptionsHtml = '—';
@@ -2616,6 +2616,23 @@
                     const stats = itemStatsCache[Number(id)];
                     itemName = (stats && stats.name) ? stats.name : (elementalDisplayNames[String(id)] || 'Item ' + id);
                     return { itemId: id, itemName };
+                }
+            }
+            // Fallback: search elementalSlotOptions for pattern_name match (exact or partial, e.g. "Timeless Leather Tunic" matches "Timeless Leather Tunic Pattern")
+            if (elementalSlotOptions && elementalSlotOptions.by_slot_id && norm) {
+                for (const slotId of Object.keys(elementalSlotOptions.by_slot_id)) {
+                    const opts = elementalSlotOptions.by_slot_id[slotId] || [];
+                    for (const opt of opts) {
+                        const optNorm = normalizeItemNameForLookup(opt.pattern_name);
+                        if (optNorm === norm || optNorm.indexOf(norm) !== -1 || norm.indexOf(optNorm) !== -1) {
+                            const byClass = opt.by_class || {};
+                            const firstKey = Object.keys(byClass).sort()[0];
+                            const firstId = firstKey ? (byClass[firstKey] || '').trim() : '';
+                            if (firstId) {
+                                return { itemId: firstId, itemName: opt.pattern_name };
+                            }
+                        }
+                    }
                 }
             }
             return null;
