@@ -30,6 +30,11 @@ MULE_CHARACTERS = [
     "Magicianboy", "Necromancerboy", "Paladinboy", "Shamanboy"
 ]
 
+# GoatCounter analytics snippet (included in all generated HTML pages)
+GOATCOUNTER_SCRIPT = '''    <script data-goatcounter="https://ammordius.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
+'''
+
 # Officer mule characters
 OFFICER_MULE_CHARACTERS = [
     "Nagalchpoistink", "Nagbaker", "Nagbows", "Nagbrew",
@@ -1026,7 +1031,7 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
         });
     })();
     </script>
-    </div>
+""" + GOATCOUNTER_SCRIPT + """    </div>
 </body>
 </html>
 """
@@ -1513,6 +1518,7 @@ def generate_mob_tracker_html(base_dir: str) -> str:
     }
 })();
 </script>
+''' + GOATCOUNTER_SCRIPT + '''
 </body>
 </html>
 '''
@@ -2441,6 +2447,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     
     html += """
     </div>
+""" + GOATCOUNTER_SCRIPT + """
 </body>
 </html>
 """
@@ -2595,6 +2602,7 @@ def generate_leaderboard_html(period_name, aa_leaderboard, hp_leaderboard, perio
     
     html += """
     </div>
+""" + GOATCOUNTER_SCRIPT + """
 </body>
 </html>
 """
@@ -2627,7 +2635,7 @@ def generate_date_range_delta_html(start_date, end_date, base_dir='delta_snapsho
     <h1>TAKP Date Range Delta Report</h1>
     <p>No delta data found for date range: {start_date} to {end_date}</p>
     <p>This may be because daily delta JSON files are not available for this date range.</p>
-</body>
+{GOATCOUNTER_SCRIPT}</body>
 </html>"""
     
     # Use the existing generate_delta_html function but we need to reconstruct
@@ -3766,6 +3774,7 @@ def generate_delta_history(base_dir):
         }
         
     </script>
+""" + GOATCOUNTER_SCRIPT + """
 </body>
 </html>
 """
