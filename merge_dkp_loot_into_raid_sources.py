@@ -168,8 +168,8 @@ def main() -> int:
         raid_path.write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Wrote {raid_path}")
 
-        if args.write_name_to_id:
-            _write_name_to_id(raid_sources, OUT_NAME_TO_ID, dry_run=False)
+    if args.write_name_to_id:
+        _write_name_to_id(raid_sources, OUT_NAME_TO_ID, dry_run=False)
 
     return 0
 
@@ -207,10 +207,84 @@ def _merge_elemental_dkp_into_name_to_id(name_to_id: dict[str, int]) -> None:
         return
 
 
+def _merge_item_stats_into_name_to_id(name_to_id: dict[str, int]) -> int:
+    """Add item_stats.json (id -> {name, ...}) to name_to_id. Returns count added.
+    Ensures spell focus items and all Magelo items resolve by name even when not in raid loot."""
+    added = 0
+    for path in [
+        SCRIPT_DIR / "data" / "item_stats.json",
+        SCRIPT_DIR.parent / "magelo" / "data" / "item_stats.json",
+    ]:
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        for sid, ent in data.items():
+            if not isinstance(ent, dict):
+                continue
+            try:
+                iid = int(sid)
+            except (ValueError, TypeError):
+                continue
+            name = (ent.get("name") or "").strip()
+            if not name or is_placeholder_name(name):
+                continue
+            norm = normalize_name(name)
+            if norm and norm not in name_to_id:
+                name_to_id[norm] = iid
+                added += 1
+        return added
+    return added
+
+
+def _merge_spell_focii_into_name_to_id(name_to_id: dict[str, int]) -> int:
+    """Add spell_focii_level65.json items (with id) to name_to_id. Returns count added.
+    Ensures focus items like Ethereal Silk Leggings (28649) resolve even if missing from other sources."""
+    added = 0
+    for path in [
+        SCRIPT_DIR / "spell_focii_level65.json",
+        SCRIPT_DIR.parent / "Server" / "spell_focii_level65.json",
+        SCRIPT_DIR.parent / "magelo" / "spell_focii_level65.json",
+    ]:
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        focii = data.get("focii", []) if isinstance(data, dict) else []
+        for focus in focii:
+            if not isinstance(focus, dict):
+                continue
+            for item in focus.get("items", []):
+                if not isinstance(item, dict):
+                    continue
+                iid = item.get("id")
+                name = (item.get("name") or "").strip()
+                if iid is None or not name:
+                    continue
+                try:
+                    iid = int(iid)
+                except (ValueError, TypeError):
+                    continue
+                norm = normalize_name(name)
+                if norm and norm not in name_to_id:
+                    name_to_id[norm] = iid
+                    added += 1
+        return added
+    return added
+
+
 def _write_name_to_id(raid_sources: dict, out_path: Path, *, dry_run: bool) -> None:
-    """Build normalized name -> item_id from raid_sources and write JSON (or print if dry_run).
-    Also merges elemental DKP purchase names from dkp_elemental_to_magelo.json."""
+    """Build normalized name -> item_id from multiple sources and write JSON (or print if dry_run).
+    Sources (in order, later do not override): raid_sources, item_stats.json, spell_focii_level65.json,
+    dkp_elemental_to_magelo.json. This ensures spell focus items and all Magelo items resolve by name."""
     name_to_id: dict[str, int] = {}
+    # 1. raid_item_sources (raid + DKP loot)
     for sid, ent in raid_sources.items():
         try:
             iid = int(sid)
@@ -222,6 +296,15 @@ def _write_name_to_id(raid_sources: dict, out_path: Path, *, dry_run: bool) -> N
         norm = normalize_name(name)
         if norm and norm not in name_to_id:
             name_to_id[norm] = iid
+    # 2. item_stats.json (full Magelo item DB - spell focii, quest items, etc.)
+    stats_added = _merge_item_stats_into_name_to_id(name_to_id)
+    if stats_added:
+        print(f"  item_name_to_id: +{stats_added} from item_stats.json")
+    # 3. spell_focii_level65.json (focus items that may have different names)
+    focii_added = _merge_spell_focii_into_name_to_id(name_to_id)
+    if focii_added:
+        print(f"  item_name_to_id: +{focii_added} from spell_focii_level65.json")
+    # 4. elemental DKP purchase names
     _merge_elemental_dkp_into_name_to_id(name_to_id)
     # JSON keys must be strings
     out_obj = {k: v for k, v in name_to_id.items()}
