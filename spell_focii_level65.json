@@ -84,12 +84,14 @@
         {
           "name": "Batfang Headband",
           "zone": "Dragon Necropolis",
-          "mob": "The Great Oowomp"
+          "mob": "The Great Oowomp",
+          "id": 10108
         },
         {
           "name": "Chestplate of the Constant",
           "zone": "Temple of Sol Ro",
-          "mob": "Quest: Chestplate of the Constant"
+          "mob": "Quest: Chestplate of the Constant",
+          "id": 4926
         },
         {
           "name": "Clawed Knuckle-Ring",
@@ -100,17 +102,20 @@
         {
           "name": "Drakescale Belt",
           "zone": "Solusek's Eye",
-          "mob": "Singe"
+          "mob": "Singe",
+          "id": 2338
         },
         {
           "name": "Totemic Breastplate",
           "zone": "Temple of Sol Ro",
-          "mob": "Quest: Totemic Breastplate"
+          "mob": "Quest: Totemic Breastplate",
+          "id": 4946
         },
         {
           "name": "Amulet of Insight",
           "zone": "Icewell Keep",
-          "mob": "Royal Scribe Kaavin"
+          "mob": "Royal Scribe Kaavin",
+          "id": 19721
         },
         {
           "name": "Dragon Scaled Mask",
@@ -128,7 +133,8 @@
         {
           "name": "Rokyls Channelling Crystal",
           "zone": "Nagafen's Lair",
-          "mob": "Magus Rokyl"
+          "mob": "Magus Rokyl",
+          "id": 10219
         },
         {
           "name": "Ceramic Shield of Valor",
@@ -146,12 +152,14 @@
         {
           "name": "Headsmans Hoop",
           "zone": "The Plane of Justice",
-          "mob": "The Seventh Hammer"
+          "mob": "The Seventh Hammer",
+          "id": 15929
         },
         {
           "name": "Idol of the Tempest Storm",
           "zone": "The Plane of Storms",
-          "mob": "Gurebk, Lord of Krendic"
+          "mob": "Gurebk, Lord of Krendic",
+          "id": 20604
         }
       ]
     },
@@ -229,27 +237,32 @@
         {
           "name": "Medicine Totem",
           "zone": "Frontier Mountains",
-          "mob": "Blugtigin"
+          "mob": "Blugtigin",
+          "id": 11967
         },
         {
           "name": "Turtleshell Helm",
           "zone": "The Western Plains of Karana",
-          "mob": "Chief Goonda"
+          "mob": "Chief Goonda",
+          "id": 10100
         },
         {
           "name": "Zaharns Coronet",
           "zone": "The Permafrost Caverns",
-          "mob": "High Priest Zaharn"
+          "mob": "High Priest Zaharn",
+          "id": 3000
         },
         {
           "name": "Book of Obulus",
           "zone": "Karnor's Castle",
-          "mob": "spectral turnkey"
+          "mob": "spectral turnkey",
+          "id": 14745
         },
         {
           "name": "Fine Antique Veil",
           "zone": "Plane of Knowledge",
-          "mob": "Quest: Drelynn's Gem Collection"
+          "mob": "Quest: Drelynn's Gem Collection",
+          "id": 28242
         },
         {
           "name": "Frakadar's Talisman",
@@ -260,12 +273,14 @@
         {
           "name": "Meditative Blanket",
           "zone": "Trakanon's Teeth",
-          "mob": "Titail Sinok"
+          "mob": "Titail Sinok",
+          "id": 1631
         },
         {
           "name": "Idol of the Underking",
           "zone": "The Hole",
-          "mob": "Master Yael"
+          "mob": "Master Yael",
+          "id": 14762
         },
         {
           "name": "Mask of Fall",
@@ -283,7 +298,8 @@
         {
           "name": "Ceramic Totem of The Rathe",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Totem Of The Rathe"
+          "mob": "Recipe : Ceramic Totem Of The Rathe",
+          "id": 29033
         },
         {
           "name": "Knucklebone Beaded Veil",
@@ -295,12 +311,14 @@
         {
           "name": "Mantle of Flame Wisdom",
           "zone": "The Plane of Fire",
-          "mob": "Doomfire Warmaster"
+          "mob": "Doomfire Warmaster",
+          "id": 13644
         },
         {
           "name": "Polished Smoothmetal Torque",
           "zone": "The Plane of Innovation",
-          "mob": "Manaetic Prototype X"
+          "mob": "Manaetic Prototype X",
+          "id": 9496
         },
         {
           "name": "Primal Mask of the Earthcrafter",
@@ -312,7 +330,8 @@
         {
           "name": "Scaled Avatar's Sleeves",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Chain Ornate Tranquility Armor"
+          "mob": "Quest: Chain Ornate Tranquility Armor",
+          "id": 11518
         },
         {
           "name": "Trydan's Armplates of Nobility",
@@ -323,7 +342,8 @@
         {
           "name": "Vambraces of Vengeful Fury",
           "zone": "The Plane of Tranquility",
-          "mob": "Plate Ornate Tranquility Armor"
+          "mob": "Plate Ornate Tranquility Armor",
+          "id": 11499
         },
         {
           "name": "Veil of War Wise Eyes",
@@ -334,7 +354,8 @@
         {
           "name": "Wanderer's Sylvan Sleeves",
           "zone": "The Plane of Tranquility",
-          "mob": "Leather Ornate Tranquility Armor"
+          "mob": "Leather Ornate Tranquility Armor",
+          "id": 11549
         }
       ]
     },
@@ -430,7 +451,8 @@
         {
           "name": "Sharp Ended Broken Lever",
           "zone": "The Plane of Innovation",
-          "mob": "Manaetic Prototype IX"
+          "mob": "Manaetic Prototype IX",
+          "id": 24771
         },
         {
           "name": "Staff of Swiftness",
@@ -462,7 +484,8 @@
         {
           "name": "Wand of the War Wizard",
           "zone": "Drunder, the Fortress of Zek",
-          "mob": "Anival the Blade"
+          "mob": "Anival the Blade",
+          "id": 26746
         }
       ]
     },
@@ -474,17 +497,20 @@
         {
           "name": "Ceramic Rod of Storms",
           "zone": "POTTERY",
-          "mob": "Recipe: Ceramic Rod of Storms"
+          "mob": "Recipe: Ceramic Rod of Storms",
+          "id": 32242
         },
         {
           "name": "Ornate Sceptre",
           "zone": "The Plane of Justice",
-          "mob": "A Burning Nemesis"
+          "mob": "A Burning Nemesis",
+          "id": 21889
         },
         {
           "name": "Raintravelers Overcloak",
           "zone": "The Plane of Storms",
-          "mob": "Jeplak, Lord of Srerendi"
+          "mob": "Jeplak, Lord of Srerendi",
+          "id": 15828
         },
         {
           "name": "Stormriders Signet",
@@ -503,17 +529,20 @@
         {
           "name": "Carved Jetsam Short Staff",
           "zone": "The Plane of Storms",
-          "mob": "Laruken the Rigid"
+          "mob": "Laruken the Rigid",
+          "id": 21891
         },
         {
           "name": "Flickering Powersource",
           "zone": "The Plane of Innovation",
-          "mob": "Junk Beast"
+          "mob": "Junk Beast",
+          "id": 27098
         },
         {
           "name": "Putrid Eye of the Possessed",
           "zone": "Ruins of Lxanvom (Crypt of Decay)",
-          "mob": "Plague Lord Hetral"
+          "mob": "Plague Lord Hetral",
+          "id": 20897
         }
       ]
     },
@@ -552,42 +581,50 @@
         {
           "name": "Allize Volew Medicine Bag",
           "zone": "The Feerott",
-          "mob": "lizardman mystic"
+          "mob": "lizardman mystic",
+          "id": 14199
         },
         {
           "name": "Aviak Charm",
           "zone": "The Southern Plains of Karana",
-          "mob": "aviak avocet"
+          "mob": "aviak avocet",
+          "id": 13737
         },
         {
           "name": "Golden Ear Stud",
           "zone": "Lake Rathetear",
-          "mob": "gnoll embalmer"
+          "mob": "gnoll embalmer",
+          "id": 10320
         },
         {
           "name": "Hollowed Bone Bracers",
           "zone": "Najena",
-          "mob": "Rathyl reincarnate"
+          "mob": "Rathyl reincarnate",
+          "id": 1321
         },
         {
           "name": "The Skull of Torture",
           "zone": "Kurn's Tower",
-          "mob": "Quest: Mirgon Dower's Head"
+          "mob": "Quest: Mirgon Dower's Head",
+          "id": 1115
         },
         {
           "name": "Kobold-hide Boots",
           "zone": "Solusek's Eye",
-          "mob": "kobold predator"
+          "mob": "kobold predator",
+          "id": 2337
         },
         {
           "name": "Reed Belt",
           "zone": "Dagnor's Cauldron",
-          "mob": "Bilge Farfathom"
+          "mob": "Bilge Farfathom",
+          "id": 2407
         },
         {
           "name": "Serpentine Bracer",
           "zone": "Ruins of Old Guk",
-          "mob": "a reanimated hand"
+          "mob": "a reanimated hand",
+          "id": 10148
         },
         {
           "name": "Bone-Clasped Girdle",
@@ -605,17 +642,20 @@
         {
           "name": "Coldain Military Wristguard",
           "zone": "The Great Divide",
-          "mob": "Quest- Coldain Military Wristguard"
+          "mob": "Quest- Coldain Military Wristguard",
+          "id": 30168
         },
         {
           "name": "Cryosilk Cap",
           "zone": "Plane of Fear",
-          "mob": "a spinechiller spider"
+          "mob": "a spinechiller spider",
+          "id": 1211
         },
         {
           "name": "Ceramic Shackles of Torment",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Shackles Of Torment"
+          "mob": "Recipe : Ceramic Shackles Of Torment",
+          "id": 29034
         },
         {
           "name": "Grimror's Sleeves of the Plagues",
@@ -633,7 +673,8 @@
         {
           "name": "Orb of the Fearless",
           "zone": "?",
-          "mob": "?"
+          "mob": "?",
+          "id": 20663
         }
       ]
     },
@@ -787,22 +828,26 @@
         {
           "name": "Gallenites Sapphire Bracelet",
           "zone": "Spell: Summon Sapphire Bracelet",
-          "mob": "Quest: Rallican's Bracer"
+          "mob": "Quest: Rallican's Bracer",
+          "id": 29798
         },
         {
           "name": "Gallenites Opal Bracelet",
           "zone": "Spell: Summon Opal Bracelet",
-          "mob": "Jolum"
+          "mob": "Jolum",
+          "id": 23507
         },
         {
           "name": "Gallenites Ruby Bracelet",
           "zone": "Spell: Summon Ruby Bracelet",
-          "mob": "Jolum"
+          "mob": "Jolum",
+          "id": 23508
         },
         {
           "name": "Gallenites Jade Bracelet",
           "zone": "Spell: Summon Jade Bracelet",
-          "mob": "Jolum"
+          "mob": "Jolum",
+          "id": 23506
         }
       ]
     },
@@ -814,42 +859,50 @@
         {
           "name": "Azure Sleeves",
           "zone": "The Ruins of Old Guk",
-          "mob": "a minotaur patriarch"
+          "mob": "a minotaur patriarch",
+          "id": 1361
         },
         {
           "name": "Lupine Claw Gauntlets",
           "zone": "Everfrost Peaks",
-          "mob": "Lupine Claw Gauntlets"
+          "mob": "Lupine Claw Gauntlets",
+          "id": 2402
         },
         {
           "name": "Mammoth Hide Cloak",
           "zone": "The Permafrost Caverns",
-          "mob": "a goblin alchemist"
+          "mob": "a goblin alchemist",
+          "id": 2913
         },
         {
           "name": "Robe of the Oracle",
           "zone": "Ocean of Tears",
-          "mob": "Oracle of K`Arnon"
+          "mob": "Oracle of K`Arnon",
+          "id": 1354
         },
         {
           "name": "Book of Tactics",
           "zone": "Kael Drakkel",
-          "mob": "Gkrean Prophet of Tallon"
+          "mob": "Gkrean Prophet of Tallon",
+          "id": 25038
         },
         {
           "name": "Imperial Wardog Collar",
           "zone": "Chardok",
-          "mob": "Deathfang"
+          "mob": "Deathfang",
+          "id": 5794
         },
         {
           "name": "Polished Mithril Mask",
           "zone": "Nagafen's Lair",
-          "mob": "Magus Rokyl"
+          "mob": "Magus Rokyl",
+          "id": 4505
         },
         {
           "name": "Wurm Scale Coat",
           "zone": "The Burning Wood",
-          "mob": "Phurzikon"
+          "mob": "Phurzikon",
+          "id": 11976
         },
         {
           "name": "Fedora Secundae",
@@ -866,7 +919,8 @@
         {
           "name": "Jungle Spider Fur Cap",
           "zone": "Cazic Thule",
-          "mob": "a toxic jungle hunter"
+          "mob": "a toxic jungle hunter",
+          "id": 27880
         },
         {
           "name": "Mask of the Dragon Slayer",
@@ -889,17 +943,20 @@
         {
           "name": "Ceramic Incense Burner of Ro",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Incense Burner Of Ro"
+          "mob": "Recipe : Ceramic Incense Burner Of Ro",
+          "id": 29031
         },
         {
           "name": "Honorary Amulet",
           "zone": "The Plane of Valor",
-          "mob": "Aerin`Dar"
+          "mob": "Aerin`Dar",
+          "id": 8366
         },
         {
           "name": "War Crested Ring",
           "zone": "Drunder, the Fortress of Zek",
-          "mob": "an Enraged War Boar"
+          "mob": "an Enraged War Boar",
+          "id": 10947
         }
       ]
     },
@@ -1038,37 +1095,44 @@
         {
           "name": "Granite Bracer",
           "zone": "The Rathe Mountains",
-          "mob": "Petrifin"
+          "mob": "Petrifin",
+          "id": 4311
         },
         {
           "name": "Polished Stone Anklet",
           "zone": "The Field of Bone",
-          "mob": "a burynai cutter"
+          "mob": "a burynai cutter",
+          "id": 10129
         },
         {
           "name": "Ring of Goblin Lords",
           "zone": "Solusek's Eye",
-          "mob": "Solusek goblin king"
+          "mob": "Solusek goblin king",
+          "id": 10340
         },
         {
           "name": "Chrysoberyl Talisman",
           "zone": "The Ruins of Old Guk",
-          "mob": "a minotaur elder"
+          "mob": "a minotaur elder",
+          "id": 10146
         },
         {
           "name": "Green Silken Drape",
           "zone": "Nagafen's Lair",
-          "mob": "noxious spider"
+          "mob": "noxious spider",
+          "id": 1412
         },
         {
           "name": "Iksar Hide Boots",
           "zone": "The Ruins of Sebilis",
-          "mob": "froglok ilis wizard"
+          "mob": "froglok ilis wizard",
+          "id": 4318
         },
         {
           "name": "Silken Cat-fur Girdle",
           "zone": "Trakanon's Teeth",
-          "mob": "Sigra"
+          "mob": "Sigra",
+          "id": 2740
         },
         {
           "name": "Bracelet of the Sky",
@@ -1144,7 +1208,8 @@
         {
           "name": "Breastplate of Vengeful Fury",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Plate Ornate Tranquility Armor"
+          "mob": "Quest: Plate Ornate Tranquility Armor",
+          "id": 15770
         }
       ]
     },
@@ -1182,62 +1247,74 @@
         {
           "name": "Braided Ivy Cords",
           "zone": "The Lesser Faydark",
-          "mob": "Thistle Underbrush"
+          "mob": "Thistle Underbrush",
+          "id": 1367
         },
         {
           "name": "Cape of Midnight Mist",
           "zone": "The Castle of Mistmoore",
-          "mob": "Butler Syncall"
+          "mob": "Butler Syncall",
+          "id": 1407
         },
         {
           "name": "Cat Skull Cap",
           "zone": "The Liberated Citadel of Runnyeye",
-          "mob": "a Pickclaw mindripper"
+          "mob": "a Pickclaw mindripper",
+          "id": 12372
         },
         {
           "name": "Etched Iron Helm",
           "zone": "The Stonebrunt Mountains",
-          "mob": "a highland kobold"
+          "mob": "a highland kobold",
+          "id": 2548
         },
         {
           "name": "Gatorscale Sleeves",
           "zone": "The City of Guk",
-          "mob": "an ancient croc"
+          "mob": "an ancient croc",
+          "id": 2458
         },
         {
           "name": "Fine Antique Amice",
           "zone": "Plane of Knowledge",
-          "mob": "Quest: Lohie's Music Exhibit"
+          "mob": "Quest: Lohie's Music Exhibit",
+          "id": 28239
         },
         {
           "name": "Golden Efreeti Boots",
           "zone": "Nagafen's Lair",
-          "mob": "Efreeti Lord Djarn"
+          "mob": "Efreeti Lord Djarn",
+          "id": 4407
         },
         {
           "name": "Platinum Tiara",
           "zone": "The Ruins of Old Guk",
-          "mob": "a froglok tactician"
+          "mob": "a froglok tactician",
+          "id": 30363
         },
         {
           "name": "Sarnak Arcane Fetish",
           "zone": "Chardok",
-          "mob": "Most Mobs"
+          "mob": "Most Mobs",
+          "id": 14753
         },
         {
           "name": "Teachers Syllabus",
           "zone": "Tower of Frozen Shadow",
-          "mob": "an angry librarian"
+          "mob": "an angry librarian",
+          "id": 29115
         },
         {
           "name": "Mosquito Hide Belt",
           "zone": "Accursed Temple of CazicThule",
-          "mob": "a graystriped mosquito"
+          "mob": "a graystriped mosquito",
+          "id": 27890
         },
         {
           "name": "Mosquito Hide Mask",
           "zone": "Accursed Temple of CazicThule",
-          "mob": "a virulent mosquito"
+          "mob": "a virulent mosquito",
+          "id": 27879
         },
         {
           "name": "Ring of the Shissar",
@@ -1255,7 +1332,8 @@
         {
           "name": "Ceramic Hammer of Innovation",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Hammer Of Innovation"
+          "mob": "Recipe : Ceramic Hammer Of Innovation",
+          "id": 29036
         },
         {
           "name": "Obsidian Plated Pauldrons",
@@ -1274,7 +1352,8 @@
         {
           "name": "Signet of the Valorous",
           "zone": "The Plane of Valor",
-          "mob": "The Sleep Walker"
+          "mob": "The Sleep Walker",
+          "id": 10422
         }
       ]
     },
@@ -1307,12 +1386,14 @@
         {
           "name": "Cog Encrusted Epaulets",
           "zone": "The Plane of Innovation",
-          "mob": "Manaetic Prototype X"
+          "mob": "Manaetic Prototype X",
+          "id": 13646
         },
         {
           "name": "First Sergeants Insignia",
           "zone": "Halls of Honor",
-          "mob": "Halgoz Rellinic"
+          "mob": "Halgoz Rellinic",
+          "id": 7131
         },
         {
           "name": "Mantle of the Rainmaker",
@@ -1323,12 +1404,14 @@
         {
           "name": "Opalescent Seascale",
           "zone": "Reef of Coirnav",
-          "mob": "Hraquis Arch Magus"
+          "mob": "Hraquis Arch Magus",
+          "id": 20506
         },
         {
           "name": "Wicked Bone Atlatl",
           "zone": "Ruins of Lxanvom (Crypt of Decay)",
-          "mob": "Firebone Archmagus"
+          "mob": "Firebone Archmagus",
+          "id": 20628
         }
       ]
     },
@@ -1340,7 +1423,8 @@
         {
           "name": "Blood Runed Battle Wand",
           "zone": "Drunder, the Fortress of Zek (potactics)",
-          "mob": "Glykus Helmir"
+          "mob": "Glykus Helmir",
+          "id": 21874
         },
         {
           "name": "Circular Shield of the Blaze",
@@ -1357,12 +1441,14 @@
         {
           "name": "Ivory Candle Skull",
           "zone": "Doomfire, the Burning Lands",
-          "mob": "Wild Fiery Spirit Steed"
+          "mob": "Wild Fiery Spirit Steed",
+          "id": 20439
         },
         {
           "name": "Oceanic Kelp Boots",
           "zone": "Reef of Coirnav",
-          "mob": "a supreme anglerfish"
+          "mob": "a supreme anglerfish",
+          "id": 19088
         },
         {
           "name": "Symbol of the Plaguebringer",
@@ -1373,7 +1459,8 @@
         {
           "name": "The Weapon's Driveshaft",
           "zone": "Plane of Innovation",
-          "mob": "Xanamech Nezmirthafen"
+          "mob": "Xanamech Nezmirthafen",
+          "id": 24785
         }
       ]
     },
@@ -1385,22 +1472,26 @@
         {
           "name": "Nakis Tiny Ring",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Tiny Ring"
+          "mob": "Spell: Summon Tiny Ring",
+          "id": 23509
         },
         {
           "name": "Nakis Twisted Ring",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Twisted Ring"
+          "mob": "Spell: Summon Twisted Ring",
+          "id": 23510
         },
         {
           "name": "Nakis Studded Ring",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Studded Ring"
+          "mob": "Spell: Summon Studded Ring",
+          "id": 23511
         },
         {
           "name": "Nakis Spiked Ring",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Spiked Ring"
+          "mob": "Spell: Summon Spiked Ring",
+          "id": 29799
         }
       ]
     },
@@ -1502,37 +1593,44 @@
         {
           "name": "Carved Ivory Mask",
           "zone": "The Ruins of Old Guk",
-          "mob": "a minotaur elder"
+          "mob": "a minotaur elder",
+          "id": 10144
         },
         {
           "name": "Ivory Bracelet",
           "zone": "The Estate of Unrest",
-          "mob": "a reanimated hand"
+          "mob": "a reanimated hand",
+          "id": 10408
         },
         {
           "name": "Nightshade Wreath",
           "zone": "The Castle of Mistmoore",
-          "mob": "Maid Issis"
+          "mob": "Maid Issis",
+          "id": 1408
         },
         {
           "name": "Engraved Bone Pauldrons",
           "zone": "Kael Drakkel",
-          "mob": "Wenglawks Kkeak"
+          "mob": "Wenglawks Kkeak",
+          "id": 25062
         },
         {
           "name": "Flayed Paebala Gloves",
           "zone": "Dragon Necropolis",
-          "mob": "a Chetari Dominator"
+          "mob": "a Chetari Dominator",
+          "id": 26020
         },
         {
           "name": "Robe of Enshroudment",
           "zone": "Neriak - Foreign Quarter",
-          "mob": "X`Ta Timpi"
+          "mob": "X`Ta Timpi",
+          "id": 1355
         },
         {
           "name": "Fetid Flesh Belt",
           "zone": "The Fungus Grove",
-          "mob": "a mutant dreg"
+          "mob": "a mutant dreg",
+          "id": 28743
         },
         {
           "name": "Grotesque Girdle",
@@ -1544,7 +1642,8 @@
         {
           "name": "Slick Leather Courier`s Cape",
           "zone": "Chardok",
-          "mob": "Korucust`s Courier"
+          "mob": "Korucust`s Courier",
+          "id": 5736
         }
       ]
     },
@@ -1642,57 +1741,68 @@
         {
           "name": "Beaded Slime Necklace",
           "zone": "The Liberated Citadel of Runnyeye",
-          "mob": "a slime elemental"
+          "mob": "a slime elemental",
+          "id": 10311
         },
         {
           "name": "Bracelet of Woven Grass",
           "zone": "The City of Guk",
-          "mob": "a froglok scryer"
+          "mob": "a froglok scryer",
+          "id": 10360
         },
         {
           "name": "Gilded Cloth",
           "zone": "The Ruins of Old Guk",
-          "mob": "a froglok noble"
+          "mob": "a froglok noble",
+          "id": 1402
         },
         {
           "name": "Wolf Fur Slippers",
           "zone": "The Permafrost Caverns",
-          "mob": "a goblin scryer"
+          "mob": "a goblin scryer",
+          "id": 1368
         },
         {
           "name": "Djarns Amethyst Ring",
           "zone": "Nagafen's Lair",
-          "mob": "Efreeti Lord Djarn"
+          "mob": "Efreeti Lord Djarn",
+          "id": 10366
         },
         {
           "name": "Fine Antique Corset",
           "zone": "The Plane of Knowledge",
-          "mob": "Quest: Randi's Floral Specimens"
+          "mob": "Quest: Randi's Floral Specimens",
+          "id": 28238
         },
         {
           "name": "Fine Cut, Diamond Inlaid Mask",
           "zone": "The Plane of Knowledge",
-          "mob": "Quest: The Magic Pool"
+          "mob": "Quest: The Magic Pool",
+          "id": 9321
         },
         {
           "name": "Mithril-Runed Tunic",
           "zone": "The Ruins of Old Guk",
-          "mob": "a froglok crusader"
+          "mob": "a froglok crusader",
+          "id": 2405
         },
         {
           "name": "Necklace of Superiority",
           "zone": "The Howling Stones",
-          "mob": "Drusella Sathir"
+          "mob": "Drusella Sathir",
+          "id": 14709
         },
         {
           "name": "Shining Metallic Robes",
           "zone": "Steamfont Mountains",
-          "mob": "Yendar Starpyre"
+          "mob": "Yendar Starpyre",
+          "id": 1360
         },
         {
           "name": "Shiny Robe of the Underfoot",
           "zone": "The Hole",
-          "mob": "Quest: Shiny Robe of the Underfoot"
+          "mob": "Quest: Shiny Robe of the Underfoot",
+          "id": 8960
         },
         {
           "name": "Essence Lens",
@@ -1722,12 +1832,14 @@
         {
           "name": "Arantir's Sandals of Discovery",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 20433
         },
         {
           "name": "Ceramic Totem of Xegony",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Totem Of Xegony"
+          "mob": "Recipe : Ceramic Totem Of Xegony",
+          "id": 29037
         },
         {
           "name": "Dumul's Sleeves of the Brute",
@@ -1738,12 +1850,14 @@
         {
           "name": "Elemental Slippers of the Prime",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 20427
         },
         {
           "name": "Half Spiked Sprocket",
           "zone": "The Plane of Innovation",
-          "mob": "junk beast"
+          "mob": "junk beast",
+          "id": 10368
         },
         {
           "name": "Shimmering Sleeves of Flame",
@@ -1755,7 +1869,8 @@
         {
           "name": "Silken Augmenter's Shoes",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 20424
         },
         {
           "name": "Tallon's War Charm",
@@ -1767,12 +1882,14 @@
         {
           "name": "Tormentor's Chain Collar",
           "zone": "Torment, the Plane of Pain",
-          "mob": "The Keeper of Sorrows"
+          "mob": "The Keeper of Sorrows",
+          "id": 8783
         },
         {
           "name": "Vorshar's Slippers of the Blight",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 20430
         }
       ]
     },
@@ -1784,17 +1901,20 @@
         {
           "name": "A Shimmering Orb",
           "zone": "The City of Guk",
-          "mob": "a froglok scryer"
+          "mob": "a froglok scryer",
+          "id": 10406
         },
         {
           "name": "Adamantite Band",
           "zone": "The Ruins of Old Guk",
-          "mob": "a reanimated hand"
+          "mob": "a reanimated hand",
+          "id": 14749
         },
         {
           "name": "Dusty Ransacker's Pack",
           "zone": "Kaesora",
-          "mob": "spectral guardian"
+          "mob": "spectral guardian",
+          "id": 17081
         },
         {
           "name": "Earring of Essence",
@@ -1805,32 +1925,38 @@
         {
           "name": "Incandescent Mask",
           "zone": "The Temple of Solusek Ro",
-          "mob": "Quest: Incandescent Mask"
+          "mob": "Quest: Incandescent Mask",
+          "id": 2350
         },
         {
           "name": "Robe of the Elements",
           "zone": "The Temple of Solusek Ro",
-          "mob": "Quest: Robe of the Elements"
+          "mob": "Quest: Robe of the Elements",
+          "id": 1356
         },
         {
           "name": "Sarnak Hide Boots",
           "zone": "Chardok",
-          "mob": "Watch Sergeant Riz`oul"
+          "mob": "Watch Sergeant Riz`oul",
+          "id": 5749
         },
         {
           "name": "Shadel Bandit Ring",
           "zone": "The Fungus Grove",
-          "mob": "a Shadel Bandit"
+          "mob": "a Shadel Bandit",
+          "id": 28708
         },
         {
           "name": "Brell's Girdle",
           "zone": "The Hole",
-          "mob": "Master Yael"
+          "mob": "Master Yael",
+          "id": 2742
         },
         {
           "name": "Kobold Jester's Crown",
           "zone": "Velketor's Labyrinth",
-          "mob": "Rowwek Icepaw"
+          "mob": "Rowwek Icepaw",
+          "id": 25586
         },
         {
           "name": "Ring of Lightning",
@@ -1841,22 +1967,26 @@
         {
           "name": "Decaying Bone Idol",
           "zone": "The Plane of Nightmares",
-          "mob": "a weathered gargoyle"
+          "mob": "a weathered gargoyle",
+          "id": 20895
         },
         {
           "name": "Elemental Divining Rod",
           "zone": "The Plane of Innovation",
-          "mob": "Quest: Endurance Testing"
+          "mob": "Quest: Endurance Testing",
+          "id": 22947
         },
         {
           "name": "Firebone Notebook",
           "zone": "The Plane of Disease",
-          "mob": "Aramin the Spider Guardian"
+          "mob": "Aramin the Spider Guardian",
+          "id": 26744
         },
         {
           "name": "Shield of the Ebon Hand",
           "zone": "The Halls of Honor",
-          "mob": "Konid Merdrid"
+          "mob": "Konid Merdrid",
+          "id": 27499
         }
       ]
     },
@@ -1887,32 +2017,38 @@
         {
           "name": "Diamondine Earring",
           "zone": "The Castle of Mistmoore",
-          "mob": "Lasna Cheroon"
+          "mob": "Lasna Cheroon",
+          "id": 10165
         },
         {
           "name": "Impskin Gloves",
           "zone": "Solusek's Eye",
-          "mob": "Kindle"
+          "mob": "Kindle",
+          "id": 2336
         },
         {
           "name": "Polished Bone Bracelet",
           "zone": "Eastern Plains of Karana",
-          "mob": "an evil eye"
+          "mob": "an evil eye",
+          "id": 10314
         },
         {
           "name": "Chipped Bone Bracelet",
           "zone": "The Western Plains of Karana",
-          "mob": "Chief Goonda"
+          "mob": "Chief Goonda",
+          "id": 10105
         },
         {
           "name": "Squallsurge Shawl",
           "zone": "Kedge Keep",
-          "mob": "Undertow"
+          "mob": "Undertow",
+          "id": 1905
         },
         {
           "name": "White Gold Necklace",
           "zone": "The Ruins of Old Guk",
-          "mob": "a froglok noble"
+          "mob": "a froglok noble",
+          "id": 10147
         },
         {
           "name": "Boots of Superiority",
@@ -1935,22 +2071,26 @@
         {
           "name": "Ceramic Gavel of Justice",
           "zone": "Pottery",
-          "mob": "Ceramic Gavel Of Justice Recipe"
+          "mob": "Ceramic Gavel Of Justice Recipe",
+          "id": 29029
         },
         {
           "name": "Falchion of Flowing Water",
           "zone": "The Plane of Justice",
-          "mob": "Dreamthief"
+          "mob": "Dreamthief",
+          "id": 24574
         },
         {
           "name": "Pus Covered Beetle Carapace",
           "zone": "The Plane of Disease",
-          "mob": "Grummus"
+          "mob": "Grummus",
+          "id": 27285
         },
         {
           "name": "Sharp Claw Ahlspiess",
           "zone": "The Plane of Nightmares",
-          "mob": "Untel`Dak"
+          "mob": "Untel`Dak",
+          "id": 20519
         },
         {
           "name": "Festering Earlobe",
@@ -1980,7 +2120,8 @@
         {
           "name": "Elemental Gloves of the Prime",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 13618
         }
       ]
     },
@@ -2005,7 +2146,8 @@
         {
           "name": "Gauntlets of Vengeful Fury",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Plate Ornate Tranquility Armor"
+          "mob": "Quest: Plate Ornate Tranquility Armor",
+          "id": 13557
         }
       ]
     },
@@ -2125,7 +2267,8 @@
         {
           "name": "Arantir's Gloves of Discovery",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 13626
         }
       ]
     },
@@ -2137,17 +2280,20 @@
         {
           "name": "Valorian Insignia",
           "zone": "The Halls of Honor",
-          "mob": "An Animated Guardian"
+          "mob": "An Animated Guardian",
+          "id": 20510
         },
         {
           "name": "Woven Knucklebone Choker",
           "zone": "Ruins of Lxanvom (Crypt of Decay)",
-          "mob": "High Priest Ultor Szanvon"
+          "mob": "High Priest Ultor Szanvon",
+          "id": 8771
         },
         {
           "name": "Writ of Wisdom",
           "zone": "Plane of Knowledge",
-          "mob": "Quest: Trial of Lashing"
+          "mob": "Quest: Trial of Lashing",
+          "id": 26792
         }
       ]
     },
@@ -2172,7 +2318,8 @@
         {
           "name": "Malarian Leg Ear Stud",
           "zone": "Plane of Disease",
-          "mob": "Grummus"
+          "mob": "Grummus",
+          "id": 5593
         },
         {
           "name": "Tormented Stone of Souls",
@@ -2229,7 +2376,8 @@
         {
           "name": "Silken Augmenter's Gloves",
           "zone": "Plane of Tranquility",
-          "mob": "Silk Ornate Tranquility Armor"
+          "mob": "Silk Ornate Tranquility Armor",
+          "id": 13613
         }
       ]
     },
@@ -2241,22 +2389,26 @@
         {
           "name": "Jolums Tarnished Bauble",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Tarnished Bauble"
+          "mob": "Spell: Summon Tarnished Bauble",
+          "id": 23512
         },
         {
           "name": "Jolums Shiny Bauble",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Shiny Bauble"
+          "mob": "Spell: Summon Shiny Bauble",
+          "id": 23513
         },
         {
           "name": "Jolums Brilliant Bauble",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Brilliant Bauble"
+          "mob": "Spell: Summon Brilliant Bauble",
+          "id": 23514
         },
         {
           "name": "Jolums Glowing Bauble",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Glowing Bauble"
+          "mob": "Spell: Summon Glowing Bauble",
+          "id": 29800
         }
       ]
     },
@@ -2268,62 +2420,74 @@
         {
           "name": "Cougar Claw Earring",
           "zone": "The Iceclad Ocean",
-          "mob": "a snow cougar"
+          "mob": "a snow cougar",
+          "id": 30019
         },
         {
           "name": "Platinum Armband",
           "zone": "Solusek's Eye",
-          "mob": "reckless efreeti"
+          "mob": "reckless efreeti",
+          "id": 10336
         },
         {
           "name": "Polished Bone Hoop",
           "zone": "Eastern Plains of Karana",
-          "mob": "an evil eye"
+          "mob": "an evil eye",
+          "id": 10321
         },
         {
           "name": "Testament of Vanear",
           "zone": "Erudin",
-          "mob": "Quest: Library Book"
+          "mob": "Quest: Library Book",
+          "id": 13991
         },
         {
           "name": "Black Alloy Medallion",
           "zone": "The Liberated Citadel of Runnyeye",
-          "mob": "a Pickclaw Slayspell"
+          "mob": "a Pickclaw Slayspell",
+          "id": 3615
         },
         {
           "name": "Dustscryers Crystal Ball",
           "zone": "Frontier Mountains",
-          "mob": "a goblin dustscryer"
+          "mob": "a goblin dustscryer",
+          "id": 11958
         },
         {
           "name": "Fine Antique Ring",
           "zone": "The Plane of Knowledge",
-          "mob": "Quest: Holly Longtail's Replacement Parts"
+          "mob": "Quest: Holly Longtail's Replacement Parts",
+          "id": 28237
         },
         {
           "name": "Mane Attraction",
           "zone": "Northern Felwithe",
-          "mob": "Quest: Rain Caller"
+          "mob": "Quest: Rain Caller",
+          "id": 12254
         },
         {
           "name": "Orb of Draconic Energy",
           "zone": "Skyshrine",
-          "mob": "Quest: Ancient Dragon Tome"
+          "mob": "Quest: Ancient Dragon Tome",
+          "id": 12558
         },
         {
           "name": "Silver Dragon Tattoo",
           "zone": "Kael Drakkel",
-          "mob": "Nojas Blackfist"
+          "mob": "Nojas Blackfist",
+          "id": 25056
         },
         {
           "name": "Crystalline Torque",
           "zone": "Velketor's Labyrinth",
-          "mob": "Meljemor"
+          "mob": "Meljemor",
+          "id": 25554
         },
         {
           "name": "Helm of Nocturnal Phantasms",
           "zone": "Jewelry Making",
-          "mob": "Recipe : Helm Of Nocturnal Phantasms"
+          "mob": "Recipe : Helm Of Nocturnal Phantasms",
+          "id": 28275
         },
         {
           "name": "Nevederias Left Eye",
@@ -2334,7 +2498,8 @@
         {
           "name": "Obulus Death Shroud",
           "zone": "The Ruins of Sebilis",
-          "mob": "froglok bok shaman"
+          "mob": "froglok bok shaman",
+          "id": 4315
         },
         {
           "name": "Sky Watcher's Monocle",
@@ -2345,7 +2510,8 @@
         {
           "name": "Arantir's Sleeves of Discovery",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 11620
         },
         {
           "name": "Askr's Thunderous Boots",
@@ -2356,7 +2522,8 @@
         {
           "name": "Boots of Vengeful Fury",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Plate Ornate Tranquility Armor"
+          "mob": "Quest: Plate Ornate Tranquility Armor",
+          "id": 20073
         },
         {
           "name": "Carved Bone Ring",
@@ -2368,7 +2535,8 @@
         {
           "name": "Ceramic Water Sprinkler of Marr",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Water Sprinkler Of Marr"
+          "mob": "Recipe : Ceramic Water Sprinkler Of Marr",
+          "id": 29032
         },
         {
           "name": "Dumul's Boots of the Brute",
@@ -2379,7 +2547,8 @@
         {
           "name": "Elemental Sleeves of the Prime",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 11597
         },
         {
           "name": "Grimror's Boots of the Plagues",
@@ -2390,7 +2559,8 @@
         {
           "name": "Scaled Avatar's Boots",
           "zone": "The Plane of Tranquility",
-          "mob": "Chain Ornate Tranquility Armor"
+          "mob": "Chain Ornate Tranquility Armor",
+          "id": 20077
         },
         {
           "name": "Self Contained Force Barrier",
@@ -2408,7 +2578,8 @@
         {
           "name": "Silken Augmenter's Sleeves",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 11577
         },
         {
           "name": "Trydan's Boots of Nobility",
@@ -2419,17 +2590,20 @@
         {
           "name": "Vorshar's Sleeves of the Blight",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 11600
         },
         {
           "name": "Wanderer's Sylvan Boots",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Leather Ornate Tranquility Armor"
+          "mob": "Quest: Leather Ornate Tranquility Armor",
+          "id": 20152
         },
         {
           "name": "Writ of Karana",
           "zone": "The Plane of Storms",
-          "mob": "Gurebk, Lord of Krendic"
+          "mob": "Gurebk, Lord of Krendic",
+          "id": 26796
         }
       ]
     },
@@ -2454,7 +2628,8 @@
         {
           "name": "Vorshars Gloves of the Blight",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Ornate Tranquility Armor"
+          "mob": "Quest: Silk Ornate Tranquility Armor",
+          "id": 13622
         }
       ]
     },
@@ -2646,27 +2821,32 @@
         {
           "name": "Dark Circlet",
           "zone": "Najena",
-          "mob": "Trazdon"
+          "mob": "Trazdon",
+          "id": 13742
         },
         {
           "name": "Flowing Black Robe",
           "zone": "Najena",
-          "mob": "Najena"
+          "mob": "Najena",
+          "id": 1320
         },
         {
           "name": "Lizardskin Tribal Mask",
           "zone": "The Feerrott",
-          "mob": "a Silverflank guardian"
+          "mob": "a Silverflank guardian",
+          "id": 2330
         },
         {
           "name": "Platinum Skull Ring",
           "zone": "The Castle of Mistmoore",
-          "mob": "Lasna Cheroon"
+          "mob": "Lasna Cheroon",
+          "id": 10163
         },
         {
           "name": "Runed Cowl",
           "zone": "The Ruins of Old Guk",
-          "mob": "a ghoul sage"
+          "mob": "a ghoul sage",
+          "id": 10141
         },
         {
           "name": "Crown of Resiliance",
@@ -2677,7 +2857,8 @@
         {
           "name": "Mask of Pulchritude",
           "zone": "Grieg's End",
-          "mob": "Servitor of Luclin"
+          "mob": "Servitor of Luclin",
+          "id": 26513
         },
         {
           "name": "Onyx Gauntlets",
@@ -2734,7 +2915,8 @@
         {
           "name": "Rosrak's Gauntlets of the Prima",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Chain Elemental Tranquility Armor"
+          "mob": "Quest: Chain Elemental Tranquility Armor",
+          "id": 13579
         }
       ]
     },
@@ -2746,7 +2928,8 @@
         {
           "name": "Scaled Avatar's Gloves",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Chain Ornate Tranquility Armor"
+          "mob": "Quest: Chain Ornate Tranquility Armor",
+          "id": 13569
         }
       ]
     },
@@ -2771,7 +2954,8 @@
         {
           "name": "Wanderer's Sylvan Gloves",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Leather Ornate Tranquility Armor"
+          "mob": "Quest: Leather Ornate Tranquility Armor",
+          "id": 13589
         }
       ]
     },
@@ -2796,37 +2980,44 @@
         {
           "name": "Band of Flesh",
           "zone": "Najena",
-          "mob": "BoneCracker"
+          "mob": "BoneCracker",
+          "id": 10421
         },
         {
           "name": "Dusty Bloodstained Gloves",
           "zone": "The Estate of Unrest",
-          "mob": "reclusive ghoul magus"
+          "mob": "reclusive ghoul magus",
+          "id": 1404
         },
         {
           "name": "Gossamer Robe",
           "zone": "Befallen",
-          "mob": "Many Mobs"
+          "mob": "Many Mobs",
+          "id": 1307
         },
         {
           "name": "Di`zok Begirding",
           "zone": "Chardok",
-          "mob": "Many Mobs"
+          "mob": "Many Mobs",
+          "id": 10346
         },
         {
           "name": "Embroidered Black Sleeves",
           "zone": "The Ruins of Old Guk",
-          "mob": "a ghoul ritualist"
+          "mob": "a ghoul ritualist",
+          "id": 1362
         },
         {
           "name": "Fine Antique Locket",
           "zone": "The Plane of Knowledge",
-          "mob": "Quest: Alexis' Book Collection"
+          "mob": "Quest: Alexis' Book Collection",
+          "id": 28240
         },
         {
           "name": "Robe of the Ishva",
           "zone": "Dagnor's Cauldron",
-          "mob": "Jinalis Andir"
+          "mob": "Jinalis Andir",
+          "id": 1357
         },
         {
           "name": "Circlet of Summer",
@@ -2837,17 +3028,20 @@
         {
           "name": "Enshrouded Veil",
           "zone": "The Howling Stones",
-          "mob": "embalming fluid"
+          "mob": "embalming fluid",
+          "id": 1625
         },
         {
           "name": "Overseer`s Signet",
           "zone": "Chardok",
-          "mob": "Overseer Dal`guur"
+          "mob": "Overseer Dal`guur",
+          "id": 5778
         },
         {
           "name": "Swirling Cloak of the Elements",
           "zone": "The Plane of Sky?",
-          "mob": "?"
+          "mob": "?",
+          "id": 15866
         }
       ]
     },
@@ -2892,7 +3086,8 @@
         {
           "name": "Crystal Tipped Onyxwood Staff",
           "zone": "Eryslai, the Kingdom of Wind",
-          "mob": "A Swirling Elemental Force"
+          "mob": "A Swirling Elemental Force",
+          "id": 24784
         },
         {
           "name": "Hoop of the Enlightened",
@@ -2963,52 +3158,62 @@
         {
           "name": "An Elven Charm Necklace",
           "zone": "Blackburrow",
-          "mob": "the gnoll high shaman"
+          "mob": "the gnoll high shaman",
+          "id": 10701
         },
         {
           "name": "Drake-hide Sleeves",
           "zone": "Solusek's Eye",
-          "mob": "fire goblin bartender"
+          "mob": "fire goblin bartender",
+          "id": 2342
         },
         {
           "name": "Glowing Bone Collar",
           "zone": "The Western Plains of Karana",
-          "mob": "an ogre priestess"
+          "mob": "an ogre priestess",
+          "id": 10055
         },
         {
           "name": "Fancy Velvet Mantle",
           "zone": "Chardok",
-          "mob": "Observer Aq`touz"
+          "mob": "Observer Aq`touz",
+          "id": 5725
         },
         {
           "name": "Fine Antique Velvet Rose",
           "zone": "Plane of Knowledge",
-          "mob": "Quest: Merri's Artifact Collection"
+          "mob": "Quest: Merri's Artifact Collection",
+          "id": 28241
         },
         {
           "name": "Golden Bracer",
           "zone": "The Howling Stones",
-          "mob": "a Crypt Spectre"
+          "mob": "a Crypt Spectre",
+          "id": 4780
         },
         {
           "name": "Moonstone Ring",
           "zone": "The Ruins of Old Guk",
-          "mob": "a frenzied ghoul"
+          "mob": "a frenzied ghoul",
+          "id": 10150
         },
         {
           "name": "Shimmering Terror Hide Boots",
           "zone": "Velketor's Labyrinth",
-          "mob": "Venar Icepaw"
+          "mob": "Venar Icepaw",
+          "id": 25552
         },
         {
           "name": "Cryosilk Sash",
           "zone": "The Plane of Fear",
-          "mob": "a spinechiller spider"
+          "mob": "a spinechiller spider",
+          "id": 1217
         },
         {
           "name": "Drachnid Thyxl",
           "zone": "The Dreadlands",
-          "mob": "a dread widow"
+          "mob": "a dread widow",
+          "id": 11981
         },
         {
           "name": "Glowing Amber Band",
@@ -3019,47 +3224,56 @@
         {
           "name": "Square Helm",
           "zone": "Skyshrine",
-          "mob": "Many Mobs"
+          "mob": "Many Mobs",
+          "id": 29678
         },
         {
           "name": "Supple Scale Armband",
           "zone": "Karnor's Castle",
-          "mob": "a Drolvarg warlord"
+          "mob": "a Drolvarg warlord",
+          "id": 1618
         },
         {
           "name": "Ceramic Sword of War",
           "zone": "Pottery",
-          "mob": "Recipe : Ceramic Sword Of War"
+          "mob": "Recipe : Ceramic Sword Of War",
+          "id": 29030
         },
         {
           "name": "Diseased Ratskin Mask",
           "zone": "The Plane of Disease",
-          "mob": "Grummus"
+          "mob": "Grummus",
+          "id": 9443
         },
         {
           "name": "Ivory Claw Necklace",
           "zone": "The Plane of Nightmares",
-          "mob": "a tar`dak hunter"
+          "mob": "a tar`dak hunter",
+          "id": 9319
         },
         {
           "name": "Prismatic Belt of the Queztocatal",
           "zone": "The Plane of Air",
-          "mob": "Calebgrothiel"
+          "mob": "Calebgrothiel",
+          "id": 16153
         },
         {
           "name": "Red Circlet of the Evoker",
           "zone": "Drunder, the Fortress of Zek",
-          "mob": "The Diaku Armorer"
+          "mob": "The Diaku Armorer",
+          "id": 9494
         },
         {
           "name": "Sharkbone Earring",
           "zone": "The Plane of Water",
-          "mob": "?"
+          "mob": "?",
+          "id": 5791
         },
         {
           "name": "Small Larvae Carapace",
           "zone": "The Plane of Valor",
-          "mob": "A Razorfiend Subjugator"
+          "mob": "A Razorfiend Subjugator",
+          "id": 20626
         },
         {
           "name": "Wand of the Ice Storm",
@@ -3070,7 +3284,8 @@
         {
           "name": "Wind Worn Luckstone",
           "zone": "The Plane of Storms",
-          "mob": "Drornok Tok Vo`Lok"
+          "mob": "Drornok Tok Vo`Lok",
+          "id": 20504
         }
       ]
     },
@@ -3082,7 +3297,8 @@
         {
           "name": "Ring of Farsight",
           "zone": "Plane of Knowledge",
-          "mob": "Quest: Essences of Power"
+          "mob": "Quest: Essences of Power",
+          "id": 32109
         },
         {
           "name": "Wristband of Judgement",
@@ -3126,22 +3342,26 @@
         {
           "name": "Jedahs Brass Choker",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Brass Choker"
+          "mob": "Spell: Summon Brass Choker",
+          "id": 23500
         },
         {
           "name": "Jedahs Silver Choker",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Silver Choker"
+          "mob": "Spell: Summon Silver Choker",
+          "id": 23501
         },
         {
           "name": "Jedahs Golden Choker",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Golden Choker"
+          "mob": "Spell: Summon Golden Choker",
+          "id": 23502
         },
         {
           "name": "Jedahs Platinum Choker",
           "zone": "The Bazaar:",
-          "mob": "Spell: Summon Platinum Choker"
+          "mob": "Spell: Summon Platinum Choker",
+          "id": 29796
         }
       ]
     },
@@ -3153,57 +3373,68 @@
         {
           "name": "Batskull Earring",
           "zone": "Dragon Necropolis",
-          "mob": "Chief Goonda"
+          "mob": "Chief Goonda",
+          "id": 10107
         },
         {
           "name": "Drake-hide Leggings",
           "zone": "Solusek's Eye",
-          "mob": "fire goblin bartender"
+          "mob": "fire goblin bartender",
+          "id": 2343
         },
         {
           "name": "Happy Love Bracers",
           "zone": "Neriak - 3rd Gate",
-          "mob": "Ratraz"
+          "mob": "Ratraz",
+          "id": 12202
         },
         {
           "name": "Amethyst Bracelet",
           "zone": "The Ruins of Old Guk",
-          "mob": "a froglok yun priest"
+          "mob": "a froglok yun priest",
+          "id": 10149
         },
         {
           "name": "Crown of Leaves",
           "zone": "The Southern Plains of Karana",
-          "mob": "Narra Tanith"
+          "mob": "Narra Tanith",
+          "id": 2321
         },
         {
           "name": "Fine Silk Turban",
           "zone": "Oasis of Marr",
-          "mob": "Hatar"
+          "mob": "Hatar",
+          "id": 1405
         },
         {
           "name": "Savants Cap",
           "zone": "The Estate of Unrest",
-          "mob": "reclusive ghoul magus"
+          "mob": "reclusive ghoul magus",
+          "id": 1302
         },
         {
           "name": "Iksar Hide Cap",
           "zone": "Chardok",
-          "mob": "Kennel Master Al`ele"
+          "mob": "Kennel Master Al`ele",
+          "id": 5799
         },
         {
           "name": "Robe of the Kedge",
           "zone": "Kedge Keep",
-          "mob": "Phinigel Autropos"
+          "mob": "Phinigel Autropos",
+          "id": 1253
         },
         {
           "name": "Runed Mithril Bracer",
           "zone": "Nagafen's Lair",
-          "mob": "Solusek kobold king"
+          "mob": "Solusek kobold king",
+          "id": 4406
         },
         {
           "name": "Steel Wristband of Strategy",
           "zone": "Kael Drakkel",
-          "mob": "Semkak Prophet of Vallon"
+          "mob": "Semkak Prophet of Vallon",
+          "id": 25036
         }
       ]
     }
