@@ -1,8 +1,8 @@
 {
-  "_comment": "Manual item ID mappings for spell_focii items not in item_stats. Sources: TAKP AllaClone, EQ Resource, P99 Wiki, ZAM.",
+  "_comment": "Manual item ID mappings for spell_focii items not in item_stats. Verify IDs at https://www.takproject.net/allaclone/fullsearch.php?isearchtype=name&iname=<itemname>",
   "Bear-hide Boots": 1753,
   "Damask Robe": 1334,
-  "Lockjaw Hide Vest": 1990,
-  "Shazda Turban": 1370,
+  "Lockjaw Hide Vest": 2329,
+  "Shazda Turban": 1413,
   "Clawed Knuckle-Ring": 10403
 }
