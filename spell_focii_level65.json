@@ -906,9 +906,10 @@
       "percentage": 30.0,
       "items": [
         {
-          "name": "Miraguls Shroud of Risen Souls",
+          "name": "Miragul's Shroud of Risen Souls",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Silk Elemental Tranquility Armor"
+          "mob": "Quest: Silk Elemental Tranquility Armor",
+          "id": 32142
         },
         {
           "name": "Symbol of the Planemasters",
