@@ -11,6 +11,9 @@ on:
       - main
     # Run on any push to main (not just specific files) to ensure it runs
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   update-spell-inventory:
     runs-on: ubuntu-latest
@@ -23,10 +26,10 @@ jobs:
       id-token: write
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: '3.11'
     
@@ -100,7 +103,7 @@ jobs:
         fi
     
     - name: Restore yesterday's cache (to get previous files)
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: cache-yesterday
       continue-on-error: true
       with:
@@ -170,7 +173,7 @@ jobs:
         fi
     
     - name: Cache magelo dump files (current - this will overwrite yesterday's files)
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: cache-magelo
       with:
         path: |
@@ -366,7 +369,7 @@ jobs:
     # 3. After backfill we MUST "Restore today's dump for main run" so current = TODAY again before running generate_spell_page.py.
     # 4. Main run then produces delta.html (today vs yesterday) and delta_daily_TODAY.json.gz (today vs baseline) from correct data.
     - name: Restore baseline cache (needed for historical delta + leaderboards)
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: cache-baseline-historical
       continue-on-error: true
       with:
@@ -379,7 +382,7 @@ jobs:
           magelo-baseline-
     
     - name: Restore cache for 2026-02-07 and generate delta
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: cache-2026-02-07
       continue-on-error: true
       with:
@@ -431,7 +434,7 @@ jobs:
         fi
     
     - name: Restore cache for 2026-02-08 and generate delta
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: cache-2026-02-08
       continue-on-error: true
       with:
@@ -485,7 +488,7 @@ jobs:
     # CRITICAL: Historical backfill (2/7, 2/8) overwrote character/ and inventory/ with past data.
     # Restore today's dump so the main generator uses TODAY's data for delta.html and delta_daily_YYYY-MM-DD.json.gz.
     - name: Restore today's dump for main run (after historical backfill)
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           character/TAKP_character.txt
@@ -906,7 +909,7 @@ jobs:
     
     - name: Upload Pages artifact
       id: upload
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v4
       if: github.ref == 'refs/heads/main'
       with:
         path: ./deploy
@@ -935,7 +938,7 @@ jobs:
     
     # Cache baselines (master + weekly/monthly for leaderboards); deltas live in repo
     - name: Cache baselines
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: cache-baseline
       with:
         path: |
@@ -948,7 +951,7 @@ jobs:
           magelo-baseline-
     
     - name: Cache current files for next run
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           character/TAKP_character.txt
