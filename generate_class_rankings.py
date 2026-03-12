@@ -315,8 +315,17 @@ def get_focus_sources(char_inventory, focus_lookup):
                 add_source(f'Spell Damage ({damage_type})', pct, item_name, slot_id, item_id)
             elif cat == 'Spell Mana Efficiency':
                 sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, focus_name, 'Nuke')
-                key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
-                add_source(key, pct, item_name, slot_id, item_id)
+                if sub == 'LDD':
+                    add_source('Spell Mana Efficiency (Long Duration Debuff)', pct, item_name, slot_id, item_id)
+                elif sub == 'All':
+                    # All applies to Bene, Det, Nuke, LDD (like Spell Haste All -> both Bene and Det)
+                    add_source('Spell Mana Efficiency (Bene)', pct, item_name, slot_id, item_id)
+                    add_source('Spell Mana Efficiency (Det)', pct, item_name, slot_id, item_id)
+                    add_source('Spell Mana Efficiency (Nuke)', pct, item_name, slot_id, item_id)
+                    add_source('Spell Mana Efficiency (Long Duration Debuff)', pct, item_name, slot_id, item_id)
+                else:
+                    key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
+                    add_source(key, pct, item_name, slot_id, item_id)
             elif cat == 'Long Duration Detrimental Mana Preservation':
                 add_source('Spell Mana Efficiency (Long Duration Debuff)', pct, item_name, slot_id, item_id)
             elif cat == 'Spell Haste':
@@ -512,8 +521,13 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
             candidates[key].append(entry)
         elif cat == 'Spell Mana Efficiency':
             sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
-            key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
-            candidates[key].append(entry)
+            if sub == 'LDD':
+                candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry)
+            elif sub == 'All':
+                for key in ('Spell Mana Efficiency (Bene)', 'Spell Mana Efficiency (Det)', 'Spell Mana Efficiency (Nuke)', 'Spell Mana Efficiency (Long Duration Debuff)'):
+                    candidates[key].append(entry)
+            else:
+                candidates[f'Spell Mana Efficiency ({sub})'].append(entry)
         elif cat == 'Long Duration Detrimental Mana Preservation':
             candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry)
         elif cat == 'Spell Haste':
@@ -548,11 +562,16 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
         for eff in effects:
             if eff['category'] == 'Spell Mana Efficiency':
                 sub = SPELL_MANA_EFFICIENCY_CATEGORY_MAP.get(eff['name'], 'Nuke')
-                key = f'Spell Mana Efficiency (Long Duration Debuff)' if sub == 'LDD' else f'Spell Mana Efficiency ({sub})'
                 entry = {'item_name': item_name, 'item_id': item_id, 'value': eff['percentage']}
                 if item_id in item_stats_lookup:
                     entry['classes'] = item_stats_lookup[item_id]
-                candidates[key].append(entry)
+                if sub == 'LDD':
+                    candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry)
+                elif sub == 'All':
+                    for key in ('Spell Mana Efficiency (Bene)', 'Spell Mana Efficiency (Det)', 'Spell Mana Efficiency (Nuke)', 'Spell Mana Efficiency (Long Duration Debuff)'):
+                        candidates[key].append(entry)
+                else:
+                    candidates[f'Spell Mana Efficiency ({sub})'].append(entry)
             elif eff['category'] == 'Buff Spell Duration':
                 entry = {'item_name': item_name, 'item_id': item_id, 'value': eff['percentage']}
                 if item_id in item_stats_lookup:
@@ -660,6 +679,7 @@ SPELL_MANA_EFFICIENCY_CATEGORY_MAP = {
     # General mana preservation (applies to all: Bene, Det, Nuke, LDD)
     'Conservation of Xegony': 'All',
     'Preservation of the Akheva': 'All',  # 18% all (Mask of Secrets, Mask of Judgement)
+    'Mana Preservation IV': 'All',  # Applies to all spell types (Bene, Det, Nuke, LDD); many items in item_stats
 
     # General detrimental mana efficiency (nukes + debuffs; not LDD-only like Bertoxxulous)
     'Conservation of Solusek': 'Det',
@@ -864,7 +884,7 @@ PET_POWER_ITEM_NAMES = {
 
 # Item-based Spell Mana Efficiency overrides (not in spell_focii JSON). item_id -> list of {name, category, percentage}.
 # Conservation of Bertoxxulous: 30% mana efficiency on long duration debuffs (item 5594 Earring of Temporal Solstice).
-# Conservation of Xegony: 20% general mana preservation (items 26996 Gloves of the Unseen, 7769 Talisman of the Elements).
+    # Conservation of Xegony: 20% general mana preservation (items 26996 Gloves of the Unseen, 7769 Talisman of the Elements).
 # Preservation of Solusek 20% detrimental/nuke (3542 Talisman of Tainted Energy, 15815 Cloak of the Falling Skies).
 # Blessed Coldain Prayer Shawl (1200): Zephyr of Brell 20% beneficial spell duration.
 ITEM_FOCUS_OVERRIDES = {
