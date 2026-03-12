@@ -1129,6 +1129,8 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
             if category == 'Spell Damage':
                 # Paladins don't need spell damage
                 focus_scores[category] = 0
+            elif category == 'Long Duration Detrimental Mana Preservation':
+                continue  # LDD is subcategory of Spell Mana Efficiency, shown in focus_details
             elif category == 'Healing Enhancement':
                 # Track Healing Enhancement for Paladins
                 char_pct = char_focii.get(category, 0)
@@ -1306,6 +1308,9 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
                 ) if char_mana_efficiency_cats else (
                     (char_focii.get(category, 0) / best_pct * 100) if best_pct > 0 and char_focii.get(category, 0) > 0 else 0
                 )
+            elif category == 'Long Duration Detrimental Mana Preservation':
+                # Skip: LDD is a subcategory of Spell Mana Efficiency, shown in focus_details (Spell Mana Efficiency -> Long duration debuff)
+                continue
             elif category == 'Spell Haste' and char_class == 'Magician' and char_spell_haste_cats and best_haste_by_cat:
                 # Magician: score Beneficial and Detrimental Spell Haste separately (like Enchanter)
                 best_all_haste = best_haste_by_cat.get('All', 0)

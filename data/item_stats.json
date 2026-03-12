@@ -4354,6 +4354,7 @@
     "effectNote": "",
     "focusSpellId": 3537,
     "focusSpellName": "Mana Preservation IV",
+    "focusPct": 10,
     "weight": 0.8,
     "size": "SMALL",
     "classes": "ALL",
