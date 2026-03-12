@@ -60,22 +60,26 @@
         {
           "name": "Bear-hide Boots",
           "zone": "Qeynos Hills",
-          "mob": "Quest: Bear Hide Armor"
+          "mob": "Quest: Bear Hide Armor",
+          "id": 1753
         },
         {
           "name": "Damask Robe",
           "zone": "Befallen",
-          "mob": "Lynada the exiled"
+          "mob": "Lynada the exiled",
+          "id": 1334
         },
         {
           "name": "Lockjaw Hide Vest",
           "zone": "Oasis of Marr",
-          "mob": "Lockjaw"
+          "mob": "Lockjaw",
+          "id": 1990
         },
         {
           "name": "Shazda Turban",
           "zone": "Kerra Isle",
-          "mob": "Shazda Asad"
+          "mob": "Shazda Asad",
+          "id": 1370
         },
         {
           "name": "Batfang Headband",
@@ -90,7 +94,8 @@
         {
           "name": "Clawed Knuckle-Ring",
           "zone": "High Keep",
-          "mob": "Tyrana Slil"
+          "mob": "Tyrana Slil",
+          "id": 10403
         },
         {
           "name": "Drakescale Belt",
@@ -128,7 +133,7 @@
         {
           "name": "Ceramic Shield of Valor",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Shield Of Valor",
+          "mob": "Recipe : Ceramic Shield Of Valor",
           "id": 29038
         },
         {
@@ -172,7 +177,8 @@
         {
           "name": "Romar's Robe of Visions",
           "zone": "The Plane of Time",
-          "mob": "Cazic Thule"
+          "mob": "Cazic Thule",
+          "id": 32140
         },
         {
           "name": "Rosrak's Hauberk of the Primal",
@@ -277,7 +283,7 @@
         {
           "name": "Ceramic Totem of The Rathe",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Totem Of The Rathe"
+          "mob": "Recipe : Ceramic Totem Of The Rathe"
         },
         {
           "name": "Knucklebone Beaded Veil",
@@ -311,7 +317,8 @@
         {
           "name": "Trydan's Armplates of Nobility",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Plate Elemental Tranquility Armor"
+          "mob": "Quest: Plate Elemental Tranquility Armor",
+          "id": 11438
         },
         {
           "name": "Vambraces of Vengeful Fury",
@@ -321,7 +328,8 @@
         {
           "name": "Veil of War Wise Eyes",
           "zone": "Drunder, the Fortress of Zek",
-          "mob": "Tagrin Maldric"
+          "mob": "Tagrin Maldric",
+          "id": 9489
         },
         {
           "name": "Wanderer's Sylvan Sleeves",
@@ -345,12 +353,14 @@
         {
           "name": "Trydan's Chestplate of Nobility",
           "zone": "BLACKSMITHING",
-          "mob": "Quest: Plate Elemental Tranquility Armor"
+          "mob": "Quest: Plate Elemental Tranquility Armor",
+          "id": 32132
         },
         {
           "name": "Ultor's Chestguard of Faith",
           "zone": "BLACKSMITHING",
-          "mob": "Quest: Plate Elemental Tranquility Armor"
+          "mob": "Quest: Plate Elemental Tranquility Armor",
+          "id": 32603
         },
         {
           "name": "Whorl of Unnatural Forces",
@@ -368,7 +378,8 @@
         {
           "name": "Kerasha's Sylvan Sleeves",
           "zone": "TAILORING",
-          "mob": "Quest: Leather Elemental Tranquility Armor"
+          "mob": "Quest: Leather Elemental Tranquility Armor",
+          "id": 11575
         },
         {
           "name": "Raiment of the Fire Son",
@@ -380,7 +391,8 @@
         {
           "name": "Rosrak's Sleeves of the Primal",
           "zone": "BLACKSMITHING",
-          "mob": "Quest: Chain Elemental Tranquility Armor"
+          "mob": "Quest: Chain Elemental Tranquility Armor",
+          "id": 11529
         },
         {
           "name": "Simple Ring of Purity",
@@ -392,7 +404,8 @@
         {
           "name": "Ultor's Vambraces of Faith",
           "zone": "BLACKSMITHING",
-          "mob": "Quest: Plate Elemental Tranquility Armor"
+          "mob": "Quest: Plate Elemental Tranquility Armor",
+          "id": 32012
         }
       ]
     },
@@ -602,12 +615,13 @@
         {
           "name": "Ceramic Shackles of Torment",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Shackles Of Torment"
+          "mob": "Recipe : Ceramic Shackles Of Torment"
         },
         {
           "name": "Grimror's Sleeves of the Plagues",
           "zone": "Plane of Tranquility",
-          "mob": "Plate Elemental Tranquility Armor"
+          "mob": "Plate Elemental Tranquility Armor",
+          "id": 11441
         },
         {
           "name": "Miserable Bauble",
@@ -670,7 +684,8 @@
         {
           "name": "Grimror's Guard of the Plagues",
           "zone": "The Plane of Tranquility(Zone)",
-          "mob": "Quest: Plate Elemental Tranquility Armor"
+          "mob": "Quest: Plate Elemental Tranquility Armor",
+          "id": 32602
         }
       ]
     },
@@ -868,12 +883,13 @@
         {
           "name": "Askr's Thunderous Armplates",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Chain Elemental Tranquility Armor"
+          "mob": "Quest: Chain Elemental Tranquility Armor",
+          "id": 11447
         },
         {
           "name": "Ceramic Incense Burner of Ro",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Incense Burner Of Ro"
+          "mob": "Recipe : Ceramic Incense Burner Of Ro"
         },
         {
           "name": "Honorary Amulet",
@@ -972,12 +988,14 @@
         {
           "name": "Dumul's Chestwraps of the Brute",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Leather Elemental Tranquility Armor"
+          "mob": "Quest: Leather Elemental Tranquility Armor",
+          "id": 32136
         },
         {
           "name": "Kerasha's Sylvan Tunic",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Leather Elemental Tranquility Armor"
+          "mob": "Quest: Leather Elemental Tranquility Armor",
+          "id": 32139
         }
       ]
     },
@@ -989,7 +1007,8 @@
         {
           "name": "Askr's Thunderous Chainmail",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Chain Elemental Tranquility Armor"
+          "mob": "Quest: Chain Elemental Tranquility Armor",
+          "id": 32604
         },
         {
           "name": "Cape of Endless Torment",
@@ -1000,12 +1019,14 @@
         {
           "name": "Maelins Robe of Lore",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Elemental Tranquility Armor"
+          "mob": "Quest: Silk Elemental Tranquility Armor",
+          "id": 32143
         },
         {
           "name": "Magi`Kots Robe of Convergence",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Elemental Tranquility Armor"
+          "mob": "Quest: Silk Elemental Tranquility Armor",
+          "id": 32141
         }
       ]
     },
@@ -1077,7 +1098,7 @@
         {
           "name": "Ceramic Skull of Decay",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Skull Of Decay",
+          "mob": "Recipe : Ceramic Skull Of Decay",
           "id": 29035
         },
         {
@@ -1234,7 +1255,7 @@
         {
           "name": "Ceramic Hammer of Innovation",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Hammer Of Innovation"
+          "mob": "Recipe : Ceramic Hammer Of Innovation"
         },
         {
           "name": "Obsidian Plated Pauldrons",
@@ -1296,7 +1317,8 @@
         {
           "name": "Mantle of the Rainmaker",
           "zone": "Torden, the Bastion of Thunder",
-          "mob": "Agnarr the Storm Lord"
+          "mob": "Agnarr the Storm Lord",
+          "id": 13670
         },
         {
           "name": "Opalescent Seascale",
@@ -1705,12 +1727,13 @@
         {
           "name": "Ceramic Totem of Xegony",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Totem Of Xegony"
+          "mob": "Recipe : Ceramic Totem Of Xegony"
         },
         {
           "name": "Dumul's Sleeves of the Brute",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Leather Elemental Tranquility Armor"
+          "mob": "Quest: Leather Elemental Tranquility Armor",
+          "id": 11450
         },
         {
           "name": "Elemental Slippers of the Prime",
@@ -1969,7 +1992,8 @@
         {
           "name": "Magi`Kots Gloves of Convergence",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Elemental Tranquility Armor"
+          "mob": "Quest: Silk Elemental Tranquility Armor",
+          "id": 13619
         }
       ]
     },
@@ -1993,7 +2017,8 @@
         {
           "name": "Ultor's Gauntlets of Faith",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Plate Elemental Tranquility Armor"
+          "mob": "Quest: Plate Elemental Tranquility Armor",
+          "id": 13563
         }
       ]
     },
@@ -2178,7 +2203,8 @@
         {
           "name": "Maelin's Gloves of Lore",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Elemental Tranquility Armor"
+          "mob": "Quest: Silk Elemental Tranquility Armor",
+          "id": 13627
         }
       ]
     },
@@ -2190,7 +2216,8 @@
         {
           "name": "Romar's Gloves of Visions",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Elemental Tranquility Armor"
+          "mob": "Quest: Silk Elemental Tranquility Armor",
+          "id": 13614
         }
       ]
     },
@@ -2296,7 +2323,7 @@
         {
           "name": "Helm of Nocturnal Phantasms",
           "zone": "Jewelry Making",
-          "mob": "Recipe\u00a0: Helm Of Nocturnal Phantasms"
+          "mob": "Recipe : Helm Of Nocturnal Phantasms"
         },
         {
           "name": "Nevederias Left Eye",
@@ -2323,7 +2350,8 @@
         {
           "name": "Askr's Thunderous Boots",
           "zone": "The Plane of Tranquility",
-          "mob": "Quest: Chain Elemental Tranquility Armor"
+          "mob": "Quest: Chain Elemental Tranquility Armor",
+          "id": 19838
         },
         {
           "name": "Boots of Vengeful Fury",
@@ -2340,12 +2368,13 @@
         {
           "name": "Ceramic Water Sprinkler of Marr",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Water Sprinkler Of Marr"
+          "mob": "Recipe : Ceramic Water Sprinkler Of Marr"
         },
         {
           "name": "Dumul's Boots of the Brute",
           "zone": "The Plane of Tranquility",
-          "mob": "Leather Elemental Tranquility Armor"
+          "mob": "Leather Elemental Tranquility Armor",
+          "id": 20032
         },
         {
           "name": "Elemental Sleeves of the Prime",
@@ -2355,7 +2384,8 @@
         {
           "name": "Grimror's Boots of the Plagues",
           "zone": "The Plane of Tranquility",
-          "mob": "Plate Elemental Tranquility Armor"
+          "mob": "Plate Elemental Tranquility Armor",
+          "id": 19546
         },
         {
           "name": "Scaled Avatar's Boots",
@@ -2383,7 +2413,8 @@
         {
           "name": "Trydan's Boots of Nobility",
           "zone": "The Plane of Tranquility",
-          "mob": "Plate Elemental Tranquility Armor"
+          "mob": "Plate Elemental Tranquility Armor",
+          "id": 19449
         },
         {
           "name": "Vorshar's Sleeves of the Blight",
@@ -2410,7 +2441,8 @@
         {
           "name": "Miraguls Gloves of Risen Souls",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Silk Elemental Tranquility Armor"
+          "mob": "Quest: Silk Elemental Tranquility Armor",
+          "id": 13623
         }
       ]
     },
@@ -2533,32 +2565,38 @@
         {
           "name": "Kerasha's Sylvan Boots",
           "zone": "TAILORING",
-          "mob": "Quest: Leather Elemental Tranquility Armor"
+          "mob": "Quest: Leather Elemental Tranquility Armor",
+          "id": 20422
         },
         {
           "name": "Maelins Sleeves of Lore",
           "zone": "TAILORING",
-          "mob": "Silk Elemental Tranquility Armor"
+          "mob": "Silk Elemental Tranquility Armor",
+          "id": 11876
         },
         {
           "name": "Magi`Kot's Sleeves of Convergence",
           "zone": "TAILORING",
-          "mob": "Silk Elemental Tranquility Armor"
+          "mob": "Silk Elemental Tranquility Armor",
+          "id": 11598
         },
         {
           "name": "Miragul's Sleeves of Risen Souls",
           "zone": "TAILORING",
-          "mob": "Silk Elemental Tranquility Armor"
+          "mob": "Silk Elemental Tranquility Armor",
+          "id": 11618
         },
         {
           "name": "Romar's Sleeves of Visions",
           "zone": "TAILORING",
-          "mob": "Silk Elemental Tranquility Armor"
+          "mob": "Silk Elemental Tranquility Armor",
+          "id": 11578
         },
         {
           "name": "Rosrak's Boots of the Primal",
           "zone": "BLACKSMITHING",
-          "mob": "Chain Elemental Tranquility Armor"
+          "mob": "Chain Elemental Tranquility Armor",
+          "id": 20078
         },
         {
           "name": "Signet of the Arcane",
@@ -2569,7 +2607,8 @@
         {
           "name": "Ultor's Boots of Faith",
           "zone": "BLACKSMITHING",
-          "mob": "Plate Elemental Tranquility Armor"
+          "mob": "Plate Elemental Tranquility Armor",
+          "id": 20074
         },
         {
           "name": "Vest of Phoenix Feathers",
@@ -2744,7 +2783,8 @@
         {
           "name": "Kerasha's Sylvan Gloves",
           "zone": "Plane of Tranquility",
-          "mob": "Quest: Leather Elemental Tranquility Armor"
+          "mob": "Quest: Leather Elemental Tranquility Armor",
+          "id": 13603
         }
       ]
     },
@@ -2973,7 +3013,8 @@
         {
           "name": "Glowing Amber Band",
           "zone": "Sanctus Seru",
-          "mob": "Lord Inquisitor Seru"
+          "mob": "Lord Inquisitor Seru",
+          "id": 30552
         },
         {
           "name": "Square Helm",
@@ -2988,7 +3029,7 @@
         {
           "name": "Ceramic Sword of War",
           "zone": "Pottery",
-          "mob": "Recipe\u00a0: Ceramic Sword Of War"
+          "mob": "Recipe : Ceramic Sword Of War"
         },
         {
           "name": "Diseased Ratskin Mask",
