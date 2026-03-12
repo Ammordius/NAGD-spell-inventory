@@ -256,11 +256,11 @@ def analyze_character_focii(char_inventory, focus_lookup):
 
 
 def get_focus_sources(char_inventory, focus_lookup):
-    """Return per-focus item sources for equipped gear (slots 1-22 only).
-    Pet Power is checked from full inventory (including bags) so swap-in is shown.
+    """Return per-focus item sources for all inventory (equipped + bags).
+    Scoring uses full inventory, so we list sources from all items so users can see
+    which item provides each focus (including swap items in bags).
     Keys match focus_scores keys where possible. Skip attack haste (Haste/ATK) item listing.
     Value is list of ALL items providing that focus (not just best), each {item_name, slot_id, value, item_id}."""
-    EQUIPPED_SLOTS = set(range(1, 23))  # 1-22
     # Collect ALL sources per key (list of (pct, item_name, slot_id, item_id)), then sort by pct desc
     sources = defaultdict(list)  # focus_key -> [(pct, item_name, slot_id, item_id), ...]
 
@@ -276,10 +276,9 @@ def get_focus_sources(char_inventory, focus_lookup):
             slot_id = item.get('slot_id', 0)
             add_source('Pet Power', pct, item_name, slot_id, item_id)
 
+    # Include ALL inventory items (equipped + bags) so focus sources are listed when scoring from bag items
     for item in char_inventory or []:
         slot_id = item.get('slot_id', 0)
-        if slot_id not in EQUIPPED_SLOTS:
-            continue
         item_id = str(item.get('item_id', '')) if item.get('item_id') is not None else ''
         item_name = item.get('item_name', '') or item.get('name', '') or f'Item {item_id}'
 

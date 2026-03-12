@@ -3276,7 +3276,7 @@
                         let sourceHtml = '';
                         if (sources && sources.length > 0) {
                             sourceHtml = sources.map(s => {
-                                const slotName = slotNames[s.slot_id] || `Slot ${s.slot_id}`;
+                                const slotName = slotNames[s.slot_id] || (s.slot_id >= 23 ? 'Bag' : `Slot ${s.slot_id}`);
                                 const valStr = (s.value !== undefined && s.value !== null) ? ` ${s.value}%` : '';
                                 const id = (s.item_id != null && s.item_id !== '') ? s.item_id : (char.inventory?.find(i => i.slot_id === s.slot_id)?.item_id || '');
                                 return `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${id}" target="_blank" data-item-id="${id}" data-item-name="${escapeHtml(s.item_name || '')}">${escapeHtml(s.item_name || '')}</a> (${slotName})${valStr}`;
