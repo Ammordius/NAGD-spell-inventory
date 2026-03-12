@@ -704,6 +704,7 @@ SPELL_HASTE_CATEGORY_MAP = {
     # Detrimental haste (general: nukes + debuffs)
     'Haste of Solusek': 'Det',
     'Quickening of Solusek': 'Det',  # Detrimental spell haste
+    'Blaze of the Lightbringer': 'Det',  # 20% detrimental spell haste (Leaf-twined Guards, Earring of Eternal Flame, Lightbringers Earring)
 
     # Affliction haste (DoT/debuff only, 33% cap; does not affect nukes — useless for Wizard/Magician)
     'Affliction Haste': 'Affliction',
