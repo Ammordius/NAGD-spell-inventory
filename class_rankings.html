@@ -89,6 +89,29 @@
             color: black;
         }
 
+        .modal-tabs {
+            display: flex;
+            gap: 4px;
+        }
+        .modal-tab {
+            padding: 8px 14px;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            background: #e9ecef;
+            cursor: pointer;
+            font-size: 0.95rem;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: -1px;
+        }
+        .modal-tab:hover {
+            background: #dee2e6;
+        }
+        .modal-tab-active {
+            background: #fefefe;
+            font-weight: 600;
+            border-bottom: 1px solid #fefefe;
+        }
+
         .score-breakdown {
             margin-top: 20px;
         }
@@ -2936,7 +2959,8 @@
             
             let html = `<h2>${escapeHtml(char.name)} (${escapeHtml(char.class)})</h2>`;
             html += `<p><a href="https://www.takproject.net/magelo/character.php?char=${encodeURIComponent(char.name)}" target="_blank">View on Magelo</a></p>`;
-            html += `<div class="score-breakdown">`;
+            html += `<div class="modal-tabs" style="margin-bottom: 12px; border-bottom: 1px solid #dee2e6;"><button type="button" class="modal-tab modal-tab-active" data-tab="breakdown">Score breakdown</button><button type="button" class="modal-tab" data-tab="itempicker">Item picker</button></div>`;
+            html += `<div id="scoreBreakdownPanel" class="modal-panel"><div class="score-breakdown">`;
             
             // Use browser-computed points when available (from recalculateScores; works with dynamic reweighting)
             let totalStatPoints = 0.0;
@@ -3429,9 +3453,29 @@
             }
             html += `<div id="upgradeSuggestionsContainer"><div id="upgradeSuggestionsPlaceholder" style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 6px; color: #6c757d;">Loading upgrade suggestions…</div></div>`;
             
-            html += `</div>`;
+            html += `</div></div>`;
+            html += `<div id="itemPickerPanel" class="modal-panel" style="display: none;"><div id="itemPickerPlaceholder" style="padding: 12px; color: #6c757d;">Loading item picker…</div></div>`;
             modalContent.innerHTML = html;
             modal.style.display = 'block';
+
+            // Tab switching: show/hide panels and update tab active state
+            const scoreBreakdownPanel = document.getElementById('scoreBreakdownPanel');
+            const itemPickerPanel = document.getElementById('itemPickerPanel');
+            const tabButtons = modalContent.querySelectorAll('.modal-tab');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.getAttribute('data-tab');
+                    tabButtons.forEach(b => b.classList.remove('modal-tab-active'));
+                    btn.classList.add('modal-tab-active');
+                    if (tab === 'breakdown') {
+                        if (scoreBreakdownPanel) scoreBreakdownPanel.style.display = '';
+                        if (itemPickerPanel) itemPickerPanel.style.display = 'none';
+                    } else {
+                        if (scoreBreakdownPanel) scoreBreakdownPanel.style.display = 'none';
+                        if (itemPickerPanel) itemPickerPanel.style.display = '';
+                    }
+                });
+            });
 
             // Fill upgrade list from full item_stats (browser-only, so stat priority changes apply)
             // When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool; otherwise use user's upgradesPerSlot (default 5).
@@ -3441,6 +3485,139 @@
                 const upgradeData = computeUpgradesForCharacter(char, getMaxPerSlot());
                 const container = document.getElementById('upgradeSuggestionsContainer');
                 if (!container) return;
+
+                // --- Item picker panel: build from same upgradeData (current + upgrades per slot)
+                const itemPickerPlaceholder = document.getElementById('itemPickerPlaceholder');
+                const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+                const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+                const bySlotMap = {};
+                (upgradeData.bySlot || []).forEach(s => { bySlotMap[s.slotId] = s; });
+
+                let virtualLoadout = {};
+                equippedOnly.forEach(inv => {
+                    const id = inv.item_id != null && inv.item_id !== '' ? Number(inv.item_id) : null;
+                    if (inv.slot_id >= 1 && inv.slot_id <= 22 && !isNaN(id)) virtualLoadout[inv.slot_id] = id;
+                });
+
+                function recomputeVirtualStats() {
+                    const totalDelta = { hp: 0, mana: 0, ac: 0, svByType: { MR: 0, FR: 0, CR: 0, DR: 0, PR: 0 } };
+                    const getOriginalItemId = (slotId) => {
+                        const inv = equippedOnly.find(i => i.slot_id === slotId);
+                        if (!inv || inv.item_id == null || inv.item_id === '') return null;
+                        const id = Number(inv.item_id);
+                        return isNaN(id) ? null : id;
+                    };
+                    for (let slotId = 1; slotId <= 22; slotId++) {
+                        const originalItemId = getOriginalItemId(slotId);
+                        const pickedItemId = virtualLoadout[slotId] != null ? Number(virtualLoadout[slotId]) : null;
+                        const originalStats = originalItemId != null ? itemStatsCache[originalItemId] : null;
+                        const pickedStats = pickedItemId != null ? itemStatsCache[pickedItemId] : null;
+
+                        if (slotId === 13) {
+                            const offhandInv = equippedOnly.find(i => i.slot_id === 14);
+                            const offhandItemId = (offhandInv && offhandInv.item_id != null && offhandInv.item_id !== '') ? Number(offhandInv.item_id) : null;
+                            const offhandStats = offhandItemId != null && !isNaN(offhandItemId) ? itemStatsCache[offhandItemId] : null;
+                            const pickedIs2H = pickedStats && isItemTwoHanded(pickedStats);
+                            if (pickedIs2H) {
+                                const currentRaw = mergeRawStats(getItemRawStats(originalStats), getItemRawStats(offhandStats));
+                                const d = getItemStatDeltasFromRaw(currentRaw, pickedStats);
+                                totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
+                                RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                            } else {
+                                const d = getItemStatDeltas(originalStats, pickedStats);
+                                totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
+                                RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                            }
+                        } else if (slotId === 14) {
+                            const mainPickedId = virtualLoadout[13] != null ? Number(virtualLoadout[13]) : null;
+                            const mainPickedStats = mainPickedId != null ? itemStatsCache[mainPickedId] : null;
+                            if (mainPickedStats && isItemTwoHanded(mainPickedStats)) {
+                                // Slot 13 already accounted for removing offhand when comparing 2H to primary+offhand merged; skip slot 14.
+                            } else {
+                                const d = getItemStatDeltas(originalStats, pickedStats);
+                                totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
+                                RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                            }
+                        } else {
+                            const d = getItemStatDeltas(originalStats, pickedStats);
+                            totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
+                            RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                        }
+                    }
+                    const cur = char.stats || {};
+                    const ind = char.individual_resists || {};
+                    return {
+                        totalDelta,
+                        newStats: {
+                            hp: (cur.hp || 0) + totalDelta.hp,
+                            mana: (cur.mana || 0) + totalDelta.mana,
+                            ac: (cur.ac || 0) + totalDelta.ac,
+                            MR: (ind.MR || 0) + totalDelta.svByType.MR,
+                            FR: (ind.FR || 0) + totalDelta.svByType.FR,
+                            CR: (ind.CR || 0) + totalDelta.svByType.CR,
+                            DR: (ind.DR || 0) + totalDelta.svByType.DR,
+                            PR: (ind.PR || 0) + totalDelta.svByType.PR
+                        }
+                    };
+                }
+
+                function updateItemPickerStatTable(result) {
+                    const tbody = document.getElementById('itemPickerStatTableBody');
+                    if (!tbody) return;
+                    const { totalDelta, newStats } = result;
+                    const cur = char.stats || {};
+                    const ind = char.individual_resists || {};
+                    const rows = [
+                        ['HP', (cur.hp || 0), totalDelta.hp, newStats.hp],
+                        ['Mana', (cur.mana || 0), totalDelta.mana, newStats.mana],
+                        ['AC', (cur.ac || 0), totalDelta.ac, newStats.ac],
+                        ['MR', (ind.MR || 0), totalDelta.svByType.MR, newStats.MR],
+                        ['FR', (ind.FR || 0), totalDelta.svByType.FR, newStats.FR],
+                        ['CR', (ind.CR || 0), totalDelta.svByType.CR, newStats.CR],
+                        ['DR', (ind.DR || 0), totalDelta.svByType.DR, newStats.DR],
+                        ['PR', (ind.PR || 0), totalDelta.svByType.PR, newStats.PR]
+                    ];
+                    tbody.innerHTML = rows.map(([stat, current, delta, newVal]) => {
+                        const deltaStr = delta === 0 ? '—' : (delta > 0 ? '+' : '') + delta;
+                        return `<tr><td>${stat}</td><td>${Number(current).toLocaleString()}</td><td>${deltaStr}</td><td>${Number(newVal).toLocaleString()}</td></tr>`;
+                    }).join('');
+                }
+
+                let pickerHtml = `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped.</p>`;
+                pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
+                pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
+                for (let slotId = 1; slotId <= 22; slotId++) {
+                    const slotName = slotNames[slotId] || `Slot ${slotId}`;
+                    const slotData = bySlotMap[slotId];
+                    const currentItemId = slotData ? (slotData.currentItemId != null ? Number(slotData.currentItemId) : null) : null;
+                    const currentItemName = slotData ? (slotData.currentItemName || '') : '';
+                    const upgrades = (slotData && slotData.upgrades) ? slotData.upgrades : [];
+                    const options = [];
+                    if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName });
+                    upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName }); });
+                    const selectedId = virtualLoadout[slotId] != null ? virtualLoadout[slotId] : (options.length ? options[0].id : '');
+                    pickerHtml += `<div><label style="font-weight: 600; font-size: 0.9em;">${escapeHtml(slotName)}</label><select class="item-picker-slot" data-slot-id="${slotId}" style="width: 100%; margin-top: 2px; padding: 4px 6px;">`;
+                    if (options.length === 0) pickerHtml += `<option value=""${selectedId === '' ? ' selected' : ''}>— None —</option>`;
+                    else options.forEach(opt => { pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${escapeHtml(opt.name)}</option>`; });
+                    pickerHtml += `</select></div>`;
+                }
+                pickerHtml += `</div>`;
+                if (itemPickerPlaceholder && itemPickerPlaceholder.parentNode) {
+                    itemPickerPlaceholder.innerHTML = pickerHtml;
+                    itemPickerPlaceholder.id = '';
+                    const selects = itemPickerPlaceholder.querySelectorAll('.item-picker-slot');
+                    selects.forEach(sel => {
+                        sel.addEventListener('change', () => {
+                            const slotId = parseInt(sel.getAttribute('data-slot-id'), 10);
+                            const val = sel.value;
+                            virtualLoadout[slotId] = val === '' ? null : Number(val);
+                            const result = recomputeVirtualStats();
+                            updateItemPickerStatTable(result);
+                        });
+                    });
+                    const result = recomputeVirtualStats();
+                    updateItemPickerStatTable(result);
+                }
 
                 /** HP/DKP for an upgrade (null if no DKP data or no HP gain). */
                 function getHpPerDkp(u) {
