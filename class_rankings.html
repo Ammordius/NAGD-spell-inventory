@@ -799,7 +799,7 @@
             };
         }
 
-        /** Format absolute resist part from svByType: "+50 sv all" when all same, else "+14 sv FR  +4 sv DR  ...". */
+        /** Format absolute resist part from svByType: "+50 sv all" when all same, else "+14 FR  +4 DR  ...". */
         function formatResistPartAbsolute(svByType) {
             if (!svByType || typeof svByType !== 'object') return '';
             const values = RESIST_ORDER.map(abbrev => svByType[abbrev] || 0).filter(v => v !== 0);
@@ -807,11 +807,11 @@
             const allSame = values.length === 5 && values.every(v => v === values[0]);
             if (allSame && values[0] !== 0) return '+' + values[0] + ' sv all';
             return RESIST_ORDER.filter(abbrev => (svByType[abbrev] || 0) !== 0)
-                .map(abbrev => ((svByType[abbrev] || 0) > 0 ? '+' : '') + svByType[abbrev] + ' sv ' + abbrev)
+                .map(abbrev => ((svByType[abbrev] || 0) > 0 ? '+' : '') + svByType[abbrev] + ' ' + abbrev)
                 .join('  ');
         }
 
-        /** Format resist deltas from svDeltasByType: "+3 sv all" when all same, else "+30 sv FR  -5 sv DR  ...". */
+        /** Format resist deltas from svDeltasByType: "+3 sv all" when all same, else "+30 FR  -5 DR  ...". */
         function formatResistPartDeltas(svDeltasByType) {
             if (!svDeltasByType || typeof svDeltasByType !== 'object') return '';
             const deltas = RESIST_ORDER.map(abbrev => svDeltasByType[abbrev] || 0);
@@ -825,7 +825,7 @@
             return RESIST_ORDER.filter(abbrev => (svDeltasByType[abbrev] || 0) !== 0)
                 .map(abbrev => {
                     const d = svDeltasByType[abbrev] || 0;
-                    return (d > 0 ? '+' : '') + d + ' sv ' + abbrev;
+                    return (d > 0 ? '+' : '') + d + ' ' + abbrev;
                 })
                 .join('  ');
         }
