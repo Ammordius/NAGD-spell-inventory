@@ -924,9 +924,11 @@
          * Returns { bySlot: [{ slotId, slotName, currentItem, currentScore, currentInData, upgrades }], anyMissing }.
          * @param {Object} char - character object
          * @param {number} [maxPerSlot=5] - max candidates per slot (use larger e.g. 25 when DKP filter will apply)
+         * @param {boolean} [includeDowngrades=false] - if true, include items with score <= current (delta <= 0) so users can explore alternatives
          */
-        function computeUpgradesForCharacter(char, maxPerSlot) {
+        function computeUpgradesForCharacter(char, maxPerSlot, includeDowngrades) {
             if (maxPerSlot == null || maxPerSlot < 1) maxPerSlot = 5;
+            if (includeDowngrades == null) includeDowngrades = false;
             const charClass = char.class;
             const classAbbrev = CLASS_TO_ABBREV[charClass] || '';
             const customWeight = customWeights[charClass] || {};
@@ -1007,9 +1009,9 @@
                     } else {
                         deltas = getItemStatDeltas(currentStats, stats);
                     }
-                    if (score <= baselineScore) continue;
-
                     const delta = score - baselineScore;
+                    if (!includeDowngrades && delta <= 0) continue;
+
                     const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
                     candidates.push({
                         itemId: id,
@@ -2588,7 +2590,7 @@
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
-                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
+                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
                     const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
                     if (slot && slot.upgrades) {
                         const u = slot.upgrades.find(x => String(x.itemId) === String(elementalItemId));
@@ -2599,11 +2601,12 @@
                             if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                         }
-                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(elementalItemId)).slice(0, 5);
+                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(elementalItemId)).slice(0, upgradesPerSlot);
                         otherOptionsHtml = others.length ? others.map(o => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                             const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                         }).join(', ') : '—';
                     }
                     rows.push({ char, benefit, otherOptionsHtml, sortKey });
@@ -2638,7 +2641,7 @@
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
-                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
+                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
                     const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
                     if (slot && slot.upgrades) {
                         const u = slot.upgrades.find(x => String(x.itemId) === String(itemId));
@@ -2649,11 +2652,12 @@
                             if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                         }
-                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 5);
+                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
                         otherOptionsHtml = others.length ? others.map(o => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                             const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                         }).join(', ') : '—';
                     }
                     rows.push({ char, benefit, otherOptionsHtml, sortKey });
@@ -2788,7 +2792,7 @@
                 let otherOptionsHtml = '—';
                 let slotName = '—';
                 let sortKey = -Infinity;
-                const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25));
+                const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
                 let slot = null;
                 if (upgradeData.bySlot) {
                     for (const s of upgradeData.bySlot) {
@@ -2801,11 +2805,12 @@
                             benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
                             if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
-                            const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, 5);
+                            const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
                             otherOptionsHtml = others.length ? others.map(o => {
                                 const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                                 const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                                return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                                const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                                return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                             }).join(', ') : '—';
                             break;
                         }
@@ -2816,11 +2821,12 @@
                     slotName = slotNames[sid] || 'Slot ' + sid;
                     slot = upgradeData.bySlot && upgradeData.bySlot.find(s => s.slotId === sid);
                     if (slot && slot.upgrades) {
-                        const others = slot.upgrades.slice(0, 5);
+                        const others = slot.upgrades.slice(0, upgradesPerSlot);
                         otherOptionsHtml = others.length ? others.map(o => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                             const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            return deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                         }).join(', ') : '—';
                     }
                 }
@@ -3486,20 +3492,17 @@
                 const container = document.getElementById('upgradeSuggestionsContainer');
                 if (!container) return;
 
-                // --- Item picker panel: build from same upgradeData (current + upgrades per slot)
-                const itemPickerPlaceholder = document.getElementById('itemPickerPlaceholder');
-                const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
-                const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
-                const bySlotMap = {};
-                (upgradeData.bySlot || []).forEach(s => { bySlotMap[s.slotId] = s; });
+                // Item picker uses data that includes downgrades so users can explore alternatives.
+                let pickerData = computeUpgradesForCharacter(char, getMaxPerSlot(), true);
 
-                let virtualLoadout = {};
-                equippedOnly.forEach(inv => {
-                    const id = inv.item_id != null && inv.item_id !== '' ? Number(inv.item_id) : null;
-                    if (inv.slot_id >= 1 && inv.slot_id <= 22 && !isNaN(id)) virtualLoadout[inv.slot_id] = id;
-                });
+                // Shared state for item picker so we can preserve selections when rebuilding (e.g. when "Upgrades per slot" changes).
+                const itemPickerState = { virtualLoadout: {} };
+
+                const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
 
                 function recomputeVirtualStats() {
+                    const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+                    const virtualLoadout = itemPickerState.virtualLoadout;
                     const totalDelta = { hp: 0, mana: 0, ac: 0, svByType: { MR: 0, FR: 0, CR: 0, DR: 0, PR: 0 } };
                     const getOriginalItemId = (slotId) => {
                         const inv = equippedOnly.find(i => i.slot_id === slotId);
@@ -3583,26 +3586,45 @@
                     }).join('');
                 }
 
-                let pickerHtml = `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped.</p>`;
-                pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
-                pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
-                for (let slotId = 1; slotId <= 22; slotId++) {
-                    const slotName = slotNames[slotId] || `Slot ${slotId}`;
-                    const slotData = bySlotMap[slotId];
-                    const currentItemId = slotData ? (slotData.currentItemId != null ? Number(slotData.currentItemId) : null) : null;
-                    const currentItemName = slotData ? (slotData.currentItemName || '') : '';
-                    const upgrades = (slotData && slotData.upgrades) ? slotData.upgrades : [];
-                    const options = [];
-                    if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName });
-                    upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName }); });
-                    const selectedId = virtualLoadout[slotId] != null ? virtualLoadout[slotId] : (options.length ? options[0].id : '');
-                    pickerHtml += `<div><label style="font-weight: 600; font-size: 0.9em;">${escapeHtml(slotName)}</label><select class="item-picker-slot" data-slot-id="${slotId}" style="width: 100%; margin-top: 2px; padding: 4px 6px;">`;
-                    if (options.length === 0) pickerHtml += `<option value=""${selectedId === '' ? ' selected' : ''}>— None —</option>`;
-                    else options.forEach(opt => { pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${escapeHtml(opt.name)}</option>`; });
-                    pickerHtml += `</select></div>`;
-                }
-                pickerHtml += `</div>`;
-                if (itemPickerPlaceholder && itemPickerPlaceholder.parentNode) {
+                /** Build the item picker panel (Stat simulator) from upgradeData. Preserves current selections where still valid when rebuilding. */
+                function buildItemPickerPanel(upgradeData, char) {
+                    const itemPickerPlaceholder = document.getElementById('itemPickerPlaceholder');
+                    if (!itemPickerPlaceholder || !itemPickerPlaceholder.parentNode) return;
+                    const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+                    const bySlotMap = {};
+                    (upgradeData.bySlot || []).forEach(s => { bySlotMap[s.slotId] = s; });
+                    // Init virtualLoadout: preserve existing selection if still in new options; else use current equipped or first option.
+                    for (let slotId = 1; slotId <= 22; slotId++) {
+                        const slotData = bySlotMap[slotId];
+                        const currentItemId = slotData ? (slotData.currentItemId != null ? Number(slotData.currentItemId) : null) : null;
+                        const currentItemName = slotData ? (slotData.currentItemName || '') : '';
+                        const upgrades = (slotData && slotData.upgrades) ? slotData.upgrades : [];
+                        const options = [];
+                        if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName });
+                        upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName }); });
+                        const prevId = itemPickerState.virtualLoadout[slotId] != null ? Number(itemPickerState.virtualLoadout[slotId]) : null;
+                        const stillValid = options.some(o => o.id === prevId);
+                        itemPickerState.virtualLoadout[slotId] = stillValid ? prevId : (options.length ? options[0].id : null);
+                    }
+                    let pickerHtml = `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped.</p>`;
+                    pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
+                    pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
+                    for (let slotId = 1; slotId <= 22; slotId++) {
+                        const slotName = slotNames[slotId] || `Slot ${slotId}`;
+                        const slotData = bySlotMap[slotId];
+                        const currentItemId = slotData ? (slotData.currentItemId != null ? Number(slotData.currentItemId) : null) : null;
+                        const currentItemName = slotData ? (slotData.currentItemName || '') : '';
+                        const upgrades = (slotData && slotData.upgrades) ? slotData.upgrades : [];
+                        const options = [];
+                        if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName, delta: null });
+                        upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName, delta: u.delta }); });
+                        const selectedId = itemPickerState.virtualLoadout[slotId] != null ? itemPickerState.virtualLoadout[slotId] : (options.length ? options[0].id : '');
+                        pickerHtml += `<div><label style="font-weight: 600; font-size: 0.9em;">${escapeHtml(slotName)}</label><select class="item-picker-slot" data-slot-id="${slotId}" style="width: 100%; margin-top: 2px; padding: 4px 6px;">`;
+                        if (options.length === 0) pickerHtml += `<option value=""${selectedId === '' ? ' selected' : ''}>— None —</option>`;
+                        else options.forEach(opt => { const label = escapeHtml(opt.name) + (opt.delta != null && opt.delta <= 0 ? ' (downgrade)' : ''); pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`; });
+                        pickerHtml += `</select></div>`;
+                    }
+                    pickerHtml += `</div>`;
                     itemPickerPlaceholder.innerHTML = pickerHtml;
                     itemPickerPlaceholder.id = '';
                     const selects = itemPickerPlaceholder.querySelectorAll('.item-picker-slot');
@@ -3610,7 +3632,7 @@
                         sel.addEventListener('change', () => {
                             const slotId = parseInt(sel.getAttribute('data-slot-id'), 10);
                             const val = sel.value;
-                            virtualLoadout[slotId] = val === '' ? null : Number(val);
+                            itemPickerState.virtualLoadout[slotId] = val === '' ? null : Number(val);
                             const result = recomputeVirtualStats();
                             updateItemPickerStatTable(result);
                         });
@@ -3618,6 +3640,8 @@
                     const result = recomputeVirtualStats();
                     updateItemPickerStatTable(result);
                 }
+
+                buildItemPickerPanel(pickerData, char);
 
                 /** HP/DKP for an upgrade (null if no DKP data or no HP gain). */
                 function getHpPerDkp(u) {
@@ -3719,12 +3743,16 @@
 
                 const upgradesPerSlotSelect = document.getElementById('upgradesPerSlotSelect');
                 if (upgradesPerSlotSelect) {
-                    upgradesPerSlotSelect.addEventListener('change', () => {
+                    const applyUpgradesPerSlot = () => {
                         upgradesPerSlot = parseInt(upgradesPerSlotSelect.value, 10);
                         localStorage.setItem('upgradesPerSlot', String(upgradesPerSlot));
                         const newData = computeUpgradesForCharacter(char, getMaxPerSlot());
+                        pickerData = computeUpgradesForCharacter(char, getMaxPerSlot(), true);
                         container.innerHTML = buildUpgradeSection(newData, getMinVal());
-                    });
+                        buildItemPickerPanel(pickerData, char);
+                    };
+                    upgradesPerSlotSelect.addEventListener('change', applyUpgradesPerSlot);
+                    upgradesPerSlotSelect.addEventListener('input', applyUpgradesPerSlot);
                 }
                 if (dkpValEnabled && dkpMinInput) {
                     dkpMinInput.addEventListener('input', () => {
