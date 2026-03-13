@@ -1028,6 +1028,46 @@
                 bySlot.push({ slotId, slotName, currentItemName, currentItemId, currentScore, currentInData, upgrades });
             }
 
+            // When main hand (slot 13) has a two-handed weapon, slot 14 is not equipped so it was skipped. Add Off Hand so the item picker can show OH options.
+            const hasSlot14 = bySlot.some(s => s.slotId === 14);
+            const slot13Entry = bySlot.find(s => s.slotId === 13);
+            const mainHandIs2H = slot13Entry && slot13Entry.currentItemId != null && itemStatsCache[slot13Entry.currentItemId] && isItemTwoHanded(itemStatsCache[slot13Entry.currentItemId]);
+            if (!hasSlot14 && mainHandIs2H) {
+                const slotId = 14;
+                const slotName = slotNames[slotId] || 'Off Hand';
+                const currentItemId = null;
+                const currentItemName = '';
+                const currentScore = 0;
+                const currentInData = true;
+                const otherEquippedIds = new Set(equippedOnly.filter(i => i.slot_id !== slotId).map(i => i.item_id != null && i.item_id !== '' ? Number(i.item_id) : null).filter(n => n != null && !isNaN(n)));
+                const candidates = [];
+                for (const [idStr, stats] of Object.entries(itemStatsCache)) {
+                    const id = Number(idStr);
+                    if (isNaN(id) || !stats) continue;
+                    if (!itemMatchesSlot(slotId, stats.slot)) continue;
+                    if (!itemUsableByClass(stats.classes, classAbbrev)) continue;
+                    if (slotId === 14 && isItemTwoHanded(stats)) continue;
+                    if (isItemLore(stats) && otherEquippedIds.has(id)) continue;
+                    const score = scoreItemForUpgrade(stats, id, norm, focusWeights, focusValuesByItem);
+                    const deltas = getItemStatDeltas(null, stats);
+                    const delta = score;
+                    if (!includeDowngrades && delta <= 0) continue;
+                    const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
+                    candidates.push({
+                        itemId: id,
+                        itemName: stats.name || elementalDisplayNames[String(id)] || `Item ${id}`,
+                        score,
+                        delta,
+                        deltas,
+                        focusSpellName
+                    });
+                }
+                candidates.sort((a, b) => b.delta - a.delta);
+                // Use full list for synthetic OH so the item picker shows all off-hands, not just top N by score.
+                const upgrades = candidates;
+                bySlot.push({ slotId, slotName, currentItemName, currentItemId, currentScore, currentInData, upgrades });
+            }
+
             return { bySlot, anyMissing };
         }
 
@@ -3512,7 +3552,8 @@
                     };
                     for (let slotId = 1; slotId <= 22; slotId++) {
                         const originalItemId = getOriginalItemId(slotId);
-                        const pickedItemId = virtualLoadout[slotId] != null ? Number(virtualLoadout[slotId]) : null;
+                        const rawPicked = virtualLoadout[slotId];
+                        const pickedItemId = (rawPicked != null && rawPicked !== '') ? Number(rawPicked) : null;
                         const originalStats = originalItemId != null ? itemStatsCache[originalItemId] : null;
                         const pickedStats = pickedItemId != null ? itemStatsCache[pickedItemId] : null;
 
@@ -3535,7 +3576,12 @@
                             const mainPickedId = virtualLoadout[13] != null ? Number(virtualLoadout[13]) : null;
                             const mainPickedStats = mainPickedId != null ? itemStatsCache[mainPickedId] : null;
                             if (mainPickedStats && isItemTwoHanded(mainPickedStats)) {
-                                // Slot 13 already accounted for removing offhand when comparing 2H to primary+offhand merged; skip slot 14.
+                                // Main hand is 2H; OH slot is "empty" in-game. If user picked an OH in the picker, add its stats (delta from nothing).
+                                if (pickedStats) {
+                                    const d = getItemStatDeltas(null, pickedStats);
+                                    totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
+                                    RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                }
                             } else {
                                 const d = getItemStatDeltas(originalStats, pickedStats);
                                 totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
@@ -3632,10 +3678,15 @@
                         const upgrades = (slotData && slotData.upgrades) ? slotData.upgrades : [];
                         const options = [];
                         if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName });
+                        else if (slotId === 14) options.push({ id: '', name: '— None —' }); // OH empty when main is 2H
                         upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName }); });
-                        const prevId = itemPickerState.virtualLoadout[slotId] != null ? Number(itemPickerState.virtualLoadout[slotId]) : null;
-                        const stillValid = options.some(o => o.id === prevId);
-                        itemPickerState.virtualLoadout[slotId] = stillValid ? prevId : (options.length ? options[0].id : null);
+                        const prevRaw = itemPickerState.virtualLoadout[slotId];
+                        const prevId = (prevRaw != null && prevRaw !== '') ? Number(prevRaw) : null;
+                        // When OH is empty (synthetic slot 14), don't carry over previous selection; show None.
+                        const forceNone = (slotId === 14 && currentItemId == null);
+                        const stillValid = !forceNone && prevId != null && options.some(o => o.id === prevId);
+                        const defaultId = options.length ? (options[0].id === '' ? null : options[0].id) : null;
+                        itemPickerState.virtualLoadout[slotId] = stillValid ? prevId : defaultId;
                     }
                     let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
                     pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
@@ -3649,8 +3700,9 @@
                         const upgrades = (slotData && slotData.upgrades) ? slotData.upgrades : [];
                         const options = [];
                         if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName, delta: null });
+                        else if (slotId === 14) options.push({ id: '', name: '— None —', delta: null });
                         upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName, delta: u.delta }); });
-                        const selectedId = itemPickerState.virtualLoadout[slotId] != null ? itemPickerState.virtualLoadout[slotId] : (options.length ? options[0].id : '');
+                        const selectedId = (itemPickerState.virtualLoadout[slotId] != null && itemPickerState.virtualLoadout[slotId] !== '') ? itemPickerState.virtualLoadout[slotId] : (options.length ? options[0].id : '');
                         const isEquipped = selectedId !== '' && selectedId !== null && Number(selectedId) === currentItemId;
                         const rowClass = options.length === 0 ? '' : (isEquipped ? 'equipped' : 'changed');
                         pickerHtml += `<div class="item-picker-slot-row ${rowClass}" data-current-id="${currentItemId != null ? currentItemId : ''}"><label style="font-weight: 600; font-size: 0.9em;">${escapeHtml(slotName)}</label><select class="item-picker-slot" data-slot-id="${slotId}" style="width: 100%; margin-top: 2px; padding: 4px 6px;">`;
