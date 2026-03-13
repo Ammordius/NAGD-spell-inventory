@@ -705,19 +705,30 @@ SPELL_HASTE_CATEGORY_MAP = {
     'Haste of Solusek': 'Det',
     'Quickening of Solusek': 'Det',  # Detrimental spell haste
     'Blaze of the Lightbringer': 'Det',  # 20% detrimental spell haste (Leaf-twined Guards, Earring of Eternal Flame, Lightbringers Earring)
+    'Shade Stone Focus': 'Det',
+    'Speed of Solusek': 'Det',
 
     # Affliction haste (DoT/debuff only, 33% cap; does not affect nukes — useless for Wizard/Magician)
     'Affliction Haste': 'Affliction',
 
     # Enhancement haste: buff-casting only (not general beneficial); tiered e.g. Enhancement Haste III
     'Enhancement Haste': 'Enhancement',
+    'Reanimation Haste': 'Enhancement',
+    'Summoning Haste': 'Enhancement',
 
     # Beneficial haste (general)
-    'Reanimation Haste': 'Bene',
-    'Summoning Haste': 'Bene',
     'Haste of Mithaniel': 'Bene',  # Paladin beneficial
-    'Haste of Druzzil': 'Bene',  # Usually beneficial
-    'Spell Haste': 'Bene',  # Generic beneficial
+    'Haste of Druzzil': 'All',  # All spell haste
+    'Blessing of Reverence': 'All',
+    'Contemplative Alacrity': 'All',
+    'Conundrum of Speed': 'All',
+    "Naki's _______ Pernicity": 'All',
+    'Quickening of Druzzil': 'All',
+    'Quickening of Mithaniel': 'Bene',
+    'Speed of Mithaniel': 'Bene',
+
+    # Generic/all-purpose haste
+    'Spell Haste': 'All',  # Generic all spell haste
     'Speeding Thought': 'All',  # 18% spell haste all (beneficial and detrimental); ornate/elemental caster boots
     
     # 'All Spell Haste': 'All',  # Uncomment if a focus applies to both Bene and Det
