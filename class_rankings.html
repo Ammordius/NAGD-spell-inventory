@@ -3588,7 +3588,7 @@
 
                 /** Build the item picker panel (Stat simulator) from upgradeData. Preserves current selections where still valid when rebuilding. */
                 function buildItemPickerPanel(upgradeData, char) {
-                    const itemPickerPlaceholder = document.getElementById('itemPickerPlaceholder');
+                    const itemPickerPlaceholder = document.getElementById('itemPickerPlaceholder') || document.getElementById('itemPickerPanel')?.firstElementChild;
                     if (!itemPickerPlaceholder || !itemPickerPlaceholder.parentNode) return;
                     const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
                     const bySlotMap = {};
@@ -3606,7 +3606,8 @@
                         const stillValid = options.some(o => o.id === prevId);
                         itemPickerState.virtualLoadout[slotId] = stillValid ? prevId : (options.length ? options[0].id : null);
                     }
-                    let pickerHtml = `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped.</p>`;
+                    let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
+                    pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
                     pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
                     pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
                     for (let slotId = 1; slotId <= 22; slotId++) {
@@ -3619,20 +3620,33 @@
                         if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName, delta: null });
                         upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName, delta: u.delta }); });
                         const selectedId = itemPickerState.virtualLoadout[slotId] != null ? itemPickerState.virtualLoadout[slotId] : (options.length ? options[0].id : '');
-                        pickerHtml += `<div><label style="font-weight: 600; font-size: 0.9em;">${escapeHtml(slotName)}</label><select class="item-picker-slot" data-slot-id="${slotId}" style="width: 100%; margin-top: 2px; padding: 4px 6px;">`;
+                        const isEquipped = selectedId !== '' && selectedId !== null && Number(selectedId) === currentItemId;
+                        const rowClass = options.length === 0 ? '' : (isEquipped ? 'equipped' : 'changed');
+                        pickerHtml += `<div class="item-picker-slot-row ${rowClass}" data-current-id="${currentItemId != null ? currentItemId : ''}"><label style="font-weight: 600; font-size: 0.9em;">${escapeHtml(slotName)}</label><select class="item-picker-slot" data-slot-id="${slotId}" style="width: 100%; margin-top: 2px; padding: 4px 6px;">`;
                         if (options.length === 0) pickerHtml += `<option value=""${selectedId === '' ? ' selected' : ''}>— None —</option>`;
-                        else options.forEach(opt => { const label = escapeHtml(opt.name) + (opt.delta != null && opt.delta <= 0 ? ' (downgrade)' : ''); pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`; });
+                        else options.forEach(opt => {
+                            const suffix = (opt.id === currentItemId ? ' (equipped)' : (opt.delta != null && opt.delta <= 0 ? ' (downgrade)' : ''));
+                            const label = escapeHtml(opt.name) + suffix;
+                            pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`;
+                        });
                         pickerHtml += `</select></div>`;
                     }
                     pickerHtml += `</div>`;
                     itemPickerPlaceholder.innerHTML = pickerHtml;
-                    itemPickerPlaceholder.id = '';
+                    if (!itemPickerPlaceholder.id) itemPickerPlaceholder.id = 'itemPickerPlaceholder';
                     const selects = itemPickerPlaceholder.querySelectorAll('.item-picker-slot');
                     selects.forEach(sel => {
                         sel.addEventListener('change', () => {
                             const slotId = parseInt(sel.getAttribute('data-slot-id'), 10);
                             const val = sel.value;
                             itemPickerState.virtualLoadout[slotId] = val === '' ? null : Number(val);
+                            const row = sel.closest('.item-picker-slot-row');
+                            if (row) {
+                                const currentId = row.getAttribute('data-current-id');
+                                const isEquipped = val !== '' && currentId !== '' && Number(val) === Number(currentId);
+                                row.classList.toggle('equipped', isEquipped);
+                                row.classList.toggle('changed', !isEquipped && val !== '');
+                            }
                             const result = recomputeVirtualStats();
                             updateItemPickerStatTable(result);
                         });
