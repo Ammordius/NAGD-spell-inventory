@@ -817,6 +817,12 @@
           "zone": "The Plane of Time: Phase 2",
           "mob": "Quarm",
           "id": 20496
+        },
+        {
+          "name": "Greatstaff of Power",
+          "zone": "Plane of Time",
+          "mob": "Rallos Zek",
+          "id": 24793
         }
       ]
     },
@@ -1555,6 +1561,12 @@
           "mob": "Fennin Ro, The Tyrant of Fire",
           "id": 12510,
           "classes": "CLR DRU SHM"
+        },
+        {
+          "name": "Temporal Chainmail Sleeves",
+          "zone": "The Plane of Time",
+          "mob": "Vallon Zek",
+          "id": 32608
         }
       ]
     },
@@ -2791,6 +2803,12 @@
           "mob": "Xegony the Queen of Air",
           "id": 14747,
           "classes": "NEC WIZ MAG ENC"
+        },
+        {
+          "name": "Signet of the Arcane",
+          "zone": "Quest",
+          "mob": "Signets of the Councilman",
+          "id": 16257
         }
       ]
     },
@@ -3121,6 +3139,12 @@
           "zone": "The Plane of Time: Phase 1",
           "mob": "Kazrok of Fire",
           "id": 28668
+        },
+        {
+          "name": "Earthen Bile",
+          "zone": "Plane of Time",
+          "mob": "Avatar of Earth",
+          "id": 20621
         }
       ]
     },
