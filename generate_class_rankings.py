@@ -514,47 +514,51 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 cls_str = item_stats_lookup.get(item_id, '')
                 if cls_str:
                     entry['classes'] = cls_str
-        if cat == 'Spell Damage':
-            damage_type = _focus_map_get(SPELL_DAMAGE_TYPE_MAP, name, 'All')
-            key = f'Spell Damage ({damage_type})'
-            candidates[key].append(entry)
-        elif cat == 'Spell Mana Efficiency':
-            sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
-            if sub == 'LDD':
+
+            # Attach this specific item entry to the appropriate focus bucket(s)
+            if cat == 'Spell Damage':
+                damage_type = _focus_map_get(SPELL_DAMAGE_TYPE_MAP, name, 'All')
+                key = f'Spell Damage ({damage_type})'
+                candidates[key].append(entry)
+            elif cat == 'Spell Mana Efficiency':
+                sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
+                if sub == 'LDD':
+                    candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry)
+                elif sub == 'All':
+                    for key in ('Spell Mana Efficiency (Bene)', 'Spell Mana Efficiency (Det)', 'Spell Mana Efficiency (Nuke)', 'Spell Mana Efficiency (Long Duration Debuff)'):
+                        candidates[key].append(entry)
+                else:
+                    candidates[f'Spell Mana Efficiency ({sub})'].append(entry)
+            elif cat == 'Long Duration Detrimental Mana Preservation':
                 candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry)
-            elif sub == 'All':
-                for key in ('Spell Mana Efficiency (Bene)', 'Spell Mana Efficiency (Det)', 'Spell Mana Efficiency (Nuke)', 'Spell Mana Efficiency (Long Duration Debuff)'):
+            elif cat == 'Spell Haste':
+                sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, name, 'Bene')
+                if sub == 'Det':
+                    key = 'Detrimental Spell Haste'
+                    candidates[key].append(entry)
+                elif sub == 'Affliction':
+                    key = 'Focus Affliction Haste'
+                    candidates[key].append(entry)
+                elif sub == 'All':
+                    candidates['Beneficial Spell Haste'].append(entry)
+                    candidates['Detrimental Spell Haste'].append(entry)
+                elif sub == 'Enhancement':
+                    key = 'Enhancement Spell Haste'
+                    candidates[key].append(entry)
+                else:
+                    key = 'Beneficial Spell Haste'
+                    candidates[key].append(entry)
+            elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
+                if cat == 'All Spell Duration':
+                    candidates['Buff Spell Duration'].append(entry)
+                    candidates['Detrimental Spell Duration'].append(entry)
+                else:
+                    dur_cat = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
+                    key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
                     candidates[key].append(entry)
             else:
-                candidates[f'Spell Mana Efficiency ({sub})'].append(entry)
-        elif cat == 'Long Duration Detrimental Mana Preservation':
-            candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry)
-        elif cat == 'Spell Haste':
-            sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, name, 'Bene')
-            if sub == 'Det':
-                key = 'Detrimental Spell Haste'
-            elif sub == 'Affliction':
-                key = 'Focus Affliction Haste'
-            elif sub == 'All':
-                candidates['Beneficial Spell Haste'].append(entry)
-                candidates['Detrimental Spell Haste'].append(entry)
-                continue
-            elif sub == 'Enhancement':
-                key = 'Enhancement Spell Haste'
-            else:
-                key = 'Beneficial Spell Haste'
-            candidates[key].append(entry)
-        elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
-            if cat == 'All Spell Duration':
-                candidates['Buff Spell Duration'].append(entry)
-                candidates['Detrimental Spell Duration'].append(entry)
-            else:
-                dur_cat = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
-                key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
-                candidates[key].append(entry)
-        else:
-            # Healing Enhancement, Spell Range Extension, etc.
-            candidates[cat].append(entry)
+                # Healing Enhancement, Spell Range Extension, etc.
+                candidates[cat].append(entry)
     # Add item-based overrides (Conservation of Bertoxxulous / Conservation of Xegony) so they appear in "items that could give this focus"
     for item_id, effects in ITEM_FOCUS_OVERRIDES.items():
         item_name = ITEM_FOCUS_OVERRIDE_NAMES.get(item_id, f'Item {item_id}')
