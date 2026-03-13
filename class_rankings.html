@@ -3584,6 +3584,37 @@
                         const deltaStr = delta === 0 ? '—' : (delta > 0 ? '+' : '') + delta;
                         return `<tr><td>${stat}</td><td>${Number(current).toLocaleString()}</td><td>${deltaStr}</td><td>${Number(newVal).toLocaleString()}</td></tr>`;
                     }).join('');
+                    if (dkpValEnabled) updateItemPickerTotalDkp();
+                }
+
+                /** When dkp_val=true: return { last3, avg } for an item from dkpPricesCache. */
+                function getDkpForItemId(itemId) {
+                    if (itemId == null || itemId === '') return { last3: [], avg: 0 };
+                    const entry = dkpPricesCache[String(itemId)];
+                    const prices = entry && entry.dkp_prices ? entry.dkp_prices.slice(0, 3) : [];
+                    const last3 = prices.map(p => p.cost);
+                    const avg = last3.length ? last3.reduce((a, b) => a + b, 0) / last3.length : 0;
+                    return { last3, avg };
+                }
+
+                /** When dkp_val=true: refresh the "Total DKP for changes" line from current selections. */
+                function updateItemPickerTotalDkp() {
+                    const totalEl = document.getElementById('itemPickerTotalDkp');
+                    if (!totalEl) return;
+                    let sum = 0;
+                    const placeholder = document.getElementById('itemPickerPlaceholder');
+                    if (placeholder) {
+                        placeholder.querySelectorAll('.item-picker-slot-row').forEach(row => {
+                            const select = row.querySelector('.item-picker-slot');
+                            const currentId = row.getAttribute('data-current-id');
+                            const val = select ? select.value : '';
+                            if (val !== '' && currentId !== '' && Number(val) !== Number(currentId)) {
+                                const { avg } = getDkpForItemId(val);
+                                sum += avg;
+                            }
+                        });
+                    }
+                    totalEl.innerHTML = `Total DKP for changes: <strong>${sum > 0 ? sum.toFixed(1) : '0'}</strong>`;
                 }
 
                 /** Build the item picker panel (Stat simulator) from upgradeData. Preserves current selections where still valid when rebuilding. */
@@ -3629,9 +3660,18 @@
                             const label = escapeHtml(opt.name) + suffix;
                             pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`;
                         });
-                        pickerHtml += `</select></div>`;
+                        pickerHtml += `</select>`;
+                        if (dkpValEnabled) {
+                            const dkp = getDkpForItemId(selectedId);
+                            const dkpLine = dkp.last3.length ? `Last 3 DKP: ${dkp.last3.join(', ')} (avg ${dkp.avg.toFixed(1)})` : '(no DKP)';
+                            pickerHtml += `<div class="item-picker-dkp" data-slot-id="${slotId}" style="font-size: 0.85em; color: #17a2b8; margin-top: 2px;">${escapeHtml(dkpLine)}</div>`;
+                        }
+                        pickerHtml += `</div>`;
                     }
                     pickerHtml += `</div>`;
+                    if (dkpValEnabled) {
+                        pickerHtml += `<div id="itemPickerTotalDkp" style="margin-top: 12px; padding: 8px 12px; background: rgba(23, 162, 184, 0.12); border-radius: 6px; font-size: 0.95em;">Total DKP for changes: <strong>0</strong></div>`;
+                    }
                     itemPickerPlaceholder.innerHTML = pickerHtml;
                     if (!itemPickerPlaceholder.id) itemPickerPlaceholder.id = 'itemPickerPlaceholder';
                     const selects = itemPickerPlaceholder.querySelectorAll('.item-picker-slot');
@@ -3646,6 +3686,13 @@
                                 const isEquipped = val !== '' && currentId !== '' && Number(val) === Number(currentId);
                                 row.classList.toggle('equipped', isEquipped);
                                 row.classList.toggle('changed', !isEquipped && val !== '');
+                                if (dkpValEnabled) {
+                                    const dkpEl = row.querySelector('.item-picker-dkp');
+                                    if (dkpEl) {
+                                        const dkp = getDkpForItemId(val);
+                                        dkpEl.textContent = dkp.last3.length ? `Last 3 DKP: ${dkp.last3.join(', ')} (avg ${dkp.avg.toFixed(1)})` : '(no DKP)';
+                                    }
+                                }
                             }
                             const result = recomputeVirtualStats();
                             updateItemPickerStatTable(result);
