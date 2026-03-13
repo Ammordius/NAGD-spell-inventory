@@ -717,9 +717,12 @@
                 (ac / scale.ac) * (norm.ac_pct || 0) + resistContrib;
         }
 
-        /** Extract raw HP, mana, AC, and total saves (MR+FR+CR+DR+PR) from item stats for delta display. */
+        const RESIST_LABEL_TO_ABBREV = { fire: 'FR', cold: 'CR', magic: 'MR', disease: 'DR', poison: 'PR' };
+        const RESIST_ORDER = ['FR', 'CR', 'MR', 'DR', 'PR'];
+
+        /** Extract raw HP, mana, AC, total saves, and per-type saves from item stats for delta display. */
         function getItemRawStats(stats) {
-            if (!stats) return { hp: 0, mana: 0, ac: 0, svAll: 0 };
+            if (!stats) return { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
             const mods = stats.mods || [];
             let hp = 0, mana = 0;
             mods.forEach(m => {
@@ -728,72 +731,132 @@
             });
             const ac = Number(stats.ac) || 0;
             let svAll = 0;
+            const svByType = {};
             (stats.resists || []).forEach(r => {
                 const label = (r.label || '').toLowerCase();
-                if (['magic', 'fire', 'cold', 'poison', 'disease'].includes(label))
-                    svAll += Number(r.value) || 0;
+                if (['magic', 'fire', 'cold', 'poison', 'disease'].includes(label)) {
+                    const val = Number(r.value) || 0;
+                    svAll += val;
+                    const abbrev = RESIST_LABEL_TO_ABBREV[label];
+                    if (abbrev) svByType[abbrev] = val;
+                }
             });
-            return { hp, mana, ac, svAll };
+            return { hp, mana, ac, svAll, svByType };
         }
 
         /** Deltas (candidate minus current) for HP, mana, AC, and total saves. If currentStats is null, returns candidate's raw stats. */
         function getItemStatDeltas(currentStats, candidateStats) {
             const cur = getItemRawStats(currentStats);
             const cand = getItemRawStats(candidateStats);
+            const svDeltasByType = {};
+            RESIST_ORDER.forEach(abbrev => {
+                const c = (cur.svByType && cur.svByType[abbrev]) || 0;
+                const n = (cand.svByType && cand.svByType[abbrev]) || 0;
+                svDeltasByType[abbrev] = n - c;
+            });
             return {
                 hpDelta: cand.hp - cur.hp,
                 manaDelta: cand.mana - cur.mana,
                 acDelta: cand.ac - cur.ac,
-                svAllDelta: cand.svAll - cur.svAll
+                svAllDelta: cand.svAll - cur.svAll,
+                svDeltasByType
             };
         }
 
         /** Sum two raw stat objects (e.g. primary + offhand for fair 2her comparison). */
         function mergeRawStats(rawA, rawB) {
-            const a = rawA || { hp: 0, mana: 0, ac: 0, svAll: 0 };
-            const b = rawB || { hp: 0, mana: 0, ac: 0, svAll: 0 };
+            const a = rawA || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
+            const b = rawB || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
+            const svByType = {};
+            RESIST_ORDER.forEach(abbrev => {
+                svByType[abbrev] = (a.svByType && a.svByType[abbrev] || 0) + (b.svByType && b.svByType[abbrev] || 0);
+            });
             return {
                 hp: (a.hp || 0) + (b.hp || 0),
                 mana: (a.mana || 0) + (b.mana || 0),
                 ac: (a.ac || 0) + (b.ac || 0),
-                svAll: (a.svAll || 0) + (b.svAll || 0)
+                svAll: (a.svAll || 0) + (b.svAll || 0),
+                svByType
             };
         }
 
         /** Deltas when "current" is given as raw stats (e.g. merged primary+offhand for 2her). */
         function getItemStatDeltasFromRaw(currentRaw, candidateStats) {
-            const cur = currentRaw || { hp: 0, mana: 0, ac: 0, svAll: 0 };
+            const cur = currentRaw || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
             const cand = getItemRawStats(candidateStats);
+            const svDeltasByType = {};
+            RESIST_ORDER.forEach(abbrev => {
+                const c = (cur.svByType && cur.svByType[abbrev]) || 0;
+                const n = (cand.svByType && cand.svByType[abbrev]) || 0;
+                svDeltasByType[abbrev] = n - c;
+            });
             return {
                 hpDelta: cand.hp - (cur.hp || 0),
                 manaDelta: cand.mana - (cur.mana || 0),
                 acDelta: cand.ac - (cur.ac || 0),
-                svAllDelta: cand.svAll - (cur.svAll || 0)
+                svAllDelta: cand.svAll - (cur.svAll || 0),
+                svDeltasByType
             };
         }
 
-        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +8 sv  · Focus: Spell Haste III". */
+        /** Format absolute resist part from svByType: "+50 sv all" when all same, else "+14 sv FR  +4 sv DR  ...". */
+        function formatResistPartAbsolute(svByType) {
+            if (!svByType || typeof svByType !== 'object') return '';
+            const values = RESIST_ORDER.map(abbrev => svByType[abbrev] || 0).filter(v => v !== 0);
+            if (values.length === 0) return '';
+            const allSame = values.length === 5 && values.every(v => v === values[0]);
+            if (allSame && values[0] !== 0) return '+' + values[0] + ' sv all';
+            return RESIST_ORDER.filter(abbrev => (svByType[abbrev] || 0) !== 0)
+                .map(abbrev => ((svByType[abbrev] || 0) > 0 ? '+' : '') + svByType[abbrev] + ' sv ' + abbrev)
+                .join('  ');
+        }
+
+        /** Format resist deltas from svDeltasByType: "+3 sv all" when all same, else "+30 sv FR  -5 sv DR  ...". */
+        function formatResistPartDeltas(svDeltasByType) {
+            if (!svDeltasByType || typeof svDeltasByType !== 'object') return '';
+            const deltas = RESIST_ORDER.map(abbrev => svDeltasByType[abbrev] || 0);
+            const nonZero = deltas.filter(d => d !== 0);
+            if (nonZero.length === 0) return '';
+            const allSame = nonZero.length === 5 && nonZero.every(d => d === nonZero[0]);
+            if (allSame && nonZero[0] !== 0) {
+                const d = nonZero[0];
+                return (d > 0 ? '+' : '') + d + ' sv all';
+            }
+            return RESIST_ORDER.filter(abbrev => (svDeltasByType[abbrev] || 0) !== 0)
+                .map(abbrev => {
+                    const d = svDeltasByType[abbrev] || 0;
+                    return (d > 0 ? '+' : '') + d + ' sv ' + abbrev;
+                })
+                .join('  ');
+        }
+
+        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +3 sv all  · Focus: Spell Haste III". */
         function formatUpgradeDeltas(deltas, focusSpellName) {
             const parts = [];
             if (deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
             if (deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
             if (deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
-            if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
+            const resistPart = deltas.svDeltasByType ? formatResistPartDeltas(deltas.svDeltasByType) : '';
+            if (resistPart) parts.push(resistPart);
+            else if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
             let text = parts.join('  ');
             if (focusSpellName && focusSpellName.trim()) text += (text ? '  · ' : '') + 'Focus: ' + focusSpellName.trim();
             return text || '';
         }
 
-        /** Format item stats as absolute values for display (e.g. "+50 HP  +55 mana  +2 AC  +15 sv  · Focus: X"). */
+        /** Format item stats as absolute values for display (e.g. "+50 HP  +55 mana  +2 AC  +5 sv all  · Focus: X"). */
         function formatItemStatsAbsolute(stats) {
             if (!stats) return '—';
             const raw = getItemRawStats(stats);
-            return formatUpgradeDeltas({
-                hpDelta: raw.hp,
-                manaDelta: raw.mana,
-                acDelta: raw.ac,
-                svAllDelta: raw.svAll
-            }, stats.focusSpellName || '') || '—';
+            const parts = [];
+            if (raw.hp !== 0) parts.push((raw.hp > 0 ? '+' : '') + raw.hp + ' HP');
+            if (raw.mana !== 0) parts.push((raw.mana > 0 ? '+' : '') + raw.mana + ' mana');
+            if (raw.ac !== 0) parts.push((raw.ac > 0 ? '+' : '') + raw.ac + ' AC');
+            const resistPart = formatResistPartAbsolute(raw.svByType);
+            if (resistPart) parts.push(resistPart);
+            let text = parts.join('  ');
+            if (stats.focusSpellName && stats.focusSpellName.trim()) text += (text ? '  · ' : '') + 'Focus: ' + stats.focusSpellName.trim();
+            return text || '—';
         }
 
         /** Focus score for one item: sum over (value/100)*weight for each focus the item provides.
@@ -2343,7 +2406,9 @@
             if (deltas && deltas.hpDelta != null && deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
             if (deltas && deltas.manaDelta != null && deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
             if (deltas && deltas.acDelta != null && deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
-            if (deltas && deltas.svAllDelta != null && deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
+            const resistPart = (deltas && deltas.svDeltasByType) ? formatResistPartDeltas(deltas.svDeltasByType) : '';
+            if (resistPart) parts.push(resistPart);
+            else if (deltas && deltas.svAllDelta != null && deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
             if (focusSpellName) parts.push('Focus: ' + focusSpellName);
             return parts.join(' ');
         }
