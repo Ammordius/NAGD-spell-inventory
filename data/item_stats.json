@@ -5237,7 +5237,8 @@
     "weight": 4.5,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 17
+    "gearScore": 17,
+    "atkDelay": 40
   },
   "7905": {
     "name": "Shadow Heart",
@@ -7341,7 +7342,8 @@
     "weight": 2.5,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 40
+    "gearScore": 40,
+    "atkDelay": 35
   },
   "8288": {
     "name": "Yttrium Wrapped Sleeves",
@@ -29436,7 +29438,8 @@
     "weight": 0.0,
     "size": "TINY",
     "classes": "WAR RNG",
-    "gearScore": 33
+    "gearScore": 33,
+    "atkDelay": 45
   },
   "25209": {
     "name": "Helmet of Rallos Zek",
@@ -41555,7 +41558,8 @@
     "weight": 1.0,
     "size": "SMALL",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 74
+    "gearScore": 74,
+    "atkDelay": 45
   },
   "27321": {
     "name": "Primal Velium Battlehammer",
@@ -42057,7 +42061,8 @@
     "weight": 1.0,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 51
+    "gearScore": 51,
+    "atkDelay": 35
   },
   "27327": {
     "name": "Primal Velium Battle Axe",
@@ -42395,7 +42400,8 @@
     "weight": 5.5,
     "size": "LARGE",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 88
+    "gearScore": 88,
+    "atkDelay": 37
   },
   "27648": {
     "name": "Fire Marked Rune",
@@ -42517,7 +42523,8 @@
     "weight": 4.0,
     "size": "LARGE",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 106
+    "gearScore": 106,
+    "atkDelay": 32
   },
   "27815": {
     "name": "Bow of Contortion",
@@ -42572,7 +42579,8 @@
     "weight": 4.0,
     "size": "LARGE",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 93
+    "gearScore": 93,
+    "atkDelay": 31
   },
   "27818": {
     "name": "Bow of the Tempest",
@@ -42646,7 +42654,8 @@
     "weight": 2.0,
     "size": "LARGE",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 165
+    "gearScore": 165,
+    "atkDelay": 36
   },
   "27851": {
     "name": "Crystallized Acid Bracer",
@@ -43663,7 +43672,8 @@
     "weight": 3.5,
     "size": "LARGE",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 150
+    "gearScore": 150,
+    "atkDelay": 30
   },
   "27989": {
     "name": "Warmaster's Recurved Longbow",
@@ -43721,7 +43731,8 @@
     "weight": 4.5,
     "size": "LARGE",
     "classes": "RNG",
-    "gearScore": 93
+    "gearScore": 93,
+    "atkDelay": 30
   },
   "27990": {
     "name": "Gauntlets of Disruption",
@@ -44169,7 +44180,8 @@
     "weight": 1.0,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 75
+    "gearScore": 75,
+    "atkDelay": 35
   },
   "28104": {
     "name": "Fervid Gloves of the Warder",
@@ -51638,7 +51650,8 @@
     "weight": 1.0,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 91
+    "gearScore": 91,
+    "atkDelay": 35
   },
   "28931": {
     "name": "Mask of Resiliance",
@@ -51957,7 +51970,8 @@
     "weight": 1.0,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 93
+    "gearScore": 93,
+    "atkDelay": 35
   },
   "28936": {
     "name": "Great Cloak of Shadows",
@@ -54446,7 +54460,8 @@
     "weight": 1.0,
     "size": "SMALL",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 91
+    "gearScore": 91,
+    "atkDelay": 35
   },
   "28991": {
     "name": "Rune of Judgement",
@@ -56074,7 +56089,8 @@
     "weight": 2.0,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 38
+    "gearScore": 38,
+    "atkDelay": 35
   },
   "29433": {
     "name": "Ancient Prismatic Bow",
@@ -56156,7 +56172,8 @@
     "weight": 1.0,
     "size": "MEDIUM",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 51
+    "gearScore": 51,
+    "atkDelay": 35
   },
   "29434": {
     "name": "Ancient Prismatic Lance",
@@ -60080,7 +60097,8 @@
     "weight": 1.0,
     "size": "SMALL",
     "classes": "WAR PAL RNG SHD BRD ROG",
-    "gearScore": 74
+    "gearScore": 74,
+    "atkDelay": 45
   },
   "30545": {
     "name": "Black Runed Talisman",
@@ -61581,7 +61599,8 @@
     "weight": 1.0,
     "size": "TINY",
     "classes": "RNG",
-    "gearScore": 26
+    "gearScore": 26,
+    "atkDelay": 42
   },
   "31214": {
     "name": "Barrier of Sound",
@@ -64953,7 +64972,8 @@
     "weight": 0.5,
     "size": "TINY",
     "classes": "WAR RNG ROG",
-    "gearScore": 25
+    "gearScore": 25,
+    "atkDelay": 17
   },
   "31336": {
     "name": "Boots of the Destroyer",
@@ -77591,7 +77611,8 @@
     "weight": 3.0,
     "size": "LARGE",
     "classes": "WAR PAL RNG SHD ROG",
-    "gearScore": 78
+    "gearScore": 78,
+    "atkDelay": 37
   },
   "1557": {
     "name": "Shawl of Protection",
@@ -79254,6 +79275,7 @@
       "NO DROP"
     ],
     "slot": "RANGE",
+    "atkDelay": 35,
     "dmg": 37,
     "dmgBonus": 13,
     "dmgBonusNote": "(lvl 65)",

@@ -69,6 +69,14 @@ def main() -> int:
         if name:
             id_to_name_raid[iid] = name
 
+    # Load existing magelo item_stats so we can preserve hand-audited fields (e.g. bow/range atkDelay)
+    existing_magelo: dict = {}
+    if OUT_ITEM_STATS_JSON.exists():
+        try:
+            existing_magelo = json.loads(OUT_ITEM_STATS_JSON.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"Warning: could not load existing {OUT_ITEM_STATS_JSON}: {e}", file=sys.stderr)
+
     merged = {}
     for sid, stats in (dkp_stats.items() if isinstance(dkp_stats, dict) else []):
         try:
@@ -79,6 +87,13 @@ def main() -> int:
         name = (entry.get("name") or "").strip() or id_to_name_raid.get(iid, "")
         if name:
             entry["name"] = name
+        # Preserve certain manually maintained fields when DKP stats do not provide them.
+        # This keeps re-parsed bow/range delays (atkDelay) stable when we refresh from DKP.
+        if isinstance(existing_magelo.get(sid), dict):
+            old_entry = existing_magelo[sid]
+            for key in ("atkDelay",):
+                if key in old_entry and key not in entry:
+                    entry[key] = old_entry[key]
         merged[sid] = entry
 
     # Add raid-only items (name only) so cards can resolve
