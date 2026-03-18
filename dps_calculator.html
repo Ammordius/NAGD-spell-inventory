@@ -792,7 +792,7 @@
         return cls === 'Warrior' || cls === 'Paladin' || cls === 'Shadow Knight';
     }
 
-    function compute() {
+        function compute() {
         const cls = document.getElementById('classSelect').value;
         const cfg = getClassConfig();
         const aas = getEffectiveAAs();
@@ -800,7 +800,6 @@
         const mobAC = parseInt(document.getElementById('mobAC').value, 10) || 200;
         const hastePct = parseInt(document.getElementById('hastePct').value, 10) || 0;
         const overhastePct = parseInt(document.getElementById('overhastePct').value, 10) || 0;
-        let combinedHaste = Math.min(100, hastePct) + overhastePct;
         const use2H = document.getElementById('use2H').value === '1';
         const useBackstab = document.getElementById('useBackstab') && document.getElementById('useBackstab').checked;
         const backstabBehind = document.getElementById('backstabBehind') && document.getElementById('backstabBehind').checked;
@@ -809,6 +808,12 @@
         const rangerMode = rangerModeSel ? rangerModeSel.value : 'bow';
         const useBow = isRanger && rangerMode === 'bow';
         const useFleeting = document.getElementById('useFleeting') && document.getElementById('useFleeting').checked;
+        // Spell/buff haste is capped at 100%; overhaste (including Fleeting Quiver) stacks above that.
+        // Treat Fleeting as additional overhaste for archery so that all non-spell haste stacks in one bucket.
+        let combinedHaste = Math.min(100, hastePct) + overhastePct;
+        if (useBow && useFleeting) {
+            combinedHaste += 30;
+        }
         const attackFromFront = !useBow && document.getElementById('attackFromFront') && document.getElementById('attackFromFront').checked;
 
         const level = dpsConfig.levelCap || 65;
@@ -911,9 +916,8 @@
             maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgBonus;
         }
 
-        // Fleeting Quiver applies only to bow attacks (archery): extra 30% haste.
-        const effectiveHasteMH = (isRangedAttack && useFleeting) ? (combinedHaste + 30) : combinedHaste;
-        const effDelayMH = effectiveDelay(delayMH, effectiveHasteMH, !!isRangedAttack);
+        // Apply combined haste (spell + overhaste + Fleeting when applicable) to delay.
+        const effDelayMH = effectiveDelay(delayMH, combinedHaste, !!isRangedAttack);
         let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
         // Triple Attack: Warrior and Monk 60+ get 13.5% extra primary swing (skill/innate, not AA). Flurry AA (Warrior only) adds extra after triple.
         if ((cls === 'Warrior' || cls === 'Monk') && level >= 60) {
