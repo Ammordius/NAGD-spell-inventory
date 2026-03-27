@@ -123,7 +123,7 @@
       ]
     },
     "Beastlord": {
-      "skills": { "offense": 252, "defense": 240, "doubleAttack": 252, "dualWield": 245, "handToHand": 250, "1HBlunt": 225, "2HBlunt": 225 },
+      "skills": { "offense": 252, "defense": 240, "doubleAttack": 0, "dualWield": 245, "handToHand": 250, "1HBlunt": 225, "2HBlunt": 225 },
       "str": 280,
       "dex": 280,
       "agi": 280,

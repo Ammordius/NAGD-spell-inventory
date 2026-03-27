@@ -388,21 +388,19 @@
     // Server: Client::RollDamageMultiplier applies to ALL client melee (not just monks).
     // When it procs, damage *= (100 + rand(0, baseBonus)) / 100, capped at maxExtra/100.
     function rollDamageMultiplierExpected(offense, level, isMonk) {
-        // For our tuning, we slightly lower the non-Monk max multiplier at 65+
-        // so that 1H Warrior crit caps (e.g. Darkblade) line up with parses (~404).
         let rollChance = 51, maxExtra = 210, minusFactor = 105;
         if (isMonk && level >= 65) {
             rollChance = 83; maxExtra = 300; minusFactor = 50;
         } else if (level >= 65 || (isMonk && level >= 63)) {
-            rollChance = 81; maxExtra = 230; minusFactor = 55;
+            rollChance = 81; maxExtra = 295; minusFactor = 55;
         } else if (level >= 63 || (isMonk && level >= 60)) {
-            rollChance = 79; maxExtra = 225; minusFactor = 60;
+            rollChance = 79; maxExtra = 290; minusFactor = 60;
         } else if (level >= 60 || (isMonk && level >= 56)) {
-            rollChance = 77; maxExtra = 220; minusFactor = 65;
+            rollChance = 77; maxExtra = 285; minusFactor = 65;
         } else if (level >= 56) {
-            rollChance = 72; maxExtra = 210; minusFactor = 70;
+            rollChance = 72; maxExtra = 265; minusFactor = 70;
         } else if (level >= 51 || isMonk) {
-            rollChance = 65; maxExtra = 200; minusFactor = 80;
+            rollChance = 65; maxExtra = 245; minusFactor = 80;
         } else {
             return 1;
         }
@@ -412,17 +410,23 @@
         return (rollChance / 100) * multWhenProc + (1 - rollChance / 100) * 1;
     }
     // Max multiplier for display (server caps proc at maxExtra).
-    // 2H warrior parses (e.g. Vanazir max 652) run ~8% below 1H caps; scale down when use2H.
+    // 2H warrior parses run lower than 1H caps; keep existing adjustment when selected.
     function rollDamageMultiplierMax(level, isMonk, use2HWarrior) {
         let mult = 1;
         if (isMonk && level >= 65) mult = 300 / 100;
-        else if (level >= 65 || (isMonk && level >= 63)) mult = 230 / 100;
-        else if (level >= 63 || (isMonk && level >= 60)) mult = 225 / 100;
-        else if (level >= 60 || (isMonk && level >= 56)) mult = 220 / 100;
-        else if (level >= 56) mult = 210 / 100;
-        else if (level >= 51 || isMonk) mult = 200 / 100;
+        else if (level >= 65 || (isMonk && level >= 63)) mult = 295 / 100;
+        else if (level >= 63 || (isMonk && level >= 60)) mult = 290 / 100;
+        else if (level >= 60 || (isMonk && level >= 56)) mult = 285 / 100;
+        else if (level >= 56) mult = 265 / 100;
+        else if (level >= 51 || isMonk) mult = 245 / 100;
         if (use2HWarrior) mult = 1 + (mult - 1) * 0.92;
         return mult;
+    }
+    function computeMaxCritHit(maxHit, totalDamageBonus) {
+        // Server crit path in attack.cpp:
+        // crit = ((damage - damageBonus) * 17 + 5) / 10 + 8 + damageBonus
+        const nonCritPortion = Math.max(0, maxHit - totalDamageBonus);
+        return Math.floor((nonCritPortion * 17 + 5) / 10) + 8 + totalDamageBonus;
     }
     function getSkillBaseDamageKick(skillLevel) {
         let base = 3;
@@ -486,6 +490,11 @@
         let chance = skill + level;
         chance += aas.Ambidexterity || 0;
         return chance * 100 / 375;
+    }
+    function canOffhandDoubleAttack(daSkill, aas) {
+        // Server offhand DA gate in client_process.cpp:
+        // (double attack skill >= 150 || GiveDoubleAttack) && CheckDoubleAttack()
+        return (daSkill >= 150) || ((aas.GiveDoubleAttack || 0) > 0);
     }
     function effectiveDelay(delay, hastePct, isRanged) {
         // delay is in tenths of a second (delay 10 = 1 second).
@@ -613,7 +622,8 @@
             dmgPerSwingMH = Math.floor(dmgPerSwingMH * monkMult) + damageBonusMH + itemDmgBonus;
         }
 
-        const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
+        const daSkill = (cfg.skills && cfg.skills.doubleAttack != null) ? cfg.skills.doubleAttack : 252;
+        const daChance = getDoubleAttackChance(daSkill, level, aas);
 
         const effDelayMH = effectiveDelay(delayMH, env.combinedHaste, false);
         let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
@@ -705,7 +715,10 @@
         const delayOH = weapon.atkDelay || 40;
         const effOH = effectiveDelay(delayOH, env.combinedHaste, false);
         const dwChance = getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas);
-        const swingsOH = (10 / effOH) * (dwChance / 100);
+        const daSkill = (cfg.skills && cfg.skills.doubleAttack != null) ? cfg.skills.doubleAttack : 252;
+        const daChance = getDoubleAttackChance(daSkill, level, aas);
+        const offhandDAMult = canOffhandDoubleAttack(daSkill, aas) ? (1 + daChance / 100) : 1;
+        const swingsOH = (10 / effOH) * (dwChance / 100) * offhandDAMult;
         const dmgPerSwingOH = calcMeleeDamage(baseOH, offense, mitigation, false);
 
         let meleeDPS = hitPct * dmgPerSwingOH * swingsOH;
@@ -858,7 +871,8 @@
         // Warrior Strike Through (Tactical Mastery) bypasses each avoid per server; assume general enemies are warriors (parry/riposte/dodge, no block).
         if (attackFromFront) hitPct = hitPct * mobFrontAvoidanceFactor(mobLevel, cls === 'Warrior' ? (aas.StrikeThrough || 0) : 0);
 
-        const daChance = getDoubleAttackChance((cfg.skills && cfg.skills.doubleAttack) || 252, level, aas);
+        const daSkill = (cfg.skills && cfg.skills.doubleAttack != null) ? cfg.skills.doubleAttack : 252;
+        const daChance = getDoubleAttackChance(daSkill, level, aas);
         let dwChance = weaponOH ? getDualWieldChance((cfg.skills && cfg.skills.dualWield) || 252, level, aas) : 0;
         // Knights cannot dual wield on TAKP; force OH swings to 0.
         if (cls === 'Paladin' || cls === 'Shadow Knight') dwChance = 0;
@@ -945,7 +959,8 @@
             minHitOH = Math.max(1, Math.floor(rollMinRawOH * 1) + itemDmgBonusOH);
             maxHitOH = Math.floor(rollMaxRawOH * multMaxOH) + itemDmgBonusOH;
             const effOH = effectiveDelay(delayOH, combinedHaste, false);
-            swingsOH = (10 / effOH) * (dwChance / 100);
+            const offhandDAMult = canOffhandDoubleAttack(daSkill, aas) ? (1 + daChance / 100) : 1;
+            swingsOH = (10 / effOH) * (dwChance / 100) * offhandDAMult;
         }
 
         let meleeDPS = hitPct * (dmgPerSwingMH * swingsMH + dmgPerSwingOH * swingsOH);
@@ -999,7 +1014,8 @@
         document.getElementById('outSwingsOH').textContent = swingsOH.toFixed(2);
         document.getElementById('outDmgPerHit').textContent = baseDmgMH > 0 ? dmgPerSwingMH.toFixed(0) : '—';
         document.getElementById('outMinMaxHit').textContent = baseDmgMH > 0 ? (minHitMH + ' – ' + maxHitMH) : '—';
-        const approxMaxCritMH = baseDmgMH > 0 ? Math.floor(maxHitMH * 2) : 0;
+        const totalBonusMH = damageBonusMH + itemDmgBonus;
+        const approxMaxCritMH = baseDmgMH > 0 ? computeMaxCritHit(maxHitMH, totalBonusMH) : 0;
         document.getElementById('outMaxCritMH').textContent = baseDmgMH > 0 ? approxMaxCritMH : '—';
         const hasOH = weaponOH && !use2H;
         const rowGroupOH = document.getElementById('rowGroupOH');
@@ -1011,7 +1027,8 @@
         document.getElementById('outDmgPerHitOH').textContent = hasOH ? dmgPerSwingOH.toFixed(0) : '—';
         if (rowMaxOH) rowMaxOH.style.display = hasOH ? '' : 'none';
         document.getElementById('outMinMaxHitOH').textContent = hasOH ? (minHitOH + ' – ' + maxHitOH) : '—';
-        const approxMaxCritOH = hasOH ? Math.floor(maxHitOH * 2) : 0;
+        const itemDmgBonusOH = hasOH ? (weaponOH.dmgBonus || 0) : 0;
+        const approxMaxCritOH = hasOH ? computeMaxCritHit(maxHitOH, itemDmgBonusOH) : 0;
         if (rowCritOH) rowCritOH.style.display = hasOH ? '' : 'none';
         document.getElementById('outMaxCritOH').textContent = hasOH ? approxMaxCritOH : '—';
         document.getElementById('outMeleeDPS').textContent = meleeDPS.toFixed(1);
