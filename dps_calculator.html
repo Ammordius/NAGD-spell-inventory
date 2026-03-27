@@ -257,6 +257,7 @@
             async src="//gc.zgo.at/count.js"></script>
     <script>
 (function() {
+    const WARRIOR_2H_MULT_SCALE = 0.91;
     const CLASSES = ['Warrior','Rogue','Monk','Ranger','Paladin','Shadow Knight','Bard','Beastlord'];
     const CLASS_ABBR = {
         'Warrior': 'WAR',
@@ -306,6 +307,7 @@
         let levelBonus = Math.floor((level - 30) / 5) + 1;
         if (level > 50) {
             let levelBonus2 = level - 50;
+            levelBonus += 1;
             if (level > 67) levelBonus2 += 5;
             else if (level > 59) levelBonus2 += 4;
             else if (level > 58) levelBonus2 += 3;
@@ -419,7 +421,7 @@
         else if (level >= 60 || (isMonk && level >= 56)) mult = 285 / 100;
         else if (level >= 56) mult = 265 / 100;
         else if (level >= 51 || isMonk) mult = 245 / 100;
-        if (use2HWarrior) mult = 1 + (mult - 1) * 0.92;
+        if (use2HWarrior) mult = 1 + (mult - 1) * WARRIOR_2H_MULT_SCALE;
         return mult;
     }
     function computeMaxCritHit(maxHit, totalDamageBonus) {
@@ -616,7 +618,7 @@
         let dmgPerSwingMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
         const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
         if (use2H && cls === 'Warrior') {
-            const scaled = 1 + (monkMult - 1) * 0.92;
+            const scaled = 1 + (monkMult - 1) * WARRIOR_2H_MULT_SCALE;
             dmgPerSwingMH = Math.floor(dmgPerSwingMH * scaled) + damageBonusMH + itemDmgBonus;
         } else {
             dmgPerSwingMH = Math.floor(dmgPerSwingMH * monkMult) + damageBonusMH + itemDmgBonus;
@@ -910,7 +912,7 @@
         }
         const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
         let monkMultMH = monkMult;
-        if (use2H && cls === 'Warrior') monkMultMH = 1 + (monkMult - 1) * 0.92;
+        if (use2H && cls === 'Warrior') monkMultMH = 1 + (monkMult - 1) * WARRIOR_2H_MULT_SCALE;
         let dmgPerSwingMH = Math.floor(rollPartMH * monkMultMH) + damageBonusMH + itemDmgBonus;
 
         let minHitMH = 1, maxHitMH = 1;
