@@ -460,7 +460,10 @@
         return map[raw] || raw;
     }
     function getDoubleAttackChance(skill, level, aas) {
-        let chance = skill + level;
+        // Server (Mob::GetDoubleAttackChance):
+        // start from skill, add level only if skill > 0.
+        let chance = skill;
+        if (chance > 0) chance += level;
         chance += (aas.GiveDoubleAttack || 0) * 5;
         chance += chance * (aas.DoubleAttackChance || 0) / 100;
         return Math.min(100, chance / 5);
