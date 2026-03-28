@@ -126,10 +126,6 @@
                         <label><input type="checkbox" id="attackFromFront" /> Attacking from front (tank position)</label>
                         <span style="font-size:0.8em; color:#666;" title="Uses server logic: mob parry/riposte/dodge (zone/attack.cpp AvoidDamage) reduce effective hit rate by mob level.">Lowers hit rate (parry/riposte/dodge)</span>
                     </div>
-                    <div class="field backstab-option">
-                        <label><input type="checkbox" id="hateModelServer" /> Hate: server model (precomputed)</label>
-                        <span style="font-size:0.8em; color:#666;" title="Uses weapon_threat_server.json (Warrior 65, haste 70, DEX 255). See data/DPS_CALCULATOR_THREAT.md.">Meriadoc sheet vs TAKP aggro mirror</span>
-                    </div>
                 </div>
             </div>
             <div class="section">
@@ -235,13 +231,13 @@
                     <tr><th>Proc (MH)</th><td id="outProcDPSMH"></td></tr>
                     <tr><th>Proc (OH)</th><td id="outProcDPSOH"></td></tr>
                     <tr><th class="total-dps">Total DPS</th><td class="total-dps" id="outTotalDPS"></td></tr>
-                    <tr class="results-group"><th colspan="2" id="hateGroupLabel">Hate (Meriadoc)</th></tr>
+                    <tr class="results-group"><th colspan="2">Hate (TAKP server model)</th></tr>
                     <tr><th>Melee (MH + OH)</th><td id="outMeleeHate"></td></tr>
                     <tr><th>Proc (MH + OH)</th><td id="outProcHate"></td></tr>
                     <tr><th>Total hate/sec</th><td id="outTotalHate"></td></tr>
                 </table>
                 </div>
-                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. Proc DPS and proc hate from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a>.</p>
+                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. <strong>Proc DPS</strong> uses <code>weapon_procs.json</code>; <strong>melee and proc threat/sec</strong> use <code>weapon_threat_server.json</code> (TAKP server aggro mirror). <a href="dps_calculator_guide.html#weapon-threat-proc">How proc DPS and hate are derived</a>.</p>
                 <div class="parse-validation section" style="margin-top:20px;">
                     <h3 class="collapsible" id="parseHeader">Compare to parse</h3>
                     <div class="collapse-content" id="parseSection">
@@ -301,10 +297,9 @@
     }
 
     function getHatePerSecForWeapon(item, isOffhand) {
-        const useSrv = document.getElementById('hateModelServer') && document.getElementById('hateModelServer').checked;
         if (!item || !item.name) return { melee: 0, proc: 0 };
         const key = normalizeProcName(item.name);
-        if (useSrv && weaponThreatServer[key]) {
+        if (weaponThreatServer[key]) {
             const s = weaponThreatServer[key];
             if (isOffhand) {
                 return {
@@ -1075,9 +1070,6 @@
         document.getElementById('outTotalDPS').textContent = totalDPS.toFixed(1);
         const meleeHateTotal = meleeHateMH + meleeHateOH;
         const procHateTotal = procHateMH + procHateOH;
-        const useSrvHate = document.getElementById('hateModelServer') && document.getElementById('hateModelServer').checked;
-        const hateLabel = document.getElementById('hateGroupLabel');
-        if (hateLabel) hateLabel.textContent = useSrvHate ? 'Hate (server model)' : 'Hate (Meriadoc)';
         document.getElementById('outMeleeHate').textContent = (meleeHateTotal + procHateTotal) > 0 ? meleeHateTotal.toFixed(2) : '—';
         document.getElementById('outProcHate').textContent = procHateTotal > 0 ? procHateTotal.toFixed(2) : '—';
         document.getElementById('outTotalHate').textContent = totalHatePerSec > 0 ? totalHatePerSec.toFixed(2) : '—';
@@ -1236,9 +1228,6 @@
     const attackFromFrontEl = document.getElementById('attackFromFront');
     if (attackFromFrontEl) attackFromFrontEl.addEventListener('change', compute);
     document.getElementById('btnCompute').addEventListener('click', compute);
-    const hateModelSrvEl = document.getElementById('hateModelServer');
-    if (hateModelSrvEl) hateModelSrvEl.addEventListener('change', compute);
-
     async function init() {
         const warnEl = document.getElementById('loadWarning');
         try {

@@ -1,6 +1,6 @@
 # DPS Calculator – Threat / hate (TAKP Server reference)
 
-This document ties the magelo **server-derived threat** tooling to EQEmu/TAKP server code. Use it when interpreting `spells_threat.json`, `weapon_threat_server.json`, and `compare_threat_meriadoc.py` output.
+This document ties the magelo **server-derived threat** tooling to EQEmu/TAKP server code. Use it when interpreting `spells_threat.json`, `weapon_threat_server.json`, and (for QA) `compare_threat_meriadoc.py` output.
 
 ## Melee hate (player → NPC)
 
@@ -30,7 +30,8 @@ This document ties the magelo **server-derived threat** tooling to EQEmu/TAKP se
 |------|---------|
 | [data/spells_threat.json](spells_threat.json) | Subset of `spells_new`/`spells_en` columns needed for `CheckAggroAmount` (built by `scripts/build_spells_threat_json.py` from Server SQL dumps). |
 | [data/item_proc_meta.json](item_proc_meta.json) | Optional `item_id → { procrate, proclevel, proceffect }` from live DB (`scripts/threat/sql/export_item_proc_meta.sql`). If empty, proc rate modifier defaults to **0**. |
-| [data/weapon_threat_server.json](weapon_threat_server.json) | Precomputed per-weapon server-model hate/sec for the DPS calculator toggle (`scripts/build_weapon_threat_server.py`). |
+| [data/weapon_threat_server.json](weapon_threat_server.json) | Precomputed per-weapon server-model melee + proc **hate/sec** for the DPS calculator (`scripts/build_weapon_threat_server.py`). |
+| [data/weapon_procs.json](weapon_procs.json) | Per-weapon **proc DPS** (and optional legacy hate columns). The calculator always uses `weapon_threat_server.json` for displayed hate when the weapon key exists; proc DPS is read from `procDps` / `procDpsOH` here. |
 
 ## Assumptions for default numbers
 
@@ -41,8 +42,8 @@ This document ties the magelo **server-derived threat** tooling to EQEmu/TAKP se
 - **Shadows of Luclin disease-counter rule:** disabled (matches pre-SoL branch in `CheckAggroAmount`).  
 - **Scars of Velious epic instant-hate override:** disabled unless you enable it in Python options.
 
-## Meriadoc comparison
+## Legacy spreadsheet comparison
 
-[Meriadoc’s TAKP Weapon Chart](https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/) supplies `meleeHatePerSec` / `hatePerSec` in [data/weapon_procs.json](weapon_procs.json). Differences often trace to: (1) melee hate tied to DPS vs fixed per-swing hate, (2) proc hate using spreadsheet DPS coupling, (3) benchmark target HP for `standardSpellHate`, (4) missing `procrate` in `item_proc_meta.json`.
+Older third-party weapon charts coupled melee threat to expected DPS and used different proc assumptions. The calculator’s **authoritative** hate numbers are `weapon_threat_server.json` (fixed per-swing melee hate, `CheckAggroAmount` for procs). For regression checks against legacy columns still present in `weapon_procs.json`, see `scripts/compare_threat_meriadoc.py` and [threat_compare_summary.md](threat_compare_summary.md).
 
 See also: [DPS_CALCULATOR_AAS.md](DPS_CALCULATOR_AAS.md) for melee DPS mechanics.

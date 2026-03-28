@@ -55,7 +55,9 @@
             <p>Total DPS is:</p>
             <code class="formula">(Melee DPS + Kick DPS + Backstab DPS) × (1 + Crit chance) + Proc DPS (MH) + Proc DPS (OH)</code>
             <p>Melee DPS = Hit chance × (MH damage per swing × MH swings/sec + OH damage per swing × OH swings/sec). Each component is derived from server-style formulas for offense, mitigation, hit chance, damage bonus, haste, and special attacks.</p>
-            <p><strong>Proc DPS and proc hate</strong> (per second) are taken from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a> (Google Sheets). We use his Proc DPS and PHate/Sec (proc hate per second) as ground truth; the calculator looks up values by weapon name from CSV exports of his sheets. Credit: <strong>Meriadoc</strong> for weapon proc and hate data.</p>
+            <h2 id="weapon-threat-proc">Weapon proc DPS and threat</h2>
+            <p><strong>Proc DPS</strong> (main- and off-hand) is read from <code>data/weapon_procs.json</code> by normalized weapon name. Those numbers are built to align with the TAKP server proc pipeline (proc rate, spell damage, and swings) rather than third-party spreadsheets.</p>
+            <p><strong>Threat per second</strong> (melee + proc hate) shown in results comes from <code>data/weapon_threat_server.json</code>: precomputed values that mirror <code>attack.cpp</code> per-swing hate and <code>aggro.cpp</code> <code>CheckAggroAmount</code> for weapon procs, under the assumptions documented in <code>data/DPS_CALCULATOR_THREAT.md</code> (Warrior baseline, fixed haste/DEX/target HP for the table). If a weapon is missing from that file, the calculator falls back to legacy columns in <code>weapon_procs.json</code>.</p>
 
             <h2>Target: Mitigation &amp; Avoidance</h2>
             <p>NPCs have <strong>mitigation</strong> (reduces your damage roll) and <strong>avoidance</strong> (reduces your hit chance). Both are derived from mob level; mitigation also uses mob AC when it matters.</p>
@@ -157,7 +159,7 @@ Effective delay = max(minDelay, floor(reduced))</code>
             </ul>
 
             <h2>Summary</h2>
-            <p>Inputs (class, weapons, mob level/AC, haste, ATK, AAs) drive offense, mitigation, avoidance, hit chance, damage per swing, and swings per second. Melee DPS plus Kick and Backstab when applicable, multiplied by (1 + crit chance), plus <strong>proc DPS</strong> from main hand and off hand (from <a href="https://docs.google.com/spreadsheets/d/1YA6WAkCKPdytNOsdeoxicv7_ng2BZviwSdAG7GNn1-Y/edit?gid=424438092#gid=424438092" target="_blank" rel="noopener">Meriadoc's TAKP Weapon Chart</a>), gives the reported Total DPS. The results table also shows <strong>proc hate/sec</strong> (Meriadoc’s PHate/Sec) per weapon and total. Formulas match TAKP server logic where documented; some caps (e.g. RollDamageMultiplier for non-monks, 2H warrior scale) are tuned to align with parses.</p>
+            <p>Inputs (class, weapons, mob level/AC, haste, ATK, AAs) drive offense, mitigation, avoidance, hit chance, damage per swing, and swings per second. Melee DPS plus Kick and Backstab when applicable, multiplied by (1 + crit chance), plus <strong>proc DPS</strong> from main hand and off hand (<code>weapon_procs.json</code>), gives the reported Total DPS. The results table shows <strong>hate/sec</strong> from the server-model table (<code>weapon_threat_server.json</code>) where available. Formulas match TAKP server logic where documented; some caps (e.g. RollDamageMultiplier for non-monks, 2H warrior scale) are tuned to align with parses.</p>
 
         </div>
     </div>

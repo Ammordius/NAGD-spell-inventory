@@ -83,7 +83,7 @@ Audited `dps_config.json` against `Server/utils/sql/aa_list_canonical_results.tx
 
 ## Threat / hate (server model)
 
-For **server-derived hate per second** (melee + proc), `CheckAggroAmount`, and comparison vs Meriadoc’s sheet, see **[DPS_CALCULATOR_THREAT.md](DPS_CALCULATOR_THREAT.md)**.
+For **server-derived hate per second** (melee + proc) and `CheckAggroAmount`, see **[DPS_CALCULATOR_THREAT.md](DPS_CALCULATOR_THREAT.md)**.
 
 ## Source of truth
 
