@@ -235,9 +235,13 @@
                     <tr><th>Melee (MH + OH)</th><td id="outMeleeHate"></td></tr>
                     <tr><th>Proc (MH + OH)</th><td id="outProcHate"></td></tr>
                     <tr><th>Total hate/sec</th><td id="outTotalHate"></td></tr>
+                    <tr class="results-group" id="rowMeriadocHateGroup" style="display:none;"><th colspan="2">Hate (Meriadoc sheet — reference)</th></tr>
+                    <tr id="rowMeriadocMelee" style="display:none;"><th>Melee (MH + OH)</th><td id="outMeriadocMeleeHate"></td></tr>
+                    <tr id="rowMeriadocProc" style="display:none;"><th>Proc (MH + OH)</th><td id="outMeriadocProcHate"></td></tr>
+                    <tr id="rowMeriadocTotal" style="display:none;"><th>Total hate/sec</th><td id="outMeriadocTotalHate"></td></tr>
                 </table>
                 </div>
-                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. <strong>Proc DPS</strong> uses <code>weapon_procs.json</code>; <strong>melee and proc threat/sec</strong> start from <code>weapon_threat_server.json</code> (TAKP per-swing hate and proc aggro) and are scaled by this page's swing rate (haste, double attack, triple, flurry, extra 2H attack, dual wield) and your DEX for proc chance. <a href="dps_calculator_guide.html#weapon-threat-proc">How proc DPS and hate are derived</a>.</p>
+                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. <strong>Proc DPS</strong> uses <code>weapon_procs.json</code>; <strong>melee and proc threat/sec</strong> start from <code>weapon_threat_server.json</code> (TAKP per-swing hate and proc aggro) and are scaled by this page's swing rate (haste, double attack, triple, flurry, extra 2H attack, dual wield) and your DEX for proc chance. <strong>Meriadoc sheet</strong> rows (when shown) are the legacy <code>weapon_procs.json</code> hate columns for side-by-side validation — they are not expected to match the server model for proc-heavy weapons; see <a href="data/DPS_CALCULATOR_THREAT.md">DPS_CALCULATOR_THREAT.md</a> and <code>compare_threat_meriadoc.py</code>. <a href="dps_calculator_guide.html#weapon-threat-proc">How proc DPS and hate are derived</a>.</p>
                 <div class="parse-validation section" style="margin-top:20px;">
                     <h3 class="collapsible" id="parseHeader">Compare to parse</h3>
                     <div class="collapse-content" id="parseSection">
@@ -541,6 +545,14 @@
         return 10 / effDelay;
     }
 
+    const MIN_HASTED_DELAY_MS = 400;
+    /** Client::SetAttackTimer speed_ms, then min 400ms — matches mob GetWeaponSpeedbyHand for proc. */
+    function attackTimerDurationMs(delayTenths, combinedHasteMelee) {
+        const hasteMod = (100 + combinedHasteMelee) / 100;
+        const speedMs = Math.floor((delayTenths / hasteMod) * 100);
+        return Math.max(MIN_HASTED_DELAY_MS, speedMs);
+    }
+
     function sumWarriorConfigFlurryChance() {
         const w = dpsConfig.classes && dpsConfig.classes.Warrior;
         if (!w || !w.aas) return 0;
@@ -580,8 +592,13 @@
         const offhandDAMult = (daSkill >= 150 || (aasW.GiveDoubleAttack || 0) > 0) ? (1 + refDa / 100) : 1;
         return (10 / eff) * (refDw / 100) * offhandDAMult;
     }
-    function getProcChanceFraction(dexVal, delayTenths, isOffhand, dualWieldChancePct) {
-        const weaponSpeed = delayTenths / 100;
+    /** Mob::GetProcChance — combinedHasteMelee defaults to threat JSON ref when omitted. */
+    function getProcChanceFraction(dexVal, delayTenths, isOffhand, dualWieldChancePct, combinedHasteMelee) {
+        const ch = combinedHasteMelee != null && combinedHasteMelee !== undefined
+            ? combinedHasteMelee
+            : getThreatBuildCombinedHaste();
+        const durMs = attackTimerDurationMs(delayTenths, ch);
+        const weaponSpeed = durMs / 100;
         const d = Math.min(dexVal, 255);
         let chance = (0.0004166667 + 1.1437908496732e-5 * d) * weaponSpeed;
         if (isOffhand) {
@@ -1050,8 +1067,8 @@
 
         const procDataMH = getProcData(weaponMH, false);
         const procDataOH = weaponOH ? getProcData(weaponOH, true) : null;
-        const procDpsMH = procDataMH ? (procDataMH.procDps || 0) : 0;
-        const procDpsOH = procDataOH ? (procDataOH.procDps || 0) : 0;
+        let procDpsMH = procDataMH ? (procDataMH.procDps || 0) : 0;
+        let procDpsOH = procDataOH ? (procDataOH.procDps || 0) : 0;
         const hateMH = getHatePerSecForWeapon(weaponMH, false);
         const hateOH = weaponOH ? getHatePerSecForWeapon(weaponOH, true) : { melee: 0, proc: 0 };
         let procHateMH = hateMH.proc;
@@ -1067,30 +1084,41 @@
         const refDwThreat = weaponThreatMeta.dualWieldChancePct != null ? weaponThreatMeta.dualWieldChancePct : 0;
         if (metaOk && rowMH && baseDmgMH > 0 && delayMH > 0) {
             const refSwingsMH = referenceMainhandSwingsForThreat(delayMH);
+            const refCh = getThreatBuildCombinedHaste();
             if (refSwingsMH > 0) {
                 const meleeBase = rowMH.meleeHatePerSecServer != null ? rowMH.meleeHatePerSecServer : hateMH.melee;
                 meleeHateMH = meleeBase * (swingsMH / refSwingsMH);
+                const pr = rowMH.procRateDb != null ? rowMH.procRateDb : 0;
+                // PPM is haste-invariant on server; use ref haste for WPC so ratio is dex-only (not haste).
+                const wpcRef = Math.min(1, wpcFromProcRate(getProcChanceFraction(refDexThreat, delayMH, false, refDwThreat, refCh), pr));
+                const wpcUser = Math.min(1, wpcFromProcRate(getProcChanceFraction(dex, delayMH, false, dwChance, refCh), pr));
+                const wpcRatio = wpcRef > 1e-9 ? wpcUser / wpcRef : 1;
                 const procBase = rowMH.hatePerSecServer != null ? rowMH.hatePerSecServer : hateMH.proc;
                 if (procBase > 0) {
-                    const pr = rowMH.procRateDb != null ? rowMH.procRateDb : 0;
-                    const wpcRef = Math.min(1, wpcFromProcRate(getProcChanceFraction(refDexThreat, delayMH, false, refDwThreat), pr));
-                    const wpcUser = Math.min(1, wpcFromProcRate(getProcChanceFraction(dex, delayMH, false, dwChance), pr));
-                    procHateMH = procBase * (swingsMH / refSwingsMH) * (wpcRef > 1e-9 ? wpcUser / wpcRef : 1);
+                    procHateMH = procBase * wpcRatio;
+                }
+                if (rowMH.procDpsServer != null && rowMH.procDpsServer > 0) {
+                    procDpsMH = rowMH.procDpsServer * wpcRatio;
                 }
             }
         }
         if (metaOk && rowOH && weaponOH && !use2H) {
             const delayOH = weaponOH.atkDelay || 40;
             const refSwingsOH = referenceOffhandSwingsForThreat(delayOH);
+            const refCh = getThreatBuildCombinedHaste();
             if (refSwingsOH > 0) {
                 const meleeOHBase = rowOH.meleeHatePerSecOHServer != null ? rowOH.meleeHatePerSecOHServer : hateOH.melee;
                 meleeHateOH = meleeOHBase * (swingsOH / refSwingsOH);
+                const pr = rowOH.procRateDb != null ? rowOH.procRateDb : 0;
+                const wpcRef = Math.min(1, wpcFromProcRate(getProcChanceFraction(refDexThreat, delayOH, true, refDwThreat, refCh), pr));
+                const wpcUser = Math.min(1, wpcFromProcRate(getProcChanceFraction(dex, delayOH, true, dwChance, refCh), pr));
+                const wpcRatio = wpcRef > 1e-9 ? wpcUser / wpcRef : 1;
                 const procOHBase = rowOH.hatePerSecOHServer != null ? rowOH.hatePerSecOHServer : hateOH.proc;
                 if (procOHBase > 0) {
-                    const pr = rowOH.procRateDb != null ? rowOH.procRateDb : 0;
-                    const wpcRef = Math.min(1, wpcFromProcRate(getProcChanceFraction(refDexThreat, delayOH, true, refDwThreat), pr));
-                    const wpcUser = Math.min(1, wpcFromProcRate(getProcChanceFraction(dex, delayOH, true, dwChance), pr));
-                    procHateOH = procOHBase * (swingsOH / refSwingsOH) * (wpcRef > 1e-9 ? wpcUser / wpcRef : 1);
+                    procHateOH = procOHBase * wpcRatio;
+                }
+                if (rowOH.procDpsOHServer != null && rowOH.procDpsOHServer > 0) {
+                    procDpsOH = rowOH.procDpsOHServer * wpcRatio;
                 }
             }
         }
@@ -1165,6 +1193,38 @@
         document.getElementById('outTotalHate').textContent = totalHatePerSec > 0 ? totalHatePerSec.toFixed(2) : '—';
         document.getElementById('outTotalDPSSummary').textContent = totalDPS.toFixed(1);
         document.getElementById('outTotalHPSSummary').textContent = totalHatePerSec > 0 ? totalHatePerSec.toFixed(2) : '—';
+
+        let meriMeleeH = 0;
+        let meriProcH = 0;
+        if (weaponMH) {
+            const pmh = getProcData(weaponMH, false);
+            if (pmh) {
+                meriMeleeH += pmh.meleeHatePerSec || 0;
+                meriProcH += pmh.hatePerSec || 0;
+            }
+        }
+        if (weaponOH && !use2H) {
+            const poh = getProcData(weaponOH, true);
+            if (poh) {
+                meriMeleeH += poh.meleeHatePerSec || 0;
+                meriProcH += poh.hatePerSec || 0;
+            }
+        }
+        const meriHateTotal = meriMeleeH + meriProcH;
+        const showMeriHate = meriHateTotal > 0;
+        const meriGroup = document.getElementById('rowMeriadocHateGroup');
+        if (meriGroup) meriGroup.style.display = showMeriHate ? '' : 'none';
+        ['rowMeriadocMelee', 'rowMeriadocProc', 'rowMeriadocTotal'].forEach((rid) => {
+            const el = document.getElementById(rid);
+            if (el) el.style.display = showMeriHate ? '' : 'none';
+        });
+        const outMm = document.getElementById('outMeriadocMeleeHate');
+        const outMp = document.getElementById('outMeriadocProcHate');
+        const outMt = document.getElementById('outMeriadocTotalHate');
+        if (outMm) outMm.textContent = showMeriHate ? meriMeleeH.toFixed(2) : '—';
+        if (outMp) outMp.textContent = showMeriHate ? meriProcH.toFixed(2) : '—';
+        if (outMt) outMt.textContent = showMeriHate ? meriHateTotal.toFixed(2) : '—';
+
         const rowSwingsOH = document.getElementById('rowSwingsOH');
         const rowKickDPS = document.getElementById('rowKickDPS');
         const rowBackstabDPS = document.getElementById('rowBackstabDPS');

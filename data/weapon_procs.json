@@ -1,7 +1,7 @@
 {
   "darkblade of the warlord": {
     "procName": "Anger",
-    "procDps": 3.52,
+    "procDps": 4.33,
     "hatePerSec": 40.43,
     "meleeHatePerSec": 35.56,
     "procDpsOH": 0,
@@ -10,10 +10,10 @@
   },
   "ethereal destroyer": {
     "procName": "Time Lapse",
-    "procDps": 17.24,
+    "procDps": 21.25,
     "hatePerSec": 17.24,
     "meleeHatePerSec": 32.18,
-    "procDpsOH": 8.62,
+    "procDpsOH": 10.63,
     "hatePerSecOH": 8.62,
     "meleeHatePerSecOH": 16.19
   },
@@ -37,16 +37,16 @@
   },
   "blasphemous blade of the exiled": {
     "procName": "Sanity Warp",
-    "procDps": 4.24,
+    "procDps": 5.23,
     "hatePerSec": 22.09,
     "meleeHatePerSec": 37.34,
-    "procDpsOH": 2.12,
+    "procDpsOH": 2.61,
     "hatePerSecOH": 11.04,
     "meleeHatePerSecOH": 17.02
   },
   "furious hammer of zek": {
     "procName": "Hand of the Gods",
-    "procDps": 21.3,
+    "procDps": 23.52,
     "hatePerSec": 21.3,
     "meleeHatePerSec": 35.39,
     "procDpsOH": 0,
@@ -100,16 +100,16 @@
   },
   "edge of eternity": {
     "procName": "Time Snap",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 14.87,
     "meleeHatePerSec": 40.27,
-    "procDpsOH": 2.03,
+    "procDpsOH": 2.5,
     "hatePerSecOH": 7.44,
     "meleeHatePerSecOH": 22.26
   },
   "vanazir, dreamer's despair": {
     "procName": "Nightmares",
-    "procDps": 2.7,
+    "procDps": 3.33,
     "hatePerSec": 13.52,
     "meleeHatePerSec": 64.23,
     "procDpsOH": 0,
@@ -118,16 +118,16 @@
   },
   "club of slime": {
     "procName": "Waves of the Deep Sea",
-    "procDps": 0.54,
+    "procDps": 0.67,
     "hatePerSec": 11.36,
     "meleeHatePerSec": 33.69,
-    "procDpsOH": 0.27,
+    "procDpsOH": 0.33,
     "hatePerSecOH": 5.68,
     "meleeHatePerSecOH": 16.95
   },
   "hammer of hours": {
     "procName": "Time Lapse",
-    "procDps": 20.28,
+    "procDps": 25.0,
     "hatePerSec": 20.28,
     "meleeHatePerSec": 34.98,
     "procDpsOH": 0,
@@ -145,7 +145,7 @@
   },
   "greatblade of chaos": {
     "procName": "Tendrils of Fire",
-    "procDps": 6.76,
+    "procDps": 8.33,
     "hatePerSec": 6.76,
     "meleeHatePerSec": 68.05,
     "procDpsOH": 0,
@@ -163,25 +163,25 @@
   },
   "hammer of crushing waves": {
     "procName": "Wrath of Ice",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 4.06,
     "meleeHatePerSec": 39.05,
-    "procDpsOH": 2.03,
+    "procDpsOH": 2.5,
     "hatePerSecOH": 2.03,
     "meleeHatePerSecOH": 21.14
   },
   "hammer of the timeweaver": {
     "procName": "Timestrike",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 4.06,
     "meleeHatePerSec": 39.67,
-    "procDpsOH": 2.03,
+    "procDpsOH": 2.5,
     "hatePerSecOH": 2.03,
     "meleeHatePerSecOH": 24.12
   },
   "fiery staff of zha": {
     "procName": "Flame of the Efreeti",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 4.06,
     "meleeHatePerSec": 59.81,
     "procDpsOH": 0,
@@ -190,10 +190,10 @@
   },
   "double edged stormblade": {
     "procName": "Wrath of Wind",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 4.06,
     "meleeHatePerSec": 36.61,
-    "procDpsOH": 2.03,
+    "procDpsOH": 2.5,
     "hatePerSecOH": 2.03,
     "meleeHatePerSecOH": 18.92
   },
@@ -208,7 +208,7 @@
   },
   "the sword of ssraeshza": {
     "procName": "Serpent's Bite",
-    "procDps": 2.84,
+    "procDps": 3.5,
     "hatePerSec": 2.84,
     "meleeHatePerSec": 60.23,
     "procDpsOH": 0,
@@ -217,19 +217,19 @@
   },
   "ifir, dagger of fire": {
     "procName": "Flame of the Efreeti",
-    "procDps": 2.7,
+    "procDps": 3.33,
     "hatePerSec": 2.7,
     "meleeHatePerSec": 37.27,
-    "procDpsOH": 1.35,
+    "procDpsOH": 1.67,
     "hatePerSecOH": 1.35,
     "meleeHatePerSecOH": 21.1
   },
   "acrylia handled broadsword": {
     "procName": "Serpent's Bite",
-    "procDps": 2.79,
+    "procDps": 3.43,
     "hatePerSec": 2.79,
     "meleeHatePerSec": 37.27,
-    "procDpsOH": 1.39,
+    "procDpsOH": 1.72,
     "hatePerSecOH": 1.39,
     "meleeHatePerSecOH": 18.75
   },
@@ -244,10 +244,10 @@
   },
   "cudgel of wrecking": {
     "procName": "Soul Leech",
-    "procDps": 2.03,
+    "procDps": 2.5,
     "hatePerSec": 2.03,
     "meleeHatePerSec": 37.17,
-    "procDpsOH": 1.01,
+    "procDpsOH": 1.25,
     "hatePerSecOH": 1.01,
     "meleeHatePerSecOH": 20.13
   },
@@ -262,10 +262,10 @@
   },
   "obsidian scimitar of war": {
     "procName": "Obsidian Shatter",
-    "procDps": 1.01,
+    "procDps": 1.25,
     "hatePerSec": 14.54,
     "meleeHatePerSec": 35.98,
-    "procDpsOH": 0.51,
+    "procDpsOH": 0.63,
     "hatePerSecOH": 7.27,
     "meleeHatePerSecOH": 17.58
   },
@@ -280,7 +280,7 @@
   },
   "hammer of holy vengeance": {
     "procName": "Hand of Retribution",
-    "procDps": 21.3,
+    "procDps": 23.52,
     "hatePerSec": 21.3,
     "meleeHatePerSec": 37.1,
     "procDpsOH": 0,
@@ -352,10 +352,10 @@
   },
   "jagged timeforged blade": {
     "procName": "Assassin's Blood",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 39.05,
-    "procDpsOH": 2.03,
+    "procDpsOH": 2.5,
     "hatePerSecOH": 0.0,
     "meleeHatePerSecOH": 21.14
   },
@@ -370,7 +370,7 @@
   },
   "sledge of smashing": {
     "procName": "Wrath",
-    "procDps": 5.9,
+    "procDps": 7.27,
     "hatePerSec": 5.9,
     "meleeHatePerSec": 39.05,
     "procDpsOH": 0,
@@ -403,7 +403,7 @@
   },
   "blade of angles": {
     "procName": "Wrathful Strike",
-    "procDps": 5.41,
+    "procDps": 6.67,
     "hatePerSec": 5.41,
     "meleeHatePerSec": 53.45,
     "procDpsOH": 0,
@@ -412,7 +412,7 @@
   },
   "gaudralek, sword of the sky": {
     "procName": "Rage of the Sky",
-    "procDps": 4.84,
+    "procDps": 5.97,
     "hatePerSec": 4.84,
     "meleeHatePerSec": 53.31,
     "procDpsOH": 0,
@@ -421,16 +421,16 @@
   },
   "flameforge hammer": {
     "procName": "Planar Strike",
-    "procDps": 2.03,
+    "procDps": 2.5,
     "hatePerSec": 12.85,
     "meleeHatePerSec": 29.83,
-    "procDpsOH": 1.01,
+    "procDpsOH": 1.25,
     "hatePerSecOH": 6.42,
     "meleeHatePerSecOH": 16.49
   },
   "staff of transcendence": {
     "procName": "Time Rend",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 14.87,
     "meleeHatePerSec": 73.24,
     "procDpsOH": 0,
@@ -556,10 +556,10 @@
   },
   "great blade of storms": {
     "procName": "Force Shock",
-    "procDps": 4.84,
+    "procDps": 5.97,
     "hatePerSec": 15.66,
     "meleeHatePerSec": 36.6,
-    "procDpsOH": 2.42,
+    "procDpsOH": 2.98,
     "hatePerSecOH": 7.83,
     "meleeHatePerSecOH": 17.31
   },
@@ -610,7 +610,7 @@
   },
   "gold inlaid ulak": {
     "procName": "None",
-    "procDps": 0.0,
+    "procDps": 2.5,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 25.27,
     "procDpsOH": 0.0,
@@ -637,7 +637,7 @@
   },
   "khashek's katar": {
     "procName": "None",
-    "procDps": 0.0,
+    "procDps": 2.5,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 30.51,
     "procDpsOH": 0.0,
@@ -646,13 +646,13 @@
   },
   "wand of temporal power": {
     "procName": "Time Lapse",
-    "procDps": 20.28,
+    "procDps": 25.0,
     "hatePerSec": 20.0,
     "meleeHatePerSec": 0
   },
   "hammer of the sun": {
     "procName": "Dawncall",
-    "procDps": 0.0,
+    "procDps": 4.17,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 44.38,
     "procDpsOH": 0,
@@ -688,7 +688,7 @@
   },
   "earthspined staff": {
     "procName": "Bite of Bertoxxulous",
-    "procDps": 4.06,
+    "procDps": 5.0,
     "hatePerSec": 4.06,
     "meleeHatePerSec": 63.47,
     "procDpsOH": 0,
@@ -742,7 +742,7 @@
   },
   "greatstaff of the four winds": {
     "procName": "Lightning Surge",
-    "procDps": 2.64,
+    "procDps": 3.25,
     "hatePerSec": 2.64,
     "meleeHatePerSec": 60.62,
     "procDpsOH": 0,
@@ -760,7 +760,7 @@
   },
   "ornate greatblade": {
     "procName": "None",
-    "procDps": 0.0,
+    "procDps": 0.8,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 52.0,
     "procDpsOH": 0,
@@ -868,7 +868,7 @@
   },
   "norge`tal": {
     "procName": "None",
-    "procDps": 0.0,
+    "procDps": 3.0,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 52.62,
     "procDpsOH": 0,
@@ -949,7 +949,7 @@
   },
   "reinforced mephit talon": {
     "procName": "None",
-    "procDps": 0.0,
+    "procDps": 5.0,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 38.55,
     "procDpsOH": 0.0,
@@ -967,7 +967,7 @@
   },
   "lava infused bludgeon": {
     "procName": "None",
-    "procDps": 0.0,
+    "procDps": 5.33,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 35.98,
     "procDpsOH": 0.0,
@@ -1171,7 +1171,7 @@
   },
   "skybreaker": {
     "procName": "None",
-    "procDps": 0.0,
+    "procDps": 2.5,
     "hatePerSec": 0.0,
     "meleeHatePerSec": 33.41,
     "procDpsOH": 0.0,

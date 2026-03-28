@@ -866,6 +866,10 @@ jobs:
           cp data/weapon_threat_server.json deploy/data/weapon_threat_server.json
           echo "✓ Copied data/weapon_threat_server.json to deploy (DPS calculator server-model hate/sec)"
         fi
+        if [ -f "data/DPS_CALCULATOR_THREAT.md" ]; then
+          cp data/DPS_CALCULATOR_THREAT.md deploy/data/DPS_CALCULATOR_THREAT.md
+          echo "✓ Copied data/DPS_CALCULATOR_THREAT.md to deploy (DPS calculator threat doc link)"
+        fi
         # Copy scoring explanation page
         if [ -f "scoring_explanation.html" ]; then
           cp scoring_explanation.html deploy/scoring_explanation.html

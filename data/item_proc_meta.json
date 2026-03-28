@@ -1,1 +1,5137 @@
-{}
+{
+  "1094": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1495
+  },
+  "1097": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 508
+  },
+  "1116": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 46
+  },
+  "1136": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 465
+  },
+  "1154": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 71
+  },
+  "1158": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 2019
+  },
+  "1204": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 276
+  },
+  "1207": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1788
+  },
+  "1209": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 2005
+  },
+  "1255": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 697
+  },
+  "1269": {
+    "procrate": 0,
+    "proclevel": 60,
+    "proceffect": 1693
+  },
+  "1281": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 80
+  },
+  "1414": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 276
+  },
+  "1421": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 174
+  },
+  "1465": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 508
+  },
+  "1549": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "1550": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "1559": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 478
+  },
+  "1574": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 229
+  },
+  "1676": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 511
+  },
+  "1715": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 222
+  },
+  "1728": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1364
+  },
+  "1738": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 971
+  },
+  "1743": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 80
+  },
+  "1750": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 898
+  },
+  "1794": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1008
+  },
+  "1868": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 216
+  },
+  "2061": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1002
+  },
+  "2097": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1364
+  },
+  "2099": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1509
+  },
+  "2388": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 80
+  },
+  "2403": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 276
+  },
+  "2509": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 217
+  },
+  "2560": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 936
+  },
+  "2561": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 936
+  },
+  "2563": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 936
+  },
+  "2565": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 936
+  },
+  "2566": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 936
+  },
+  "2567": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 936
+  },
+  "2578": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 502
+  },
+  "2579": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1468
+  },
+  "2580": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 77
+  },
+  "2582": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 512
+  },
+  "2610": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1788
+  },
+  "2611": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1788
+  },
+  "2631": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1321
+  },
+  "2699": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2011
+  },
+  "2700": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2012
+  },
+  "2745": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 1369
+  },
+  "3162": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 80
+  },
+  "3381": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 2703
+  },
+  "3382": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2701
+  },
+  "3551": {
+    "procrate": 0,
+    "proclevel": 33,
+    "proceffect": 657
+  },
+  "3554": {
+    "procrate": 0,
+    "proclevel": 38,
+    "proceffect": 113
+  },
+  "3574": {
+    "procrate": 0,
+    "proclevel": 48,
+    "proceffect": 46
+  },
+  "3583": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 57
+  },
+  "3811": {
+    "procrate": 0,
+    "proclevel": 22,
+    "proceffect": 2702
+  },
+  "3820": {
+    "procrate": 100,
+    "proclevel": 10,
+    "proceffect": 2704
+  },
+  "3860": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 65535
+  },
+  "3861": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 65535
+  },
+  "3862": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 65535
+  },
+  "3863": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 65535
+  },
+  "3868": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 65535
+  },
+  "4504": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 276
+  },
+  "4515": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 276
+  },
+  "4561": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 86
+  },
+  "5058": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 269
+  },
+  "5078": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 1010
+  },
+  "5127": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1363
+  },
+  "5137": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 216
+  },
+  "5138": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 5221
+  },
+  "5148": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 277
+  },
+  "5151": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 83
+  },
+  "5155": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 434
+  },
+  "5158": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 503
+  },
+  "5159": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 355
+  },
+  "5160": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 231
+  },
+  "5163": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 18
+  },
+  "5164": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 434
+  },
+  "5165": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 18
+  },
+  "5217": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 355
+  },
+  "5218": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 124
+  },
+  "5221": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 413
+  },
+  "5230": {
+    "procrate": 0,
+    "proclevel": 4,
+    "proceffect": 676
+  },
+  "5310": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 341
+  },
+  "5316": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 352
+  },
+  "5317": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 216
+  },
+  "5319": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 248
+  },
+  "5331": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 1001
+  },
+  "5360": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 21
+  },
+  "5362": {
+    "procrate": 0,
+    "proclevel": 17,
+    "proceffect": 965
+  },
+  "5365": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 648
+  },
+  "5391": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 355
+  },
+  "5403": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 117
+  },
+  "5404": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 944
+  },
+  "5405": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 76
+  },
+  "5407": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 998
+  },
+  "5410": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 231
+  },
+  "5411": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 413
+  },
+  "5499": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1003
+  },
+  "5500": {
+    "procrate": 0,
+    "proclevel": 37,
+    "proceffect": 945
+  },
+  "5506": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 644
+  },
+  "5507": {
+    "procrate": 0,
+    "proclevel": 37,
+    "proceffect": 945
+  },
+  "5523": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 350
+  },
+  "5531": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 998
+  },
+  "5603": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 464
+  },
+  "5604": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 945
+  },
+  "5607": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 16
+  },
+  "5608": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 368
+  },
+  "5611": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 945
+  },
+  "5613": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 506
+  },
+  "5615": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1811
+  },
+  "5617": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 483
+  },
+  "5619": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 127
+  },
+  "5621": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 91
+  },
+  "5626": {
+    "procrate": 0,
+    "proclevel": 26,
+    "proceffect": 155
+  },
+  "5631": {
+    "procrate": 0,
+    "proclevel": 22,
+    "proceffect": 256
+  },
+  "5635": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1801
+  },
+  "5636": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1534
+  },
+  "5637": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1802
+  },
+  "5638": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1803
+  },
+  "5643": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 242
+  },
+  "5646": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 452
+  },
+  "5647": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1805
+  },
+  "5656": {
+    "procrate": 0,
+    "proclevel": 37,
+    "proceffect": 945
+  },
+  "5666": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 216
+  },
+  "5667": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 406
+  },
+  "5701": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 662
+  },
+  "5714": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 507
+  },
+  "5717": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 242
+  },
+  "5726": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 1807
+  },
+  "5731": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 123
+  },
+  "5734": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 77
+  },
+  "5737": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 186
+  },
+  "5745": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 1389
+  },
+  "5748": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 1392
+  },
+  "5754": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 1847
+  },
+  "5759": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 120
+  },
+  "5764": {
+    "procrate": 0,
+    "proclevel": 44,
+    "proceffect": 539
+  },
+  "5774": {
+    "procrate": 0,
+    "proclevel": 44,
+    "proceffect": 1388
+  },
+  "5776": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 77
+  },
+  "5788": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 658
+  },
+  "5795": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 765
+  },
+  "5798": {
+    "procrate": 450,
+    "proclevel": 60,
+    "proceffect": 2173
+  },
+  "5800": {
+    "procrate": 250,
+    "proclevel": 50,
+    "proceffect": 2173
+  },
+  "5818": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 133
+  },
+  "5820": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 91
+  },
+  "5835": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "5838": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1969
+  },
+  "5842": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2013
+  },
+  "6205": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 438
+  },
+  "6300": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 230
+  },
+  "6305": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 934
+  },
+  "6323": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 372
+  },
+  "6324": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 376
+  },
+  "6334": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 177
+  },
+  "6335": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 75
+  },
+  "6336": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 286
+  },
+  "6356": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 8
+  },
+  "6358": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 218
+  },
+  "6359": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 17
+  },
+  "6364": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 230
+  },
+  "6403": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 385
+  },
+  "6404": {
+    "procrate": 0,
+    "proclevel": 28,
+    "proceffect": 296
+  },
+  "6405": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 296
+  },
+  "6406": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 980
+  },
+  "6438": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "6603": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 18
+  },
+  "6604": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1807
+  },
+  "6607": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 945
+  },
+  "6609": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1808
+  },
+  "6610": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 65
+  },
+  "6613": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 216
+  },
+  "6618": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 677
+  },
+  "6619": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 16
+  },
+  "6620": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 656
+  },
+  "6621": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 945
+  },
+  "6623": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 445
+  },
+  "6629": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 124
+  },
+  "6631": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1809
+  },
+  "6638": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 185
+  },
+  "6639": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1809
+  },
+  "6644": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 1812
+  },
+  "6645": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 1811
+  },
+  "6648": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 43
+  },
+  "6654": {
+    "procrate": 0,
+    "proclevel": 36,
+    "proceffect": 334
+  },
+  "6656": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 467
+  },
+  "6686": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 86
+  },
+  "6687": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 271
+  },
+  "6692": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 94
+  },
+  "6693": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 124
+  },
+  "6715": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 904
+  },
+  "6806": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "6838": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 340
+  },
+  "6839": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 512
+  },
+  "6859": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 46
+  },
+  "6950": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 1001
+  },
+  "6952": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 282
+  },
+  "7041": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 91
+  },
+  "7049": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1001
+  },
+  "7085": {
+    "procrate": 0,
+    "proclevel": 27,
+    "proceffect": 355
+  },
+  "7106": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 75
+  },
+  "7111": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 340
+  },
+  "7183": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 275
+  },
+  "7185": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 275
+  },
+  "7187": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 275
+  },
+  "7189": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 275
+  },
+  "7191": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 275
+  },
+  "7193": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 275
+  },
+  "7200": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1814
+  },
+  "7201": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1827
+  },
+  "7205": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 512
+  },
+  "7207": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 659
+  },
+  "7211": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 216
+  },
+  "7213": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 426
+  },
+  "7214": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 505
+  },
+  "7216": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 503
+  },
+  "7219": {
+    "procrate": 0,
+    "proclevel": 36,
+    "proceffect": 945
+  },
+  "7229": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 944
+  },
+  "7234": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1805
+  },
+  "7237": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 656
+  },
+  "7240": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 379
+  },
+  "7241": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 216
+  },
+  "7242": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 965
+  },
+  "7243": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 230
+  },
+  "7249": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1267
+  },
+  "7252": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 656
+  },
+  "7286": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 282
+  },
+  "7288": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 282
+  },
+  "7290": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 282
+  },
+  "7292": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 282
+  },
+  "7294": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 282
+  },
+  "7296": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 282
+  },
+  "7312": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 936
+  },
+  "7315": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 1001
+  },
+  "7323": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 41
+  },
+  "7328": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 231
+  },
+  "7335": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 1106
+  },
+  "7340": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 761
+  },
+  "7348": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 65535
+  },
+  "7359": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 86
+  },
+  "7364": {
+    "procrate": 5,
+    "proclevel": 39,
+    "proceffect": 435
+  },
+  "7370": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1002
+  },
+  "7371": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1002
+  },
+  "7399": {
+    "procrate": 4,
+    "proclevel": 50,
+    "proceffect": 524
+  },
+  "7404": {
+    "procrate": 0,
+    "proclevel": 16,
+    "proceffect": 965
+  },
+  "7459": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 86
+  },
+  "7463": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 276
+  },
+  "7502": {
+    "procrate": 0,
+    "proclevel": 27,
+    "proceffect": 355
+  },
+  "7505": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 370
+  },
+  "7507": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 43
+  },
+  "7510": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 508
+  },
+  "7822": {
+    "procrate": 65,
+    "proclevel": 55,
+    "proceffect": 306
+  },
+  "7823": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 758
+  },
+  "7824": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1303
+  },
+  "7906": {
+    "procrate": 1,
+    "proclevel": 45,
+    "proceffect": 216
+  },
+  "7973": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1299
+  },
+  "7975": {
+    "procrate": 1,
+    "proclevel": 50,
+    "proceffect": 732
+  },
+  "7979": {
+    "procrate": 5,
+    "proclevel": 50,
+    "proceffect": 1865
+  },
+  "8095": {
+    "procrate": 4,
+    "proclevel": 34,
+    "proceffect": 514
+  },
+  "8102": {
+    "procrate": 4,
+    "proclevel": 39,
+    "proceffect": 2997
+  },
+  "8227": {
+    "procrate": 5,
+    "proclevel": 55,
+    "proceffect": 445
+  },
+  "8285": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 80
+  },
+  "8363": {
+    "procrate": 4,
+    "proclevel": 20,
+    "proceffect": 1003
+  },
+  "8364": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2247
+  },
+  "8377": {
+    "procrate": 3,
+    "proclevel": 46,
+    "proceffect": 91
+  },
+  "8378": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 91
+  },
+  "8425": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1300
+  },
+  "8430": {
+    "procrate": 2,
+    "proclevel": 35,
+    "proceffect": 765
+  },
+  "8433": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "8446": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2065
+  },
+  "8447": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2065
+  },
+  "8495": {
+    "procrate": 3,
+    "proclevel": 0,
+    "proceffect": 2679
+  },
+  "8733": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "8777": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1118
+  },
+  "8789": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1499
+  },
+  "8899": {
+    "procrate": -10,
+    "proclevel": 51,
+    "proceffect": 2664
+  },
+  "8903": {
+    "procrate": -10,
+    "proclevel": 51,
+    "proceffect": 2664
+  },
+  "8906": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 1407
+  },
+  "8916": {
+    "procrate": 10,
+    "proclevel": 46,
+    "proceffect": 470
+  },
+  "8949": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 93
+  },
+  "8968": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 80
+  },
+  "8983": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 16
+  },
+  "8986": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 16
+  },
+  "9264": {
+    "procrate": 10,
+    "proclevel": 0,
+    "proceffect": 253
+  },
+  "9315": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 86
+  },
+  "9374": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1978
+  },
+  "9408": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 352
+  },
+  "9419": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1299
+  },
+  "9428": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 86
+  },
+  "9483": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 46
+  },
+  "9628": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9629": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9631": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 46
+  },
+  "9638": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 46
+  },
+  "9784": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 945
+  },
+  "9787": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 965
+  },
+  "9805": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9806": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9808": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9809": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9811": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9812": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9814": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9815": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9817": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9818": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9820": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9821": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9823": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9824": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9826": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9827": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9829": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9830": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9832": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9833": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 3660
+  },
+  "9835": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9836": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9845": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 46
+  },
+  "9908": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9944": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9946": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9947": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "9949": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1632
+  },
+  "9950": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3660
+  },
+  "10099": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1957
+  },
+  "10297": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 100
+  },
+  "10310": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 276
+  },
+  "10313": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 86
+  },
+  "10323": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 46
+  },
+  "10341": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 276
+  },
+  "10575": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 216
+  },
+  "10819": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 997
+  },
+  "10821": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 22
+  },
+  "10827": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 6854
+  },
+  "10839": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 163
+  },
+  "10850": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 278
+  },
+  "10852": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 700
+  },
+  "10858": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 393
+  },
+  "10860": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 9
+  },
+  "10879": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 39
+  },
+  "10888": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 6859
+  },
+  "10891": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 369
+  },
+  "10894": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 120
+  },
+  "10896": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 419
+  },
+  "10898": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 419
+  },
+  "10902": {
+    "procrate": 0,
+    "proclevel": 18,
+    "proceffect": 340
+  },
+  "10903": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 215
+  },
+  "10908": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1933
+  },
+  "10910": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1935
+  },
+  "11000": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 995
+  },
+  "11001": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 995
+  },
+  "11010": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 200
+  },
+  "11050": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 657
+  },
+  "11052": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 80
+  },
+  "11104": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 6488
+  },
+  "11156": {
+    "procrate": 82,
+    "proclevel": 1,
+    "proceffect": 329
+  },
+  "11495": {
+    "procrate": 0,
+    "proclevel": 34,
+    "proceffect": 968
+  },
+  "11552": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 46
+  },
+  "11560": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 46
+  },
+  "11565": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 116
+  },
+  "11604": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 759
+  },
+  "11609": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 758
+  },
+  "11611": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 44
+  },
+  "11625": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 678
+  },
+  "11628": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 31
+  },
+  "11629": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 406
+  },
+  "11630": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 115
+  },
+  "11645": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 451
+  },
+  "11647": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 509
+  },
+  "11648": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 118
+  },
+  "11649": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 259
+  },
+  "11662": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 118
+  },
+  "11664": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 410
+  },
+  "11665": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 111
+  },
+  "11675": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1269
+  },
+  "11676": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 998
+  },
+  "11677": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 385
+  },
+  "11679": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1267
+  },
+  "11681": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 115
+  },
+  "11682": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 117
+  },
+  "11683": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 217
+  },
+  "11684": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 998
+  },
+  "11689": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 503
+  },
+  "11692": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1507
+  },
+  "11694": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 506
+  },
+  "11696": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 826
+  },
+  "11697": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 129
+  },
+  "11908": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 526
+  },
+  "11924": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 282
+  },
+  "12532": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12533": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12534": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12535": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12536": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12537": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12538": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12539": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12540": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12541": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12542": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12543": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12544": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12545": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 445
+  },
+  "12559": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 1788
+  },
+  "12863": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1199
+  },
+  "12897": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 270
+  },
+  "12978": {
+    "procrate": 0,
+    "proclevel": 15,
+    "proceffect": 242
+  },
+  "14015": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 760
+  },
+  "14016": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 765
+  },
+  "14024": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 761
+  },
+  "14032": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 760
+  },
+  "14033": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 761
+  },
+  "14034": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 762
+  },
+  "14035": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 763
+  },
+  "14036": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 764
+  },
+  "14037": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 765
+  },
+  "14038": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 766
+  },
+  "14039": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 767
+  },
+  "14040": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 768
+  },
+  "14049": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1883
+  },
+  "14050": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 1832
+  },
+  "14051": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 1833
+  },
+  "14052": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 1837
+  },
+  "14053": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 1838
+  },
+  "14054": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 1834
+  },
+  "14055": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 1835
+  },
+  "14056": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 1836
+  },
+  "14057": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1851
+  },
+  "14058": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1853
+  },
+  "14059": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1839
+  },
+  "14060": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1841
+  },
+  "14061": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1856
+  },
+  "14062": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1860
+  },
+  "14063": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1847
+  },
+  "14064": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1863
+  },
+  "14065": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1865
+  },
+  "14066": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1868
+  },
+  "14067": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1849
+  },
+  "14068": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1870
+  },
+  "14069": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1843
+  },
+  "14070": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1845
+  },
+  "14071": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1872
+  },
+  "14072": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1858
+  },
+  "14073": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1852
+  },
+  "14074": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1840
+  },
+  "14075": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1842
+  },
+  "14076": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1854
+  },
+  "14077": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1861
+  },
+  "14078": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1857
+  },
+  "14079": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1864
+  },
+  "14080": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1848
+  },
+  "14081": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1866
+  },
+  "14082": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1850
+  },
+  "14083": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1869
+  },
+  "14084": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1871
+  },
+  "14085": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1873
+  },
+  "14086": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1844
+  },
+  "14087": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1846
+  },
+  "14088": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 1859
+  },
+  "14089": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 1867
+  },
+  "14090": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1862
+  },
+  "14091": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1875
+  },
+  "14092": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1876
+  },
+  "14093": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1877
+  },
+  "14094": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1878
+  },
+  "14095": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1855
+  },
+  "14096": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1879
+  },
+  "14097": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1880
+  },
+  "14098": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1881
+  },
+  "14099": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1882
+  },
+  "14301": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 763
+  },
+  "14309": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 764
+  },
+  "14346": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1307
+  },
+  "14367": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 117
+  },
+  "14383": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1930
+  },
+  "14560": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 46
+  },
+  "14734": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 521
+  },
+  "14735": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 80
+  },
+  "14751": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 80
+  },
+  "14756": {
+    "procrate": 0,
+    "proclevel": 5,
+    "proceffect": 80
+  },
+  "14797": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 1002
+  },
+  "14811": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 48
+  },
+  "15794": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 352
+  },
+  "15845": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "15996": {
+    "procrate": 325,
+    "proclevel": 50,
+    "proceffect": 2173
+  },
+  "16260": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 80
+  },
+  "16889": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 86
+  },
+  "18049": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2931
+  },
+  "18123": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 568
+  },
+  "18124": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 604
+  },
+  "18127": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1428
+  },
+  "18128": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 146
+  },
+  "18194": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 744
+  },
+  "18197": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 223
+  },
+  "18251": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 700
+  },
+  "18258": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 67
+  },
+  "18259": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 18
+  },
+  "18281": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2548
+  },
+  "18444": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 145
+  },
+  "18445": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 152
+  },
+  "18446": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 45
+  },
+  "18447": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 504
+  },
+  "18448": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 131
+  },
+  "18471": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 207
+  },
+  "18479": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 15
+  },
+  "18480": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 78
+  },
+  "18481": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 95
+  },
+  "18482": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 96
+  },
+  "18485": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 512
+  },
+  "18486": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 517
+  },
+  "18488": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 45
+  },
+  "18489": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 504
+  },
+  "18555": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 45
+  },
+  "18556": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 504
+  },
+  "18557": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 131
+  },
+  "18563": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 512
+  },
+  "18564": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 417
+  },
+  "18565": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 422
+  },
+  "18566": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 145
+  },
+  "18567": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 217
+  },
+  "18568": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 430
+  },
+  "18581": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 129
+  },
+  "18582": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 417
+  },
+  "18583": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 217
+  },
+  "18584": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 61
+  },
+  "18585": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 144
+  },
+  "18586": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 228
+  },
+  "18587": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 259
+  },
+  "18588": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 406
+  },
+  "18589": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 418
+  },
+  "18593": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 28
+  },
+  "18594": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 57
+  },
+  "18595": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 137
+  },
+  "18596": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 422
+  },
+  "18597": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 490
+  },
+  "18598": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 518
+  },
+  "18617": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 16
+  },
+  "18849": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2192
+  },
+  "18874": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 378
+  },
+  "18875": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 354
+  },
+  "18876": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 379
+  },
+  "18877": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 380
+  },
+  "18878": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 446
+  },
+  "18879": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 642
+  },
+  "18880": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 370
+  },
+  "18881": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 61
+  },
+  "18882": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 170
+  },
+  "18981": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 501
+  },
+  "18982": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 47
+  },
+  "18983": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 123
+  },
+  "18984": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 228
+  },
+  "18985": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 248
+  },
+  "18986": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 368
+  },
+  "19701": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 478
+  },
+  "19715": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 2995
+  },
+  "19723": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2035
+  },
+  "19810": {
+    "procrate": 5,
+    "proclevel": 37,
+    "proceffect": 2878
+  },
+  "20082": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 80
+  },
+  "20087": {
+    "procrate": 5,
+    "proclevel": 51,
+    "proceffect": 2762
+  },
+  "20454": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 482
+  },
+  "20488": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1928
+  },
+  "20542": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 1937
+  },
+  "20613": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "20617": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 46
+  },
+  "20627": {
+    "procrate": 530,
+    "proclevel": 0,
+    "proceffect": 3881
+  },
+  "20657": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1775
+  },
+  "20679": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 222
+  },
+  "20994": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 1001
+  },
+  "21797": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 3590
+  },
+  "21852": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 482
+  },
+  "21863": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3589
+  },
+  "21864": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2989
+  },
+  "21865": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 657
+  },
+  "21866": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 31
+  },
+  "21872": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1497
+  },
+  "21876": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3630
+  },
+  "21878": {
+    "procrate": 100,
+    "proclevel": 25,
+    "proceffect": 1189
+  },
+  "21884": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 57
+  },
+  "21885": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2984
+  },
+  "21886": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3630
+  },
+  "21897": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3036
+  },
+  "22300": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3587
+  },
+  "22580": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2674
+  },
+  "22816": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 86
+  },
+  "22820": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 998
+  },
+  "22825": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 654
+  },
+  "22826": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 418
+  },
+  "22877": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3638
+  },
+  "22879": {
+    "procrate": 25,
+    "proclevel": 55,
+    "proceffect": 965
+  },
+  "22883": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 758
+  },
+  "22886": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 355
+  },
+  "22887": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 445
+  },
+  "22889": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 446
+  },
+  "22890": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3622
+  },
+  "22894": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3649
+  },
+  "22896": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1972
+  },
+  "22898": {
+    "procrate": 530,
+    "proclevel": 55,
+    "proceffect": 2173
+  },
+  "22899": {
+    "procrate": 530,
+    "proclevel": 0,
+    "proceffect": 2173
+  },
+  "22907": {
+    "procrate": 530,
+    "proclevel": 55,
+    "proceffect": 2173
+  },
+  "22946": {
+    "procrate": 70,
+    "proclevel": 0,
+    "proceffect": 2984
+  },
+  "22971": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 22
+  },
+  "22975": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3038
+  },
+  "22980": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3633
+  },
+  "22982": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1785
+  },
+  "22985": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2973
+  },
+  "22986": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3648
+  },
+  "22988": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3590
+  },
+  "22990": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3629
+  },
+  "22995": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1794
+  },
+  "22998": {
+    "procrate": -15,
+    "proclevel": 0,
+    "proceffect": 3630
+  },
+  "22999": {
+    "procrate": 30,
+    "proclevel": 0,
+    "proceffect": 3624
+  },
+  "23491": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2965
+  },
+  "23493": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 17
+  },
+  "23494": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3636
+  },
+  "23496": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1180
+  },
+  "23497": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2502
+  },
+  "23498": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3606
+  },
+  "23543": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 945
+  },
+  "23546": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 965
+  },
+  "23554": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 945
+  },
+  "23557": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 965
+  },
+  "23565": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 945
+  },
+  "23568": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 965
+  },
+  "24006": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 998
+  },
+  "24017": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "24029": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "24500": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 46
+  },
+  "24568": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1468
+  },
+  "24569": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 483
+  },
+  "24572": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3038
+  },
+  "24573": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3870
+  },
+  "24585": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3629
+  },
+  "24587": {
+    "procrate": 10,
+    "proclevel": 0,
+    "proceffect": 3036
+  },
+  "24589": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3635
+  },
+  "24590": {
+    "procrate": 25,
+    "proclevel": 55,
+    "proceffect": 965
+  },
+  "24592": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3590
+  },
+  "24594": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3639
+  },
+  "24602": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1969
+  },
+  "24608": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 524
+  },
+  "24611": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3037
+  },
+  "24613": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 22
+  },
+  "24617": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 434
+  },
+  "24618": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 945
+  },
+  "24622": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 452
+  },
+  "24629": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 46
+  },
+  "24631": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1801
+  },
+  "24635": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 216
+  },
+  "24639": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1802
+  },
+  "24643": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3640
+  },
+  "24645": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 360
+  },
+  "24647": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3603
+  },
+  "24648": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 393
+  },
+  "24649": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1946
+  },
+  "24692": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3625
+  },
+  "24695": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3646
+  },
+  "24697": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 17
+  },
+  "24707": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 360
+  },
+  "24722": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "24724": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1978
+  },
+  "24726": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 1979
+  },
+  "24727": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "24728": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1978
+  },
+  "24730": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "24734": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1980
+  },
+  "24744": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 1979
+  },
+  "24745": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "24767": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1333
+  },
+  "24776": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1192
+  },
+  "24779": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2251
+  },
+  "24780": {
+    "procrate": 30,
+    "proclevel": 55,
+    "proceffect": 2658
+  },
+  "24789": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1815
+  },
+  "24790": {
+    "procrate": 30,
+    "proclevel": 55,
+    "proceffect": 1825
+  },
+  "24793": {
+    "procrate": 180,
+    "proclevel": 0,
+    "proceffect": 3875
+  },
+  "24796": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3637
+  },
+  "24799": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3588
+  },
+  "24879": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3646
+  },
+  "24999": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3878
+  },
+  "25004": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 372
+  },
+  "25022": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 1945
+  },
+  "25030": {
+    "procrate": 0,
+    "proclevel": 44,
+    "proceffect": 511
+  },
+  "25031": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 46
+  },
+  "25032": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1785
+  },
+  "25033": {
+    "procrate": 0,
+    "proclevel": 49,
+    "proceffect": 282
+  },
+  "25045": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "25051": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 75
+  },
+  "25059": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 282
+  },
+  "25079": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 210
+  },
+  "25083": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 648
+  },
+  "25091": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 1786
+  },
+  "25194": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1788
+  },
+  "25208": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1786
+  },
+  "25209": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "25210": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2675
+  },
+  "25220": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2642
+  },
+  "25225": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3648
+  },
+  "25226": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2658
+  },
+  "25228": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1389
+  },
+  "25285": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "25308": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "25313": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 917
+  },
+  "25316": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 851
+  },
+  "25560": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1945
+  },
+  "25561": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 276
+  },
+  "25562": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 352
+  },
+  "25566": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 508
+  },
+  "25568": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 502
+  },
+  "25569": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 445
+  },
+  "25571": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 679
+  },
+  "25575": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 277
+  },
+  "25594": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 21
+  },
+  "25595": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 1498
+  },
+  "25606": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 281
+  },
+  "25800": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2972
+  },
+  "25981": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 451
+  },
+  "25982": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1954
+  },
+  "25983": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 483
+  },
+  "25987": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 971
+  },
+  "25989": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2675
+  },
+  "25990": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 276
+  },
+  "25994": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1489
+  },
+  "25997": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2674
+  },
+  "25999": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3590
+  },
+  "26001": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 904
+  },
+  "26023": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1961
+  },
+  "26024": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1014
+  },
+  "26027": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 163
+  },
+  "26030": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1389
+  },
+  "26031": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3589
+  },
+  "26032": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 445
+  },
+  "26034": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1960
+  },
+  "26035": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1840
+  },
+  "26038": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3634
+  },
+  "26039": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1221
+  },
+  "26040": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1961
+  },
+  "26041": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1741
+  },
+  "26087": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 3037
+  },
+  "26092": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3626
+  },
+  "26213": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 917
+  },
+  "26218": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2998
+  },
+  "26220": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3036
+  },
+  "26507": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 2969
+  },
+  "26525": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 2965
+  },
+  "26526": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 2979
+  },
+  "26535": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 352
+  },
+  "26553": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 2965
+  },
+  "26554": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 207
+  },
+  "26560": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "26566": {
+    "procrate": 3,
+    "proclevel": 46,
+    "proceffect": 445
+  },
+  "26581": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "26585": {
+    "procrate": 3,
+    "proclevel": 45,
+    "proceffect": 2972
+  },
+  "26587": {
+    "procrate": 5,
+    "proclevel": 60,
+    "proceffect": 2972
+  },
+  "26590": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2278
+  },
+  "26599": {
+    "procrate": 25,
+    "proclevel": 55,
+    "proceffect": 2972
+  },
+  "26603": {
+    "procrate": 0,
+    "proclevel": 46,
+    "proceffect": 2973
+  },
+  "26737": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3645
+  },
+  "26738": {
+    "procrate": 50,
+    "proclevel": 0,
+    "proceffect": 1969
+  },
+  "26739": {
+    "procrate": 0,
+    "proclevel": 61,
+    "proceffect": 1807
+  },
+  "26740": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3621
+  },
+  "26749": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2278
+  },
+  "26762": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2200
+  },
+  "26765": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 998
+  },
+  "26767": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2598
+  },
+  "26780": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2200
+  },
+  "26786": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2200
+  },
+  "26805": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 2996
+  },
+  "26806": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 2997
+  },
+  "26807": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2998
+  },
+  "26808": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2999
+  },
+  "26809": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2642
+  },
+  "26819": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2642
+  },
+  "26826": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 2997
+  },
+  "26827": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2998
+  },
+  "26836": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 2997
+  },
+  "26839": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2642
+  },
+  "26846": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 2997
+  },
+  "26847": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2998
+  },
+  "26848": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2999
+  },
+  "26849": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2642
+  },
+  "26855": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 2996
+  },
+  "26859": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2642
+  },
+  "26860": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2642
+  },
+  "26861": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2642
+  },
+  "26986": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3660
+  },
+  "26988": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3660
+  },
+  "27181": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "27188": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "27200": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 904
+  },
+  "27314": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 679
+  },
+  "27315": {
+    "procrate": 0,
+    "proclevel": 58,
+    "proceffect": 2642
+  },
+  "27320": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27321": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27322": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27323": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27324": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27325": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27326": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27327": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27328": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "27641": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2802
+  },
+  "27646": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2012
+  },
+  "27704": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 648
+  },
+  "27705": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 46
+  },
+  "27707": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1267
+  },
+  "27709": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 115
+  },
+  "27718": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1507
+  },
+  "27725": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 700
+  },
+  "27732": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 129
+  },
+  "27898": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 2654
+  },
+  "27899": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 2664
+  },
+  "27921": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 2803
+  },
+  "27936": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 2982
+  },
+  "27953": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 2803
+  },
+  "27984": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2251
+  },
+  "27989": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1793
+  },
+  "27992": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3645
+  },
+  "28217": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "28222": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 242
+  },
+  "28266": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "28399": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 454
+  },
+  "28515": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 86
+  },
+  "28595": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 3038
+  },
+  "28596": {
+    "procrate": 0,
+    "proclevel": 10,
+    "proceffect": 3037
+  },
+  "28597": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 3036
+  },
+  "28785": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 176
+  },
+  "28804": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2655
+  },
+  "28806": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2311
+  },
+  "28810": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2678
+  },
+  "28811": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2664
+  },
+  "28812": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2651
+  },
+  "28814": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2670
+  },
+  "28821": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2648
+  },
+  "28822": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2670
+  },
+  "28824": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2656
+  },
+  "28825": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2652
+  },
+  "28826": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2667
+  },
+  "28827": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2658
+  },
+  "28828": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2672
+  },
+  "28829": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2646
+  },
+  "28831": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2657
+  },
+  "28832": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2655
+  },
+  "28833": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2654
+  },
+  "28834": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2660
+  },
+  "28835": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2669
+  },
+  "28837": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2649
+  },
+  "28839": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1686
+  },
+  "28845": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1389
+  },
+  "28846": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2653
+  },
+  "28847": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 419
+  },
+  "28849": {
+    "procrate": -50,
+    "proclevel": 50,
+    "proceffect": 2667
+  },
+  "28850": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2312
+  },
+  "28853": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2674
+  },
+  "28854": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2675
+  },
+  "28855": {
+    "procrate": 55,
+    "proclevel": 50,
+    "proceffect": 2675
+  },
+  "28883": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 352
+  },
+  "28895": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2191
+  },
+  "28907": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1299
+  },
+  "28908": {
+    "procrate": -20,
+    "proclevel": 0,
+    "proceffect": 1686
+  },
+  "28909": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "28913": {
+    "procrate": -75,
+    "proclevel": 0,
+    "proceffect": 1704
+  },
+  "28917": {
+    "procrate": -20,
+    "proclevel": 0,
+    "proceffect": 1686
+  },
+  "28918": {
+    "procrate": 0,
+    "proclevel": 60,
+    "proceffect": 80
+  },
+  "28935": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 657
+  },
+  "28940": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "28948": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "28961": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 31
+  },
+  "28969": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1281
+  },
+  "28982": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "28983": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2200
+  },
+  "28985": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2907
+  },
+  "28989": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2907
+  },
+  "29118": {
+    "procrate": 0,
+    "proclevel": 33,
+    "proceffect": 372
+  },
+  "29121": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 918
+  },
+  "29126": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 762
+  },
+  "29172": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3877
+  },
+  "29182": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 352
+  },
+  "29202": {
+    "procrate": 0,
+    "proclevel": 1,
+    "proceffect": 1766
+  },
+  "29206": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 944
+  },
+  "29280": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 318
+  },
+  "29317": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1741
+  },
+  "29327": {
+    "procrate": 0,
+    "proclevel": 20,
+    "proceffect": 117
+  },
+  "29328": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 643
+  },
+  "29329": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 754
+  },
+  "29330": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "29365": {
+    "procrate": 530,
+    "proclevel": 60,
+    "proceffect": 2173
+  },
+  "29433": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29434": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29435": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29436": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29437": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29438": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29439": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29440": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29441": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29442": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29443": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29444": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 2434
+  },
+  "29460": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1788
+  },
+  "29474": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 80
+  },
+  "29482": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1632
+  },
+  "29541": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 65535
+  },
+  "29555": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 2072
+  },
+  "29596": {
+    "procrate": 0,
+    "proclevel": 61,
+    "proceffect": 657
+  },
+  "29598": {
+    "procrate": 0,
+    "proclevel": 61,
+    "proceffect": 3589
+  },
+  "29599": {
+    "procrate": 0,
+    "proclevel": 61,
+    "proceffect": 2847
+  },
+  "29605": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 48
+  },
+  "29607": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 370
+  },
+  "29608": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 458
+  },
+  "29609": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 411
+  },
+  "29610": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 677
+  },
+  "29627": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 370
+  },
+  "29647": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 508
+  },
+  "29859": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 80
+  },
+  "29860": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "29870": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 281
+  },
+  "30000": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 282
+  },
+  "30054": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 502
+  },
+  "30056": {
+    "procrate": 0,
+    "proclevel": 32,
+    "proceffect": 1783
+  },
+  "30070": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "30071": {
+    "procrate": 0,
+    "proclevel": 51,
+    "proceffect": 508
+  },
+  "30101": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 43
+  },
+  "30105": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1794
+  },
+  "30143": {
+    "procrate": 0,
+    "proclevel": 35,
+    "proceffect": 94
+  },
+  "30144": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 656
+  },
+  "30200": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30201": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30202": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30203": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30204": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30205": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30206": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30207": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30208": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30209": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30210": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30211": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30212": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30213": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30214": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30215": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30216": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30217": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30218": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30219": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1784
+  },
+  "30239": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1947
+  },
+  "30240": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1947
+  },
+  "30263": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 1784
+  },
+  "30275": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 46
+  },
+  "30276": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30277": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30278": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30279": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30281": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30283": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30285": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30287": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30292": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30293": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 1784
+  },
+  "30380": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1468
+  },
+  "30503": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1793
+  },
+  "30507": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1788
+  },
+  "30512": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 419
+  },
+  "30530": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 483
+  },
+  "30531": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 86
+  },
+  "30539": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 419
+  },
+  "30541": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 352
+  },
+  "31209": {
+    "procrate": 0,
+    "proclevel": 45,
+    "proceffect": 1952
+  },
+  "31224": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1790
+  },
+  "31232": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1791
+  },
+  "31241": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1791
+  },
+  "31243": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1791
+  },
+  "31244": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "31300": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1368
+  },
+  "31304": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 329
+  },
+  "31305": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1366
+  },
+  "31308": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1972
+  },
+  "31309": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "31310": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "31311": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "31312": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 86
+  },
+  "31315": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1973
+  },
+  "31318": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "31326": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1815
+  },
+  "31338": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 477
+  },
+  "31343": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1969
+  },
+  "31344": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1969
+  },
+  "31346": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1977
+  },
+  "31348": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1976
+  },
+  "31356": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1977
+  },
+  "31362": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 450
+  },
+  "31392": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1974
+  },
+  "31396": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 434
+  },
+  "31407": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1788
+  },
+  "31468": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1499
+  },
+  "31470": {
+    "procrate": 0,
+    "proclevel": 40,
+    "proceffect": 1788
+  },
+  "31744": {
+    "procrate": 0,
+    "proclevel": 25,
+    "proceffect": 86
+  },
+  "31795": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 980
+  },
+  "31829": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 201
+  },
+  "31830": {
+    "procrate": 0,
+    "proclevel": 30,
+    "proceffect": 657
+  },
+  "31873": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31880": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31887": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31894": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31901": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1214
+  },
+  "31908": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31915": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31922": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31929": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1214
+  },
+  "31936": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31937": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31938": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31939": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31940": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31941": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31943": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31944": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31945": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "31947": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1220
+  },
+  "31969": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 1214
+  },
+  "32108": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 3869
+  },
+  "32182": {
+    "procrate": 10,
+    "proclevel": 0,
+    "proceffect": 2847
+  },
+  "32440": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 2191
+  },
+  "32446": {
+    "procrate": 0,
+    "proclevel": 50,
+    "proceffect": 998
+  },
+  "32593": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 447
+  },
+  "32594": {
+    "procrate": 0,
+    "proclevel": 55,
+    "proceffect": 1614
+  },
+  "32606": {
+    "procrate": 0,
+    "proclevel": 0,
+    "proceffect": 1825
+  }
+}

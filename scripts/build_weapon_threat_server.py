@@ -50,17 +50,25 @@ def main() -> int:
     ap.add_argument("--item-proc-meta", type=Path, default=_MAG / "data" / "item_proc_meta.json")
     ap.add_argument("--dps-config", type=Path, default=_MAG / "data" / "dps_config.json")
     ap.add_argument("--out", type=Path, default=_MAG / "data" / "weapon_threat_server.json")
+    ap.add_argument(
+        "--patch-weapon-procs",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Rewrite weapon_procs.json procDps/procDpsOH from server proc rate × spell DD when spell data exists.",
+    )
     args = ap.parse_args()
 
     sys.path.insert(0, str(_MAG / "scripts"))
-    from threat.check_aggro_amount import check_aggro_amount
+    from threat.check_aggro_amount import check_aggro_amount, spell_direct_damage_total
     from threat.melee_proc import (
         double_attack_chance_pct,
         dual_wield_chance_pct,
         get_proc_chance_fraction,
         is_two_hander_skill,
+        mainhand_proc_rolls_per_second,
         melee_hate_per_swing_offhand,
         melee_hate_per_swing_primary,
+        offhand_proc_rolls_per_second,
         swings_per_second_mh,
         swings_per_second_oh,
         warrior_aa_map,
@@ -96,7 +104,7 @@ def main() -> int:
         "targetMaxHp": 1_000_000,
         "dualWieldChancePct": round(dw_pct, 3),
         "doubleAttackChancePct": round(da_pct, 3),
-        "note": "OH melee/proc uses same item delay/dmg as MH when only one item row matches the weapon name.",
+        "note": "Proc hate/DPS: one TryProcs per attack timer tick (not per DA/triple/flurry swing). GetProcChance uses attack_timer duration_ms/100 (Client::SetAttackTimer), not item_delay/100 as seconds.",
     }
     out["_meta"] = meta
 
@@ -121,6 +129,8 @@ def main() -> int:
             proc_rate = int(proc_meta[str(item_id)].get("procrate", 0) or 0)
         elif item_id is not None and item_id in proc_meta:
             proc_rate = int(proc_meta[item_id].get("procrate", 0) or 0)
+        if proc_rate == 0 and it is not None and it.get("procrate") is not None:
+            proc_rate = int(it.get("procrate") or 0)
 
         swings_mh = swings_per_second_mh(
             delay, haste_pct, overhaste_pct, da_chance_pct=da_pct, level=level, flurry_chance=flurry
@@ -145,27 +155,58 @@ def main() -> int:
             melee_hps_oh = swings_oh * hate_oh_sw
 
         proc_hate_per_cast = 0
+        spell_dd = 0
+        spell_obj = None
         if spell_id is not None and str(spell_id) in spells:
+            spell_obj = spells[str(spell_id)]
             proc_hate_per_cast = check_aggro_amount(
-                spells[str(spell_id)],
+                spell_obj,
                 caster_level=level,
                 target_max_hp=1_000_000,
                 class_id=1,
                 is_weapon_proc=True,
             )
+            spell_dd = spell_direct_damage_total(spell_obj, caster_level=level)
 
-        base_pc_mh = get_proc_chance_fraction(dex, delay, hand_is_secondary=False, dual_wield_chance_pct=dw_pct)
+        base_pc_mh = get_proc_chance_fraction(
+            dex,
+            delay,
+            haste_pct=haste_pct,
+            overhaste_pct=overhaste_pct,
+            hand_is_secondary=False,
+            dual_wield_chance_pct=dw_pct,
+        )
         wpc_mh = min(1.0, wpc_from_proc_rate(base_pc_mh, proc_rate))
-        proc_hps_mh = swings_mh * wpc_mh * proc_hate_per_cast
+        mh_proc_rolls = mainhand_proc_rolls_per_second(delay, haste_pct, overhaste_pct)
+        proc_hps_mh = mh_proc_rolls * wpc_mh * proc_hate_per_cast
 
         proc_hps_oh = 0.0
+        wpc_oh = 0.0
+        oh_proc_rolls = 0.0
         oh_proc = float(wp.get("hatePerSecOH") or 0) > 0 or float(wp.get("procDpsOH") or 0) > 0
         if oh_proc and not use_2h and proc_hate_per_cast > 0:
-            base_pc_oh = get_proc_chance_fraction(dex, delay, hand_is_secondary=True, dual_wield_chance_pct=dw_pct)
+            base_pc_oh = get_proc_chance_fraction(
+                dex,
+                delay,
+                haste_pct=haste_pct,
+                overhaste_pct=overhaste_pct,
+                hand_is_secondary=True,
+                dual_wield_chance_pct=dw_pct,
+            )
             wpc_oh = min(1.0, wpc_from_proc_rate(base_pc_oh, proc_rate))
-            proc_hps_oh = swings_oh * wpc_oh * proc_hate_per_cast
+            oh_proc_rolls = offhand_proc_rolls_per_second(
+                delay, haste_pct, overhaste_pct, dw_chance_pct=dw_pct
+            )
+            proc_hps_oh = oh_proc_rolls * wpc_oh * proc_hate_per_cast
 
-        out[wkey] = {
+        proc_dps_mh = 0.0
+        proc_dps_oh = 0.0
+        if spell_dd > 0:
+            proc_dps_mh = mh_proc_rolls * wpc_mh * spell_dd
+            if oh_proc and not use_2h:
+                proc_dps_oh = oh_proc_rolls * wpc_oh * spell_dd
+
+        row: dict[str, object] = {
             "meleeHatePerSecServer": round(melee_hps_mh, 2),
             "hatePerSecServer": round(proc_hps_mh, 2),
             "meleeHatePerSecOHServer": round(melee_hps_oh, 2) if not use_2h else 0,
@@ -174,11 +215,36 @@ def main() -> int:
             "effectSpellId": spell_id,
             "procRateDb": proc_rate,
         }
+        if spell_dd > 0:
+            row["procDpsServer"] = round(proc_dps_mh, 2)
+            if oh_proc and not use_2h:
+                row["procDpsOHServer"] = round(proc_dps_oh, 2)
+        out[wkey] = row
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2), encoding="utf-8")
     n = len([k for k in out if not str(k).startswith("_")])
     print(f"Wrote {args.out} ({n} weapons)")
+
+    if args.patch_weapon_procs:
+        wpn = load_json(args.weapon_procs)
+        patched = 0
+        for wkey, row in out.items():
+            if str(wkey).startswith("_"):
+                continue
+            ent = wpn.get(wkey)
+            if not isinstance(ent, dict):
+                continue
+            srv = row.get("procDpsServer")
+            if srv is not None:
+                ent["procDps"] = srv
+                patched += 1
+            srv_oh = row.get("procDpsOHServer")
+            if srv_oh is not None:
+                ent["procDpsOH"] = srv_oh
+        args.weapon_procs.write_text(json.dumps(wpn, indent=2), encoding="utf-8")
+        print(f"Patched procDps in {args.weapon_procs} ({patched} entries with spell DD)")
+
     return 0
 
 

@@ -101,6 +101,23 @@ def can_class_cast_spell(spell: Mapping[str, Any], class_id_1based: int) -> bool
     return int(classes[idx]) < 255
 
 
+def spell_direct_damage_total(spell: Mapping[str, Any], *, caster_level: int = 65) -> int:
+    """Sum of negative-HP effect magnitudes at caster_level (proc DPS baseline, no resists)."""
+    spell_id = int(spell["id"])
+    if spell_id == SPELL_MANABURN:
+        return 0
+    damage = 0
+    for o in range(12):
+        eid = int(spell["effectid"][o])
+        if eid == UNUSED_EFFECT or eid < 0:
+            continue
+        if eid in (SE_CurrentHPOnce, SE_CurrentHP):
+            val = _effect_val(spell, o, spell_id, caster_level)
+            if val < 0:
+                damage -= val
+    return int(damage)
+
+
 def check_aggro_amount(
     spell: Mapping[str, Any],
     *,
@@ -109,7 +126,7 @@ def check_aggro_amount(
     class_id: int = 1,
     is_pet: bool = False,
     is_bard: bool = False,
-    is_weapon_proc: bool = True,
+    is_weapon_proc: bool = True,  # unused for cap; kept for call-site compatibility
     shadows_of_luclin_disease_rule: bool = False,
     scars_of_velious_epic_hate: bool = False,
     spell_aggro_mod: int = 100,
@@ -121,8 +138,10 @@ def check_aggro_amount(
     """
     Return spell hate added to hatelist (before melee CommonDamage extras).
 
-    When modeling weapon procs, pass is_weapon_proc=True so the 400 non-damage cap is not applied
-    (mirrors equipped proc matching GetWeaponEffectID on TAKP).
+    For spells the caster cannot cast from the spellbook, non-damage hate is capped at **400** before
+    adding SE_InstantHate and DD hate (TAKP ``aggro.cpp`` proc/clickable cap). The server **skips**
+    this cap when the proc matches the equipped weapon on a client; magelo/DPS tooling **always**
+    applies the cap so proc hate matches the conservative 400 + instant + damage path.
     """
     spell_id = int(spell["id"])
     non_damage_hate = 0
@@ -269,8 +288,7 @@ def check_aggro_amount(
         non_damage_hate = 100
 
     if not can_class_cast_spell(spell, class_id) and non_damage_hate > 400:
-        if not is_weapon_proc:
-            non_damage_hate = 400
+        non_damage_hate = 400
 
     if is_bard:
         if damage + non_damage_hate > 40:

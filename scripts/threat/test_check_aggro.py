@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import unittest
+from pathlib import Path
 
 from threat.check_aggro_amount import check_aggro_amount
+
+_SPELLS = Path(__file__).resolve().parents[2] / "data" / "spells_threat.json"
 
 
 class TestCheckAggroAmount(unittest.TestCase):
@@ -44,7 +48,7 @@ class TestCheckAggroAmount(unittest.TestCase):
         h = check_aggro_amount(spell, is_weapon_proc=False, class_id=1)
         self.assertEqual(h, 400)
 
-    def test_weapon_proc_skips_cap(self):
+    def test_weapon_proc_uses_400_cap_on_non_damage(self):
         spell = {
             "id": 999001,
             "effectid": [21] + [254] * 11,
@@ -60,7 +64,13 @@ class TestCheckAggroAmount(unittest.TestCase):
             "goodEffect": 0,
         }
         h = check_aggro_amount(spell, is_weapon_proc=True, class_id=1)
-        self.assertEqual(h, min(1200, 1_000_000 // 15))
+        self.assertEqual(h, 400)
+
+    def test_anger_proc_capped_path(self):
+        data = json.loads(_SPELLS.read_text(encoding="utf-8"))
+        spell = data["spells"]["3624"]
+        h = check_aggro_amount(spell, caster_level=65, target_max_hp=1_000_000, class_id=1)
+        self.assertEqual(h, 1150)
 
 
 if __name__ == "__main__":

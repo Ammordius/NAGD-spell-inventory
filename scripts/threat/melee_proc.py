@@ -50,9 +50,46 @@ def client_damage_bonus_primary(level: int, delay: int, *, is_two_hander: bool) 
     return bonus
 
 
-def get_proc_chance_fraction(dex: int, weapon_delay_tenths: int, *, hand_is_secondary: bool, dual_wield_chance_pct: float) -> float:
-    """Mob::GetProcChance — returns probability per swing (0–1+)."""
-    weapon_speed = weapon_delay_tenths / 100.0
+# RuleI(Combat, MinHastedDelay) — zone/common/ruletypes.h
+MIN_HASTED_DELAY_MS = 400
+
+
+def attack_timer_duration_ms(
+    delay_tenths: int,
+    haste_pct: int,
+    overhaste_pct: int = 0,
+    *,
+    hundred_hands: int = 0,
+) -> int:
+    """Client::SetAttackTimer melee timer duration (ms), then Mob::GetWeaponSpeedbyHand min clamp."""
+    combined = min(100, int(haste_pct)) + int(overhaste_pct)
+    haste_mod = (100 + combined) / 100.0
+    delay_f = float(delay_tenths)
+    inner = delay_f / haste_mod + (float(hundred_hands) / 100.0) * delay_f
+    speed_ms = int(inner * 100.0)
+    return max(MIN_HASTED_DELAY_MS, speed_ms)
+
+
+def proc_weapon_speed_units(duration_ms: int) -> float:
+    """GetProcChance: weapon_speed = GetWeaponSpeedbyHand(hand) / 100.0 (after min-delay clamp)."""
+    return duration_ms / 100.0
+
+
+def get_proc_chance_fraction(
+    dex: int,
+    delay_tenths: int,
+    *,
+    haste_pct: int,
+    overhaste_pct: int = 0,
+    hand_is_secondary: bool,
+    dual_wield_chance_pct: float,
+    hundred_hands: int = 0,
+) -> float:
+    """Mob::GetProcChance — success probability per TryProcs roll (0–1+ before Roll cap)."""
+    dur = attack_timer_duration_ms(
+        delay_tenths, haste_pct, overhaste_pct, hundred_hands=hundred_hands
+    )
+    weapon_speed = proc_weapon_speed_units(dur)
     d = float(min(dex, 255))
     chance = (0.0004166667 + 1.1437908496732e-5 * d) * weapon_speed
     if hand_is_secondary:
@@ -60,6 +97,34 @@ def get_proc_chance_fraction(dex: int, weapon_delay_tenths: int, *, hand_is_seco
             return 0.0
         chance *= 50.0 / dual_wield_chance_pct
     return float(chance)
+
+
+def mainhand_proc_rolls_per_second(
+    delay_tenths: int,
+    haste_pct: int,
+    overhaste_pct: int = 0,
+    *,
+    hundred_hands: int = 0,
+) -> float:
+    """One weapon proc roll per primary attack timer tick (client_process TryProcs before Attack)."""
+    dur = attack_timer_duration_ms(
+        delay_tenths, haste_pct, overhaste_pct, hundred_hands=hundred_hands
+    )
+    return 1000.0 / float(dur)
+
+
+def offhand_proc_rolls_per_second(
+    delay_tenths: int,
+    haste_pct: int,
+    overhaste_pct: int = 0,
+    *,
+    dw_chance_pct: float,
+    hundred_hands: int = 0,
+) -> float:
+    """Offhand: one roll per offhand timer tick when dual wield succeeds."""
+    return mainhand_proc_rolls_per_second(
+        delay_tenths, haste_pct, overhaste_pct, hundred_hands=hundred_hands
+    ) * (float(dw_chance_pct) / 100.0)
 
 
 def dual_wield_chance_pct(dual_wield_skill: int, level: int, ambidexterity: int) -> float:

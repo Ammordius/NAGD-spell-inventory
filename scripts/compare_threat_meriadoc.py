@@ -46,6 +46,10 @@ def main() -> int:
         srv_total = sm_mh + sm_oh + sp_mh + sp_oh
 
         delta = srv_total - meri_total
+        delta_proc_mh = sp_mh - p_mh
+        delta_proc_oh = sp_oh - p_oh
+        delta_melee_mh = sm_mh - m_mh
+        delta_melee_oh = sm_oh - m_oh
         rows.append(
             {
                 "weapon": key,
@@ -57,6 +61,10 @@ def main() -> int:
                 "srv_proc_mh": round(sp_mh, 2),
                 "meri_proc_oh": round(p_oh, 2),
                 "srv_proc_oh": round(sp_oh, 2),
+                "delta_melee_mh": round(delta_melee_mh, 2),
+                "delta_melee_oh": round(delta_melee_oh, 2),
+                "delta_proc_mh": round(delta_proc_mh, 2),
+                "delta_proc_oh": round(delta_proc_oh, 2),
                 "meri_total": round(meri_total, 2),
                 "srv_total": round(srv_total, 2),
                 "delta": round(delta, 2),
@@ -78,6 +86,10 @@ def main() -> int:
         "srv_proc_mh",
         "meri_proc_oh",
         "srv_proc_oh",
+        "delta_melee_mh",
+        "delta_melee_oh",
+        "delta_proc_mh",
+        "delta_proc_oh",
         "meri_total",
         "srv_total",
         "delta",
@@ -90,22 +102,40 @@ def main() -> int:
         w.writerows(rows)
 
     top = rows[:15]
+    # Largest proc-only disagreements (Meriadoc proc MH − server proc MH, by absolute delta)
+    proc_rows = sorted(rows, key=lambda r: abs(r["delta_proc_mh"]), reverse=True)[:10]
     lines = [
-        "# Meriadoc vs server-model threat (largest absolute deltas first)",
+        "# Meriadoc vs server-model threat (largest absolute **total** deltas first)",
         "",
         "Server model: fixed Warrior 65, haste 70, DEX 255, target max HP 1M — see `weapon_threat_server.json` `_meta`.",
+        "Proc frequency uses `items.procrate` from `item_proc_meta.json` when present (re-export from your DB if values differ from TAKP).",
         "",
         "Typical reasons for gaps:",
         "",
         "- **Melee**: Meriadoc ties hate to expected DPS; server uses fixed hate per swing (no crit scaling).",
-        "- **Procs**: `item_proc_meta.json` may be empty — proc rate modifier defaults to 0 (underestimates vs DB procrate).",
-        "- **standardSpellHate** scales with benchmark target HP for non-DD proc components.",
+        "- **Procs (total)**: Meriadoc `hatePerSec` is a separate model from `CheckAggroAmount` + `GetProcChance` × `(100+procrate)/100`.",
+        "- **Anger / stun procs**: Magelo uses **400** non-damage cap + **SE_InstantHate** + DD hate per proc (see `check_aggro_amount.py`); Meriadoc sheet numbers use a different model.",
+        "- **procRateDb**: If `item_proc_meta.json` is stale or from another fork, proc HPS will not match live TAKP.",
         "",
         "| weapon | Meriadoc total | Server total | Δ |",
         "|--------|----------------|--------------|---|",
     ]
     for r in top:
         lines.append(f"| {r['weapon'][:40]} | {r['meri_total']} | {r['srv_total']} | {r['delta']} |")
+    lines.extend(
+        [
+            "",
+            "## Largest proc (MH) disagreements: Meriadoc `hatePerSec` vs server `hatePerSecServer`",
+            "",
+            "| weapon | Meriadoc proc MH | Server proc MH | Δ proc MH | procRateDb |",
+            "|--------|------------------|----------------|-----------|------------|",
+        ]
+    )
+    for r in proc_rows:
+        lines.append(
+            f"| {r['weapon'][:36]} | {r['meri_proc_mh']} | {r['srv_proc_mh']} | "
+            f"{r['delta_proc_mh']} | {r['procRateDb']} |"
+        )
     lines.append("")
     args.md_out.write_text("\n".join(lines), encoding="utf-8")
     print(f"Wrote {args.csv_out} and {args.md_out}")
