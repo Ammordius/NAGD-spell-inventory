@@ -122,6 +122,9 @@
                     <div class="field backstab-option" id="rangerStationaryWrap" style="display:none;">
                         <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (2× bow dmg)</label>
                     </div>
+                    <div class="field backstab-option" id="trueshotWrap" style="display:none;">
+                        <label><input type="checkbox" id="useTrueshot" /> Trueshot discipline (+100% archery, spell SE 301)</label>
+                    </div>
                     <div class="field backstab-option" id="attackFromFrontWrap">
                         <label><input type="checkbox" id="attackFromFront" /> Attacking from front (tank position)</label>
                         <span style="font-size:0.8em; color:#666;" title="Uses server logic: mob parry/riposte/dodge (zone/attack.cpp AvoidDamage) reduce effective hit rate by mob level.">Lowers hit rate (parry/riposte/dodge)</span>
@@ -262,6 +265,8 @@
     <script>
 (function() {
     const WARRIOR_2H_MULT_SCALE = 0.91;
+    /** Trueshot discipline: spellbonuses.ArcheryDamageModifier (SE 301) after Archery Mastery on base (special_attacks.cpp). */
+    const TRUESHOT_ARCHERY_DAMAGE_PCT = 100;
     const CLASSES = ['Warrior','Rogue','Monk','Ranger','Paladin','Shadow Knight','Bard','Beastlord'];
     const CLASS_ABBR = {
         'Warrior': 'WAR',
@@ -921,6 +926,7 @@
         const rangerMode = rangerModeSel ? rangerModeSel.value : 'bow';
         const useBow = isRanger && rangerMode === 'bow';
         const useFleeting = document.getElementById('useFleeting') && document.getElementById('useFleeting').checked;
+        const useTrueshot = document.getElementById('useTrueshot') && document.getElementById('useTrueshot').checked;
         // Spell/buff haste is capped at 100%; overhaste (including Fleeting Quiver) stacks above that.
         // Treat Fleeting as additional overhaste for archery so that all non-spell haste stacks in one bucket.
         let combinedHaste = Math.min(100, hastePct) + overhastePct;
@@ -1007,6 +1013,9 @@
         if (isRangedAttack && cls === 'Ranger' && aas.ArcheryDamageModifier) {
             rollBaseMH = Math.floor(rollBaseMH * (1 + aas.ArcheryDamageModifier / 100));
         }
+        if (isRangedAttack && cls === 'Ranger' && useTrueshot) {
+            rollBaseMH = Math.floor(rollBaseMH * (1 + TRUESHOT_ARCHERY_DAMAGE_PCT / 100));
+        }
         let rollPartMH = calcMeleeDamage(rollBaseMH, offense, mitigation, isRangedAttack);
         if (isRangedAttack && cls === 'Ranger') {
             const rangerStationary = document.getElementById('rangerStationary') && document.getElementById('rangerStationary').checked;
@@ -1023,6 +1032,9 @@
             let adjBase = baseDmgMH;
             if (isRangedAttack && cls === 'Ranger' && aas.ArcheryDamageModifier) {
                 adjBase = Math.floor(adjBase * (1 + aas.ArcheryDamageModifier / 100));
+            }
+            if (isRangedAttack && cls === 'Ranger' && useTrueshot) {
+                adjBase = Math.floor(adjBase * (1 + TRUESHOT_ARCHERY_DAMAGE_PCT / 100));
             }
             // Match CalcMeleeDamage: archery DI uses base/2 before (roll*base+5)/10.
             let diBase = adjBase;
@@ -1298,6 +1310,8 @@
         if (fleetingWrap) fleetingWrap.style.display = useBow ? '' : 'none';
         const rangerStationaryWrap = document.getElementById('rangerStationaryWrap');
         if (rangerStationaryWrap) rangerStationaryWrap.style.display = useBow ? '' : 'none';
+        const trueshotWrap = document.getElementById('trueshotWrap');
+        if (trueshotWrap) trueshotWrap.style.display = useBow ? '' : 'none';
         const attackFromFrontWrap = document.getElementById('attackFromFrontWrap');
         if (attackFromFrontWrap) {
             attackFromFrontWrap.style.display = '';
@@ -1386,6 +1400,12 @@
     document.getElementById('aaToggles').addEventListener('change', function(e) { if (e.target.type === 'checkbox') compute(); });
     const attackFromFrontEl = document.getElementById('attackFromFront');
     if (attackFromFrontEl) attackFromFrontEl.addEventListener('change', compute);
+    const useTrueshotEl = document.getElementById('useTrueshot');
+    if (useTrueshotEl) useTrueshotEl.addEventListener('change', compute);
+    const useFleetingEl = document.getElementById('useFleeting');
+    if (useFleetingEl) useFleetingEl.addEventListener('change', compute);
+    const rangerStationaryEl = document.getElementById('rangerStationary');
+    if (rangerStationaryEl) rangerStationaryEl.addEventListener('change', compute);
     document.getElementById('btnCompute').addEventListener('click', compute);
     async function init() {
         const warnEl = document.getElementById('loadWarning');
