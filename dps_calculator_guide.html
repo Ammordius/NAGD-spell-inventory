@@ -123,17 +123,15 @@ damagePerSwing = floor(rollPart × rollMultiplierExpected) + damageBonus + itemD
             <p>Off-hand uses the same roll + multiplier + item bonus (no warrior damage bonus on OH).</p>
 
             <h2>Haste &amp; attack speed</h2>
-            <p>Weapon delay is in <strong>tenths of a second</strong> (e.g. 40 = 4.0 s). Haste reduces delay; the server enforces a minimum delay.</p>
-            <code class="formula">reduced = delay × 100 / (100 + hastePct)
-Melee min delay = 4 (0.4 s)
-Ranged (archery) min delay = 10 (1.0 s)
-Effective delay = max(minDelay, floor(reduced))</code>
-            <p>Combined haste = spell haste (cap 100%) + overhaste. Rangers with <strong>Fleeting Quiver</strong> get +30% haste for bow attacks only.</p>
-            <code class="formula">Swings per second = 10 / effectiveDelay</code>
+            <p>Weapon delay is in <strong>tenths of a second</strong> (e.g. 40 = 4.0 s). <strong>Melee</strong> uses effective delay with a 0.4 s floor (4 tenths). <strong>Bow</strong> matches <code>Client::SetAttackTimer</code> in milliseconds: <code>GetHaste</code> (100 + spell haste capped at 100 + overhaste), then quiver reduction, then min 400 ms, then −100 ms client correction for bows.</p>
+            <code class="formula">Melee: reduced = delay × 100 / (100 + combinedHaste), combinedHaste = min(100, spell%) + overhaste%
+Melee effective delay (tenths) = max(4, floor(reduced))
+Melee swings/sec = 10 / effectiveDelay</code>
+            <p><strong>Bow:</strong> <code>speedMs = floor((delay / (GetHaste/100) + (HundredHands/100)×delay) × 100)</code>. With a quiver, <code>reduction = floor(quiverHaste × speedMs + 1)</code> where <code>quiverHaste = (BagWR / QuiverWRHasteDiv) / 100</code> (Fleeting Quiver uses BagWR 60, divisor 4 → 0.15). Apply reduction only if <code>speedMs − reduction &gt; 1000</code> (Sony rule). Timer = <code>max(400, speedMs) − 100</code> ms; swings/sec = <code>1000 / timer</code>.</p>
 
             <h2>Double attack, dual wield, triple attack</h2>
             <h3>Double attack</h3>
-            <p>Chance from skill, level, and AAs (e.g. Give Double Attack, Double Attack Chance). Formula: <code>chance = (skill + level + AA terms) / 5</code>, capped at 100. Applied as extra MH swings: <code>swings × (1 + doubleAttack%/100)</code>.</p>
+            <p>Chance from skill, level, and AAs (e.g. Give Double Attack, Double Attack Chance). Formula: <code>chance = (skill + level + AA terms) / 5</code>, capped at 100. For <strong>melee</strong>, applied as extra MH swings: <code>swings × (1 + doubleAttack%/100)</code>. <strong>Bow archery</strong> does not use double attack on TAKP (<code>RangedAttack</code> calls <code>DoArcheryAttackDmg</code> once per shot).</p>
             <h3>Dual wield</h3>
             <p>Off-hand swing chance: <code>(skill + level + Ambidexterity) × 100 / 375</code>. Knights cannot dual wield (0% OH). OH swings per second = <code>(10/effDelayOH) × (dwChance/100)</code>.</p>
             <h3>Triple attack (Warrior, Monk 60+)</h3>
@@ -155,7 +153,7 @@ Effective delay = max(minDelay, floor(reduced))</code>
                 <li><strong>Bow base damage:</strong> Roll uses half of (bow DMG + ammo DMG) for the d20 roll; bonuses and multiplier apply to the result.</li>
                 <li><strong>Archery Mastery AA:</strong> Adds a % damage modifier.</li>
                 <li><strong>Stationary target:</strong> When checked, doubles bow damage (simulates standing still).</li>
-                <li><strong>Fleeting Quiver:</strong> +30% haste for bow attacks only; ranged delay floor remains 1.0 s.</li>
+                <li><strong>Fleeting Quiver:</strong> Bow-only timer reduction from quiver BagWR (not added to spell/overhaste); see Haste section.</li>
             </ul>
 
             <h2>Summary</h2>

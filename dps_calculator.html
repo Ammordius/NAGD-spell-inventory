@@ -117,7 +117,7 @@
                         <label><input type="checkbox" id="backstabBehind" checked /> Assume behind target</label>
                     </div>
                     <div class="field backstab-option" id="fleetingWrap" style="display:none;">
-                        <label><input type="checkbox" id="useFleeting" checked /> Fleeting Quiver (+30% haste)</label>
+                        <label><input type="checkbox" id="useFleeting" checked /> Fleeting Quiver (BagWR 60 → server quiver timer reduction)</label>
                     </div>
                     <div class="field backstab-option" id="rangerStationaryWrap" style="display:none;">
                         <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (2× bow dmg)</label>
@@ -536,10 +536,8 @@
         return (daSkill >= 150) || ((aas.GiveDoubleAttack || 0) > 0);
     }
     function effectiveDelay(delay, hastePct, isRanged) {
-        // delay is in tenths of a second (delay 10 = 1 second).
-        // The server enforces different haste floors:
-        // - Melee: 0.4s (4 deciseconds)
-        // - Archery: 1.0s (10 deciseconds)
+        // delay in tenths of a second. Melee: Client::SetAttackTimer min 400 ms => 4 ds equivalent here.
+        // isRanged true kept for API compat; bow DPS uses bowRangedTimerDurationMs (server attack.cpp).
         const deciseconds = delay;
         const reduced = deciseconds * 100 / (100 + hastePct);
         const minDelay = isRanged ? 10 : 4;
@@ -551,11 +549,42 @@
     }
 
     const MIN_HASTED_DELAY_MS = 400;
+    const BOW_TIMER_CORR_MS = 100;
+    /** Fleeting Quiver: BagWR / Rule Combat:QuiverWRHasteDiv, then /100 → quiver_haste (attack.cpp). */
+    const FLEETING_QUIVER_BAG_WR = 60;
+    const QUIVER_WR_HASTE_DIV = 4;
+
     /** Client::SetAttackTimer speed_ms, then min 400ms — matches mob GetWeaponSpeedbyHand for proc. */
     function attackTimerDurationMs(delayTenths, combinedHasteMelee) {
         const hasteMod = (100 + combinedHasteMelee) / 100;
         const speedMs = Math.floor((delayTenths / hasteMod) * 100);
         return Math.max(MIN_HASTED_DELAY_MS, speedMs);
+    }
+
+    /**
+     * Client::SetAttackTimer ranged slot for ItemTypeBow (zone/attack.cpp) + GetQuiverHaste.
+     * getHaste = 100 + min(100, spell bonus) + overhaste (maps UI to Mob::GetHaste when hastetype2/extra are 0).
+     */
+    function bowRangedTimerDurationMs(delayTenths, spellHasteBonus0to100, overhastePct, useQuiver, hundredHands) {
+        const capSpell = Math.min(100, spellHasteBonus0to100 | 0);
+        const over = overhastePct | 0;
+        const getHaste = 100 + capSpell + over;
+        const hasteMod = getHaste / 100;
+        const hhe = hundredHands | 0;
+        let speedMs = Math.floor((delayTenths / hasteMod + (hhe / 100) * delayTenths) * 100);
+        if (useQuiver) {
+            const quiverHaste = (FLEETING_QUIVER_BAG_WR / QUIVER_WR_HASTE_DIV) / 100;
+            const bowDelayReduction = Math.floor(quiverHaste * speedMs + 1);
+            if (speedMs - bowDelayReduction > 1000) {
+                speedMs -= bowDelayReduction;
+            }
+        }
+        return Math.max(MIN_HASTED_DELAY_MS, speedMs) - BOW_TIMER_CORR_MS;
+    }
+
+    function bowSwingsPerSecondFromTimer(delayTenths, spellHasteBonus0to100, overhastePct, useQuiver, hundredHands) {
+        const ms = bowRangedTimerDurationMs(delayTenths, spellHasteBonus0to100, overhastePct, useQuiver, hundredHands);
+        return 1000 / ms;
     }
 
     function sumWarriorConfigFlurryChance() {
@@ -927,12 +956,8 @@
         const useBow = isRanger && rangerMode === 'bow';
         const useFleeting = document.getElementById('useFleeting') && document.getElementById('useFleeting').checked;
         const useTrueshot = document.getElementById('useTrueshot') && document.getElementById('useTrueshot').checked;
-        // Spell/buff haste is capped at 100%; overhaste (including Fleeting Quiver) stacks above that.
-        // Treat Fleeting as additional overhaste for archery so that all non-spell haste stacks in one bucket.
-        let combinedHaste = Math.min(100, hastePct) + overhastePct;
-        if (useBow && useFleeting) {
-            combinedHaste += 30;
-        }
+        // Spell/buff haste capped at 100%; overhaste stacks after cap (Mob::GetHaste). Fleeting Quiver: bowRangedTimerDurationMs.
+        const combinedHaste = Math.min(100, hastePct) + overhastePct;
         const attackFromFront = !useBow && document.getElementById('attackFromFront') && document.getElementById('attackFromFront').checked;
 
         const level = dpsConfig.levelCap || 65;
@@ -1050,18 +1075,24 @@
             maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgAddMH;
         }
 
-        // Apply combined haste (spell + overhaste + Fleeting when applicable) to delay.
-        const effDelayMH = effectiveDelay(delayMH, combinedHaste, !!isRangedAttack);
-        let swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100);
+        let baseSwingsPerSecMH;
+        if (isRangedAttack) {
+            baseSwingsPerSecMH = bowSwingsPerSecondFromTimer(delayMH, hastePct, overhastePct, useFleeting, 0);
+        } else {
+            const effDelayMH = effectiveDelay(delayMH, combinedHaste, false);
+            baseSwingsPerSecMH = swingsPerSecond(effDelayMH);
+        }
+        // Archery: Client::RangedAttack fires one DoArcheryAttackDmg per ranged timer; no CheckDoubleAttack (special_attacks.cpp).
+        let swingsMH = baseSwingsPerSecMH * (isRangedAttack ? 1 : (1 + daChance / 100));
         // Triple Attack: Warrior and Monk 60+ get 13.5% extra primary swing (skill/innate, not AA). Flurry AA (Warrior only) adds extra after triple.
         if ((cls === 'Warrior' || cls === 'Monk') && level >= 60) {
           const tripleExtra = 0.135;
           const flurryExtra = (cls === 'Warrior' && aas.FlurryChance) ? 0.135 * (aas.FlurryChance / 100) * 1.1 : 0;
-          swingsMH = swingsPerSecond(effDelayMH) * (1 + daChance / 100 + tripleExtra + flurryExtra);
+          swingsMH = baseSwingsPerSecMH * (1 + daChance / 100 + tripleExtra + flurryExtra);
         }
         // ExtraAttackChance (Punishing Blade, Speed of the Knight): % chance for one extra 2H primary swing per round
         if (use2H && weaponMH && (weaponMH.skill || '').indexOf('2H') >= 0 && aas.ExtraAttackChance) {
-          swingsMH += swingsPerSecond(effDelayMH) * (aas.ExtraAttackChance / 100);
+          swingsMH += baseSwingsPerSecMH * (aas.ExtraAttackChance / 100);
         }
         let swingsOH = 0;
         let dmgPerSwingOH = 0;
