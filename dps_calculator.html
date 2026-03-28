@@ -119,6 +119,9 @@
                     <div class="field backstab-option" id="fleetingWrap" style="display:none;">
                         <label><input type="checkbox" id="useFleeting" checked /> Fleeting Quiver (BagWR 60 → server quiver timer reduction)</label>
                     </div>
+                    <div class="field backstab-option" id="eagleEyeWrap" style="display:none;">
+                        <label><input type="checkbox" id="useEagleEye" checked title="AA: +40% archery hit (server HitChanceEffect[Archery] in AvoidanceCheck)" /> Eagle Eye (+40% archery hit)</label>
+                    </div>
                     <div class="field backstab-option" id="rangerStationaryWrap" style="display:none;">
                         <label><input type="checkbox" id="rangerStationary" checked /> Stationary target (2× bow dmg)</label>
                     </div>
@@ -215,8 +218,8 @@
                 <table>
                     <tr class="results-group"><th colspan="2">Attack rate</th></tr>
                     <tr><th>Hit chance</th><td id="outHitChance"></td></tr>
-                    <tr><th>Double attack</th><td id="outDoubleAttack"></td></tr>
-                    <tr><th>Dual wield</th><td id="outDualWield"></td></tr>
+                    <tr id="rowDoubleAttack"><th>Double attack</th><td id="outDoubleAttack"></td></tr>
+                    <tr id="rowDualWield"><th>Dual wield</th><td id="outDualWield"></td></tr>
                     <tr><th>Swings/sec (MH)</th><td id="outSwingsMH"></td></tr>
                     <tr id="rowSwingsOH"><th>Swings/sec (OH)</th><td id="outSwingsOH"></td></tr>
                     <tr class="results-group"><th colspan="2">Main hand</th></tr>
@@ -267,6 +270,8 @@
     const WARRIOR_2H_MULT_SCALE = 0.91;
     /** Trueshot discipline: spellbonuses.ArcheryDamageModifier (SE 301) after Archery Mastery on base (special_attacks.cpp). */
     const TRUESHOT_ARCHERY_DAMAGE_PCT = 100;
+    /** Eagle Eye AA: HitChanceEffect[Archery] in Mob::AvoidanceCheck (attack.cpp). */
+    const EAGLE_EYE_ARCHERY_HIT_PCT = 40;
     const CLASSES = ['Warrior','Rogue','Monk','Ranger','Paladin','Shadow Knight','Bard','Beastlord'];
     const CLASS_ABBR = {
         'Warrior': 'WAR',
@@ -997,7 +1002,10 @@
 
         const accuracy = aas.AccuracyAll || 0;
         const toHit = getToHit(offenseSkill, ws, accuracy);
-        let hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, 0, 0)));
+        const eagleEyeEl = document.getElementById('useEagleEye');
+        const useEagleEye = !eagleEyeEl || eagleEyeEl.checked;
+        const archeryHitPctBonus = (cls === 'Ranger' && useBow && weaponRange && useEagleEye) ? EAGLE_EYE_ARCHERY_HIT_PCT : 0;
+        let hitPct = Math.min(1, Math.max(0, hitChance(toHit, avoidance, archeryHitPctBonus, 0)));
         // When attacking from front (tank position), mob can block/parry/riposte/dodge per server AvoidDamage().
         // Warrior Strike Through (Tactical Mastery) bypasses each avoid per server; assume general enemies are warriors (parry/riposte/dodge, no block).
         if (attackFromFront) hitPct = hitPct * mobFrontAvoidanceFactor(mobLevel, cls === 'Warrior' ? (aas.StrikeThrough || 0) : 0);
@@ -1209,7 +1217,11 @@
 
         document.getElementById('outHitChance').textContent = (hitPct * 100).toFixed(1) + '%';
         document.getElementById('outDoubleAttack').textContent = daChance.toFixed(1) + '%';
+        const rowDoubleAttack = document.getElementById('rowDoubleAttack');
+        if (rowDoubleAttack) rowDoubleAttack.style.display = isRangedAttack ? 'none' : '';
         document.getElementById('outDualWield').textContent = dwChance.toFixed(1) + '%';
+        const rowDualWield = document.getElementById('rowDualWield');
+        if (rowDualWield) rowDualWield.style.display = isRangedAttack ? 'none' : '';
         document.getElementById('outSwingsMH').textContent = swingsMH.toFixed(2);
         document.getElementById('outSwingsOH').textContent = swingsOH.toFixed(2);
         document.getElementById('outDmgPerHit').textContent = baseDmgMH > 0 ? dmgPerSwingMH.toFixed(0) : '—';
@@ -1339,6 +1351,8 @@
         document.getElementById('backstabWrap').style.display = cls === 'Rogue' ? '' : 'none';
         const fleetingWrap = document.getElementById('fleetingWrap');
         if (fleetingWrap) fleetingWrap.style.display = useBow ? '' : 'none';
+        const eagleEyeWrap = document.getElementById('eagleEyeWrap');
+        if (eagleEyeWrap) eagleEyeWrap.style.display = useBow ? '' : 'none';
         const rangerStationaryWrap = document.getElementById('rangerStationaryWrap');
         if (rangerStationaryWrap) rangerStationaryWrap.style.display = useBow ? '' : 'none';
         const trueshotWrap = document.getElementById('trueshotWrap');
@@ -1435,6 +1449,8 @@
     if (useTrueshotEl) useTrueshotEl.addEventListener('change', compute);
     const useFleetingEl = document.getElementById('useFleeting');
     if (useFleetingEl) useFleetingEl.addEventListener('change', compute);
+    const useEagleEyeEl = document.getElementById('useEagleEye');
+    if (useEagleEyeEl) useEagleEyeEl.addEventListener('change', compute);
     const rangerStationaryEl = document.getElementById('rangerStationary');
     if (rangerStationaryEl) rangerStationaryEl.addEventListener('change', compute);
     document.getElementById('btnCompute').addEventListener('click', compute);

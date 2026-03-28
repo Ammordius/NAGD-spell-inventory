@@ -95,6 +95,7 @@ If toHit'×1.21 &gt; avoidance':
 Else:
   Hit chance = (toHit'×1.21) / (avoidance'×2)</code>
             <p>Result is clamped to [0, 1]. Higher ToHit or lower Avoidance increases hit chance.</p>
+            <p>For <strong>archery</strong>, the server applies <code>HitChanceEffect[Archery]</code> (e.g. Eagle Eye AA) before the +10 step: <code>toHit = toHit × (100 + toHitPct) / 100</code> in <code>Mob::AvoidanceCheck</code>. The calculator has an optional <strong>Eagle Eye</strong> checkbox (default on for ranger bow) using +40 for that modifier.</p>
 
             <h2>Damage per swing (melee)</h2>
             <p>Damage is built in stages: a d20-style roll from offense vs mitigation, then optional multiplier, then additive bonuses.</p>
@@ -154,6 +155,7 @@ Melee swings/sec = 10 / effectiveDelay</code>
                 <li><strong>Archery Mastery AA:</strong> Adds a % damage modifier.</li>
                 <li><strong>Stationary target:</strong> When checked, doubles bow damage (simulates standing still).</li>
                 <li><strong>Fleeting Quiver:</strong> Bow-only timer reduction from quiver BagWR (not added to spell/overhaste); see Haste section.</li>
+                <li><strong>Eagle Eye:</strong> Optional +40 archery hit percent (server <code>HitChanceEffect</code>); see Hit chance section.</li>
             </ul>
 
             <h2>Summary</h2>
