@@ -126,6 +126,10 @@
                         <label><input type="checkbox" id="attackFromFront" /> Attacking from front (tank position)</label>
                         <span style="font-size:0.8em; color:#666;" title="Uses server logic: mob parry/riposte/dodge (zone/attack.cpp AvoidDamage) reduce effective hit rate by mob level.">Lowers hit rate (parry/riposte/dodge)</span>
                     </div>
+                    <div class="field backstab-option">
+                        <label><input type="checkbox" id="hateModelServer" /> Hate: server model (precomputed)</label>
+                        <span style="font-size:0.8em; color:#666;" title="Uses weapon_threat_server.json (Warrior 65, haste 70, DEX 255). See data/DPS_CALCULATOR_THREAT.md.">Meriadoc sheet vs TAKP aggro mirror</span>
+                    </div>
                 </div>
             </div>
             <div class="section">
@@ -231,7 +235,7 @@
                     <tr><th>Proc (MH)</th><td id="outProcDPSMH"></td></tr>
                     <tr><th>Proc (OH)</th><td id="outProcDPSOH"></td></tr>
                     <tr><th class="total-dps">Total DPS</th><td class="total-dps" id="outTotalDPS"></td></tr>
-                    <tr class="results-group"><th colspan="2">Hate (Meriadoc)</th></tr>
+                    <tr class="results-group"><th colspan="2" id="hateGroupLabel">Hate (Meriadoc)</th></tr>
                     <tr><th>Melee (MH + OH)</th><td id="outMeleeHate"></td></tr>
                     <tr><th>Proc (MH + OH)</th><td id="outProcHate"></td></tr>
                     <tr><th>Total hate/sec</th><td id="outTotalHate"></td></tr>
@@ -272,6 +276,7 @@
     let itemStats = {};
     let dpsConfig = {};
     let weaponProcs = {};
+    let weaponThreatServer = {};
     let weaponsBySlot = { PRIMARY: [], SECONDARY: [], RANGE: [] };
     let precomputedWeaponDps = {};
 
@@ -293,6 +298,30 @@
             };
         }
         return data;
+    }
+
+    function getHatePerSecForWeapon(item, isOffhand) {
+        const useSrv = document.getElementById('hateModelServer') && document.getElementById('hateModelServer').checked;
+        if (!item || !item.name) return { melee: 0, proc: 0 };
+        const key = normalizeProcName(item.name);
+        if (useSrv && weaponThreatServer[key]) {
+            const s = weaponThreatServer[key];
+            if (isOffhand) {
+                return {
+                    melee: s.meleeHatePerSecOHServer != null ? s.meleeHatePerSecOHServer : 0,
+                    proc: s.hatePerSecOHServer != null ? s.hatePerSecOHServer : 0,
+                };
+            }
+            return {
+                melee: s.meleeHatePerSecServer != null ? s.meleeHatePerSecServer : 0,
+                proc: s.hatePerSecServer != null ? s.hatePerSecServer : 0,
+            };
+        }
+        const pd = getProcData(item, isOffhand);
+        return {
+            melee: pd ? (pd.meleeHatePerSec || 0) : 0,
+            proc: pd ? (pd.hatePerSec || 0) : 0,
+        };
     }
 
     function getDamageBonus1H(level) {
@@ -974,10 +1003,12 @@
         const procDataOH = weaponOH ? getProcData(weaponOH, true) : null;
         const procDpsMH = procDataMH ? (procDataMH.procDps || 0) : 0;
         const procDpsOH = procDataOH ? (procDataOH.procDps || 0) : 0;
-        const procHateMH = procDataMH ? (procDataMH.hatePerSec || 0) : 0;
-        const procHateOH = procDataOH ? (procDataOH.hatePerSec || 0) : 0;
-        const meleeHateMH = procDataMH ? (procDataMH.meleeHatePerSec || 0) : 0;
-        const meleeHateOH = procDataOH ? (procDataOH.meleeHatePerSec || 0) : 0;
+        const hateMH = getHatePerSecForWeapon(weaponMH, false);
+        const hateOH = weaponOH ? getHatePerSecForWeapon(weaponOH, true) : { melee: 0, proc: 0 };
+        const procHateMH = hateMH.proc;
+        const procHateOH = hateOH.proc;
+        const meleeHateMH = hateMH.melee;
+        const meleeHateOH = hateOH.melee;
         const totalHatePerSec = meleeHateMH + meleeHateOH + procHateMH + procHateOH;
 
         let kickDPS = 0;
@@ -1044,6 +1075,9 @@
         document.getElementById('outTotalDPS').textContent = totalDPS.toFixed(1);
         const meleeHateTotal = meleeHateMH + meleeHateOH;
         const procHateTotal = procHateMH + procHateOH;
+        const useSrvHate = document.getElementById('hateModelServer') && document.getElementById('hateModelServer').checked;
+        const hateLabel = document.getElementById('hateGroupLabel');
+        if (hateLabel) hateLabel.textContent = useSrvHate ? 'Hate (server model)' : 'Hate (Meriadoc)';
         document.getElementById('outMeleeHate').textContent = (meleeHateTotal + procHateTotal) > 0 ? meleeHateTotal.toFixed(2) : '—';
         document.getElementById('outProcHate').textContent = procHateTotal > 0 ? procHateTotal.toFixed(2) : '—';
         document.getElementById('outTotalHate').textContent = totalHatePerSec > 0 ? totalHatePerSec.toFixed(2) : '—';
@@ -1202,6 +1236,8 @@
     const attackFromFrontEl = document.getElementById('attackFromFront');
     if (attackFromFrontEl) attackFromFrontEl.addEventListener('change', compute);
     document.getElementById('btnCompute').addEventListener('click', compute);
+    const hateModelSrvEl = document.getElementById('hateModelServer');
+    if (hateModelSrvEl) hateModelSrvEl.addEventListener('change', compute);
 
     async function init() {
         const warnEl = document.getElementById('loadWarning');
@@ -1214,6 +1250,15 @@
                 weaponProcs = await (await fetch(dataPath + 'weapon_procs.json')).json();
             } catch (e2) {
                 weaponProcs = {};
+            }
+            try {
+                weaponThreatServer = await (await fetch(dataPath + 'weapon_threat_server.json')).json();
+                if (weaponThreatServer && weaponThreatServer._meta) {
+                    const { _meta, ...rest } = weaponThreatServer;
+                    weaponThreatServer = rest;
+                }
+            } catch (e3) {
+                weaponThreatServer = {};
             }
         } catch (e) {
             itemStats = {};

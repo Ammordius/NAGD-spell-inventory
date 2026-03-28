@@ -81,6 +81,10 @@ Audited `dps_config.json` against `Server/utils/sql/aa_list_canonical_results.tx
 - **Sinister Strikes** (Rogue) – not in TAKP canonical list; removed.
 - **Harmonious Attack** (Beastlord) – in TAKP it is **Bard-only** (classes=256); Beastlord has Bestial Frenzy (effect 225, 15) only; removed from Beastlord.
 
+## Threat / hate (server model)
+
+For **server-derived hate per second** (melee + proc), `CheckAggroAmount`, and comparison vs Meriadoc’s sheet, see **[DPS_CALCULATOR_THREAT.md](DPS_CALCULATOR_THREAT.md)**.
+
 ## Source of truth
 
 - **Server**: `zone/client_process.cpp` (Triple Attack 13.5%, Flurry after triple), `zone/attack.cpp` (melee crit paths: Warrior 12+, Ranger archery 17+, non‑Warrior with CriticalHitChance), `zone/aa.h` (AA IDs), `zone/common.h` (bonus names), `zone/special_attacks.cpp` (Technique of Master Wu).
