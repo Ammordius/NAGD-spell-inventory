@@ -247,7 +247,7 @@
                     <tr id="rowMeriadocTotal" style="display:none;"><th>Total hate/sec</th><td id="outMeriadocTotalHate"></td></tr>
                 </table>
                 </div>
-                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. <strong>Proc DPS</strong> uses <code>weapon_procs.json</code>; <strong>melee and proc threat/sec</strong> start from <code>weapon_threat_server.json</code> (TAKP per-swing hate and proc aggro) and are scaled by this page's swing rate (haste, double attack, triple, flurry, extra 2H attack, dual wield) and your DEX for proc chance. <strong>Meriadoc sheet</strong> rows (when shown) are the legacy <code>weapon_procs.json</code> hate columns for side-by-side validation — they are not expected to match the server model for proc-heavy weapons; see <a href="data/DPS_CALCULATOR_THREAT.md">DPS_CALCULATOR_THREAT.md</a> and <code>compare_threat_meriadoc.py</code>. <a href="dps_calculator_guide.html#weapon-threat-proc">How proc DPS and hate are derived</a>.</p>
+                <p class="results-note">DPS varies with target AC and level. Easier targets (e.g. lower AC) yield higher hit rate and avg damage. <strong>Proc DPS</strong> uses <code>weapon_procs.json</code>; <strong>melee and proc threat/sec</strong> start from <code>weapon_threat_server.json</code> (TAKP per-swing hate and proc aggro) and are scaled by this page's swing rate (haste, double attack, triple, flurry, extra 2H attack, dual wield) and your DEX for proc chance. <strong>Bard</strong> uses scaled main-hand melee hate and bard proc-hate columns when present (see <a href="data/DPS_CALCULATOR_THREAT.md">DPS_CALCULATOR_THREAT.md</a>). Log “total DPS” often uses full encounter time vs. this page’s steady melee model. <strong>Meriadoc sheet</strong> rows (when shown) are the legacy <code>weapon_procs.json</code> hate columns for side-by-side validation — they are not expected to match the server model for proc-heavy weapons; see <a href="data/DPS_CALCULATOR_THREAT.md">DPS_CALCULATOR_THREAT.md</a> and <code>compare_threat_meriadoc.py</code>. <a href="dps_calculator_guide.html#weapon-threat-proc">How proc DPS and hate are derived</a>.</p>
                 <div class="parse-validation section" style="margin-top:20px;">
                     <h3 class="collapsible" id="parseHeader">Compare to parse</h3>
                     <div class="collapse-content" id="parseSection">
@@ -337,6 +337,20 @@
     function getDamageBonus1H(level) {
         if (level < 28) return 0;
         return 1 + Math.floor((level - 28) / 3);
+    }
+    /** Warrior primary-hand innate damage bonus (hate table in weapon_threat_server.json); bards do not get this. */
+    function warriorPrimaryDamageBonusForThreat(level, delayTenths, weaponSkillStr) {
+        const s = weaponSkillStr || '';
+        if (s.indexOf('2H') >= 0)
+            return getDamageBonus2H(level, delayTenths);
+        return getDamageBonus1H(level);
+    }
+    /** Scale MH melee hate from Warrior-built table to Bard: hate per swing is weaponDmg only vs weaponDmg+DB. */
+    function bardMeleeHateMhScaleFromWarriorTable(weaponDmg, level, delayTenths, weaponSkillStr) {
+        const d = Math.max(0, weaponDmg | 0);
+        const db = warriorPrimaryDamageBonusForThreat(level, delayTenths, weaponSkillStr);
+        const denom = d + db;
+        return denom > 0 ? d / denom : 1;
     }
     function getDamageBonus2H(level, delay) {
         if (level < 28) return 0;
@@ -493,6 +507,7 @@
         const raw = String(weaponSkill).replace(/\s/g, '');
         const map = {
             '1HSlashing': '1HSlash', '2HSlashing': '2HSlash',
+            '1HBlunt': '1HBlunt', '2HBlunt': '2HBlunt',
             'HandtoHand': 'handToHand',
             'Piercing': '1HPiercing'
         };
@@ -1147,12 +1162,17 @@
             if (refSwingsMH > 0) {
                 const meleeBase = rowMH.meleeHatePerSecServer != null ? rowMH.meleeHatePerSecServer : hateMH.melee;
                 meleeHateMH = meleeBase * (swingsMH / refSwingsMH);
+                if (cls === 'Bard' && weaponMH) {
+                    meleeHateMH *= bardMeleeHateMhScaleFromWarriorTable(baseDmgMH, level, delayMH, weaponMH.skill);
+                }
                 const pr = rowMH.procRateDb != null ? rowMH.procRateDb : 0;
                 // PPM is haste-invariant on server; use ref haste for WPC so ratio is dex-only (not haste).
                 const wpcRef = Math.min(1, wpcFromProcRate(getProcChanceFraction(refDexThreat, delayMH, false, refDwThreat, refCh), pr));
                 const wpcUser = Math.min(1, wpcFromProcRate(getProcChanceFraction(dex, delayMH, false, dwChance, refCh), pr));
                 const wpcRatio = wpcRef > 1e-9 ? wpcUser / wpcRef : 1;
-                const procBase = rowMH.hatePerSecServer != null ? rowMH.hatePerSecServer : hateMH.proc;
+                const procBase = (cls === 'Bard' && rowMH.hatePerSecServerBard != null)
+                    ? rowMH.hatePerSecServerBard
+                    : (rowMH.hatePerSecServer != null ? rowMH.hatePerSecServer : hateMH.proc);
                 if (procBase > 0) {
                     procHateMH = procBase * wpcRatio;
                 }
@@ -1172,7 +1192,9 @@
                 const wpcRef = Math.min(1, wpcFromProcRate(getProcChanceFraction(refDexThreat, delayOH, true, refDwThreat, refCh), pr));
                 const wpcUser = Math.min(1, wpcFromProcRate(getProcChanceFraction(dex, delayOH, true, dwChance, refCh), pr));
                 const wpcRatio = wpcRef > 1e-9 ? wpcUser / wpcRef : 1;
-                const procOHBase = rowOH.hatePerSecOHServer != null ? rowOH.hatePerSecOHServer : hateOH.proc;
+                const procOHBase = (cls === 'Bard' && rowOH.hatePerSecOHServerBard != null)
+                    ? rowOH.hatePerSecOHServerBard
+                    : (rowOH.hatePerSecOHServer != null ? rowOH.hatePerSecOHServer : hateOH.proc);
                 if (procOHBase > 0) {
                     procHateOH = procOHBase * wpcRatio;
                 }

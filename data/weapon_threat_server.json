@@ -8,13 +8,15 @@
     "targetMaxHp": 1000000,
     "dualWieldChancePct": 91.2,
     "doubleAttackChancePct": 69.106,
-    "note": "Proc hate/DPS: one TryProcs per attack timer tick (not per DA/triple/flurry swing). GetProcChance uses attack_timer duration_ms/100 (Client::SetAttackTimer), not item_delay/100 as seconds."
+    "note": "Proc hate/DPS: one TryProcs per attack timer tick (not per DA/triple/flurry swing). GetProcChance uses attack_timer duration_ms/100 (Client::SetAttackTimer), not item_delay/100 as seconds. hatePerSec*ServerBard: CheckAggroAmount with is_bard=True. Melee rows are still Warrior primary DB; dps_calculator scales Bard MH melee hate in JS."
   },
   "darkblade of the warlord": {
     "meleeHatePerSecServer": 47.97,
     "hatePerSecServer": 49.83,
+    "hatePerSecServerBard": 32.5,
     "meleeHatePerSecOHServer": 29.3,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "22999",
     "effectSpellId": 3624,
     "procRateDb": 30,
@@ -23,8 +25,10 @@
   "ethereal destroyer": {
     "meleeHatePerSecServer": 45.46,
     "hatePerSecServer": 21.25,
+    "hatePerSecServerBard": 21.25,
     "meleeHatePerSecOHServer": 20.56,
     "hatePerSecOHServer": 10.63,
+    "hatePerSecOHServerBard": 10.63,
     "itemId": "22998",
     "effectSpellId": 3630,
     "procRateDb": -15,
@@ -34,8 +38,10 @@
   "bloodfrenzy": {
     "meleeHatePerSecServer": 49.59,
     "hatePerSecServer": 36.17,
+    "hatePerSecServerBard": 36.17,
     "meleeHatePerSecOHServer": 22.43,
     "hatePerSecOHServer": 18.08,
+    "hatePerSecOHServerBard": 18.08,
     "itemId": "28855",
     "effectSpellId": 2675,
     "procRateDb": 55
@@ -43,8 +49,10 @@
   "frostbite, cold blade of dread": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -52,8 +60,10 @@
   "blasphemous blade of the exiled": {
     "meleeHatePerSecServer": 48.91,
     "hatePerSecServer": 27.23,
+    "hatePerSecServerBard": 5.23,
     "meleeHatePerSecOHServer": 20.05,
     "hatePerSecOHServer": 13.61,
+    "hatePerSecOHServerBard": 2.61,
     "itemId": "7822",
     "effectSpellId": 306,
     "procRateDb": 65,
@@ -63,8 +73,10 @@
   "furious hammer of zek": {
     "meleeHatePerSecServer": 49.59,
     "hatePerSecServer": 23.52,
+    "hatePerSecServerBard": 23.52,
     "meleeHatePerSecOHServer": 22.43,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "22907",
     "effectSpellId": 2173,
     "procRateDb": 530,
@@ -73,8 +85,10 @@
   "blade of war": {
     "meleeHatePerSecServer": 88.83,
     "hatePerSecServer": 23.33,
+    "hatePerSecServerBard": 23.33,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "25989",
     "effectSpellId": 2675,
     "procRateDb": 0
@@ -82,8 +96,10 @@
   "hategiver": {
     "meleeHatePerSecServer": 47.88,
     "hatePerSecServer": 23.33,
+    "hatePerSecServerBard": 23.33,
     "meleeHatePerSecOHServer": 21.03,
     "hatePerSecOHServer": 11.67,
+    "hatePerSecOHServerBard": 11.67,
     "itemId": "28854",
     "effectSpellId": 2675,
     "procRateDb": 0
@@ -91,8 +107,10 @@
   "blade of carnage": {
     "meleeHatePerSecServer": 47.88,
     "hatePerSecServer": 23.33,
+    "hatePerSecServerBard": 23.33,
     "meleeHatePerSecOHServer": 21.03,
     "hatePerSecOHServer": 11.67,
+    "hatePerSecOHServerBard": 11.67,
     "itemId": "25210",
     "effectSpellId": 2675,
     "procRateDb": 0
@@ -100,8 +118,10 @@
   "sceptre of destruction": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -109,8 +129,10 @@
   "jagged blade of war": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -118,8 +140,10 @@
   "edge of eternity": {
     "meleeHatePerSecServer": 56.43,
     "hatePerSecServer": 18.33,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 28.04,
     "hatePerSecOHServer": 9.17,
+    "hatePerSecOHServerBard": 2.5,
     "itemId": "22986",
     "effectSpellId": 3648,
     "procRateDb": 0,
@@ -129,8 +153,10 @@
   "vanazir, dreamer's despair": {
     "meleeHatePerSecServer": 85.5,
     "hatePerSecServer": 16.67,
+    "hatePerSecServerBard": 3.33,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "29172",
     "effectSpellId": 3877,
     "procRateDb": 0,
@@ -139,8 +165,10 @@
   "club of slime": {
     "meleeHatePerSecServer": 45.46,
     "hatePerSecServer": 14.0,
+    "hatePerSecServerBard": 0.67,
     "meleeHatePerSecOHServer": 20.56,
     "hatePerSecOHServer": 7.0,
+    "hatePerSecOHServerBard": 0.33,
     "itemId": "22896",
     "effectSpellId": 1972,
     "procRateDb": 0,
@@ -150,8 +178,10 @@
   "hammer of hours": {
     "meleeHatePerSecServer": 47.58,
     "hatePerSecServer": 25.0,
+    "hatePerSecServerBard": 25.0,
     "meleeHatePerSecOHServer": 27.22,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "21886",
     "effectSpellId": 3630,
     "procRateDb": 0,
@@ -160,8 +190,10 @@
   "greatstaff of thunder": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -169,8 +201,10 @@
   "greatblade of chaos": {
     "meleeHatePerSecServer": 89.1,
     "hatePerSecServer": 8.33,
+    "hatePerSecServerBard": 8.33,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "26092",
     "effectSpellId": 3626,
     "procRateDb": 0,
@@ -179,8 +213,10 @@
   "stone etched war sword": {
     "meleeHatePerSecServer": 89.62,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "25983",
     "effectSpellId": 483,
     "procRateDb": 0
@@ -188,8 +224,10 @@
   "hammer of crushing waves": {
     "meleeHatePerSecServer": 54.72,
     "hatePerSecServer": 5.0,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 26.64,
     "hatePerSecOHServer": 2.5,
+    "hatePerSecOHServerBard": 2.5,
     "itemId": "26220",
     "effectSpellId": 3036,
     "procRateDb": 0,
@@ -199,8 +237,10 @@
   "hammer of the timeweaver": {
     "meleeHatePerSecServer": 52.4,
     "hatePerSecServer": 5.0,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 28.64,
     "hatePerSecOHServer": 2.5,
+    "hatePerSecOHServerBard": 2.5,
     "itemId": "22894",
     "effectSpellId": 3649,
     "procRateDb": 0,
@@ -210,8 +250,10 @@
   "fiery staff of zha": {
     "meleeHatePerSecServer": 83.79,
     "hatePerSecServer": 5.0,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "26738",
     "effectSpellId": 1969,
     "procRateDb": 50,
@@ -220,8 +262,10 @@
   "double edged stormblade": {
     "meleeHatePerSecServer": 51.3,
     "hatePerSecServer": 5.0,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 23.83,
     "hatePerSecOHServer": 2.5,
+    "hatePerSecOHServerBard": 2.5,
     "itemId": "22975",
     "effectSpellId": 3038,
     "procRateDb": 0,
@@ -231,8 +275,10 @@
   "stone etched mallet": {
     "meleeHatePerSecServer": 45.85,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 25.06,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "20454",
     "effectSpellId": 482,
     "procRateDb": 0
@@ -240,8 +286,10 @@
   "the sword of ssraeshza": {
     "meleeHatePerSecServer": 73.67,
     "hatePerSecServer": 3.5,
+    "hatePerSecServerBard": 3.5,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "26587",
     "effectSpellId": 2972,
     "procRateDb": 5,
@@ -250,8 +298,10 @@
   "ifir, dagger of fire": {
     "meleeHatePerSecServer": 53.01,
     "hatePerSecServer": 3.33,
+    "hatePerSecServerBard": 3.33,
     "meleeHatePerSecOHServer": 25.24,
     "hatePerSecOHServer": 1.67,
+    "hatePerSecOHServerBard": 1.67,
     "itemId": "24602",
     "effectSpellId": 1969,
     "procRateDb": 0,
@@ -261,8 +311,10 @@
   "acrylia handled broadsword": {
     "meleeHatePerSecServer": 49.59,
     "hatePerSecServer": 3.43,
+    "hatePerSecServerBard": 3.43,
     "meleeHatePerSecOHServer": 22.43,
     "hatePerSecOHServer": 1.72,
+    "hatePerSecOHServerBard": 1.72,
     "itemId": "26585",
     "effectSpellId": 2972,
     "procRateDb": 3,
@@ -272,8 +324,10 @@
   "sword of primordial power": {
     "meleeHatePerSecServer": 46.47,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 26.31,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "24585",
     "effectSpellId": 3629,
     "procRateDb": 0
@@ -281,8 +335,10 @@
   "cudgel of wrecking": {
     "meleeHatePerSecServer": 50.16,
     "hatePerSecServer": 2.5,
+    "hatePerSecServerBard": 2.5,
     "meleeHatePerSecOHServer": 24.42,
     "hatePerSecOHServer": 1.25,
+    "hatePerSecOHServerBard": 1.25,
     "itemId": "22883",
     "effectSpellId": 758,
     "procRateDb": 0,
@@ -292,8 +348,10 @@
   "vyzh`dra's render of souls": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -301,8 +359,10 @@
   "obsidian scimitar of war": {
     "meleeHatePerSecServer": 47.88,
     "hatePerSecServer": 17.92,
+    "hatePerSecServerBard": 1.25,
     "meleeHatePerSecOHServer": 21.03,
     "hatePerSecOHServer": 8.96,
+    "hatePerSecOHServerBard": 0.63,
     "itemId": "22879",
     "effectSpellId": 965,
     "procRateDb": 25,
@@ -312,8 +372,10 @@
   "dagger of distraction": {
     "meleeHatePerSecServer": 53.01,
     "hatePerSecServer": -5.0,
+    "hatePerSecServerBard": -5.0,
     "meleeHatePerSecOHServer": 25.24,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "24776",
     "effectSpellId": 1192,
     "procRateDb": 0
@@ -321,8 +383,10 @@
   "hammer of holy vengeance": {
     "meleeHatePerSecServer": 51.06,
     "hatePerSecServer": 23.52,
+    "hatePerSecServerBard": 23.52,
     "meleeHatePerSecOHServer": 27.54,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "20627",
     "effectSpellId": 3881,
     "procRateDb": 530,
@@ -331,8 +395,10 @@
   "infestation": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -340,8 +406,10 @@
   "steel hilted flint dagger": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -349,8 +417,10 @@
   "waning light katar": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -358,8 +428,10 @@
   "keen edged cleaver": {
     "meleeHatePerSecServer": 43.89,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 19.28,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "28830",
     "effectSpellId": null,
     "procRateDb": 0
@@ -367,8 +439,10 @@
   "blade of strategy": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -376,8 +450,10 @@
   "blade of tactics": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -385,8 +461,10 @@
   "wind-worn handblade": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -394,8 +472,10 @@
   "jagged timeforged blade": {
     "meleeHatePerSecServer": 56.43,
     "hatePerSecServer": 0.33,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 28.04,
     "hatePerSecOHServer": 0.17,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "24692",
     "effectSpellId": 3625,
     "procRateDb": 0,
@@ -405,8 +485,10 @@
   "primal velium knight's sword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -414,8 +496,10 @@
   "sledge of smashing": {
     "meleeHatePerSecServer": 53.74,
     "hatePerSecServer": 7.27,
+    "hatePerSecServerBard": 7.27,
     "meleeHatePerSecOHServer": 29.74,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "31304",
     "effectSpellId": 329,
     "procRateDb": 0,
@@ -424,8 +508,10 @@
   "horror shard blade": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -433,8 +519,10 @@
   "kelp hilted mace": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -442,8 +530,10 @@
   "shortblade of lightning": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -451,8 +541,10 @@
   "blade of angles": {
     "meleeHatePerSecServer": 72.11,
     "hatePerSecServer": 6.67,
+    "hatePerSecServerBard": 6.67,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "28824",
     "effectSpellId": 2656,
     "procRateDb": 0,
@@ -461,8 +553,10 @@
   "gaudralek, sword of the sky": {
     "meleeHatePerSecServer": 70.97,
     "hatePerSecServer": 5.97,
+    "hatePerSecServerBard": 5.97,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "31305",
     "effectSpellId": 1366,
     "procRateDb": 0,
@@ -471,8 +565,10 @@
   "flameforge hammer": {
     "meleeHatePerSecServer": 41.38,
     "hatePerSecServer": 15.83,
+    "hatePerSecServerBard": 2.5,
     "meleeHatePerSecOHServer": 20.56,
     "hatePerSecOHServer": 7.92,
+    "hatePerSecOHServerBard": 1.25,
     "itemId": "22300",
     "effectSpellId": 3587,
     "procRateDb": 0,
@@ -482,8 +578,10 @@
   "staff of transcendence": {
     "meleeHatePerSecServer": 99.58,
     "hatePerSecServer": 18.33,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "24999",
     "effectSpellId": 3878,
     "procRateDb": 0,
@@ -492,8 +590,10 @@
   "primal velium brawl stick": {
     "meleeHatePerSecServer": 67.72,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "27324",
     "effectSpellId": 2434,
     "procRateDb": 0
@@ -501,8 +601,10 @@
   "whip of the earthcrafter": {
     "meleeHatePerSecServer": 49.59,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 22.43,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "22980",
     "effectSpellId": 3633,
     "procRateDb": 0
@@ -510,8 +612,10 @@
   "short sword of the ykesha": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -519,8 +623,10 @@
   "an executioners axe": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -528,8 +634,10 @@
   "obsidian shard": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -537,8 +645,10 @@
   "enameled black mace": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -546,8 +656,10 @@
   "a mithril two-handed sword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -555,8 +667,10 @@
   "shield of the slain unicorn": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -564,8 +678,10 @@
   "bladed thulian claws": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -573,8 +689,10 @@
   "blackened iron bastard sword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -582,8 +700,10 @@
   "minotaur battle axe": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -591,8 +711,10 @@
   "entwood mace": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -600,8 +722,10 @@
   "gem encrusted axe": {
     "meleeHatePerSecServer": 72.11,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 42.41,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "22990",
     "effectSpellId": 3629,
     "procRateDb": 0
@@ -609,8 +733,10 @@
   "great blade of storms": {
     "meleeHatePerSecServer": 50.79,
     "hatePerSecServer": 19.3,
+    "hatePerSecServerBard": 5.97,
     "meleeHatePerSecOHServer": 21.59,
     "hatePerSecOHServer": 9.65,
+    "hatePerSecOHServerBard": 2.98,
     "itemId": "22971",
     "effectSpellId": 22,
     "procRateDb": 0,
@@ -620,8 +746,10 @@
   "windblade": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -629,8 +757,10 @@
   "honorable longsword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -638,8 +768,10 @@
   "swiftblade of zek": {
     "meleeHatePerSecServer": 45.14,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 16.96,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "25203",
     "effectSpellId": null,
     "procRateDb": 0
@@ -647,8 +779,10 @@
   "great lance of stone": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -656,8 +790,10 @@
   "crescent blades of luclin": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -665,8 +801,10 @@
   "gold inlaid ulak": {
     "meleeHatePerSecServer": 34.09,
     "hatePerSecServer": 2.5,
+    "hatePerSecServerBard": 2.5,
     "meleeHatePerSecOHServer": 15.42,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "26807",
     "effectSpellId": 2998,
     "procRateDb": 0,
@@ -675,8 +813,10 @@
   "claw of the savage spirit (p)": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -684,8 +824,10 @@
   "claw of the savage spirit (s)": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -693,8 +835,10 @@
   "khashek's katar": {
     "meleeHatePerSecServer": 42.75,
     "hatePerSecServer": 2.5,
+    "hatePerSecServerBard": 2.5,
     "meleeHatePerSecOHServer": 16.82,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "26827",
     "effectSpellId": 2998,
     "procRateDb": 0,
@@ -703,8 +847,10 @@
   "wand of temporal power": {
     "meleeHatePerSecServer": 47.58,
     "hatePerSecServer": 25.0,
+    "hatePerSecServerBard": 25.0,
     "meleeHatePerSecOHServer": 27.22,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "21876",
     "effectSpellId": 3630,
     "procRateDb": 0,
@@ -713,8 +859,10 @@
   "hammer of the sun": {
     "meleeHatePerSecServer": 53.3,
     "hatePerSecServer": 4.17,
+    "hatePerSecServerBard": 4.17,
     "meleeHatePerSecOHServer": 26.99,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "28836",
     "effectSpellId": 1977,
     "procRateDb": 0,
@@ -723,8 +871,10 @@
   "timeless coral greatsword": {
     "meleeHatePerSecServer": 85.09,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "32606",
     "effectSpellId": 1825,
     "procRateDb": 0
@@ -732,8 +882,10 @@
   "heavy windriders lance": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -741,8 +893,10 @@
   "tri-plated golden hackle hammer": {
     "meleeHatePerSecServer": 36.28,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 15.42,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "30502",
     "effectSpellId": 67,
     "procRateDb": 0
@@ -750,8 +904,10 @@
   "earthspined staff": {
     "meleeHatePerSecServer": 85.59,
     "hatePerSecServer": 5.0,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "24879",
     "effectSpellId": 3646,
     "procRateDb": 0,
@@ -760,8 +916,10 @@
   "crow footed lance": {
     "meleeHatePerSecServer": 78.66,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "26095",
     "effectSpellId": null,
     "procRateDb": 0
@@ -769,8 +927,10 @@
   "war marshall's bladed staff": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -778,8 +938,10 @@
   "great sword of slaughter": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -787,8 +949,10 @@
   "dark mace of thought": {
     "meleeHatePerSecServer": 51.06,
     "hatePerSecServer": 0.27,
+    "hatePerSecServerBard": 0.27,
     "meleeHatePerSecOHServer": 27.54,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "28908",
     "effectSpellId": 1686,
     "procRateDb": -20
@@ -796,8 +960,10 @@
   "resplendent war maul": {
     "meleeHatePerSecServer": 80.61,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "25228",
     "effectSpellId": 1389,
     "procRateDb": 0
@@ -805,8 +971,10 @@
   "greatstaff of the four winds": {
     "meleeHatePerSecServer": 80.47,
     "hatePerSecServer": 3.25,
+    "hatePerSecServerBard": 3.25,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "24780",
     "effectSpellId": 2658,
     "procRateDb": 30,
@@ -815,8 +983,10 @@
   "yttrium war axe": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -824,8 +994,10 @@
   "ornate greatblade": {
     "meleeHatePerSecServer": 70.9,
     "hatePerSecServer": 0.8,
+    "hatePerSecServerBard": 0.8,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "25981",
     "effectSpellId": 451,
     "procRateDb": 0,
@@ -834,8 +1006,10 @@
   "basalt greatsword of protector": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -843,8 +1017,10 @@
   "bloodied berserker's blade": {
     "meleeHatePerSecServer": 76.88,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "30530",
     "effectSpellId": 483,
     "procRateDb": 0
@@ -852,8 +1028,10 @@
   "spear of fire": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -861,8 +1039,10 @@
   "greater poleaxe of sorrow": {
     "meleeHatePerSecServer": 65.84,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "25849",
     "effectSpellId": null,
     "procRateDb": 0
@@ -870,8 +1050,10 @@
   "great blade of malise": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -879,8 +1061,10 @@
   "greatsword of the disciple": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -888,8 +1072,10 @@
   "runed lance of gryme": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -897,8 +1083,10 @@
   "kavilis mosquito lance": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -906,8 +1094,10 @@
   "double-edged greatsword of visions": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -915,8 +1105,10 @@
   "obsidian greatblade": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -924,8 +1116,10 @@
   "plankton laced greatsword": {
     "meleeHatePerSecServer": 68.31,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "25986",
     "effectSpellId": null,
     "procRateDb": 0
@@ -933,8 +1127,10 @@
   "norge`tal": {
     "meleeHatePerSecServer": 72.35,
     "hatePerSecServer": 16.33,
+    "hatePerSecServerBard": 3.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "28825",
     "effectSpellId": 2652,
     "procRateDb": 0,
@@ -943,8 +1139,10 @@
   "ironbound quarterstaff": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -952,8 +1150,10 @@
   "corrupted shissar claidhmore": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -961,8 +1161,10 @@
   "dathor great hammer": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -970,8 +1172,10 @@
   "razing sword of skarlon": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -979,8 +1183,10 @@
   "hopebringer": {
     "meleeHatePerSecServer": 72.55,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 45.17,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "23498",
     "effectSpellId": 3577,
     "procRateDb": 0
@@ -988,8 +1194,10 @@
   "ornate broadsword": {
     "meleeHatePerSecServer": 66.69,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 36.45,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "23497",
     "effectSpellId": 2502,
     "procRateDb": 0
@@ -997,8 +1205,10 @@
   "knight's gleaming mace": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1006,8 +1216,10 @@
   "songblade of the eternal": {
     "meleeHatePerSecServer": 59.85,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 30.84,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "24570",
     "effectSpellId": 3628,
     "procRateDb": 0
@@ -1015,8 +1227,10 @@
   "reinforced mephit talon": {
     "meleeHatePerSecServer": 51.3,
     "hatePerSecServer": 5.0,
+    "hatePerSecServerBard": 5.0,
     "meleeHatePerSecOHServer": 23.83,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "24695",
     "effectSpellId": 3646,
     "procRateDb": 0,
@@ -1025,8 +1239,10 @@
   "braided strands of corrupted mana": {
     "meleeHatePerSecServer": 52.25,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 20.56,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "7821",
     "effectSpellId": null,
     "procRateDb": 0
@@ -1034,8 +1250,10 @@
   "lava infused bludgeon": {
     "meleeHatePerSecServer": 47.88,
     "hatePerSecServer": 5.33,
+    "hatePerSecServerBard": 5.33,
     "meleeHatePerSecOHServer": 21.03,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "28833",
     "effectSpellId": 2654,
     "procRateDb": 0,
@@ -1044,8 +1262,10 @@
   "obsidian battle sword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1053,8 +1273,10 @@
   "coral hilted shortsword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1062,8 +1284,10 @@
   "ribcracker": {
     "meleeHatePerSecServer": 42.99,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 20.93,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "28808",
     "effectSpellId": null,
     "procRateDb": 0
@@ -1071,8 +1295,10 @@
   "toetwister": {
     "meleeHatePerSecServer": 41.65,
     "hatePerSecServer": 11.67,
+    "hatePerSecServerBard": -1.67,
     "meleeHatePerSecOHServer": 19.83,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "28832",
     "effectSpellId": 2655,
     "procRateDb": 0
@@ -1080,8 +1306,10 @@
   "siren song, dagger of the sea": {
     "meleeHatePerSecServer": 43.89,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 19.28,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "31315",
     "effectSpellId": 1973,
     "procRateDb": 0
@@ -1089,8 +1317,10 @@
   "corrupted shissar warsword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1098,8 +1328,10 @@
   "blam stick": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1107,8 +1339,10 @@
   "swiftwind": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1116,8 +1350,10 @@
   "disembowler": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1125,8 +1361,10 @@
   "singing short sword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1134,8 +1372,10 @@
   "defenders lightblade": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1143,8 +1383,10 @@
   "earthcaller": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1152,8 +1394,10 @@
   "stronghorns horn": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1161,8 +1405,10 @@
   "wavecrasher": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1170,8 +1416,10 @@
   "shard of night": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1179,8 +1427,10 @@
   "staff of flowing water": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1188,8 +1438,10 @@
   "mace of the fallen crusader": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1197,8 +1449,10 @@
   "aegis of the earth": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "27290",
     "effectSpellId": 2459,
     "procRateDb": 0
@@ -1206,8 +1460,10 @@
   "primal velium warsword": {
     "meleeHatePerSecServer": 44.46,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 18.23,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "27328",
     "effectSpellId": 2434,
     "procRateDb": 0
@@ -1215,8 +1471,10 @@
   "twisted steel bastard sword": {
     "meleeHatePerSecServer": 72.35,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "31383",
     "effectSpellId": null,
     "procRateDb": 0
@@ -1224,8 +1482,10 @@
   "widebladed greatsword": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1233,8 +1493,10 @@
   "primal velium fist wraps": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1242,8 +1504,10 @@
   "skybreaker": {
     "meleeHatePerSecServer": 44.46,
     "hatePerSecServer": 2.5,
+    "hatePerSecServerBard": 2.5,
     "meleeHatePerSecOHServer": 18.23,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": "28827",
     "effectSpellId": 2658,
     "procRateDb": 0,
@@ -1252,8 +1516,10 @@
   "adjutant's saber": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1261,8 +1527,10 @@
   "scimitar of the emerald dawn": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0
@@ -1270,8 +1538,10 @@
   "feartouched greatsword": {
     "meleeHatePerSecServer": 71.97,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0,
     "hatePerSecOHServer": 0,
+    "hatePerSecOHServerBard": 0,
     "itemId": "27961",
     "effectSpellId": null,
     "procRateDb": 0
@@ -1279,8 +1549,10 @@
   "shield": {
     "meleeHatePerSecServer": 10.63,
     "hatePerSecServer": 0.0,
+    "hatePerSecServerBard": 0.0,
     "meleeHatePerSecOHServer": 0.0,
     "hatePerSecOHServer": 0.0,
+    "hatePerSecOHServerBard": 0.0,
     "itemId": null,
     "effectSpellId": null,
     "procRateDb": 0

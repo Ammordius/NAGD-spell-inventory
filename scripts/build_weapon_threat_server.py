@@ -104,7 +104,7 @@ def main() -> int:
         "targetMaxHp": 1_000_000,
         "dualWieldChancePct": round(dw_pct, 3),
         "doubleAttackChancePct": round(da_pct, 3),
-        "note": "Proc hate/DPS: one TryProcs per attack timer tick (not per DA/triple/flurry swing). GetProcChance uses attack_timer duration_ms/100 (Client::SetAttackTimer), not item_delay/100 as seconds.",
+        "note": "Proc hate/DPS: one TryProcs per attack timer tick (not per DA/triple/flurry swing). GetProcChance uses attack_timer duration_ms/100 (Client::SetAttackTimer), not item_delay/100 as seconds. hatePerSec*ServerBard: CheckAggroAmount with is_bard=True. Melee rows are still Warrior primary DB; dps_calculator scales Bard MH melee hate in JS.",
     }
     out["_meta"] = meta
 
@@ -157,6 +157,7 @@ def main() -> int:
         proc_hate_per_cast = 0
         spell_dd = 0
         spell_obj = None
+        proc_hate_per_cast_bard = 0
         if spell_id is not None and str(spell_id) in spells:
             spell_obj = spells[str(spell_id)]
             proc_hate_per_cast = check_aggro_amount(
@@ -165,6 +166,14 @@ def main() -> int:
                 target_max_hp=1_000_000,
                 class_id=1,
                 is_weapon_proc=True,
+            )
+            proc_hate_per_cast_bard = check_aggro_amount(
+                spell_obj,
+                caster_level=level,
+                target_max_hp=1_000_000,
+                class_id=1,
+                is_weapon_proc=True,
+                is_bard=True,
             )
             spell_dd = spell_direct_damage_total(spell_obj, caster_level=level)
 
@@ -179,8 +188,10 @@ def main() -> int:
         wpc_mh = min(1.0, wpc_from_proc_rate(base_pc_mh, proc_rate))
         mh_proc_rolls = mainhand_proc_rolls_per_second(delay, haste_pct, overhaste_pct)
         proc_hps_mh = mh_proc_rolls * wpc_mh * proc_hate_per_cast
+        proc_hps_mh_bard = mh_proc_rolls * wpc_mh * proc_hate_per_cast_bard
 
         proc_hps_oh = 0.0
+        proc_hps_oh_bard = 0.0
         wpc_oh = 0.0
         oh_proc_rolls = 0.0
         oh_proc = float(wp.get("hatePerSecOH") or 0) > 0 or float(wp.get("procDpsOH") or 0) > 0
@@ -198,6 +209,7 @@ def main() -> int:
                 delay, haste_pct, overhaste_pct, dw_chance_pct=dw_pct
             )
             proc_hps_oh = oh_proc_rolls * wpc_oh * proc_hate_per_cast
+            proc_hps_oh_bard = oh_proc_rolls * wpc_oh * proc_hate_per_cast_bard
 
         proc_dps_mh = 0.0
         proc_dps_oh = 0.0
@@ -209,8 +221,10 @@ def main() -> int:
         row: dict[str, object] = {
             "meleeHatePerSecServer": round(melee_hps_mh, 2),
             "hatePerSecServer": round(proc_hps_mh, 2),
+            "hatePerSecServerBard": round(proc_hps_mh_bard, 2),
             "meleeHatePerSecOHServer": round(melee_hps_oh, 2) if not use_2h else 0,
             "hatePerSecOHServer": round(proc_hps_oh, 2) if not use_2h else 0,
+            "hatePerSecOHServerBard": round(proc_hps_oh_bard, 2) if not use_2h else 0,
             "itemId": item_id,
             "effectSpellId": spell_id,
             "procRateDb": proc_rate,
