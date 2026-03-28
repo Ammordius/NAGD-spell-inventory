@@ -85,6 +85,47 @@ Audited `dps_config.json` against `Server/utils/sql/aa_list_canonical_results.tx
 
 For **server-derived hate per second** (melee + proc) and `CheckAggroAmount`, see **[DPS_CALCULATOR_THREAT.md](DPS_CALCULATOR_THREAT.md)**.
 
+### Per-AA threat / TPS (TAKP server)
+
+Melee **hate per swing** is fixed from weapon (+ warrior primary `GetDamageBonus` only on main hand); rolled damage and crit do not add to the hatelist **hate** field. **TPS** still rises when an effect adds **more discrete attacks**, each generating that fixed hate (and proc rolls).
+
+**Calculator (`dps_calculator.html`):** values from `weapon_threat_server.json` are scaled by the page’s **swings/sec** (haste, double attack, triple, flurry, extra 2H attack, dual wield) and **DEX** for proc chance, so the AAs in the “raises TPS” rows move **Total hate/sec** with DPS when a weapon row exists in that JSON.
+
+#### Does not change hate per swing (DPS up; TPS from that swing’s hate unchanged)
+
+| AA / mechanic | Config key / note | Threat (server) |
+|---------------|-------------------|-----------------|
+| **Combat Fury** / **Fury of the Ages** | `CriticalHitChance` | Crit changes damage after hate is fixed (`Client::Attack`, `DoSpecialAttackDamage`). |
+| **Planar Power** | `StatBonus` → STR | STR affects offense / damage multipliers, not `GetBaseDamage` used for melee hate. |
+| **Archery Mastery** | `ArcheryDamageModifier` | In `DoArcheryAttackDmg`, projectile hate is set from raw `GetBaseDamage` **before** the AA bumps damage; hate does not follow Archery Mastery. |
+| **Tactical Mastery (Strikethrough)** | `StrikeThrough` | Only affects whether the swing deals damage after avoidance; per-swing hate is already applied. |
+| **Combat Agility** | `CombatAgility` | Defensive; no extra outgoing hate when you attack. |
+
+#### Raises TPS (more hate events × same per-swing formula)
+
+| AA / mechanic | Config key / note | Threat (server) |
+|---------------|-------------------|-----------------|
+| **Ferocity** (Warrior) | `DoubleAttackChance` | Extra main-hand swings → extra `AddToHateList` per swing. |
+| **Knight’s Advantage** (PAL/SKD) | `DoubleAttackChance` | Same. |
+| **Bestial Frenzy** (BST) | `GiveDoubleAttack` | Same (off-hand double-attack gate + chance). |
+| **Flurry** / **Raging Flurry** (Warrior) | `FlurryChance` | Extra primary swings after triple → extra hate applications. |
+| **Ambidexterity** | `Ambidexterity` | Higher dual wield / OH double attack → more swings → more hate. |
+| **Punishing Blade** / **Speed of the Knight** | `ExtraAttackChance` | Extra 2H primary swings → extra hate. |
+| **Triple Attack** (innate 60+ WAR/MNK) | (no AA toggle) | Extra primary swing → extra hate (see § Innate / skill). |
+| **Technique of Master Wu** (Monk) | `DoubleSpecialAttack` | Extra `DoMonkSpecialAttack` → each `DoSpecialAttackDamage` adds hate from skill base. |
+| **Double Riposte** | `GiveDoubleRiposte0` / related | When **tanking**, `DoRiposte` → `Attack()` (and possible second attack / monk special) → **tank TPS** scales with riposte rate; not in live melee DPS totals until a riposte model exists. |
+| **Return Kick** (Monk) | `RiposteChance` | More riposte attempts when tanking → more chances for the above chain. |
+
+#### Situational / mixed
+
+| AA / mechanic | Config key | Threat (server) |
+|---------------|------------|-----------------|
+| **Chaotic Stab** (Rogue) | `FrontalBackstabMinDmg` | Frontal without AA: normal `Attack()` (weapon hate). With AA: backstab path uses scaled base for hate; double backstab from behind = two hate events. |
+
+#### Procs and DEX
+
+Weapon proc **TPS** uses `CheckAggroAmount` on the proc spell; **DEX** changes proc rate (`GetProcChance`) independently of melee hate per swing. The calculator scales proc hate with swing rate and DEX when using `weapon_threat_server.json`.
+
 ## Source of truth
 
 - **Server**: `zone/client_process.cpp` (Triple Attack 13.5%, Flurry after triple), `zone/attack.cpp` (melee crit paths: Warrior 12+, Ranger archery 17+, non‑Warrior with CriticalHitChance), `zone/aa.h` (AA IDs), `zone/common.h` (bonus names), `zone/special_attacks.cpp` (Technique of Master Wu).
