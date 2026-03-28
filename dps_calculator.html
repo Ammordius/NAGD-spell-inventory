@@ -987,6 +987,8 @@
                 damageBonusMH = (weaponMH.atkDelay && (weaponMH.skill || '').indexOf('2H') >= 0) ? getDamageBonus2H(level, delayMH) : getDamageBonus1H(level);
         }
         const isRangedAttack = useBow && weaponRange;
+        // Client::GetBaseDamage (range) uses item Damage only; dmgBonus in JSON is display/rec-level, not added on server.
+        const itemDmgAddMH = isRangedAttack ? 0 : itemDmgBonus;
         const offenseBase = getOffense(ws, str, dex, isRangedAttack, isRanger && level > 54);
         const wornATKVal = parseInt(document.getElementById('wornATK').value, 10) || 0;
         const spellATKVal = parseInt(document.getElementById('spellATK').value, 10) || 0;
@@ -999,35 +1001,41 @@
             (atkFerocity ? 140 : 0) +
             (atkPredTunare ? 140 : 0) +
             (atkVallonsQuickening ? 41 : 0);
-        let rollPartMH = calcMeleeDamage(baseDmgMH, offense, mitigation, isRangedAttack);
-        // Archery Mastery and stationary target double-damage (Ranger ranged only).
+        // Server: Archery Mastery on full base (special_attacks.cpp), then CalcMeleeDamage halves archery base, then DI roll;
+        // stationary ×2 runs after CalcMeleeDamage on the projectile (beacon.cpp).
+        let rollBaseMH = baseDmgMH;
+        if (isRangedAttack && cls === 'Ranger' && aas.ArcheryDamageModifier) {
+            rollBaseMH = Math.floor(rollBaseMH * (1 + aas.ArcheryDamageModifier / 100));
+        }
+        let rollPartMH = calcMeleeDamage(rollBaseMH, offense, mitigation, isRangedAttack);
         if (isRangedAttack && cls === 'Ranger') {
-            let archeryMult = 1;
-            if (aas.ArcheryDamageModifier) archeryMult += aas.ArcheryDamageModifier / 100;
             const rangerStationary = document.getElementById('rangerStationary') && document.getElementById('rangerStationary').checked;
-            if (rangerStationary) archeryMult += 1;
-            rollPartMH = Math.floor(rollPartMH * archeryMult);
+            if (rangerStationary) rollPartMH = Math.floor(rollPartMH * 2);
         }
         const monkMult = rollDamageMultiplierExpected(offense, level, cls === 'Monk');
         let monkMultMH = monkMult;
         if (use2H && cls === 'Warrior') monkMultMH = 1 + (monkMult - 1) * WARRIOR_2H_MULT_SCALE;
-        let dmgPerSwingMH = Math.floor(rollPartMH * monkMultMH) + damageBonusMH + itemDmgBonus;
+        let dmgPerSwingMH = Math.floor(rollPartMH * monkMultMH) + damageBonusMH + itemDmgAddMH;
 
         let minHitMH = 1, maxHitMH = 1;
         if (baseDmgMH > 0) {
-            let rollMinRaw = Math.max(baseDmgMH, Math.floor((1 * baseDmgMH + 5) / 10));
-            let rollMaxRaw = Math.floor((20 * baseDmgMH + 5) / 10);
-            if (isRangedAttack && cls === 'Ranger') {
-                let archeryMult = 1;
-                if (aas.ArcheryDamageModifier) archeryMult += aas.ArcheryDamageModifier / 100;
-                const rangerStationary = document.getElementById('rangerStationary') && document.getElementById('rangerStationary').checked;
-                if (rangerStationary) archeryMult += 1;
-                rollMinRaw = Math.floor(rollMinRaw * archeryMult);
-                rollMaxRaw = Math.floor(rollMaxRaw * archeryMult);
+            const rangerStationary = document.getElementById('rangerStationary') && document.getElementById('rangerStationary').checked;
+            let adjBase = baseDmgMH;
+            if (isRangedAttack && cls === 'Ranger' && aas.ArcheryDamageModifier) {
+                adjBase = Math.floor(adjBase * (1 + aas.ArcheryDamageModifier / 100));
+            }
+            // Match CalcMeleeDamage: archery DI uses base/2 before (roll*base+5)/10.
+            let diBase = adjBase;
+            if (isRangedAttack && diBase > 1) diBase = Math.floor(diBase / 2);
+            let rollMinRaw = Math.max(diBase, Math.floor((1 * diBase + 5) / 10));
+            let rollMaxRaw = Math.floor((20 * diBase + 5) / 10);
+            if (isRangedAttack && cls === 'Ranger' && rangerStationary) {
+                rollMinRaw = Math.floor(rollMinRaw * 2);
+                rollMaxRaw = Math.floor(rollMaxRaw * 2);
             }
             const multMax = rollDamageMultiplierMax(level, cls === 'Monk', use2H && cls === 'Warrior');
-            minHitMH = Math.max(1, Math.floor(rollMinRaw * 1) + damageBonusMH + itemDmgBonus);
-            maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgBonus;
+            minHitMH = Math.max(1, Math.floor(rollMinRaw * 1) + damageBonusMH + itemDmgAddMH);
+            maxHitMH = Math.floor(rollMaxRaw * multMax) + damageBonusMH + itemDmgAddMH;
         }
 
         // Apply combined haste (spell + overhaste + Fleeting when applicable) to delay.
@@ -1163,7 +1171,8 @@
         document.getElementById('outSwingsOH').textContent = swingsOH.toFixed(2);
         document.getElementById('outDmgPerHit').textContent = baseDmgMH > 0 ? dmgPerSwingMH.toFixed(0) : '—';
         document.getElementById('outMinMaxHit').textContent = baseDmgMH > 0 ? (minHitMH + ' – ' + maxHitMH) : '—';
-        const totalBonusMH = damageBonusMH + itemDmgBonus;
+        // Projectile archery: beacon TryCriticalHit(..., damageBonus=0) — no warrior DB / item flat in crit split.
+        const totalBonusMH = isRangedAttack ? 0 : (damageBonusMH + itemDmgBonus);
         const approxMaxCritMH = baseDmgMH > 0 ? computeMaxCritHit(maxHitMH, totalBonusMH) : 0;
         document.getElementById('outMaxCritMH').textContent = baseDmgMH > 0 ? approxMaxCritMH : '—';
         const hasOH = weaponOH && !use2H;
