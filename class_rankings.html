@@ -822,6 +822,62 @@
             };
         }
 
+        /** Magelo "255 / 250" or "12 / 15" → { cur, cap }. */
+        function parseMageloSlashStat(str, defaultCap) {
+            if (str == null || str === '') return { cur: 0, cap: defaultCap };
+            if (typeof str === 'string' && str.includes(' / ')) {
+                const p = str.split(' / ');
+                return { cur: parseInt(p[0], 10) || 0, cap: parseInt(p[1], 10) || defaultCap };
+            }
+            const n = Number(str);
+            return { cur: isNaN(n) ? 0 : n, cap: defaultCap };
+        }
+
+        function getSpellLineBonus(spellId) {
+            if (spellId == null || spellId === '') return { atk: 0, haste: 0, ft: 0 };
+            const sid = String(Number(spellId));
+            if (sid === 'NaN') return { atk: 0, haste: 0, ft: 0 };
+            const b = itemSpellBonusesById[sid];
+            if (!b) return { atk: 0, haste: 0, ft: 0 };
+            return { atk: b.atk || 0, haste: b.haste || 0, ft: b.ft || 0 };
+        }
+
+        function sumItemSpellBonuses(stats) {
+            if (!stats) return { atk: 0, haste: 0, ft: 0 };
+            const ids = new Set();
+            if (stats.effectSpellId != null && stats.effectSpellId !== '') {
+                const n = Number(stats.effectSpellId);
+                if (!isNaN(n)) ids.add(n);
+            }
+            if (stats.focusSpellId != null && stats.focusSpellId !== '') {
+                const n = Number(stats.focusSpellId);
+                if (!isNaN(n)) ids.add(n);
+            }
+            let atk = 0, haste = 0, ft = 0;
+            ids.forEach(id => {
+                const b = getSpellLineBonus(id);
+                atk += b.atk; haste += b.haste; ft += b.ft;
+            });
+            return { atk, haste, ft };
+        }
+
+        /** Merge worn spell bonuses from two equipped items (e.g. main + offhand for 2H comparison). */
+        function mergeItemSpellBonusesFromItems(statsA, statsB) {
+            return addSpellBonuses(sumItemSpellBonuses(statsA), sumItemSpellBonuses(statsB));
+        }
+
+        function addSpellBonuses(a, b) {
+            return { atk: a.atk + b.atk, haste: a.haste + b.haste, ft: a.ft + b.ft };
+        }
+
+        function spellBonusDelta(picked, original) {
+            return {
+                atk: picked.atk - original.atk,
+                haste: picked.haste - original.haste,
+                ft: picked.ft - original.ft
+            };
+        }
+
         /** Format absolute resist part from svByType: "+50 sv all" when all same, else "+14 FR  +4 DR  ...". */
         function formatResistPartAbsolute(svByType) {
             if (!svByType || typeof svByType !== 'object') return '';
@@ -2916,7 +2972,7 @@
                 });
 
                 const mode = (toonPanelSlotSort && toonPanelSlotSort.value) || dkpSlotSortMode;
-                (dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices()]) : loadItemStats()).then(() => {
+                (dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses()]) : Promise.all([loadItemStats(), loadItemSpellBonuses()])).then(() => {
                     renderToonUpgradesStrip(matched[0]);
                 }).catch(() => {
                     toonUpgradesContent.innerHTML = '<p style="color: #dc3545;">Failed to load item/DKP data.</p>';
@@ -3526,7 +3582,9 @@
             // Fill upgrade list from full item_stats (browser-only, so stat priority changes apply)
             // When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool; otherwise use user's upgradesPerSlot (default 5).
             function getMaxPerSlot() { return dkpValEnabled ? Math.max(upgradesPerSlot, 25) : upgradesPerSlot; }
-            const upgradePromise = dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices()]) : loadItemStats();
+            const upgradePromise = dkpValEnabled
+                ? Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses()])
+                : Promise.all([loadItemStats(), loadItemSpellBonuses()]);
             upgradePromise.then(() => {
                 const upgradeData = computeUpgradesForCharacter(char, getMaxPerSlot());
                 const container = document.getElementById('upgradeSuggestionsContainer');
@@ -3544,6 +3602,7 @@
                     const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
                     const virtualLoadout = itemPickerState.virtualLoadout;
                     const totalDelta = { hp: 0, mana: 0, ac: 0, svByType: { MR: 0, FR: 0, CR: 0, DR: 0, PR: 0 } };
+                    const totalSpellDelta = { ft: 0, atk: 0, haste: 0 };
                     const getOriginalItemId = (slotId) => {
                         const inv = equippedOnly.find(i => i.slot_id === slotId);
                         if (!inv || inv.item_id == null || inv.item_id === '') return null;
@@ -3567,10 +3626,16 @@
                                 const d = getItemStatDeltasFromRaw(currentRaw, pickedStats);
                                 totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                 RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                const curSp = mergeItemSpellBonusesFromItems(originalStats, offhandStats);
+                                const newSp = sumItemSpellBonuses(pickedStats);
+                                const sd = spellBonusDelta(newSp, curSp);
+                                totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                             } else {
                                 const d = getItemStatDeltas(originalStats, pickedStats);
                                 totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                 RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(originalStats));
+                                totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                             }
                         } else if (slotId === 14) {
                             const mainPickedId = virtualLoadout[13] != null ? Number(virtualLoadout[13]) : null;
@@ -3581,22 +3646,48 @@
                                     const d = getItemStatDeltas(null, pickedStats);
                                     totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                     RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                    const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(null));
+                                    totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                                 }
                             } else {
                                 const d = getItemStatDeltas(originalStats, pickedStats);
                                 totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                 RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(originalStats));
+                                totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                             }
                         } else {
                             const d = getItemStatDeltas(originalStats, pickedStats);
                             totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                             RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                            const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(originalStats));
+                            totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
+                        }
+                    }
+                    const focusSet = new Set();
+                    for (let slotId = 1; slotId <= 22; slotId++) {
+                        const rawPicked = virtualLoadout[slotId];
+                        const pickedItemId = (rawPicked != null && rawPicked !== '') ? Number(rawPicked) : null;
+                        const pickedStats = pickedItemId != null ? itemStatsCache[pickedItemId] : null;
+                        if (pickedStats && pickedStats.focusSpellName) {
+                            const fn = String(pickedStats.focusSpellName).trim();
+                            if (fn) focusSet.add(fn);
                         }
                     }
                     const cur = char.stats || {};
                     const ind = char.individual_resists || {};
+                    const ftB = parseMageloSlashStat(cur.mana_regen_item, 15);
+                    const atkB = parseMageloSlashStat(cur.atk_item, 250);
+                    const hasteCur = Number(cur.haste) || 0;
                     return {
                         totalDelta,
+                        spellDelta: totalSpellDelta,
+                        focusNames: Array.from(focusSet).sort(),
+                        gear: {
+                            ft: { cur: ftB.cur, cap: ftB.cap, delta: totalSpellDelta.ft, new: ftB.cur + totalSpellDelta.ft },
+                            atk: { cur: atkB.cur, cap: atkB.cap, delta: totalSpellDelta.atk, new: atkB.cur + totalSpellDelta.atk },
+                            haste: { cur: hasteCur, delta: totalSpellDelta.haste, new: hasteCur + totalSpellDelta.haste }
+                        },
                         newStats: {
                             hp: (cur.hp || 0) + totalDelta.hp,
                             mana: (cur.mana || 0) + totalDelta.mana,
@@ -3630,6 +3721,25 @@
                         const deltaStr = delta === 0 ? '—' : (delta > 0 ? '+' : '') + delta;
                         return `<tr><td>${stat}</td><td>${Number(current).toLocaleString()}</td><td>${deltaStr}</td><td>${Number(newVal).toLocaleString()}</td></tr>`;
                     }).join('');
+                    const extras = document.getElementById('itemPickerGearExtras');
+                    const gear = result.gear;
+                    const focusNames = result.focusNames || [];
+                    if (extras && gear && gear.ft && gear.atk && gear.haste) {
+                        const fmtSlash = (g) => `${g.cur} / ${g.cap}`;
+                        const fmtD = (d) => d === 0 ? '—' : (d > 0 ? '+' : '') + d;
+                        const clampH = (x) => Math.min(30, Math.max(0, Number(x) || 0));
+                        const focusHtml = focusNames.length
+                            ? focusNames.map((n) => escapeHtml(n)).join(', ')
+                            : '<em style="color:#6c757d;">(none)</em>';
+                        extras.innerHTML = `<p style="margin:0 0 8px 0;"><strong>Spell focuses (virtual)</strong> — ${focusHtml}</p>` +
+                            `<table style="margin-bottom:0;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody>` +
+                            `<tr><td>FT (mana regen item)</td><td>${fmtSlash(gear.ft)}</td><td>${fmtD(gear.ft.delta)}</td><td>${gear.ft.new} / ${gear.ft.cap}</td></tr>` +
+                            `<tr><td>Worn ATK</td><td>${fmtSlash(gear.atk)}</td><td>${fmtD(gear.atk.delta)}</td><td>${gear.atk.new} / ${gear.atk.cap}</td></tr>` +
+                            `<tr><td>Melee item haste %</td><td>${clampH(gear.haste.cur)}</td><td>${fmtD(gear.haste.delta)}</td><td>${clampH(gear.haste.new)} <span style="color:#6c757d;">(worn cap 30)</span></td></tr>` +
+                            `</tbody></table>`;
+                    } else if (extras) {
+                        extras.innerHTML = '';
+                    }
                     if (dkpValEnabled) updateItemPickerTotalDkp();
                 }
 
@@ -3691,6 +3801,7 @@
                     let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
                     pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
                     pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
+                    pickerHtml += `<div id="itemPickerGearExtras" style="margin-top: 12px; font-size: 0.92em;"></div>`;
                     pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
                     for (let slotId = 1; slotId <= 22; slotId++) {
                         const slotName = slotNames[slotId] || `Slot ${slotId}`;
@@ -3894,6 +4005,9 @@
         let itemStatsCache = {};
         let itemNameToId = {};  // normalized name -> item id (for links that have name but no id)
         let itemStatsLoadPromise = null;
+        /** data/item_spell_bonuses.json: spell id string → { atk, haste, ft } */
+        let itemSpellBonusesById = {};
+        let itemSpellBonusesLoadPromise = null;
 
         /** Normalize item name for lookup: lowercase, collapse spaces, remove apostrophe/backtick (match Python normalize_item_name). */
         function normalizeItemNameForLookup(name) {
@@ -4064,6 +4178,42 @@
                 })();
             }
             return itemStatsLoadPromise;
+        }
+
+        function loadItemSpellBonuses() {
+            if (itemSpellBonusesLoadPromise != null) return itemSpellBonusesLoadPromise;
+            const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
+            const possiblePaths = [
+                baseDir + 'data/item_spell_bonuses.json',
+                new URL('data/item_spell_bonuses.json', document.baseURI).href,
+                'data/item_spell_bonuses.json',
+                './data/item_spell_bonuses.json',
+            ];
+            itemSpellBonusesLoadPromise = (async () => {
+                for (const path of possiblePaths) {
+                    try {
+                        const r = await fetch(path);
+                        if (!r.ok) continue;
+                        const obj = await r.json();
+                        if (obj && typeof obj === 'object') {
+                            if (obj.spells && typeof obj.spells === 'object') {
+                                itemSpellBonusesById = obj.spells;
+                            } else {
+                                itemSpellBonusesById = {};
+                                for (const [k, v] of Object.entries(obj)) {
+                                    if (k === '_meta' || v == null || typeof v !== 'object') continue;
+                                    if ('atk' in v && 'haste' in v && 'ft' in v) itemSpellBonusesById[k] = v;
+                                }
+                            }
+                            return obj;
+                        }
+                    } catch (e) { /* try next path */ }
+                }
+                console.warn('item_spell_bonuses.json not loaded; Stat simulator FT/ATK/haste from spells will be 0.');
+                itemSpellBonusesById = {};
+                return {};
+            })();
+            return itemSpellBonusesLoadPromise;
         }
 
         /** Load data/dkp_prices.json when dkp_val=true. Populates dkpPricesCache. */
@@ -4270,7 +4420,7 @@
 
         loadData();
         // Preload item_stats so name→id resolution works on first hover (e.g. gear slots that lack item_id in JSON)
-        loadItemStats().then(() => {
+        Promise.all([loadItemStats(), loadItemSpellBonuses()]).then(() => {
             const hasNames = Object.keys(itemNameToId).length > 0;
             const hasStats = Object.keys(itemStatsCache).length > 0;
             if (!hasNames && !hasStats) {
