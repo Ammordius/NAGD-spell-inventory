@@ -580,6 +580,67 @@ def get_all_focus_candidates(focii_data, item_stats_lookup=None):
                 if item_id in item_stats_lookup:
                     entry['classes'] = item_stats_lookup[item_id]
                 candidates['Buff Spell Duration'].append(entry)
+    # Merge item_stats focusSpellName (same rules as create_focus_lookup) for gear picker / focus_candidates
+    try:
+        item_stats_full = _load_item_stats_full()
+        for iid, entry in (item_stats_full or {}).items():
+            focus_name = (entry.get('focusSpellName') or entry.get('focus') or '').strip()
+            if not focus_name:
+                continue
+            cat, pct = _infer_focus_category(focus_name)
+            if cat is None:
+                continue
+            raw_pct = entry.get('focusPct', entry.get('focusPercentage'))
+            if raw_pct is not None and isinstance(raw_pct, (int, float)):
+                pct = float(raw_pct)
+            item_name = (entry.get('name') or '').strip() or f'Item {iid}'
+            item_id = str(iid)
+            entry_row = {'item_name': item_name, 'item_id': item_id, 'value': pct}
+            if item_stats_lookup:
+                cls_str = item_stats_lookup.get(item_id, '')
+                if cls_str:
+                    entry_row['classes'] = cls_str
+            name = focus_name
+            if cat == 'Spell Damage':
+                damage_type = _focus_map_get(SPELL_DAMAGE_TYPE_MAP, name, 'All')
+                key = f'Spell Damage ({damage_type})'
+                candidates[key].append(entry_row)
+            elif cat == 'Spell Mana Efficiency':
+                sub = _focus_map_get(SPELL_MANA_EFFICIENCY_CATEGORY_MAP, name, 'Nuke')
+                if sub == 'LDD':
+                    candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry_row)
+                elif sub == 'All':
+                    for key in ('Spell Mana Efficiency (Bene)', 'Spell Mana Efficiency (Det)', 'Spell Mana Efficiency (Nuke)', 'Spell Mana Efficiency (Long Duration Debuff)'):
+                        candidates[key].append(entry_row)
+                else:
+                    candidates[f'Spell Mana Efficiency ({sub})'].append(entry_row)
+            elif cat == 'Long Duration Detrimental Mana Preservation':
+                candidates['Spell Mana Efficiency (Long Duration Debuff)'].append(entry_row)
+            elif cat == 'Spell Haste':
+                sub = _focus_map_get(SPELL_HASTE_CATEGORY_MAP, name, 'Bene')
+                if sub == 'Det':
+                    candidates['Detrimental Spell Haste'].append(entry_row)
+                elif sub == 'Affliction':
+                    candidates['Focus Affliction Haste'].append(entry_row)
+                elif sub == 'All':
+                    candidates['Beneficial Spell Haste'].append(entry_row)
+                    candidates['Detrimental Spell Haste'].append(entry_row)
+                elif sub == 'Enhancement':
+                    candidates['Enhancement Spell Haste'].append(entry_row)
+                else:
+                    candidates['Beneficial Spell Haste'].append(entry_row)
+            elif cat in ('Buff Spell Duration', 'Detrimental Spell Duration', 'All Spell Duration'):
+                if cat == 'All Spell Duration':
+                    candidates['Buff Spell Duration'].append(entry_row)
+                    candidates['Detrimental Spell Duration'].append(entry_row)
+                else:
+                    dur_cat = _focus_map_get(SPELL_DURATION_CATEGORY_MAP, name, 'Bene' if cat == 'Buff Spell Duration' else 'Det')
+                    key = 'Buff Spell Duration' if dur_cat == 'Bene' else 'Detrimental Spell Duration'
+                    candidates[key].append(entry_row)
+            else:
+                candidates[cat].append(entry_row)
+    except Exception:
+        pass
     # Dedupe by item_id per key (keep highest value)
     result = {}
     for key, items in candidates.items():

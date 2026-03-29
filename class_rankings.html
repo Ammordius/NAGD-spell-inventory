@@ -798,6 +798,83 @@
             }
         }
 
+        /** First spell_focii record that lists this item id (authoritative name/category/percentage). */
+        function findSpellFociiRecordForItemId(itemId) {
+            if (!spellFociiList || !Array.isArray(spellFociiList)) return null;
+            const nid = Number(itemId);
+            if (isNaN(nid)) return null;
+            for (const focus of spellFociiList) {
+                for (const item of (focus.items || [])) {
+                    if (item.id != null && Number(item.id) === nid) return focus;
+                }
+            }
+            return null;
+        }
+
+        /** Mirror generate_class_rankings._infer_focus_category; returns { category, defaultPct } or null. */
+        function inferFocusCategoryFromItemStatsName(focusName) {
+            const n = normalizeFocusNameForMap(focusName);
+            if (!n || typeof n !== 'string') return null;
+            const nLower = n.toLowerCase();
+            const pctOverride = { 'speeding thought': 18, 'vengeance of time': 25, 'vengeance of eternity': 30 };
+            const defaultPct = pctOverride[nLower] !== undefined ? pctOverride[nLower] : 15;
+            if (focusMapGet(SPELL_DAMAGE_TYPE_MAP_JS, focusName, undefined) !== undefined) {
+                return { category: 'Spell Damage', defaultPct };
+            }
+            if (focusMapGet(SPELL_MANA_EFFICIENCY_CATEGORY_MAP_JS, focusName, undefined) !== undefined) {
+                return { category: 'Spell Mana Efficiency', defaultPct };
+            }
+            if (focusMapGet(SPELL_HASTE_CATEGORY_MAP_JS, focusName, undefined) !== undefined) {
+                return { category: 'Spell Haste', defaultPct };
+            }
+            const dur = focusMapGet(SPELL_DURATION_CATEGORY_MAP_JS, focusName, undefined);
+            if (dur !== undefined) {
+                return { category: dur === 'Det' ? 'Detrimental Spell Duration' : 'Buff Spell Duration', defaultPct };
+            }
+            if (nLower === 'improved healing') return { category: 'Healing Enhancement', defaultPct };
+            return null;
+        }
+
+        /** Merge item_stats focusSpellName into byItem (max per key). Covers focii JSON / focus_candidates gaps. */
+        function mergeItemStatsFocusIntoFocusValuesByItem(byItem) {
+            if (!itemStatsCache || typeof itemStatsCache !== 'object') return;
+            for (const [idStr, stats] of Object.entries(itemStatsCache)) {
+                if (!stats || typeof stats !== 'object') continue;
+                const id = Number(idStr);
+                if (isNaN(id)) continue;
+                const focusName = (stats.focusSpellName != null ? String(stats.focusSpellName) : '').trim()
+                    || (stats.focus != null ? String(stats.focus) : '').trim();
+                if (!focusName) continue;
+                let record = null;
+                const rawPct = stats.focusPct != null ? stats.focusPct : stats.focusPercentage;
+                const rawPctNum = rawPct != null && rawPct !== '' ? Number(rawPct) : NaN;
+                if (!isNaN(rawPctNum)) {
+                    const inf = inferFocusCategoryFromItemStatsName(focusName);
+                    if (!inf) continue;
+                    record = { name: focusName, category: inf.category, percentage: rawPctNum };
+                } else {
+                    const sf = findSpellFociiRecordForItemId(id);
+                    if (sf) {
+                        record = {
+                            name: sf.name || focusName,
+                            category: sf.category || '',
+                            percentage: Number(sf.percentage) || 0
+                        };
+                    } else {
+                        const inf = inferFocusCategoryFromItemStatsName(focusName);
+                        if (!inf) continue;
+                        record = { name: focusName, category: inf.category, percentage: inf.defaultPct };
+                    }
+                }
+                const pairs = fociiRecordToCandidateKeyValues(record);
+                for (const { key, value } of pairs) {
+                    const val = Number(value) || 0;
+                    if (!byItem[id]) byItem[id] = {};
+                    if (!byItem[id][key] || val > byItem[id][key]) byItem[id][key] = val;
+                }
+            }
+        }
+
         /** Build map itemId -> { focusKey: value } from focusCandidates + spell_focii_level65 (value is 0-100 percent). */
         function buildFocusValuesByItem() {
             const byItem = {};
@@ -812,6 +889,7 @@
                 }
             }
             mergeSpellFociiIntoFocusValuesByItem(byItem);
+            mergeItemStatsFocusIntoFocusValuesByItem(byItem);
             return byItem;
         }
 
@@ -3813,7 +3891,7 @@
                 let pickerData = computeUpgradesForCharacter(char, getMaxPerSlot(), true);
 
                 // Shared state for item picker so we can preserve selections when rebuilding (e.g. when "Upgrades per slot" changes).
-                const itemPickerState = { virtualLoadout: {} };
+                const itemPickerState = { virtualLoadout: {}, slotExtras: {} };
 
                 const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
 
@@ -4043,16 +4121,21 @@
                         if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName });
                         else if (slotId === 14) options.push({ id: '', name: '— None —' }); // OH empty when main is 2H
                         upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName }); });
+                        (itemPickerState.slotExtras[slotId] || []).forEach(e => {
+                            if (e && e.id != null && !options.some(o => Number(o.id) === Number(e.id))) {
+                                options.push({ id: e.id, name: e.name || `Item ${e.id}` });
+                            }
+                        });
                         const prevRaw = itemPickerState.virtualLoadout[slotId];
                         const prevId = (prevRaw != null && prevRaw !== '') ? Number(prevRaw) : null;
                         // When OH is empty (synthetic slot 14), don't carry over previous selection; show None.
                         const forceNone = (slotId === 14 && currentItemId == null);
-                        const stillValid = !forceNone && prevId != null && options.some(o => o.id === prevId);
+                        const stillValid = !forceNone && prevId != null && options.some(o => o.id === prevId || Number(o.id) === prevId);
                         const defaultId = options.length ? (options[0].id === '' ? null : options[0].id) : null;
                         itemPickerState.virtualLoadout[slotId] = stillValid ? prevId : defaultId;
                     }
                     let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
-                    pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
+                    pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Use <strong>Add by ID</strong> to test an item not listed. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
                     pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
                     pickerHtml += `<div id="itemPickerGearExtras" style="margin-top: 12px; font-size: 0.92em;"></div>`;
                     pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
@@ -4066,6 +4149,11 @@
                         if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName, delta: null });
                         else if (slotId === 14) options.push({ id: '', name: '— None —', delta: null });
                         upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName, delta: u.delta }); });
+                        (itemPickerState.slotExtras[slotId] || []).forEach(e => {
+                            if (e && e.id != null && !options.some(o => Number(o.id) === Number(e.id))) {
+                                options.push({ id: e.id, name: e.name || `Item ${e.id}`, delta: null });
+                            }
+                        });
                         const selectedId = (itemPickerState.virtualLoadout[slotId] != null && itemPickerState.virtualLoadout[slotId] !== '') ? itemPickerState.virtualLoadout[slotId] : (options.length ? options[0].id : '');
                         const isEquipped = selectedId !== '' && selectedId !== null && Number(selectedId) === currentItemId;
                         const rowClass = options.length === 0 ? '' : (isEquipped ? 'equipped' : 'changed');
@@ -4077,6 +4165,7 @@
                             pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`;
                         });
                         pickerHtml += `</select>`;
+                        pickerHtml += `<div style="font-size:0.78em;margin-top:4px;display:flex;gap:4px;align-items:center;flex-wrap:wrap;"><input type="text" class="item-picker-id-input" data-slot-id="${slotId}" placeholder="Magelo ID" title="Add any item from item_stats by numeric ID" style="width:90px;padding:2px 6px;font-size:0.95em;border:1px solid #ced4da;border-radius:4px;"/><button type="button" class="item-picker-add-by-id-btn" data-slot-id="${slotId}" style="font-size:0.9em;padding:2px 8px;cursor:pointer;">Add</button></div>`;
                         if (dkpValEnabled) {
                             const dkp = getDkpForItemId(selectedId);
                             const dkpLine = dkp.last3.length ? `Last 3 DKP: ${dkp.last3.join(', ')} (avg ${dkp.avg.toFixed(1)})` : '(no DKP)';
@@ -4112,6 +4201,40 @@
                             }
                             const result = recomputeVirtualStats();
                             updateItemPickerStatTable(result);
+                        });
+                    });
+                    itemPickerPlaceholder.querySelectorAll('.item-picker-add-by-id-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const slotId = parseInt(btn.getAttribute('data-slot-id'), 10);
+                            const inp = itemPickerPlaceholder.querySelector(`.item-picker-id-input[data-slot-id="${slotId}"]`);
+                            const raw = (inp && inp.value ? String(inp.value) : '').trim();
+                            const nid = Number(raw);
+                            if (!raw || isNaN(nid)) {
+                                alert('Enter a numeric Magelo item ID.');
+                                return;
+                            }
+                            const st = itemStatsCache[nid];
+                            if (!st) {
+                                alert('Item not in database (item_stats).');
+                                return;
+                            }
+                            const abbrev = CLASS_TO_ABBREV[char.class];
+                            if (!itemMatchesSlot(slotId, st.slot)) {
+                                alert('That item does not go in this slot.');
+                                return;
+                            }
+                            if (!itemUsableByClass(st.classes, abbrev)) {
+                                alert('Your class cannot equip this item.');
+                                return;
+                            }
+                            itemPickerState.slotExtras[slotId] = itemPickerState.slotExtras[slotId] || [];
+                            const inm = (st.name || '').trim() || `Item ${nid}`;
+                            if (!itemPickerState.slotExtras[slotId].some(x => Number(x.id) === nid)) {
+                                itemPickerState.slotExtras[slotId].push({ id: nid, name: inm });
+                            }
+                            itemPickerState.virtualLoadout[slotId] = nid;
+                            if (inp) inp.value = '';
+                            buildItemPickerPanel(upgradeData, char);
                         });
                     });
                     const result = recomputeVirtualStats();
