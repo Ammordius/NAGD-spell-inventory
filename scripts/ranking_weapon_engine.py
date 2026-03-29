@@ -513,6 +513,9 @@ def compute_total_hate_per_sec(
     row_mh = weapon_threat.get(key_mh) if key_mh else None
     ref_swings_mh = reference_mainhand_swings_for_threat(delay_mh, threat_meta, dps_config)
     melee_hate_mh, proc_hate_mh = get_hate_per_sec_for_weapon(weapon_threat, weapon_procs, weapon_mh, False)
+    # Used by OH proc scaling; must exist even when MH has no weapon_threat row
+    ref_dex = int(threat_meta.get("dex", 255))
+    ref_dw = float(threat_meta.get("dualWieldChancePct", 91.2))
     if isinstance(row_mh, dict) and ref_swings_mh > 0:
         melee_base = float(row_mh.get("meleeHatePerSecServer") or melee_hate_mh)
         melee_hate_mh = melee_base * (swings_mh / ref_swings_mh)
@@ -525,8 +528,6 @@ def compute_total_hate_per_sec(
             )
         pr = int(row_mh.get("procRateDb") or 0)
         ref_ch = min(100, int(threat_meta.get("hastePct", 70))) + int(threat_meta.get("overhastePct", 0) or 0)
-        ref_dex = int(threat_meta.get("dex", 255))
-        ref_dw = float(threat_meta.get("dualWieldChancePct", 91.2))
         wpc_ref = min(
             1.0,
             mp.wpc_from_proc_rate(
@@ -888,6 +889,366 @@ def pick_first_owned_row(
     return ("none", None)
 
 
+# Magelo item_stats.classes abbreviations -> class name keys used here
+MELEE_CLASS_ITEM_ABBREV: dict[str, str] = {
+    "Warrior": "WAR",
+    "Rogue": "ROG",
+    "Monk": "MNK",
+    "Beastlord": "BST",
+    "Bard": "BRD",
+    "Ranger": "RNG",
+}
+
+
+def _item_usable_by_class(char_class: str, it: Mapping[str, Any] | None) -> bool:
+    if not it:
+        return False
+    ab = MELEE_CLASS_ITEM_ABBREV.get(char_class)
+    if not ab:
+        return False
+    cls = str(it.get("classes") or "").strip().upper()
+    if cls == "ALL":
+        return True
+    return ab in cls.split()
+
+
+def _slot_upper(it: Mapping[str, Any]) -> str:
+    return str(it.get("slot") or "").upper()
+
+
+def _is_melee_weapon_skill(skill: str) -> bool:
+    su = skill.upper()
+    if not su:
+        return False
+    for bad in ("ARCHERY", "THROWING"):
+        if bad in su:
+            return False
+    return any(
+        x in su
+        for x in ("1H", "2H", "HAND", "PIERCING", "SLASH", "BLUNT")
+    )
+
+
+def is_inventory_primary_melee(char_class: str, it: Mapping[str, Any] | None) -> bool:
+    """1H / H2H main-hand weapon usable by class (not bows, not 2H — those are separate)."""
+    if not it or not _item_usable_by_class(char_class, it):
+        return False
+    if int(it.get("dmg") or 0) <= 0:
+        return False
+    su = _slot_upper(it)
+    if "RANGE" in su and "PRIMARY" not in su:
+        return False
+    if "PRIMARY" not in su and "MAIN" not in su:
+        return False
+    sk = str(it.get("skill") or "")
+    if not _is_melee_weapon_skill(sk):
+        return False
+    if is_two_hander_item(it):
+        return False
+    return True
+
+
+def is_inventory_two_hand_melee(char_class: str, it: Mapping[str, Any] | None) -> bool:
+    if not it or not _item_usable_by_class(char_class, it):
+        return False
+    if int(it.get("dmg") or 0) <= 0:
+        return False
+    su = _slot_upper(it)
+    if "PRIMARY" not in su and "MAIN" not in su:
+        return False
+    if not is_two_hander_item(it):
+        return False
+    return True
+
+
+def is_inventory_offhand_melee(char_class: str, it: Mapping[str, Any] | None) -> bool:
+    """Offhand 1H: must fit SECONDARY (includes PRIMARY SECONDARY combo pieces)."""
+    if not it or not _item_usable_by_class(char_class, it):
+        return False
+    if int(it.get("dmg") or 0) <= 0:
+        return False
+    su = _slot_upper(it)
+    if "SECONDARY" not in su:
+        return False
+    sk = str(it.get("skill") or "")
+    if not _is_melee_weapon_skill(sk):
+        return False
+    if is_two_hander_item(it):
+        return False
+    return True
+
+
+def _melee_dps_heuristic(it: Mapping[str, Any] | None) -> float:
+    if not it:
+        return 0.0
+    d = int(it.get("dmg") or 0)
+    delay = max(4, int(it.get("atkDelay") or 40))
+    return d * 100.0 / delay
+
+
+def _collect_inventory_weapon_ids(
+    char_class: str,
+    counts: Mapping[str, int],
+    item_stats: Mapping[str, Any],
+) -> tuple[list[str], list[str], list[str]]:
+    """Return (primary_1h_ids, offhand_ids, two_hand_ids) from inventory."""
+    primary: list[str] = []
+    offh: list[str] = []
+    twoh: list[str] = []
+    for iid, n in counts.items():
+        if int(n) < 1:
+            continue
+        ob = item_by_id(item_stats, iid)
+        if is_inventory_primary_melee(char_class, ob):
+            primary.append(iid)
+        if is_inventory_offhand_melee(char_class, ob):
+            offh.append(iid)
+        if is_inventory_two_hand_melee(char_class, ob):
+            twoh.append(iid)
+    return primary, offh, twoh
+
+
+def _prune_weapon_ids(
+    ids: list[str],
+    item_stats: Mapping[str, Any],
+    cap: int,
+) -> list[str]:
+    if len(ids) <= cap:
+        return ids
+    scored = [(_melee_dps_heuristic(item_by_id(item_stats, i)), i) for i in ids]
+    scored.sort(key=lambda x: -x[0])
+    return [i for _, i in scored[:cap]]
+
+
+def find_best_inventory_melee_dps_loadout(
+    char_class: str,
+    counts: Mapping[str, int],
+    item_stats: Mapping[str, Any],
+    env_b: BuffEnv,
+    env_u: BuffEnv,
+    dps_config: Mapping[str, Any],
+    weapon_procs: Mapping[str, Any],
+    level: int,
+    mob_level: int,
+    mob_ac: int,
+) -> tuple[str | None, dict[str, Any] | None, float | None, float | None]:
+    """
+    When weapon_ranking_presets miss, score dual-wield and 2H combos from any owned weapons.
+    Returns (mode, row, dps_buffed, dps_unbuffed) or (None, None, None, None).
+    """
+    prim, offs, th_ids = _collect_inventory_weapon_ids(char_class, counts, item_stats)
+    prim = _prune_weapon_ids(prim, item_stats, 72)
+    offs = _prune_weapon_ids(offs, item_stats, 72)
+    th_ids = _prune_weapon_ids(th_ids, item_stats, 48)
+
+    best_b = -1.0
+    best_u: float | None = None
+    best_mode: str | None = None
+    best_row: dict[str, Any] | None = None
+
+    for mh_id in th_ids:
+        if int(counts.get(mh_id, 0)) < 1:
+            continue
+        mh = item_by_id(item_stats, mh_id)
+        if not mh:
+            continue
+        db = compute_total_dps(
+            char_class,
+            mh,
+            None,
+            None,
+            None,
+            False,
+            True,
+            env_b,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+        )
+        du = compute_total_dps(
+            char_class,
+            mh,
+            None,
+            None,
+            None,
+            False,
+            True,
+            env_u,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+        )
+        if db > best_b:
+            best_b = db
+            best_u = du
+            best_mode = "two_hand"
+            nm = str(mh.get("name") or mh_id)
+            best_row = {"mh": mh_id, "label": f"{nm} (2H, inventory)"}
+
+    for mh_id in prim:
+        for oh_id in offs:
+            if not can_dual_wield_preset(mh_id, oh_id, counts, item_stats):
+                continue
+            mh = item_by_id(item_stats, mh_id)
+            oh = item_by_id(item_stats, oh_id)
+            if not mh or not oh:
+                continue
+            db = compute_total_dps(
+                char_class,
+                mh,
+                oh,
+                None,
+                None,
+                False,
+                False,
+                env_b,
+                dps_config,
+                weapon_procs,
+                level,
+                mob_level,
+                mob_ac,
+            )
+            du = compute_total_dps(
+                char_class,
+                mh,
+                oh,
+                None,
+                None,
+                False,
+                False,
+                env_u,
+                dps_config,
+                weapon_procs,
+                level,
+                mob_level,
+                mob_ac,
+            )
+            if db > best_b:
+                best_b = db
+                best_u = du
+                best_mode = "dual_wield"
+                mhn = str(mh.get("name") or mh_id)
+                ohn = str(oh.get("name") or oh_id)
+                best_row = {"mh": mh_id, "oh": oh_id, "label": f"{mhn} / {ohn} (inventory)"}
+
+    if best_mode is None or best_row is None or best_u is None:
+        return None, None, None, None
+    return best_mode, best_row, float(best_b), float(best_u)
+
+
+def find_best_inventory_warrior_hate_loadout(
+    counts: Mapping[str, int],
+    item_stats: Mapping[str, Any],
+    env_b: BuffEnv,
+    env_u: BuffEnv,
+    dps_config: Mapping[str, Any],
+    weapon_procs: Mapping[str, Any],
+    weapon_threat: Mapping[str, Any],
+    threat_meta: Mapping[str, Any],
+    level: int,
+    dex: int,
+) -> tuple[str | None, dict[str, Any] | None, float | None, float | None]:
+    """Inventory fallback for Warrior hate/sec when presets do not match."""
+    prim, offs, th_ids = _collect_inventory_weapon_ids("Warrior", counts, item_stats)
+    prim = _prune_weapon_ids(prim, item_stats, 72)
+    offs = _prune_weapon_ids(offs, item_stats, 72)
+    th_ids = _prune_weapon_ids(th_ids, item_stats, 48)
+
+    best_b = -1.0
+    best_u: float | None = None
+    best_mode: str | None = None
+    best_row: dict[str, Any] | None = None
+
+    for mh_id in th_ids:
+        if int(counts.get(mh_id, 0)) < 1:
+            continue
+        mh = item_by_id(item_stats, mh_id)
+        if not mh:
+            continue
+        hb = compute_total_hate_per_sec(
+            "Warrior",
+            mh,
+            None,
+            True,
+            env_b,
+            dps_config,
+            weapon_procs,
+            weapon_threat,
+            threat_meta,
+            level,
+            dex,
+        )
+        hu = compute_total_hate_per_sec(
+            "Warrior",
+            mh,
+            None,
+            True,
+            env_u,
+            dps_config,
+            weapon_procs,
+            weapon_threat,
+            threat_meta,
+            level,
+            dex,
+        )
+        if hb > best_b:
+            best_b = hb
+            best_u = hu
+            best_mode = "two_hand"
+            nm = str(mh.get("name") or mh_id)
+            best_row = {"mh": mh_id, "label": f"{nm} (2H, inventory)"}
+
+    for mh_id in prim:
+        for oh_id in offs:
+            if not can_dual_wield_preset(mh_id, oh_id, counts, item_stats):
+                continue
+            mh = item_by_id(item_stats, mh_id)
+            oh = item_by_id(item_stats, oh_id)
+            if not mh or not oh:
+                continue
+            hb = compute_total_hate_per_sec(
+                "Warrior",
+                mh,
+                oh,
+                False,
+                env_b,
+                dps_config,
+                weapon_procs,
+                weapon_threat,
+                threat_meta,
+                level,
+                dex,
+            )
+            hu = compute_total_hate_per_sec(
+                "Warrior",
+                mh,
+                oh,
+                False,
+                env_u,
+                dps_config,
+                weapon_procs,
+                weapon_threat,
+                threat_meta,
+                level,
+                dex,
+            )
+            if hb > best_b:
+                best_b = hb
+                best_u = hu
+                best_mode = "dual_wield"
+                mhn = str(mh.get("name") or mh_id)
+                ohn = str(oh.get("name") or oh_id)
+                best_row = {"mh": mh_id, "oh": oh_id, "label": f"{mhn} / {ohn} (inventory)"}
+
+    if best_mode is None or best_row is None or best_u is None:
+        return None, None, None, None
+    return best_mode, best_row, float(best_b), float(best_u)
+
+
 def is_ranger_bow_candidate(it: Mapping[str, Any] | None) -> bool:
     """True if item_stats row is a Ranger-usable ranged (bow) weapon for scoring."""
     if not it:
@@ -1033,7 +1394,22 @@ def compute_weapon_ranking_metrics(
             item_stats,
         )
         if mode == "none" or not row:
-            return empty
+            inv_mode, inv_row, _, _ = find_best_inventory_warrior_hate_loadout(
+                counts,
+                item_stats,
+                env_b,
+                env_u,
+                dps_config,
+                weapon_procs,
+                weapon_threat,
+                threat_meta,
+                level,
+                cfg_dex,
+            )
+            if inv_mode and inv_row:
+                mode, row = inv_mode, inv_row
+            else:
+                return empty
         label = str(row.get("label") or "Warrior loadout")
         mh = item_by_id(item_stats, str(row.get("mh") or ""))
         use_2h = mode == "two_hand"
@@ -1102,6 +1478,21 @@ def compute_weapon_ranking_metrics(
             counts,
             item_stats,
         )
+        if melee_mode == "none" or not melee_row:
+            inv_m, inv_r, _, _ = find_best_inventory_melee_dps_loadout(
+                "Ranger",
+                counts,
+                item_stats,
+                env_b,
+                env_u,
+                dps_config,
+                weapon_procs,
+                level,
+                mob_level,
+                mob_ac,
+            )
+            if inv_m and inv_r:
+                melee_mode, melee_row = inv_m, inv_r
         blend = presets.get("ranger_blend") or {"archery": 0.7, "melee": 0.3}
         wa = float(blend.get("archery", 0.7))
         wm = float(blend.get("melee", 0.3))
@@ -1223,6 +1614,34 @@ def compute_weapon_ranking_metrics(
         item_stats,
     )
     if mode == "none" or not row:
+        inv_mode, inv_row, inv_db, inv_du = find_best_inventory_melee_dps_loadout(
+            char_class,
+            counts,
+            item_stats,
+            env_b,
+            env_u,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+        )
+        if inv_mode and inv_row and inv_db is not None and inv_du is not None:
+            mode, row = inv_mode, inv_row
+            label = str(row.get("label") or char_class)
+            return {
+                "weapon_preset_kind": mode,
+                "weapon_preset_label": label,
+                "dps_buffed": round(inv_db, 2),
+                "dps_unbuffed": round(inv_du, 2),
+                "hate_per_sec_buffed": None,
+                "hate_per_sec_unbuffed": None,
+                "ranger_archery_dps_buffed": None,
+                "ranger_archery_dps_unbuffed": None,
+                "ranger_melee_dps_buffed": None,
+                "ranger_melee_dps_unbuffed": None,
+                "focus_raw_buffed": inv_db,
+            }
         return empty
     label = str(row.get("label") or char_class)
     mh = item_by_id(item_stats, str(row.get("mh") or ""))

@@ -1442,6 +1442,16 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
         if char_class in WEAPON_METRIC_DPS_CLASSES or char_class == 'Bard':
             focus_scores.pop('ATK', None)
             focus_scores['Haste'] = 0.0
+    elif char_class in WEAPON_METRIC_CLASSES and 'WeaponMetric' not in focus_scores:
+        # Presets + inventory weapon scan both missed: approximate WeaponMetric from worn ATK/haste
+        # so Damage % / focus totals are not N/A for geared melee.
+        atk_p = scores.get('atk_pct')
+        hst_p = scores.get('haste_pct')
+        if atk_p is not None and hst_p is not None:
+            focus_scores['WeaponMetric'] = (float(atk_p) + float(hst_p)) / 2.0
+            if char_class in WEAPON_METRIC_DPS_CLASSES or char_class == 'Bard':
+                focus_scores.pop('ATK', None)
+                focus_scores['Haste'] = 0.0
     
     scores['focus_scores'] = focus_scores
     
