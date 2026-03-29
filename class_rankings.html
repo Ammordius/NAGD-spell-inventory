@@ -4135,7 +4135,7 @@
                         itemPickerState.virtualLoadout[slotId] = stillValid ? prevId : defaultId;
                     }
                     let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
-                    pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Use <strong>Add by ID</strong> to test an item not listed. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
+                    pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
                     pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
                     pickerHtml += `<div id="itemPickerGearExtras" style="margin-top: 12px; font-size: 0.92em;"></div>`;
                     pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
@@ -4165,7 +4165,6 @@
                             pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`;
                         });
                         pickerHtml += `</select>`;
-                        pickerHtml += `<div style="font-size:0.78em;margin-top:4px;display:flex;gap:4px;align-items:center;flex-wrap:wrap;"><input type="text" class="item-picker-id-input" data-slot-id="${slotId}" placeholder="Magelo ID" title="Add any item from item_stats by numeric ID" style="width:90px;padding:2px 6px;font-size:0.95em;border:1px solid #ced4da;border-radius:4px;"/><button type="button" class="item-picker-add-by-id-btn" data-slot-id="${slotId}" style="font-size:0.9em;padding:2px 8px;cursor:pointer;">Add</button></div>`;
                         if (dkpValEnabled) {
                             const dkp = getDkpForItemId(selectedId);
                             const dkpLine = dkp.last3.length ? `Last 3 DKP: ${dkp.last3.join(', ')} (avg ${dkp.avg.toFixed(1)})` : '(no DKP)';
@@ -4201,40 +4200,6 @@
                             }
                             const result = recomputeVirtualStats();
                             updateItemPickerStatTable(result);
-                        });
-                    });
-                    itemPickerPlaceholder.querySelectorAll('.item-picker-add-by-id-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const slotId = parseInt(btn.getAttribute('data-slot-id'), 10);
-                            const inp = itemPickerPlaceholder.querySelector(`.item-picker-id-input[data-slot-id="${slotId}"]`);
-                            const raw = (inp && inp.value ? String(inp.value) : '').trim();
-                            const nid = Number(raw);
-                            if (!raw || isNaN(nid)) {
-                                alert('Enter a numeric Magelo item ID.');
-                                return;
-                            }
-                            const st = itemStatsCache[nid];
-                            if (!st) {
-                                alert('Item not in database (item_stats).');
-                                return;
-                            }
-                            const abbrev = CLASS_TO_ABBREV[char.class];
-                            if (!itemMatchesSlot(slotId, st.slot)) {
-                                alert('That item does not go in this slot.');
-                                return;
-                            }
-                            if (!itemUsableByClass(st.classes, abbrev)) {
-                                alert('Your class cannot equip this item.');
-                                return;
-                            }
-                            itemPickerState.slotExtras[slotId] = itemPickerState.slotExtras[slotId] || [];
-                            const inm = (st.name || '').trim() || `Item ${nid}`;
-                            if (!itemPickerState.slotExtras[slotId].some(x => Number(x.id) === nid)) {
-                                itemPickerState.slotExtras[slotId].push({ id: nid, name: inm });
-                            }
-                            itemPickerState.virtualLoadout[slotId] = nid;
-                            if (inp) inp.value = '';
-                            buildItemPickerPanel(upgradeData, char);
                         });
                     });
                     const result = recomputeVirtualStats();
