@@ -428,6 +428,9 @@
                     <option value="mana">Mana %</option>
                     <option value="ac">AC %</option>
                     <option value="atk">ATK %</option>
+                    <option value="resists">Resists</option>
+                    <option value="weapon_b">Wpn B (buffed)</option>
+                    <option value="weapon_u">Wpn U (unbuffed)</option>
                     <option value="focus">Focus Score</option>
                 </select>
             </div>
@@ -494,6 +497,8 @@
                         <th class="stat-col" data-stat="ac">AC</th>
                         <th class="stat-col" data-stat="atk">ATK</th>
                         <th class="stat-col" data-stat="resists">Resists</th>
+                        <th class="stat-col" data-stat="weapon_b" title="Weapon DPS or hate/sec (buffed: 70% haste + item, +140 Pred/Tunare vs worn ATK)">Wpn B</th>
+                        <th class="stat-col" data-stat="weapon_u" title="Unbuffed (item haste + worn ATK only)">Wpn U</th>
                         <th>Focus %</th>
                         <th class="stat-col" data-stat="spelldmg">Spell Dmg %</th>
                         <th>Damage Types</th>
@@ -2199,7 +2204,7 @@
                 if (charClass === 'Warrior') {
                     for (const [focusCat, weight] of Object.entries(focusWeights)) {
                         if (focusCat === 'ATK') continue;
-                        if (['Darkblade', 'Raex Chest', 'Haste'].includes(focusCat) && typeof weight === 'number' && weight > 0) {
+                        if (['WeaponMetric', 'Raex Chest'].includes(focusCat) && typeof weight === 'number' && weight > 0) {
                             focusPoints += (focusScores[focusCat] || 0) * weight;
                         }
                     }
@@ -2413,6 +2418,26 @@
                     return bAtk - aAtk;
                 }
                 if (sortBy === 'resists') return (b.scores.resists || 0) - (a.scores.resists || 0);
+                if (sortBy === 'weapon_b') {
+                    const wk = (c) => {
+                        const wr = c.scores && c.scores.weapon_ranking;
+                        if (!wr) return -Infinity;
+                        if (wr.hate_per_sec_buffed != null) return wr.hate_per_sec_buffed;
+                        if (wr.dps_buffed != null) return wr.dps_buffed;
+                        return -Infinity;
+                    };
+                    return wk(b) - wk(a);
+                }
+                if (sortBy === 'weapon_u') {
+                    const wk = (c) => {
+                        const wr = c.scores && c.scores.weapon_ranking;
+                        if (!wr) return -Infinity;
+                        if (wr.hate_per_sec_unbuffed != null) return wr.hate_per_sec_unbuffed;
+                        if (wr.dps_unbuffed != null) return wr.dps_unbuffed;
+                        return -Infinity;
+                    };
+                    return wk(b) - wk(a);
+                }
                 if (sortBy === 'focus') return (b.scores.focus_overall_pct || 0) - (a.scores.focus_overall_pct || 0);
                 return 0;
             });
@@ -2458,17 +2483,14 @@
                 let otherBadges = '';
                 
                 if (charClass === 'Warrior') {
-                    // For Warriors, show individual focus items in Damage Types column
                     const focusItems = scores.focus_items || {};
+                    const wr = scores.weapon_ranking || {};
                     const badges = [];
-                    if (focusItems.has_darkblade) {
-                        badges.push('<span class="focus-badge" title="Darkblade of the Warlord">Darkblade</span>');
+                    if (wr.weapon_preset_label) {
+                        badges.push(`<span class="focus-badge" title="First owned weapon preset (inventory)">${escapeHtml(String(wr.weapon_preset_label))}</span>`);
                     }
                     if (focusItems.has_raex_chest) {
                         badges.push('<span class="focus-badge" title="Raex\'s Chestplate of Destruction">Raex Chest</span>');
-                    }
-                    if (focusItems.has_haste) {
-                        badges.push('<span class="focus-badge" title="Max Haste (100%)">Haste ✓</span>');
                     }
                     damageBadges = badges.length > 0 ? badges.join(' ') : '<span style="color: #6c757d;">-</span>';
                     otherBadges = '<span style="color: #6c757d;">-</span>'; // Warriors don't have other focii
@@ -2643,10 +2665,35 @@
                 const resistsValue = scores.resists !== null && scores.resists !== undefined ? scores.resists : 0;
                 const resistsDisplay = resistsValue > 0 ? resistsValue.toLocaleString() : 'N/A';
                 cells.push(`<td class="stat-col" data-stat="resists">${resistsDisplay}</td>`);
+
+                const wr = scores.weapon_ranking;
+                let wB = '-';
+                let wU = '-';
+                let wTitle = '';
+                if (wr) {
+                    wTitle = wr.weapon_preset_label ? escapeHtml(String(wr.weapon_preset_label)) : '';
+                    const cls = char.class || '';
+                    if (cls === 'Warrior') {
+                        wB = wr.hate_per_sec_buffed != null ? String(wr.hate_per_sec_buffed) : '-';
+                        wU = wr.hate_per_sec_unbuffed != null ? String(wr.hate_per_sec_unbuffed) : '-';
+                    } else if (cls === 'Ranger') {
+                        wB = wr.dps_buffed != null ? String(wr.dps_buffed) : '-';
+                        wU = wr.dps_unbuffed != null ? String(wr.dps_unbuffed) : '-';
+                        if (wr.ranger_archery_dps_buffed != null || wr.ranger_melee_dps_buffed != null) {
+                            wTitle = (wTitle ? wTitle + ' — ' : '') + 'Archery: ' + (wr.ranger_archery_dps_buffed != null ? wr.ranger_archery_dps_buffed : '-') +
+                                ', Melee: ' + (wr.ranger_melee_dps_buffed != null ? wr.ranger_melee_dps_buffed : '-');
+                        }
+                    } else {
+                        wB = wr.dps_buffed != null ? String(wr.dps_buffed) : '-';
+                        wU = wr.dps_unbuffed != null ? String(wr.dps_unbuffed) : '-';
+                    }
+                }
+                cells.push(`<td class="stat-col" data-stat="weapon_b" title="${wTitle}">${wB}</td>`);
+                cells.push(`<td class="stat-col" data-stat="weapon_u" title="${wTitle}">${wU}</td>`);
                 
-                // Focus %, Spell Dmg %, Damage Types, Other Focii (fixed columns - indices 11-14)
-                // IMPORTANT: Always create all 15 cells in exact header order to maintain alignment
-                cells.push(`<td class="score">${formatScore(scores.focus_overall_pct)}</td>`);  // Index 11: Focus %
+                // Focus %, Spell Dmg %, Damage Types, Other Focii
+                // IMPORTANT: Always create all 17 cells in exact header order to maintain alignment
+                cells.push(`<td class="score">${formatScore(scores.focus_overall_pct)}</td>`);  // Focus %
                 cells.push(`<td class="stat-col score ${spellDmgScore !== null ? getScoreClass(spellDmgScore) : ''}" data-stat="spelldmg">${formatScore(spellDmgScore)}</td>`);  // Index 12: Spell Dmg %
                 // Damage Types - ensure we're using the badges, not a score
                 const damageTypesDisplay = damageBadges || '<span style="color: #6c757d;">-</span>';
@@ -2655,9 +2702,9 @@
                 const otherFociiDisplay = otherBadges || '<span style="color: #6c757d;">-</span>';
                 cells.push(`<td>${otherFociiDisplay}</td>`);  // Index 14: Other Focii
                 
-                // Verify we have exactly 15 cells (matching 15 headers)
-                if (cells.length !== 15) {
-                    console.error(`Row for ${char.name} has ${cells.length} cells, expected 15`);
+                // Verify we have exactly 17 cells (matching headers)
+                if (cells.length !== 17) {
+                    console.error(`Row for ${char.name} has ${cells.length} cells, expected 17`);
                     console.error('Cells:', cells.map((c, i) => `${i}: ${c.substring(0, 50)}`));
                 }
                 
@@ -3568,6 +3615,9 @@
                         // Haste is binary, show the item haste value
                         const hasteValue = char.stats?.haste || 0;
                         return hasteValue >= 30 ? 30 : hasteValue;
+                    } else if (focusCat === 'WeaponMetric') {
+                        const wr = scores.weapon_ranking || {};
+                        return wr.focus_raw_buffed != null ? wr.focus_raw_buffed : 0;
                     } else if (focusCat === "Time's Antithesis" || focusCat === 'Serpent of Vindication') {
                         // Binary item focus: 100 if has item, 0 otherwise
                         return (focusScores[focusCat] === 100) ? 100 : 0;
@@ -3617,7 +3667,17 @@
                         // Haste is binary, show the item haste value
                         const hasteValue = char.stats?.haste || 0;
                         rawValue = hasteValue >= 30 ? 30 : hasteValue;
-                    } else if (focusCat === 'Darkblade' || focusCat === 'Raex Chest') {
+                    } else if (focusCat === 'WeaponMetric') {
+                        if (weight === undefined || weight === null) {
+                            const rawWeights = originalClassWeights[charClass] || classWeights[charClass] || {};
+                            const rawFocus = rawWeights.focus || {};
+                            console.warn(`Weight missing for ${focusCat}. Available normalized focus weights:`, Object.keys(focusWeights));
+                            console.warn(`Raw focus dict for ${charClass}:`, rawFocus);
+                            weight = 0;
+                        }
+                        const wr = scores.weapon_ranking || {};
+                        rawValue = wr.focus_raw_buffed != null ? wr.focus_raw_buffed : 0;
+                    } else if (focusCat === 'Raex Chest') {
                         if (weight === undefined || weight === null) {
                             const rawWeights = originalClassWeights[charClass] || classWeights[charClass] || {};
                             const rawFocus = rawWeights.focus || {};
@@ -3638,13 +3698,18 @@
                     
                     // Format raw value
                     let rawDisplay = 'N/A';
-                    if (rawValue > 0 || (bardInstrumentCats.includes(focusCat) && rawValue === 0)) {
+                    const wrMetric = scores.weapon_ranking || {};
+                    const showWeaponRaw = focusCat === 'WeaponMetric' && wrMetric.focus_raw_buffed != null;
+                    if (rawValue > 0 || (bardInstrumentCats.includes(focusCat) && rawValue === 0) || showWeaponRaw) {
                         if (focusCat === 'Haste') {
                             rawDisplay = `${rawValue}% (${rawValue >= 30 ? 'Capped' : 'Not Capped'})`;
                         } else if (focusCat === 'FT') {
                             const ftCurrent = scores.ft_current != null ? scores.ft_current : 0;
                             const ftCap = scores.ft_cap != null ? scores.ft_cap : 15;
                             rawDisplay = `${ftCurrent}/${ftCap}`;
+                        } else if (focusCat === 'WeaponMetric') {
+                            const unit = (wrMetric.hate_per_sec_buffed != null) ? ' hate/s' : ' DPS';
+                            rawDisplay = `${Number(wrMetric.focus_raw_buffed).toFixed(1)}${unit}`;
                         } else if (bardInstrumentCats.includes(focusCat)) {
                             rawDisplay = `${Number(rawValue).toFixed(0)}%`;
                         } else {

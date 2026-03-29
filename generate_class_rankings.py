@@ -14,6 +14,13 @@ CLASSES_WITH_MANA = {'Cleric', 'Druid', 'Shaman', 'Necromancer', 'Wizard', 'Magi
 CLASSES_NEED_AC = {'Warrior', 'Shadow Knight', 'Paladin', 'Beastlord', 'Ranger'}
 CLASSES_NEED_ATK = {'Rogue', 'Ranger', 'Monk', 'Warrior', 'Shadow Knight', 'Paladin', 'Beastlord', 'Bard'}
 PURE_MELEE = {'Warrior', 'Rogue', 'Monk'}
+# Weapon DPS / hate-sec from ranking_weapon_engine (inventory + presets)
+WEAPON_METRIC_CLASSES = {'Warrior', 'Rogue', 'Monk', 'Ranger', 'Beastlord', 'Bard'}
+WEAPON_METRIC_DPS_CLASSES = {'Rogue', 'Monk', 'Ranger', 'Beastlord', 'Bard'}
+
+_SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts')
+if _SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPTS_DIR)
 
 # Load spell focus data
 def load_focii():
@@ -291,9 +298,6 @@ def get_focus_sources(char_inventory, focus_lookup):
             continue
         if item_id == SHAMAN_FOCUS_ITEMS['range']:
             add_source("Time's Antithesis", 100, item_name, slot_id, item_id)
-            continue
-        if item_id == WARRIOR_FOCUS_ITEMS['mh']:
-            add_source('Darkblade', 100, item_name, slot_id, item_id)
             continue
         if item_id == WARRIOR_FOCUS_ITEMS['chest']:
             add_source('Raex Chest', 100, item_name, slot_id, item_id)
@@ -924,7 +928,7 @@ CLASS_FOCUS_PRIORITIES = {
     'Wizard': ['Spell Damage (Fire)', 'Spell Damage (Cold)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste'],
     'Magician': ['Spell Damage (Fire)', 'Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Detrimental Spell Haste'],
     'Enchanter': ['Spell Damage (Magic)', 'Spell Mana Efficiency', 'Spell Haste', 'Buff Spell Duration', 'Detrimental Spell Haste', 'Focus Affliction Haste'],
-    'Beastlord': ['ATK', 'FT', 'Spell Damage (Cold)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration', 'Beneficial Spell Haste', 'Detrimental Spell Haste'],
+    'Beastlord': ['WeaponMetric', 'FT', 'Spell Damage (Cold)', 'Healing Enhancement', 'Spell Mana Efficiency', 'Buff Spell Duration', 'Beneficial Spell Haste', 'Detrimental Spell Haste'],
     'Bard': ['Brass', 'Percussion', 'Singing', 'Strings', 'Wind'],
 }
 
@@ -1047,35 +1051,15 @@ def check_bard_instrument_focus(char_inventory, bard_data):
     return focus_scores, items_detail
 
 def check_warrior_focus_items(char_inventory, char_haste):
-    """Check if Warrior has the required focus items anywhere in inventory and max haste
-    Returns individual scores for each item (Darkblade, Raex Chest, Haste)"""
-    has_darkblade = False
+    """Raex chest only (binary). Darkblade / haste are folded into WeaponMetric (hate/sec)."""
+    del char_haste  # retained for call-site compatibility
     has_raex_chest = False
-    
     for item in char_inventory:
         item_id = item.get('item_id', '')
-        
-        # Check for Darkblade (item 22999) anywhere in inventory
-        if item_id == WARRIOR_FOCUS_ITEMS['mh']:
-            has_darkblade = True
-        # Check for Raex Chest (item 32129) anywhere in inventory
         if item_id == WARRIOR_FOCUS_ITEMS['chest']:
             has_raex_chest = True
-    
-    # Check haste - binary: 30% item haste (70% buff + 30% item = 100% total) = on, otherwise off
-    # char_haste is the item haste value, so >= 30 means max total haste
-    has_max_haste = (char_haste >= 30)
-    
-    # Return individual scores for each item (each has weight 1.0)
-    darkblade_score = 100.0 if has_darkblade else 0.0
     raex_chest_score = 100.0 if has_raex_chest else 0.0
-    haste_score = 100.0 if has_max_haste else 0.0
-    
-    return {
-        'Darkblade': darkblade_score,
-        'Raex Chest': raex_chest_score,
-        'Haste': haste_score
-    }, {'has_darkblade': has_darkblade, 'has_raex_chest': has_raex_chest, 'has_haste': has_max_haste}
+    return {'Raex Chest': raex_chest_score}, {'has_raex_chest': has_raex_chest}
 
 def check_paladin_sk_focus_items(char_inventory):
     """Check if Paladin/Shadow Knight has Shield of Strife"""
@@ -1118,11 +1102,13 @@ def check_shaman_focus_items(char_inventory):
     return 100.0 if has_times_antithesis else 0.0, {'has_times_antithesis': has_times_antithesis}
 
 # Calculate class-specific scores
-def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, bard_instrument_data=None, best_mana_by_cat=None, best_haste_by_cat=None, best_duration_by_cat=None, best_pet_power_by_class=None):
+def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, all_chars_by_class, char_inventory=None, char_spell_haste_cats=None, char_duration_cats=None, char_mana_efficiency_cats=None, bard_instrument_data=None, best_mana_by_cat=None, best_haste_by_cat=None, best_duration_by_cat=None, best_pet_power_by_class=None, weapon_focus_score_pct=None, weapon_metrics=None):
     """Calculate percentage scores for a character based on their class.
     best_*_by_cat: best focus % per subcategory (Det/Bene/Nuke/Sanguine for mana; Det/Bene for haste; Bene/Det/All for duration)."""
     char_class = char_data['class']
     scores = {}
+    if weapon_metrics:
+        scores['weapon_ranking'] = weapon_metrics
     
     # HP - store raw value for conversion-based scoring
     scores['hp'] = char_data['stats']['hp']
@@ -1188,12 +1174,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     if char_class == 'Warrior':
         char_haste = char_data.get('stats', {}).get('haste', 0)
         warrior_focus_scores, warrior_items = check_warrior_focus_items(char_inventory or [], char_haste)
-        # For Warriors, each focus item has its own score (ATK, Haste, Darkblade, Raex Chest)
         focus_scores = warrior_focus_scores
-        # Add ATK to focus_scores (ATK is calculated in scores['atk_pct'])
-        if scores.get('atk_pct') is not None:
-            focus_scores['ATK'] = scores['atk_pct']
-        # Store item status for display
         scores['focus_items'] = warrior_items
     elif char_class == 'Paladin':
         # Paladins have Shield of Strife + spell focuses
@@ -1455,6 +1436,12 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     # FT (Flowing Thought) - tracked focus for all classes with mana, cap 15
     if char_class in CLASSES_WITH_MANA and scores.get('ft_capped') is not None:
         focus_scores['FT'] = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
+
+    if weapon_focus_score_pct is not None:
+        focus_scores['WeaponMetric'] = float(weapon_focus_score_pct)
+        if char_class in WEAPON_METRIC_DPS_CLASSES or char_class == 'Bard':
+            focus_scores.pop('ATK', None)
+            focus_scores['Haste'] = 0.0
     
     scores['focus_scores'] = focus_scores
     
@@ -1492,10 +1479,10 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     
     # Calculate overall focus score based on class priorities
     if char_class == 'Warrior':
-        # For Warriors, calculate weighted average of Darkblade, Raex Chest, and Haste (each weight 1.0)
+        # Raex Chest + WeaponMetric (hate/sec); Darkblade/Haste folded into WeaponMetric
         total_score = 0.0
         total_weight = 0.0
-        for focus_name in ['Darkblade', 'Raex Chest', 'Haste']:
+        for focus_name in ['Raex Chest', 'WeaponMetric']:
             if focus_name in focus_scores:
                 total_score += focus_scores[focus_name] * 1.0
                 total_weight += 1.0
@@ -1590,26 +1577,23 @@ CLASS_WEIGHTS = {
         'hp_pct': 3.0,
         'mana_pct': 0.0,
         'ac_pct': 2.0,
-        'atk_pct': 0.0,  # Moved to focus
-        'haste_pct': 0.0,  # Moved to focus
+        'atk_pct': 0.0,
+        'haste_pct': 0.0,
         'resists_pct': 2.0,
         'focus': {
-            'ATK': 1.0,  # ATK moved to focus
-            'Haste': 1.0,  # Item haste (30% item = 100% total) moved to focus
-            'Darkblade': 1.0,  # Darkblade of the Warlord
-            'Raex Chest': 1.0,  # Raex's Chestplate of Destruction
+            'WeaponMetric': 3.0,  # Hate/sec from best preset weapons (inventory)
+            'Raex Chest': 1.0,
         }
     },
     'Monk': {
         'hp_pct': 1.0,
         'mana_pct': 0.0,
         'ac_pct': 0.2,  # Small contribution from AC (all classes get small AC weight)
-        'atk_pct': 0.0,  # Moved to focus
-        'haste_pct': 1.0,
+        'atk_pct': 0.0,
+        'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 1.0,  # ATK moved to focus
-            'Haste': 1.0,  # Item haste
+            'WeaponMetric': 2.0,  # DPS from presets (replaces ATK + Haste)
         }
     },
     
@@ -1618,12 +1602,11 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 0.0,
         'ac_pct': 0.2,  # Small contribution from AC for all classes
-        'atk_pct': 0.0,  # Moved to focus
-        'haste_pct': 1.0,
+        'atk_pct': 0.0,
+        'haste_pct': 0.0,
         'resists_pct': 1.0,
         'focus': {
-            'ATK': 1.0,  # ATK moved to focus
-            'Haste': 1.0,  # Item haste
+            'WeaponMetric': 2.0,
         }
     },
     
@@ -1790,11 +1773,10 @@ CLASS_WEIGHTS = {
         'mana_pct': 1.0,
         'ac_pct': 2.0,
         'atk_pct': 0.0,
-        'haste_pct': 1.0,
+        'haste_pct': 0.0,
         'resists_pct': 2.0,
         'focus': {
-            'ATK': 1.0,
-            'Haste': 0.75,
+            'WeaponMetric': 1.75,
             'FT': 1.0,
             'Spell Damage': {'Cold': 0.5},
             'Healing Enhancement': 0.75,
@@ -1834,12 +1816,11 @@ CLASS_WEIGHTS = {
         'mana_pct': 1.0,
         'ac_pct': 2.0,
         'atk_pct': 0.0,
-        'haste_pct': 1.0,
+        'haste_pct': 0.0,
         'resists_pct': 2.0,
         'focus': {
-            'ATK': 1.5,
+            'WeaponMetric': 3.0,
             'FT': 0,
-            'Haste': 1.5,
         }
     },
     
@@ -1849,14 +1830,13 @@ CLASS_WEIGHTS = {
         'hp_pct': 1.0,
         'mana_pct': 1.0,
         'ac_pct': 0.2,
-        'atk_pct': 0.0,  # Moved to focus
-        'haste_pct': 1.0,
+        'atk_pct': 0.0,
+        'haste_pct': 0.0,
         'resists_pct': 1.0,
         'target_focus': 0.40,
         'focus': {
-            'ATK': 4.0,
+            'WeaponMetric': 4.0,
             'FT': 4.0,
-            'Haste': 4.0,
             'Brass': 4.0,
             'Percussion': 4.0,
             'Singing': 4.0,
@@ -2044,6 +2024,10 @@ def compute_focus_total_points(char_class, scores, focus_scores, focus_weights):
             if w > 0:
                 ft_pct = 100.0 if scores.get('ft_capped') else (scores.get('ft_pct') or 0)
                 points += w * ft_pct / 100.0
+        elif focus_cat == 'WeaponMetric':
+            w = weight_config if isinstance(weight_config, (int, float)) else 0.0
+            if w > 0:
+                points += w * (focus_scores.get('WeaponMetric') or 0) / 100.0
         elif isinstance(weight_config, dict):
             for subcat, w in weight_config.items():
                 if w > 0:
@@ -2174,9 +2158,8 @@ def calculate_overall_score_with_weights(char_class, scores, char_damage_focii, 
             # For Warriors, focus is already calculated in focus_overall_pct
             # For Paladins, handle focuses individually (Shield of Strife, Beneficial Spell Haste, Healing Enhancement)
             if char_class == 'Warrior':
-                # Handle Warrior focuses individually: ATK, Haste, Darkblade, Raex Chest (each normalized to equal weight)
                 for focus_cat, weight_config in focus_weights.items():
-                    if focus_cat in ['ATK', 'Haste', 'Darkblade', 'Raex Chest']:
+                    if focus_cat in ['WeaponMetric', 'Raex Chest']:
                         if isinstance(weight_config, (int, float)) and weight_config > 0:
                             focus_score = focus_scores.get(focus_cat, 0)
                             total_score += focus_score * weight_config
@@ -2774,11 +2757,87 @@ def main():
                 best_pp = p
         best_pet_power_by_class[char_class] = best_pp
 
+    # Weapon DPS / hate (inventory + presets); normalize per class to max raw
+    weapon_ranking_data = None
+    weapon_metrics_by_char = {}
+    class_max_weapon_raw = defaultdict(float)
+    try:
+        from ranking_weapon_engine import compute_weapon_ranking_metrics, load_json as rw_load_json
+
+        _base = os.path.dirname(os.path.abspath(__file__))
+        _dd = os.path.join(_base, "data")
+        weapon_ranking_data = {
+            "item_stats": rw_load_json(os.path.join(_dd, "item_stats.json")),
+            "presets": rw_load_json(os.path.join(_dd, "weapon_ranking_presets.json")),
+            "dps_config": rw_load_json(os.path.join(_dd, "dps_config.json")),
+            "weapon_procs": rw_load_json(os.path.join(_dd, "weapon_procs.json")),
+            "weapon_threat": rw_load_json(os.path.join(_dd, "weapon_threat_server.json")),
+        }
+        weapon_ranking_data["threat_meta"] = weapon_ranking_data["weapon_threat"].get("_meta") or {}
+        for cid, cdata in characters.items():
+            c = cdata["class"]
+            if c not in WEAPON_METRIC_CLASSES:
+                continue
+            inv = inventory.get(cid, [])
+            atk_item = cdata.get("stats", {}).get("atk_item", "0 / 250")
+            worn = 0
+            if isinstance(atk_item, str) and " / " in atk_item:
+                try:
+                    worn = int(atk_item.split(" / ")[0])
+                except ValueError:
+                    worn = 0
+            hst = cdata.get("stats", {}).get("haste", 0)
+            if not isinstance(hst, (int, float)):
+                hst = 0
+            m = compute_weapon_ranking_metrics(
+                c,
+                inv,
+                worn,
+                int(hst),
+                item_stats=weapon_ranking_data["item_stats"],
+                presets=weapon_ranking_data["presets"],
+                dps_config=weapon_ranking_data["dps_config"],
+                weapon_procs=weapon_ranking_data["weapon_procs"],
+                weapon_threat=weapon_ranking_data["weapon_threat"],
+                threat_meta=weapon_ranking_data["threat_meta"],
+            )
+            weapon_metrics_by_char[cid] = m
+            raw = m.get("focus_raw_buffed")
+            if raw is not None:
+                class_max_weapon_raw[c] = max(class_max_weapon_raw[c], float(raw))
+        print(f"  Weapon metrics: {len(weapon_metrics_by_char)} weapon-class characters loaded")
+    except Exception as e:
+        print(f"Warning: weapon ranking metrics disabled: {e}")
+
     for char_id, char_data in characters.items():
         char_class = char_data['class']
         char_inventory = inventory.get(char_id, [])
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
-        scores = calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii, chars_by_class, char_inventory, char_spell_haste_cats, char_duration_cats, char_mana_efficiency_cats, bard_instrument_data, best_mana_by_cat, best_haste_by_cat, best_duration_by_cat, best_pet_power_by_class)
+        wm = weapon_metrics_by_char.get(char_id) if weapon_metrics_by_char else None
+        weapon_focus_pct = None
+        if char_class in WEAPON_METRIC_CLASSES and wm and wm.get("focus_raw_buffed") is not None:
+            mx = class_max_weapon_raw.get(char_class, 0)
+            weapon_focus_pct = (
+                min(100.0, float(wm["focus_raw_buffed"]) / mx * 100.0) if mx > 0 else 0.0
+            )
+        scores = calculate_class_scores(
+            char_data,
+            char_focii,
+            char_damage_focii,
+            best_focii,
+            chars_by_class,
+            char_inventory,
+            char_spell_haste_cats,
+            char_duration_cats,
+            char_mana_efficiency_cats,
+            bard_instrument_data,
+            best_mana_by_cat,
+            best_haste_by_cat,
+            best_duration_by_cat,
+            best_pet_power_by_class,
+            weapon_focus_score_pct=weapon_focus_pct,
+            weapon_metrics=wm if char_class in WEAPON_METRIC_CLASSES else None,
+        )
         scores['focus_sources'] = get_focus_sources(char_inventory, focus_lookup)
         
         # Calculate overall score using class-specific weights with conversion rates

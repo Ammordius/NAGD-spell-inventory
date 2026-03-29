@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "ranger_blend": {
+    "archery": 0.7,
+    "melee": 0.3
+  },
+  "Warrior": {
+    "dual_wield": [
+      { "mh": "22999", "oh": "28855", "label": "Darkblade / Bloodfrenzy" },
+      { "mh": "22999", "oh": "22998", "label": "Darkblade / Ethereal Destroyer" },
+      { "mh": "22998", "oh": "28855", "label": "Ethereal Destroyer / Bloodfrenzy" },
+      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+    ],
+    "two_hand": [
+      { "mh": "22907", "label": "Furious Hammer of Zek (2H)" }
+    ]
+  },
+  "Rogue": {
+    "dual_wield": [
+      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" },
+      { "mh": "22999", "oh": "22998", "label": "Darkblade / Ethereal Destroyer" }
+    ],
+    "two_hand": []
+  },
+  "Monk": {
+    "dual_wield": [
+      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+    ],
+    "two_hand": []
+  },
+  "Beastlord": {
+    "dual_wield": [
+      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+    ],
+    "two_hand": []
+  },
+  "Bard": {
+    "dual_wield": [
+      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+    ],
+    "two_hand": []
+  },
+  "Ranger": {
+    "archery": [
+      { "range": "29433", "ammo": null, "label": "Ancient Prismatic Bow" }
+    ],
+    "melee": {
+      "dual_wield": [
+        { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+      ],
+      "two_hand": []
+    }
+  }
+}
