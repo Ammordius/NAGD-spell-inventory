@@ -79449,5 +79449,378 @@
     "size": "MEDIUM",
     "classes": "CLR DRU SHM NEC WIZ MAG ENC",
     "gearScore": 87
+  },
+  "26528": {
+    "name": "Bile Stained Robes",
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "CHEST",
+    "ac": 45,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 5
+      },
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "STA",
+        "value": 4
+      },
+      {
+        "label": "WIS",
+        "value": 12
+      },
+      {
+        "label": "INT",
+        "value": 12
+      },
+      {
+        "label": "AGI",
+        "value": 4
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Disease",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      },
+      {
+        "label": "Poison",
+        "value": 5
+      }
+    ],
+    "requiredLevel": 51,
+    "levelType": "required",
+    "effectSpellId": 1298,
+    "effectSpellName": "Flowing Thought I",
+    "effectNote": "",
+    "weight": 2.4,
+    "size": "MEDIUM",
+    "classes": "CLR NEC WIZ MAG ENC",
+    "races": "ALL",
+    "gearScore": 88
+  },
+  "15870": {
+    "name": "Flame Buckled Belt",
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "WAIST",
+    "ac": 12,
+    "mods": [
+      {
+        "label": "STR",
+        "value": 15
+      },
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 85
+      },
+      {
+        "label": "MANA",
+        "value": 85
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 15
+      }
+    ],
+    "requiredLevel": 62,
+    "levelType": "recommended",
+    "effectSpellId": 1300,
+    "effectSpellName": "Flowing Thought III",
+    "effectNote": "",
+    "weight": 0.5,
+    "size": "MEDIUM",
+    "classes": "ALL",
+    "gearScore": 78
+  },
+  "26746": {
+    "name": "Wand of the War Wizard",
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM"
+    ],
+    "slot": "PRIMARY SECONDARY",
+    "skill": "1H Blunt",
+    "atkDelay": 20,
+    "dmg": 10,
+    "dmgBonus": 13,
+    "dmgBonusNote": "(lvl 65)",
+    "ac": 8,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "CHA",
+        "value": 5
+      },
+      {
+        "label": "INT",
+        "value": 9
+      },
+      {
+        "label": "HP",
+        "value": 50
+      },
+      {
+        "label": "MANA",
+        "value": 75
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 8
+      },
+      {
+        "label": "Poison",
+        "value": 8
+      }
+    ],
+    "requiredLevel": 56,
+    "levelType": "recommended",
+    "effectSpellId": 3522,
+    "effectSpellName": "Anger of Druzzil",
+    "effectNote": "",
+    "focusSpellId": 3522,
+    "focusSpellName": "Anger of Druzzil",
+    "weight": 1.0,
+    "size": "SMALL",
+    "classes": "NEC WIZ MAG ENC",
+    "gearScore": 72
+  },
+  "20439": {
+    "name": "Ivory Candle Skull",
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "RANGE",
+    "ac": 10,
+    "mods": [
+      {
+        "label": "DEX",
+        "value": 8
+      },
+      {
+        "label": "STA",
+        "value": 12
+      },
+      {
+        "label": "CHA",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 15
+      },
+      {
+        "label": "HP",
+        "value": 65
+      },
+      {
+        "label": "MANA",
+        "value": 90
+      }
+    ],
+    "resists": [
+      {
+        "label": "Disease",
+        "value": 12
+      },
+      {
+        "label": "Poison",
+        "value": 12
+      }
+    ],
+    "requiredLevel": 62,
+    "levelType": "recommended",
+    "effectSpellId": 3528,
+    "effectSpellName": "Haste of Solusek",
+    "effectNote": "",
+    "focusSpellId": 3528,
+    "focusSpellName": "Haste of Solusek",
+    "weight": 0.5,
+    "size": "SMALL",
+    "classes": "NEC WIZ MAG ENC",
+    "gearScore": 70
+  },
+  "13649": {
+    "name": "Pauldrons of Witness",
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM"
+    ],
+    "slot": "SHOULDERS",
+    "ac": 7,
+    "mods": [
+      {
+        "label": "DEX",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 7
+      },
+      {
+        "label": "INT",
+        "value": 7
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "resists": [
+      {
+        "label": "Cold",
+        "value": 5
+      }
+    ],
+    "requiredLevel": 50,
+    "levelType": "recommended",
+    "weight": 0.8,
+    "size": "MEDIUM",
+    "classes": "CLR DRU SHM NEC WIZ MAG ENC",
+    "gearScore": 42
+  },
+  "9494": {
+    "name": "Red Circlet of the Evoker",
+    "flags": [
+      "MAGIC ITEM",
+      "LORE ITEM"
+    ],
+    "slot": "HEAD",
+    "ac": 8,
+    "mods": [
+      {
+        "label": "DEX",
+        "value": 10
+      },
+      {
+        "label": "STA",
+        "value": 10
+      },
+      {
+        "label": "INT",
+        "value": 10
+      },
+      {
+        "label": "HP",
+        "value": 35
+      },
+      {
+        "label": "MANA",
+        "value": 35
+      }
+    ],
+    "requiredLevel": 56,
+    "levelType": "recommended",
+    "effectSpellId": 3510,
+    "effectSpellName": "Extended Range IV",
+    "effectNote": "",
+    "focusSpellId": 3510,
+    "focusSpellName": "Extended Range IV",
+    "weight": 0.5,
+    "size": "MEDIUM",
+    "classes": "NEC WIZ MAG ENC",
+    "gearScore": 63
+  },
+  "28771": {
+    "name": "Earring of the Solstice",
+    "flags": [
+      "LORE ITEM",
+      "NO DROP"
+    ],
+    "slot": "EAR",
+    "ac": 5,
+    "mods": [
+      {
+        "label": "STA",
+        "value": 5
+      },
+      {
+        "label": "WIS",
+        "value": 8
+      },
+      {
+        "label": "INT",
+        "value": 8
+      },
+      {
+        "label": "HP",
+        "value": 55
+      },
+      {
+        "label": "MANA",
+        "value": 55
+      }
+    ],
+    "resists": [
+      {
+        "label": "Fire",
+        "value": 5
+      },
+      {
+        "label": "Cold",
+        "value": 5
+      },
+      {
+        "label": "Magic",
+        "value": 5
+      }
+    ],
+    "requiredLevel": 51,
+    "levelType": "recommended",
+    "effectSpellId": 1298,
+    "effectSpellName": "Flowing Thought I",
+    "effectNote": "",
+    "weight": 0.1,
+    "size": "TINY",
+    "classes": "ALL",
+    "races": "ALL",
+    "gearScore": 58
   }
 }
