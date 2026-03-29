@@ -632,9 +632,6 @@
             return typeof w === 'number' ? w : 0;
         }
 
-        /** Default archery/melee blend for Ranger weapon preset (see data/weapon_ranking_presets.json). */
-        const RANGER_WEAPON_BLEND = { archery: 0.7, melee: 0.3 };
-
         /**
          * Class-relative unified damage %: blends focus_scores WeaponMetric and Spell Damage using
          * the same relative weights as class focus config (sums nested Spell Damage weights).
@@ -663,20 +660,15 @@
             return computeUnifiedDamagePctFromWeights(char, fw);
         }
 
-        /** Subline under Damage %: preset label and Ranger archery/melee DPS. */
+        /** Subline under Damage %: Ranger archery/melee DPS only (no preset names or blend on main table). */
         function buildDamageColumnSubline(char, wr) {
             const cls = char.class || '';
-            const parts = [];
-            if (wr && wr.weapon_preset_label) {
-                parts.push(escapeHtml(String(wr.weapon_preset_label)));
-            }
             if (cls === 'Ranger' && wr && (wr.ranger_archery_dps_buffed != null || wr.ranger_melee_dps_buffed != null)) {
                 const a = wr.ranger_archery_dps_buffed != null ? wr.ranger_archery_dps_buffed : '—';
                 const m = wr.ranger_melee_dps_buffed != null ? wr.ranger_melee_dps_buffed : '—';
-                parts.push(`Archery ${a} · Melee ${m} DPS (${Math.round(RANGER_WEAPON_BLEND.archery * 100)}/${Math.round(RANGER_WEAPON_BLEND.melee * 100)} blend)`);
+                return `<div class="damage-cell-sub">Archery ${a} · Melee ${m} DPS</div>`;
             }
-            if (parts.length === 0) return '';
-            return `<div class="damage-cell-sub">${parts.join(' · ')}</div>`;
+            return '';
         }
 
         /** Focus keys that can represent the same underlying item effect (e.g. "All" spell haste adds to both Bene and Det).
@@ -3454,7 +3446,7 @@
 
             const dmgUnifiedModal = computeUnifiedDamagePctFromWeights(char, focusWeights);
             html += `<h3>Damage detail</h3>`;
-            html += `<p style="margin: 6px 0 10px 0; color: #495057;">Unified <strong>Damage %</strong> blends WeaponMetric and Spell Damage (composite) using this class&rsquo;s focus weights—the same idea as the main table column.</p>`;
+            html += `<p style="margin: 6px 0 10px 0; color: #495057;">Unified <strong>Damage %</strong> combines WeaponMetric and Spell Damage (composite) using this class&rsquo;s focus weights—the same idea as the main table column.</p>`;
             html += `<p style="margin: 4px 0 12px 0;"><strong>Damage % (class-relative):</strong> ${dmgUnifiedModal != null ? formatScore(dmgUnifiedModal) : 'N/A'}</p>`;
             const wrD = scores.weapon_ranking || {};
             if (wrD && (wrD.dps_buffed != null || wrD.hate_per_sec_buffed != null || wrD.focus_raw_buffed != null)) {
@@ -3467,9 +3459,6 @@
                 if (charClass === 'Ranger') {
                     html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Archery</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_archery_dps_buffed != null ? wrD.ranger_archery_dps_buffed + ' DPS' : 'N/A'}</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_archery_dps_unbuffed != null ? wrD.ranger_archery_dps_unbuffed + ' DPS' : 'N/A'}</td></tr>`;
                     html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Melee</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_melee_dps_buffed != null ? wrD.ranger_melee_dps_buffed + ' DPS' : 'N/A'}</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_melee_dps_unbuffed != null ? wrD.ranger_melee_dps_unbuffed + ' DPS' : 'N/A'}</td></tr>`;
-                    html += `<tr><td colspan="3" style="padding:8px;font-size:0.9em;color:#555;">Blend: ${Math.round(RANGER_WEAPON_BLEND.archery * 100)}% archery / ${Math.round(RANGER_WEAPON_BLEND.melee * 100)}% melee (<code>weapon_ranking_presets.json</code>). Preset: ${escapeHtml(String(wrD.weapon_preset_label || ''))}</td></tr>`;
-                } else if (wrD.weapon_preset_label) {
-                    html += `<tr><td colspan="3" style="padding:8px;font-size:0.9em;color:#555;">First owned preset: ${escapeHtml(String(wrD.weapon_preset_label))}</td></tr>`;
                 }
                 html += `</tbody></table>`;
             } else {

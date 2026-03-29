@@ -8,6 +8,7 @@ Unbuffed: item haste only, worn ATK only.
 from __future__ import annotations
 
 import json
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
@@ -831,49 +832,156 @@ def item_by_id(item_stats: Mapping[str, Any], iid: str) -> dict[str, Any] | None
     return ob if isinstance(ob, dict) else None
 
 
-def inventory_id_set(char_inventory: list[dict[str, Any]]) -> set[str]:
-    out: set[str] = set()
+def inventory_item_counts(char_inventory: list[dict[str, Any]]) -> dict[str, int]:
+    c: Counter[str] = Counter()
     for it in char_inventory or []:
         iid = it.get("item_id")
         if iid is not None and str(iid).strip():
-            out.add(str(iid).strip())
-    return out
+            c[str(iid).strip()] += 1
+    return dict(c)
+
+
+def item_is_lore(stats: Mapping[str, Any] | None) -> bool:
+    if not stats:
+        return False
+    flags = stats.get("flags")
+    if isinstance(flags, list):
+        return any("LORE" in str(f).upper() for f in flags)
+    if isinstance(flags, str) and flags.strip():
+        return "LORE" in flags.upper()
+    return False
+
+
+def can_dual_wield_preset(
+    mh: str,
+    oh: str,
+    counts: Mapping[str, int],
+    item_stats: Mapping[str, Any],
+) -> bool:
+    if not mh or not oh:
+        return False
+    mhc = int(counts.get(mh, 0))
+    ohc = int(counts.get(oh, 0))
+    if mh == oh:
+        st = item_by_id(item_stats, mh)
+        if item_is_lore(st):
+            return False
+        return mhc >= 2
+    return mhc >= 1 and ohc >= 1
 
 
 def pick_first_owned_row(
     dual_rows: list[dict[str, Any]],
     two_h_rows: list[dict[str, Any]],
-    owned: set[str],
+    counts: Mapping[str, int],
+    item_stats: Mapping[str, Any],
 ) -> tuple[str, dict[str, Any] | None]:
     for row in dual_rows:
         mh = str(row.get("mh") or "")
         oh = str(row.get("oh") or "")
-        if mh in owned and oh in owned:
+        if can_dual_wield_preset(mh, oh, counts, item_stats):
             return ("dual_wield", row)
     for row in two_h_rows:
         mh = str(row.get("mh") or "")
-        if mh in owned:
+        if mh and int(counts.get(mh, 0)) >= 1:
             return ("two_hand", row)
     return ("none", None)
 
 
-def pick_ranger_rows(
-    archery_list: list[dict[str, Any]],
-    melee_dual: list[dict[str, Any]],
-    melee_2h: list[dict[str, Any]],
-    owned: set[str],
-) -> tuple[dict[str, Any] | None, tuple[str, dict[str, Any] | None]]:
-    arch_sel = None
-    for row in archery_list:
+def is_ranger_bow_candidate(it: Mapping[str, Any] | None) -> bool:
+    """True if item_stats row is a Ranger-usable ranged (bow) weapon for scoring."""
+    if not it:
+        return False
+    if str(it.get("slot") or "") != "RANGE":
+        return False
+    cls = str(it.get("classes") or "").upper()
+    if "RNG" not in cls and "ALL" not in cls:
+        return False
+    sk = str(it.get("skill") or "").upper()
+    if "THROWING" in sk:
+        return False
+    if sk and "ARCHERY" not in sk:
+        return False
+    if it.get("atkDelay") is None and it.get("dmg") is None:
+        return False
+    return True
+
+
+def merge_ranger_archery_candidate_rows(
+    preset_rows: list[dict[str, Any]],
+    counts: Mapping[str, int],
+    item_stats: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    seen: set[str] = set()
+    out: list[dict[str, Any]] = []
+    for row in preset_rows:
+        rid = str(row.get("range") or "")
+        if rid and rid not in seen:
+            seen.add(rid)
+            out.append(dict(row))
+    for iid, n in counts.items():
+        if int(n) < 1 or iid in seen:
+            continue
+        ob = item_by_id(item_stats, iid)
+        if not is_ranger_bow_candidate(ob):
+            continue
+        name = str(ob.get("name") or iid)
+        out.append({"range": iid, "ammo": None, "label": name})
+        seen.add(iid)
+    return out
+
+
+def sort_ranger_archery_rows_by_buffed_dps(
+    rows: list[dict[str, Any]],
+    env_b: BuffEnv,
+    dps_config: Mapping[str, Any],
+    weapon_procs: Mapping[str, Any],
+    level: int,
+    mob_level: int,
+    mob_ac: int,
+    item_stats: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for row in rows:
+        wr = item_by_id(item_stats, str(row.get("range") or ""))
+        if not wr:
+            continue
+        ammo_id = row.get("ammo")
+        wa_it = item_by_id(item_stats, str(ammo_id)) if ammo_id else None
+        d = compute_total_dps(
+            "Ranger",
+            None,
+            None,
+            wr,
+            wa_it,
+            True,
+            False,
+            env_b,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+        )
+        scored.append((d, row))
+    scored.sort(key=lambda x: -x[0])
+    return [r for _, r in scored]
+
+
+def pick_first_owned_archery_row(
+    sorted_rows: list[dict[str, Any]],
+    counts: Mapping[str, int],
+) -> dict[str, Any] | None:
+    for row in sorted_rows:
         r = str(row.get("range") or "")
+        if int(counts.get(r, 0)) < 1:
+            continue
         ammo = row.get("ammo")
         need_ammo = ammo is not None and str(ammo).strip() != ""
-        ok = r in owned and (not need_ammo or str(ammo) in owned)
-        if ok:
-            arch_sel = row
-            break
-    melee_mode, melee_row = pick_first_owned_row(melee_dual, melee_2h, owned)
-    return arch_sel, (melee_mode, melee_row)
+        if need_ammo and int(counts.get(str(ammo), 0)) < 1:
+            continue
+        return row
+    return None
 
 
 def compute_weapon_ranking_metrics(
@@ -896,7 +1004,7 @@ def compute_weapon_ranking_metrics(
     level = int(dps_config.get("levelCap") or 65)
     mob_level = level
     mob_ac = 200
-    owned = inventory_id_set(char_inventory)
+    counts = inventory_item_counts(char_inventory)
     cfg_dex = int(((dps_config.get("classes") or {}).get(char_class) or {}).get("dex") or 255)
 
     env_b = make_env_buffed(item_haste, worn_atk)
@@ -921,7 +1029,8 @@ def compute_weapon_ranking_metrics(
         mode, row = pick_first_owned_row(
             list(wpre.get("dual_wield") or []),
             list(wpre.get("two_hand") or []),
-            owned,
+            counts,
+            item_stats,
         )
         if mode == "none" or not row:
             return empty
@@ -973,13 +1082,25 @@ def compute_weapon_ranking_metrics(
 
     if char_class == "Ranger":
         rp = presets.get("Ranger") or {}
-        arch_list = list(rp.get("archery") or [])
+        arch_preset = list(rp.get("archery") or [])
         melee_sec = rp.get("melee") or {}
-        arch_sel, (melee_mode, melee_row) = pick_ranger_rows(
-            arch_list,
+        arch_merged = merge_ranger_archery_candidate_rows(arch_preset, counts, item_stats)
+        arch_sorted = sort_ranger_archery_rows_by_buffed_dps(
+            arch_merged,
+            env_b,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+            item_stats,
+        )
+        arch_sel = pick_first_owned_archery_row(arch_sorted, counts)
+        melee_mode, melee_row = pick_first_owned_row(
             list(melee_sec.get("dual_wield") or []),
             list(melee_sec.get("two_hand") or []),
-            owned,
+            counts,
+            item_stats,
         )
         blend = presets.get("ranger_blend") or {"archery": 0.7, "melee": 0.3}
         wa = float(blend.get("archery", 0.7))
@@ -1098,7 +1219,8 @@ def compute_weapon_ranking_metrics(
     mode, row = pick_first_owned_row(
         list(wpre.get("dual_wield") or []),
         list(wpre.get("two_hand") or []),
-        owned,
+        counts,
+        item_stats,
     )
     if mode == "none" or not row:
         return empty

@@ -8,8 +8,7 @@
     "dual_wield": [
       { "mh": "22999", "oh": "28855", "label": "Darkblade / Bloodfrenzy" },
       { "mh": "22999", "oh": "22998", "label": "Darkblade / Ethereal Destroyer" },
-      { "mh": "22998", "oh": "28855", "label": "Ethereal Destroyer / Bloodfrenzy" },
-      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+      { "mh": "22998", "oh": "28855", "label": "Ethereal Destroyer / Bloodfrenzy" }
     ],
     "two_hand": [
       { "mh": "22907", "label": "Furious Hammer of Zek (2H)" }
@@ -17,26 +16,26 @@
   },
   "Rogue": {
     "dual_wield": [
-      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" },
-      { "mh": "22999", "oh": "22998", "label": "Darkblade / Ethereal Destroyer" }
+      { "mh": "22999", "oh": "22998", "label": "Darkblade / Ethereal Destroyer" },
+      { "mh": "22998", "oh": "2699", "label": "Ethereal Destroyer / Essence Mace" }
     ],
     "two_hand": []
   },
   "Monk": {
     "dual_wield": [
-      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+      { "mh": "22998", "oh": "2699", "label": "Ethereal Destroyer / Essence Mace" }
     ],
     "two_hand": []
   },
   "Beastlord": {
     "dual_wield": [
-      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+      { "mh": "22998", "oh": "2699", "label": "Ethereal Destroyer / Essence Mace" }
     ],
     "two_hand": []
   },
   "Bard": {
     "dual_wield": [
-      { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+      { "mh": "22998", "oh": "2699", "label": "Ethereal Destroyer / Essence Mace" }
     ],
     "two_hand": []
   },
@@ -46,7 +45,8 @@
     ],
     "melee": {
       "dual_wield": [
-        { "mh": "22998", "oh": "22998", "label": "Ethereal Destroyer / Ethereal Destroyer" }
+        { "mh": "22999", "oh": "22998", "label": "Darkblade / Ethereal Destroyer" },
+        { "mh": "22998", "oh": "22999", "label": "Ethereal Destroyer / Darkblade" }
       ],
       "two_hand": []
     }
