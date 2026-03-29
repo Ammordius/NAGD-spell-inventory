@@ -564,6 +564,9 @@
         let customWeights = {}; // User-customized weights
         let originalClassWeights = {}; // Backup of original weights
         let focusCandidates = {}; // focus_key -> list of { item_name, item_id, value, classes? } for items that could give that focus
+        /** Parsed spell_focii_level65.json ocii array; merges item id -> focus keys so gear planner matches Python get_all_focus_candidates. */
+        let spellFociiList = null;
+        let spellFociiLoadPromise = null;
 
         // Hidden DKP feature: ?dkp_val=true shows last 3 DKP prices and HP/DKP on recommended upgrades
         const dkpValEnabled = (() => { const p = new URLSearchParams(window.location.search); return p.get('dkp_val') === 'true'; })();
@@ -681,7 +684,121 @@
             return c.split(/\s+/).indexOf(classAbbrev) !== -1;
         }
 
-        /** Build map itemId -> { focusKey: value } from focusCandidates (value is 0-100 percent). */
+        /** Match generate_class_rankings._normalize_focus_name_for_map / _focus_map_get. */
+        function normalizeFocusNameForMap(name) {
+            if (!name || typeof name !== 'string') return name;
+            return name.replace(/\s+(?:I{1,3}|IV|V|VI{0,3}|VII)$/i, '').trim() || name;
+        }
+        function focusMapGet(m, name, defaultVal) {
+            if (name != null && m[name] !== undefined) return m[name];
+            const n = normalizeFocusNameForMap(name);
+            return (n != null && m[n] !== undefined) ? m[n] : defaultVal;
+        }
+        /** Mirrors generate_class_rankings.SPELL_DAMAGE_TYPE_MAP. */
+        const SPELL_DAMAGE_TYPE_MAP_JS = {
+            'Anger of Druzzil': 'Magic', 'Fury of Druzzil': 'Magic', 'Wrath of Druzzil': 'Magic',
+            'Anger of Ro': 'Fire', 'Anger of Solusek': 'Fire', 'Fury of Ro': 'Fire', 'Fury of Solusek': 'All',
+            'Wrath of Ro': 'Fire', 'Burning Affliction': 'Fire', 'Focus of Flame': 'Fire', 'Fires of Sol': 'Fire',
+            'Inferno of Sol': 'Fire', "Summer's Anger": 'Fire', "Summer's Vengeance": 'Fire',
+            'Anger of E`ci': 'Cold', 'Fury of E`ci': 'Cold', 'Wrath of E`ci': 'Cold', 'Chill of the Umbra': 'Cold',
+            'Enchantment of Destruction': 'Magic', 'Insidious Dreams': 'Magic',
+            'Vengeance of Eternity': 'DoT', 'Vengeance of Time': 'DoT', 'Cursed Extension': 'DoT',
+            'Improved Damage': 'All', "Gallenite's ____": 'All'
+        };
+        const SPELL_MANA_EFFICIENCY_CATEGORY_MAP_JS = {
+            'Affliction Efficiency': 'Det', 'Affliction Preservation': 'Det',
+            'Enhancement Efficiency': 'Bene', 'Enhancement Preservation': 'Bene', 'Preservation of Mithaniel': 'Bene',
+            'Reanimation Efficiency': 'Bene', 'Reanimation Preservation': 'Bene', 'Summoning Efficiency': 'Bene',
+            'Summoning Preservation': 'Bene', 'Alluring Preservation': 'Bene',
+            'Mana Preservation': 'Nuke', 'Preservation of Xegony': 'Nuke', 'Preservation of Solusek': 'Nuke',
+            'Preservation of Ro': 'Nuke', 'Preservation of Druzzil': 'Nuke',
+            'Conservation of Xegony': 'All', 'Preservation of the Akheva': 'All', 'Mana Preservation IV': 'All',
+            'Conservation of Solusek': 'Det', 'Conservation of Bertoxxulous': 'LDD',
+            'Sanguine Preservation': 'Sanguine', 'Sanguine Enchantment': 'Sanguine'
+        };
+        const SPELL_HASTE_CATEGORY_MAP_JS = {
+            'Haste of Solusek': 'Det', 'Quickening of Solusek': 'Det', 'Blaze of the Lightbringer': 'Det',
+            'Shade Stone Focus': 'Det', 'Speed of Solusek': 'Det',
+            'Affliction Haste': 'Affliction',
+            'Enhancement Haste': 'Enhancement', 'Reanimation Haste': 'Enhancement', 'Summoning Haste': 'Enhancement',
+            'Haste of Mithaniel': 'Bene', 'Haste of Druzzil': 'All', 'Blessing of Reverence': 'All',
+            'Contemplative Alacrity': 'All', 'Conundrum of Speed': 'All', "Naki's _______ Pernicity": 'All',
+            'Quickening of Druzzil': 'All', 'Quickening of Mithaniel': 'Bene', 'Speed of Mithaniel': 'Bene',
+            'Spell Haste': 'All', 'Speeding Thought': 'All'
+        };
+        const SPELL_DURATION_CATEGORY_MAP_JS = {
+            'Extended Affliction': 'Det', 'Affliction Extension': 'Det',
+            'Extended Enhancement': 'Bene', 'Enhancement Extension': 'Bene', 'Chrononostrum': 'Bene',
+            'Eterninostrum': 'Bene', 'Extended Reanimation': 'Bene', 'Extended Summoning': 'Bene'
+        };
+        /** Same bucket keys as generate_class_rankings.get_all_focus_candidates for one focii record. */
+        function fociiRecordToCandidateKeyValues(focus) {
+            const name = focus.name || '';
+            const cat = focus.category || '';
+            const pct = Number(focus.percentage) || 0;
+            const keys = [];
+            if (cat === 'Spell Damage') {
+                const damageType = focusMapGet(SPELL_DAMAGE_TYPE_MAP_JS, name, 'All');
+                keys.push({ key: 'Spell Damage (' + damageType + ')', value: pct });
+                return keys;
+            }
+            if (cat === 'Spell Mana Efficiency') {
+                const sub = focusMapGet(SPELL_MANA_EFFICIENCY_CATEGORY_MAP_JS, name, 'Nuke');
+                if (sub === 'LDD') {
+                    keys.push({ key: 'Spell Mana Efficiency (Long Duration Debuff)', value: pct });
+                } else if (sub === 'All') {
+                    ['Spell Mana Efficiency (Bene)', 'Spell Mana Efficiency (Det)', 'Spell Mana Efficiency (Nuke)', 'Spell Mana Efficiency (Long Duration Debuff)'].forEach(k => keys.push({ key: k, value: pct }));
+                } else {
+                    keys.push({ key: 'Spell Mana Efficiency (' + sub + ')', value: pct });
+                }
+                return keys;
+            }
+            if (cat === 'Long Duration Detrimental Mana Preservation') {
+                keys.push({ key: 'Spell Mana Efficiency (Long Duration Debuff)', value: pct });
+                return keys;
+            }
+            if (cat === 'Spell Haste') {
+                const sub = focusMapGet(SPELL_HASTE_CATEGORY_MAP_JS, name, 'Bene');
+                if (sub === 'Det') keys.push({ key: 'Detrimental Spell Haste', value: pct });
+                else if (sub === 'Affliction') keys.push({ key: 'Focus Affliction Haste', value: pct });
+                else if (sub === 'All') {
+                    keys.push({ key: 'Beneficial Spell Haste', value: pct });
+                    keys.push({ key: 'Detrimental Spell Haste', value: pct });
+                } else if (sub === 'Enhancement') keys.push({ key: 'Enhancement Spell Haste', value: pct });
+                else keys.push({ key: 'Beneficial Spell Haste', value: pct });
+                return keys;
+            }
+            if (cat === 'Buff Spell Duration' || cat === 'Detrimental Spell Duration' || cat === 'All Spell Duration') {
+                if (cat === 'All Spell Duration') {
+                    keys.push({ key: 'Buff Spell Duration', value: pct });
+                    keys.push({ key: 'Detrimental Spell Duration', value: pct });
+                } else {
+                    const durCat = focusMapGet(SPELL_DURATION_CATEGORY_MAP_JS, name, cat === 'Buff Spell Duration' ? 'Bene' : 'Det');
+                    keys.push({ key: durCat === 'Bene' ? 'Buff Spell Duration' : 'Detrimental Spell Duration', value: pct });
+                }
+                return keys;
+            }
+            keys.push({ key: cat, value: pct });
+            return keys;
+        }
+        function mergeSpellFociiIntoFocusValuesByItem(byItem) {
+            if (!spellFociiList || !Array.isArray(spellFociiList)) return;
+            for (const focus of spellFociiList) {
+                const pairs = fociiRecordToCandidateKeyValues(focus);
+                if (!pairs.length) continue;
+                for (const item of (focus.items || [])) {
+                    const id = item.id != null ? Number(item.id) : null;
+                    if (id == null || isNaN(id)) continue;
+                    for (const { key, value } of pairs) {
+                        const val = Number(value) || 0;
+                        if (!byItem[id]) byItem[id] = {};
+                        if (!byItem[id][key] || val > byItem[id][key]) byItem[id][key] = val;
+                    }
+                }
+            }
+        }
+
+        /** Build map itemId -> { focusKey: value } from focusCandidates + spell_focii_level65 (value is 0-100 percent). */
         function buildFocusValuesByItem() {
             const byItem = {};
             for (const [focusKey, list] of Object.entries(focusCandidates)) {
@@ -694,7 +811,124 @@
                     if (!byItem[id][focusKey] || val > byItem[id][focusKey]) byItem[id][focusKey] = val;
                 }
             }
+            mergeSpellFociiIntoFocusValuesByItem(byItem);
             return byItem;
+        }
+
+
+        /** Focus keys with positive weight (same shape as Score breakdown tab). */
+        function getScoredFocusKeysFromWeights(fw) {
+            const keys = [];
+            if (!fw) return keys;
+            for (const [k, v] of Object.entries(fw)) {
+                if (typeof v === 'object' && v !== null) {
+                    for (const sub of Object.keys(v)) {
+                        const w = (v[sub] != null && typeof v[sub] === 'number') ? v[sub] : 0;
+                        if (w > 0) keys.push(k === 'Spell Damage' ? `Spell Damage (${sub})` : `${k} (${sub})`);
+                    }
+                } else if (typeof v === 'number' && v > 0) {
+                    keys.push(k);
+                }
+            }
+            return keys;
+        }
+
+        /** Merge custom stat weights + normalize; used by upgrade picker and virtual focus breakdown. */
+        function getNormAndFocusWeightsForCharacter(char) {
+            const charClass = char.class;
+            const customWeight = customWeights[charClass] || {};
+            let weights = JSON.parse(JSON.stringify(originalClassWeights[charClass] || classWeights[charClass] || {}));
+            Object.keys(customWeight).forEach(key => {
+                if (key !== '_meta' && key !== 'focus' && weights.hasOwnProperty(key)) weights[key] = customWeight[key];
+            });
+            if (customWeight.focus && weights.focus) {
+                Object.keys(customWeight.focus).forEach(fk => {
+                    if (weights.focus[fk] !== undefined) {
+                        if (typeof customWeight.focus[fk] === 'object' && customWeight.focus[fk] !== null) {
+                            if (!weights.focus[fk]) weights.focus[fk] = {};
+                            Object.keys(customWeight.focus[fk]).forEach(nk => {
+                                if (weights.focus[fk][nk] !== undefined) weights.focus[fk][nk] = customWeight.focus[fk][nk];
+                            });
+                        } else weights.focus[fk] = customWeight.focus[fk];
+                    }
+                });
+            }
+            const focusMultiplier = customWeight._meta?.focusMultiplier || 2.4;
+            const norm = normalizeWeights(weights, focusMultiplier, charClass);
+            return { norm, focusWeights: norm.focus || {} };
+        }
+
+        /** Item IDs on the virtual loadout (slots 1–22); offhand excluded when main hand is 2H. */
+        function getVirtualWornItemIds(virtualLoadout, itemStatsCache) {
+            const ids = [];
+            const mainRaw = virtualLoadout[13];
+            const mainId = (mainRaw != null && mainRaw !== '') ? Number(mainRaw) : null;
+            const mainStats = mainId != null ? itemStatsCache[mainId] : null;
+            for (let slotId = 1; slotId <= 22; slotId++) {
+                if (slotId === 14 && mainStats && isItemTwoHanded(mainStats)) continue;
+                const rawPicked = virtualLoadout[slotId];
+                const pickedId = (rawPicked != null && rawPicked !== '') ? Number(rawPicked) : null;
+                if (pickedId != null && !isNaN(pickedId)) ids.push(pickedId);
+            }
+            return ids;
+        }
+
+        /** Equipped item IDs (slots 1–22); offhand excluded when main is 2H. */
+        function getEquippedWornItemIds(char) {
+            const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+            const getOrig = (slotId) => {
+                const inv = equippedOnly.find(i => i.slot_id === slotId);
+                if (!inv || inv.item_id == null || inv.item_id === '') return null;
+                const id = Number(inv.item_id);
+                return isNaN(id) ? null : id;
+            };
+            const mainId = getOrig(13);
+            const mainStats = mainId != null ? itemStatsCache[mainId] : null;
+            const ids = [];
+            for (let slotId = 1; slotId <= 22; slotId++) {
+                if (slotId === 14 && mainStats && isItemTwoHanded(mainStats)) continue;
+                const id = getOrig(slotId);
+                if (id != null) ids.push(id);
+            }
+            return ids;
+        }
+
+        /** Max focus raw % per key across a set of worn items (from focus_candidates). */
+        function aggregateMaxFocusRawByKey(itemIds, focusValuesByItem) {
+            const out = {};
+            for (const id of itemIds) {
+                const vals = focusValuesByItem[id];
+                if (!vals) continue;
+                for (const [k, v] of Object.entries(vals)) {
+                    const n = Number(v) || 0;
+                    if (n > (out[k] || 0)) out[k] = n;
+                }
+            }
+            return out;
+        }
+
+        /** Resolve focus score % for a key (matches Score breakdown modal fallbacks). */
+        function resolveFocusScorePctForKey(focusKey, char) {
+            const scores = char.scores || {};
+            const focusScores = scores.focus_scores || {};
+            const focusDetails = scores.focus_details || {};
+            let scorePct = focusScores[focusKey];
+            if (scorePct === undefined && focusKey === 'Spell Damage') scorePct = focusScores['Spell Damage'];
+            if (scorePct === undefined && focusKey.startsWith('Spell Damage (')) scorePct = focusScores['Spell Damage'];
+            if (scorePct === undefined && focusKey === 'ATK' && scores.atk_pct != null) scorePct = scores.atk_pct;
+            if (scorePct === undefined) {
+                const match = focusKey.match(/^(.+)\s+\(([^)]+)\)$/);
+                if (match) {
+                    const [, parent, sub] = match;
+                    const rows = focusDetails[parent];
+                    if (Array.isArray(rows)) {
+                        const row = rows.find(r => (r.cat || r.label) === sub || (r.label && r.label.toLowerCase().startsWith(sub.toLowerCase())));
+                        if (row != null && row.score_pct != null) scorePct = row.score_pct;
+                    }
+                }
+            }
+            if (scorePct === undefined) scorePct = 0;
+            return scorePct;
         }
 
         /** Typical scales so raw stats contribute in a comparable way to normalized weights (0-1). */
@@ -2972,7 +3206,7 @@
                 });
 
                 const mode = (toonPanelSlotSort && toonPanelSlotSort.value) || dkpSlotSortMode;
-                (dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses()]) : Promise.all([loadItemStats(), loadItemSpellBonuses()])).then(() => {
+                (dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses(), loadSpellFocii()]) : Promise.all([loadItemStats(), loadItemSpellBonuses(), loadSpellFocii()])).then(() => {
                     renderToonUpgradesStrip(matched[0]);
                 }).catch(() => {
                     toonUpgradesContent.innerHTML = '<p style="color: #dc3545;">Failed to load item/DKP data.</p>';
@@ -3415,22 +3649,7 @@
                 // Focus breakdown: all focuses we're scored on, with bar and sources (uses same focusWeights as sliders, so updates when sliders change)
                 const focusSources = scores.focus_sources || {};
                 const slotNames = { 0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
-                function getScoredFocusKeys(fw) {
-                    const keys = [];
-                    if (!fw) return keys;
-                    for (const [k, v] of Object.entries(fw)) {
-                        if (typeof v === 'object' && v !== null) {
-                            for (const sub of Object.keys(v)) {
-                                const w = (v[sub] != null && typeof v[sub] === 'number') ? v[sub] : 0;
-                                if (w > 0) keys.push(k === 'Spell Damage' ? `Spell Damage (${sub})` : `${k} (${sub})`);
-                            }
-                        } else if (typeof v === 'number' && v > 0) {
-                            keys.push(k);
-                        }
-                    }
-                    return keys;
-                }
-                const scoredFocusKeys = getScoredFocusKeys(focusWeights);
+                const scoredFocusKeys = getScoredFocusKeysFromWeights(focusWeights);
                 if (scoredFocusKeys.length > 0) {
                     scoredFocusKeys.sort((a, b) => getWeightForFocusKey(b, focusWeights) - getWeightForFocusKey(a, focusWeights));
                     html += `<div class="focus-breakdown-section"><h3>Focus breakdown (what you're scored on)</h3>`;
@@ -3583,8 +3802,8 @@
             // When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool; otherwise use user's upgradesPerSlot (default 5).
             function getMaxPerSlot() { return dkpValEnabled ? Math.max(upgradesPerSlot, 25) : upgradesPerSlot; }
             const upgradePromise = dkpValEnabled
-                ? Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses()])
-                : Promise.all([loadItemStats(), loadItemSpellBonuses()]);
+                ? Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses(), loadSpellFocii()])
+                : Promise.all([loadItemStats(), loadItemSpellBonuses(), loadSpellFocii()]);
             upgradePromise.then(() => {
                 const upgradeData = computeUpgradesForCharacter(char, getMaxPerSlot());
                 const container = document.getElementById('upgradeSuggestionsContainer');
@@ -3664,16 +3883,34 @@
                             totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                         }
                     }
-                    const focusSet = new Set();
-                    for (let slotId = 1; slotId <= 22; slotId++) {
-                        const rawPicked = virtualLoadout[slotId];
-                        const pickedItemId = (rawPicked != null && rawPicked !== '') ? Number(rawPicked) : null;
-                        const pickedStats = pickedItemId != null ? itemStatsCache[pickedItemId] : null;
-                        if (pickedStats && pickedStats.focusSpellName) {
-                            const fn = String(pickedStats.focusSpellName).trim();
-                            if (fn) focusSet.add(fn);
+                    const focusValuesByItem = buildFocusValuesByItem();
+                    const virtualIds = getVirtualWornItemIds(virtualLoadout, itemStatsCache);
+                    const equippedIds = getEquippedWornItemIds(char);
+                    const virtualRawByKey = aggregateMaxFocusRawByKey(virtualIds, focusValuesByItem);
+                    const equippedRawByKey = aggregateMaxFocusRawByKey(equippedIds, focusValuesByItem);
+                    const { focusWeights } = getNormAndFocusWeightsForCharacter(char);
+                    const statDerivedFocus = new Set(['FT', 'ATK', 'Haste']);
+                    let scoredKeys = getScoredFocusKeysFromWeights(focusWeights).filter(k => !statDerivedFocus.has(k));
+                    scoredKeys = scoredKeys.filter(k => getWeightForFocusKey(k, focusWeights) > 0);
+                    scoredKeys.sort((a, b) => getWeightForFocusKey(b, focusWeights) - getWeightForFocusKey(a, focusWeights));
+                    const scoredSet = new Set(scoredKeys);
+                    const extraFromVirtual = Object.keys(virtualRawByKey).filter(k => (virtualRawByKey[k] || 0) > 0 && !statDerivedFocus.has(k) && !scoredSet.has(k));
+                    extraFromVirtual.sort((a, b) => a.localeCompare(b));
+                    const orderedFocusKeys = scoredKeys.concat(extraFromVirtual);
+                    const virtualFocusBreakdown = [];
+                    orderedFocusKeys.forEach(focusKey => {
+                        const virtualRaw = virtualRawByKey[focusKey] || 0;
+                        const equippedRaw = equippedRawByKey[focusKey] || 0;
+                        const currentScore = resolveFocusScorePctForKey(focusKey, char);
+                        if (virtualRaw <= 0 && equippedRaw <= 0 && currentScore <= 0) return;
+                        let scorePct = null;
+                        if (currentScore > 0 && equippedRaw > 0) {
+                            const bestRaw = equippedRaw / (currentScore / 100);
+                            if (bestRaw > 0) scorePct = Math.min(100, (virtualRaw / bestRaw) * 100);
                         }
-                    }
+                        const displayName = focusKey === 'FT' ? 'FT (Flowing Thought)' : focusKey;
+                        virtualFocusBreakdown.push({ focusKey, displayName, raw: virtualRaw, scorePct });
+                    });
                     const cur = char.stats || {};
                     const ind = char.individual_resists || {};
                     const ftB = parseMageloSlashStat(cur.mana_regen_item, 15);
@@ -3682,7 +3919,7 @@
                     return {
                         totalDelta,
                         spellDelta: totalSpellDelta,
-                        focusNames: Array.from(focusSet).sort(),
+                        virtualFocusBreakdown,
                         gear: {
                             ft: { cur: ftB.cur, cap: ftB.cap, delta: totalSpellDelta.ft, new: ftB.cur + totalSpellDelta.ft },
                             atk: { cur: atkB.cur, cap: atkB.cap, delta: totalSpellDelta.atk, new: atkB.cur + totalSpellDelta.atk },
@@ -3723,15 +3960,31 @@
                     }).join('');
                     const extras = document.getElementById('itemPickerGearExtras');
                     const gear = result.gear;
-                    const focusNames = result.focusNames || [];
+                    const vfb = result.virtualFocusBreakdown || [];
                     if (extras && gear && gear.ft && gear.atk && gear.haste) {
                         const fmtSlash = (g) => `${g.cur} / ${g.cap}`;
                         const fmtD = (d) => d === 0 ? '—' : (d > 0 ? '+' : '') + d;
                         const clampH = (x) => Math.min(30, Math.max(0, Number(x) || 0));
-                        const focusHtml = focusNames.length
-                            ? focusNames.map((n) => escapeHtml(n)).join(', ')
-                            : '<em style="color:#6c757d;">(none)</em>';
-                        extras.innerHTML = `<p style="margin:0 0 8px 0;"><strong>Spell focuses (virtual)</strong> — ${focusHtml}</p>` +
+                        let focusBlock = '';
+                        if (vfb.length === 0) {
+                            focusBlock = '<p style="margin:0 0 12px 0;color:#6c757d;"><em>No weighted focus data for this loadout (check focus_candidates / item coverage).</em></p>';
+                        } else {
+                            focusBlock = '<div class="focus-breakdown-section" style="margin-top:0;margin-bottom:12px;"><h3 style="font-size:1.05em;margin-top:0;">Focus breakdown (virtual)</h3>';
+                            vfb.forEach(({ displayName, raw, scorePct }) => {
+                                const barClass = scorePct == null ? 'none' : (scorePct >= 80 ? 'high' : scorePct >= 40 ? 'mid' : scorePct > 0 ? 'low' : 'none');
+                                const width = scorePct == null ? 0 : Math.min(100, Math.max(0, scorePct));
+                                focusBlock += `<div class="focus-breakdown-item"><div class="focus-breakdown-name">${escapeHtml(displayName)}</div>`;
+                                focusBlock += `<div class="focus-breakdown-bar-wrap"><div class="focus-breakdown-bar ${barClass}" style="width:${width}%"></div></div>`;
+                                if (scorePct != null) {
+                                    focusBlock += `<div class="focus-breakdown-value">${formatScore(scorePct)} <span style="color:#6c757d;">· Worn max ${raw.toFixed(0)}%</span></div>`;
+                                } else {
+                                    focusBlock += `<div class="focus-breakdown-value">Worn max ${raw.toFixed(0)}% <span style="color:#6c757d;">(normalized N/A)</span></div>`;
+                                }
+                                focusBlock += `</div>`;
+                            });
+                            focusBlock += '</div>';
+                        }
+                        extras.innerHTML = focusBlock +
                             `<table style="margin-bottom:0;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody>` +
                             `<tr><td>FT (mana regen item)</td><td>${fmtSlash(gear.ft)}</td><td>${fmtD(gear.ft.delta)}</td><td>${gear.ft.new} / ${gear.ft.cap}</td></tr>` +
                             `<tr><td>Worn ATK</td><td>${fmtSlash(gear.atk)}</td><td>${fmtD(gear.atk.delta)}</td><td>${gear.atk.new} / ${gear.atk.cap}</td></tr>` +
@@ -4216,6 +4469,34 @@
             return itemSpellBonusesLoadPromise;
         }
 
+        function loadSpellFocii() {
+            if (spellFociiLoadPromise != null) return spellFociiLoadPromise;
+            const baseDir = window.location.pathname.replace(/\/[^/]*$/, '/');
+            const possiblePaths = [
+                baseDir + 'spell_focii_level65.json',
+                new URL('spell_focii_level65.json', document.baseURI).href,
+                'spell_focii_level65.json',
+                './spell_focii_level65.json',
+            ];
+            spellFociiLoadPromise = (async () => {
+                for (const path of possiblePaths) {
+                    try {
+                        const r = await fetch(path);
+                        if (!r.ok) continue;
+                        const obj = await r.json();
+                        if (obj && Array.isArray(obj.focii)) {
+                            spellFociiList = obj.focii;
+                            return obj;
+                        }
+                    } catch (e) { /* try next path */ }
+                }
+                console.warn('spell_focii_level65.json not loaded; some item focii may be missing in Stat simulator.');
+                spellFociiList = null;
+                return {};
+            })();
+            return spellFociiLoadPromise;
+        }
+
         /** Load data/dkp_prices.json when dkp_val=true. Populates dkpPricesCache. */
         let dkpPricesLoadPromise = null;
         function loadDkpPrices() {
@@ -4420,7 +4701,7 @@
 
         loadData();
         // Preload item_stats so name→id resolution works on first hover (e.g. gear slots that lack item_id in JSON)
-        Promise.all([loadItemStats(), loadItemSpellBonuses()]).then(() => {
+        Promise.all([loadItemStats(), loadItemSpellBonuses(), loadSpellFocii()]).then(() => {
             const hasNames = Object.keys(itemNameToId).length > 0;
             const hasStats = Object.keys(itemStatsCache).length > 0;
             if (!hasNames && !hasStats) {
