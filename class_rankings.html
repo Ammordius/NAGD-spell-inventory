@@ -660,24 +660,9 @@
             return computeUnifiedDamagePctFromWeights(char, fw);
         }
 
-        /** Subline under Damage %: Ranger archery/melee; Warrior hate/DPS; loadout when present. */
+        /** Damage % column shows only the unified percentage; weapon details are in the score breakdown modal. */
         function buildDamageColumnSubline(char, wr) {
-            const cls = char.class || '';
-            const lines = [];
-            if (cls === 'Ranger' && wr && (wr.ranger_archery_dps_buffed != null || wr.ranger_melee_dps_buffed != null)) {
-                const a = wr.ranger_archery_dps_buffed != null ? wr.ranger_archery_dps_buffed : '—';
-                const m = wr.ranger_melee_dps_buffed != null ? wr.ranger_melee_dps_buffed : '—';
-                lines.push(`Archery ${a} · Melee ${m} DPS`);
-            }
-            if (cls === 'Warrior' && wr && wr.hate_per_sec_buffed != null && wr.dps_buffed != null) {
-                lines.push(`Hate ${wr.hate_per_sec_buffed} · DPS ${wr.dps_buffed}`);
-            }
-            if (wr && wr.weapon_loadout_display) {
-                lines.push(wr.weapon_loadout_display);
-            }
-            if (lines.length === 0) return '';
-            const inner = lines.map((s) => escapeHtml(String(s))).join('<br>');
-            return `<div class="damage-cell-sub">${inner}</div>`;
+            return '';
         }
 
         /** Focus keys that can represent the same underlying item effect (e.g. "All" spell haste adds to both Bene and Det).
@@ -3459,11 +3444,16 @@
             html += `<p style="margin: 4px 0 12px 0;"><strong>Damage % (class-relative):</strong> ${dmgUnifiedModal != null ? formatScore(dmgUnifiedModal) : 'N/A'}</p>`;
             const wrD = scores.weapon_ranking || {};
             if (wrD && (wrD.dps_buffed != null || wrD.hate_per_sec_buffed != null || wrD.focus_raw_buffed != null)) {
+                if (charClass === 'Ranger' && (wrD.ranger_archery_dps_buffed != null || wrD.ranger_melee_dps_buffed != null)) {
+                    const ra = wrD.ranger_archery_dps_buffed != null ? wrD.ranger_archery_dps_buffed : '—';
+                    const rm = wrD.ranger_melee_dps_buffed != null ? wrD.ranger_melee_dps_buffed : '—';
+                    html += `<p style="margin: 0 0 8px 0; color: #495057;"><strong>Ranger components (buffed DPS):</strong> Archery ${ra} · Melee ${rm}</p>`;
+                }
                 if (wrD.weapon_loadout_display) {
-                    html += `<p style="margin: 0 0 8px 0; color: #495057;"><strong>Loadout:</strong> ${escapeHtml(String(wrD.weapon_loadout_display))}</p>`;
+                    html += `<p style="margin: 0 0 8px 0; color: #495057;"><strong>Loadout (used for WeaponMetric):</strong> ${escapeHtml(String(wrD.weapon_loadout_display))}</p>`;
                 }
                 if (charClass === 'Warrior' && wrD.hate_per_sec_buffed != null && wrD.dps_buffed != null) {
-                    html += `<p style="margin: 0 0 10px 0; color: #6c757d; font-size: 0.9em;">WeaponMetric score uses <strong>80%</strong> class-relative hate/s + <strong>20%</strong> class-relative DPS.</p>`;
+                    html += `<p style="margin: 0 0 10px 0; color: #6c757d; font-size: 0.9em;">WeaponMetric score uses <strong>80%</strong> class-relative hate/s + <strong>20%</strong> class-relative DPS. The loadout below is chosen for tanking (hate); DPS row reflects that same combo.</p>`;
                 }
                 html += `<table style="width:100%; max-width:520px; margin-bottom:14px; border-collapse:collapse;"><thead><tr style="background:#667eea;color:white;"><th style="padding:6px 8px;">Weapon metric (raw)</th><th style="padding:6px 8px;">Buffed</th><th style="padding:6px 8px;">Unbuffed</th></tr></thead><tbody>`;
                 if (charClass === 'Warrior' && wrD.hate_per_sec_buffed != null && wrD.dps_buffed != null) {
@@ -3481,6 +3471,11 @@
                     html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Melee</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_melee_dps_buffed != null ? wrD.ranger_melee_dps_buffed + ' DPS' : 'N/A'}</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_melee_dps_unbuffed != null ? wrD.ranger_melee_dps_unbuffed + ' DPS' : 'N/A'}</td></tr>`;
                 }
                 html += `</tbody></table>`;
+                if (charClass === 'Warrior' && wrD.best_owned_dps_buffed != null && wrD.best_owned_dps_loadout_display) {
+                    const ubu = wrD.best_owned_dps_unbuffed != null ? Number(wrD.best_owned_dps_unbuffed).toFixed(2) : 'N/A';
+                    html += `<p style="margin: 10px 0 0 0; color: #495057; font-size: 0.95em;"><strong>Best DPS from owned weapons (inventory scan):</strong> ${escapeHtml(String(wrD.best_owned_dps_loadout_display))}</p>`;
+                    html += `<p style="margin: 4px 0 12px 0; color: #6c757d; font-size: 0.88em;">Buffed ${Number(wrD.best_owned_dps_buffed).toFixed(2)} DPS · unbuffed ${ubu} DPS — highest among all dual-wield and two-hand combinations in inventory. Scoring may use a different combo for hate-tank.</p>`;
+                }
             } else {
                 html += `<p style="color:#6c757d;font-size:0.9em;margin-bottom:12px;">No weapon metric (pure caster, or no matching inventory preset for weapon classes).</p>`;
             }

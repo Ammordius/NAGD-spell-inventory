@@ -1400,6 +1400,9 @@ def compute_weapon_ranking_metrics(
         "ranger_melee_dps_unbuffed": None,
         "focus_raw_buffed": None,
         "weapon_loadout_display": None,
+        "best_owned_dps_buffed": None,
+        "best_owned_dps_unbuffed": None,
+        "best_owned_dps_loadout_display": None,
     }
 
     if char_class == "Warrior":
@@ -1490,6 +1493,27 @@ def compute_weapon_ranking_metrics(
             mob_ac,
         )
         wld = format_weapon_loadout_display(mh, oh, use_2h)
+        bod_b = bod_u = None
+        bod_wld: str | None = None
+        inv_dm, inv_dr, inv_db, inv_du = find_best_inventory_melee_dps_loadout(
+            "Warrior",
+            counts,
+            item_stats,
+            env_b,
+            env_u,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+        )
+        if inv_dm and inv_dr and inv_db is not None and inv_du is not None:
+            mh_bd = item_by_id(item_stats, str(inv_dr.get("mh") or ""))
+            use_2h_bd = inv_dm == "two_hand"
+            oh_bd = None if use_2h_bd else item_by_id(item_stats, str(inv_dr.get("oh") or ""))
+            bod_b = round(float(inv_db), 2)
+            bod_u = round(float(inv_du), 2)
+            bod_wld = format_weapon_loadout_display(mh_bd, oh_bd, use_2h_bd)
         return {
             "weapon_preset_kind": mode,
             "weapon_preset_label": label,
@@ -1503,6 +1527,9 @@ def compute_weapon_ranking_metrics(
             "ranger_melee_dps_unbuffed": None,
             "focus_raw_buffed": hb,
             "weapon_loadout_display": wld,
+            "best_owned_dps_buffed": bod_b,
+            "best_owned_dps_unbuffed": bod_u,
+            "best_owned_dps_loadout_display": bod_wld,
         }
 
     if char_class == "Ranger":
