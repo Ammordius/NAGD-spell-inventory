@@ -833,6 +833,21 @@ def item_by_id(item_stats: Mapping[str, Any], iid: str) -> dict[str, Any] | None
     return ob if isinstance(ob, dict) else None
 
 
+def format_weapon_loadout_display(
+    mh: Mapping[str, Any] | None,
+    oh: Mapping[str, Any] | None,
+    use_2h: bool,
+) -> str | None:
+    """Human-readable weapon combination used for ranking metrics (2H or DW)."""
+    if not mh:
+        return None
+    mn = str(mh.get("name") or "?").strip() or "?"
+    if use_2h or not oh:
+        return f"2H: {mn}"
+    on = str(oh.get("name") or "?").strip() or "?"
+    return f"DW: {mn} / {on}"
+
+
 def inventory_item_counts(char_inventory: list[dict[str, Any]]) -> dict[str, int]:
     c: Counter[str] = Counter()
     for it in char_inventory or []:
@@ -1360,7 +1375,8 @@ def compute_weapon_ranking_metrics(
 ) -> dict[str, Any]:
     """
     Returns weapon DPS / hate metrics for class rankings.
-    focus_raw_buffed: value used for WeaponMetric normalization (hate for Warrior, blended DPS for Ranger, else DPS).
+    focus_raw_buffed: value used for WeaponMetric normalization (hate-only raw for Warrior; blended DPS for Ranger; else DPS).
+    Warrior WeaponMetric score is computed in generate_class_rankings from class-relative hate + DPS (80/20 blend).
     """
     level = int(dps_config.get("levelCap") or 65)
     mob_level = level
@@ -1383,6 +1399,7 @@ def compute_weapon_ranking_metrics(
         "ranger_melee_dps_buffed": None,
         "ranger_melee_dps_unbuffed": None,
         "focus_raw_buffed": None,
+        "weapon_loadout_display": None,
     }
 
     if char_class == "Warrior":
@@ -1442,11 +1459,42 @@ def compute_weapon_ranking_metrics(
             level,
             cfg_dex,
         )
+        db = compute_total_dps(
+            "Warrior",
+            mh,
+            oh,
+            None,
+            None,
+            False,
+            use_2h,
+            env_b,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+        )
+        du = compute_total_dps(
+            "Warrior",
+            mh,
+            oh,
+            None,
+            None,
+            False,
+            use_2h,
+            env_u,
+            dps_config,
+            weapon_procs,
+            level,
+            mob_level,
+            mob_ac,
+        )
+        wld = format_weapon_loadout_display(mh, oh, use_2h)
         return {
             "weapon_preset_kind": mode,
             "weapon_preset_label": label,
-            "dps_buffed": None,
-            "dps_unbuffed": None,
+            "dps_buffed": round(db, 2),
+            "dps_unbuffed": round(du, 2),
             "hate_per_sec_buffed": round(hb, 2),
             "hate_per_sec_unbuffed": round(hu, 2),
             "ranger_archery_dps_buffed": None,
@@ -1454,6 +1502,7 @@ def compute_weapon_ranking_metrics(
             "ranger_melee_dps_buffed": None,
             "ranger_melee_dps_unbuffed": None,
             "focus_raw_buffed": hb,
+            "weapon_loadout_display": wld,
         }
 
     if char_class == "Ranger":
@@ -1589,6 +1638,20 @@ def compute_weapon_ranking_metrics(
             label_parts.append(str(melee_row.get("label") or "Melee"))
         lbl = " + ".join(label_parts) if label_parts else None
 
+        loadout_parts: list[str] = []
+        if arch_sel:
+            wr_nm = item_by_id(item_stats, str(arch_sel.get("range") or ""))
+            if wr_nm:
+                loadout_parts.append(f"Arch: {str(wr_nm.get('name') or '?')}")
+        if melee_row and melee_mode != "none":
+            mh_rm = item_by_id(item_stats, str(melee_row.get("mh") or ""))
+            use_2h_rm = melee_mode == "two_hand"
+            oh_rm = None if use_2h_rm else item_by_id(item_stats, str(melee_row.get("oh") or ""))
+            wl_rm = format_weapon_loadout_display(mh_rm, oh_rm, use_2h_rm)
+            if wl_rm:
+                loadout_parts.append(f"Melee: {wl_rm}")
+        ranger_wld = " | ".join(loadout_parts) if loadout_parts else None
+
         return {
             "weapon_preset_kind": "ranger_mixed",
             "weapon_preset_label": lbl,
@@ -1601,6 +1664,7 @@ def compute_weapon_ranking_metrics(
             "ranger_melee_dps_buffed": round(mel_b, 2) if mel_b is not None else None,
             "ranger_melee_dps_unbuffed": round(mel_u, 2) if mel_u is not None else None,
             "focus_raw_buffed": focus_raw,
+            "weapon_loadout_display": ranger_wld,
         }
 
     if char_class not in ("Rogue", "Monk", "Beastlord", "Bard"):
@@ -1629,6 +1693,10 @@ def compute_weapon_ranking_metrics(
         if inv_mode and inv_row and inv_db is not None and inv_du is not None:
             mode, row = inv_mode, inv_row
             label = str(row.get("label") or char_class)
+            mh_inv = item_by_id(item_stats, str(row.get("mh") or ""))
+            use_2h_inv = mode == "two_hand"
+            oh_inv = None if use_2h_inv else item_by_id(item_stats, str(row.get("oh") or ""))
+            wld_inv = format_weapon_loadout_display(mh_inv, oh_inv, use_2h_inv)
             return {
                 "weapon_preset_kind": mode,
                 "weapon_preset_label": label,
@@ -1641,6 +1709,7 @@ def compute_weapon_ranking_metrics(
                 "ranger_melee_dps_buffed": None,
                 "ranger_melee_dps_unbuffed": None,
                 "focus_raw_buffed": inv_db,
+                "weapon_loadout_display": wld_inv,
             }
         return empty
     label = str(row.get("label") or char_class)
@@ -1680,6 +1749,7 @@ def compute_weapon_ranking_metrics(
         mob_level,
         mob_ac,
     )
+    wld_m = format_weapon_loadout_display(mh, oh, use_2h)
     return {
         "weapon_preset_kind": mode,
         "weapon_preset_label": label,
@@ -1692,4 +1762,5 @@ def compute_weapon_ranking_metrics(
         "ranger_melee_dps_buffed": None,
         "ranger_melee_dps_unbuffed": None,
         "focus_raw_buffed": db,
+        "weapon_loadout_display": wld_m,
     }

@@ -16,6 +16,10 @@ CLASSES_NEED_ATK = {'Rogue', 'Ranger', 'Monk', 'Warrior', 'Shadow Knight', 'Pala
 PURE_MELEE = {'Warrior', 'Rogue', 'Monk'}
 # Weapon DPS / hate-sec from ranking_weapon_engine (inventory + presets)
 WEAPON_METRIC_CLASSES = {'Warrior', 'Rogue', 'Monk', 'Ranger', 'Beastlord', 'Bard'}
+
+# Warrior WeaponMetric: blend class-relative hate/sec and DPS (see ranking_weapon_engine + weapon loop below)
+WARRIOR_WEAPON_SCORE_HATE_SHARE = 0.8
+WARRIOR_WEAPON_SCORE_DPS_SHARE = 0.2
 WEAPON_METRIC_DPS_CLASSES = {'Rogue', 'Monk', 'Ranger', 'Beastlord', 'Bard'}
 
 _SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts')
@@ -1051,7 +1055,7 @@ def check_bard_instrument_focus(char_inventory, bard_data):
     return focus_scores, items_detail
 
 def check_warrior_focus_items(char_inventory, char_haste):
-    """Raex chest only (binary). Darkblade / haste are folded into WeaponMetric (hate/sec)."""
+    """Raex chest only (binary). Darkblade / haste are folded into WeaponMetric (hate + DPS blend)."""
     del char_haste  # retained for call-site compatibility
     has_raex_chest = False
     for item in char_inventory:
@@ -1489,7 +1493,7 @@ def calculate_class_scores(char_data, char_focii, char_damage_focii, best_focii,
     
     # Calculate overall focus score based on class priorities
     if char_class == 'Warrior':
-        # Raex Chest + WeaponMetric (hate/sec); Darkblade/Haste folded into WeaponMetric
+        # Raex Chest + WeaponMetric (hate + DPS blend); Darkblade/Haste folded into WeaponMetric
         total_score = 0.0
         total_weight = 0.0
         for focus_name in ['Raex Chest', 'WeaponMetric']:
@@ -1591,7 +1595,7 @@ CLASS_WEIGHTS = {
         'haste_pct': 0.0,
         'resists_pct': 2.0,
         'focus': {
-            'WeaponMetric': 3.0,  # Hate/sec from best preset weapons (inventory)
+            'WeaponMetric': 3.0,  # 80% class-relative hate + 20% class-relative DPS (inventory/presets)
             'Raex Chest': 1.0,
         }
     },
@@ -2767,10 +2771,12 @@ def main():
                 best_pp = p
         best_pet_power_by_class[char_class] = best_pp
 
-    # Weapon DPS / hate (inventory + presets); normalize per class to max raw
+    # Weapon DPS / hate (inventory + presets); normalize per class to max raw (Warrior: 80/20 hate/DPS blend)
     weapon_ranking_data = None
     weapon_metrics_by_char = {}
     class_max_weapon_raw = defaultdict(float)
+    max_warrior_hate = 0.0
+    max_warrior_dps = 0.0
     try:
         from ranking_weapon_engine import compute_weapon_ranking_metrics, load_json as rw_load_json
 
@@ -2812,9 +2818,17 @@ def main():
                 threat_meta=weapon_ranking_data["threat_meta"],
             )
             weapon_metrics_by_char[cid] = m
-            raw = m.get("focus_raw_buffed")
-            if raw is not None:
-                class_max_weapon_raw[c] = max(class_max_weapon_raw[c], float(raw))
+            if c == "Warrior":
+                h_w = m.get("hate_per_sec_buffed")
+                d_w = m.get("dps_buffed")
+                if h_w is not None:
+                    max_warrior_hate = max(max_warrior_hate, float(h_w))
+                if d_w is not None:
+                    max_warrior_dps = max(max_warrior_dps, float(d_w))
+            else:
+                raw = m.get("focus_raw_buffed")
+                if raw is not None:
+                    class_max_weapon_raw[c] = max(class_max_weapon_raw[c], float(raw))
         print(f"  Weapon metrics: {len(weapon_metrics_by_char)} weapon-class characters loaded")
     except Exception as e:
         print(f"Warning: weapon ranking metrics disabled: {e}")
@@ -2825,7 +2839,25 @@ def main():
         char_focii, char_damage_focii, char_mana_efficiency_cats, char_spell_haste_cats, char_duration_cats = analyze_character_focii(char_inventory, focus_lookup)
         wm = weapon_metrics_by_char.get(char_id) if weapon_metrics_by_char else None
         weapon_focus_pct = None
-        if char_class in WEAPON_METRIC_CLASSES and wm and wm.get("focus_raw_buffed") is not None:
+        if char_class == "Warrior" and wm:
+            h_m = wm.get("hate_per_sec_buffed")
+            d_m = wm.get("dps_buffed")
+            if h_m is not None and d_m is not None:
+                h_pct = (
+                    min(100.0, float(h_m) / max_warrior_hate * 100.0)
+                    if max_warrior_hate > 0
+                    else 0.0
+                )
+                d_pct = (
+                    min(100.0, float(d_m) / max_warrior_dps * 100.0)
+                    if max_warrior_dps > 0
+                    else 0.0
+                )
+                weapon_focus_pct = (
+                    WARRIOR_WEAPON_SCORE_HATE_SHARE * h_pct
+                    + WARRIOR_WEAPON_SCORE_DPS_SHARE * d_pct
+                )
+        elif char_class in WEAPON_METRIC_CLASSES and wm and wm.get("focus_raw_buffed") is not None:
             mx = class_max_weapon_raw.get(char_class, 0)
             weapon_focus_pct = (
                 min(100.0, float(wm["focus_raw_buffed"]) / mx * 100.0) if mx > 0 else 0.0

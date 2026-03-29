@@ -660,15 +660,24 @@
             return computeUnifiedDamagePctFromWeights(char, fw);
         }
 
-        /** Subline under Damage %: Ranger archery/melee DPS only (no preset names or blend on main table). */
+        /** Subline under Damage %: Ranger archery/melee; Warrior hate/DPS; loadout when present. */
         function buildDamageColumnSubline(char, wr) {
             const cls = char.class || '';
+            const lines = [];
             if (cls === 'Ranger' && wr && (wr.ranger_archery_dps_buffed != null || wr.ranger_melee_dps_buffed != null)) {
                 const a = wr.ranger_archery_dps_buffed != null ? wr.ranger_archery_dps_buffed : '—';
                 const m = wr.ranger_melee_dps_buffed != null ? wr.ranger_melee_dps_buffed : '—';
-                return `<div class="damage-cell-sub">Archery ${a} · Melee ${m} DPS</div>`;
+                lines.push(`Archery ${a} · Melee ${m} DPS`);
             }
-            return '';
+            if (cls === 'Warrior' && wr && wr.hate_per_sec_buffed != null && wr.dps_buffed != null) {
+                lines.push(`Hate ${wr.hate_per_sec_buffed} · DPS ${wr.dps_buffed}`);
+            }
+            if (wr && wr.weapon_loadout_display) {
+                lines.push(wr.weapon_loadout_display);
+            }
+            if (lines.length === 0) return '';
+            const inner = lines.map((s) => escapeHtml(String(s))).join('<br>');
+            return `<div class="damage-cell-sub">${inner}</div>`;
         }
 
         /** Focus keys that can represent the same underlying item effect (e.g. "All" spell haste adds to both Bene and Det).
@@ -3450,12 +3459,23 @@
             html += `<p style="margin: 4px 0 12px 0;"><strong>Damage % (class-relative):</strong> ${dmgUnifiedModal != null ? formatScore(dmgUnifiedModal) : 'N/A'}</p>`;
             const wrD = scores.weapon_ranking || {};
             if (wrD && (wrD.dps_buffed != null || wrD.hate_per_sec_buffed != null || wrD.focus_raw_buffed != null)) {
-                const isHate = wrD.hate_per_sec_buffed != null;
-                const unit = isHate ? ' hate/s' : ' DPS';
-                const b = isHate ? wrD.hate_per_sec_buffed : wrD.dps_buffed;
-                const u = isHate ? wrD.hate_per_sec_unbuffed : wrD.dps_unbuffed;
+                if (wrD.weapon_loadout_display) {
+                    html += `<p style="margin: 0 0 8px 0; color: #495057;"><strong>Loadout:</strong> ${escapeHtml(String(wrD.weapon_loadout_display))}</p>`;
+                }
+                if (charClass === 'Warrior' && wrD.hate_per_sec_buffed != null && wrD.dps_buffed != null) {
+                    html += `<p style="margin: 0 0 10px 0; color: #6c757d; font-size: 0.9em;">WeaponMetric score uses <strong>80%</strong> class-relative hate/s + <strong>20%</strong> class-relative DPS.</p>`;
+                }
                 html += `<table style="width:100%; max-width:520px; margin-bottom:14px; border-collapse:collapse;"><thead><tr style="background:#667eea;color:white;"><th style="padding:6px 8px;">Weapon metric (raw)</th><th style="padding:6px 8px;">Buffed</th><th style="padding:6px 8px;">Unbuffed</th></tr></thead><tbody>`;
-                html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Blended (used for score)</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${b != null ? Number(b).toFixed(2) + unit : 'N/A'}</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${u != null ? Number(u).toFixed(2) + unit : 'N/A'}</td></tr>`;
+                if (charClass === 'Warrior' && wrD.hate_per_sec_buffed != null && wrD.dps_buffed != null) {
+                    html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Hate/sec</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${Number(wrD.hate_per_sec_buffed).toFixed(2)} hate/s</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.hate_per_sec_unbuffed != null ? Number(wrD.hate_per_sec_unbuffed).toFixed(2) + ' hate/s' : 'N/A'}</td></tr>`;
+                    html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">DPS</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${Number(wrD.dps_buffed).toFixed(2)} DPS</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.dps_unbuffed != null ? Number(wrD.dps_unbuffed).toFixed(2) + ' DPS' : 'N/A'}</td></tr>`;
+                } else {
+                    const isHate = wrD.hate_per_sec_buffed != null;
+                    const unit = isHate ? ' hate/s' : ' DPS';
+                    const b = isHate ? wrD.hate_per_sec_buffed : wrD.dps_buffed;
+                    const u = isHate ? wrD.hate_per_sec_unbuffed : wrD.dps_unbuffed;
+                    html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Blended (used for score)</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${b != null ? Number(b).toFixed(2) + unit : 'N/A'}</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${u != null ? Number(u).toFixed(2) + unit : 'N/A'}</td></tr>`;
+                }
                 if (charClass === 'Ranger') {
                     html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Archery</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_archery_dps_buffed != null ? wrD.ranger_archery_dps_buffed + ' DPS' : 'N/A'}</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_archery_dps_unbuffed != null ? wrD.ranger_archery_dps_unbuffed + ' DPS' : 'N/A'}</td></tr>`;
                     html += `<tr><td style="padding:6px 8px;border-bottom:1px solid #ddd;">Melee</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_melee_dps_buffed != null ? wrD.ranger_melee_dps_buffed + ' DPS' : 'N/A'}</td><td style="padding:6px 8px;border-bottom:1px solid #ddd;">${wrD.ranger_melee_dps_unbuffed != null ? wrD.ranger_melee_dps_unbuffed + ' DPS' : 'N/A'}</td></tr>`;
@@ -3739,7 +3759,10 @@
                     // Format raw value
                     let rawDisplay = 'N/A';
                     const wrMetric = scores.weapon_ranking || {};
-                    const showWeaponRaw = focusCat === 'WeaponMetric' && wrMetric.focus_raw_buffed != null;
+                    const showWeaponRaw = focusCat === 'WeaponMetric' && (
+                        wrMetric.focus_raw_buffed != null
+                        || (wrMetric.hate_per_sec_buffed != null && wrMetric.dps_buffed != null)
+                    );
                     if (rawValue > 0 || (bardInstrumentCats.includes(focusCat) && rawValue === 0) || showWeaponRaw) {
                         if (focusCat === 'Haste') {
                             rawDisplay = `${rawValue}% (${rawValue >= 30 ? 'Capped' : 'Not Capped'})`;
@@ -3747,9 +3770,17 @@
                             const ftCurrent = scores.ft_current != null ? scores.ft_current : 0;
                             const ftCap = scores.ft_cap != null ? scores.ft_cap : 15;
                             rawDisplay = `${ftCurrent}/${ftCap}`;
+                        } else if (focusCat === 'WeaponMetric' && charClass === 'Warrior' && wrMetric.hate_per_sec_buffed != null && wrMetric.dps_buffed != null) {
+                            const lo = wrMetric.weapon_loadout_display
+                                ? `<br><small style="color:#6c757d;">${escapeHtml(String(wrMetric.weapon_loadout_display))}</small>`
+                                : '';
+                            rawDisplay = `${Number(wrMetric.hate_per_sec_buffed).toFixed(1)} hate/s · ${Number(wrMetric.dps_buffed).toFixed(1)} DPS${lo}`;
                         } else if (focusCat === 'WeaponMetric') {
                             const unit = (wrMetric.hate_per_sec_buffed != null) ? ' hate/s' : ' DPS';
-                            rawDisplay = `${Number(wrMetric.focus_raw_buffed).toFixed(1)}${unit}`;
+                            const lo = wrMetric.weapon_loadout_display
+                                ? `<br><small style="color:#6c757d;">${escapeHtml(String(wrMetric.weapon_loadout_display))}</small>`
+                                : '';
+                            rawDisplay = `${Number(wrMetric.focus_raw_buffed).toFixed(1)}${unit}${lo}`;
                         } else if (bardInstrumentCats.includes(focusCat)) {
                             rawDisplay = `${Number(rawValue).toFixed(0)}%`;
                         } else {
