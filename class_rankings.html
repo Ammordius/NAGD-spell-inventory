@@ -1100,15 +1100,33 @@
 
         const RESIST_LABEL_TO_ABBREV = { fire: 'FR', cold: 'CR', magic: 'MR', disease: 'DR', poison: 'PR' };
         const RESIST_ORDER = ['FR', 'CR', 'MR', 'DR', 'PR'];
+        const PRIM_STAT_KEYS = ['STR', 'STA', 'AGI', 'DEX', 'WIS', 'INT', 'CHA'];
 
-        /** Extract raw HP, mana, AC, total saves, and per-type saves from item stats for delta display. */
+        function emptyPrimByKey() {
+            const o = {};
+            PRIM_STAT_KEYS.forEach(k => { o[k] = 0; });
+            return o;
+        }
+
+        /** Primary totals from character export (same source as HP/Mana/AC in class_rankings.json). */
+        function getSheetPrimByKey(char) {
+            const st = (char && char.stats) || {};
+            const o = emptyPrimByKey();
+            PRIM_STAT_KEYS.forEach(k => { o[k] = Number(st[k]) || 0; });
+            return o;
+        }
+
+        /** Extract raw HP, mana, AC, total saves, per-type saves, and primary stat mods from item stats for delta display. */
         function getItemRawStats(stats) {
-            if (!stats) return { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
+            if (!stats) return { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {}, primByKey: emptyPrimByKey() };
             const mods = stats.mods || [];
             let hp = 0, mana = 0;
+            const primByKey = emptyPrimByKey();
             mods.forEach(m => {
-                if ((m.label || '').toUpperCase() === 'HP') hp += Number(m.value) || 0;
-                if ((m.label || '').toUpperCase() === 'MANA') mana += Number(m.value) || 0;
+                const lab = (m.label || '').toUpperCase();
+                if (lab === 'HP') hp += Number(m.value) || 0;
+                else if (lab === 'MANA') mana += Number(m.value) || 0;
+                else if (primByKey.hasOwnProperty(lab)) primByKey[lab] += Number(m.value) || 0;
             });
             const ac = Number(stats.ac) || 0;
             let svAll = 0;
@@ -1122,10 +1140,10 @@
                     if (abbrev) svByType[abbrev] = val;
                 }
             });
-            return { hp, mana, ac, svAll, svByType };
+            return { hp, mana, ac, svAll, svByType, primByKey };
         }
 
-        /** Deltas (candidate minus current) for HP, mana, AC, and total saves. If currentStats is null, returns candidate's raw stats. */
+        /** Deltas (candidate minus current) for HP, mana, AC, total saves, and primary stats. If currentStats is null, returns candidate's raw stats. */
         function getItemStatDeltas(currentStats, candidateStats) {
             const cur = getItemRawStats(currentStats);
             const cand = getItemRawStats(candidateStats);
@@ -1135,35 +1153,47 @@
                 const n = (cand.svByType && cand.svByType[abbrev]) || 0;
                 svDeltasByType[abbrev] = n - c;
             });
+            const primDeltasByKey = {};
+            PRIM_STAT_KEYS.forEach(k => {
+                const c = (cur.primByKey && cur.primByKey[k]) || 0;
+                const n = (cand.primByKey && cand.primByKey[k]) || 0;
+                primDeltasByKey[k] = n - c;
+            });
             return {
                 hpDelta: cand.hp - cur.hp,
                 manaDelta: cand.mana - cur.mana,
                 acDelta: cand.ac - cur.ac,
                 svAllDelta: cand.svAll - cur.svAll,
-                svDeltasByType
+                svDeltasByType,
+                primDeltasByKey
             };
         }
 
         /** Sum two raw stat objects (e.g. primary + offhand for fair 2her comparison). */
         function mergeRawStats(rawA, rawB) {
-            const a = rawA || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
-            const b = rawB || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
+            const a = rawA || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {}, primByKey: emptyPrimByKey() };
+            const b = rawB || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {}, primByKey: emptyPrimByKey() };
             const svByType = {};
             RESIST_ORDER.forEach(abbrev => {
                 svByType[abbrev] = (a.svByType && a.svByType[abbrev] || 0) + (b.svByType && b.svByType[abbrev] || 0);
+            });
+            const primByKey = emptyPrimByKey();
+            PRIM_STAT_KEYS.forEach(k => {
+                primByKey[k] = ((a.primByKey && a.primByKey[k]) || 0) + ((b.primByKey && b.primByKey[k]) || 0);
             });
             return {
                 hp: (a.hp || 0) + (b.hp || 0),
                 mana: (a.mana || 0) + (b.mana || 0),
                 ac: (a.ac || 0) + (b.ac || 0),
                 svAll: (a.svAll || 0) + (b.svAll || 0),
-                svByType
+                svByType,
+                primByKey
             };
         }
 
         /** Deltas when "current" is given as raw stats (e.g. merged primary+offhand for 2her). */
         function getItemStatDeltasFromRaw(currentRaw, candidateStats) {
-            const cur = currentRaw || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {} };
+            const cur = currentRaw || { hp: 0, mana: 0, ac: 0, svAll: 0, svByType: {}, primByKey: emptyPrimByKey() };
             const cand = getItemRawStats(candidateStats);
             const svDeltasByType = {};
             RESIST_ORDER.forEach(abbrev => {
@@ -1171,12 +1201,19 @@
                 const n = (cand.svByType && cand.svByType[abbrev]) || 0;
                 svDeltasByType[abbrev] = n - c;
             });
+            const primDeltasByKey = {};
+            PRIM_STAT_KEYS.forEach(k => {
+                const c = (cur.primByKey && cur.primByKey[k]) || 0;
+                const n = (cand.primByKey && cand.primByKey[k]) || 0;
+                primDeltasByKey[k] = n - c;
+            });
             return {
                 hpDelta: cand.hp - (cur.hp || 0),
                 manaDelta: cand.mana - (cur.mana || 0),
                 acDelta: cand.ac - (cur.ac || 0),
                 svAllDelta: cand.svAll - (cur.svAll || 0),
-                svDeltasByType
+                svDeltasByType,
+                primDeltasByKey
             };
         }
 
@@ -1267,12 +1304,25 @@
                 .join('  ');
         }
 
-        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +3 sv all  · Focus: Spell Haste III". */
+        /** Format primary stat deltas from primDeltasByKey: "+5 STR  -2 STA". */
+        function formatPrimPartDeltas(primDeltasByKey) {
+            if (!primDeltasByKey || typeof primDeltasByKey !== 'object') return '';
+            const parts = [];
+            PRIM_STAT_KEYS.forEach(k => {
+                const d = primDeltasByKey[k] || 0;
+                if (d !== 0) parts.push((d > 0 ? '+' : '') + d + ' ' + k);
+            });
+            return parts.join('  ');
+        }
+
+        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +5 STR  +3 sv all  · Focus: Spell Haste III". */
         function formatUpgradeDeltas(deltas, focusSpellName) {
             const parts = [];
             if (deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
             if (deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
             if (deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
+            const primPart = deltas.primDeltasByKey ? formatPrimPartDeltas(deltas.primDeltasByKey) : '';
+            if (primPart) parts.push(primPart);
             const resistPart = deltas.svDeltasByType ? formatResistPartDeltas(deltas.svDeltasByType) : '';
             if (resistPart) parts.push(resistPart);
             else if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
@@ -1281,7 +1331,7 @@
             return text || '';
         }
 
-        /** Format item stats as absolute values for display (e.g. "+50 HP  +55 mana  +2 AC  +5 sv all  · Focus: X"). */
+        /** Format item stats as absolute values for display (e.g. "+50 HP  +55 mana  +2 AC  +15 STR  +5 sv all  · Focus: X"). */
         function formatItemStatsAbsolute(stats) {
             if (!stats) return '—';
             const raw = getItemRawStats(stats);
@@ -1289,6 +1339,8 @@
             if (raw.hp !== 0) parts.push((raw.hp > 0 ? '+' : '') + raw.hp + ' HP');
             if (raw.mana !== 0) parts.push((raw.mana > 0 ? '+' : '') + raw.mana + ' mana');
             if (raw.ac !== 0) parts.push((raw.ac > 0 ? '+' : '') + raw.ac + ' AC');
+            const primPart = raw.primByKey ? formatPrimPartDeltas(raw.primByKey) : '';
+            if (primPart) parts.push(primPart);
             const resistPart = formatResistPartAbsolute(raw.svByType);
             if (resistPart) parts.push(resistPart);
             let text = parts.join('  ');
@@ -2893,6 +2945,8 @@
             if (deltas && deltas.hpDelta != null && deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
             if (deltas && deltas.manaDelta != null && deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
             if (deltas && deltas.acDelta != null && deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
+            const primPart = (deltas && deltas.primDeltasByKey) ? formatPrimPartDeltas(deltas.primDeltasByKey) : '';
+            if (primPart) parts.push(primPart);
             const resistPart = (deltas && deltas.svDeltasByType) ? formatResistPartDeltas(deltas.svDeltasByType) : '';
             if (resistPart) parts.push(resistPart);
             else if (deltas && deltas.svAllDelta != null && deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
@@ -4029,7 +4083,7 @@
                 function recomputeVirtualStats() {
                     const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
                     const virtualLoadout = itemPickerState.virtualLoadout;
-                    const totalDelta = { hp: 0, mana: 0, ac: 0, svByType: { MR: 0, FR: 0, CR: 0, DR: 0, PR: 0 } };
+                    const totalDelta = { hp: 0, mana: 0, ac: 0, svByType: { MR: 0, FR: 0, CR: 0, DR: 0, PR: 0 }, primByKey: emptyPrimByKey() };
                     const totalSpellDelta = { ft: 0, atk: 0, haste: 0 };
                     const getOriginalItemId = (slotId) => {
                         const inv = equippedOnly.find(i => i.slot_id === slotId);
@@ -4054,6 +4108,7 @@
                                 const d = getItemStatDeltasFromRaw(currentRaw, pickedStats);
                                 totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                 RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                PRIM_STAT_KEYS.forEach(k => { totalDelta.primByKey[k] += (d.primDeltasByKey && d.primDeltasByKey[k]) || 0; });
                                 const curSp = mergeItemSpellBonusesFromItems(originalStats, offhandStats);
                                 const newSp = sumItemSpellBonuses(pickedStats);
                                 const sd = spellBonusDelta(newSp, curSp);
@@ -4062,6 +4117,7 @@
                                 const d = getItemStatDeltas(originalStats, pickedStats);
                                 totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                 RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                PRIM_STAT_KEYS.forEach(k => { totalDelta.primByKey[k] += (d.primDeltasByKey && d.primDeltasByKey[k]) || 0; });
                                 const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(originalStats));
                                 totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                             }
@@ -4074,6 +4130,7 @@
                                     const d = getItemStatDeltas(null, pickedStats);
                                     totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                     RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                    PRIM_STAT_KEYS.forEach(k => { totalDelta.primByKey[k] += (d.primDeltasByKey && d.primDeltasByKey[k]) || 0; });
                                     const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(null));
                                     totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                                 }
@@ -4081,6 +4138,7 @@
                                 const d = getItemStatDeltas(originalStats, pickedStats);
                                 totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                                 RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                                PRIM_STAT_KEYS.forEach(k => { totalDelta.primByKey[k] += (d.primDeltasByKey && d.primDeltasByKey[k]) || 0; });
                                 const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(originalStats));
                                 totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                             }
@@ -4088,6 +4146,7 @@
                             const d = getItemStatDeltas(originalStats, pickedStats);
                             totalDelta.hp += d.hpDelta; totalDelta.mana += d.manaDelta; totalDelta.ac += d.acDelta;
                             RESIST_ORDER.forEach(abbrev => { totalDelta.svByType[abbrev] += d.svDeltasByType[abbrev] || 0; });
+                            PRIM_STAT_KEYS.forEach(k => { totalDelta.primByKey[k] += (d.primDeltasByKey && d.primDeltasByKey[k]) || 0; });
                             const sd = spellBonusDelta(sumItemSpellBonuses(pickedStats), sumItemSpellBonuses(originalStats));
                             totalSpellDelta.ft += sd.ft; totalSpellDelta.atk += sd.atk; totalSpellDelta.haste += sd.haste;
                         }
@@ -4153,6 +4212,7 @@
                     const { totalDelta, newStats } = result;
                     const cur = char.stats || {};
                     const ind = char.individual_resists || {};
+                    const sheetPrim = getSheetPrimByKey(char);
                     const rows = [
                         ['HP', (cur.hp || 0), totalDelta.hp, newStats.hp],
                         ['Mana', (cur.mana || 0), totalDelta.mana, newStats.mana],
@@ -4163,10 +4223,19 @@
                         ['DR', (ind.DR || 0), totalDelta.svByType.DR, newStats.DR],
                         ['PR', (ind.PR || 0), totalDelta.svByType.PR, newStats.PR]
                     ];
+                    PRIM_STAT_KEYS.forEach(k => {
+                        const current = sheetPrim[k] || 0;
+                        const d = totalDelta.primByKey[k] || 0;
+                        rows.push([k, current, d, current + d]);
+                    });
                     tbody.innerHTML = rows.map(([stat, current, delta, newVal]) => {
                         const deltaStr = delta === 0 ? '—' : (delta > 0 ? '+' : '') + delta;
                         return `<tr><td>${stat}</td><td>${Number(current).toLocaleString()}</td><td>${deltaStr}</td><td>${Number(newVal).toLocaleString()}</td></tr>`;
                     }).join('');
+                    const primNote = document.getElementById('itemPickerPrimNote');
+                    if (primNote) {
+                        primNote.innerHTML = '<small style="color:#6c757d;">STR–CHA: Current/New use character export totals plus gear deltas (same idea as HP/Mana/AC).</small>';
+                    }
                     const extras = document.getElementById('itemPickerGearExtras');
                     const gear = result.gear;
                     const vfb = result.virtualFocusBreakdown || [];
@@ -4267,7 +4336,7 @@
                     }
                     let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
                     pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
-                    pickerHtml += `<table style="margin-bottom: 16px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table>`;
+                    pickerHtml += `<table style="margin-bottom: 8px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table><p id="itemPickerPrimNote" style="margin: 0 0 12px 0;"></p>`;
                     pickerHtml += `<div id="itemPickerGearExtras" style="margin-top: 12px; font-size: 0.92em;"></div>`;
                     pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
                     for (let slotId = 1; slotId <= 22; slotId++) {

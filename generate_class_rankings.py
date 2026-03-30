@@ -2679,7 +2679,14 @@ def main():
                             'atk_item': f"{safe_int(row.get('atk_item'))} / {safe_int(row.get('atk_item_cap'))}",
                             'haste': safe_int(row.get('haste_item')),
                             'mana_regen_item': ft_str,
-                            'resists': resists_total
+                            'resists': resists_total,
+                            'STR': safe_int(_row_get(row, 'STR_total', 0)),
+                            'STA': safe_int(_row_get(row, 'STA_total', 0)),
+                            'AGI': safe_int(_row_get(row, 'AGI_total', 0)),
+                            'DEX': safe_int(_row_get(row, 'DEX_total', 0)),
+                            'WIS': safe_int(_row_get(row, 'WIS_total', 0)),
+                            'INT': safe_int(_row_get(row, 'INT_total', 0)),
+                            'CHA': safe_int(_row_get(row, 'CHA_total', 0)),
                         }
                     }
                 except Exception as e:
