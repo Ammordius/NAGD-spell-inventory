@@ -110,7 +110,7 @@
       ]
     },
     "Bard": {
-      "skills": { "offense": 252, "defense": 252, "doubleAttack": 252, "dualWield": 245, "1HSlash": 250, "1HBlunt": 250, "2HBlunt": 250, "1HPiercing": 250 },
+      "skills": { "offense": 252, "defense": 252, "doubleAttack": 0, "dualWield": 245, "1HSlash": 250, "1HBlunt": 250, "2HBlunt": 250, "1HPiercing": 250 },
       "str": 280,
       "dex": 280,
       "agi": 280,
