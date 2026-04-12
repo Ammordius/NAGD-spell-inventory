@@ -1106,14 +1106,50 @@ def compare_character_data(current_data, previous_data, character_list=None):
     return deltas
 
 # Equipment slots (1-22 = worn slots; used to detect "no items -> any items" = corpse loot across day boundary)
-EQUIPPED_SLOT_IDS = set(str(i) for i in range(1, 23))
+
+
+def _parse_worn_slot_id(slot_id):
+    """Return int 1-22 if worn slot, else None. Accepts int or str from TSV."""
+    if slot_id is None:
+        return None
+    try:
+        s = int(str(slot_id).strip())
+        if 1 <= s <= 22:
+            return s
+    except (ValueError, TypeError):
+        pass
+    return None
+
+
+def _item_id_counts_as_worn_equipped(item_id):
+    """True if item_id is a real item (not empty/NULL/0). Used for corpse-loot heuristic."""
+    if item_id is None:
+        return False
+    s = str(item_id).strip()
+    if not s or s.upper() == 'NULL':
+        return False
+    try:
+        return int(s) != 0
+    except (ValueError, TypeError):
+        return False
 
 
 def count_equipped(items):
-    """Return number of items in equipped slots (1-22). Used to detect corpse-loot chars."""
+    """Return number of real items in worn slots (1-22). Rows with empty/NULL/0 item_id are ignored."""
     if not items:
         return 0
-    return sum(1 for it in items if it.get('slot_id') in EQUIPPED_SLOT_IDS)
+    return sum(
+        1
+        for it in items
+        if _parse_worn_slot_id(it.get('slot_id')) is not None
+        and _item_id_counts_as_worn_equipped(it.get('item_id'))
+    )
+
+
+def equipped_worn_by_char_from_inventories(char_data, inv_data):
+    """Build { char_name: {'count': N} } for daily delta JSON (historical corpse-loot parity)."""
+    names = set(char_data.keys()) | set(inv_data.keys())
+    return {name: {'count': count_equipped(inv_data.get(name, []))} for name in names}
 
 
 def chars_corpse_loot_excluded(current_inv, previous_inv):
@@ -3289,6 +3325,23 @@ def generate_delta_history(base_dir):
                     if (charName in startState || charName in invDeltas) continue;
                     invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: true };
                 }
+                // Corpse-loot exclusion: 0 real worn at range start -> any worn at end (match delta.html); requires equipped_worn_by_char on both daily JSONs
+                const corpseLootChars = new Set();
+                const emStart = startDelta.equipped_worn_by_char;
+                const emEnd = endDelta.equipped_worn_by_char;
+                if (emStart && emEnd && typeof emStart === 'object' && typeof emEnd === 'object') {
+                    const names = new Set([...Object.keys(emStart), ...Object.keys(emEnd)]);
+                    for (const charName of names) {
+                        const sc = emStart[charName] && emStart[charName].count;
+                        const ec = emEnd[charName] && emEnd[charName].count;
+                        if (typeof sc === 'number' && typeof ec === 'number' && sc === 0 && ec >= 1) {
+                            corpseLootChars.add(charName);
+                        }
+                    }
+                }
+                for (const charName of corpseLootChars) {
+                    delete invDeltas[charName];
+                }
                 const invDeltasLevel1 = {};
                 const invDeltasOthers = {};
                 for (const [charName, delta] of Object.entries(invDeltas)) {
@@ -3437,6 +3490,7 @@ def generate_delta_history(base_dir):
                 for (const [charName, changes] of Object.entries(charChanges)) {
                     if (changes.is_deleted || changes.is_new) continue;
                     if (!charsInBoth.has(charName)) continue;
+                    if (corpseLootChars.has(charName)) continue;
                     
                     const currentLevel = changes.current_level;
                     const previousLevel = changes.previous_level;

@@ -555,7 +555,12 @@ def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str
     baseline_inv_data = baseline['inventories']
     
     # Calculate deltas from baseline
-    from generate_spell_page import compare_character_data, compare_inventories, chars_corpse_loot_excluded
+    from generate_spell_page import (
+        compare_character_data,
+        compare_inventories,
+        chars_corpse_loot_excluded,
+        equipped_worn_by_char_from_inventories,
+    )
     char_deltas = compare_character_data(current_char_data, baseline_char_data, None)
     inv_deltas = compare_inventories(current_inv_data, baseline_inv_data, None)
     # Exclude corpse-loot chars (0 equipped -> any equipped) so delta-history and other consumers don't see them
@@ -588,6 +593,9 @@ def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str
     filename = f"delta_daily_{date_str}.json"
     filepath = os.path.join(base_dir, filename)
     
+    # Per-character worn slot counts (real item_id in slots 1-22) for historical corpse-loot parity
+    equipped_worn_by_char = equipped_worn_by_char_from_inventories(current_char_data, current_inv_data)
+
     # Save delta data (changes from baseline)
     daily_delta = {
         'date': date_str,
@@ -595,6 +603,7 @@ def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str
         'baseline_date': baseline['baseline_date'],
         'char_deltas': char_deltas,
         'inv_deltas': inv_deltas,
+        'equipped_worn_by_char': equipped_worn_by_char,
         'timestamp': datetime.now().isoformat()
     }
     
@@ -661,6 +670,22 @@ def load_daily_delta_json(date_str, base_dir='delta_snapshots'):
     return None
 
 
+def _corpse_loot_chars_from_equipped_meta(delta_prev, delta_curr):
+    """Names with 0 real worn items at prev snapshot and >=1 at curr; only if both have numeric counts."""
+    meta_p = delta_prev.get('equipped_worn_by_char') or {}
+    meta_c = delta_curr.get('equipped_worn_by_char') or {}
+    if not meta_p or not meta_c:
+        return set()
+    out = set()
+    for name in set(meta_p.keys()) & set(meta_c.keys()):
+        cp = meta_p.get(name) or {}
+        cc = meta_c.get(name) or {}
+        a_count, b_count = cp.get('count'), cc.get('count')
+        if isinstance(a_count, int) and isinstance(b_count, int) and a_count == 0 and b_count >= 1:
+            out.add(name)
+    return out
+
+
 def list_available_delta_dates(base_dir='delta_snapshots'):
     """Return sorted list of date strings (YYYY-MM-DD) for which we have a daily delta JSON."""
     import glob
@@ -680,6 +705,8 @@ def list_available_delta_dates(base_dir='delta_snapshots'):
 def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta_snapshots'):
     """Compute AA/HP gains from start_date to end_date using daily delta JSONs (same data as delta-history).
     Only includes characters present in BOTH start and end deltas (excludes anon flip / visibility change).
+    When both daily JSONs include equipped_worn_by_char, excludes characters with 0 real worn at start
+    and >=1 at end (corpse-loot across range), matching delta.html leaderboards.
     Returns dict char_name -> {aa_gain, hp_gain, class, level} or None if either delta is missing."""
     delta_start = load_daily_delta_json(start_date, base_dir)
     delta_end = load_daily_delta_json(end_date, base_dir)
@@ -695,9 +722,12 @@ def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta
         if end_deltas.get(char_name, {}).get('is_deleted'):
             chars_in_both.discard(char_name)
     result = compare_delta_to_delta(delta_start, delta_end)
+    corpse_loot_chars = _corpse_loot_chars_from_equipped_meta(delta_start, delta_end)
     totals = {}
     for char_name, delta in result.get('char_deltas', {}).items():
         if char_name not in chars_in_both:
+            continue
+        if char_name in corpse_loot_chars:
             continue
         if delta.get('is_deleted') or delta.get('is_new'):
             continue
