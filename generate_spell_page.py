@@ -17,7 +17,8 @@ from delta_storage import (
     save_baseline_json, save_daily_delta_json, get_date_range_deltas,
     save_master_baseline, load_master_baseline,
     save_daily_delta_from_baseline, compare_delta_to_delta,
-    load_daily_delta_json
+    load_daily_delta_json,
+    _corpse_loot_chars_from_equipped_meta,
 )
 
 # Character names to look for
@@ -1712,12 +1713,14 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
 
 def generate_delta_html(current_char_data, previous_char_data, current_inv, previous_inv, 
                         magelo_update_date, serverwide=True, char_deltas=None, inv_deltas=None,
-                        mob_tracker_deaths_path=None, observed_at=None, raid_item_sources_path=None):
+                        mob_tracker_deaths_path=None, observed_at=None, raid_item_sources_path=None,
+                        corpse_loot_chars=None):
     """Generate HTML page showing deltas between current and previous magelo dump.
     If serverwide is True, compares all characters, otherwise only mules.
     If char_deltas and inv_deltas are provided, uses those instead of recalculating.
     If mob_tracker_deaths_path and observed_at are set, appends (zone, mob) from this delta to the mob tracker JSON.
-    If raid_item_sources_path is set, used to drop deaths 1 day after repop window ends."""
+    If raid_item_sources_path is set, used to drop deaths 1 day after repop window ends.
+    If corpse_loot_chars is set, use it instead of inferring from current_inv vs previous_inv."""
     
     # Compare character data (serverwide) if not provided
     if char_deltas is None:
@@ -1765,7 +1768,8 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 }
     
     # Characters who went 0 equipped -> any equipped (corpse loot across day boundary): exclude from delta/raid/mob tracker
-    corpse_loot_chars = chars_corpse_loot_excluded(current_inv, previous_inv)
+    if corpse_loot_chars is None:
+        corpse_loot_chars = chars_corpse_loot_excluded(current_inv, previous_inv)
     # Tracked item IDs that are NO DROP (from item_stats); non-no-drop tracked loot needs net-change verification for mob kill
     no_drop_tracked = load_no_drop_tracked_item_ids() & tracked_ids if tracked_ids else set()
     # Serverwide net change per tracked item (excluding corpse-loot chars) for non-no-drop kill verification
@@ -4142,11 +4146,27 @@ def main():
         
         yesterday_delta = load_daily_delta_json(yesterday_date_str, delta_snapshots_dir)
         
+        corpse_loot_override = None
         if today_delta and yesterday_delta:
-            # Compare deltas: today's delta vs yesterday's delta
-            delta_comparison = compare_delta_to_delta(yesterday_delta, today_delta)
+            # Compare deltas: today's delta vs yesterday's delta (inventory visibility matches delta-history when baseline is passed)
+            baseline_chars = baseline.get('characters') if baseline else None
+            delta_comparison = compare_delta_to_delta(
+                yesterday_delta, today_delta, baseline_chars
+            )
             char_deltas = delta_comparison['char_deltas']
             inv_deltas = delta_comparison['inv_deltas']
+            em_y = yesterday_delta.get('equipped_worn_by_char') or {}
+            em_t = today_delta.get('equipped_worn_by_char') or {}
+            if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
+                corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
+                    yesterday_delta, today_delta
+                )
+            else:
+                corpse_loot_override = chars_corpse_loot_excluded(
+                    current_inventories, previous_inventories
+                )
+            for _cn in corpse_loot_override:
+                inv_deltas.pop(_cn, None)
             print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
         elif today_delta:
             # Only today's delta available, show changes from baseline
@@ -4204,7 +4224,8 @@ def main():
             inv_deltas=inv_deltas,
             mob_tracker_deaths_path=mob_tracker_path,
             observed_at=observed_at,
-            raid_item_sources_path=raid_sources_path
+            raid_item_sources_path=raid_sources_path,
+            corpse_loot_chars=corpse_loot_override,
         )
         
         delta_file = os.path.join(base_dir, "delta.html")

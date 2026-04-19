@@ -743,12 +743,60 @@ def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta
     return totals
 
 
-def compare_delta_to_delta(delta_a, delta_b):
+def reconstruct_character_names(baseline_characters, delta):
+    """Character names present in a snapshot = baseline keys + char_deltas, mirroring
+    delta-history.js reconstructCharacterState (keys only)."""
+    names = set((baseline_characters or {}).keys())
+    for char_name, d in (delta.get('char_deltas') or {}).items():
+        if d.get('is_deleted'):
+            names.discard(char_name)
+            continue
+        if d.get('is_new') or char_name not in names:
+            names.add(char_name)
+    return names
+
+
+def _apply_cross_day_inventory_visibility(inv_deltas, delta_a, delta_b, baseline_characters):
+    """Tag inv_deltas with is_visibility_change and add empty rows (delta-history parity)."""
+    if not baseline_characters:
+        return
+    start_names = reconstruct_character_names(baseline_characters, delta_a)
+    end_names = reconstruct_character_names(baseline_characters, delta_b)
+    inv_a = delta_a.get('inv_deltas') or {}
+    inv_b = delta_b.get('inv_deltas') or {}
+    inv_a_keys = set(inv_a.keys())
+    inv_b_keys = set(inv_b.keys())
+
+    for char_name in list(inv_deltas.keys()):
+        row = inv_deltas[char_name]
+        in_start_state = char_name in start_names
+        in_end_state = char_name in end_names
+        is_vis = (in_start_state and not in_end_state) or (not in_start_state and in_end_state)
+        if not is_vis:
+            is_vis = (char_name in inv_a_keys and char_name not in inv_b_keys) or (
+                char_name not in inv_a_keys and char_name in inv_b_keys
+            )
+        row['is_visibility_change'] = is_vis
+
+    empty_vis = {'added': {}, 'removed': {}, 'item_names': {}, 'is_visibility_change': True}
+    for char_name in start_names:
+        if char_name in end_names or char_name in inv_deltas:
+            continue
+        inv_deltas[char_name] = dict(empty_vis)
+    for char_name in end_names:
+        if char_name in start_names or char_name in inv_deltas:
+            continue
+        inv_deltas[char_name] = dict(empty_vis)
+
+
+def compare_delta_to_delta(delta_a, delta_b, baseline_characters=None):
     """Compare two deltas (from baseline) to get changes between Day A and Day B.
     
     Args:
         delta_a: Delta dict for Day A (from baseline)
         delta_b: Delta dict for Day B (from baseline)
+        baseline_characters: Optional baseline ``characters`` dict; when set, merged
+            ``inv_deltas`` get ``is_visibility_change`` (same rules as delta-history.html).
     
     Returns:
         Dict with 'char_deltas' and 'inv_deltas' representing changes from Day A to Day B
@@ -847,6 +895,9 @@ def compare_delta_to_delta(delta_a, delta_b):
                 'removed': dict(removed_items),
                 'item_names': item_names
             }
+
+    if baseline_characters:
+        _apply_cross_day_inventory_visibility(inv_deltas, delta_a, delta_b, baseline_characters)
     
     return {
         'char_deltas': char_deltas,
@@ -897,8 +948,14 @@ def get_date_range_deltas(start_date, end_date, base_dir='delta_snapshots'):
         # This is a limitation but should be rare (only happens across yearly resets)
         pass
     
+    baseline_chars = None
+    if baseline_start == baseline_end:
+        baseline_obj = load_master_baseline(base_dir)
+        if baseline_obj:
+            baseline_chars = baseline_obj.get('characters')
+
     # Compare the two deltas
-    result = compare_delta_to_delta(delta_start, delta_end)
+    result = compare_delta_to_delta(delta_start, delta_end, baseline_chars)
     result['start_date'] = start_date
     result['end_date'] = end_date
     
