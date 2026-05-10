@@ -3999,48 +3999,50 @@ def main():
         f.write(html)
     
     # Try to generate delta page if previous day's files exist
-    # Priority: 1) Yesterday's dated file, 2) _previous files, 3) prototype files
+    # Priority: 1) _previous from CI — yesterday's dump copied before today's file overwrites it.
+    #            2) Yesterday's dated file (M_D_YY.txt) when using dated archives only.
+    #            3) Prototype files for local testing.
+    # Dated names used to win over _previous; a stale M_D_YY snapshot next to fresh TAKP_character.txt
+    # produced a "whole quarter" diff. Prefer _previous whenever present (GitHub Actions always sets it).
     previous_char_file = None
     previous_inv_file = None
     current_char_file = char_file
     current_inv_file = inv_file
-    
-    # First, try to find yesterday's file based on current file's date
-    # This ensures we compare today vs yesterday for daily deltas
+
+    prev_ci_char = os.path.join(char_dir, "TAKP_character_previous.txt")
+    prev_ci_inv = os.path.join(inv_dir, "TAKP_character_inventory_previous.txt")
+
     yesterday_char_file = find_yesterday_file(char_file, char_dir)
     yesterday_inv_file = find_yesterday_file(inv_file, inv_dir)
-    
-    if yesterday_char_file and yesterday_inv_file:
+
+    if os.path.exists(prev_ci_char) and os.path.exists(prev_ci_inv):
+        previous_char_file = prev_ci_char
+        previous_inv_file = prev_ci_inv
+        print("[OK] Using workflow _previous files (yesterday Magelo vs current):")
+        print(f"  Previous: {os.path.basename(previous_char_file)}")
+        print(f"  Current: {os.path.basename(current_char_file)}")
+    elif yesterday_char_file and yesterday_inv_file:
         print(f"[OK] Found yesterday's files based on current file date (daily delta):")
         print(f"  Yesterday: {os.path.basename(yesterday_char_file)}")
         print(f"  Current: {os.path.basename(current_char_file)}")
         previous_char_file = yesterday_char_file
         previous_inv_file = yesterday_inv_file
     else:
-        # Fall back to _previous files from workflow (may be older than yesterday)
-        previous_char_file = os.path.join(char_dir, "TAKP_character_previous.txt")
-        previous_inv_file = os.path.join(inv_dir, "TAKP_character_inventory_previous.txt")
-        if os.path.exists(previous_char_file) and os.path.exists(previous_inv_file):
-            print(f"[WARNING] Using _previous files (yesterday's dated files not found - may not be daily delta):")
-            print(f"  Previous: {os.path.basename(previous_char_file)}")
-            print(f"  Current: {os.path.basename(current_char_file)}")
+        proto_prev_char = os.path.join(char_dir, "1_14_24.txt")
+        proto_prev_inv = os.path.join(inv_dir, "1_14_24.txt")
+        proto_curr_char = os.path.join(char_dir, "1_17_24.txt")
+        proto_curr_inv = os.path.join(inv_dir, "1_17_24.txt")
+
+        if os.path.exists(proto_prev_char) and os.path.exists(proto_prev_inv) and \
+           os.path.exists(proto_curr_char) and os.path.exists(proto_curr_inv):
+            print("⚠ Prototype files found (1_14_24 and 1_17_24), generating serverwide delta page...")
+            previous_char_file = proto_prev_char
+            previous_inv_file = proto_prev_inv
+            current_char_file = proto_curr_char
+            current_inv_file = proto_curr_inv
         else:
-            # Last resort: check for prototype files (for testing)
-            proto_prev_char = os.path.join(char_dir, "1_14_24.txt")
-            proto_prev_inv = os.path.join(inv_dir, "1_14_24.txt")
-            proto_curr_char = os.path.join(char_dir, "1_17_24.txt")
-            proto_curr_inv = os.path.join(inv_dir, "1_17_24.txt")
-            
-            if os.path.exists(proto_prev_char) and os.path.exists(proto_prev_inv) and \
-               os.path.exists(proto_curr_char) and os.path.exists(proto_curr_inv):
-                print("⚠ Prototype files found (1_14_24 and 1_17_24), generating serverwide delta page...")
-                previous_char_file = proto_prev_char
-                previous_inv_file = proto_prev_inv
-                current_char_file = proto_curr_char
-                current_inv_file = proto_curr_inv
-            else:
-                previous_char_file = None
-                previous_inv_file = None
+            previous_char_file = None
+            previous_inv_file = None
     
     if previous_char_file and previous_inv_file and \
        os.path.exists(previous_char_file) and os.path.exists(previous_inv_file):
