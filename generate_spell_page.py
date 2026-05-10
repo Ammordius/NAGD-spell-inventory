@@ -4148,26 +4148,43 @@ def main():
         
         corpse_loot_override = None
         if today_delta and yesterday_delta:
-            # Compare deltas: today's delta vs yesterday's delta (inventory visibility matches delta-history when baseline is passed)
-            baseline_chars = baseline.get('characters') if baseline else None
-            delta_comparison = compare_delta_to_delta(
-                yesterday_delta, today_delta, baseline_chars
-            )
-            char_deltas = delta_comparison['char_deltas']
-            inv_deltas = delta_comparison['inv_deltas']
-            em_y = yesterday_delta.get('equipped_worn_by_char') or {}
-            em_t = today_delta.get('equipped_worn_by_char') or {}
-            if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
-                corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
-                    yesterday_delta, today_delta
+            # Quarterly baseline reset: daily JSONs are cumulative vs different baselines; today's file
+            # omits unchanged chars so compare_delta_to_delta mis-reads missing keys as zeros.
+            baseline_y = yesterday_delta.get('baseline_date')
+            baseline_t = today_delta.get('baseline_date')
+            if baseline_y != baseline_t:
+                print(
+                    f"Baseline transition ({baseline_y} -> {baseline_t}); "
+                    "using previous vs current Magelo files for delta.html"
                 )
-            else:
+                char_deltas = compare_character_data(current_char_data, previous_char_data, None)
+                inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
                 corpse_loot_override = chars_corpse_loot_excluded(
                     current_inventories, previous_inventories
                 )
-            for _cn in corpse_loot_override:
-                inv_deltas.pop(_cn, None)
-            print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
+                for _cn in corpse_loot_override:
+                    inv_deltas.pop(_cn, None)
+            else:
+                # Compare deltas: today's delta vs yesterday's delta (inventory visibility matches delta-history when baseline is passed)
+                baseline_chars = baseline.get('characters') if baseline else None
+                delta_comparison = compare_delta_to_delta(
+                    yesterday_delta, today_delta, baseline_chars
+                )
+                char_deltas = delta_comparison['char_deltas']
+                inv_deltas = delta_comparison['inv_deltas']
+                em_y = yesterday_delta.get('equipped_worn_by_char') or {}
+                em_t = today_delta.get('equipped_worn_by_char') or {}
+                if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
+                    corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
+                        yesterday_delta, today_delta
+                    )
+                else:
+                    corpse_loot_override = chars_corpse_loot_excluded(
+                        current_inventories, previous_inventories
+                    )
+                for _cn in corpse_loot_override:
+                    inv_deltas.pop(_cn, None)
+                print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
         elif today_delta:
             # Only today's delta available, show changes from baseline
             char_deltas = today_delta.get('char_deltas', {})
