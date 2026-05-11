@@ -712,6 +712,11 @@ def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta
     delta_end = load_daily_delta_json(end_date, base_dir)
     if not delta_start or not delta_end:
         return None
+    baseline_chars = None
+    if delta_start.get('baseline_date') == delta_end.get('baseline_date'):
+        bl = load_master_baseline(base_dir)
+        if bl:
+            baseline_chars = bl.get('characters')
     # Only consider characters present in both snapshots (same rule as delta-history / general visibility)
     start_chars = set(delta_start.get('char_deltas', {}).keys())
     end_chars = set(delta_end.get('char_deltas', {}).keys())
@@ -721,7 +726,7 @@ def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta
     for char_name in list(chars_in_both):
         if end_deltas.get(char_name, {}).get('is_deleted'):
             chars_in_both.discard(char_name)
-    result = compare_delta_to_delta(delta_start, delta_end)
+    result = compare_delta_to_delta(delta_start, delta_end, baseline_chars)
     corpse_loot_chars = _corpse_loot_chars_from_equipped_meta(delta_start, delta_end)
     totals = {}
     for char_name, delta in result.get('char_deltas', {}).items():
@@ -789,6 +794,26 @@ def _apply_cross_day_inventory_visibility(inv_deltas, delta_a, delta_b, baseline
         inv_deltas[char_name] = dict(empty_vis)
 
 
+def _cumulative_char_stats_at_slice(baseline_characters, char_name, char_deltas_dict):
+    """Level/AA/HP at end of day for one daily delta JSON.
+
+    Daily files omit characters identical to baseline; missing key means baseline stats.
+    """
+    row = (char_deltas_dict or {}).get(char_name)
+    if row:
+        lvl = row.get('current_level', row.get('previous_level', 0))
+        aa = row.get('current_aa_total', row.get('previous_aa_total', 0))
+        hp = row.get('current_hp', row.get('previous_hp', 0))
+        return (int(lvl or 0), int(aa or 0), int(hp or 0))
+    bc = (baseline_characters or {}).get(char_name)
+    if bc:
+        lvl = int(bc.get('level', 0) or 0)
+        aa = int(bc.get('aa_unspent', 0) or 0) + int(bc.get('aa_spent', 0) or 0)
+        hp = int(bc.get('hp_max_total', 0) or 0)
+        return (lvl, aa, hp)
+    return (0, 0, 0)
+
+
 def compare_delta_to_delta(delta_a, delta_b, baseline_characters=None):
     """Compare two deltas (from baseline) to get changes between Day A and Day B.
     
@@ -797,6 +822,8 @@ def compare_delta_to_delta(delta_a, delta_b, baseline_characters=None):
         delta_b: Delta dict for Day B (from baseline)
         baseline_characters: Optional baseline ``characters`` dict; when set, merged
             ``inv_deltas`` get ``is_visibility_change`` (same rules as delta-history.html).
+            **Strongly recommended:** daily JSONs omit unchanged characters; without baseline,
+            missing keys are misread as 0 (inflating day-over-day to full cumulative-from-baseline).
     
     Returns:
         Dict with 'char_deltas' and 'inv_deltas' representing changes from Day A to Day B
@@ -809,18 +836,20 @@ def compare_delta_to_delta(delta_a, delta_b, baseline_characters=None):
     # Get all characters from both deltas
     all_chars = set(list(delta_a.get('char_deltas', {}).keys()) + 
                     list(delta_b.get('char_deltas', {}).keys()))
+    cd_a = delta_a.get('char_deltas') or {}
+    cd_b = delta_b.get('char_deltas') or {}
     
     for char_name in all_chars:
-        delta_a_char = delta_a.get('char_deltas', {}).get(char_name, {})
-        delta_b_char = delta_b.get('char_deltas', {}).get(char_name, {})
+        delta_a_char = cd_a.get(char_name, {})
+        delta_b_char = cd_b.get(char_name, {})
         
-        # Extract values (these are cumulative from baseline)
-        a_level = delta_a_char.get('current_level', delta_a_char.get('previous_level', 0))
-        b_level = delta_b_char.get('current_level', delta_b_char.get('previous_level', 0))
-        a_aa = delta_a_char.get('current_aa_total', delta_a_char.get('previous_aa_total', 0))
-        b_aa = delta_b_char.get('current_aa_total', delta_b_char.get('previous_aa_total', 0))
-        a_hp = delta_a_char.get('current_hp', delta_a_char.get('previous_hp', 0))
-        b_hp = delta_b_char.get('current_hp', delta_b_char.get('previous_hp', 0))
+        # Extract values (cumulative-from-baseline snapshot at each day; missing row = baseline)
+        a_level, a_aa, a_hp = _cumulative_char_stats_at_slice(
+            baseline_characters, char_name, cd_a
+        )
+        b_level, b_aa, b_hp = _cumulative_char_stats_at_slice(
+            baseline_characters, char_name, cd_b
+        )
         
         # Calculate changes from Day A to Day B
         level_change = b_level - a_level
