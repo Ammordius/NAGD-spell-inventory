@@ -102,6 +102,20 @@ jobs:
           echo "yesterday_date=" >> $GITHUB_OUTPUT
         fi
     
+    - name: Calculate week and month boundaries
+      id: date-info
+      run: |
+        CURRENT_DATE="${{ steps.check-update.outputs.normalized_date }}"
+        if [ "$CURRENT_DATE" != "unknown" ]; then
+          WEEK_START=$(python3 -c "from datetime import datetime, timedelta; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); days_since_monday = dt.weekday(); monday = dt - timedelta(days=days_since_monday); print(monday.strftime('%Y-%m-%d'))")
+          MONTH_START=$(python3 -c "from datetime import datetime; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); print(dt.replace(day=1).strftime('%Y-%m-%d'))")
+          echo "week_start=$WEEK_START" >> $GITHUB_OUTPUT
+          echo "month_start=$MONTH_START" >> $GITHUB_OUTPUT
+        else
+          echo "week_start=" >> $GITHUB_OUTPUT
+          echo "month_start=" >> $GITHUB_OUTPUT
+        fi
+    
     - name: Restore yesterday's cache (to get previous files)
       uses: actions/cache@v5
       id: cache-yesterday
@@ -525,6 +539,10 @@ jobs:
           echo "::warning::Current and previous inventory files are IDENTICAL. Inventory delta will be empty."
         fi
         echo "✓ Current and previous character files differ - delta comparison is valid."
+        Y="${{ steps.yesterday.outputs.yesterday_date }}"
+        if [ -n "$Y" ] && [ ! -f "delta_snapshots/delta_daily_${Y}.json.gz" ]; then
+          echo "::warning::delta_snapshots/delta_daily_${Y}.json.gz not in repo — delta.html uses Magelo file diff for yesterday vs today (compare_delta_to_delta skipped until the file is committed)"
+        fi
     
     # Restore mob_tracker_deaths.json from last deploy so we merge with existing deaths (file is not in repo).
     - name: Fetch current mob tracker deaths from Pages (for persistence across runs)
@@ -923,20 +941,6 @@ jobs:
         path: ./deploy
         name: github-pages-${{ github.run_id }}
         retention-days: 3
-    
-    - name: Calculate week and month boundaries
-      id: date-info
-      run: |
-        CURRENT_DATE="${{ steps.check-update.outputs.normalized_date }}"
-        if [ "$CURRENT_DATE" != "unknown" ]; then
-          WEEK_START=$(python3 -c "from datetime import datetime, timedelta; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); days_since_monday = dt.weekday(); monday = dt - timedelta(days=days_since_monday); print(monday.strftime('%Y-%m-%d'))")
-          MONTH_START=$(python3 -c "from datetime import datetime; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); print(dt.replace(day=1).strftime('%Y-%m-%d'))")
-          echo "week_start=$WEEK_START" >> $GITHUB_OUTPUT
-          echo "month_start=$MONTH_START" >> $GITHUB_OUTPUT
-        else
-          echo "week_start=" >> $GITHUB_OUTPUT
-          echo "month_start=" >> $GITHUB_OUTPUT
-        fi
     
     - name: Weekly/monthly baseline JSON (handled by Python script)
       run: |

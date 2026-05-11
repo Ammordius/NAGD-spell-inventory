@@ -4141,7 +4141,6 @@ def main():
         today_delta = load_daily_delta_json(date_str, delta_snapshots_dir)
         
         # Calculate yesterday's date
-        from datetime import timedelta
         today_dt = datetime.strptime(date_str, '%Y-%m-%d')
         yesterday_dt = today_dt - timedelta(days=1)
         yesterday_date_str = yesterday_dt.strftime('%Y-%m-%d')
@@ -4188,10 +4187,19 @@ def main():
                     inv_deltas.pop(_cn, None)
                 print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
         elif today_delta:
-            # Only today's delta available, show changes from baseline
-            char_deltas = today_delta.get('char_deltas', {})
-            inv_deltas = today_delta.get('inv_deltas', {})
-            print(f"Showing changes from baseline to {date_str} (yesterday's delta not available)")
+            # Today's JSON is cumulative vs baseline — never use it for the daily HTML report when
+            # yesterday's delta file is missing (would show the full baseline window, e.g. ~90 days).
+            print(
+                f"Yesterday's delta JSON missing ({yesterday_date_str}); "
+                "using previous vs current Magelo files for delta.html"
+            )
+            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
+            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+            corpse_loot_override = chars_corpse_loot_excluded(
+                current_inventories, previous_inventories
+            )
+            for _cn in corpse_loot_override:
+                inv_deltas.pop(_cn, None)
         else:
             # Fall back to comparing current vs previous files (backward compatibility)
             print("Warning: Daily deltas not available, falling back to file comparison")
