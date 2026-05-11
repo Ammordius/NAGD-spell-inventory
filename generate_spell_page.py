@@ -4172,7 +4172,11 @@ def main():
                     yesterday_delta, today_delta, baseline_chars
                 )
                 char_deltas = delta_comparison['char_deltas']
-                inv_deltas = delta_comparison['inv_deltas']
+                # inv_deltas from JSON are each "vs baseline" and omit chars with no inv change vs baseline.
+                # compare_delta_to_delta subtracts two such sparse rows and treats a missing row like {} on
+                # both added/removed axes, which lists essentially every equipped item as gained in one day.
+                # Consecutive Magelo dumps are authoritative for inventory on this page.
+                inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
                 em_y = yesterday_delta.get('equipped_worn_by_char') or {}
                 em_t = today_delta.get('equipped_worn_by_char') or {}
                 if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
