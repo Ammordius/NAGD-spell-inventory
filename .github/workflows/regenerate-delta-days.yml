@@ -6,9 +6,11 @@
 #   baseline_era_date: 2026-02-09
 #   force: true
 #
-# Requires delta_snapshots/baseline_master_<baseline_era_date>.json.gz in the repo (or restored
-# from a baseline cache entry that contains it). Copies that file over baseline_master.json.gz
-# before save_daily_delta_from_baseline (which always reads the master path).
+# Master baseline file ``delta_snapshots/baseline_master.json.gz`` must exist before Python runs.
+# It is supplied by (in order): optional baseline_cache_date exact cache; default baseline cache
+# restore (restore-keys magelo-baseline-); baseline_era_date copy from repo archive
+# ``baseline_master_<date>.json.gz``; infer-from-existing-delta; curl from GitHub Pages (current-era
+# master only). If none apply, set inputs or see docs/DELTA_BASELINE_HANDOFF_2026-05.md.
 
 name: Regenerate delta daily JSONs
 
@@ -25,7 +27,7 @@ on:
         type: string
         default: ""
       baseline_cache_date:
-        description: "Optional. Exact cache key day magelo-baseline-YYYY-MM-DD to restore before era copy (when archive not in repo yet)."
+        description: "Optional. Exact magelo-baseline-YYYY-MM-DD cache key. If empty, workflow still restores baseline via restore-keys magelo-baseline- (latest prior cache); for historical days prefer baseline_era_date so baseline_date matches the delta era."
         required: false
         type: string
         default: ""
@@ -90,8 +92,9 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Optional — restore baseline bundle from cache
+      - name: Restore baseline bundle from cache (exact key)
         if: ${{ inputs.baseline_cache_date != '' }}
+        id: cache-baseline-exact
         uses: actions/cache@v5
         continue-on-error: true
         with:
@@ -100,6 +103,19 @@ jobs:
             delta_snapshots/baseline_master_*.json.gz
           key: magelo-baseline-${{ inputs.baseline_cache_date }}
 
+      - name: Restore baseline bundle from cache (default restore-keys)
+        if: ${{ inputs.baseline_cache_date == '' }}
+        id: cache-baseline-restore-keys
+        uses: actions/cache@v5
+        continue-on-error: true
+        with:
+          path: |
+            delta_snapshots/baseline_master.json.gz
+            delta_snapshots/baseline_master_*.json.gz
+          key: magelo-baseline-regen-${{ github.run_id }}-${{ matrix.date }}
+          restore-keys: |
+            magelo-baseline-
+
       - name: Apply baseline era (copy archived baseline over master)
         env:
           ERA: ${{ inputs.baseline_era_date }}
@@ -107,7 +123,7 @@ jobs:
           set -euo pipefail
           mkdir -p delta_snapshots
           if [ -z "${ERA}" ]; then
-            echo "No baseline_era_date — using repo baseline_master.json.gz as-is."
+            echo "No baseline_era_date — using baseline_master.json.gz from checkout/cache/infer."
             exit 0
           fi
           ARCH="delta_snapshots/baseline_master_${ERA}.json.gz"
@@ -117,6 +133,11 @@ jobs:
           fi
           cp -f "$ARCH" delta_snapshots/baseline_master.json.gz
           echo "✓ Copied $ARCH -> baseline_master.json.gz"
+
+      - name: Log baseline cache restore
+        run: |
+          echo "Exact-key baseline cache hit: ${{ steps.cache-baseline-exact.outputs.cache-hit }}"
+          echo "Restore-keys baseline cache hit: ${{ steps.cache-baseline-restore-keys.outputs.cache-hit }}"
 
       # Exact key only: do not use restore-keys magelo-dump- or a wrong day's dump could be restored.
       - name: Restore Magelo dump for ${{ matrix.date }}
@@ -134,23 +155,112 @@ jobs:
           echo "::error::No Actions cache hit for magelo-dump-${{ matrix.date }}. Cache may have expired; regenerate is not possible from CI."
           exit 1
 
+      - name: Infer baseline era from existing delta (before force delete)
+        env:
+          ERA_IN: ${{ inputs.baseline_era_date }}
+        run: |
+          set -euo pipefail
+          mkdir -p delta_snapshots
+          if [ -f delta_snapshots/baseline_master.json.gz ]; then
+            echo "Master baseline already present; skip infer."
+            exit 0
+          fi
+          if [ -n "${ERA_IN}" ]; then
+            echo "baseline_era_date is set; infer skipped (Apply baseline era should have provided master)."
+            exit 0
+          fi
+          DELTA="delta_snapshots/delta_daily_${{ matrix.date }}.json.gz"
+          if [ ! -f "$DELTA" ]; then
+            echo "No existing $DELTA to infer baseline_date from."
+            exit 0
+          fi
+          BD=$(python3 -c "import gzip, json; d=json.load(gzip.open(\"$DELTA\", \"rt\", encoding=\"utf-8\")); print(d.get(\"baseline_date\") or \"\")")
+          if [ -z "$BD" ]; then
+            echo "Could not read baseline_date from existing delta."
+            exit 0
+          fi
+          ARCH="delta_snapshots/baseline_master_${BD}.json.gz"
+          if [ ! -f "$ARCH" ]; then
+            echo "Inferred baseline_date=${BD} but no $ARCH in repo (add archive or use baseline_cache_date)."
+            exit 0
+          fi
+          cp -f "$ARCH" delta_snapshots/baseline_master.json.gz
+          echo "✓ Inferred era ${BD} from existing delta → baseline_master.json.gz"
+
+      # Last resort when repo + Actions cache have no baseline (e.g. fork never ran daily, or cache expired).
+      # Live site baseline matches the current era only — for older baseline_date eras set baseline_era_date.
+      - name: Fetch master baseline from GitHub Pages (fallback)
+        run: |
+          set -euo pipefail
+          mkdir -p delta_snapshots
+          if [ -f delta_snapshots/baseline_master.json.gz ]; then
+            echo "baseline_master.json.gz already present; skip Pages fetch."
+            exit 0
+          fi
+          OWNER="${{ github.repository_owner }}"
+          REPO="${{ github.event.repository.name }}"
+          REPO_LC=$(echo "$REPO" | tr '[:upper:]' '[:lower:]')
+          URL="https://${OWNER}.github.io/${REPO_LC}/delta_snapshots/baseline_master.json.gz"
+          echo "Trying Pages baseline: ${URL}"
+          if curl -fsSL --connect-timeout 15 --max-time 120 "$URL" -o delta_snapshots/baseline_master.json.gz; then
+            echo "✓ Downloaded baseline_master.json.gz from GitHub Pages"
+          else
+            echo "Pages fetch failed (repo may not publish Pages, or path 404); continuing."
+            rm -f delta_snapshots/baseline_master.json.gz
+          fi
+
       - name: Remove existing delta (force)
         if: ${{ github.event.inputs.force != 'false' }}
         run: |
           rm -f "delta_snapshots/delta_daily_${{ matrix.date }}.json.gz" "delta_snapshots/delta_daily_${{ matrix.date }}.json" || true
 
+      - name: Verify master baseline exists
+        run: |
+          set -euo pipefail
+          if [ ! -f delta_snapshots/baseline_master.json.gz ]; then
+            echo "::error::delta_snapshots/baseline_master.json.gz is missing. Set baseline_era_date so baseline_master_<date>.json.gz from the repo is copied over the master path, and/or baseline_cache_date for an exact magelo-baseline-YYYY-MM-DD cache hit. With no inputs, the workflow restores baseline via restore-keys magelo-baseline-; if cache expired, commit baseline archives to the repo or run a daily job to refresh cache. See docs/DELTA_BASELINE_HANDOFF_2026-05.md."
+            exit 1
+          fi
+          python3 -c "import gzip, json; b=json.load(gzip.open('delta_snapshots/baseline_master.json.gz', 'rt', encoding='utf-8')); print('Using master baseline_date:', b.get('baseline_date', '?'))"
+
       - name: Generate delta_daily_${{ matrix.date }}.json.gz
         run: |
           mkdir -p character inventory delta_snapshots
           cat > /tmp/regen_one_day.py << 'ENDPY'
+          import gzip
+          import json
           import os
+          import shutil
           import sys
 
           sys.path.insert(0, os.getcwd())
           from generate_spell_page import parse_character_data, parse_inventory_file
-          from delta_storage import save_daily_delta_from_baseline
+          from delta_storage import load_master_baseline, save_daily_delta_from_baseline
 
           target = sys.argv[1]
+          base_dir = "delta_snapshots"
+
+          def ensure_master_baseline():
+              if load_master_baseline(base_dir):
+                  return
+              delta_path = os.path.join(base_dir, f"delta_daily_{target}.json.gz")
+              if os.path.isfile(delta_path):
+                  with gzip.open(delta_path, "rt", encoding="utf-8") as f:
+                      bd = (json.load(f).get("baseline_date") or "").strip()
+                  if bd:
+                      arch = os.path.join(base_dir, f"baseline_master_{bd}.json.gz")
+                      if os.path.isfile(arch):
+                          shutil.copy2(arch, os.path.join(base_dir, "baseline_master.json.gz"))
+                          return
+              print(
+                  "::error::No master baseline. Workflow should restore cache, copy baseline_master_<era>.json.gz, "
+                  "infer from delta_daily, or fetch from Pages. See docs/DELTA_BASELINE_HANDOFF_2026-05.md",
+                  file=sys.stderr,
+              )
+              sys.exit(1)
+
+          ensure_master_baseline()
+
           char_data = parse_character_data("character/TAKP_character.txt", None)
           char_ids = {}
           with open("character/TAKP_character.txt", "r", encoding="utf-8") as f:
@@ -165,7 +275,7 @@ jobs:
           )
           print("OK", target)
           ENDPY
-          python /tmp/regen_one_day.py "${{ matrix.date }}"
+          python3 /tmp/regen_one_day.py "${{ matrix.date }}"
 
       - name: Upload generated delta
         uses: actions/upload-artifact@v4
