@@ -858,8 +858,10 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Add any new delta JSON files
+        # Add any new delta JSON files and dated baseline archives (rotation writes
+        # baseline_master_YYYY-MM-DD.json.gz; without git add it never reaches the repo/Pages clone).
         git add delta_snapshots/delta_daily_*.json.gz 2>/dev/null || true
+        git add delta_snapshots/baseline_master_*.json.gz 2>/dev/null || true
         if git diff --staged --quiet; then
           echo "No new delta files to commit"
         else

@@ -484,6 +484,35 @@ def load_master_baseline(base_dir='delta_snapshots'):
     
     return None
 
+
+def load_baseline_for_date(baseline_date, base_dir='delta_snapshots'):
+    """Load the master baseline snapshot for a given ``baseline_date`` string.
+
+    Prefer ``baseline_master_<baseline_date>.json.gz`` (written on rotation). If missing,
+    use ``baseline_master.json.gz`` only when its embedded ``baseline_date`` matches
+    (avoids using a post-rotation master for old daily JSONs).
+    """
+    import gzip
+
+    if not baseline_date or baseline_date == 'Unknown':
+        return load_master_baseline(base_dir)
+
+    archive = os.path.join(base_dir, f'baseline_master_{baseline_date}.json.gz')
+    if os.path.isfile(archive):
+        with gzip.open(archive, 'rt', encoding='utf-8') as f:
+            baseline = json.load(f)
+        return {
+            'characters': baseline.get('characters', {}),
+            'inventories': baseline.get('inventories', {}),
+            'baseline_date': baseline.get('baseline_date', baseline_date),
+        }
+
+    master = load_master_baseline(base_dir)
+    if master and str(master.get('baseline_date')) == str(baseline_date):
+        return master
+    return master
+
+
 def should_reset_baseline(baseline_date, current_date, reset_interval_days=90):
     """Check if baseline should be reset (e.g., quarterly).
     
@@ -708,15 +737,23 @@ def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta
     When both daily JSONs include equipped_worn_by_char, excludes characters with 0 real worn at start
     and >=1 at end (corpse-loot across range), matching delta.html leaderboards.
     Returns dict char_name -> {aa_gain, hp_gain, class, level} or None if either delta is missing."""
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
     delta_start = load_daily_delta_json(start_date, base_dir)
     delta_end = load_daily_delta_json(end_date, base_dir)
     if not delta_start or not delta_end:
         return None
-    baseline_chars = None
-    if delta_start.get('baseline_date') == delta_end.get('baseline_date'):
-        bl = load_master_baseline(base_dir)
-        if bl:
-            baseline_chars = bl.get('characters')
+    bd_s = delta_start.get('baseline_date', 'Unknown')
+    bd_e = delta_end.get('baseline_date', 'Unknown')
+    if bd_s != 'Unknown' and bd_e != 'Unknown' and bd_s != bd_e:
+        result = compare_delta_to_delta_reconstructed(delta_start, delta_end, base_dir)
+    else:
+        baseline_chars = None
+        if bd_s == bd_e and bd_s != 'Unknown':
+            bl = load_baseline_for_date(bd_s, base_dir)
+            if bl:
+                baseline_chars = bl.get('characters')
+        result = compare_delta_to_delta(delta_start, delta_end, baseline_chars)
     # Only consider characters present in both snapshots (same rule as delta-history / general visibility)
     start_chars = set(delta_start.get('char_deltas', {}).keys())
     end_chars = set(delta_end.get('char_deltas', {}).keys())
@@ -726,7 +763,6 @@ def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta
     for char_name in list(chars_in_both):
         if end_deltas.get(char_name, {}).get('is_deleted'):
             chars_in_both.discard(char_name)
-    result = compare_delta_to_delta(delta_start, delta_end, baseline_chars)
     corpse_loot_chars = _corpse_loot_chars_from_equipped_meta(delta_start, delta_end)
     totals = {}
     for char_name, delta in result.get('char_deltas', {}).items():
@@ -812,6 +848,191 @@ def _cumulative_char_stats_at_slice(baseline_characters, char_name, char_deltas_
         hp = int(bc.get('hp_max_total', 0) or 0)
         return (lvl, aa, hp)
     return (0, 0, 0)
+
+
+def _apply_cross_day_inventory_visibility_dual(
+    inv_deltas, delta_a, delta_b, baseline_a, baseline_b
+):
+    """Tag inv_deltas with is_visibility_change when the two days use different baselines."""
+    bc_a = (baseline_a or {}).get('characters') or {}
+    bc_b = (baseline_b or {}).get('characters') or {}
+    start_names = reconstruct_character_names(bc_a, delta_a)
+    end_names = reconstruct_character_names(bc_b, delta_b)
+    inv_a = delta_a.get('inv_deltas') or {}
+    inv_b = delta_b.get('inv_deltas') or {}
+    inv_a_keys = set(inv_a.keys())
+    inv_b_keys = set(inv_b.keys())
+
+    for char_name in list(inv_deltas.keys()):
+        row = inv_deltas[char_name]
+        in_start_state = char_name in start_names
+        in_end_state = char_name in end_names
+        is_vis = (in_start_state and not in_end_state) or (not in_start_state and in_end_state)
+        if not is_vis:
+            is_vis = (char_name in inv_a_keys and char_name not in inv_b_keys) or (
+                char_name not in inv_a_keys and char_name in inv_b_keys
+            )
+        row['is_visibility_change'] = is_vis
+
+    empty_vis = {'added': {}, 'removed': {}, 'item_names': {}, 'is_visibility_change': True}
+    for char_name in start_names:
+        if char_name in end_names or char_name in inv_deltas:
+            continue
+        inv_deltas[char_name] = dict(empty_vis)
+    for char_name in end_names:
+        if char_name in start_names or char_name in inv_deltas:
+            continue
+        inv_deltas[char_name] = dict(empty_vis)
+
+
+def _reconstruct_inventory_counts_for_char(baseline_inv, inv_deltas, char_name, no_rent):
+    """Absolute item_id -> count for one character: baseline inventories + cumulative inv delta."""
+    counts = defaultdict(int)
+    no_rent = no_rent or set()
+    for item in (baseline_inv or {}).get(char_name, []):
+        item_id = item.get('item_id')
+        try:
+            iid = int(item_id)
+            if iid in no_rent:
+                continue
+        except (TypeError, ValueError):
+            pass
+        kid = str(item_id)
+        counts[kid] += 1
+    row = (inv_deltas or {}).get(char_name)
+    if not row:
+        return {k: v for k, v in counts.items() if v > 0}
+    for item_id, n in (row.get('added') or {}).items():
+        kid = str(item_id)
+        try:
+            if int(kid) in no_rent:
+                continue
+        except (TypeError, ValueError):
+            pass
+        counts[kid] += int(n or 0)
+    for item_id, n in (row.get('removed') or {}).items():
+        kid = str(item_id)
+        try:
+            if int(kid) in no_rent:
+                continue
+        except (TypeError, ValueError):
+            pass
+        counts[kid] -= int(n or 0)
+    return {k: v for k, v in counts.items() if v > 0}
+
+
+def _reconstruct_all_inventory_counts(baseline_inv, inv_deltas, no_rent):
+    inv_deltas = inv_deltas or {}
+    chars = set((baseline_inv or {}).keys()) | set(inv_deltas.keys())
+    out = {}
+    for char_name in chars:
+        c = _reconstruct_inventory_counts_for_char(baseline_inv, inv_deltas, char_name, no_rent)
+        if c:
+            out[char_name] = c
+    return out
+
+
+def _diff_inv_absolute_maps(abs_start, abs_end, inv_delta_start, inv_delta_end):
+    """Net inventory change between two absolute per-character item count maps."""
+    inv_deltas = {}
+    meta_s = inv_delta_start or {}
+    meta_e = inv_delta_end or {}
+    all_chars = set(abs_start.keys()) | set(abs_end.keys())
+    for char_name in all_chars:
+        a = abs_start.get(char_name, {})
+        b = abs_end.get(char_name, {})
+        row_s = meta_s.get(char_name) or {}
+        row_e = meta_e.get(char_name) or {}
+        names_s = row_s.get('item_names') or {}
+        names_e = row_e.get('item_names') or {}
+        all_ids = set(a.keys()) | set(b.keys())
+        added_items = {}
+        removed_items = {}
+        item_names = {}
+        for item_id in all_ids:
+            ca = int(a.get(item_id, 0) or 0)
+            cb = int(b.get(item_id, 0) or 0)
+            net = cb - ca
+            if net > 0:
+                added_items[item_id] = net
+                if names_e.get(item_id):
+                    item_names[item_id] = names_e[item_id]
+                elif names_s.get(item_id):
+                    item_names[item_id] = names_s[item_id]
+            elif net < 0:
+                removed_items[item_id] = -net
+                if names_s.get(item_id):
+                    item_names[item_id] = names_s[item_id]
+                elif names_e.get(item_id):
+                    item_names[item_id] = names_e[item_id]
+        if added_items or removed_items:
+            inv_deltas[char_name] = {
+                'added': added_items,
+                'removed': removed_items,
+                'item_names': item_names,
+            }
+    return inv_deltas
+
+
+def compare_delta_to_delta_reconstructed(delta_start, delta_end, base_dir='delta_snapshots'):
+    """Range delta when daily JSONs use different ``baseline_date`` values.
+
+    Reconstructs per-endpoint character stats and inventory using each day's baseline
+    snapshot (archived ``baseline_master_<date>.json.gz`` when present), then diffs.
+    """
+    from generate_spell_page import load_no_rent_items
+
+    bd_s = delta_start.get('baseline_date')
+    bd_e = delta_end.get('baseline_date')
+    bl_s = load_baseline_for_date(bd_s, base_dir) if bd_s else None
+    bl_e = load_baseline_for_date(bd_e, base_dir) if bd_e else None
+    bc_s = (bl_s or {}).get('characters') or {}
+    bc_e = (bl_e or {}).get('characters') or {}
+    bi_s = (bl_s or {}).get('inventories') or {}
+    bi_e = (bl_e or {}).get('inventories') or {}
+    no_rent = load_no_rent_items() or set()
+
+    char_deltas = {}
+    cd_s = delta_start.get('char_deltas') or {}
+    cd_e = delta_end.get('char_deltas') or {}
+    all_chars = set(list(cd_s.keys()) + list(cd_e.keys()))
+    for char_name in all_chars:
+        delta_a_char = cd_s.get(char_name, {})
+        delta_b_char = cd_e.get(char_name, {})
+        a_level, a_aa, a_hp = _cumulative_char_stats_at_slice(bc_s, char_name, cd_s)
+        b_level, b_aa, b_hp = _cumulative_char_stats_at_slice(bc_e, char_name, cd_e)
+        level_change = b_level - a_level
+        aa_change = b_aa - a_aa
+        hp_change = b_hp - a_hp
+        if level_change != 0 or aa_change != 0 or hp_change != 0 or \
+           delta_b_char.get('is_new', False) or delta_b_char.get('is_deleted', False):
+            char_deltas[char_name] = {
+                'name': char_name,
+                'level_change': level_change,
+                'aa_total_change': aa_change,
+                'hp_change': hp_change,
+                'current_level': b_level,
+                'previous_level': a_level,
+                'current_aa_total': b_aa,
+                'previous_aa_total': a_aa,
+                'current_hp': b_hp,
+                'previous_hp': a_hp,
+                'class': delta_b_char.get('class', '') or delta_a_char.get('class', ''),
+                'is_new': delta_b_char.get('is_new', False) and not delta_a_char.get('is_new', False),
+                'is_deleted': delta_b_char.get('is_deleted', False) and not delta_a_char.get('is_deleted', False)
+            }
+
+    abs_inv_s = _reconstruct_all_inventory_counts(bi_s, delta_start.get('inv_deltas'), no_rent)
+    abs_inv_e = _reconstruct_all_inventory_counts(bi_e, delta_end.get('inv_deltas'), no_rent)
+    inv_deltas = _diff_inv_absolute_maps(
+        abs_inv_s, abs_inv_e, delta_start.get('inv_deltas'), delta_end.get('inv_deltas')
+    )
+    _apply_cross_day_inventory_visibility_dual(inv_deltas, delta_start, delta_end, bl_s, bl_e)
+
+    return {
+        'char_deltas': char_deltas,
+        'inv_deltas': inv_deltas,
+    }
 
 
 def compare_delta_to_delta(delta_a, delta_b, baseline_characters=None):
@@ -935,57 +1156,53 @@ def compare_delta_to_delta(delta_a, delta_b, baseline_characters=None):
 
 def get_date_range_deltas(start_date, end_date, base_dir='delta_snapshots'):
     """Get deltas for a date range by comparing two daily delta JSONs.
-    This is much more efficient than aggregating all days in between.
-    
-    Handles baseline transitions automatically - if dates are from different baseline periods,
-    it will use the appropriate baseline for each.
-    
-    Args:
-        start_date: Start date string (YYYY-MM-DD)
-        end_date: End date string (YYYY-MM-DD)
-        base_dir: Base directory for daily deltas
-    
-    Returns:
-        Dict with 'char_deltas' and 'inv_deltas' representing changes from start_date to end_date
+
+    Compares the two endpoint daily files (not every calendar day in between).
+    ``start_date`` and ``end_date`` may be passed in either order; they are normalized
+    so the earlier calendar day is always the range start.
+
+    When both dailies share the same ``baseline_date``, inventory math subtracts two
+    cumulative-from-baseline snapshots (requires baseline character metadata for sparse
+    rows). When ``baseline_date`` differs (baseline rotation), character and inventory
+    changes are computed by reconstructing each endpoint from its era baseline + delta,
+    then diffing (needs ``baseline_master_<baseline_date>.json.gz`` archives on disk).
     """
-    # Load deltas for both dates
-    delta_start = load_daily_delta_json(start_date, base_dir)
-    delta_end = load_daily_delta_json(end_date, base_dir)
-    
-    if not delta_start:
-        raise ValueError(f"Delta not found for start date: {start_date}")
-    if not delta_end:
-        raise ValueError(f"Delta not found for end date: {end_date}")
-    
-    # If same date, return empty deltas (no changes)
     if start_date == end_date:
         return {
             'char_deltas': {},
             'inv_deltas': {},
             'start_date': start_date,
-            'end_date': end_date
+            'end_date': end_date,
         }
-    
-    # Check if deltas are from different baseline periods
+
+    if start_date > end_date:
+        start_date, end_date = end_date, start_date
+
+    delta_start = load_daily_delta_json(start_date, base_dir)
+    delta_end = load_daily_delta_json(end_date, base_dir)
+
+    if not delta_start:
+        raise ValueError(f"Delta not found for start date: {start_date}")
+    if not delta_end:
+        raise ValueError(f"Delta not found for end date: {end_date}")
+
     baseline_start = delta_start.get('baseline_date', 'Unknown')
     baseline_end = delta_end.get('baseline_date', 'Unknown')
-    
-    if baseline_start != baseline_end:
-        # Different baselines - need to handle this case
-        # For now, we can still compare them (the comparison function handles this)
-        # But ideally we'd want to reconstruct states from their respective baselines
-        # This is a limitation but should be rare (only happens across yearly resets)
-        pass
-    
-    baseline_chars = None
-    if baseline_start == baseline_end:
-        baseline_obj = load_master_baseline(base_dir)
-        if baseline_obj:
-            baseline_chars = baseline_obj.get('characters')
 
-    # Compare the two deltas
-    result = compare_delta_to_delta(delta_start, delta_end, baseline_chars)
+    if (
+        baseline_start != 'Unknown'
+        and baseline_end != 'Unknown'
+        and baseline_start != baseline_end
+    ):
+        result = compare_delta_to_delta_reconstructed(delta_start, delta_end, base_dir)
+    else:
+        baseline_chars = None
+        if baseline_start == baseline_end and baseline_start != 'Unknown':
+            bl = load_baseline_for_date(baseline_start, base_dir)
+            if bl:
+                baseline_chars = bl.get('characters')
+        result = compare_delta_to_delta(delta_start, delta_end, baseline_chars)
+
     result['start_date'] = start_date
     result['end_date'] = end_date
-    
     return result

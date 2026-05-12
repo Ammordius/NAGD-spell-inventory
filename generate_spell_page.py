@@ -2744,6 +2744,8 @@ def generate_delta_history(base_dir):
     # Tracked item IDs that are NO DROP (for mob kill verification: non-no-drop only counts when net change > 0)
     no_drop_tracked = load_no_drop_tracked_item_ids() & tracked_ids if tracked_ids else set()
     no_drop_tracked_json = json.dumps(list(no_drop_tracked))
+    no_rent_for_js = sorted(int(x) for x in (load_no_rent_items() or set()))
+    no_rent_json = json.dumps(no_rent_for_js)
     
     # Find all daily delta JSON files
     delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
@@ -2972,12 +2974,14 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="tracked-item-zone">""" + tracked_item_zone_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="tracked-item-mob">""" + tracked_item_mob_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="no-drop-tracked-ids">""" + no_drop_tracked_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="no-rent-item-ids">""" + no_rent_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
         const TRACKED_ITEM_ZONE = JSON.parse((document.getElementById('tracked-item-zone') || { textContent: '{}' }).textContent);
         const TRACKED_ITEM_MOB = JSON.parse((document.getElementById('tracked-item-mob') || { textContent: '{}' }).textContent);
         const NO_DROP_TRACKED_IDS = new Set(JSON.parse((document.getElementById('no-drop-tracked-ids') || { textContent: '[]' }).textContent));
+        const NO_RENT_ITEMS = new Set(JSON.parse((document.getElementById('no-rent-item-ids') || { textContent: '[]' }).textContent).map(String));
         // Set default dates (today and 7 days ago)
         const today = new Date().toISOString().split('T')[0];
         const weekAgo = new Date();
@@ -2995,7 +2999,7 @@ def generate_delta_history(base_dir):
         // Extract available dates from the page (from the date list)
         document.querySelectorAll('.delta-date').forEach(el => {
             const date = el.textContent.trim();
-            if (date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            if (date.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {
                 availableDates.add(date);
             }
         });
@@ -3140,6 +3144,87 @@ def generate_delta_history(base_dir):
             return fullState;
         }
         
+        function reconstructInventoryAbsMap(baseline, delta) {
+            const invDeltas = delta.inv_deltas || {};
+            const invBase = baseline.inventories || {};
+            const charNames = new Set([...Object.keys(invBase), ...Object.keys(invDeltas)]);
+            const out = {};
+            for (const charName of charNames) {
+                const counts = {};
+                const items = invBase[charName] || [];
+                for (const item of items) {
+                    let id = item.item_id;
+                    if (NO_RENT_ITEMS.has(String(id))) continue;
+                    id = String(id);
+                    counts[id] = (counts[id] || 0) + 1;
+                }
+                const row = invDeltas[charName];
+                if (row) {
+                    const added = row.added || {};
+                    const removed = row.removed || {};
+                    for (const itemId of Object.keys(added)) {
+                        const sid = String(itemId);
+                        if (NO_RENT_ITEMS.has(sid)) continue;
+                        counts[sid] = (counts[sid] || 0) + Number(added[itemId]);
+                    }
+                    for (const itemId of Object.keys(removed)) {
+                        const sid = String(itemId);
+                        if (NO_RENT_ITEMS.has(sid)) continue;
+                        counts[sid] = (counts[sid] || 0) - Number(removed[itemId]);
+                        if (counts[sid] <= 0) delete counts[sid];
+                    }
+                }
+                const cleaned = {};
+                for (const [k, v] of Object.entries(counts)) {
+                    if (v > 0) cleaned[k] = v;
+                }
+                if (Object.keys(cleaned).length) out[charName] = cleaned;
+            }
+            return out;
+        }
+        
+        function diffInventoryAbsMaps(absStart, absEnd, invMetaStart, invMetaEnd) {
+            const invDeltas = {};
+            invMetaStart = invMetaStart || {};
+            invMetaEnd = invMetaEnd || {};
+            const allChars = new Set([...Object.keys(absStart), ...Object.keys(absEnd)]);
+            for (const charName of allChars) {
+                const a = absStart[charName] || {};
+                const b = absEnd[charName] || {};
+                const rowS = invMetaStart[charName] || {};
+                const rowE = invMetaEnd[charName] || {};
+                const namesS = rowS.item_names || {};
+                const namesE = rowE.item_names || {};
+                const allIds = new Set([...Object.keys(a), ...Object.keys(b)]);
+                const addedItems = {};
+                const removedItems = {};
+                const itemNames = {};
+                for (const itemId of allIds) {
+                    const sid = String(itemId);
+                    const ca = Number(a[sid]) || 0;
+                    const cb = Number(b[sid]) || 0;
+                    const net = cb - ca;
+                    if (net > 0) {
+                        addedItems[sid] = net;
+                        if (namesE[sid] !== undefined) itemNames[sid] = namesE[sid];
+                        else if (namesE[itemId] !== undefined) itemNames[sid] = namesE[itemId];
+                        else if (namesS[sid] !== undefined) itemNames[sid] = namesS[sid];
+                        else if (namesS[itemId] !== undefined) itemNames[sid] = namesS[itemId];
+                    } else if (net < 0) {
+                        removedItems[sid] = -net;
+                        if (namesS[sid] !== undefined) itemNames[sid] = namesS[sid];
+                        else if (namesS[itemId] !== undefined) itemNames[sid] = namesS[itemId];
+                        else if (namesE[sid] !== undefined) itemNames[sid] = namesE[sid];
+                        else if (namesE[itemId] !== undefined) itemNames[sid] = namesE[itemId];
+                    }
+                }
+                if (Object.keys(addedItems).length > 0 || Object.keys(removedItems).length > 0) {
+                    invDeltas[charName] = { added: addedItems, removed: removedItems, item_names: itemNames };
+                }
+            }
+            return invDeltas;
+        }
+        
         async function generateDateRangeReport() {
             let start = document.getElementById('start_date').value;
             let end = document.getElementById('end_date').value;
@@ -3262,63 +3347,24 @@ def generate_delta_history(base_dir):
                     }
                 }
                 
-                // Compute inventory deltas from start to end (same logic as Python compare_delta_to_delta)
-                const invDeltas = {};
+                // Inventory: rebuild absolute bags (baseline + cumulative inv delta), then diff.
+                // Matches Python get_date_range_deltas across baseline_date boundaries.
+                const absStartInv = reconstructInventoryAbsMap(startBaseline, startDelta);
+                const absEndInv = reconstructInventoryAbsMap(endBaseline, endDelta);
+                let invDeltas = diffInventoryAbsMaps(absStartInv, absEndInv, startDelta.inv_deltas, endDelta.inv_deltas);
                 const startInv = startDelta.inv_deltas || {};
                 const endInv = endDelta.inv_deltas || {};
-                const allInvChars = new Set([...Object.keys(startInv), ...Object.keys(endInv)]);
-                for (const charName of allInvChars) {
-                    const a = startInv[charName] || { added: {}, removed: {}, item_names: {} };
-                    const b = endInv[charName] || { added: {}, removed: {}, item_names: {} };
-                    const aAdded = a.added || {};
-                    const aRemoved = a.removed || {};
-                    const bAdded = b.added || {};
-                    const bRemoved = b.removed || {};
-                    const addedItems = {};
-                    const removedItems = {};
-                    const itemNames = {};
-                    const get = (obj, k) => (typeof obj[k] !== 'undefined' ? Number(obj[k]) : 0);
-                    for (const itemId of Object.keys(bAdded)) {
-                        const count = get(bAdded, itemId);
-                        const aAdd = get(aAdded, itemId);
-                        if (count > aAdd) {
-                            addedItems[itemId] = count - aAdd;
-                            if (b.item_names && b.item_names[itemId]) itemNames[itemId] = b.item_names[itemId];
-                        }
+                for (const charName of Object.keys(invDeltas)) {
+                    const delta = invDeltas[charName];
+                    const inStart = charName in startInv;
+                    const inEnd = charName in endInv;
+                    const inStartState = charName in startState;
+                    const inEndState = charName in endState;
+                    let isVisibilityChange = (inStartState && !inEndState) || (!inStartState && inEndState);
+                    if (!isVisibilityChange) {
+                        isVisibilityChange = (inStart && !inEnd) || (!inStart && inEnd);
                     }
-                    for (const itemId of Object.keys(bRemoved)) {
-                        const count = get(bRemoved, itemId);
-                        const aRem = get(aRemoved, itemId);
-                        if (count > aRem) {
-                            removedItems[itemId] = count - aRem;
-                            if (b.item_names && b.item_names[itemId]) itemNames[itemId] = b.item_names[itemId];
-                        }
-                    }
-                    for (const itemId of Object.keys(aAdded)) {
-                        const count = get(aAdded, itemId);
-                        const bRem = get(bRemoved, itemId);
-                        if (bRem > 0) {
-                            const net = bRem - count;
-                            if (net > 0) {
-                                removedItems[itemId] = (removedItems[itemId] || 0) + net;
-                            } else if (net < 0) {
-                                addedItems[itemId] = (addedItems[itemId] || 0) + (-net);
-                            }
-                            if (a.item_names && a.item_names[itemId]) itemNames[itemId] = a.item_names[itemId];
-                        }
-                    }
-                    if (Object.keys(addedItems).length > 0 || Object.keys(removedItems).length > 0) {
-                        const inStart = charName in startInv;
-                        const inEnd = charName in endInv;
-                        // Use reconstructed state: character in one snapshot but not the other = anon/visibility change
-                        const inStartState = charName in startState;
-                        const inEndState = charName in endState;
-                        let isVisibilityChange = (inStartState && !inEndState) || (!inStartState && inEndState);
-                        if (!isVisibilityChange) {
-                            isVisibilityChange = (inStart && !inEnd) || (!inStart && inEnd);
-                        }
-                        invDeltas[charName] = { added: addedItems, removed: removedItems, item_names: itemNames, is_visibility_change: isVisibilityChange };
-                    }
+                    delta.is_visibility_change = isVisibilityChange;
                 }
                 // Include characters that exist in one snapshot but not the other (e.g. went anon) so we show "Visibility change" not a fake Lost list
                 for (const charName of Object.keys(startState)) {
@@ -3412,17 +3458,23 @@ def generate_delta_history(base_dir):
                 }
                 
                 // Generate HTML report matching delta.html formatting
+                const endBaselineResetDay = (endDelta.baseline_date === end) &&
+                    Object.keys(endDelta.inv_deltas || {}).length === 0;
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
                 
                 if (usedFallbackBaseline) {
                     reportHTML += `<p style="background: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ff9800;">
-                        <strong>⚠️ Historical baseline not found.</strong> The archived baseline for this date range (e.g. baseline_master_${startDelta.baseline_date}.json.gz) was not available (404). The <em>current</em> baseline was used instead. Character levels/AAs and visibility may be inaccurate for old dates. Inventory and tracked-item <em>diffs</em> between the two dates still come from the delta files; if those sections are empty below, delta files from this period may not include inventory data.
+                        <strong>⚠️ Historical baseline not found.</strong> The archived baseline for one or both dates (for example baseline_master_${startDelta.baseline_date}.json.gz) was not available (404), so the <em>current</em> baseline file was used as a fallback. Character levels/AAs, visibility, and <em>reconstructed inventory</em> for affected dates may be wrong. Ensure dated <code>baseline_master_*.json.gz</code> files are deployed under <code>delta_snapshots/</code>.
                     </p>`;
                 }
                 if (baselineMismatch) {
                     reportHTML += `<p style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #2196F3;">
-                        <strong>ℹ️ Different Baselines:</strong> These dates use different baselines (${startDelta.baseline_date} vs ${endDelta.baseline_date}).
-                        <br>Full character states have been reconstructed by combining baseline + delta for accurate comparison.
+                        <strong>Different baselines:</strong> These dates use different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Character changes compare reconstructed snapshot states (each date's baseline + daily delta). Inventory and tracked items compare absolute item counts rebuilt the same way, then net-changed across the range (same model as server-side range deltas).
+                    </p>`;
+                }
+                if (endBaselineResetDay) {
+                    reportHTML += `<p style="background: #fff8e1; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107;">
+                        <strong>Baseline reset (end date):</strong> The end date matches the new master baseline; that day's <code>inv_deltas</code> are often empty because inventories match the fresh baseline. Range inventory below is still computed from reconstructed absolute inventories, so changes since the start date can still appear.
                     </p>`;
                 }
                 // Collect all visibility-change names once (show once at top; sections below show only actual changes)

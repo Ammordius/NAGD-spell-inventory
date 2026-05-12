@@ -12,15 +12,22 @@ When both JSONs share the same baseline, ``compare_delta_to_delta`` should recei
 not numeric zero (which inflated day-over-day to a full quarter of gains).
 """
 
+import gzip
+import json
 import os
 import sys
+import tempfile
 import unittest
 
 _MAGELO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _MAGELO_ROOT not in sys.path:
     sys.path.insert(0, _MAGELO_ROOT)
 
-from delta_storage import compare_delta_to_delta  # noqa: E402
+from delta_storage import (  # noqa: E402
+    compare_delta_to_delta,
+    get_date_range_deltas,
+    load_baseline_for_date,
+)
 
 
 class TestCompareDeltaToDeltaBaselinePitfall(unittest.TestCase):
@@ -86,6 +93,142 @@ class TestCompareDeltaToDeltaBaselineFill(unittest.TestCase):
         self.assertEqual(alice['level_change'], 1)
         self.assertEqual(alice['aa_total_change'], 2)
         self.assertEqual(alice['hp_change'], 10)
+
+
+def _write_json_gz(path, obj):
+    with gzip.open(path, 'wt', encoding='utf-8') as f:
+        json.dump(obj, f)
+
+
+class TestGetDateRangeDeltas(unittest.TestCase):
+    """``get_date_range_deltas`` date order and cross-baseline inventory."""
+
+    def setUp(self):
+        self._td = tempfile.TemporaryDirectory()
+        self.snap = os.path.join(self._td.name, 'delta_snapshots')
+        os.makedirs(self.snap, exist_ok=True)
+
+    def tearDown(self):
+        self._td.cleanup()
+
+    def test_reversed_calendar_dates_normalized(self):
+        bd = '2026-02-09'
+        alice_bl = {
+            'level': 60,
+            'aa_unspent': 0,
+            'aa_spent': 100,
+            'hp_max_total': 500,
+            'class': 'Wizard',
+        }
+        _write_json_gz(
+            os.path.join(self.snap, f'baseline_master_{bd}.json.gz'),
+            {'baseline_date': bd, 'characters': {'Alice': alice_bl}, 'inventories': {}},
+        )
+        d1 = {
+            'date': '2026-05-01',
+            'baseline_date': bd,
+            'char_deltas': {
+                'Alice': {
+                    'current_level': 60,
+                    'previous_level': 60,
+                    'current_aa_total': 100,
+                    'previous_aa_total': 100,
+                    'current_hp': 500,
+                    'previous_hp': 500,
+                    'class': 'Wizard',
+                }
+            },
+            'inv_deltas': {},
+        }
+        d2 = {
+            'date': '2026-05-02',
+            'baseline_date': bd,
+            'char_deltas': {
+                'Alice': {
+                    'current_level': 61,
+                    'previous_level': 60,
+                    'current_aa_total': 102,
+                    'previous_aa_total': 100,
+                    'current_hp': 510,
+                    'previous_hp': 500,
+                    'class': 'Wizard',
+                }
+            },
+            'inv_deltas': {},
+        }
+        _write_json_gz(os.path.join(self.snap, 'delta_daily_2026-05-01.json.gz'), d1)
+        _write_json_gz(os.path.join(self.snap, 'delta_daily_2026-05-02.json.gz'), d2)
+
+        forward = get_date_range_deltas('2026-05-01', '2026-05-02', self.snap)
+        backward = get_date_range_deltas('2026-05-02', '2026-05-01', self.snap)
+        self.assertEqual(forward['start_date'], backward['start_date'])
+        self.assertEqual(forward['end_date'], backward['end_date'])
+        self.assertEqual(
+            forward['char_deltas']['Alice']['level_change'],
+            backward['char_deltas']['Alice']['level_change'],
+        )
+        self.assertEqual(forward['char_deltas']['Alice']['level_change'], 1)
+
+    def test_cross_baseline_inventory_uses_reconstruction(self):
+        b1 = '2026-01-01'
+        b2 = '2026-06-01'
+        _write_json_gz(
+            os.path.join(self.snap, f'baseline_master_{b1}.json.gz'),
+            {
+                'baseline_date': b1,
+                'characters': {},
+                'inventories': {'X': [{'item_id': '1', 'item_name': 'Gem'}]},
+            },
+        )
+        _write_json_gz(
+            os.path.join(self.snap, f'baseline_master_{b2}.json.gz'),
+            {
+                'baseline_date': b2,
+                'characters': {},
+                'inventories': {
+                    'X': [
+                        {'item_id': '1', 'item_name': 'Gem'},
+                        {'item_id': '1', 'item_name': 'Gem'},
+                        {'item_id': '1', 'item_name': 'Gem'},
+                    ]
+                },
+            },
+        )
+        day_a = {
+            'date': '2026-05-01',
+            'baseline_date': b1,
+            'char_deltas': {},
+            'inv_deltas': {
+                'X': {'added': {'1': 2}, 'removed': {}, 'item_names': {'1': 'Gem'}},
+            },
+        }
+        day_b = {
+            'date': '2026-06-01',
+            'baseline_date': b2,
+            'char_deltas': {},
+            'inv_deltas': {},
+        }
+        _write_json_gz(os.path.join(self.snap, 'delta_daily_2026-05-01.json.gz'), day_a)
+        _write_json_gz(os.path.join(self.snap, 'delta_daily_2026-06-01.json.gz'), day_b)
+
+        out = get_date_range_deltas('2026-05-01', '2026-06-01', self.snap)
+        self.assertEqual(out['start_date'], '2026-05-01')
+        self.assertEqual(out['end_date'], '2026-06-01')
+        self.assertNotIn('X', out.get('inv_deltas') or {})
+
+    def test_load_baseline_for_date_prefers_archive_over_mismatched_master(self):
+        b_old = '2026-01-01'
+        _write_json_gz(
+            os.path.join(self.snap, f'baseline_master_{b_old}.json.gz'),
+            {'baseline_date': b_old, 'characters': {'Z': {'level': 1}}, 'inventories': {}},
+        )
+        _write_json_gz(
+            os.path.join(self.snap, 'baseline_master.json.gz'),
+            {'baseline_date': '2026-06-01', 'characters': {'Z': {'level': 99}}, 'inventories': {}},
+        )
+        bl = load_baseline_for_date(b_old, self.snap)
+        self.assertEqual(bl['baseline_date'], b_old)
+        self.assertEqual(bl['characters']['Z']['level'], 1)
 
 
 if __name__ == '__main__':
