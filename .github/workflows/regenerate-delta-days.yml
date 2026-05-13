@@ -6,6 +6,8 @@
 #   baseline_era_date: 2026-02-09
 #   force: true
 #
+# If daily JSONs were removed after a bad baseline handoff (e.g. May 9–12, 2026), regenerate
+# once the correct ``baseline_master_<era>.json.gz`` is on disk and the dump caches still exist.
 # Master baseline file ``delta_snapshots/baseline_master.json.gz`` must exist before Python runs.
 # It is supplied by (in order): optional baseline_cache_date exact cache; default baseline cache
 # restore (restore-keys magelo-baseline-); baseline_era_date copy from repo archive

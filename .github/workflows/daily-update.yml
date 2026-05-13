@@ -725,7 +725,10 @@ jobs:
             echo "  - Previous inventory file NOT found"
           fi
         fi
-    
+
+    - name: Verify delta baseline archives and daily metadata
+      run: |
+        python scripts/verify_delta_baseline_archives.py --base-dir delta_snapshots
     - name: Generate Class Rankings
       env:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
@@ -926,10 +929,9 @@ jobs:
           else
             echo "⚠ No delta JSON files found to copy"
           fi
-          # Copy baseline files (needed for client-side date range comparisons across baseline resets)
-          # Copy both compressed and uncompressed baselines (for backward compatibility)
+          # Copy baseline files (needed for client-side date range comparisons across baseline resets).
+          # Only .gz baselines are deployed (uncompressed baseline_master.json is ~200MB+).
           cp delta_snapshots/baseline_master*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No compressed baseline files to copy"
-          cp delta_snapshots/baseline_master*.json deploy/delta_snapshots/ 2>/dev/null || echo "No uncompressed baseline files to copy"
           BASELINE_COUNT=$(ls deploy/delta_snapshots/baseline_master*.json.gz 2>/dev/null | wc -l)
           if [ "$BASELINE_COUNT" -gt 0 ]; then
             echo "✓ Copied $BASELINE_COUNT baseline files to deploy/delta_snapshots/"

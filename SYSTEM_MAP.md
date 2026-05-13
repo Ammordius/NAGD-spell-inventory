@@ -62,11 +62,12 @@
 4. **Historical backfill (optional)** — restores pinned dates (e.g. 2026-02-07, 2026-02-08) from cache to generate missing `delta_daily_*.json.gz` without polluting the main run; **restore today’s dump again** before the main generator.
 5. **Baseline cache** — restore `delta_snapshots/baseline_master*.json.gz` and weekly/monthly baselines (used for leaderboards and date-range logic).
 6. **`generate_spell_page.py`** — env `MAGELO_UPDATE_DATE` set from the export page. Produces spell inventory, delta HTML, snapshots, trackers, etc.
-7. **Class rankings** — `merge_dkp_loot_into_raid_sources.py --write-name-to-id` (best-effort); then `generate_class_rankings.py` if `spell_focii_level65.json` is available.
-8. **Commit** — new `delta_snapshots/delta_daily_*.json.gz` may be committed by `github-actions[bot]` (small JSON history in repo).
-9. **Regenerate `data/item_name_to_id.json`** again for deploy consistency.
-10. **Prepare `deploy/`** — copy `spell_inventory.html` → `deploy/index.html`, copy other HTML, `class_rankings.*`, `data/*.json` subsets, `delta_snapshots/*.json.gz`, `raid_item_sources.json`, `mob_tracker_deaths.json`, etc.; `touch deploy/.nojekyll`.
-11. **Upload Pages artifact** — `actions/upload-pages-artifact` (main branch only; short retention).
+7. **`scripts/verify_delta_baseline_archives.py`** — fails the job if a modern `delta_daily_*.json.gz` (dump date ≥ 2026-01-01) references an unresolvable `baseline_date` (for baselines ≥ 2026-02-01), or if a May+ dump is dated before its embedded `baseline_date` (bad backfill order). Skips legacy 2024-era tags.
+8. **Class rankings** — `merge_dkp_loot_into_raid_sources.py --write-name-to-id` (best-effort); then `generate_class_rankings.py` if `spell_focii_level65.json` is available.
+9. **Commit** — new `delta_snapshots/delta_daily_*.json.gz` may be committed by `github-actions[bot]` (small JSON history in repo).
+10. **Regenerate `data/item_name_to_id.json`** again for deploy consistency.
+11. **Prepare `deploy/`** — copy `spell_inventory.html` → `deploy/index.html`, copy other HTML, `class_rankings.*`, `data/*.json` subsets, `delta_snapshots/*.json.gz`, `raid_item_sources.json`, `mob_tracker_deaths.json`, etc.; `touch deploy/.nojekyll`.
+12. **Upload Pages artifact** — `actions/upload-pages-artifact` (main branch only; short retention).
 
 ### 2.3 Deploy job
 
@@ -76,7 +77,7 @@
 
 ### 2.4 Permissions / infra notes
 
-- **`steps.date-info`** (week/month boundaries) is defined **late** in the job; an **earlier** “Restore baseline cache” step still references `date-info.outputs.month_start` for the cache key. In practice the empty first segment falls through to **`restore-keys: magelo-baseline-`** until the later “Cache baselines” step runs with a resolved month. If baseline caching misbehaves, compare both cache steps in `daily-update.yml`.
+- **Baseline cache (daily-update):** both the early “Restore baseline cache (needed for historical delta + leaderboards)” step and the late “Cache baselines” step use `key: magelo-baseline-${{ steps.check-update.outputs.normalized_date }}` with `restore-keys: magelo-baseline-`. The `date-info` step (week/month boundaries) runs **before** baseline restore; it is not used in those baseline cache keys. If baseline restores look wrong on cold cache, confirm both steps list the same paths (`baseline_master.json.gz`, `baseline_master_*.json.gz`, week/month JSON).
 
 - **`contents: write`** — bot commits delta JSONs.
 - **`pages: write`** + **`id-token: write`** — OIDC for Pages deployment.

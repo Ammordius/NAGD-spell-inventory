@@ -409,16 +409,19 @@ def get_monthly_leaderboard(month_start_date, stat_type='aa', top_n=20, base_dir
 
 def save_master_baseline(char_data, inv_data, date_str, base_dir='delta_snapshots'):
     """Save a master baseline containing full character and inventory data.
+
     This is the reference point that all daily deltas are compared against.
-    
-    Saves as compressed .json.gz to stay under GitHub's 100 MB file size limit.
-    
+    Writes ``baseline_master.json.gz`` (compressed, required for GitHub size limits).
+    Uncompressed ``baseline_master.json`` is only written when env
+    ``MAGELO_WRITE_BASELINE_UNCOMPRESSED`` is 1/true/yes (local debugging); otherwise an
+    existing uncompressed file is removed to avoid huge Pages artifacts.
+
     Args:
         char_data: Dict of character data from parse_character_data
         inv_data: Dict of inventory data from parse_inventory_file
         date_str: Date string (YYYY-MM-DD) when baseline was created
         base_dir: Base directory for baselines
-    
+
     Returns:
         Path to saved baseline file (compressed)
     """
@@ -441,11 +444,20 @@ def save_master_baseline(char_data, inv_data, date_str, base_dir='delta_snapshot
     import gzip
     with gzip.open(compressed_filepath, 'wt', encoding='utf-8') as f:
         json.dump(baseline_json, f, indent=2)
-    
-    # Also save uncompressed for local use (optional, can be removed)
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(baseline_json, f, indent=2)
-    
+
+    # Uncompressed master is ~200MB+ and bloats Pages artifacts; opt-in for local debugging only.
+    write_uncompressed = os.environ.get(
+        "MAGELO_WRITE_BASELINE_UNCOMPRESSED", ""
+    ).strip().lower() in ("1", "true", "yes")
+    if write_uncompressed:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(baseline_json, f, indent=2)
+    elif os.path.isfile(filepath):
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
+
     print(f"  Baseline saved (compressed: {os.path.getsize(compressed_filepath) / 1024 / 1024:.2f} MB)")
     return compressed_filepath
 
