@@ -231,5 +231,34 @@ class TestGetDateRangeDeltas(unittest.TestCase):
         self.assertEqual(bl['characters']['Z']['level'], 1)
 
 
+    def test_load_baseline_for_date_returns_none_when_no_archive_and_master_mismatched(self):
+        b_old = '2026-02-09'
+        _write_json_gz(
+            os.path.join(self.snap, 'baseline_master.json.gz'),
+            {'baseline_date': '2026-05-12', 'characters': {}, 'inventories': {}},
+        )
+        self.assertIsNone(load_baseline_for_date(b_old, self.snap))
+
+    def test_get_date_range_deltas_raises_when_cross_baseline_missing_archive(self):
+        b1 = '2026-01-01'
+        b2 = '2026-06-01'
+        _write_json_gz(
+            os.path.join(self.snap, 'baseline_master.json.gz'),
+            {'baseline_date': b2, 'characters': {}, 'inventories': {}},
+        )
+        _write_json_gz(
+            os.path.join(self.snap, 'delta_daily_2026-05-01.json.gz'),
+            {'date': '2026-05-01', 'baseline_date': b1, 'char_deltas': {}, 'inv_deltas': {}},
+        )
+        _write_json_gz(
+            os.path.join(self.snap, 'delta_daily_2026-06-01.json.gz'),
+            {'date': '2026-06-01', 'baseline_date': b2, 'char_deltas': {}, 'inv_deltas': {}},
+        )
+        with self.assertRaises(ValueError) as ctx:
+            get_date_range_deltas('2026-05-01', '2026-06-01', self.snap)
+        self.assertIn('Missing baseline snapshot', str(ctx.exception))
+        self.assertIn(b1, str(ctx.exception))
+
+
 if __name__ == '__main__':
     unittest.main()

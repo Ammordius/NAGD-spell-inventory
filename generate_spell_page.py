@@ -3034,60 +3034,82 @@ def generate_delta_history(base_dir):
         }
         
         async function loadBaseline(baselineDate) {
-            // Try to load baseline file (compressed .json.gz)
-            // First try archived baseline_master_YYYY-MM-DD.json.gz, then current baseline_master.json.gz
+            const want = String(baselineDate);
             const baselineKey = `baseline_${baselineDate}`;
             const cacheKey = baselineKey + '_result';
             if (loadedBaselines && loadedBaselines.has(cacheKey)) {
                 return loadedBaselines.get(cacheKey);
             }
-            
+
             const currentUrl = `delta_snapshots/baseline_master.json.gz`;
             const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
-            let usedFallback = false;
-            try {
-                let response = null;
-                // Try archived baseline first (baseline_master_YYYY-MM-DD.json.gz exists only after a reset)
-                try {
-                    response = await fetch(archivedUrl);
-                } catch (e) {
-                    // Network or other error on archived URL; will try current below
-                }
-                // If archived missing (404) or failed, use current baseline (baseline_master.json.gz)
-                if (!response || !response.ok) {
-                    usedFallback = true;
-                    response = await fetch(currentUrl);
-                }
-                if (!response || !response.ok) {
-                    // Last resort: try uncompressed (for backward compatibility)
-                    usedFallback = true;
-                    const uncompressedUrl = `delta_snapshots/baseline_master_${baselineDate}.json`;
-                    response = await fetch(uncompressedUrl);
-                    if (!response || !response.ok) {
-                        response = await fetch('delta_snapshots/baseline_master.json');
-                    }
-                    if (!response || !response.ok) {
-                        throw new Error(`Baseline not found for ${baselineDate}. Tried: ${archivedUrl}, ${currentUrl}, and uncompressed variants.`);
-                    }
-                    const text = await response.text();
-                    const baseline = JSON.parse(text);
-                    if (!loadedBaselines) {
-                        loadedBaselines = new Map();
-                    }
-                    const result = { baseline, usedFallback };
-                    loadedBaselines.set(cacheKey, result);
-                    return result;
-                }
-                // Parse compressed JSON (from archived or current .json.gz)
-                const arrayBuffer = await response.arrayBuffer();
-                const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
-                const baseline = JSON.parse(decompressed);
+
+            function finish(baseline, usedFallback) {
                 if (!loadedBaselines) {
                     loadedBaselines = new Map();
                 }
                 const result = { baseline, usedFallback };
                 loadedBaselines.set(cacheKey, result);
                 return result;
+            }
+
+            /** strictMatch: when using shared master file, embedded baseline_date must equal want. */
+            function checkEmbeddedOrThrow(baseline, source, strictMatch) {
+                const embedded = baseline.baseline_date != null ? String(baseline.baseline_date) : '';
+                if (strictMatch) {
+                    if (embedded !== want) {
+                        throw new Error(
+                            `Archived baseline not found (${archivedUrl}), and ${source} has ` +
+                            `baseline_date=${embedded || '(missing)'} (expected ${want}). ` +
+                            `Deploy baseline_master_${want}.json.gz under delta_snapshots/.`
+                        );
+                    }
+                } else if (embedded && embedded !== want) {
+                    throw new Error(
+                        `Baseline file ${source} has baseline_date=${embedded}, expected ${want}.`
+                    );
+                }
+            }
+
+            try {
+                let response = null;
+                try {
+                    response = await fetch(archivedUrl);
+                } catch (e) {
+                    // Network or other error on archived URL; will try current below
+                }
+                if (response && response.ok) {
+                    const arrayBuffer = await response.arrayBuffer();
+                    const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+                    const baseline = JSON.parse(decompressed);
+                    checkEmbeddedOrThrow(baseline, archivedUrl, false);
+                    return finish(baseline, false);
+                }
+
+                // Archive missing: only accept baseline_master.json.gz if embedded baseline_date matches
+                response = await fetch(currentUrl);
+                if (response && response.ok) {
+                    const arrayBuffer = await response.arrayBuffer();
+                    const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+                    const baseline = JSON.parse(decompressed);
+                    checkEmbeddedOrThrow(baseline, currentUrl, true);
+                    return finish(baseline, true);
+                }
+
+                // Last resort: uncompressed (backward compatibility)
+                let uResp = await fetch(`delta_snapshots/baseline_master_${baselineDate}.json`);
+                if (uResp && uResp.ok) {
+                    const baseline = JSON.parse(await uResp.text());
+                    checkEmbeddedOrThrow(baseline, `delta_snapshots/baseline_master_${baselineDate}.json`, false);
+                    return finish(baseline, false);
+                }
+                uResp = await fetch('delta_snapshots/baseline_master.json');
+                if (uResp && uResp.ok) {
+                    const baseline = JSON.parse(await uResp.text());
+                    checkEmbeddedOrThrow(baseline, 'delta_snapshots/baseline_master.json', true);
+                    return finish(baseline, true);
+                }
+                throw new Error(`Baseline not found for ${baselineDate}. Tried: ${archivedUrl}, ${currentUrl}, and uncompressed variants.`);
             } catch (error) {
                 console.error(`Error loading baseline for ${baselineDate}:`, error);
                 throw error;

@@ -510,7 +510,7 @@ def load_baseline_for_date(baseline_date, base_dir='delta_snapshots'):
     master = load_master_baseline(base_dir)
     if master and str(master.get('baseline_date')) == str(baseline_date):
         return master
-    return master
+    return None
 
 
 def should_reset_baseline(baseline_date, current_date, reset_interval_days=90):
@@ -746,7 +746,11 @@ def get_leaderboard_totals_from_date_range(start_date, end_date, base_dir='delta
     bd_s = delta_start.get('baseline_date', 'Unknown')
     bd_e = delta_end.get('baseline_date', 'Unknown')
     if bd_s != 'Unknown' and bd_e != 'Unknown' and bd_s != bd_e:
-        result = compare_delta_to_delta_reconstructed(delta_start, delta_end, base_dir)
+        try:
+            result = compare_delta_to_delta_reconstructed(delta_start, delta_end, base_dir)
+        except ValueError:
+            # Missing archived baseline for one era; cannot reconstruct cross-baseline range.
+            return None
     else:
         baseline_chars = None
         if bd_s == bd_e and bd_s != 'Unknown':
@@ -986,6 +990,18 @@ def compare_delta_to_delta_reconstructed(delta_start, delta_end, base_dir='delta
     bd_e = delta_end.get('baseline_date')
     bl_s = load_baseline_for_date(bd_s, base_dir) if bd_s else None
     bl_e = load_baseline_for_date(bd_e, base_dir) if bd_e else None
+    if bd_s and bl_s is None:
+        raise ValueError(
+            f"Missing baseline snapshot for baseline_date={bd_s!r}: need "
+            f"{os.path.join(base_dir, f'baseline_master_{bd_s}.json.gz')} or "
+            f"baseline_master.json.gz whose baseline_date matches."
+        )
+    if bd_e and bl_e is None:
+        raise ValueError(
+            f"Missing baseline snapshot for baseline_date={bd_e!r}: need "
+            f"{os.path.join(base_dir, f'baseline_master_{bd_e}.json.gz')} or "
+            f"baseline_master.json.gz whose baseline_date matches."
+        )
     bc_s = (bl_s or {}).get('characters') or {}
     bc_e = (bl_e or {}).get('characters') or {}
     bi_s = (bl_s or {}).get('inventories') or {}
@@ -1166,6 +1182,10 @@ def get_date_range_deltas(start_date, end_date, base_dir='delta_snapshots'):
     rows). When ``baseline_date`` differs (baseline rotation), character and inventory
     changes are computed by reconstructing each endpoint from its era baseline + delta,
     then diffing (needs ``baseline_master_<baseline_date>.json.gz`` archives on disk).
+
+    Raises:
+        ValueError: If a daily file is missing, or cross-baseline reconstruction cannot
+        load a required baseline (missing archive and mismatched ``baseline_master.json.gz``).
     """
     if start_date == end_date:
         return {
