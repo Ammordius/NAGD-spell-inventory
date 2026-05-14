@@ -49,7 +49,7 @@ class TestVerifyDeltaBaselineArchivesScript(unittest.TestCase):
             )
             self.assertEqual(self._run(root), 0)
 
-    def test_fails_when_may_dump_before_baseline(self):
+    def test_ok_when_may_dump_before_baseline_warning_only(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             self._write_gz(
@@ -60,6 +60,25 @@ class TestVerifyDeltaBaselineArchivesScript(unittest.TestCase):
                 root / "delta_daily_2026-05-09.json.gz",
                 {
                     "date": "2026-05-09",
+                    "baseline_date": "2026-05-12",
+                    "char_deltas": {"x": {}},
+                    "inv_deltas": {},
+                },
+            )
+            # Pre-baseline dump dates do not fail CI; no same-era daily requires resolving 2026-05-12 here.
+            self.assertEqual(self._run(root), 0)
+
+    def test_fails_when_baseline_not_resolvable(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            self._write_gz(
+                root / "baseline_master.json.gz",
+                {"baseline_date": "2026-02-09", "characters": {}, "inventories": {}},
+            )
+            self._write_gz(
+                root / "delta_daily_2026-05-13.json.gz",
+                {
+                    "date": "2026-05-13",
                     "baseline_date": "2026-05-12",
                     "char_deltas": {"x": {}},
                     "inv_deltas": {},

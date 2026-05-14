@@ -726,6 +726,10 @@ jobs:
           fi
         fi
 
+    - name: Sync dated baseline_master archive from master (if missing)
+      run: |
+        python scripts/sync_baseline_master_archive_from_master.py --base-dir delta_snapshots
+
     - name: Verify delta baseline archives and daily metadata
       run: |
         python scripts/verify_delta_baseline_archives.py --base-dir delta_snapshots

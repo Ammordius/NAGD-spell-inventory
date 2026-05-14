@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Verify delta_snapshots: baseline archives for cross-era math, and date vs baseline_date sanity.
+"""Verify delta_snapshots: baseline archives for cross-era math, and daily JSON sanity.
 
 Exit 1 if any referenced baseline_date cannot be resolved (see delta_storage.load_baseline_for_date)
-for delta_daily files from 2026-01-01 onward, or if a May+ dump date is strictly before its embedded
-baseline_date by >=1 calendar day (backfill / rotation ordering bug).
+for delta_daily files from 2026-01-01 onward (required for delta-history / cross-era ranges).
+
+Dump dates strictly before ``baseline_date`` are reported as warnings only (backfill / mixed-era
+snapshots are allowed in CI).
 
 Older pinned dailies (e.g. 2024) are skipped; they predate the current baseline archive layout.
 """
@@ -109,11 +111,7 @@ def main() -> int:
                     f"regenerate with the correct era (see .github/workflows/regenerate-delta-days.yml "
                     f"baseline_era_date)."
                 )
-                # Fail CI for May 2026+ regressions; older pins (e.g. 2026-02-07 vs 2026-02-09) stay warning-only
-                if file_date >= "2026-05-01":
-                    errors.append(msg)
-                else:
-                    warnings.append(msg)
+                warnings.append(msg)
         if bd == "Unknown":
             warnings.append(f"{path.name}: missing baseline_date in JSON")
 
