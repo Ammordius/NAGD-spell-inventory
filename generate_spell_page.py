@@ -3308,6 +3308,10 @@ def generate_delta_history(base_dir):
                 const dqBadStart = !!(startDelta.data_quality && startDelta.data_quality.dump_before_baseline);
                 const dqBadEnd = !!(endDelta.data_quality && endDelta.data_quality.dump_before_baseline);
                 const dumpBeforeBaselineAny = dumpBeforeBaselineStart || dumpBeforeBaselineEnd || dqBadStart || dqBadEnd;
+                // Leaderboard AA/HP is endState - startState. Across different baseline_date (rotation),
+                // sparse char_deltas can leave start AA equal to an old baseline snapshot while end shows
+                // full cumulative vs the new baseline — looks like multi-day "gains" that are mostly rotation math.
+                const omitRangeLeaderboards = dumpBeforeBaselineAny || baselineMismatch;
                 
                 // Load baselines (needed to reconstruct full character states)
                 outputDiv.innerHTML = '<p>Loading baselines... (this may take a moment)</p>';
@@ -3518,6 +3522,7 @@ def generate_delta_history(base_dir):
                 if (baselineMismatch) {
                     reportHTML += `<p style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #2196F3;">
                         <strong>Different baselines:</strong> These dates use different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Character changes compare reconstructed snapshot states (each date's baseline + daily delta). Inventory and tracked items compare absolute item counts rebuilt the same way, then net-changed across the range (same model as server-side range deltas).
+                        <strong>AA/HP top lists are omitted</strong> for this range (see note below): sparse rows plus rotation can inflate apparent AA/HP gains.
                     </p>`;
                 }
                 if (endBaselineResetDay) {
@@ -3588,11 +3593,12 @@ def generate_delta_history(base_dir):
                 }
                 
                 // Calculate leaderboards (matching delta.html format). Skip when an endpoint is
-                // wrong-era (date < baseline_date): AA/HP gains are often wildly wrong vs reality.
+                // wrong-era (date < baseline_date), or when baseline_date differs across the range
+                // (rotation boundary — top lists are misleading vs calendar-window gains).
                 const aaLeaderboard = [];
                 const hpLeaderboard = [];
                 
-                if (!dumpBeforeBaselineAny) {
+                if (!omitRangeLeaderboards) {
                 for (const [charName, changes] of Object.entries(charChanges)) {
                     if (changes.is_deleted || changes.is_new) continue;
                     if (!charsInBoth.has(charName)) continue;
@@ -3714,6 +3720,8 @@ def generate_delta_history(base_dir):
                 
                 if (dumpBeforeBaselineAny) {
                     reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — at least one endpoint <code>delta_daily_*.json.gz</code> was built with the wrong <code>baseline_era_date</code> (dump date before <code>baseline_date</code>). Regenerate that day with <code>baseline_era_date: 2026-02-09</code> for May 9–11, then redeploy.</p>`;
+                } else if (baselineMismatch) {
+                    reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — this range crosses different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Reconstructed AA/HP at the start uses the older era baseline plus sparse <code>char_deltas</code>; at the end it uses the newer era. Characters unchanged vs the old baseline often have <strong>no</strong> row on the start day, so their AA stays at the old baseline snapshot (e.g. 173) even if the calendar day is just before rotation, while the first post-rotation daily row can show a large cumulative jump vs the <em>new</em> baseline — top lists looked like huge 3-day gains. For comparable top gainers, pick <strong>both dates on or after the newer baseline_date</strong> (here <code>2026-05-12</code>), e.g. 2026-05-12 to 2026-05-14, or use <code>delta.html</code> day-over-day.</p>`;
                 }
                 
                 // Character Changes Table (matching delta.html format)
