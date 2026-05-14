@@ -76,7 +76,7 @@ This section summarizes what landed **after** the May 12 rotation, what **still 
 
 - **`delta.html` “current delta”** looked like **months of character AA** (same failure mode as sparse JSON subtraction without the right baseline character map).
 - **CI log (May 13 run)** showed `baseline_master.json.gz` still embedded **`2026-02-09`**, then **`save_daily_delta_from_baseline`** hit the **90-day auto-reset** and created a **new** baseline dated **`2026-05-13`** mid-run. That made **`delta_daily_2026-05-12`** vs **`delta_daily_2026-05-13`** use **different `baseline_date`**, so the generator printed **`Baseline transition (2026-05-12 -> 2026-05-13); using previous vs current Magelo files for delta.html`** and skipped the JSON day-over-day path for that day.
-- **`delta-history` date-range AA leaderboard** (e.g. **2026-05-12 → 2026-05-14** or **2026-05-13 → 2026-05-14**) shows **impossible AA gains** (+250 AA in 1–2 days) even after “regenerate JSONs” for some days.
+- **`delta-history` date-range AA leaderboard** (e.g. **2026-05-12 → 2026-05-14** or **2026-05-13 → 2026-05-14**) showed **impossible AA gains** (+250 AA in 1–2 days) even after “regenerate JSONs” for some days — **partially addressed** by omitting top lists when endpoints differ in `baseline_date` or wrong-era dailies; see **Update 2026-05-15** for **2026-05-11 → 2026-05-14** and **Tuned +269** after correct regen.
 
 ### Fixes already merged (do not revert without re-reading why)
 
@@ -108,7 +108,7 @@ So: **regenerating only `2026-05-13` is not enough** if the user still picks **`
    - **Batch A — dumps `2026-05-09`, `2026-05-10`, `2026-05-11`:** `baseline_era_date: 2026-02-09` (pre-rotation era; requires `delta_snapshots/baseline_master_2026-02-09.json.gz` in repo or cache). `magelo-dump-<date>` caches must match each matrix date. `force: true`.
    - **Batch B — dumps `2026-05-12` onward** (e.g. `2026-05-12`, `2026-05-13`, `2026-05-14`): `baseline_era_date: 2026-05-12`. `force: true`.
    - **Typo check:** `baseline_era_date` must match the archive filename exactly (**`2026-05-12`**, not `2025-05-12`). If Actions reports a missing `baseline_master_YYYY-MM-DD.json.gz`, compare the year to the files in [`delta_snapshots/`](../delta_snapshots/) on `main`.
-- **Sanity check after batch A:** `python -c "import gzip,json; print(json.load(gzip.open('delta_snapshots/delta_daily_2026-05-11.json.gz'))['baseline_date'])"` must print **`2026-02-09`**. If it still prints **`2026-05-12`**, batch A did not run (wrong input or commit not on the branch Pages built from).
+   - **Sanity check after batch A:** `python -c "import gzip,json; print(json.load(gzip.open('delta_snapshots/delta_daily_2026-05-11.json.gz'))['baseline_date'])"` must print **`2026-02-09`**. If it still prints **`2026-05-12`**, batch A did not run (wrong input or commit not on the branch Pages built from).
    - If any `delta_daily` ever referenced a mistaken **`2026-05-13`** baseline era, include that date in batch B only after confirming the embedded `baseline_date` in `baseline_master_2026-05-12.json.gz` is correct.
    - After regen: **`python scripts/audit_delta_snapshots.py --from-date 2026-05-09 --to-date 2026-05-14 --fail-on-issue`** (expect **no** lines for 05-09..05-11 once batch A is correct). Spot-check AA rows: **`python scripts/audit_delta_snapshots.py --from-date 2026-05-12 --to-date 2026-05-14 --character Tuned`**. Optionally **`python scripts/verify_delta_baseline_archives.py --strict`** once all known bad files are fixed. Then **commit** the new **`delta_daily_*.json.gz`** files and redeploy.
 2. **Re-run Daily Spell Inventory Update** (or wait for schedule) so **`delta-history.html`** is regenerated with the latest embedded JS.
@@ -150,6 +150,50 @@ for p in sorted(Path('delta_snapshots').glob('delta_daily_2026-05-1*.json.gz')):
 | Local one-day regen helper | [`scripts/regenerate_delta_daily_from_dump.py`](../scripts/regenerate_delta_daily_from_dump.py) |
 | Audit dailies / AA sanity | [`scripts/audit_delta_snapshots.py`](../scripts/audit_delta_snapshots.py) |
 | Verify baselines; optional ``--strict`` | [`scripts/verify_delta_baseline_archives.py`](../scripts/verify_delta_baseline_archives.py) |
+
+---
+
+## Update 2026-05-15 — GitHub Pages artifact + “still not working”
+
+Use this when someone drops a **new** unpacked **`github-pages-*`** folder (or zip) and says behavior is unchanged.
+
+### What was verified on a good artifact (baseline metadata OK, UI still confusing)
+
+- **`delta_daily_2026-05-11.json.gz`**: `baseline_date` **`2026-02-09`** (batch A correct).
+- **`delta_daily_2026-05-12` … `2026-05-14`**: `baseline_date` **`2026-05-12`** (batch B correct).
+- **Tuned +269 AA in delta-history** for range **2026-05-11 → 2026-05-14** was **not** a wrong `baseline_era_date` on 5/11: on **5/11** Tuned often has **no** `char_deltas` row (unchanged vs Feb baseline at **173** AA). **`baseline_master_2026-02-09`** and **`baseline_master_2026-05-12`** both listed Tuned at **173** total AA. **5/14** carries the first cumulative row vs the May-12 baseline (**442**, **`aa_total_change` +269**). Reconstruction does **442 − 173** → looks like “three days of AA” but is **rotation + sparse rows + first post-rotation cumulative slice**, not a clean calendar leaderboard.
+
+### JS / deploy checklist (if the user says “still broken” after merges)
+
+1. **Which surface?** **delta-history** (embedded in generated inventory HTML), **`delta.html`** day-over-day, and **`leaderboard_week_*.html` / `leaderboard_month_*.html`** use **different code paths**. AA “top lists” on **delta-history** are built inside **`generateDateRangeReport`** in [`generate_spell_page.py`](../generate_spell_page.py). Weekly/monthly pages use **`get_weekly_leaderboard`** / **`get_monthly_leaderboard`** in [`delta_storage.py`](../delta_storage.py) — do not assume a fix to one fixes the other.
+2. **Is the new JS actually in the artifact?** After pull, open the deployed **`spell_inventory.html`** (or the main HTML that contains delta-history) and search for **`omitRangeLeaderboards`** or the literal **`AA/HP leaderboards omitted`** (or **`baselineMismatch`** next to leaderboard skip logic). If absent, the **Daily Spell Inventory** workflow that bakes `generate_spell_page.py` into HTML **did not run** on the commit you think, or the artifact is from an old run / wrong branch.
+3. **Browser cache:** `delta_snapshots/*.json.gz` and large HTML are aggressively cached. Test with **hard refresh**, **private window**, or **cache-bust query string** on the HTML URL.
+4. **Stale dailies inside the artifact:** e.g. **`delta_daily_2026-05-10.json.gz`** with **`baseline_date` still `2026-05-12`** while `date` is `2026-05-10` — regen **5/10** (and any other stragglers) with **batch A** (`baseline_era_date: 2026-02-09`) or CI verify / `data_quality.dump_before_baseline` will keep flagging wrong-era files.
+
+### One-shot inspection on an unpacked artifact root
+
+From the folder that contains **`delta_snapshots/`** (example: `github-pages-25889629987/artifact`):
+
+```bash
+python -c "
+import gzip, json
+from pathlib import Path
+root = Path('.')   # or Path(r'C:\\path\\to\\artifact')
+for p in sorted((root / 'delta_snapshots').glob('delta_daily_2026-05-*.json.gz')):
+    j = json.load(gzip.open(p, 'rt', encoding='utf-8'))
+    d, b = j.get('date'), j.get('baseline_date')
+    bad = d and b and str(d) < str(b)
+    print(p.name, 'date', d, 'baseline', b, 'BAD_dump_before_baseline' if bad else '')
+"
+```
+
+Then paste output into the new thread alongside **exact date range** selected in the UI and **which page** (delta-history vs weekly leaderboard).
+
+### Open issues (hand this to the next owner)
+
+- **delta-history character / inventory tables** across **`baseline_date` mismatch** may still read wrong or be hard to interpret even when AA/HP **top lists** are omitted (inventory reconstruction path is separate; see § “What to implement next” §2).
+- **Weekly/monthly AA leaderboards** if they still look wrong need a **separate** investigation of `get_weekly_leaderboard` / `get_monthly_leaderboard` inputs (`end_date`, `delta_snapshots_dir`, which `delta_daily` files are summed).
+- **Optional:** extend [`scripts/analyze_github_pages_artifact.py`](../scripts/analyze_github_pages_artifact.py) to grep baked HTML for the delta-history guard strings and fail CI if missing.
 
 ---
 
@@ -240,4 +284,4 @@ Use it to confirm **`baseline_names`**, last days’ **`baseline_date`**, and su
 
 ## One-line summary
 
-**CI cache collision caused bad mid-May dailies (mitigated with per-day keys + 5/10–5/11 backfill and `auto_reset_baseline=False` on backfills).** **2026-05-12 baseline rotation is intended.** **As of 2026-05-14 the product is still broken in places:** **surprise master baseline / May 13 era** (mitigated by disabling main-job auto-reset + aligning master to the May 12 archive in CI), **bad or inconsistent `delta_daily` endpoint rows** (especially rotation week — still need regen + optional schema flags), and **delta-history range leaderboards** that trust those JSONs. Original doc pain also remains: **inventory math and UX across `baseline_date` boundaries** plus **archived baselines on Pages** for `loadBaseline`.
+**CI cache collision caused bad mid-May dailies (mitigated with per-day keys + 5/10–5/11 backfill and `auto_reset_baseline=False`).** **2026-05-12 rotation is intended.** **Regen must be two-batch (Feb era for dumps before 5/12; May-12 era from 5/12).** **delta-history** now warns on wrong-era dailies, **omits AA/HP top lists** when `date < baseline_date` **or** when range endpoints use **different `baseline_date`** (rotation-spanning ranges). **Still open:** inventory/character UX across mixed baselines, **weekly/monthly leaderboard** paths, straggler dailies (e.g. **5/10**), **Pages cache**, and confirming **baked HTML** in each new artifact actually contains the latest embedded JS.
