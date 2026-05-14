@@ -395,6 +395,11 @@ jobs:
         key: magelo-baseline-${{ steps.check-update.outputs.normalized_date }}
         restore-keys: |
           magelo-baseline-
+
+    # Ensure baseline_master_<embedded>.json.gz exists before generate_spell_page (master may be newer era).
+    - name: Sync dated baseline archives from master (early)
+      run: |
+        python scripts/sync_baseline_master_archive_from_master.py --base-dir delta_snapshots
     
     - name: Restore cache for 2026-02-07 and generate delta
       uses: actions/cache@v5

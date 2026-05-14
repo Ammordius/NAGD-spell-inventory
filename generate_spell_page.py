@@ -15,7 +15,7 @@ from delta_storage import (
     get_week_start, get_month_start,
     get_weekly_leaderboard, get_monthly_leaderboard,
     save_baseline_json, save_daily_delta_json, get_date_range_deltas,
-    save_master_baseline, load_master_baseline,
+    save_master_baseline, load_master_baseline, load_baseline_for_date,
     save_daily_delta_from_baseline, compare_delta_to_delta,
     load_daily_delta_json,
     _corpse_loot_chars_from_equipped_meta,
@@ -4241,7 +4241,11 @@ def main():
                     inv_deltas.pop(_cn, None)
             else:
                 # Compare deltas: today's delta vs yesterday's delta (inventory visibility matches delta-history when baseline is passed)
-                baseline_chars = baseline.get('characters') if baseline else None
+                # Use the era for today_delta['baseline_date'], not load_master_baseline() from before save_daily_delta_from_baseline.
+                # Wrong-era baseline_chars makes missing sparse rows read as 0 → inflated "whole quarter" character deltas.
+                bd_t = today_delta.get('baseline_date')
+                bl_slice = load_baseline_for_date(str(bd_t), delta_snapshots_dir) if bd_t else None
+                baseline_chars = (bl_slice or {}).get('characters') if bl_slice else None
                 delta_comparison = compare_delta_to_delta(
                     yesterday_delta, today_delta, baseline_chars
                 )
