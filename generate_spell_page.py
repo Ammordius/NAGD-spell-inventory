@@ -3305,7 +3305,9 @@ def generate_delta_history(base_dir):
                 const baselineMismatch = startDelta.baseline_date !== endDelta.baseline_date;
                 const dumpBeforeBaselineStart = startDelta.date && startDelta.baseline_date && startDelta.baseline_date !== 'Unknown' && String(startDelta.date) < String(startDelta.baseline_date);
                 const dumpBeforeBaselineEnd = endDelta.date && endDelta.baseline_date && endDelta.baseline_date !== 'Unknown' && String(endDelta.date) < String(endDelta.baseline_date);
-                const dumpBeforeBaselineAny = dumpBeforeBaselineStart || dumpBeforeBaselineEnd;
+                const dqBadStart = !!(startDelta.data_quality && startDelta.data_quality.dump_before_baseline);
+                const dqBadEnd = !!(endDelta.data_quality && endDelta.data_quality.dump_before_baseline);
+                const dumpBeforeBaselineAny = dumpBeforeBaselineStart || dumpBeforeBaselineEnd || dqBadStart || dqBadEnd;
                 
                 // Load baselines (needed to reconstruct full character states)
                 outputDiv.innerHTML = '<p>Loading baselines... (this may take a moment)</p>';
@@ -3498,11 +3500,12 @@ def generate_delta_history(base_dir):
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
                 if (dumpBeforeBaselineAny) {
                     const bits = [];
-                    if (dumpBeforeBaselineStart) bits.push(`start ${startDelta.date} (baseline ${startDelta.baseline_date})`);
-                    if (dumpBeforeBaselineEnd) bits.push(`end ${endDelta.date} (baseline ${endDelta.baseline_date})`);
+                    if (dumpBeforeBaselineStart || dqBadStart) bits.push(`start ${startDelta.date} (baseline ${startDelta.baseline_date})`);
+                    if (dumpBeforeBaselineEnd || dqBadEnd) bits.push(`end ${endDelta.date} (baseline ${endDelta.baseline_date})`);
                     reportHTML += `<p style="background: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #f44336;">
                         <strong>Unreliable range:</strong> At least one endpoint daily JSON was built with <code>date</code> before <code>baseline_date</code> (${bits.join('; ')}).
-                        Character AA/HP in those files can be inconsistent with the archived baseline, so <strong>range leaderboards and character deltas here can look like months of gains over a day or two</strong>.
+                        Character AA/HP in those files can be inconsistent with the archived baseline, so <strong>character deltas and any old top lists could look like months of gains over a day or two</strong>.
+                        <strong>AA and HP leaderboards are omitted</strong> for this report until the bad file is fixed.
                         Regenerate the affected <code>delta_daily_*.json.gz</code> with the correct Magelo dump for that calendar day and <code>baseline_era_date</code> (see <code>regenerate-delta-days.yml</code>).
                     </p>`;
                 }
@@ -3584,10 +3587,12 @@ def generate_delta_history(base_dir):
                     reportHTML += `<p style="color: #757575; font-style: italic; margin: 10px 0;">No inventory or tracked item changes to list for this range. For date ranges outside the current baseline period, delta files from that time may not include inventory data, or all changes in this range are visibility-only (see above).</p>`;
                 }
                 
-                // Calculate leaderboards (matching delta.html format)
+                // Calculate leaderboards (matching delta.html format). Skip when an endpoint is
+                // wrong-era (date < baseline_date): AA/HP gains are often wildly wrong vs reality.
                 const aaLeaderboard = [];
                 const hpLeaderboard = [];
                 
+                if (!dumpBeforeBaselineAny) {
                 for (const [charName, changes] of Object.entries(charChanges)) {
                     if (changes.is_deleted || changes.is_new) continue;
                     if (!charsInBoth.has(charName)) continue;
@@ -3620,6 +3625,7 @@ def generate_delta_history(base_dir):
                             hp_total: endState[charName]?.hp || 0
                         });
                     }
+                }
                 }
                 
                 // Sort leaderboards
@@ -3704,6 +3710,10 @@ def generate_delta_history(base_dir):
                             </tbody>
                         </table>
                     </div>`;
+                }
+                
+                if (dumpBeforeBaselineAny) {
+                    reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — at least one endpoint <code>delta_daily_*.json.gz</code> was built with the wrong <code>baseline_era_date</code> (dump date before <code>baseline_date</code>). Regenerate that day with <code>baseline_era_date: 2026-02-09</code> for May 9–11, then redeploy.</p>`;
                 }
                 
                 // Character Changes Table (matching delta.html format)
