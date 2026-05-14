@@ -38,7 +38,7 @@ on:
         required: true
         type: string
       baseline_era_date:
-        description: "Optional. Copy baseline_master_<this>.json.gz over baseline_master.json.gz first. May 2026: use 2026-02-09 for dumps before 2026-05-12; use 2026-05-12 for 2026-05-12 onward (see workflow header + docs/DELTA_BASELINE_HANDOFF_2026-05.md)."
+        description: "Optional. Exact YYYY-MM-DD matching a committed delta_snapshots/baseline_master_<date>.json.gz (four-digit year must match repo, e.g. 2026 not 2025). May 2026: 2026-02-09 for dumps before 2026-05-12; 2026-05-12 for 2026-05-12 onward. See workflow header + docs/DELTA_BASELINE_HANDOFF_2026-05.md."
         required: false
         type: string
         default: ""
@@ -145,6 +145,13 @@ jobs:
           ARCH="delta_snapshots/baseline_master_${ERA}.json.gz"
           if [ ! -f "$ARCH" ]; then
             echo "::error::Missing $ARCH — add it to the repo or set baseline_cache_date so a cache restore provides it."
+            echo "Baseline archives present after checkout:"
+            ls -la delta_snapshots/baseline_master_*.json.gz 2>/dev/null || echo "(none)"
+            case "${ERA}" in
+              2025-05-12|2025-02-09)
+                echo "::notice::Year looks like 2025 — this repo uses 2026 for the May rotation. Try baseline_era_date: 2026-05-12 or 2026-02-09."
+                ;;
+            esac
             exit 1
           fi
           cp -f "$ARCH" delta_snapshots/baseline_master.json.gz
