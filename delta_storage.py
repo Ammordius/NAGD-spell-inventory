@@ -525,6 +525,23 @@ def load_baseline_for_date(baseline_date, base_dir='delta_snapshots'):
     return None
 
 
+def build_daily_delta_data_quality(date_str, baseline_date):
+    """Sanity flags embedded in each daily delta JSON for CI and manual review.
+
+    ``dump_before_baseline`` is True when the dump ``date`` is strictly before ``baseline_date``.
+    That usually means the wrong ``baseline_master_<era>.json.gz`` was copied when regenerating
+    (see ``verify_delta_baseline_archives`` and docs/DELTA_BASELINE_HANDOFF_2026-05.md).
+
+    Note: per-character ``aa_total_change`` in ``char_deltas`` is **cumulative vs baseline**, not
+    a one-day gain, so large values are not flagged here.
+    """
+    dq = {'dump_before_baseline': False}
+    bd = str(baseline_date or '')
+    if bd and date_str and date_str < bd:
+        dq['dump_before_baseline'] = True
+    return dq
+
+
 def should_reset_baseline(baseline_date, current_date, reset_interval_days=90):
     """Check if baseline should be reset (e.g., quarterly).
     
@@ -637,6 +654,14 @@ def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str
     # Per-character worn slot counts (real item_id in slots 1-22) for historical corpse-loot parity
     equipped_worn_by_char = equipped_worn_by_char_from_inventories(current_char_data, current_inv_data)
 
+    data_quality = build_daily_delta_data_quality(date_str, baseline.get('baseline_date'))
+    if data_quality.get('dump_before_baseline'):
+        print(
+            f"[WARN] data_quality.dump_before_baseline: date {date_str} < baseline_date "
+            f"{baseline.get('baseline_date')} — wrong-era baseline_master when generating this file; "
+            f"see docs/DELTA_BASELINE_HANDOFF_2026-05.md and regenerate-delta-days baseline_era_date."
+        )
+
     # Save delta data (changes from baseline)
     daily_delta = {
         'date': date_str,
@@ -645,6 +670,7 @@ def save_daily_delta_from_baseline(current_char_data, current_inv_data, date_str
         'char_deltas': char_deltas,
         'inv_deltas': inv_deltas,
         'equipped_worn_by_char': equipped_worn_by_char,
+        'data_quality': data_quality,
         'timestamp': datetime.now().isoformat()
     }
     

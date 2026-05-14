@@ -104,12 +104,16 @@ So: **regenerating only `2026-05-13` is not enough** if the user still picks **`
 
 ### What to do next (operator + engineer)
 
-1. **Regenerate endpoint dailies for the whole fragile window**, each with the **correct `magelo-dump-YYYY-MM-DD` cache** and **`baseline_era_date: 2026-05-12`**, **`force: true`**: at minimum **`2026-05-09` through `2026-05-12`**, and **`2026-05-13`** if it ever referenced **`2026-05-13`** baseline era. Then **commit** the new **`delta_daily_*.json.gz`** files and redeploy.
+1. **Regenerate endpoint dailies for the fragile window** using [`.github/workflows/regenerate-delta-days.yml`](../.github/workflows/regenerate-delta-days.yml) with the **correct `baseline_era_date` per dump date** (each row needs **`date >= baseline_date`** in the written JSON). **Do not** use **`baseline_era_date: 2026-05-12`** for dumps **before** 2026-05-12 — that reproduces **`dump date < baseline_date`** (incoherent deltas; CI verify warns).
+   - **Batch A — dumps `2026-05-09`, `2026-05-10`, `2026-05-11`:** `baseline_era_date: 2026-02-09` (pre-rotation era; requires `delta_snapshots/baseline_master_2026-02-09.json.gz` in repo or cache). `magelo-dump-<date>` caches must match each matrix date. `force: true`.
+   - **Batch B — dumps `2026-05-12` onward** (e.g. `2026-05-12`, `2026-05-13`, `2026-05-14`): `baseline_era_date: 2026-05-12`. `force: true`.
+   - If any `delta_daily` ever referenced a mistaken **`2026-05-13`** baseline era, include that date in batch B only after confirming the embedded `baseline_date` in `baseline_master_2026-05-12.json.gz` is correct.
+   - After regen: **`python scripts/audit_delta_snapshots.py --from-date 2026-05-09 --to-date 2026-05-14 --fail-on-issue`** (expect **no** lines for 05-09..05-11 once batch A is correct). Spot-check AA rows: **`python scripts/audit_delta_snapshots.py --from-date 2026-05-12 --to-date 2026-05-14 --character Tuned`**. Optionally **`python scripts/verify_delta_baseline_archives.py --strict`** once all known bad files are fixed. Then **commit** the new **`delta_daily_*.json.gz`** files and redeploy.
 2. **Re-run Daily Spell Inventory Update** (or wait for schedule) so **`delta-history.html`** is regenerated with the latest embedded JS.
 3. **Hard-refresh** the site when testing (`delta-history.html` + JSON gzip are cacheable).
 4. **Engineering follow-ups (pick any):**
-   - Add **`data_quality`** flags at **write** time in `save_daily_delta_from_baseline` (or a small post-write audit) when **`abs(current_aa_total - previous_aa_total)`** is huge vs plausible daily bounds, so bad rows are visible before deploy.
-   - Extend delta-history warning beyond **`date < baseline_date`** (e.g. detect **rotation week** + suspicious row stats, or ship **`dump_before_baseline` boolean** inside each daily JSON from CI).
+   - **`data_quality` at write time** — **Done** in [`delta_storage.py`](../delta_storage.py) (`save_daily_delta_from_baseline`): embeds **`dump_before_baseline`** when ``date < baseline_date`` (wrong-era ``baseline_master``). Row-level AA sanity for same-day files still needs manual spot-check (e.g. ``python scripts/audit_delta_snapshots.py --character Tuned ...``) or future delta-history UI.
+   - **`verify_delta_baseline_archives.py --strict`** — promotes **dump date `<` baseline_date** to **exit 1** for dailies on/after 2026-01-01 (enable in CI after bad historical files are regenerated or excluded).
    - Replace hardcoded **“copy `baseline_master_2026-05-12` → master”** in `daily-update.yml` with a **config file** or script driven by “current rotation anchor” so the next manual rotation does not require another workflow edit.
    - Decide whether **`baseline_master_2026-05-13.json.gz`** should remain in git if it was only created by the accidental auto-reset; remove only if **no** `delta_daily` still references **`baseline_date` = `2026-05-13`** (run verify + grep).
 
@@ -118,6 +122,9 @@ So: **regenerating only `2026-05-13` is not enough** if the user still picks **`
 ```bash
 cd /path/to/magelo
 python scripts/verify_delta_baseline_archives.py --base-dir delta_snapshots
+python scripts/verify_delta_baseline_archives.py --base-dir delta_snapshots --strict
+
+python scripts/audit_delta_snapshots.py --from-date 2026-05-09 --to-date 2026-05-14 --fail-on-issue
 
 python -c "
 import gzip, json
@@ -137,8 +144,10 @@ for p in sorted(Path('delta_snapshots').glob('delta_daily_2026-05-1*.json.gz')):
 | Main daily baseline alignment + no auto-reset in CI | [`.github/workflows/daily-update.yml`](../.github/workflows/daily-update.yml) |
 | `delta.html` JSON compare baseline chars; daily `auto_reset_baseline=False` | [`generate_spell_page.py`](../generate_spell_page.py) |
 | Baseline load rules | [`delta_storage.py`](../delta_storage.py) (`load_baseline_for_date`, `save_daily_delta_from_baseline`, `get_date_range_deltas`) |
-| Regenerate matrix | [`.github/workflows/regenerate-delta-days.yml`](../.github/workflows/regenerate-delta-days.yml) |
+| Regenerate matrix (May 2026 two-batch example in workflow header) | [`.github/workflows/regenerate-delta-days.yml`](../.github/workflows/regenerate-delta-days.yml) |
 | Local one-day regen helper | [`scripts/regenerate_delta_daily_from_dump.py`](../scripts/regenerate_delta_daily_from_dump.py) |
+| Audit dailies / AA sanity | [`scripts/audit_delta_snapshots.py`](../scripts/audit_delta_snapshots.py) |
+| Verify baselines; optional ``--strict`` | [`scripts/verify_delta_baseline_archives.py`](../scripts/verify_delta_baseline_archives.py) |
 
 ---
 
@@ -169,6 +178,8 @@ Inspect recent dailies: `baseline_date` and inventory volume.
 
 ```bash
 cd /path/to/magelo   # repo root
+python scripts/audit_delta_snapshots.py --prefix delta_daily_2026-05
+
 python -c "
 import gzip, json
 from pathlib import Path
@@ -219,6 +230,8 @@ Use it to confirm **`baseline_names`**, last days’ **`baseline_date`**, and su
 | Daily gzip schema, `compare_delta_to_delta`, `get_date_range_deltas` | [`delta_storage.py`](../delta_storage.py) |
 | delta-history JS, `generateDateRangeReport`, `loadBaseline` | [`generate_spell_page.py`](../generate_spell_page.py) |
 | Pages artifact inspection | [`scripts/analyze_github_pages_artifact.py`](../scripts/analyze_github_pages_artifact.py) |
+| Audit dailies / AA sanity | [`scripts/audit_delta_snapshots.py`](../scripts/audit_delta_snapshots.py) |
+| Verify baselines; optional ``--strict`` | [`scripts/verify_delta_baseline_archives.py`](../scripts/verify_delta_baseline_archives.py) |
 
 ---
 

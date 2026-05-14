@@ -1,7 +1,21 @@
 # Regenerate delta_daily_YYYY-MM-DD.json.gz from cached Magelo dumps (magelo-dump-<date>).
 # Use when delta files exist but are empty/wrong while the dump is still in Actions cache.
 #
-# Example (May 10–11 vs baseline era 2026-02-09):
+# May 2026 baseline rotation (2026-05-12): run TWO workflow_dispatch batches — do not use the
+# May-12 baseline archive for dumps dated BEFORE 2026-05-12 (that yields ``date < baseline_date``
+# and breaks delta-history; verify_delta_baseline_archives warns; JSON embeds data_quality).
+#
+#   Batch A (pre-rotation era, baseline still 2026-02-09):
+#     dates: 2026-05-09,2026-05-10,2026-05-11
+#     baseline_era_date: 2026-02-09
+#     force: true
+#
+#   Batch B (new era, baseline snapshot 2026-05-12):
+#     dates: 2026-05-12,2026-05-13,2026-05-14
+#     baseline_era_date: 2026-05-12
+#     force: true
+#
+# Older example (May 10–11 only, Feb era):
 #   dates: 2026-05-10,2026-05-11
 #   baseline_era_date: 2026-02-09
 #   force: true
@@ -24,7 +38,7 @@ on:
         required: true
         type: string
       baseline_era_date:
-        description: "Optional. Copy baseline_master_<this>.json.gz over baseline_master.json.gz first (e.g. 2026-02-09 for 5/10–5/11)."
+        description: "Optional. Copy baseline_master_<this>.json.gz over baseline_master.json.gz first. May 2026: use 2026-02-09 for dumps before 2026-05-12; use 2026-05-12 for 2026-05-12 onward (see workflow header + docs/DELTA_BASELINE_HANDOFF_2026-05.md)."
         required: false
         type: string
         default: ""

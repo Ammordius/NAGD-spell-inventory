@@ -5,7 +5,15 @@ Local equivalent of the matrix step in .github/workflows/regenerate-delta-days.y
 
 Requires character/TAKP_character.txt and inventory/TAKP_character_inventory.txt for that day.
 
-Example: python scripts/regenerate_delta_daily_from_dump.py 2026-05-10 --baseline-era 2026-05-12
+May 2026 rotation: use ``--baseline-era`` matching the dump's coordinate system — **not** always
+2026-05-12. For dumps **before** 2026-05-12 use the pre-rotation archive (typically ``2026-02-09``);
+for **2026-05-12** onward use ``2026-05-12``. Using the May-12 snapshot for a May-9 dump sets
+``date < baseline_date`` (incoherent; see ``data_quality`` in written JSON).
+
+Examples::
+
+    python scripts/regenerate_delta_daily_from_dump.py 2026-05-09 --baseline-era 2026-02-09 --force
+    python scripts/regenerate_delta_daily_from_dump.py 2026-05-12 --baseline-era 2026-05-12 --force
 
 With --baseline-era, copies delta_snapshots/baseline_master_<era>.json.gz over
 delta_snapshots/baseline_master.json.gz first (same as the workflow).

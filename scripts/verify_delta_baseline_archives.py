@@ -4,8 +4,8 @@
 Exit 1 if any referenced baseline_date cannot be resolved (see delta_storage.load_baseline_for_date)
 for delta_daily files from 2026-01-01 onward (required for delta-history / cross-era ranges).
 
-Dump dates strictly before ``baseline_date`` are reported as warnings only (backfill / mixed-era
-snapshots are allowed in CI).
+Dump dates strictly before ``baseline_date`` are reported as warnings by default; use ``--strict``
+to treat them as errors for dailies on/after 2026-01-01 (recommended after fixing known bad files).
 
 Older pinned dailies (e.g. 2024) are skipped; they predate the current baseline archive layout.
 """
@@ -74,6 +74,14 @@ def main() -> int:
         default=Path("delta_snapshots"),
         help="Directory containing delta_daily_*.json.gz and baseline_master*.json.gz",
     )
+    ap.add_argument(
+        "--strict",
+        action="store_true",
+        help=(
+            "Treat dump date < baseline_date as errors (exit 1) for dailies on/after "
+            f"{EARLIEST_VERIFY_DATE} instead of warnings only."
+        ),
+    )
     args = ap.parse_args()
     base_dir = args.base_dir.resolve()
     if not base_dir.is_dir():
@@ -111,7 +119,10 @@ def main() -> int:
                     f"regenerate with the correct era (see .github/workflows/regenerate-delta-days.yml "
                     f"baseline_era_date)."
                 )
-                warnings.append(msg)
+                if args.strict and file_date >= EARLIEST_VERIFY_DATE:
+                    errors.append(msg)
+                else:
+                    warnings.append(msg)
         if bd == "Unknown":
             warnings.append(f"{path.name}: missing baseline_date in JSON")
 
