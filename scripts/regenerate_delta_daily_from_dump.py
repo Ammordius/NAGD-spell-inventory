@@ -5,18 +5,16 @@ Local equivalent of the matrix step in .github/workflows/regenerate-delta-days.y
 
 Requires character/TAKP_character.txt and inventory/TAKP_character_inventory.txt for that day.
 
-May 2026 rotation: use ``--baseline-era`` matching the dump's coordinate system — **not** always
-2026-05-12. For dumps **before** 2026-05-12 use the pre-rotation archive (typically ``2026-02-09``);
-for **2026-05-12** onward use ``2026-05-12``. Using the May-12 snapshot for a May-9 dump sets
-``date < baseline_date`` (incoherent; see ``data_quality`` in written JSON).
+Use ``--baseline-era YYYY-MM-DD`` to copy ``delta_snapshots/baseline_master_<era>.json.gz`` over
+``baseline_master.json.gz`` before computing (same as the workflow). For the current single-era
+policy (anchor **2026-02-09**), pass ``--baseline-era 2026-02-09`` for every dump date including
+post–May-12 calendar days so all dailies share one ``baseline_date``. Using a newer-era snapshot
+for an older dump sets ``date < baseline_date`` (incoherent; see ``data_quality`` in written JSON).
 
 Examples::
 
     python scripts/regenerate_delta_daily_from_dump.py 2026-05-09 --baseline-era 2026-02-09 --force
-    python scripts/regenerate_delta_daily_from_dump.py 2026-05-12 --baseline-era 2026-05-12 --force
-
-With --baseline-era, copies delta_snapshots/baseline_master_<era>.json.gz over
-delta_snapshots/baseline_master.json.gz first (same as the workflow).
+    python scripts/regenerate_delta_daily_from_dump.py 2026-05-14 --baseline-era 2026-02-09 --force
 """
 
 from __future__ import annotations

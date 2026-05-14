@@ -1,24 +1,11 @@
 # Regenerate delta_daily_YYYY-MM-DD.json.gz from cached Magelo dumps (magelo-dump-<date>).
 # Use when delta files exist but are empty/wrong while the dump is still in Actions cache.
 #
-# May 2026 baseline rotation (2026-05-12): run TWO workflow_dispatch batches — do not use the
-# May-12 baseline archive for dumps dated BEFORE 2026-05-12 (that yields ``date < baseline_date``
-# and breaks delta-history; verify_delta_baseline_archives warns; JSON embeds data_quality).
-#
-#   Batch A (pre-rotation era, baseline still 2026-02-09):
-#     dates: 2026-05-09,2026-05-10,2026-05-11
-#     baseline_era_date: 2026-02-09
-#     force: true
-#
-#   Batch B (new era, baseline snapshot 2026-05-12):
-#     dates: 2026-05-12,2026-05-13,2026-05-14
-#     baseline_era_date: 2026-05-12
-#     force: true
-#
-# Older example (May 10–11 only, Feb era):
-#   dates: 2026-05-10,2026-05-11
-#   baseline_era_date: 2026-02-09
-#   force: true
+# May 2026 stabilization (single 2026-02-09 anchor): default dispatch regenerates 2026-05-09 …
+# 2026-05-14 vs ``baseline_master_2026-02-09.json.gz`` so every daily shares the same
+# ``baseline_date`` (range subtraction in delta-history stays valid). Requires each
+# ``magelo-dump-<date>`` cache key to still exist. Override ``dates`` / ``baseline_era_date`` for
+# other windows or a future multi-era rotation (see docs/DELTA_BASELINE_HANDOFF_2026-05.md).
 #
 # If daily JSONs were removed after a bad baseline handoff (e.g. May 9–12, 2026), regenerate
 # once the correct ``baseline_master_<era>.json.gz`` is on disk and the dump caches still exist.
@@ -34,14 +21,15 @@ on:
   workflow_dispatch:
     inputs:
       dates:
-        description: "Comma-separated YYYY-MM-DD (dump dates = delta filenames)"
-        required: true
-        type: string
-      baseline_era_date:
-        description: "Optional. Exact YYYY-MM-DD matching a committed delta_snapshots/baseline_master_<date>.json.gz (four-digit year must match repo, e.g. 2026 not 2025). May 2026: 2026-02-09 for dumps before 2026-05-12; 2026-05-12 for 2026-05-12 onward. See workflow header + docs/DELTA_BASELINE_HANDOFF_2026-05.md."
+        description: "Comma-separated YYYY-MM-DD (dump dates = delta filenames). Default: May 9–14, 2026 stabilization window."
         required: false
         type: string
-        default: ""
+        default: "2026-05-09,2026-05-10,2026-05-11,2026-05-12,2026-05-13,2026-05-14"
+      baseline_era_date:
+        description: "Exact YYYY-MM-DD matching delta_snapshots/baseline_master_<date>.json.gz. Default 2026-02-09 (single-era anchor). Override only for a deliberate rotation."
+        required: false
+        type: string
+        default: "2026-02-09"
       baseline_cache_date:
         description: "Optional. Exact magelo-baseline-YYYY-MM-DD cache key. If empty, workflow still restores baseline via restore-keys magelo-baseline- (latest prior cache); for historical days prefer baseline_era_date so baseline_date matches the delta era."
         required: false
@@ -78,7 +66,9 @@ jobs:
           import re
           import sys
 
-          raw = os.environ.get("DATES", "")
+          raw = os.environ.get("DATES", "").strip()
+          if not raw:
+              raw = "2026-05-09,2026-05-10,2026-05-11,2026-05-12,2026-05-13,2026-05-14"
           dates = [x.strip() for x in raw.split(",") if x.strip()]
           if not dates:
               print("::error::No dates after parsing", file=sys.stderr)
@@ -149,7 +139,7 @@ jobs:
             ls -la delta_snapshots/baseline_master_*.json.gz 2>/dev/null || echo "(none)"
             case "${ERA}" in
               2025-05-12|2025-02-09)
-                echo "::notice::Year looks like 2025 — this repo uses 2026 for the May rotation. Try baseline_era_date: 2026-05-12 or 2026-02-09."
+                echo "::notice::Year looks like 2025 — this repo uses 2026. Try baseline_era_date: 2026-02-09 (or your rotation archive date)."
                 ;;
             esac
             exit 1
