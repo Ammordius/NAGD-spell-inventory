@@ -3116,6 +3116,15 @@ def generate_delta_history(base_dir):
             }
         }
         
+        function pickAbsStat(deltaData, field, fallback) {
+            // Do not use || for AA/HP/level: legitimate 0 must not fall back to baseline.
+            if (!deltaData || !Object.prototype.hasOwnProperty.call(deltaData, field)) return fallback;
+            const v = deltaData[field];
+            if (v === null || v === undefined || v === '') return fallback;
+            const n = Number(v);
+            return Number.isFinite(n) ? n : fallback;
+        }
+
         function reconstructCharacterState(baseline, delta) {
             // Reconstruct full character state by combining baseline + delta
             const fullState = {};
@@ -3143,17 +3152,18 @@ def generate_delta_history(base_dir):
                 if (deltaData.is_new || !fullState[charName]) {
                     // New character - use current values from delta
                     fullState[charName] = {
-                        level: deltaData.current_level || 0,
-                        aa_total: deltaData.current_aa_total || 0,
-                        hp: deltaData.current_hp || 0,
+                        level: pickAbsStat(deltaData, 'current_level', 0),
+                        aa_total: pickAbsStat(deltaData, 'current_aa_total', 0),
+                        hp: pickAbsStat(deltaData, 'current_hp', 0),
                         class: deltaData.class || '',
                         guild: deltaData.guild || ''
                     };
                 } else {
                     // Update existing character - delta has current values (baseline + changes)
-                    fullState[charName].level = deltaData.current_level || fullState[charName].level;
-                    fullState[charName].aa_total = deltaData.current_aa_total || fullState[charName].aa_total;
-                    fullState[charName].hp = deltaData.current_hp || fullState[charName].hp;
+                    const prev = fullState[charName];
+                    fullState[charName].level = pickAbsStat(deltaData, 'current_level', prev.level);
+                    fullState[charName].aa_total = pickAbsStat(deltaData, 'current_aa_total', prev.aa_total);
+                    fullState[charName].hp = pickAbsStat(deltaData, 'current_hp', prev.hp);
                     if (deltaData.class) {
                         fullState[charName].class = deltaData.class;
                     }
@@ -3293,6 +3303,9 @@ def generate_delta_history(base_dir):
                 
                 // Check if baselines match
                 const baselineMismatch = startDelta.baseline_date !== endDelta.baseline_date;
+                const dumpBeforeBaselineStart = startDelta.date && startDelta.baseline_date && startDelta.baseline_date !== 'Unknown' && String(startDelta.date) < String(startDelta.baseline_date);
+                const dumpBeforeBaselineEnd = endDelta.date && endDelta.baseline_date && endDelta.baseline_date !== 'Unknown' && String(endDelta.date) < String(endDelta.baseline_date);
+                const dumpBeforeBaselineAny = dumpBeforeBaselineStart || dumpBeforeBaselineEnd;
                 
                 // Load baselines (needed to reconstruct full character states)
                 outputDiv.innerHTML = '<p>Loading baselines... (this may take a moment)</p>';
@@ -3483,6 +3496,16 @@ def generate_delta_history(base_dir):
                 const endBaselineResetDay = (endDelta.baseline_date === end) &&
                     Object.keys(endDelta.inv_deltas || {}).length === 0;
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
+                if (dumpBeforeBaselineAny) {
+                    const bits = [];
+                    if (dumpBeforeBaselineStart) bits.push(`start ${startDelta.date} (baseline ${startDelta.baseline_date})`);
+                    if (dumpBeforeBaselineEnd) bits.push(`end ${endDelta.date} (baseline ${endDelta.baseline_date})`);
+                    reportHTML += `<p style="background: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #f44336;">
+                        <strong>Unreliable range:</strong> At least one endpoint daily JSON was built with <code>date</code> before <code>baseline_date</code> (${bits.join('; ')}).
+                        Character AA/HP in those files can be inconsistent with the archived baseline, so <strong>range leaderboards and character deltas here can look like months of gains over a day or two</strong>.
+                        Regenerate the affected <code>delta_daily_*.json.gz</code> with the correct Magelo dump for that calendar day and <code>baseline_era_date</code> (see <code>regenerate-delta-days.yml</code>).
+                    </p>`;
+                }
                 
                 if (usedFallbackBaseline) {
                     reportHTML += `<p style="background: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ff9800;">
