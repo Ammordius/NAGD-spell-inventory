@@ -4196,8 +4196,16 @@ def main():
         # Step 2: Compare today vs baseline and save daily delta
         print(f"Comparing today ({date_str}) vs baseline ({baseline['baseline_date']})...")
         try:
+            # Do not auto-rotate baseline here: quarterly reset vs an old embedded
+            # baseline_master.json.gz date fights manual rotation (e.g. May 2026 era) and can
+            # create a surprise new baseline_date mid-run so yesterday/today dailies mismatch
+            # and delta.html skips JSON compare. Rotations use workflows/materialize/regenerate.
             daily_delta_path = save_daily_delta_from_baseline(
-                current_char_data, current_inventories, date_str, delta_snapshots_dir
+                current_char_data,
+                current_inventories,
+                date_str,
+                delta_snapshots_dir,
+                auto_reset_baseline=False,
             )
             print(f"Saved daily delta JSON: {daily_delta_path}")
         except Exception as e:

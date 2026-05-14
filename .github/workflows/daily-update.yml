@@ -400,6 +400,19 @@ jobs:
     - name: Sync dated baseline archives from master (early)
       run: |
         python scripts/sync_baseline_master_archive_from_master.py --base-dir delta_snapshots
+
+    # After May 12, 2026 rotation: keep baseline_master.json.gz on the same era as delta_daily_*.json.gz
+    # so save_daily_delta_from_baseline does not still use an old embedded date (e.g. 2026-02-09) and
+    # trigger a surprise 90-day auto-reset that bumps baseline_date to "today" and breaks JSON compare.
+    # Update this path when the repo moves to the next manual rotation archive.
+    - name: Align baseline_master.json.gz to May 12 rotation archive when present
+      run: |
+        if [ -f "delta_snapshots/baseline_master_2026-05-12.json.gz" ]; then
+          cp -f "delta_snapshots/baseline_master_2026-05-12.json.gz" "delta_snapshots/baseline_master.json.gz"
+          echo "OK: baseline_master.json.gz copied from baseline_master_2026-05-12.json.gz"
+        else
+          echo "No baseline_master_2026-05-12.json.gz; leaving baseline_master.json.gz unchanged"
+        fi
     
     - name: Restore cache for 2026-02-07 and generate delta
       uses: actions/cache@v5
