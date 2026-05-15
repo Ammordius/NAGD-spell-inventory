@@ -2777,6 +2777,12 @@ def generate_delta_history(base_dir):
     
     # Sort by date (newest first)
     delta_entries.sort(key=lambda x: x['date'], reverse=True)
+    sorted_dates_asc = sorted(e['date'] for e in delta_entries)
+    default_range_end = sorted_dates_asc[-1] if sorted_dates_asc else ''
+    default_range_start = (
+        sorted_dates_asc[-2] if len(sorted_dates_asc) >= 2 else default_range_end
+    )
+    sorted_dates_json = json.dumps(sorted_dates_asc)
     
     # Generate HTML with date-to-date comparison interface
     html = """<!DOCTYPE html>
@@ -2917,9 +2923,8 @@ def generate_delta_history(base_dir):
         </div>
         
         <div class="info-box">
-            <strong>ℹ️ How it works:</strong> Historical deltas are stored as JSON files (much smaller than HTML). 
-            Use the form below to generate a date-to-date comparison report for any date range. 
-            The report will be reconstructed from daily delta JSONs on demand.
+            <strong>ℹ️ How it works:</strong> Each <code>delta_daily_*.json.gz</code> is cumulative vs its <code>baseline_date</code>.
+            Pick two dates below; character changes use the same <code>compare_delta_to_delta</code> logic as <a href="delta.html">delta.html</a> (endpoint JSON diff, not raw cumulative rows).
         </div>
         
         <div class="date-range-form">
@@ -2941,7 +2946,7 @@ def generate_delta_history(base_dir):
         
         <div class="stats">
             <strong>Available Daily Delta JSON Files:</strong> """ + str(len(delta_entries)) + """
-            <br><small>These JSON files contain daily changes and can be used to reconstruct any date range.</small>
+            <br><small>Endpoint subtraction between two dates gives calendar-range changes (default: latest two files).</small>
         </div>
         
         <div class="delta-list">
@@ -2949,12 +2954,12 @@ def generate_delta_history(base_dir):
 """
     
     if delta_entries:
-        html += "            <p>Click on a date to use it in the date range form above:</p>\n"
+        html += "            <p>Click a date to set the range end to that day and the start to the previous available day:</p>\n"
         html += "            <div style='display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 15px;'>\n"
         for entry in delta_entries:
             html += f"""
                 <div class="delta-entry" style="flex-direction: column; align-items: flex-start; cursor: pointer;" 
-                     onclick="document.getElementById('start_date').value='{entry['date']}'; document.getElementById('end_date').value='{entry['date']}';">
+                     onclick="setDateRangeFromTile('{entry['date']}');">
                     <strong>{entry['date_formatted']}</strong>
                     <div class="delta-date">{entry['date']}</div>
                 </div>
@@ -2975,6 +2980,7 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="tracked-item-mob">""" + tracked_item_mob_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="no-drop-tracked-ids">""" + no_drop_tracked_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="no-rent-item-ids">""" + no_rent_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="sorted-available-dates">""" + sorted_dates_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
@@ -2982,14 +2988,21 @@ def generate_delta_history(base_dir):
         const TRACKED_ITEM_MOB = JSON.parse((document.getElementById('tracked-item-mob') || { textContent: '{}' }).textContent);
         const NO_DROP_TRACKED_IDS = new Set(JSON.parse((document.getElementById('no-drop-tracked-ids') || { textContent: '[]' }).textContent));
         const NO_RENT_ITEMS = new Set(JSON.parse((document.getElementById('no-rent-item-ids') || { textContent: '[]' }).textContent).map(String));
-        // Set default dates (today and 7 days ago)
-        const today = new Date().toISOString().split('T')[0];
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        const weekAgoStr = weekAgo.toISOString().split('T')[0];
+        const SORTED_AVAILABLE_DATES = JSON.parse((document.getElementById('sorted-available-dates') || { textContent: '[]' }).textContent);
+        const DEFAULT_RANGE_START = """ + json.dumps(default_range_start) + """;
+        const DEFAULT_RANGE_END = """ + json.dumps(default_range_end) + """;
         
-        document.getElementById('end_date').value = today;
-        document.getElementById('start_date').value = weekAgoStr;
+        function setDateRangeFromTile(endDate) {
+            const idx = SORTED_AVAILABLE_DATES.indexOf(endDate);
+            const startDate = idx > 0 ? SORTED_AVAILABLE_DATES[idx - 1] : endDate;
+            document.getElementById('start_date').value = startDate;
+            document.getElementById('end_date').value = endDate;
+        }
+        
+        if (DEFAULT_RANGE_END) {
+            document.getElementById('end_date').value = DEFAULT_RANGE_END;
+            document.getElementById('start_date').value = DEFAULT_RANGE_START || DEFAULT_RANGE_END;
+        }
         
         // Load JSONs on-demand (only when date range is selected)
         let loadedDeltas = new Map(); // Cache loaded deltas
@@ -3123,6 +3136,118 @@ def generate_delta_history(base_dir):
             if (v === null || v === undefined || v === '') return fallback;
             const n = Number(v);
             return Number.isFinite(n) ? n : fallback;
+        }
+
+        /** Mirror delta_storage._cumulative_char_stats_at_slice (missing row = baseline). */
+        function cumulativeCharStatsAtSlice(baselineCharacters, charName, charDeltasDict) {
+            const row = (charDeltasDict || {})[charName];
+            if (row) {
+                const lvl = row.current_level != null ? row.current_level : (row.previous_level || 0);
+                const aa = row.current_aa_total != null ? row.current_aa_total : (row.previous_aa_total || 0);
+                const hp = row.current_hp != null ? row.current_hp : (row.previous_hp || 0);
+                return [Number(lvl) || 0, Number(aa) || 0, Number(hp) || 0];
+            }
+            const bc = (baselineCharacters || {})[charName];
+            if (bc) {
+                return [
+                    Number(bc.level) || 0,
+                    (Number(bc.aa_unspent) || 0) + (Number(bc.aa_spent) || 0),
+                    Number(bc.hp_max_total) || 0
+                ];
+            }
+            return [0, 0, 0];
+        }
+
+        /** Same logic as delta_storage.compare_delta_to_delta (characters only). */
+        function compareDeltaToDeltaChars(deltaA, deltaB, baselineCharacters) {
+            const charDeltas = {};
+            const cdA = deltaA.char_deltas || {};
+            const cdB = deltaB.char_deltas || {};
+            const allChars = new Set([...Object.keys(cdA), ...Object.keys(cdB)]);
+            for (const charName of allChars) {
+                const deltaAChar = cdA[charName] || {};
+                const deltaBChar = cdB[charName] || {};
+                const [aLevel, aAa, aHp] = cumulativeCharStatsAtSlice(baselineCharacters, charName, cdA);
+                const [bLevel, bAa, bHp] = cumulativeCharStatsAtSlice(baselineCharacters, charName, cdB);
+                const levelChange = bLevel - aLevel;
+                const aaChange = bAa - aAa;
+                const hpChange = bHp - aHp;
+                if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0 ||
+                    deltaBChar.is_new || deltaBChar.is_deleted) {
+                    charDeltas[charName] = {
+                        name: charName,
+                        level_change: levelChange,
+                        aa_total_change: aaChange,
+                        hp_change: hpChange,
+                        current_level: bLevel,
+                        previous_level: aLevel,
+                        current_aa_total: bAa,
+                        previous_aa_total: aAa,
+                        current_hp: bHp,
+                        previous_hp: aHp,
+                        class: deltaBChar.class || deltaAChar.class || '',
+                        is_new: !!deltaBChar.is_new && !deltaAChar.is_new,
+                        is_deleted: !!deltaBChar.is_deleted && !deltaAChar.is_deleted
+                    };
+                }
+            }
+            return charDeltas;
+        }
+
+        /** Cross-baseline: mirror compare_delta_to_delta_reconstructed character loop. */
+        function compareDeltaToDeltaCharsCrossBaseline(deltaStart, deltaEnd, startBaseline, endBaseline) {
+            const bcS = (startBaseline.characters || {});
+            const bcE = (endBaseline.characters || {});
+            const charDeltas = {};
+            const cdS = deltaStart.char_deltas || {};
+            const cdE = deltaEnd.char_deltas || {};
+            const allChars = new Set([...Object.keys(cdS), ...Object.keys(cdE)]);
+            for (const charName of allChars) {
+                const deltaAChar = cdS[charName] || {};
+                const deltaBChar = cdE[charName] || {};
+                const [aLevel, aAa, aHp] = cumulativeCharStatsAtSlice(bcS, charName, cdS);
+                const [bLevel, bAa, bHp] = cumulativeCharStatsAtSlice(bcE, charName, cdE);
+                const levelChange = bLevel - aLevel;
+                const aaChange = bAa - aAa;
+                const hpChange = bHp - aHp;
+                if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0 ||
+                    deltaBChar.is_new || deltaBChar.is_deleted) {
+                    charDeltas[charName] = {
+                        name: charName,
+                        level_change: levelChange,
+                        aa_total_change: aaChange,
+                        hp_change: hpChange,
+                        current_level: bLevel,
+                        previous_level: aLevel,
+                        current_aa_total: bAa,
+                        previous_aa_total: aAa,
+                        current_hp: bHp,
+                        previous_hp: aHp,
+                        class: deltaBChar.class || deltaAChar.class || '',
+                        is_new: !!deltaBChar.is_new && !deltaAChar.is_new,
+                        is_deleted: !!deltaBChar.is_deleted && !deltaAChar.is_deleted
+                    };
+                }
+            }
+            return charDeltas;
+        }
+
+        function charDeltasToChanges(charDeltas) {
+            const charChanges = {};
+            for (const [charName, d] of Object.entries(charDeltas || {})) {
+                charChanges[charName] = {
+                    level: d.level_change,
+                    aa: d.aa_total_change,
+                    hp: d.hp_change,
+                    current_level: d.current_level,
+                    previous_level: d.previous_level,
+                    current_aa_total: d.current_aa_total,
+                    class: d.class || '',
+                    is_new: !!d.is_new,
+                    is_deleted: !!d.is_deleted
+                };
+            }
+            return charChanges;
         }
 
         function reconstructCharacterState(baseline, delta) {
@@ -3328,65 +3453,21 @@ def generate_delta_history(base_dir):
                 const endBaseline = endResult.baseline;
                 const usedFallbackBaseline = startResult.usedFallback || endResult.usedFallback;
                 
-                // Reconstruct full character states for both dates
-                outputDiv.innerHTML = '<p>Reconstructing character states...</p>';
+                // Character changes: compare_delta_to_delta (same as delta.html / get_date_range_deltas)
+                outputDiv.innerHTML = '<p>Computing character changes...</p>';
                 const startState = reconstructCharacterState(startBaseline, startDelta);
                 const endState = reconstructCharacterState(endBaseline, endDelta);
-                
-                // Compare the two reconstructed states
-                const charChanges = {};
-                const allCharNames = new Set([...Object.keys(startState), ...Object.keys(endState)]);
-                
-                for (const charName of allCharNames) {
-                    const startChar = startState[charName];
-                    const endChar = endState[charName];
-                    
-                    // Character was deleted
-                    if (startChar && !endChar) {
-                        charChanges[charName] = {
-                            level: -startChar.level,
-                            aa: -startChar.aa_total,
-                            hp: -startChar.hp,
-                            current_level: 0,
-                            previous_level: startChar.level,
-                            class: startChar.class,
-                            is_deleted: true
-                        };
-                        continue;
-                    }
-                    
-                    // Character is new
-                    if (!startChar && endChar) {
-                        charChanges[charName] = {
-                            level: endChar.level,
-                            aa: endChar.aa_total,
-                            hp: endChar.hp,
-                            current_level: endChar.level,
-                            previous_level: 0,
-                            class: endChar.class,
-                            is_new: true
-                        };
-                        continue;
-                    }
-                    
-                    // Character exists in both - compare values (anon = not in snapshot, so is_new/is_deleted cover that)
-                    if (startChar && endChar) {
-                        const levelChange = endChar.level - startChar.level;
-                        const aaChange = endChar.aa_total - startChar.aa_total;
-                        const hpChange = endChar.hp - startChar.hp;
-                        
-                        if (levelChange !== 0 || aaChange !== 0 || hpChange !== 0) {
-                            charChanges[charName] = {
-                                level: levelChange,
-                                aa: aaChange,
-                                hp: hpChange,
-                                current_level: endChar.level,
-                                previous_level: startChar.level,
-                                class: endChar.class || startChar.class || ''
-                            };
-                        }
-                    }
+                let rangeCharDeltas;
+                if (baselineMismatch) {
+                    rangeCharDeltas = compareDeltaToDeltaCharsCrossBaseline(
+                        startDelta, endDelta, startBaseline, endBaseline
+                    );
+                } else {
+                    rangeCharDeltas = compareDeltaToDeltaChars(
+                        startDelta, endDelta, startBaseline.characters || {}
+                    );
                 }
+                const charChanges = charDeltasToChanges(rangeCharDeltas);
                 
                 // Inventory: rebuild absolute bags (baseline + cumulative inv delta), then diff.
                 // Matches Python get_date_range_deltas across baseline_date boundaries.
@@ -3541,8 +3622,21 @@ def generate_delta_history(base_dir):
                 const visTracked = sortedTracked.filter(c => trackedDeltas[c] && trackedDeltas[c].is_visibility_change === true);
                 const nonVisTracked = sortedTracked.filter(c => !trackedDeltas[c] || trackedDeltas[c].is_visibility_change !== true);
                 const allVisNames = [...new Set([...visLevel1, ...visOthers, ...visTracked])].sort();
-                // Leaderboards: only consider characters present in BOTH start and end state (explicit presence)
-                const charsInBoth = new Set(Object.keys(startState).filter(c => c in endState));
+                // Leaderboards: chars with rows on both days (match delta_storage.get_leaderboard_totals_from_date_range)
+                const charsInBoth = new Set();
+                if (!baselineMismatch) {
+                    const sk = Object.keys(startDelta.char_deltas || {});
+                    const ek = new Set(Object.keys(endDelta.char_deltas || {}));
+                    for (const c of sk) {
+                        if (ek.has(c) && !(endDelta.char_deltas[c] || {}).is_deleted) {
+                            charsInBoth.add(c);
+                        }
+                    }
+                } else {
+                    for (const c of Object.keys(startState)) {
+                        if (c in endState) charsInBoth.add(c);
+                    }
+                }
                 reportHTML += `<p style="margin: 10px 0;">${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}
                     <a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
                     <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
@@ -3611,13 +3705,12 @@ def generate_delta_history(base_dir):
                     
                     // AA leaderboard (level 50+)
                     if ((currentLevel >= 50 || previousLevel >= 50) && aaGain > 0) {
-                        const endChar = endState[charName];
                         aaLeaderboard.push({
                             name: charName,
                             class: changes.class || 'Unknown',
                             level: currentLevel,
                             aa_gain: aaGain,
-                            aa_total: endChar ? endChar.aa_total : 0
+                            aa_total: changes.current_aa_total != null ? changes.current_aa_total : 0
                         });
                     }
                     

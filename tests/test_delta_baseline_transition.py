@@ -94,6 +94,48 @@ class TestCompareDeltaToDeltaBaselineFill(unittest.TestCase):
         self.assertEqual(alice['aa_total_change'], 2)
         self.assertEqual(alice['hp_change'], 10)
 
+    def test_deleted_on_end_day_aa_change_not_full_wipe(self):
+        """End-day is_deleted: diff is slice(end)-slice(start), not -start_aa (Sturm 5/14->5/15)."""
+        baseline_chars = {
+            'Sturm': {
+                'level': 65,
+                'aa_unspent': 0,
+                'aa_spent': 512,
+                'hp_max_total': 5676,
+                'class': 'Ranger',
+            }
+        }
+        day_a = {
+            'baseline_date': '2026-02-09',
+            'char_deltas': {
+                'Sturm': {
+                    'current_level': 65,
+                    'current_aa_total': 600,
+                    'current_hp': 5766,
+                    'class': 'Ranger',
+                    'is_deleted': False,
+                }
+            },
+            'inv_deltas': {},
+        }
+        day_b = {
+            'baseline_date': '2026-02-09',
+            'char_deltas': {
+                'Sturm': {
+                    'current_level': 65,
+                    'current_aa_total': 512,
+                    'current_hp': 5676,
+                    'class': 'Ranger',
+                    'is_deleted': True,
+                }
+            },
+            'inv_deltas': {},
+        }
+        out = compare_delta_to_delta(day_a, day_b, baseline_chars)
+        sturm = out['char_deltas']['Sturm']
+        self.assertEqual(sturm['aa_total_change'], -88)
+        self.assertTrue(sturm['is_deleted'])
+
 
 def _write_json_gz(path, obj):
     with gzip.open(path, 'wt', encoding='utf-8') as f:
