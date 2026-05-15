@@ -88,6 +88,11 @@ def main() -> int:
         action="store_true",
         help="Exit 1 if any dump date < baseline_date",
     )
+    ap.add_argument(
+        "--require-nonempty",
+        action="store_true",
+        help="Exit 1 if char_deltas and inv_deltas are both empty (bad regen / missing dump)",
+    )
     args = ap.parse_args()
     base = args.base_dir.resolve()
     if not base.is_dir():
@@ -110,6 +115,19 @@ def main() -> int:
     all_issues: list[str] = []
     for p in paths:
         all_issues.extend(audit_dump_before_baseline(p))
+        if args.require_nonempty:
+            try:
+                with gzip.open(p, "rt", encoding="utf-8") as f:
+                    doc = json.load(f)
+            except OSError as e:
+                all_issues.append(f"{p.name}: cannot read ({e})")
+                continue
+            chars = doc.get("char_deltas") or {}
+            inv = doc.get("inv_deltas") or {}
+            if not chars and not inv:
+                all_issues.append(
+                    f"{p.name}: empty char_deltas and inv_deltas (regenerate from magelo-dump or fix CI backfill)"
+                )
 
     for msg in all_issues:
         print(msg)
@@ -123,7 +141,8 @@ def main() -> int:
     elif not all_issues and not args.character:
         print(f"OK: audited {len(paths)} file(s), no dump-before-baseline issues")
 
-    return 1 if (args.fail_on_issue and all_issues) else 0
+    fail = bool(all_issues) and (args.fail_on_issue or args.require_nonempty)
+    return 1 if fail else 0
 
 
 if __name__ == "__main__":

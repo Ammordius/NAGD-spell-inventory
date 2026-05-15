@@ -749,6 +749,14 @@ jobs:
     - name: Verify delta baseline archives and daily metadata
       run: |
         python scripts/verify_delta_baseline_archives.py --base-dir delta_snapshots
+
+    - name: Audit recent daily deltas (non-empty, correct baseline era)
+      run: |
+        python scripts/audit_delta_snapshots.py \
+          --from-date 2026-05-09 \
+          --to-date 2099-12-31 \
+          --require-nonempty \
+          --fail-on-issue
     - name: Generate Class Rankings
       env:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
