@@ -642,6 +642,58 @@ jobs:
           echo "No today backup; using cache-restored files for main run"
         fi
     
+    # Re-pull magelo-dump-{yesterday} after backfill: early copy can carry a stale .magelo_update_date
+    # (e.g. Feb 7 stamp inside magelo-dump-2026-05-14) even when dump files are correct for May 14.
+    - name: Backup today's Magelo dump before refreshing _previous
+      if: steps.yesterday.outputs.yesterday_date != ''
+      run: |
+        mkdir -p character inventory
+        cp character/TAKP_character.txt character/.delta_today_character.txt
+        cp inventory/TAKP_character_inventory.txt inventory/.delta_today_inventory.txt
+        if [ -f ".magelo_update_date" ]; then
+          cp .magelo_update_date .delta_today_magelo_date.txt
+        fi
+        echo "✓ Backed up today's Magelo dump before restoring magelo-dump-${{ steps.yesterday.outputs.yesterday_date }} for _previous"
+    
+    - name: Restore yesterday Magelo cache for delta _previous
+      if: steps.yesterday.outputs.yesterday_date != ''
+      uses: actions/cache@v5
+      id: cache-yesterday-delta
+      with:
+        path: |
+          character/TAKP_character.txt
+          inventory/TAKP_character_inventory.txt
+          .magelo_update_date
+        key: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
+    
+    - name: Fail if yesterday Magelo cache missing for delta
+      if: steps.yesterday.outputs.yesterday_date != '' && steps.cache-yesterday-delta.outputs.cache-hit != 'true'
+      run: |
+        echo "::error::No Actions cache hit for magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}. Delta needs the prior day's dump cache (see Caches in repo settings). Yesterday's date from export: ${{ steps.yesterday.outputs.yesterday_date }}"
+        exit 1
+    
+    - name: Copy yesterday cache into _previous (align stamp to cache key date)
+      if: steps.yesterday.outputs.yesterday_date != '' && steps.cache-yesterday-delta.outputs.cache-hit == 'true'
+      env:
+        EXPECTED_YESTERDAY_DATE: ${{ steps.yesterday.outputs.yesterday_date }}
+      run: |
+        python3 scripts/refresh_magelo_previous_from_yesterday_cache.py
+    
+    - name: Restore today's Magelo dump after _previous refresh
+      if: steps.yesterday.outputs.yesterday_date != ''
+      run: |
+        if [ -f "character/.delta_today_character.txt" ] && [ -f "inventory/.delta_today_inventory.txt" ]; then
+          cp character/.delta_today_character.txt character/TAKP_character.txt
+          cp inventory/.delta_today_inventory.txt inventory/TAKP_character_inventory.txt
+          if [ -f ".delta_today_magelo_date.txt" ]; then
+            cp .delta_today_magelo_date.txt .magelo_update_date
+          fi
+          rm -f character/.delta_today_character.txt inventory/.delta_today_inventory.txt .delta_today_magelo_date.txt
+          echo "✓ Restored today's Magelo dump after refreshing _previous from magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}"
+        else
+          echo "::warning::No .delta_today backup; today's files may still be yesterday's cache restore"
+        fi
+    
     - name: Verify current vs previous (delta input check)
       run: |
         echo "=== Delta input check: current vs previous ==="
@@ -665,7 +717,7 @@ jobs:
         
         # Fail before generate_spell_page.py if stamps show >2 calendar days between exports (stale _previous).
         if [ -f ".magelo_previous_dump_date.txt" ] && [ -f ".magelo_update_date" ]; then
-          python3 scripts/validate_magelo_delta_date_span.py
+          EXPECTED_PREVIOUS_DATE="${{ steps.yesterday.outputs.yesterday_date }}" python3 scripts/validate_magelo_delta_date_span.py
         fi
     
     # Restore mob_tracker_deaths.json from last deploy so we merge with existing deaths (file is not in repo).

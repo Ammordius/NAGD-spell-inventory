@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """CI helper: ensure previous vs current Magelo export stamps are within max_span_days."""
+import os
 import re
 import sys
 from datetime import datetime
@@ -23,8 +24,10 @@ def main() -> int:
         print("No previous/current stamp files; skipping span check.")
         return 0
 
-    pt = parse_stamp(prev_path.read_text(encoding="utf-8"))
-    ct = parse_stamp(cur_path.read_text(encoding="utf-8"))
+    prev_raw = prev_path.read_text(encoding="utf-8")
+    cur_raw = cur_path.read_text(encoding="utf-8")
+    pt = parse_stamp(prev_raw)
+    ct = parse_stamp(cur_raw)
     if not pt or not ct:
         print(
             "::warning::Could not parse .magelo_previous_dump_date.txt or "
@@ -32,10 +35,23 @@ def main() -> int:
         )
         return 0
 
+    expected_prev = (os.environ.get("EXPECTED_PREVIOUS_DATE") or "").strip()
+    if expected_prev:
+        try:
+            exp_date = datetime.strptime(expected_prev, "%Y-%m-%d").date()
+        except ValueError:
+            print(f"::warning::Invalid EXPECTED_PREVIOUS_DATE: {expected_prev!r}")
+            exp_date = None
+        if exp_date is not None and pt.date() != exp_date:
+            print(
+                "::error::Previous stamp calendar date %s does not match expected "
+                "magelo-dump-%s (previous stamp: %r). Re-run refresh_magelo_previous step."
+                % (pt.date(), expected_prev, prev_raw.strip())
+            )
+            return 1
+
     days = abs((ct.date() - pt.date()).days)
     if days > 2:
-        prev_raw = prev_path.read_text(encoding="utf-8").strip()
-        cur_raw = cur_path.read_text(encoding="utf-8").strip()
         print(
             "::error::Previous Magelo export stamp vs current spans %d calendar days (max 2). "
             "Refusing to generate inflated delta.html. Previous stamp: %r. Current: %r. "
