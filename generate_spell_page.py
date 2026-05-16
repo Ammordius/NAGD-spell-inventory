@@ -15,11 +15,10 @@ from delta_storage import (
     get_week_start, get_month_start,
     get_weekly_leaderboard, get_monthly_leaderboard,
     save_baseline_json, save_daily_delta_json, get_date_range_deltas,
-    save_master_baseline, load_master_baseline, load_baseline_for_date,
-    save_daily_delta_from_baseline, compare_delta_to_delta,
+    save_master_baseline, load_master_baseline,
+    save_daily_delta_from_baseline,
     load_daily_delta_json,
     _corpse_loot_chars_from_equipped_meta,
-    daily_json_pair_usable_for_delta_html_json_compare,
 )
 
 # Character names to look for
@@ -2925,7 +2924,7 @@ def generate_delta_history(base_dir):
         
         <div class="info-box">
             <strong>ℹ️ How it works:</strong> Each <code>delta_daily_*.json.gz</code> is cumulative vs its <code>baseline_date</code>.
-            Pick two dates below; character changes use the same <code>compare_delta_to_delta</code> logic as <a href="delta.html">delta.html</a> (endpoint JSON diff, not raw cumulative rows).
+            Pick two dates below; character changes use <code>compare_delta_to_delta</code> on the two endpoint JSONs (same idea as <code>get_date_range_deltas</code>). The <a href="delta.html">current delta report</a> uses consecutive Magelo dump files for day-over-day character rows so sparse JSON cannot inflate gains.
         </div>
         
         <div class="date-range-form">
@@ -3454,7 +3453,7 @@ def generate_delta_history(base_dir):
                 const endBaseline = endResult.baseline;
                 const usedFallbackBaseline = startResult.usedFallback || endResult.usedFallback;
                 
-                // Character changes: compare_delta_to_delta (same as delta.html / get_date_range_deltas)
+                // Character changes: compare_delta_to_delta on endpoints (Python get_date_range_deltas); delta.html uses dump-vs-dump
                 outputDiv.innerHTML = '<p>Computing character changes...</p>';
                 const startState = reconstructCharacterState(startBaseline, startDelta);
                 const endState = reconstructCharacterState(endBaseline, endDelta);
@@ -4384,62 +4383,33 @@ def main():
                 for _cn in corpse_loot_override:
                     inv_deltas.pop(_cn, None)
             else:
-                # Compare deltas: today's delta vs yesterday's delta (inventory visibility matches delta-history when baseline is passed)
-                # Use the era for today_delta['baseline_date'], not load_master_baseline() from before save_daily_delta_from_baseline.
-                # Wrong-era baseline_chars makes missing sparse rows read as 0 → inflated "whole quarter" character deltas.
-                bd_t = today_delta.get('baseline_date')
-                bl_slice = load_baseline_for_date(str(bd_t), delta_snapshots_dir) if bd_t else None
-                baseline_chars = (bl_slice or {}).get('characters') if bl_slice else None
-                y_cd = yesterday_delta.get('char_deltas') or {}
-                t_cd = today_delta.get('char_deltas') or {}
-                if not daily_json_pair_usable_for_delta_html_json_compare(
-                    yesterday_delta, today_delta, baseline_chars
-                ):
-                    if not y_cd and t_cd:
-                        print(
-                            f"Prior daily JSON has empty char_deltas ({yesterday_date_str}); "
-                            "using previous vs current Magelo files for delta.html "
-                            "(JSON compare would treat the server as entirely at baseline yesterday)."
-                        )
-                    else:
-                        print(
-                            f"Could not load baseline characters for era {bd_t!r}; "
-                            "using previous vs current Magelo files for delta.html"
-                        )
-                    char_deltas = compare_character_data(
-                        current_char_data, previous_char_data, None
+                # Same baseline_date on both daily JSONs: still use Magelo dumps for character + inventory
+                # rows on this page. compare_delta_to_delta on sparse cumulative JSONs can show a full-era gain
+                # whenever yesterday's file omits characters that are not actually at baseline (partial/bad
+                # prior snapshot, not only empty char_deltas). CI always has previous vs current exports here.
+                # Daily JSONs remain the source for equipped_worn_by_char corpse-loot parity with delta-history.
+                char_deltas = compare_character_data(
+                    current_char_data, previous_char_data, None
+                )
+                inv_deltas = compare_inventories(
+                    current_inventories, previous_inventories, None
+                )
+                em_y = yesterday_delta.get('equipped_worn_by_char') or {}
+                em_t = today_delta.get('equipped_worn_by_char') or {}
+                if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
+                    corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
+                        yesterday_delta, today_delta
                     )
-                    inv_deltas = compare_inventories(
-                        current_inventories, previous_inventories, None
-                    )
+                else:
                     corpse_loot_override = chars_corpse_loot_excluded(
                         current_inventories, previous_inventories
                     )
-                    for _cn in corpse_loot_override:
-                        inv_deltas.pop(_cn, None)
-                else:
-                    delta_comparison = compare_delta_to_delta(
-                        yesterday_delta, today_delta, baseline_chars
-                    )
-                    char_deltas = delta_comparison['char_deltas']
-                    # inv_deltas from JSON are each "vs baseline" and omit chars with no inv change vs baseline.
-                    # compare_delta_to_delta subtracts two such sparse rows and treats a missing row like {} on
-                    # both added/removed axes, which lists essentially every equipped item as gained in one day.
-                    # Consecutive Magelo dumps are authoritative for inventory on this page.
-                    inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
-                    em_y = yesterday_delta.get('equipped_worn_by_char') or {}
-                    em_t = today_delta.get('equipped_worn_by_char') or {}
-                    if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
-                        corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
-                            yesterday_delta, today_delta
-                        )
-                    else:
-                        corpse_loot_override = chars_corpse_loot_excluded(
-                            current_inventories, previous_inventories
-                        )
-                    for _cn in corpse_loot_override:
-                        inv_deltas.pop(_cn, None)
-                    print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
+                for _cn in corpse_loot_override:
+                    inv_deltas.pop(_cn, None)
+                print(
+                    f"Generated delta comparison from Magelo dumps ({yesterday_date_str} to {date_str}); "
+                    "daily JSON used for equipped_worn corpse-loot metadata only."
+                )
         elif today_delta:
             # Today's JSON is cumulative vs baseline — never use it for the daily HTML report when
             # yesterday's delta file is missing (would show the full baseline window, e.g. ~90 days).

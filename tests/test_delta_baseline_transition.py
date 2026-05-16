@@ -6,10 +6,11 @@ cross-baseline slices (missing side defaults to zeros).
 
 ``generate_spell_page.py`` Step 3 compares ``baseline_date`` on both JSONs; when
 they differ, it uses previous vs current Magelo files instead (see that branch).
-
-When both JSONs share the same baseline, ``compare_delta_to_delta`` should receive
-``baseline_characters`` so omitted keys mean \"unchanged from baseline\" at that day,
-not numeric zero (which inflated day-over-day to a full quarter of gains).
+When both JSONs share the same ``baseline_date``, the **delta.html** character table
+uses Magelo dump-vs-dump (``compare_character_data``); daily JSONs supply
+``equipped_worn_by_char`` for corpse-loot parity. ``compare_delta_to_delta`` with
+``baseline_characters`` remains the right primitive for **delta-history** /
+``get_date_range_deltas`` on valid sparse endpoints.
 """
 
 import gzip
