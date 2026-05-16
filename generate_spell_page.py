@@ -2729,6 +2729,27 @@ def generate_date_range_delta_html(start_date, end_date, base_dir='delta_snapsho
     
     return html
 
+
+def default_delta_history_range_endpoints(dates_asc, max_gap_days=14):
+    """Pick default start/end dates for delta-history.html (see generate_delta_history).
+
+    Avoid defaulting to ``dates_asc[-2:]`` when the two newest files are far apart on
+    the calendar (sparse repo), which makes the UI look like a multi-month gain.
+    """
+    if not dates_asc:
+        return '', ''
+    end = dates_asc[-1]
+    if len(dates_asc) < 2:
+        return end, end
+    d_end = datetime.strptime(end, '%Y-%m-%d')
+    for i in range(len(dates_asc) - 2, -1, -1):
+        cand = dates_asc[i]
+        gap = (d_end - datetime.strptime(cand, '%Y-%m-%d')).days
+        if 0 < gap <= max_gap_days:
+            return cand, end
+    return end, end
+
+
 def generate_delta_history(base_dir):
     """Generate a history page listing all available daily delta JSON files.
     Allows generating date-to-date delta comparisons on demand."""
@@ -2778,9 +2799,8 @@ def generate_delta_history(base_dir):
     # Sort by date (newest first)
     delta_entries.sort(key=lambda x: x['date'], reverse=True)
     sorted_dates_asc = sorted(e['date'] for e in delta_entries)
-    default_range_end = sorted_dates_asc[-1] if sorted_dates_asc else ''
-    default_range_start = (
-        sorted_dates_asc[-2] if len(sorted_dates_asc) >= 2 else default_range_end
+    default_range_start, default_range_end = default_delta_history_range_endpoints(
+        sorted_dates_asc, max_gap_days=14
     )
     sorted_dates_json = json.dumps(sorted_dates_asc)
     
@@ -2925,6 +2945,7 @@ def generate_delta_history(base_dir):
         <div class="info-box">
             <strong>ℹ️ How it works:</strong> Each <code>delta_daily_*.json.gz</code> is cumulative vs its <code>baseline_date</code>.
             Pick two dates below; character changes use <code>compare_delta_to_delta</code> on the two endpoint JSONs (same idea as <code>get_date_range_deltas</code>). The <a href="delta.html">current delta report</a> uses consecutive Magelo dump files for day-over-day character rows so sparse JSON cannot inflate gains.
+            <br><small>Default start/end prefers the latest snapshot and the newest prior file within 14 calendar days (so sparse archives do not open on a long gap by mistake).</small>
         </div>
         
         <div class="date-range-form">

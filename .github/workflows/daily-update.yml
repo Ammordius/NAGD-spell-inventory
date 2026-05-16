@@ -124,10 +124,8 @@ jobs:
         path: |
           character/TAKP_character.txt
           inventory/TAKP_character_inventory.txt
+          .magelo_update_date
         key: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
-        restore-keys: |
-          magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
-          magelo-dump-
     
     - name: Copy yesterday's files to previous (before restoring today's cache)
       run: |
@@ -151,6 +149,10 @@ jobs:
           echo "✓ Copied yesterday's character file to previous"
           ls -lh character/TAKP_character_previous.txt
           echo "File size: $(wc -l < character/TAKP_character_previous.txt) lines"
+          if [ -f ".magelo_update_date" ]; then
+            cp .magelo_update_date .magelo_previous_dump_date.txt
+            echo "✓ Saved Magelo stamp for previous dump:"; cat .magelo_previous_dump_date.txt
+          fi
           
           # Verify the copy succeeded
           if [ ! -f "character/TAKP_character_previous.txt" ]; then
