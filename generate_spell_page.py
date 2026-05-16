@@ -19,6 +19,7 @@ from delta_storage import (
     save_daily_delta_from_baseline, compare_delta_to_delta,
     load_daily_delta_json,
     _corpse_loot_chars_from_equipped_meta,
+    daily_json_pair_usable_for_delta_html_json_compare,
 )
 
 # Character names to look for
@@ -4389,28 +4390,56 @@ def main():
                 bd_t = today_delta.get('baseline_date')
                 bl_slice = load_baseline_for_date(str(bd_t), delta_snapshots_dir) if bd_t else None
                 baseline_chars = (bl_slice or {}).get('characters') if bl_slice else None
-                delta_comparison = compare_delta_to_delta(
+                y_cd = yesterday_delta.get('char_deltas') or {}
+                t_cd = today_delta.get('char_deltas') or {}
+                if not daily_json_pair_usable_for_delta_html_json_compare(
                     yesterday_delta, today_delta, baseline_chars
-                )
-                char_deltas = delta_comparison['char_deltas']
-                # inv_deltas from JSON are each "vs baseline" and omit chars with no inv change vs baseline.
-                # compare_delta_to_delta subtracts two such sparse rows and treats a missing row like {} on
-                # both added/removed axes, which lists essentially every equipped item as gained in one day.
-                # Consecutive Magelo dumps are authoritative for inventory on this page.
-                inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
-                em_y = yesterday_delta.get('equipped_worn_by_char') or {}
-                em_t = today_delta.get('equipped_worn_by_char') or {}
-                if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
-                    corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
-                        yesterday_delta, today_delta
+                ):
+                    if not y_cd and t_cd:
+                        print(
+                            f"Prior daily JSON has empty char_deltas ({yesterday_date_str}); "
+                            "using previous vs current Magelo files for delta.html "
+                            "(JSON compare would treat the server as entirely at baseline yesterday)."
+                        )
+                    else:
+                        print(
+                            f"Could not load baseline characters for era {bd_t!r}; "
+                            "using previous vs current Magelo files for delta.html"
+                        )
+                    char_deltas = compare_character_data(
+                        current_char_data, previous_char_data, None
                     )
-                else:
+                    inv_deltas = compare_inventories(
+                        current_inventories, previous_inventories, None
+                    )
                     corpse_loot_override = chars_corpse_loot_excluded(
                         current_inventories, previous_inventories
                     )
-                for _cn in corpse_loot_override:
-                    inv_deltas.pop(_cn, None)
-                print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
+                    for _cn in corpse_loot_override:
+                        inv_deltas.pop(_cn, None)
+                else:
+                    delta_comparison = compare_delta_to_delta(
+                        yesterday_delta, today_delta, baseline_chars
+                    )
+                    char_deltas = delta_comparison['char_deltas']
+                    # inv_deltas from JSON are each "vs baseline" and omit chars with no inv change vs baseline.
+                    # compare_delta_to_delta subtracts two such sparse rows and treats a missing row like {} on
+                    # both added/removed axes, which lists essentially every equipped item as gained in one day.
+                    # Consecutive Magelo dumps are authoritative for inventory on this page.
+                    inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+                    em_y = yesterday_delta.get('equipped_worn_by_char') or {}
+                    em_t = today_delta.get('equipped_worn_by_char') or {}
+                    if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
+                        corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
+                            yesterday_delta, today_delta
+                        )
+                    else:
+                        corpse_loot_override = chars_corpse_loot_excluded(
+                            current_inventories, previous_inventories
+                        )
+                    for _cn in corpse_loot_override:
+                        inv_deltas.pop(_cn, None)
+                    print(f"Generated delta comparison from JSON: {yesterday_date_str} to {date_str}")
         elif today_delta:
             # Today's JSON is cumulative vs baseline — never use it for the daily HTML report when
             # yesterday's delta file is missing (would show the full baseline window, e.g. ~90 days).

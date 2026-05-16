@@ -737,6 +737,29 @@ def load_daily_delta_json(date_str, base_dir='delta_snapshots'):
     return None
 
 
+def daily_json_pair_usable_for_delta_html_json_compare(
+    yesterday_delta, today_delta, baseline_characters,
+):
+    """Return True if ``delta.html`` Step 3 may use ``compare_delta_to_delta`` for characters.
+
+    When the prior day's ``char_deltas`` is empty but today's is not, JSON subtraction
+    treats every missing row as "still at baseline yesterday", which is only valid if
+    that daily file faithfully represented the server. A degenerate/empty prior file
+    (bad run) yields cumulative-since-baseline gains on the HTML page instead of true
+    day-over-day. When ``baseline_characters`` is None, sparse reconstruction is unsafe.
+
+    Callers should fall back to Magelo file diff (``compare_character_data``) when this
+    returns False. ``delta-history`` / ``get_date_range_deltas`` are unchanged.
+    """
+    y_cd = (yesterday_delta or {}).get('char_deltas') or {}
+    t_cd = (today_delta or {}).get('char_deltas') or {}
+    if not y_cd and t_cd:
+        return False
+    if baseline_characters is None:
+        return False
+    return True
+
+
 def _corpse_loot_chars_from_equipped_meta(delta_prev, delta_curr):
     """Names with 0 real worn items at prev snapshot and >=1 at curr; only if both have numeric counts."""
     meta_p = delta_prev.get('equipped_worn_by_char') or {}

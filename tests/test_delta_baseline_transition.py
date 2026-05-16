@@ -25,6 +25,7 @@ if _MAGELO_ROOT not in sys.path:
 
 from delta_storage import (  # noqa: E402
     compare_delta_to_delta,
+    daily_json_pair_usable_for_delta_html_json_compare,
     get_date_range_deltas,
     load_baseline_for_date,
 )
@@ -58,6 +59,81 @@ class TestCompareDeltaToDeltaBaselinePitfall(unittest.TestCase):
         self.assertIsNotNone(alice)
         self.assertEqual(alice['current_level'], 0)
         self.assertEqual(alice['previous_level'], 65)
+
+
+class TestDeltaHtmlJsonComparePredicate(unittest.TestCase):
+    """``delta.html`` Step 3 must not JSON-subtract when the prior day file is degenerate."""
+
+    def test_rejects_empty_yesterday_nonempty_today_even_with_baseline(self):
+        """Bad prior run: empty char_deltas; compare_delta_to_delta would use baseline as 'yesterday'."""
+        baseline = {'Alice': {'level': 60, 'aa_unspent': 0, 'aa_spent': 100, 'hp_max_total': 500}}
+        yesterday = {'char_deltas': {}, 'baseline_date': '2026-02-09'}
+        today = {
+            'baseline_date': '2026-02-09',
+            'char_deltas': {
+                'Alice': {
+                    'current_level': 61,
+                    'previous_level': 60,
+                    'current_aa_total': 102,
+                    'previous_aa_total': 100,
+                    'current_hp': 510,
+                    'previous_hp': 500,
+                    'class': 'Wizard',
+                }
+            },
+        }
+        self.assertFalse(
+            daily_json_pair_usable_for_delta_html_json_compare(
+                yesterday, today, baseline
+            )
+        )
+
+    def test_rejects_when_baseline_characters_missing(self):
+        yesterday = {
+            'char_deltas': {
+                'Bob': {
+                    'current_level': 65,
+                    'previous_level': 65,
+                    'current_aa_total': 100,
+                    'previous_aa_total': 100,
+                    'current_hp': 5000,
+                    'previous_hp': 5000,
+                    'class': 'Warrior',
+                }
+            },
+        }
+        today = dict(yesterday)
+        self.assertFalse(
+            daily_json_pair_usable_for_delta_html_json_compare(yesterday, today, None)
+        )
+
+    def test_accepts_nonempty_yesterday_with_baseline(self):
+        row = {
+            'current_level': 65,
+            'previous_level': 65,
+            'current_aa_total': 400,
+            'previous_aa_total': 400,
+            'current_hp': 8000,
+            'previous_hp': 8000,
+            'class': 'Wizard',
+        }
+        baseline = {'Alice': {'level': 60, 'aa_unspent': 0, 'aa_spent': 100, 'hp_max_total': 500}}
+        yesterday = {'char_deltas': {'Alice': dict(row)}, 'baseline_date': '2026-02-09'}
+        today = {
+            'baseline_date': '2026-02-09',
+            'char_deltas': {
+                'Alice': {
+                    **row,
+                    'current_aa_total': 404,
+                    'previous_aa_total': 400,
+                }
+            },
+        }
+        self.assertTrue(
+            daily_json_pair_usable_for_delta_html_json_compare(
+                yesterday, today, baseline
+            )
+        )
 
 
 class TestCompareDeltaToDeltaBaselineFill(unittest.TestCase):
