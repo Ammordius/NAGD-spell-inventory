@@ -24,7 +24,7 @@ on:
         description: "Comma-separated YYYY-MM-DD (dump dates = delta filenames). Default: May 9–14, 2026 stabilization window."
         required: false
         type: string
-        default: "2026-05-09,2026-05-10,2026-05-11,2026-05-12,2026-05-13,2026-05-14,2026-05-15"
+        default: "2026-05-09,2026-05-10,2026-05-11,2026-05-12,2026-05-13,2026-05-14"
       baseline_era_date:
         description: "Exact YYYY-MM-DD matching delta_snapshots/baseline_master_<date>.json.gz. Default 2026-02-09 (single-era anchor). Override only for a deliberate rotation."
         required: false
@@ -68,7 +68,7 @@ jobs:
 
           raw = os.environ.get("DATES", "").strip()
           if not raw:
-              raw = "2026-05-09,2026-05-10,2026-05-11,2026-05-12,2026-05-13,2026-05-14,2026-05-15"
+              raw = "2026-05-09,2026-05-10,2026-05-11,2026-05-12,2026-05-13,2026-05-14"
           dates = [x.strip() for x in raw.split(",") if x.strip()]
           if not dates:
               print("::error::No dates after parsing", file=sys.stderr)
