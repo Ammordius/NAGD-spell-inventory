@@ -8,6 +8,7 @@ import json
 import math
 import os
 import re
+from html import escape
 from collections import defaultdict
 from datetime import datetime, timedelta
 from delta_storage import (
@@ -1714,13 +1715,15 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
 def generate_delta_html(current_char_data, previous_char_data, current_inv, previous_inv, 
                         magelo_update_date, serverwide=True, char_deltas=None, inv_deltas=None,
                         mob_tracker_deaths_path=None, observed_at=None, raid_item_sources_path=None,
-                        corpse_loot_chars=None):
+                        corpse_loot_chars=None, previous_export_date=None):
     """Generate HTML page showing deltas between current and previous magelo dump.
     If serverwide is True, compares all characters, otherwise only mules.
     If char_deltas and inv_deltas are provided, uses those instead of recalculating.
     If mob_tracker_deaths_path and observed_at are set, appends (zone, mob) from this delta to the mob tracker JSON.
     If raid_item_sources_path is set, used to drop deaths 1 day after repop window ends.
-    If corpse_loot_chars is set, use it instead of inferring from current_inv vs previous_inv."""
+    If corpse_loot_chars is set, use it instead of inferring from current_inv vs previous_inv.
+    If previous_export_date is set (e.g. from CI .magelo_previous_dump_date.txt), the page header
+    shows both export timestamps for transparency."""
     
     # Compare character data (serverwide) if not provided
     if char_deltas is None:
@@ -1874,6 +1877,18 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     # Sort by HP gain (descending) and take top 20
     hp_leaderboard.sort(key=lambda x: x['hp_gain'], reverse=True)
     hp_leaderboard = hp_leaderboard[:20]
+    
+    if previous_export_date and str(previous_export_date).strip():
+        pe = str(previous_export_date).strip()
+        intro_p = (
+            '<p>Day-over-day comparison: previous Magelo export <code>%s</code> '
+            '&rarr; current <code>%s</code>.</p>' % (escape(pe), escape(magelo_update_date))
+        )
+    else:
+        intro_p = (
+            '<p>Changes detected since previous magelo dump (last updated: %s)</p>'
+            % escape(magelo_update_date)
+        )
     
     html = """<!DOCTYPE html>
 <html lang="en">
@@ -2041,7 +2056,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
 <body>
     <div class="container">
         <h1>TAKP Mule Delta Report</h1>
-        <p>Changes detected since previous magelo dump (last updated: """ + magelo_update_date + """)</p>
+        """ + intro_p + """
         
         <div class="nav-menu">
             <h3>Jump to Section:</h3>
@@ -4092,6 +4107,36 @@ def find_latest_magelo_file(directory, pattern=None):
     files.sort(key=lambda x: x[1], reverse=True)
     return files[0][0]
 
+
+def parse_takp_magelo_export_datetime(stamp):
+    """Parse TAKP export page / .magelo_update_date stamp (single-line)."""
+    s = re.sub(r'\s+', ' ', (stamp or '').strip())
+    if not s or s.lower() == 'unknown':
+        return None
+    try:
+        return datetime.strptime(s, '%a %b %d %H:%M:%S UTC %Y')
+    except ValueError:
+        return None
+
+
+def delta_magelo_export_dates_plausible(base_dir, current_stamp, max_span_days=2):
+    """True if previous stamp file missing, unparseable, or span within max calendar days."""
+    path = os.path.join(base_dir, '.magelo_previous_dump_date.txt')
+    if not os.path.isfile(path):
+        return True
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            prev_raw = f.read()
+        pt = parse_takp_magelo_export_datetime(prev_raw)
+        ct = parse_takp_magelo_export_datetime(current_stamp)
+        if not pt or not ct:
+            return True
+        days = abs((ct.date() - pt.date()).days)
+        return days <= max_span_days
+    except OSError:
+        return True
+
+
 def parse_date_from_filename(filename):
     """Parse date from filename like '2_6_26.txt' -> (month, day, year).
     Returns (month, day, year) tuple or None if not parseable."""
@@ -4271,6 +4316,21 @@ def main():
             current_char_file = proto_curr_char
             current_inv_file = proto_curr_inv
         else:
+            previous_char_file = None
+            previous_inv_file = None
+    
+    if previous_char_file and previous_inv_file:
+        magelo_stamp = (os.environ.get('MAGELO_UPDATE_DATE') or '').strip()
+        if not magelo_stamp or magelo_stamp == 'Unknown':
+            ud_path = os.path.join(base_dir, '.magelo_update_date')
+            if os.path.isfile(ud_path):
+                with open(ud_path, 'r', encoding='utf-8') as uf:
+                    magelo_stamp = uf.read().strip()
+        if not delta_magelo_export_dates_plausible(base_dir, magelo_stamp, max_span_days=2):
+            print(
+                '[SKIP] delta.html: .magelo_previous_dump_date.txt vs current export span '
+                'more than 2 calendar days; skipping to avoid inflated AA/item diffs.'
+            )
             previous_char_file = None
             previous_inv_file = None
     
@@ -4487,6 +4547,11 @@ def main():
                 observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         else:
             observed_at = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        prev_export_date = None
+        prev_stamp_path = os.path.join(base_dir, '.magelo_previous_dump_date.txt')
+        if os.path.isfile(prev_stamp_path):
+            with open(prev_stamp_path, 'r', encoding='utf-8') as _pf:
+                prev_export_date = _pf.read().strip()
         delta_html = generate_delta_html(
             current_char_data, previous_char_data,
             current_inventories, previous_inventories,
@@ -4498,6 +4563,7 @@ def main():
             observed_at=observed_at,
             raid_item_sources_path=raid_sources_path,
             corpse_loot_chars=corpse_loot_override,
+            previous_export_date=prev_export_date,
         )
         
         delta_file = os.path.join(base_dir, "delta.html")
