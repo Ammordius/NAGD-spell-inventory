@@ -1,0 +1,6 @@
+# Incident window: no delta_daily JSONs; CI audit skips these calendar dates.
+2026-05-09
+2026-05-10
+2026-05-11
+2026-05-12
+2026-05-13

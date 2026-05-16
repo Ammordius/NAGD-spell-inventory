@@ -17,6 +17,8 @@ env:
 jobs:
   update-spell-inventory:
     runs-on: ubuntu-latest
+    outputs:
+      normalized_date: ${{ steps.check-update.outputs.normalized_date }}
     concurrency:
       group: "update-spell-inventory"
       cancel-in-progress: true
@@ -38,11 +40,6 @@ jobs:
       run: |
         echo "Fetching TAKP export page to check last update date..."
         EXPORT_PAGE=$(curl -sL "https://www.takproject.net/magelo/export/")
-        
-        # Debug: Show a snippet of the page to verify it's loading
-        echo "Page content preview (first 500 chars):"
-        echo "$EXPORT_PAGE" | head -c 500
-        echo ""
         
         # Extract the date line (format: "Fri Feb 6 16:30:25 UTC 2026" or "Fri Feb  6 16:30:25 UTC 2026")
         # The date may have variable whitespace, so we'll extract from the span tag and clean it
@@ -100,20 +97,6 @@ jobs:
           echo "Yesterday's date: $YESTERDAY"
         else
           echo "yesterday_date=" >> $GITHUB_OUTPUT
-        fi
-    
-    - name: Calculate week and month boundaries
-      id: date-info
-      run: |
-        CURRENT_DATE="${{ steps.check-update.outputs.normalized_date }}"
-        if [ "$CURRENT_DATE" != "unknown" ]; then
-          WEEK_START=$(python3 -c "from datetime import datetime, timedelta; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); days_since_monday = dt.weekday(); monday = dt - timedelta(days=days_since_monday); print(monday.strftime('%Y-%m-%d'))")
-          MONTH_START=$(python3 -c "from datetime import datetime; dt = datetime.strptime('$CURRENT_DATE', '%Y-%m-%d'); print(dt.replace(day=1).strftime('%Y-%m-%d'))")
-          echo "week_start=$WEEK_START" >> $GITHUB_OUTPUT
-          echo "month_start=$MONTH_START" >> $GITHUB_OUTPUT
-        else
-          echo "week_start=" >> $GITHUB_OUTPUT
-          echo "month_start=" >> $GITHUB_OUTPUT
         fi
     
     - name: Restore yesterday's cache (to get previous files)
@@ -266,18 +249,6 @@ jobs:
         echo "Inventory file size: $(wc -l < inventory/TAKP_character_inventory.txt) lines"
         echo "Update date: ${{ steps.check-update.outputs.update_date }}"
     
-    # When we downloaded today's dump, back it up so we can restore it after historical backfill
-    # (Backfill overwrites character/ and inventory/; "Restore today's dump" then restores from cache,
-    # but on first run of the day today's cache does not exist yet, so we'd get yesterday's data and lose the download.)
-    - name: Backup today's dump for main run (when we downloaded)
-      if: steps.need-update.outputs.needs_update == 'true'
-      run: |
-        if [ -f "character/TAKP_character.txt" ] && [ -f "inventory/TAKP_character_inventory.txt" ]; then
-          cp character/TAKP_character.txt character/.today_backup_character.txt
-          cp inventory/TAKP_character_inventory.txt inventory/.today_backup_inventory.txt
-          echo "✓ Backed up today's dump for restore after backfill"
-        fi
-    
     - name: Save current update date
       run: |
         # Always save the current date from the page (even if we used cache)
@@ -330,11 +301,6 @@ jobs:
             echo "  3. Cache restoration issue"
           else
             echo "✓ Character files are different - changes will be shown"
-            # Show a sample of differences to verify they're actually different
-            echo "First 3 lines of previous:"
-            head -3 character/TAKP_character_previous.txt || echo "Could not read"
-            echo "First 3 lines of current:"
-            head -3 character/TAKP_character.txt || echo "Could not read"
           fi
           
           # Also check inventory files
@@ -363,12 +329,8 @@ jobs:
         echo "✓ Found spell_exchange_list.json"
         echo "File size: $(wc -c < spell_exchange_list.json) bytes"
     
-    # --- Delta JSON order of operations (do not reorder without care) ---
-    # 1. We already have: current = TODAY (from cache-magelo or download), previous = YESTERDAY (copied only on yesterday cache hit).
-    # 2. Backfill steps below OVERWRITE character/ and inventory/ with historical dumps. Each backfill reads those files and writes delta_daily_YYYY-MM-DD.json.gz.
-    # 3. After backfill we MUST "Restore today's dump for main run" so current = TODAY again before running generate_spell_page.py.
-    # 4. Main run then produces delta.html (today vs yesterday) and delta_daily_TODAY.json.gz (today vs baseline) from correct data.
-    - name: Restore baseline cache (needed for historical delta + leaderboards)
+    # Baseline cache for daily delta JSON + leaderboards; align master to Feb 9 single-era anchor.
+    - name: Restore baseline cache (needed for daily delta + leaderboards)
       uses: actions/cache@v5
       id: cache-baseline-historical
       continue-on-error: true
@@ -382,13 +344,11 @@ jobs:
         restore-keys: |
           magelo-baseline-
 
-    # Ensure baseline_master_<embedded>.json.gz exists before generate_spell_page (master may be newer era).
-    - name: Sync dated baseline archives from master (early)
+    - name: Sync dated baseline archives from master
       run: |
         python scripts/sync_baseline_master_archive_from_master.py --base-dir delta_snapshots
 
-    # Single baseline era (2026-02-09): align master to the Feb anchor so daily saves and delta-history
-    # stay in one coordinate system (no May-12 rotation copy; see docs/DELTA_BASELINE_HANDOFF_2026-05.md).
+    # Single baseline era (2026-02-09): align master to the Feb anchor (see delta_snapshots/ABANDONED_DATES.txt).
     - name: Align baseline_master.json.gz to Feb 9 archive when present
       run: |
         if [ -f "delta_snapshots/baseline_master_2026-02-09.json.gz" ]; then
@@ -398,251 +358,7 @@ jobs:
           echo "No baseline_master_2026-02-09.json.gz; leaving baseline_master.json.gz unchanged"
         fi
 
-    - name: Restore cache for 2026-02-07 and generate delta
-      uses: actions/cache@v5
-      id: cache-2026-02-07
-      continue-on-error: true
-      with:
-        path: |
-          character/TAKP_character.txt
-          inventory/TAKP_character_inventory.txt
-        key: magelo-dump-2026-02-07
-        restore-keys: |
-          magelo-dump-2026-02-07
-          magelo-dump-
-    
-    - name: Generate delta for 2026-02-07 if cache restored
-      if: steps.cache-2026-02-07.outputs.cache-hit == 'true' && steps.cache-baseline-historical.outputs.cache-hit == 'true'
-      run: |
-        if [ ! -f "delta_snapshots/delta_daily_2026-02-07.json.gz" ]; then
-          echo "Generating delta for 2026-02-07 from cached files..."
-          cat > generate_delta_temp.py << 'ENDOFFILE'
-        import sys
-        import os
-        sys.path.insert(0, os.getcwd())
-        from generate_spell_page import parse_character_data, parse_inventory_file
-        from delta_storage import save_daily_delta_from_baseline
-        
-        # Parse character data (all characters)
-        char_data = parse_character_data('character/TAKP_character.txt', None)
-        
-        # Extract char_ids from character file
-        char_ids = {}
-        with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
-            next(f)  # Skip header
-            for line in f:
-                parts = line.strip().split('\t')
-                if len(parts) >= 9:
-                    name = parts[0]
-                    char_id = parts[8]
-                    char_ids[name] = char_id
-        
-        # Parse inventory data
-        inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
-        
-        # Generate delta (function loads baseline internally; do not rotate during historical backfill)
-        save_daily_delta_from_baseline(
-            char_data, inv_data, '2026-02-07', 'delta_snapshots',
-            auto_reset_baseline=False,
-        )
-        print('✓ Generated delta for 2026-02-07')
-        ENDOFFILE
-          python generate_delta_temp.py
-          rm -f generate_delta_temp.py
-        else
-          echo "✓ Delta for 2026-02-07 already exists"
-        fi
-    
-    - name: Restore cache for 2026-02-08 and generate delta
-      uses: actions/cache@v5
-      id: cache-2026-02-08
-      continue-on-error: true
-      with:
-        path: |
-          character/TAKP_character.txt
-          inventory/TAKP_character_inventory.txt
-        key: magelo-dump-2026-02-08
-        restore-keys: |
-          magelo-dump-2026-02-08
-          magelo-dump-
-    
-    - name: Generate delta for 2026-02-08 if cache restored
-      if: steps.cache-2026-02-08.outputs.cache-hit == 'true' && steps.cache-baseline-historical.outputs.cache-hit == 'true'
-      run: |
-        if [ ! -f "delta_snapshots/delta_daily_2026-02-08.json.gz" ]; then
-          echo "Generating delta for 2026-02-08 from cached files..."
-          cat > generate_delta_temp.py << 'ENDOFFILE'
-        import sys
-        import os
-        sys.path.insert(0, os.getcwd())
-        from generate_spell_page import parse_character_data, parse_inventory_file
-        from delta_storage import save_daily_delta_from_baseline
-        
-        # Parse character data (all characters)
-        char_data = parse_character_data('character/TAKP_character.txt', None)
-        
-        # Extract char_ids from character file
-        char_ids = {}
-        with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
-            next(f)  # Skip header
-            for line in f:
-                parts = line.strip().split('\t')
-                if len(parts) >= 9:
-                    name = parts[0]
-                    char_id = parts[8]
-                    char_ids[name] = char_id
-        
-        # Parse inventory data
-        inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
-        
-        # Generate delta (function loads baseline internally; do not rotate during historical backfill)
-        save_daily_delta_from_baseline(
-            char_data, inv_data, '2026-02-08', 'delta_snapshots',
-            auto_reset_baseline=False,
-        )
-        print('✓ Generated delta for 2026-02-08')
-        ENDOFFILE
-          python generate_delta_temp.py
-          rm -f generate_delta_temp.py
-        else
-          echo "✓ Delta for 2026-02-08 already exists"
-        fi
-    
-    - name: Restore cache for 2026-05-10 and generate delta
-      uses: actions/cache@v5
-      id: cache-2026-05-10
-      continue-on-error: true
-      with:
-        path: |
-          character/TAKP_character.txt
-          inventory/TAKP_character_inventory.txt
-        key: magelo-dump-2026-05-10
-        restore-keys: |
-          magelo-dump-2026-05-10
-          magelo-dump-
-
-    - name: Generate delta for 2026-05-10 if cache restored
-      if: steps.cache-2026-05-10.outputs.cache-hit == 'true' && steps.cache-baseline-historical.outputs.cache-hit == 'true'
-      run: |
-        if [ ! -f "delta_snapshots/delta_daily_2026-05-10.json.gz" ]; then
-          echo "Generating delta for 2026-05-10 from cached files..."
-          cat > generate_delta_temp.py << 'ENDOFFILE'
-        import sys
-        import os
-        sys.path.insert(0, os.getcwd())
-        from generate_spell_page import parse_character_data, parse_inventory_file
-        from delta_storage import save_daily_delta_from_baseline
-
-        # Parse character data (all characters)
-        char_data = parse_character_data('character/TAKP_character.txt', None)
-
-        # Extract char_ids from character file
-        char_ids = {}
-        with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
-            next(f)  # Skip header
-            for line in f:
-                parts = line.strip().split('\t')
-                if len(parts) >= 9:
-                    name = parts[0]
-                    char_id = parts[8]
-                    char_ids[name] = char_id
-
-        # Parse inventory data
-        inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
-
-        # Generate delta (function loads baseline internally; do not rotate during historical backfill)
-        save_daily_delta_from_baseline(
-            char_data, inv_data, '2026-05-10', 'delta_snapshots',
-            auto_reset_baseline=False,
-        )
-        print('✓ Generated delta for 2026-05-10')
-        ENDOFFILE
-          python generate_delta_temp.py
-          rm -f generate_delta_temp.py
-        else
-          echo "✓ Delta for 2026-05-10 already exists"
-        fi
-
-    - name: Restore cache for 2026-05-11 and generate delta
-      uses: actions/cache@v5
-      id: cache-2026-05-11
-      continue-on-error: true
-      with:
-        path: |
-          character/TAKP_character.txt
-          inventory/TAKP_character_inventory.txt
-        key: magelo-dump-2026-05-11
-        restore-keys: |
-          magelo-dump-2026-05-11
-          magelo-dump-
-
-    - name: Generate delta for 2026-05-11 if cache restored
-      if: steps.cache-2026-05-11.outputs.cache-hit == 'true' && steps.cache-baseline-historical.outputs.cache-hit == 'true'
-      run: |
-        if [ ! -f "delta_snapshots/delta_daily_2026-05-11.json.gz" ]; then
-          echo "Generating delta for 2026-05-11 from cached files..."
-          cat > generate_delta_temp.py << 'ENDOFFILE'
-        import sys
-        import os
-        sys.path.insert(0, os.getcwd())
-        from generate_spell_page import parse_character_data, parse_inventory_file
-        from delta_storage import save_daily_delta_from_baseline
-
-        # Parse character data (all characters)
-        char_data = parse_character_data('character/TAKP_character.txt', None)
-
-        # Extract char_ids from character file
-        char_ids = {}
-        with open('character/TAKP_character.txt', 'r', encoding='utf-8') as f:
-            next(f)  # Skip header
-            for line in f:
-                parts = line.strip().split('\t')
-                if len(parts) >= 9:
-                    name = parts[0]
-                    char_id = parts[8]
-                    char_ids[name] = char_id
-
-        # Parse inventory data
-        inv_data = parse_inventory_file('inventory/TAKP_character_inventory.txt', char_ids)
-
-        # Generate delta (function loads baseline internally; do not rotate during historical backfill)
-        save_daily_delta_from_baseline(
-            char_data, inv_data, '2026-05-11', 'delta_snapshots',
-            auto_reset_baseline=False,
-        )
-        print('✓ Generated delta for 2026-05-11')
-        ENDOFFILE
-          python generate_delta_temp.py
-          rm -f generate_delta_temp.py
-        else
-          echo "✓ Delta for 2026-05-11 already exists"
-        fi
-
-    # CRITICAL: Historical backfill overwrote character/ and inventory/ with past data.
-    # Restore today's dump so the main generator uses TODAY's data for delta.html and delta_daily_YYYY-MM-DD.json.gz.
-    - name: Restore today's dump for main run (after historical backfill)
-      uses: actions/cache@v5
-      with:
-        path: |
-          character/TAKP_character.txt
-          inventory/TAKP_character_inventory.txt
-        key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
-        restore-keys: |
-          magelo-dump-
-    
-    # If we had downloaded today's dump earlier, use that instead of cache (cache may be yesterday on first run of day).
-    - name: Restore today's downloaded files over cache when backup exists
-      run: |
-        if [ -f "character/.today_backup_character.txt" ] && [ -f "inventory/.today_backup_inventory.txt" ]; then
-          cp character/.today_backup_character.txt character/TAKP_character.txt
-          cp inventory/.today_backup_inventory.txt inventory/TAKP_character_inventory.txt
-          rm -f character/.today_backup_character.txt inventory/.today_backup_inventory.txt
-          echo "✓ Restored today's downloaded dump for main run (cache was not today's data yet)"
-        else
-          echo "No today backup; using cache-restored files for main run"
-        fi
-    
-    # Re-pull magelo-dump-{yesterday} after backfill: early copy can carry a stale .magelo_update_date
+    # Re-pull magelo-dump-{yesterday}: early copy can carry a stale .magelo_update_date
     # (e.g. Feb 7 stamp inside magelo-dump-2026-05-14) even when dump files are correct for May 14.
     - name: Backup today's Magelo dump before refreshing _previous
       if: steps.yesterday.outputs.yesterday_date != ''
@@ -764,151 +480,70 @@ jobs:
           echo "⚠ Error: spell_inventory.html was not generated"
         fi
         
-        # Check for delta page
         if [ -f "delta.html" ]; then
-          echo "✓ delta.html was generated"
-          echo "Delta file size: $(wc -c < delta.html) bytes"
-          echo "Delta file preview (first 10 lines):"
-          head -10 delta.html
+          echo "✓ delta.html was generated ($(wc -c < delta.html) bytes)"
         else
           echo "⚠ delta.html was NOT generated"
-          echo "Checking for previous files..."
-          if [ -f "character/TAKP_character_previous.txt" ]; then
-            echo "  - Previous character file exists: $(wc -l < character/TAKP_character_previous.txt) lines"
-          else
-            echo "  - Previous character file NOT found"
-          fi
-          if [ -f "inventory/TAKP_character_inventory_previous.txt" ]; then
-            echo "  - Previous inventory file exists: $(wc -l < inventory/TAKP_character_inventory_previous.txt) lines"
-          else
-            echo "  - Previous inventory file NOT found"
-          fi
         fi
-
-    - name: Sync dated baseline_master archive from master (if missing)
-      run: |
-        python scripts/sync_baseline_master_archive_from_master.py --base-dir delta_snapshots
 
     - name: Verify delta baseline archives and daily metadata
       run: |
         python scripts/verify_delta_baseline_archives.py --base-dir delta_snapshots
+
+    - name: Audit recent delta snapshots
+      if: steps.check-update.outputs.normalized_date != 'unknown'
+      run: |
+        FROM=$(python3 -c "from datetime import datetime, timedelta; d='${{ steps.check-update.outputs.normalized_date }}'; print((datetime.strptime(d,'%Y-%m-%d')-timedelta(days=7)).strftime('%Y-%m-%d'))")
+        python scripts/audit_delta_snapshots.py \
+          --base-dir delta_snapshots \
+          --from-date "$FROM" \
+          --to-date "${{ steps.check-update.outputs.normalized_date }}" \
+          --fail-on-issue
     - name: Generate Class Rankings
       env:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
       run: |
         echo "Generating class rankings..."
-        # Regenerate item_name_to_id.json from raid_item_sources BEFORE class rankings so the generator
-        # can backfill item_id in focus_sources/focus_candidates (e.g. Cap of Flowing Time, Mask of Strategic Insight).
-        # This ensures emitted class_rankings.json has item_id for item cards without relying on client-side name resolution.
-        python merge_dkp_loot_into_raid_sources.py --write-name-to-id || true
-        # Check if spell focus data exists in various locations
         FOCUS_FILE=""
         if [ -f "spell_focii_level65.json" ]; then
           FOCUS_FILE="spell_focii_level65.json"
-          echo "✓ Found spell_focii_level65.json in current directory"
         elif [ -f "../Server/spell_focii_level65.json" ]; then
-          FOCUS_FILE="../Server/spell_focii_level65.json"
-          echo "✓ Found spell_focii_level65.json in ../Server/"
-          cp "$FOCUS_FILE" spell_focii_level65.json
+          cp "../Server/spell_focii_level65.json" spell_focii_level65.json
+          FOCUS_FILE="spell_focii_level65.json"
         elif [ -f "../../Server/spell_focii_level65.json" ]; then
-          FOCUS_FILE="../../Server/spell_focii_level65.json"
-          echo "✓ Found spell_focii_level65.json in ../../Server/"
-          cp "$FOCUS_FILE" spell_focii_level65.json
+          cp "../../Server/spell_focii_level65.json" spell_focii_level65.json
+          FOCUS_FILE="spell_focii_level65.json"
         else
-          echo "⚠ Warning: spell_focii_level65.json not found in any expected location"
-          echo "Searching for it..."
-          find . -name "spell_focii_level65.json" 2>/dev/null | head -5 || echo "Not found"
-          echo "Current directory: $(pwd)"
-          echo "Files in current directory:"
-          ls -la | head -10
+          echo "::warning::spell_focii_level65.json not found; skipping class rankings"
         fi
-        
         if [ -n "$FOCUS_FILE" ] || [ -f "spell_focii_level65.json" ]; then
-          echo "Running generate_class_rankings.py..."
-          python generate_class_rankings.py
-          if [ $? -eq 0 ]; then
-            echo "✓ Class rankings generation completed successfully"
-          else
-            echo "⚠ Warning: Class rankings generation had issues (exit code: $?)"
-            echo "Continuing anyway..."
-          fi
-        else
-          echo "⚠ Error: spell_focii_level65.json not found, skipping class rankings"
-          echo "Class rankings require spell focus data to function properly"
+          python generate_class_rankings.py || echo "::warning::Class rankings generation had issues"
         fi
-        
-        # Verify class rankings were generated
         if [ -f "class_rankings.html" ] && [ -f "class_rankings.json" ]; then
-          echo "✓ class_rankings.html and class_rankings.json generated successfully"
-          echo "Class rankings HTML size: $(wc -c < class_rankings.html) bytes"
-          echo "Class rankings JSON size: $(wc -c < class_rankings.json) bytes"
-          echo "First few lines of JSON to verify structure:"
-          head -5 class_rankings.json
+          echo "✓ class_rankings.html and class_rankings.json generated"
         else
-          echo "⚠ Error: Class rankings files were not generated"
-          if [ ! -f "class_rankings.html" ]; then
-            echo "  - class_rankings.html is missing"
-          fi
-          if [ ! -f "class_rankings.json" ]; then
-            echo "  - class_rankings.json is missing"
-          fi
+          echo "::warning::Class rankings files were not generated"
         fi
-    
+
     - name: Verify HTML was generated
       run: |
-        echo "=== Verifying generated files ==="
         if [ ! -f "spell_inventory.html" ]; then
-          echo "Error: spell_inventory.html was not generated"
+          echo "::error::spell_inventory.html was not generated"
           exit 1
         fi
-        echo "✓ spell_inventory.html generated successfully"
-        echo "File size: $(wc -c < spell_inventory.html) bytes"
-        echo "File preview (first 5 lines):"
-        head -5 spell_inventory.html
-        
-        # Check for delta page
-        echo ""
-        echo "=== Checking for delta.html ==="
+        echo "✓ spell_inventory.html ($(wc -c < spell_inventory.html) bytes)"
         if [ -f "delta.html" ]; then
-          echo "✓ delta.html generated successfully"
-          echo "Delta file size: $(wc -c < delta.html) bytes"
-          echo "Delta file preview (first 10 lines):"
-          head -10 delta.html
-          echo ""
-          echo "Checking delta content..."
-          if grep -q "Character Level & AA Changes" delta.html; then
-            echo "✓ Delta page contains character changes section"
-          fi
+          echo "✓ delta.html ($(wc -c < delta.html) bytes)"
           if grep -q "No.*changes detected" delta.html; then
-            echo "⚠ Delta page shows 'No changes detected' - files may be identical"
+            echo "::warning::Delta page shows 'No changes detected'"
           fi
         else
-          echo "⚠ delta.html was NOT generated"
-          echo "Checking why..."
-          echo "Files in current directory:"
-          ls -la *.html 2>/dev/null || echo "No HTML files found"
-          echo ""
-          echo "Files in character/ directory:"
-          ls -la character/ 2>/dev/null | head -10
-          echo ""
-          echo "Files in inventory/ directory:"
-          ls -la inventory/ 2>/dev/null | head -10
+          echo "::warning::delta.html was NOT generated"
         fi
-        
-        # Check for class rankings
-        echo ""
-        echo "=== Checking for class_rankings.html ==="
         if [ -f "class_rankings.html" ]; then
-          echo "✓ class_rankings.html generated successfully"
-          echo "Class rankings file size: $(wc -c < class_rankings.html) bytes"
+          echo "✓ class_rankings.html ($(wc -c < class_rankings.html) bytes)"
         else
-          echo "⚠ class_rankings.html was NOT generated"
-        fi
-        if [ -f "class_rankings.json" ]; then
-          echo "✓ class_rankings.json generated successfully"
-          echo "Class rankings JSON size: $(wc -c < class_rankings.json) bytes"
-        else
-          echo "⚠ class_rankings.json was NOT generated"
+          echo "::warning::class_rankings.html was NOT generated"
         fi
     
     # --- Persistence: We do NOT regenerate all JSONs each run.
@@ -932,8 +567,8 @@ jobs:
         if git diff --staged --quiet; then
           echo "No new delta files to commit"
         else
-          git commit -m "Add historical delta JSONs from cached files" || echo "Commit failed"
-          git push || echo "Push failed"
+          git commit -m "Add daily delta JSON snapshots from CI run"
+          git push
         fi
 
     # Regenerate item_name_to_id.json from raid_item_sources so item cards resolve on the live site
@@ -1127,12 +762,6 @@ jobs:
         name: github-pages-${{ github.run_id }}
         retention-days: 3
     
-    - name: Weekly/monthly baseline JSON (handled by Python script)
-      run: |
-        # The Python script will automatically save compact JSON baselines
-        # when it detects a new week/month, instead of large text files
-        echo "Baseline JSON files will be saved by generate_spell_page.py if needed"
-    
     # Cache baselines (master + weekly/monthly for leaderboards); deltas live in repo
     - name: Cache baselines
       uses: actions/cache@v5
@@ -1177,8 +806,24 @@ jobs:
         with:
           artifact_name: github-pages-${{ github.run_id }}
       - name: Verify deployment
+        env:
+          PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          EXPORT_DATE: ${{ needs.update-spell-inventory.outputs.normalized_date }}
         run: |
-          echo "Deployment should have created/updated the gh-pages branch"
-          echo "Check https://github.com/${{ github.repository }}/tree/gh-pages to see the deployed files"
-          echo "Pages URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          echo "Class Rankings URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/class_rankings.html"
+          echo "Pages URL: $PAGES_URL/"
+          for path in index.html delta.html; do
+            if curl -sfL "$PAGES_URL/$path" -o /dev/null; then
+              echo "✓ $path"
+            else
+              echo "::error::Missing or unreachable: $PAGES_URL/$path"
+              exit 1
+            fi
+          done
+          if [ -n "$EXPORT_DATE" ] && [ "$EXPORT_DATE" != "unknown" ]; then
+            DELTA="delta_snapshots/delta_daily_${EXPORT_DATE}.json.gz"
+            if curl -sfL "$PAGES_URL/$DELTA" -o /dev/null; then
+              echo "✓ $DELTA"
+            else
+              echo "::warning::Today's delta JSON not on Pages yet: $DELTA"
+            fi
+          fi

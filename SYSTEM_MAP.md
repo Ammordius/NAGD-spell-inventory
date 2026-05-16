@@ -58,26 +58,27 @@
 3. **Cache choreography** — GitHub Actions `actions/cache` on paths under `character/`, `inventory/`, `.magelo_update_date`:
    - Restore **yesterday’s** dump → copy to `TAKP_character_previous.txt` / `TAKP_character_inventory_previous.txt` **before** today’s files overwrite them (enables real diffs).
    - Restore or **download** today’s `TAKP_character.txt` and `TAKP_character_inventory.txt` from fixed export URLs when the cache key says data is stale.
-   - **Backup today’s download** when needed so historical backfill steps cannot replace “today” with older cache restores.
-4. **Historical backfill (optional)** — restores pinned dates (e.g. 2026-02-07, 2026-02-08) from cache to generate missing `delta_daily_*.json.gz` without polluting the main run; **restore today’s dump again** before the main generator.
-5. **Baseline cache** — restore `delta_snapshots/baseline_master*.json.gz` and weekly/monthly baselines (used for leaderboards and date-range logic).
-6. **`generate_spell_page.py`** — env `MAGELO_UPDATE_DATE` set from the export page. Produces spell inventory, delta HTML, snapshots, trackers, etc.
-7. **`scripts/verify_delta_baseline_archives.py`** — fails the job if a modern `delta_daily_*.json.gz` (dump date ≥ 2026-01-01) references an unresolvable `baseline_date` (for baselines ≥ 2026-02-01), or if a May+ dump is dated before its embedded `baseline_date` (bad backfill order). Skips legacy 2024-era tags.
-8. **Class rankings** — `merge_dkp_loot_into_raid_sources.py --write-name-to-id` (best-effort); then `generate_class_rankings.py` if `spell_focii_level65.json` is available.
-9. **Commit** — new `delta_snapshots/delta_daily_*.json.gz` may be committed by `github-actions[bot]` (small JSON history in repo).
-10. **Regenerate `data/item_name_to_id.json`** again for deploy consistency.
-11. **Prepare `deploy/`** — copy `spell_inventory.html` → `deploy/index.html`, copy other HTML, `class_rankings.*`, `data/*.json` subsets, `delta_snapshots/*.json.gz`, `raid_item_sources.json`, `mob_tracker_deaths.json`, etc.; `touch deploy/.nojekyll`.
+   - **Re-restore yesterday’s cache** into `_previous` via `scripts/refresh_magelo_previous_from_yesterday_cache.py` (aligns stamp to cache key date); validate span with `scripts/validate_magelo_delta_date_span.py`.
+4. **Baseline cache** — restore `delta_snapshots/baseline_master*.json.gz`; sync dated archives; **align `baseline_master.json.gz` to `baseline_master_2026-02-09.json.gz`** (single-era policy). See `delta_snapshots/ABANDONED_DATES.txt` for the intentional gap **2026-05-09 … 2026-05-13** (no `delta_daily` JSONs).
+5. **`generate_spell_page.py`** — env `MAGELO_UPDATE_DATE` set from the export page. Prefers `compare_delta_to_delta` on yesterday/today `delta_daily_*.json.gz` when safe; else Magelo dump diff.
+6. **`scripts/verify_delta_baseline_archives.py`** — fails on unresolvable `baseline_date` or dump date before embedded baseline (modern files).
+7. **`scripts/audit_delta_snapshots.py`** — rolling 7-day window, skips `ABANDONED_DATES.txt`, fails on wrong-era or degenerate (~250 KB empty) dailies.
+8. **Class rankings** — `generate_class_rankings.py` if `spell_focii_level65.json` is available.
+9. **Commit** — new `delta_snapshots/delta_daily_*.json.gz` committed by `github-actions[bot]` (`git push` fails the job on error).
+10. **Regenerate `data/item_name_to_id.json`** for deploy (`merge_dkp_loot_into_raid_sources.py --write-name-to-id`).
+11. **Prepare `deploy/`** — copy HTML, `delta_snapshots/*.json.gz`, data JSON, etc.; `touch deploy/.nojekyll`.
 12. **Upload Pages artifact** — `actions/upload-pages-artifact` (main branch only; short retention).
 
 ### 2.3 Deploy job
 
 - Runs only on **`main`**.
 - **`actions/deploy-pages`** publishes the artifact to **GitHub Pages** (environment `github-pages`).
+- **Smoke check** — `curl` `index.html`, `delta.html`, and today’s `delta_snapshots/delta_daily_<export-date>.json.gz` on the live Pages URL.
 - Live URL pattern: `https://<owner>.github.io/<repo>/` (class rankings: `/class_rankings.html`).
 
 ### 2.4 Permissions / infra notes
 
-- **Baseline cache (daily-update):** both the early “Restore baseline cache (needed for historical delta + leaderboards)” step and the late “Cache baselines” step use `key: magelo-baseline-${{ steps.check-update.outputs.normalized_date }}` with `restore-keys: magelo-baseline-`. The `date-info` step (week/month boundaries) runs **before** baseline restore; it is not used in those baseline cache keys. If baseline restores look wrong on cold cache, confirm both steps list the same paths (`baseline_master.json.gz`, `baseline_master_*.json.gz`, week/month JSON).
+- **Baseline cache (daily-update):** early restore and late “Cache baselines” both use `key: magelo-baseline-${{ normalized_date }}` with `restore-keys: magelo-baseline-`. Master is forced to the Feb 9 archive before generation; only `baseline_master_2026-02-09.json.gz` + `baseline_master.json.gz` are deployed long-term.
 
 - **`contents: write`** — bot commits delta JSONs.
 - **`pages: write`** + **`id-token: write`** — OIDC for Pages deployment.

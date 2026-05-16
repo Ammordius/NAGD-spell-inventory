@@ -21,6 +21,10 @@ import re
 import sys
 from pathlib import Path
 
+# Empty/wrong-era regen cluster (~250 KB); healthy Feb-era dailies are typically ~800 KB+.
+MIN_HEALTHY_BYTES = 400_000
+ABANDONED_DATES_FILENAME = "ABANDONED_DATES.txt"
+
 
 def _parse_daily_path(p: Path) -> str | None:
     m = re.match(r"delta_daily_(\d{4}-\d{2}-\d{2})\.json\.gz$", p.name)
@@ -45,6 +49,38 @@ def audit_dump_before_baseline(path: Path) -> list[str]:
     if dq.get("dump_before_baseline") and not any("dump date" in x for x in issues):
         issues.append(f"{path.name}: data_quality.dump_before_baseline is true")
     return issues
+
+
+def audit_degenerate_payload(path: Path, min_bytes: int) -> list[str]:
+    """Flag tiny gzip files with empty cumulative deltas (bad regen)."""
+    if path.stat().st_size >= min_bytes:
+        return []
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as f:
+            doc = json.load(f)
+    except OSError as e:
+        return [f"{path.name}: cannot read ({e})"]
+    inv = doc.get("inv_deltas") or {}
+    char = doc.get("char_deltas") or {}
+    if not inv and not char:
+        return [
+            f"{path.name}: {path.stat().st_size} bytes with empty inv_deltas and char_deltas "
+            f"(expected >={min_bytes} bytes for a healthy daily; regen or delete)"
+        ]
+    return []
+
+
+def load_exclude_dates(base_dir: Path, explicit: str) -> set[str]:
+    out: set[str] = set()
+    if explicit.strip():
+        out.update(d.strip() for d in explicit.split(",") if d.strip())
+    abandoned = base_dir / ABANDONED_DATES_FILENAME
+    if abandoned.is_file():
+        for line in abandoned.read_text(encoding="utf-8").splitlines():
+            line = line.split("#", 1)[0].strip()
+            if line:
+                out.add(line)
+    return out
 
 
 def print_character_rows(paths: list[Path], character: str) -> None:
@@ -86,7 +122,18 @@ def main() -> int:
     ap.add_argument(
         "--fail-on-issue",
         action="store_true",
-        help="Exit 1 if any dump date < baseline_date",
+        help="Exit 1 if any dump date < baseline_date or degenerate payload",
+    )
+    ap.add_argument(
+        "--exclude-dates",
+        default="",
+        help="Comma-separated YYYY-MM-DD to skip (also reads ABANDONED_DATES.txt in base-dir)",
+    )
+    ap.add_argument(
+        "--min-bytes",
+        type=int,
+        default=MIN_HEALTHY_BYTES,
+        help="Fail when gzip is smaller and inv_deltas/char_deltas are both empty",
     )
     args = ap.parse_args()
     base = args.base_dir.resolve()
@@ -107,9 +154,14 @@ def main() -> int:
                 filtered.append(p)
         paths = filtered
 
+    exclude = load_exclude_dates(base, args.exclude_dates)
+    if exclude:
+        paths = [p for p in paths if (_parse_daily_path(p) or "") not in exclude]
+
     all_issues: list[str] = []
     for p in paths:
         all_issues.extend(audit_dump_before_baseline(p))
+        all_issues.extend(audit_degenerate_payload(p, args.min_bytes))
 
     for msg in all_issues:
         print(msg)
