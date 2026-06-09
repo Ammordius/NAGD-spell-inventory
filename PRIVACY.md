@@ -24,4 +24,13 @@ Some pages may store display preferences, filters, sorting choices, or scoring w
 
 This project may be hosted through GitHub Pages or similar static hosting. Hosting providers may collect standard access logs or telemetry according to their own policies.
 
+## Children
+
+This project is intended for a general gaming/community audience and is not directed to children under 13.
+
+The site does not knowingly collect personal information from children under 13. Visitors under 13 should not submit information to this project or use any account-based features without appropriate parental involvement.
+
+Character data published by this project is derived from public Magelo/export sources. Players who do not want character data included should make their character anonymous, private, or otherwise excluded at the original Magelo/source-data level.
+
+This project does not separately manage opt-out or removal requests for character data that remains public in the upstream source.
 
