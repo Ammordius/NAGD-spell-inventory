@@ -622,13 +622,20 @@ jobs:
             GEAR_SHARDS=$(ls deploy/delta_snapshots/gear_events/gear_*.json.gz 2>/dev/null | wc -l)
             echo "✓ Copied $GEAR_SHARDS gear event shard(s)"
           fi
-          # Legacy cumulative dailies (still deployed if present in repo for fallback)
-          cp delta_snapshots/delta_daily_*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No legacy delta JSON files to copy"
-          DELTA_COUNT=$(ls deploy/delta_snapshots/delta_daily_*.json.gz 2>/dev/null | wc -l)
-          if [ "$DELTA_COUNT" -gt 0 ]; then
-            echo "✓ Copied $DELTA_COUNT delta JSON files to deploy/delta_snapshots/"
+          # Legacy cumulative dailies: omit from Pages when gear_events shards exist
+          # (delta-history uses USE_GEAR_EVENTS; saves ~100MB on deploy). Keep fallback
+          # only when no gear shards are present (e.g. first run before backfill).
+          if [ -d "deploy/delta_snapshots/gear_events" ] && [ "$(ls deploy/delta_snapshots/gear_events/gear_*.json.gz 2>/dev/null | wc -l)" -gt 0 ]; then
+            echo "✓ Skipping legacy delta_daily_*.json.gz on Pages (gear_events shards deployed)"
+            DELTA_COUNT=0
           else
-            echo "⚠ No delta JSON files found to copy"
+            cp delta_snapshots/delta_daily_*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No legacy delta JSON files to copy"
+            DELTA_COUNT=$(ls deploy/delta_snapshots/delta_daily_*.json.gz 2>/dev/null | wc -l)
+            if [ "$DELTA_COUNT" -gt 0 ]; then
+              echo "✓ Copied $DELTA_COUNT legacy delta JSON files (gear_events fallback)"
+            else
+              echo "⚠ No delta JSON files found to copy"
+            fi
           fi
           # Copy baseline files (needed for client-side date range comparisons across baseline resets).
           # Only .gz baselines are deployed (uncompressed baseline_master.json is ~200MB+).
