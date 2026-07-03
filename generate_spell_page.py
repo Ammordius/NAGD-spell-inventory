@@ -25,7 +25,7 @@ from delta_storage import (
     _corpse_loot_chars_from_equipped_meta,
 )
 from gear_event_storage import (
-    append_day_events,
+    append_day_events_from_deltas,
     gear_events_available,
     get_day_delta_from_events,
     list_available_event_dates,
@@ -2772,6 +2772,78 @@ def _count_meaningful_char_deltas(char_deltas):
     return n
 
 
+def _count_inv_event_rows(inv_deltas):
+    return sum(
+        len((row.get("added") or {})) + len((row.get("removed") or {}))
+        for row in (inv_deltas or {}).values()
+    )
+
+
+def _previous_export_date_str(base_dir, date_str):
+    path = os.path.join(base_dir, ".magelo_previous_dump_date.txt")
+    if os.path.isfile(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                pt = parse_takp_magelo_export_datetime(f.read())
+            if pt:
+                return pt.strftime("%Y-%m-%d")
+        except OSError:
+            pass
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        return (dt - timedelta(days=1)).strftime("%Y-%m-%d")
+    except ValueError:
+        return None
+
+
+def _resolve_day_over_day_deltas(
+    previous_char_data,
+    previous_inventories,
+    current_char_data,
+    current_inventories,
+    date_str,
+    base_dir,
+    baseline,
+):
+    """Prefer delta_daily pair when dump diff looks like stale-cache cumulative inflation."""
+    char_deltas = compare_character_data(current_char_data, previous_char_data, None)
+    inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+
+    delta_snapshots_dir = os.path.join(base_dir, "delta_snapshots")
+    prev_date = _previous_export_date_str(base_dir, date_str)
+    if not prev_date or prev_date >= date_str:
+        return char_deltas, inv_deltas
+
+    da = load_daily_delta_json(prev_date, delta_snapshots_dir)
+    db = load_daily_delta_json(date_str, delta_snapshots_dir)
+    baseline_chars = (baseline or {}).get("characters")
+    if not da or not db:
+        return char_deltas, inv_deltas
+    if da.get("baseline_date") != db.get("baseline_date"):
+        return char_deltas, inv_deltas
+    if not daily_json_pair_usable_for_delta_html_json_compare(da, db, baseline_chars):
+        return char_deltas, inv_deltas
+
+    daily_diff = compare_delta_to_delta(da, db, baseline_chars)
+    daily_char = daily_diff.get("char_deltas") or {}
+    daily_inv = daily_diff.get("inv_deltas") or {}
+    dump_char_n = _count_meaningful_char_deltas(char_deltas)
+    daily_char_n = _count_meaningful_char_deltas(daily_char)
+    dump_inv_n = _count_inv_event_rows(inv_deltas)
+    daily_inv_n = _count_inv_event_rows(daily_inv)
+    if (dump_inv_n > daily_inv_n * 3 and dump_inv_n > daily_inv_n + 500) or (
+        dump_char_n > daily_char_n * 3 and dump_char_n > daily_char_n + 500
+    ):
+        print(
+            f"Warning: dump diff for {date_str} looks inflated "
+            f"({dump_inv_n} inv rows vs {daily_inv_n} from delta_daily pair); "
+            f"using delta_daily pair for gear events and delta.html"
+        )
+        char_deltas = daily_char
+        inv_deltas = daily_inv
+    return char_deltas, inv_deltas
+
+
 def _warn_if_event_dump_divergence(event_day, dump_char, dump_inv, date_str):
     """Log when gear-event fold for a day diverges sharply from Magelo dump diff."""
     event_char = event_day.get('char_deltas') or {}
@@ -4827,34 +4899,39 @@ def main():
             print(f"  Created master baseline from current data (date: {date_str})")
             baseline = load_master_baseline(delta_snapshots_dir)
         
-        # Step 2: Append gear/stat events from true day-over-day dump diff (not baseline cumulative)
+        # Step 2: Append gear/stat events from day-over-day deltas (dump diff, with daily JSON fallback)
         print(f"Appending gear events for {date_str} (previous vs current Magelo dumps)...")
+        char_deltas, inv_deltas = _resolve_day_over_day_deltas(
+            previous_char_data,
+            previous_inventories,
+            current_char_data,
+            current_inventories,
+            date_str,
+            base_dir,
+            baseline,
+        )
+        corpse_loot_override = chars_corpse_loot_excluded(
+            current_inventories, previous_inventories
+        )
+        for _cn in corpse_loot_override:
+            char_deltas.pop(_cn, None)
+            inv_deltas.pop(_cn, None)
         try:
-            gear_n, char_n = append_day_events(
-                previous_char_data,
-                previous_inventories,
-                current_char_data,
-                current_inventories,
+            gear_n, char_n = append_day_events_from_deltas(
+                char_deltas,
+                inv_deltas,
                 date_str,
                 delta_snapshots_dir,
-                baseline_date=baseline.get('baseline_date') if baseline else None,
+                baseline_date=baseline.get("baseline_date") if baseline else None,
             )
             print(f"  Saved gear_events: {gear_n} inventory rows, {char_n} stat rows")
         except Exception as e:
             print(f"Warning: Could not append gear events: {e}")
             import traceback
             traceback.print_exc()
-        
-        # Step 3: Generate delta HTML from true day-over-day Magelo dump diff (not gear event log).
-        # Gear events are persisted in step 2 for history/range; backfilled shards can be inflated.
+
+        # Step 3: Generate delta HTML from the same day-over-day deltas as gear events.
         print(f"Generating delta.html from previous vs current Magelo dumps ({date_str})...")
-        char_deltas = compare_character_data(current_char_data, previous_char_data, None)
-        inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
-        corpse_loot_override = chars_corpse_loot_excluded(
-            current_inventories, previous_inventories
-        )
-        for _cn in corpse_loot_override:
-            inv_deltas.pop(_cn, None)
         if gear_events_available(delta_snapshots_dir) and date_str in list_available_event_dates(
             delta_snapshots_dir
         ):

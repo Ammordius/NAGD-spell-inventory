@@ -13,6 +13,7 @@ if _MAGelo_ROOT not in sys.path:
 from generate_spell_page import (  # noqa: E402
     build_tracked_item_id_to_name,
     _count_meaningful_char_deltas,
+    _resolve_day_over_day_deltas,
     _warn_if_event_dump_divergence,
 )
 from gear_event_storage import (  # noqa: E402
@@ -101,6 +102,50 @@ class TestCharStateFromEvents(unittest.TestCase):
         }
         self.assertEqual(state["guild"], "Imperium")
         self.assertEqual(state["aa_total"], 115)
+
+
+class TestResolveDayOverDayDeltas(unittest.TestCase):
+    def test_falls_back_to_delta_daily_when_dump_diff_inflated(self):
+        td = tempfile.mkdtemp()
+        snap = os.path.join(td, "delta_snapshots")
+        os.makedirs(snap)
+        prev_date, curr_date = "2026-07-02", "2026-07-03"
+        baseline = {
+            "baseline_date": "2026-02-09",
+            "characters": {"Alice": {"level": 65, "aa_unspent": 0, "aa_spent": 0, "hp_max_total": 1000}},
+        }
+        daily_prev = {
+            "baseline_date": "2026-02-09",
+            "char_deltas": {"Alice": {"level": 65, "aa_total_change": 0}},
+            "inv_deltas": {"Alice": {"added": {"100": 1}, "removed": {}}},
+        }
+        daily_curr = {
+            "baseline_date": "2026-02-09",
+            "char_deltas": {"Alice": {"level": 65, "aa_total_change": 1}},
+            "inv_deltas": {"Alice": {"added": {"200": 1}, "removed": {}}},
+        }
+        import gzip
+
+        for d, payload in ((prev_date, daily_prev), (curr_date, daily_curr)):
+            with gzip.open(os.path.join(snap, f"delta_daily_{d}.json.gz"), "wt", encoding="utf-8") as f:
+                json.dump(payload, f)
+        with open(os.path.join(td, ".magelo_previous_dump_date.txt"), "w", encoding="utf-8") as f:
+            f.write("Thu Jul  2 16:30:25 UTC 2026\n")
+        huge_inv = {
+            f"Char{i}": [{"item_id": str(1000 + i)}]
+            for i in range(600)
+        }
+        char_d, inv_d = _resolve_day_over_day_deltas(
+            {},
+            {},
+            {"Alice": {"level": 65}},
+            huge_inv,
+            curr_date,
+            td,
+            baseline,
+        )
+        self.assertIn("Alice", inv_d)
+        self.assertIn("200", inv_d["Alice"]["added"])
 
 
 class TestDeltaHtmlDumpFirstHelpers(unittest.TestCase):
