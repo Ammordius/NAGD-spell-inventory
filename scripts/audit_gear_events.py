@@ -82,9 +82,11 @@ def audit(base_dir: Path, min_events_after: str | None, *, anomaly_median_factor
         med = statistics.median(vals)
         if med > 0:
             for d, total in day_counts:
+                if min_events_after and d < min_events_after:
+                    continue
                 if total > med * anomaly_median_factor:
                     issues.append(
-                        f"{d}: {total} events vs 7-day+ median {med:.0f} "
+                        f"{d}: {total} events vs manifest median {med:.0f} "
                         f"({total / med:.1f}x; possible backfill inflation)"
                     )
 
