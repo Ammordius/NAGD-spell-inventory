@@ -58,11 +58,34 @@ def _load_delta(base_dir: Path, date_str: str) -> dict | None:
         return json.load(f)
 
 
+def _daily_degenerate(daily: dict | None) -> bool:
+    """True when a cumulative daily JSON is unsuitable as a backfill pair endpoint."""
+    if not daily:
+        return True
+    dq = daily.get("data_quality") or {}
+    if dq.get("dump_before_baseline"):
+        return True
+    if not (daily.get("char_deltas") or {}):
+        return True
+    return False
+
+
+def _derived_event_counts(diff: dict) -> tuple[int, int]:
+    char_n = len(diff.get("char_deltas") or {})
+    inv_n = sum(
+        len((row.get("added") or {})) + len((row.get("removed") or {}))
+        for row in (diff.get("inv_deltas") or {}).values()
+    )
+    return char_n, inv_n
+
+
 def backfill(
     base_dir: Path | str,
     *,
     clear: bool = False,
     skip_abandoned: bool = True,
+    dry_run: bool = False,
+    anomaly_median_factor: float = 5.0,
 ) -> dict:
     base_dir = Path(base_dir)
     if clear:
@@ -78,6 +101,9 @@ def backfill(
     pairs = 0
     days_written = 0
     skipped = 0
+    skipped_degenerate = 0
+    derived_counts: list[tuple[str, int, int]] = []
+    anomalies: list[str] = []
     for i in range(1, len(dates)):
         prev_date, curr_date = dates[i - 1], dates[i]
         if curr_date in abandoned:
@@ -91,21 +117,48 @@ def backfill(
         if da.get("baseline_date") != db.get("baseline_date"):
             skipped += 1
             continue
+        if _daily_degenerate(da):
+            skipped += 1
+            skipped_degenerate += 1
+            continue
         pairs += 1
         diff = compare_delta_to_delta(da, db, baseline_chars)
-        append_day_events_from_deltas(
-            diff.get("char_deltas") or {},
-            diff.get("inv_deltas") or {},
-            curr_date,
-            str(base_dir),
-            db.get("baseline_date"),
-        )
-        days_written += 1
+        char_n, inv_n = _derived_event_counts(diff)
+        derived_counts.append((curr_date, char_n, inv_n))
+        if not dry_run:
+            append_day_events_from_deltas(
+                diff.get("char_deltas") or {},
+                diff.get("inv_deltas") or {},
+                curr_date,
+                str(base_dir),
+                db.get("baseline_date"),
+            )
+            days_written += 1
+
+    if len(derived_counts) >= 7:
+        import statistics
+
+        char_vals = [c for _, c, _ in derived_counts]
+        inv_vals = [i for _, _, i in derived_counts]
+        char_med = statistics.median(char_vals)
+        inv_med = statistics.median(inv_vals)
+        for curr_date, char_n, inv_n in derived_counts:
+            if char_med > 0 and char_n > char_med * anomaly_median_factor:
+                anomalies.append(
+                    f"{curr_date}: {char_n} char rows vs median {char_med:.0f}"
+                )
+            if inv_med > 0 and inv_n > inv_med * anomaly_median_factor:
+                anomalies.append(
+                    f"{curr_date}: {inv_n} inv event rows vs median {inv_med:.0f}"
+                )
 
     return {
         "pairs": pairs,
         "days_written": days_written,
         "skipped": skipped,
+        "skipped_degenerate": skipped_degenerate,
+        "dry_run": dry_run,
+        "anomalies": anomalies,
         "event_dates": len(list_available_event_dates(str(base_dir))),
     }
 
@@ -151,6 +204,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--base-dir", type=Path, default=Path("delta_snapshots"))
     ap.add_argument("--clear", action="store_true", help="Remove existing gear_events before backfill")
+    ap.add_argument("--dry-run", action="store_true", help="Compute stats only; do not write shards")
     ap.add_argument("--parity", action="store_true", help="Run parity checks after backfill")
     ap.add_argument("--parity-only", action="store_true", help="Only run parity checks")
     args = ap.parse_args()
@@ -171,10 +225,14 @@ def main() -> int:
         print("Parity OK")
         return 0
 
-    stats = backfill(base_dir, clear=args.clear)
+    stats = backfill(base_dir, clear=args.clear, dry_run=args.dry_run)
     print(json.dumps(stats, indent=2))
+    if stats.get("anomalies"):
+        print("ANOMALY (possible cumulative inflation in backfill source):")
+        for line in stats["anomalies"]:
+            print(f"  {line}")
 
-    if args.parity:
+    if args.parity and not args.dry_run:
         issues = parity_check(base_dir)
         if issues:
             for issue in issues:

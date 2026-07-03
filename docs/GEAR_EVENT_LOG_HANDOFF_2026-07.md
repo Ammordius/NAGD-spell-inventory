@@ -9,7 +9,7 @@ Replaces cumulative `delta_daily_*.json.gz` growth (~76 MB, unbounded per baseli
 | Before | After |
 |--------|-------|
 | Each day commits `delta_daily_DATE.json.gz` (cumulative vs baseline) | Each day appends rows to `delta_snapshots/gear_events/gear_YYYY-MM.json.gz` |
-| `delta.html` subtracts two cumulative JSONs | `delta.html` reads today's events from the log |
+| `delta.html` subtracts two cumulative JSONs | `delta.html` diffs previous vs current Magelo dumps (true day-over-day); gear events are persisted separately for history |
 | `get_date_range_deltas` diffs two cumulative endpoints | Prefers folding events in `(start, end]` when both dates are in `manifest.json` |
 | ~622 KB/day average gz growth | ~tens of KB/day append |
 
@@ -105,6 +105,13 @@ When gear shards exist at build time, generated HTML sets `USE_GEAR_EVENTS = tru
 3. **Git history:** old `delta_daily_*.json.gz` remain in history (~76 MB); optional `git filter-repo` cleanup is separate.
 4. **Item timelines in UI:** `item_history()` / `detect_oscillations()` exist in Python; no dedicated UI yet (phase 2).
 5. **Local branch:** pull/rebase before push if behind `origin/main` (CI bot commits).
+6. **Backfill regen after inflation fix:** if `delta.html` or audit flagged inflated days, re-run:
+   ```bash
+   python scripts/backfill_gear_events_from_dailies.py --base-dir delta_snapshots --dry-run
+   python scripts/backfill_gear_events_from_dailies.py --base-dir delta_snapshots --clear --parity
+   python scripts/audit_gear_events.py --base-dir delta_snapshots --fail-on-issue
+   ```
+   CI `append_day_events()` overwrites each calendar day going forward; historical days need regen or manual clear.
 
 ---
 

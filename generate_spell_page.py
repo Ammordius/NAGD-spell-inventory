@@ -2755,6 +2755,90 @@ def generate_date_range_delta_html(start_date, end_date, base_dir='delta_snapsho
     return html
 
 
+def _count_meaningful_char_deltas(char_deltas):
+    """Count char rows with real stat changes (exclude visibility-only)."""
+    n = 0
+    for _name, d in (char_deltas or {}).items():
+        if d.get('is_visibility_change'):
+            continue
+        if (
+            d.get('level_change')
+            or d.get('aa_total_change')
+            or d.get('hp_change')
+            or d.get('is_new')
+            or d.get('is_deleted')
+        ):
+            n += 1
+    return n
+
+
+def _warn_if_event_dump_divergence(event_day, dump_char, dump_inv, date_str):
+    """Log when gear-event fold for a day diverges sharply from Magelo dump diff."""
+    event_char = event_day.get('char_deltas') or {}
+    event_inv = event_day.get('inv_deltas') or {}
+    dump_char_n = _count_meaningful_char_deltas(dump_char)
+    event_char_n = _count_meaningful_char_deltas(event_char)
+    dump_inv_n = len(dump_inv or {})
+    event_inv_n = len(event_inv or {})
+    char_ratio = event_char_n / max(dump_char_n, 1)
+    inv_ratio = event_inv_n / max(dump_inv_n, 1)
+    if char_ratio > 3 and event_char_n > dump_char_n + 500:
+        print(
+            f"Warning: gear events for {date_str} show {event_char_n} char changes "
+            f"vs {dump_char_n} from dump diff ({char_ratio:.1f}x); delta.html uses dump diff"
+        )
+    if inv_ratio > 3 and event_inv_n > dump_inv_n + 500:
+        print(
+            f"Warning: gear events for {date_str} show {event_inv_n} inventory char rows "
+            f"vs {dump_inv_n} from dump diff ({inv_ratio:.1f}x); delta.html uses dump diff"
+        )
+
+
+def build_tracked_item_id_to_name(base_dir, tracked_ids=None):
+    """Build id -> display name map for tracked items (delta-history client embed)."""
+    if tracked_ids is None:
+        tracked_ids, _, _, _ = load_tracked_item_ids()
+    tracked_ids = {str(i) for i in (tracked_ids or set())}
+    name_map = {}
+    data_dir = os.path.join(base_dir, 'data')
+    name_to_id_path = os.path.join(data_dir, 'item_name_to_id.json')
+    if os.path.exists(name_to_id_path):
+        try:
+            with open(name_to_id_path, 'r', encoding='utf-8') as f:
+                for name, iid in json.load(f).items():
+                    sid = str(iid)
+                    if sid in tracked_ids:
+                        name_map[sid] = name
+        except (json.JSONDecodeError, OSError):
+            pass
+    stats_path = os.path.join(data_dir, 'item_stats.json')
+    if os.path.exists(stats_path):
+        try:
+            with open(stats_path, 'r', encoding='utf-8') as f:
+                stats = json.load(f)
+            for sid, entry in stats.items():
+                sid = str(sid)
+                if sid not in tracked_ids or sid in name_map:
+                    continue
+                if isinstance(entry, dict) and entry.get('name'):
+                    name_map[sid] = entry['name']
+        except (json.JSONDecodeError, OSError):
+            pass
+    praesterium_path = os.path.join(base_dir, 'praesterium_loot.json')
+    if os.path.exists(praesterium_path):
+        try:
+            with open(praesterium_path, 'r', encoding='utf-8') as f:
+                for sid, entry in json.load(f).items():
+                    sid = str(sid)
+                    if sid not in tracked_ids or sid in name_map:
+                        continue
+                    if isinstance(entry, dict) and entry.get('name'):
+                        name_map[sid] = entry['name']
+        except (json.JSONDecodeError, OSError):
+            pass
+    return name_map
+
+
 def default_delta_history_range_endpoints(dates_asc, max_gap_days=14):
     """Pick default start/end dates for delta-history.html (see generate_delta_history).
 
@@ -2859,6 +2943,16 @@ def generate_delta_history(base_dir):
     sorted_dates_json = json.dumps(sorted_dates_asc)
     gear_shard_months_json = json.dumps(gear_shard_months)
     use_gear_events_json = 'true' if use_gear_events else 'false'
+    gear_event_manifest_json = '{}'
+    if use_gear_events:
+        manifest_path = os.path.join(delta_snapshots_dir, 'gear_events', 'manifest.json')
+        if os.path.isfile(manifest_path):
+            try:
+                with open(manifest_path, 'r', encoding='utf-8') as mf:
+                    gear_event_manifest_json = json.dumps(json.load(mf))
+            except (json.JSONDecodeError, OSError):
+                pass
+    item_id_to_name_json = json.dumps(build_tracked_item_id_to_name(base_dir, tracked_ids))
     
     # Generate HTML with date-to-date comparison interface
     html = """<!DOCTYPE html>
@@ -3058,6 +3152,8 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="no-rent-item-ids">""" + no_rent_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="sorted-available-dates">""" + sorted_dates_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="gear-event-shard-months">""" + gear_shard_months_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="gear-event-manifest">""" + gear_event_manifest_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="item-id-to-name">""" + item_id_to_name_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
@@ -3067,13 +3163,27 @@ def generate_delta_history(base_dir):
         const NO_RENT_ITEMS = new Set(JSON.parse((document.getElementById('no-rent-item-ids') || { textContent: '[]' }).textContent).map(String));
         const SORTED_AVAILABLE_DATES = JSON.parse((document.getElementById('sorted-available-dates') || { textContent: '[]' }).textContent);
         const GEAR_EVENT_SHARD_MONTHS = JSON.parse((document.getElementById('gear-event-shard-months') || { textContent: '[]' }).textContent);
+        const GEAR_EVENT_MANIFEST = JSON.parse((document.getElementById('gear-event-manifest') || { textContent: '{}' }).textContent);
+        const ITEM_ID_TO_NAME = JSON.parse((document.getElementById('item-id-to-name') || { textContent: '{}' }).textContent);
         const USE_GEAR_EVENTS = """ + use_gear_events_json + """;
         const DEFAULT_RANGE_START = """ + json.dumps(default_range_start) + """;
         const DEFAULT_RANGE_END = """ + json.dumps(default_range_end) + """;
+        const MAX_RANGE_GAP_DAYS = 14;
         
         function setDateRangeFromTile(endDate) {
             const idx = SORTED_AVAILABLE_DATES.indexOf(endDate);
-            const startDate = idx > 0 ? SORTED_AVAILABLE_DATES[idx - 1] : endDate;
+            let startDate = endDate;
+            if (idx > 0) {
+                const endMs = new Date(endDate + 'T00:00:00').getTime();
+                for (let i = idx - 1; i >= 0; i--) {
+                    const cand = SORTED_AVAILABLE_DATES[i];
+                    const gap = (endMs - new Date(cand + 'T00:00:00').getTime()) / 86400000;
+                    if (gap > 0 && gap <= MAX_RANGE_GAP_DAYS) {
+                        startDate = cand;
+                        break;
+                    }
+                }
+            }
             document.getElementById('start_date').value = startDate;
             document.getElementById('end_date').value = endDate;
         }
@@ -3184,6 +3294,84 @@ def generate_delta_history(base_dir):
             const gearFiltered = gear.filter(ev => ev.d > start && ev.d <= end);
             const charFiltered = chars.filter(ev => ev.d > start && ev.d <= end);
             return { gear: gearFiltered, char: charFiltered };
+        }
+
+        async function loadCharEventsUpTo(endDate) {
+            if (!GEAR_EVENT_SHARD_MONTHS.length) return [];
+            const firstMonth = GEAR_EVENT_SHARD_MONTHS[0];
+            const months = monthsBetween(firstMonth, endDate.slice(0, 7));
+            const chars = [];
+            for (const month of months) {
+                if (!GEAR_EVENT_SHARD_MONTHS.includes(month)) continue;
+                try {
+                    chars.push(...(await loadCharShard(month)));
+                } catch (e) { /* optional shard */ }
+            }
+            return chars.filter(ev => ev.d && ev.d <= endDate);
+        }
+
+        function resolveItemNames(invDeltas, nameMap) {
+            for (const delta of Object.values(invDeltas || {})) {
+                const inames = delta.item_names || (delta.item_names = {});
+                for (const bucket of ['added', 'removed']) {
+                    for (const itemId of Object.keys(delta[bucket] || {})) {
+                        if (!inames[itemId] && nameMap[itemId]) {
+                            inames[itemId] = nameMap[itemId];
+                        }
+                    }
+                }
+            }
+        }
+
+        function buildCharacterStateFromEvents(baseline, charEvents) {
+            const folded = foldCharEventsToCharDeltas(charEvents);
+            const baselineChars = (baseline && baseline.characters) || {};
+            const fullState = {};
+            for (const [charName, charData] of Object.entries(baselineChars)) {
+                fullState[charName] = {
+                    level: charData.level || 0,
+                    aa_total: (charData.aa_unspent || 0) + (charData.aa_spent || 0),
+                    hp: charData.hp_max_total || 0,
+                    class: charData.class || '',
+                    guild: charData.guild || ''
+                };
+            }
+            for (const [charName, deltaData] of Object.entries(folded)) {
+                if (deltaData.is_deleted) {
+                    delete fullState[charName];
+                    continue;
+                }
+                if (fullState[charName]) {
+                    fullState[charName].level += deltaData.level_change || 0;
+                    fullState[charName].aa_total += deltaData.aa_total_change || 0;
+                    fullState[charName].hp += deltaData.hp_change || 0;
+                    if (deltaData.class) fullState[charName].class = deltaData.class;
+                } else if (!deltaData.is_deleted) {
+                    fullState[charName] = {
+                        level: Math.max(0, deltaData.level_change || 0),
+                        aa_total: Math.max(0, deltaData.aa_total_change || 0),
+                        hp: Math.max(0, deltaData.hp_change || 0),
+                        class: deltaData.class || '',
+                        guild: ''
+                    };
+                }
+            }
+            return fullState;
+        }
+
+        function gearManifestBaselineForDate(dateStr) {
+            const days = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.days) || {};
+            if (days[dateStr] && days[dateStr].baseline_date) {
+                return days[dateStr].baseline_date;
+            }
+            const eras = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.eras) || [];
+            for (let i = eras.length - 1; i >= 0; i--) {
+                const era = eras[i];
+                if (era.first_event && era.first_event <= dateStr && era.baseline_date) {
+                    return era.baseline_date;
+                }
+            }
+            return null;
         }
 
         function foldGearEventsToInvDeltas(gearEvents) {
@@ -3632,9 +3820,41 @@ def generate_delta_history(base_dir):
                     outputDiv.innerHTML = '<p>Loading gear events for ' + start + ' to ' + end + '...</p>';
                     const { gear, char } = await loadEventsInRange(start, end);
                     invDeltas = foldGearEventsToInvDeltas(gear);
+                    resolveItemNames(invDeltas, ITEM_ID_TO_NAME);
                     const rangeCharDeltas = foldCharEventsToCharDeltas(char);
                     charChanges = charDeltasToChanges(rangeCharDeltas);
                     eventSourceNote = `gear event log (${gear.length} inventory events, ${char.length} stat events)`;
+
+                    const baselineDate = gearManifestBaselineForDate(end);
+                    if (baselineDate) {
+                        outputDiv.innerHTML = '<p>Loading baseline for character state...</p>';
+                        const baselineResult = await loadBaseline(baselineDate);
+                        if (baselineResult && baselineResult.baseline) {
+                            usedFallbackBaseline = baselineResult.usedFallback;
+                            const [charUpToStart, charUpToEnd] = await Promise.all([
+                                loadCharEventsUpTo(start),
+                                loadCharEventsUpTo(end)
+                            ]);
+                            startState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToStart);
+                            endState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToEnd);
+                            for (const charName of Object.keys(startState)) {
+                                if (charName in endState || charName in invDeltas) continue;
+                                invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: true };
+                            }
+                            for (const charName of Object.keys(endState)) {
+                                if (charName in startState || charName in invDeltas) continue;
+                                invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: true };
+                            }
+                            for (const charName of Object.keys(invDeltas)) {
+                                const delta = invDeltas[charName];
+                                const inStart = charName in startState;
+                                const inEnd = charName in endState;
+                                if (!delta.is_visibility_change) {
+                                    delta.is_visibility_change = (inStart && !inEnd) || (!inStart && inEnd);
+                                }
+                            }
+                        }
+                    }
                 } else {
                 // Legacy: cumulative daily JSON endpoints
                 // Load deltas and baselines for both dates
@@ -3854,8 +4074,11 @@ def generate_delta_history(base_dir):
                 const allVisNames = [...new Set([...visLevel1, ...visOthers, ...visTracked])].sort();
                 // Leaderboards: chars with rows on both days (match delta_storage.get_leaderboard_totals_from_date_range)
                 const charsInBoth = new Set();
-                if (!eventSourceNote) {
-                if (!baselineMismatch) {
+                if (eventSourceNote) {
+                    for (const c of Object.keys(startState)) {
+                        if (c in endState) charsInBoth.add(c);
+                    }
+                } else if (!baselineMismatch) {
                     const sk = Object.keys(startDelta.char_deltas || {});
                     const ek = new Set(Object.keys(endDelta.char_deltas || {}));
                     for (const c of sk) {
@@ -3867,7 +4090,6 @@ def generate_delta_history(base_dir):
                     for (const c of Object.keys(startState)) {
                         if (c in endState) charsInBoth.add(c);
                     }
-                }
                 }
                 reportHTML += `<p style="margin: 10px 0;">${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}
                     <a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
@@ -4623,31 +4845,26 @@ def main():
             import traceback
             traceback.print_exc()
         
-        # Step 3: Generate delta HTML (prefer gear event log for this calendar day)
-        corpse_loot_override = None
+        # Step 3: Generate delta HTML from true day-over-day Magelo dump diff (not gear event log).
+        # Gear events are persisted in step 2 for history/range; backfilled shards can be inflated.
+        print(f"Generating delta.html from previous vs current Magelo dumps ({date_str})...")
+        char_deltas = compare_character_data(current_char_data, previous_char_data, None)
+        inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
+        corpse_loot_override = chars_corpse_loot_excluded(
+            current_inventories, previous_inventories
+        )
+        for _cn in corpse_loot_override:
+            inv_deltas.pop(_cn, None)
         if gear_events_available(delta_snapshots_dir) and date_str in list_available_event_dates(
             delta_snapshots_dir
         ):
-            event_day = get_day_delta_from_events(date_str, delta_snapshots_dir)
-            char_deltas = event_day.get('char_deltas') or {}
-            inv_deltas = event_day.get('inv_deltas') or {}
-            corpse_loot_override = chars_corpse_loot_excluded(
-                current_inventories, previous_inventories
-            )
-            for _cn in corpse_loot_override:
-                inv_deltas.pop(_cn, None)
-            print(f"Generated delta comparison from gear event log ({date_str})")
-        else:
-            print(
-                f"No gear events for {date_str}; using previous vs current Magelo files for delta.html"
-            )
-            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
-            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
-            corpse_loot_override = chars_corpse_loot_excluded(
-                current_inventories, previous_inventories
-            )
-            for _cn in corpse_loot_override:
-                inv_deltas.pop(_cn, None)
+            try:
+                event_day = get_day_delta_from_events(date_str, delta_snapshots_dir)
+                _warn_if_event_dump_divergence(
+                    event_day, char_deltas, inv_deltas, date_str
+                )
+            except Exception as e:
+                print(f"Warning: Could not cross-check gear events vs dump diff: {e}")
         
         # Legacy cumulative daily JSON (optional; disabled by default — use gear_events/)
         if os.environ.get('MAGELO_WRITE_CUMULATIVE_DAILY', '').strip() in ('1', 'true', 'yes'):

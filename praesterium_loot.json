@@ -1,17 +1,22 @@
 {
   "21807": {
-    "category": "praesterium"
+    "category": "praesterium",
+    "name": "White Silken Bridle"
   },
   "29881": {
-    "category": "praesterium"
+    "category": "praesterium",
+    "name": "Shard of the Shoulder"
   },
   "29882": {
-    "category": "praesterium"
+    "category": "praesterium",
+    "name": "Shard of the Eye"
   },
   "29883": {
-    "category": "praesterium"
+    "category": "praesterium",
+    "name": "Shard of the Hand"
   },
   "29884": {
-    "category": "praesterium"
+    "category": "praesterium",
+    "name": "Shard of the Heart"
   }
 }

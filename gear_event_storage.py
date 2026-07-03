@@ -620,7 +620,7 @@ def populate_item_names_for_inv_deltas(
     inv_deltas: dict,
     current_inv_data: dict | None = None,
 ) -> None:
-    """Fill item_names in inv_deltas from inventory rows or item_name_to_id."""
+    """Fill item_names in inv_deltas from inventory rows, item_name_to_id, item_stats, praesterium."""
     all_ids: set[str] = set()
     for row in (inv_deltas or {}).values():
         all_ids.update((row.get("added") or {}).keys())
@@ -632,8 +632,8 @@ def populate_item_names_for_inv_deltas(
                 iid = str(item.get("item_id", ""))
                 if iid in all_ids:
                     name_map[iid] = item.get("item_name", "")
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     if len(name_map) < len(all_ids):
-        base_dir = os.path.dirname(os.path.abspath(__file__))
         path = os.path.join(base_dir, "data", "item_name_to_id.json")
         if os.path.exists(path):
             try:
@@ -642,6 +642,32 @@ def populate_item_names_for_inv_deltas(
                 for iid in all_ids:
                     if iid not in name_map and iid in id_to_name:
                         name_map[iid] = id_to_name[iid]
+            except (json.JSONDecodeError, OSError):
+                pass
+    if len(name_map) < len(all_ids):
+        stats_path = os.path.join(base_dir, "data", "item_stats.json")
+        if os.path.exists(stats_path):
+            try:
+                with open(stats_path, "r", encoding="utf-8") as f:
+                    stats = json.load(f)
+                for iid in all_ids:
+                    if iid in name_map:
+                        continue
+                    entry = stats.get(iid) or stats.get(str(iid))
+                    if isinstance(entry, dict) and entry.get("name"):
+                        name_map[iid] = entry["name"]
+            except (json.JSONDecodeError, OSError):
+                pass
+    if len(name_map) < len(all_ids):
+        pr_path = os.path.join(base_dir, "praesterium_loot.json")
+        if os.path.exists(pr_path):
+            try:
+                with open(pr_path, "r", encoding="utf-8") as f:
+                    for sid, entry in json.load(f).items():
+                        sid = str(sid)
+                        if sid in all_ids and sid not in name_map:
+                            if isinstance(entry, dict) and entry.get("name"):
+                                name_map[sid] = entry["name"]
             except (json.JSONDecodeError, OSError):
                 pass
     for row in inv_deltas.values():

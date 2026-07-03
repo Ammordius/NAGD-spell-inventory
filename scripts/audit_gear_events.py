@@ -16,7 +16,7 @@ if str(MAGELO_ROOT) not in sys.path:
 from gear_event_storage import list_available_event_dates  # noqa: E402
 
 
-def audit(base_dir: Path, min_events_after: str | None) -> list[str]:
+def audit(base_dir: Path, min_events_after: str | None, *, anomaly_median_factor: float = 5.0) -> list[str]:
     issues: list[str] = []
     gear_root = base_dir / "gear_events"
     if not gear_root.is_dir():
@@ -24,6 +24,7 @@ def audit(base_dir: Path, min_events_after: str | None) -> list[str]:
         return issues
 
     manifest_path = gear_root / "manifest.json"
+    manifest: dict = {}
     if not manifest_path.is_file():
         issues.append("manifest.json missing")
     else:
@@ -67,6 +68,25 @@ def audit(base_dir: Path, min_events_after: str | None) -> list[str]:
                                 day_events += 1
                 if day_events == 0:
                     issues.append(f"no gear events for {d}")
+
+    day_counts: list[tuple[str, int]] = []
+    days_meta = manifest.get("days") or {}
+    for d in sorted(days_meta.keys()):
+        meta = days_meta[d] or {}
+        total = int(meta.get("gear") or 0) + int(meta.get("char") or 0)
+        day_counts.append((d, total))
+    if len(day_counts) >= 7:
+        import statistics
+
+        vals = [c for _, c in day_counts]
+        med = statistics.median(vals)
+        if med > 0:
+            for d, total in day_counts:
+                if total > med * anomaly_median_factor:
+                    issues.append(
+                        f"{d}: {total} events vs 7-day+ median {med:.0f} "
+                        f"({total / med:.1f}x; possible backfill inflation)"
+                    )
 
     print(f"gear_events: {len(shards)} shards, {total_events} total events, {len(dates)} days in manifest")
     return issues
