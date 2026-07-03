@@ -1232,9 +1232,12 @@ def compare_delta_to_delta(delta_a, delta_b, baseline_characters=None):
     }
 
 def get_date_range_deltas(start_date, end_date, base_dir='delta_snapshots'):
-    """Get deltas for a date range by comparing two daily delta JSONs.
+    """Get deltas for a date range.
 
-    Compares the two endpoint daily files (not every calendar day in between).
+  Prefer the append-only gear event log when both endpoint dates are present
+  (``delta_snapshots/gear_events/``). Otherwise compares two cumulative daily
+  delta JSONs (legacy path).
+
     ``start_date`` and ``end_date`` may be passed in either order; they are normalized
     so the earlier calendar day is always the range start.
 
@@ -1258,6 +1261,19 @@ def get_date_range_deltas(start_date, end_date, base_dir='delta_snapshots'):
 
     if start_date > end_date:
         start_date, end_date = end_date, start_date
+
+    try:
+        from gear_event_storage import (
+            gear_events_available,
+            get_range_delta_from_events,
+            list_available_event_dates,
+        )
+        if gear_events_available(base_dir):
+            event_dates = set(list_available_event_dates(base_dir))
+            if start_date in event_dates and end_date in event_dates:
+                return get_range_delta_from_events(start_date, end_date, base_dir)
+    except ImportError:
+        pass
 
     delta_start = load_daily_delta_json(start_date, base_dir)
     delta_end = load_daily_delta_json(end_date, base_dir)

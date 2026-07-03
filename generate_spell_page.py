@@ -24,6 +24,13 @@ from delta_storage import (
     daily_json_pair_usable_for_delta_html_json_compare,
     _corpse_loot_chars_from_equipped_meta,
 )
+from gear_event_storage import (
+    append_day_events,
+    gear_events_available,
+    get_day_delta_from_events,
+    list_available_event_dates,
+    populate_item_names_for_inv_deltas,
+)
 
 # Character names to look for
 MULE_CHARACTERS = [
@@ -2737,7 +2744,7 @@ def generate_date_range_delta_html(start_date, end_date, base_dir='delta_snapsho
     header_note = f"""
     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 5px solid #2196F3;">
         <h2 style="margin-top: 0; color: #1976D2;">Date Range: {start_date} to {end_date}</h2>
-        <p>This report shows aggregated changes across {start_date} to {end_date}, reconstructed from daily delta JSON files.</p>
+        <p>This report shows aggregated changes across {start_date} to {end_date}, reconstructed from the gear event log when available.</p>
         <p><strong>Note:</strong> This is a reconstructed view. For the most recent daily changes, see the <a href="delta.html">current delta report</a>.</p>
     </div>
 """
@@ -2786,15 +2793,28 @@ def generate_delta_history(base_dir):
     no_rent_for_js = sorted(int(x) for x in (load_no_rent_items() or set()))
     no_rent_json = json.dumps(no_rent_for_js)
     
-    # Find all daily delta JSON files
+    # Find all daily delta JSON files and gear event dates
     delta_snapshots_dir = os.path.join(base_dir, 'delta_snapshots')
     delta_files = []
+    event_dates: list[str] = []
+    gear_shard_months: list[str] = []
+    use_gear_events = gear_events_available(delta_snapshots_dir)
+    if use_gear_events:
+        event_dates = list_available_event_dates(delta_snapshots_dir)
+        gear_events_root = os.path.join(delta_snapshots_dir, 'gear_events')
+        if os.path.isdir(gear_events_root):
+            for name in os.listdir(gear_events_root):
+                m = re.match(r'^gear_(\d{4}-\d{2})\.json\.gz$', name)
+                if m:
+                    gear_shard_months.append(m.group(1))
+            gear_shard_months.sort()
     
     if os.path.exists(delta_snapshots_dir):
-        # Find all delta_daily_YYYY-MM-DD.json.gz files (compressed)
+        # Find all delta_daily_YYYY-MM-DD.json.gz files (compressed, legacy)
         delta_files.extend(glob.glob(os.path.join(delta_snapshots_dir, "delta_daily_*.json.gz")))
     
     # Extract dates from filenames and sort
+    dates_seen: set[str] = set()
     delta_entries = []
     for filepath in delta_files:
         filename = os.path.basename(filepath)
@@ -2802,6 +2822,7 @@ def generate_delta_history(base_dir):
         match = re.match(r'delta_daily_(\d{4}-\d{2}-\d{2})\.json(\.gz)?', filename)
         if match:
             date_str = match.group(1)
+            dates_seen.add(date_str)
             try:
                 dt = datetime.strptime(date_str, '%Y-%m-%d')
                 delta_entries.append({
@@ -2811,8 +2832,23 @@ def generate_delta_history(base_dir):
                     'filepath': filepath,
                     'timestamp': os.path.getmtime(filepath)
                 })
-            except:
+            except Exception:
                 pass
+    for date_str in event_dates:
+        if date_str in dates_seen:
+            continue
+        dates_seen.add(date_str)
+        try:
+            dt = datetime.strptime(date_str, '%Y-%m-%d')
+            delta_entries.append({
+                'date': date_str,
+                'date_formatted': dt.strftime('%B %d, %Y'),
+                'filename': '',
+                'filepath': '',
+                'timestamp': 0,
+            })
+        except Exception:
+            pass
     
     # Sort by date (newest first)
     delta_entries.sort(key=lambda x: x['date'], reverse=True)
@@ -2821,6 +2857,8 @@ def generate_delta_history(base_dir):
         sorted_dates_asc, max_gap_days=14
     )
     sorted_dates_json = json.dumps(sorted_dates_asc)
+    gear_shard_months_json = json.dumps(gear_shard_months)
+    use_gear_events_json = 'true' if use_gear_events else 'false'
     
     # Generate HTML with date-to-date comparison interface
     html = """<!DOCTYPE html>
@@ -2961,8 +2999,7 @@ def generate_delta_history(base_dir):
         </div>
         
         <div class="info-box">
-            <strong>ℹ️ How it works:</strong> Each <code>delta_daily_*.json.gz</code> is cumulative vs its <code>baseline_date</code>.
-            Pick two dates below; character changes use <code>compare_delta_to_delta</code> on the two endpoint JSONs (same idea as <code>get_date_range_deltas</code>). The <a href="delta.html">current delta report</a> uses the same JSON day-over-day path when both daily files share a baseline and pass the safety check; otherwise it falls back to consecutive Magelo dump files.
+            <strong>ℹ️ How it works:</strong> History is stored as dated gear +/- events under <code>delta_snapshots/gear_events/</code> (true day-over-day changes). Pick two dates below to aggregate events in that range. Legacy cumulative <code>delta_daily_*.json.gz</code> files are still loaded as a fallback when event shards are missing.
             <br><small>Default start/end prefers the latest snapshot and the newest prior file within 14 calendar days (so sparse archives do not open on a long gap by mistake).</small>
         </div>
         
@@ -2984,8 +3021,8 @@ def generate_delta_history(base_dir):
         </div>
         
         <div class="stats">
-            <strong>Available Daily Delta JSON Files:</strong> """ + str(len(delta_entries)) + """
-            <br><small>Endpoint subtraction between two dates gives calendar-range changes (default: latest two files).</small>
+            <strong>Available history dates:</strong> """ + str(len(delta_entries)) + """
+            <br><small>Range reports sum gear events with start &lt; event date ≤ end (same as <code>get_date_range_deltas</code> when events are present).</small>
         </div>
         
         <div class="delta-list">
@@ -3020,6 +3057,7 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="no-drop-tracked-ids">""" + no_drop_tracked_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="no-rent-item-ids">""" + no_rent_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="sorted-available-dates">""" + sorted_dates_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="gear-event-shard-months">""" + gear_shard_months_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
@@ -3028,6 +3066,8 @@ def generate_delta_history(base_dir):
         const NO_DROP_TRACKED_IDS = new Set(JSON.parse((document.getElementById('no-drop-tracked-ids') || { textContent: '[]' }).textContent));
         const NO_RENT_ITEMS = new Set(JSON.parse((document.getElementById('no-rent-item-ids') || { textContent: '[]' }).textContent).map(String));
         const SORTED_AVAILABLE_DATES = JSON.parse((document.getElementById('sorted-available-dates') || { textContent: '[]' }).textContent);
+        const GEAR_EVENT_SHARD_MONTHS = JSON.parse((document.getElementById('gear-event-shard-months') || { textContent: '[]' }).textContent);
+        const USE_GEAR_EVENTS = """ + use_gear_events_json + """;
         const DEFAULT_RANGE_START = """ + json.dumps(default_range_start) + """;
         const DEFAULT_RANGE_END = """ + json.dumps(default_range_end) + """;
         
@@ -3049,6 +3089,7 @@ def generate_delta_history(base_dir):
         let availableDates = new Set(); // Track which dates have JSON files
         
         // Extract available dates from the page (from the date list)
+        SORTED_AVAILABLE_DATES.forEach(d => availableDates.add(d));
         document.querySelectorAll('.delta-date').forEach(el => {
             const date = el.textContent.trim();
             if (date.match(/^\\d{4}-\\d{2}-\\d{2}$/)) {
@@ -3083,6 +3124,125 @@ def generate_delta_history(base_dir):
                 console.error(`Error loading delta for ${date}:`, error);
                 throw error; // Re-throw so caller can handle it
             }
+        }
+
+        let loadedGearShards = new Map();
+        let loadedCharShards = new Map();
+
+        function monthsBetween(start, end) {
+            const out = [];
+            const sy = parseInt(start.slice(0, 4), 10);
+            const sm = parseInt(start.slice(5, 7), 10);
+            const ey = parseInt(end.slice(0, 4), 10);
+            const em = parseInt(end.slice(5, 7), 10);
+            let y = sy, m = sm;
+            while (y < ey || (y === ey && m <= em)) {
+                out.push(`${y}-${String(m).padStart(2, '0')}`);
+                m += 1;
+                if (m > 12) { m = 1; y += 1; }
+            }
+            return out;
+        }
+
+        async function loadGearShard(month) {
+            if (loadedGearShards.has(month)) return loadedGearShards.get(month);
+            const url = `delta_snapshots/gear_events/gear_${month}.json.gz`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Gear shard not found: ${url}`);
+            const arrayBuffer = await response.arrayBuffer();
+            const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+            const events = JSON.parse(decompressed);
+            loadedGearShards.set(month, events);
+            return events;
+        }
+
+        async function loadCharShard(month) {
+            if (loadedCharShards.has(month)) return loadedCharShards.get(month);
+            const url = `delta_snapshots/gear_events/char_${month}.json.gz`;
+            const response = await fetch(url);
+            if (!response.ok) return [];
+            const arrayBuffer = await response.arrayBuffer();
+            const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+            const events = JSON.parse(decompressed);
+            loadedCharShards.set(month, events);
+            return events;
+        }
+
+        async function loadEventsInRange(start, end) {
+            const months = monthsBetween(start.slice(0, 7), end.slice(0, 7));
+            const gear = [];
+            const chars = [];
+            for (const month of months) {
+                if (GEAR_EVENT_SHARD_MONTHS.length && !GEAR_EVENT_SHARD_MONTHS.includes(month)) continue;
+                try {
+                    gear.push(...(await loadGearShard(month)));
+                } catch (e) { /* shard may not exist for sparse months */ }
+                try {
+                    chars.push(...(await loadCharShard(month)));
+                } catch (e) { /* optional */ }
+            }
+            const gearFiltered = gear.filter(ev => ev.d > start && ev.d <= end);
+            const charFiltered = chars.filter(ev => ev.d > start && ev.d <= end);
+            return { gear: gearFiltered, char: charFiltered };
+        }
+
+        function foldGearEventsToInvDeltas(gearEvents) {
+            const invDeltas = {};
+            for (const ev of gearEvents) {
+                const charName = ev.c;
+                const itemId = String(ev.i);
+                const sign = Number(ev.s);
+                const n = Number(ev.n) || 0;
+                if (!charName || !itemId || n <= 0 || (sign !== 1 && sign !== -1)) continue;
+                if (!invDeltas[charName]) {
+                    invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: false };
+                }
+                const row = invDeltas[charName];
+                if (ev.v) row.is_visibility_change = true;
+                const bucket = sign > 0 ? row.added : row.removed;
+                bucket[itemId] = (bucket[itemId] || 0) + n;
+            }
+            for (const charName of Object.keys(invDeltas)) {
+                const row = invDeltas[charName];
+                const added = row.added;
+                const removed = row.removed;
+                for (const itemId of Object.keys(added)) {
+                    if (!removed[itemId]) continue;
+                    const a = added[itemId];
+                    const r = removed[itemId];
+                    if (a > r) { added[itemId] = a - r; delete removed[itemId]; }
+                    else if (r > a) { removed[itemId] = r - a; delete added[itemId]; }
+                    else { delete added[itemId]; delete removed[itemId]; }
+                }
+            }
+            return invDeltas;
+        }
+
+        function foldCharEventsToCharDeltas(charEvents) {
+            const charDeltas = {};
+            for (const ev of charEvents) {
+                const charName = ev.c;
+                if (!charName) continue;
+                if (!charDeltas[charName]) {
+                    charDeltas[charName] = {
+                        name: charName, level_change: 0, aa_total_change: 0, hp_change: 0,
+                        current_level: 0, previous_level: 0, current_aa_total: 0, previous_aa_total: 0,
+                        current_hp: 0, previous_hp: 0, class: ev.cl || '', is_new: false, is_deleted: false,
+                        is_visibility_change: false
+                    };
+                }
+                const row = charDeltas[charName];
+                if (ev.cl) row.class = ev.cl;
+                if (ev.v) row.is_visibility_change = true;
+                const f = ev.f;
+                const n = Number(ev.n) || 0;
+                if (f === 'lvl') row.level_change += n;
+                else if (f === 'aa') row.aa_total_change += n;
+                else if (f === 'hp') row.hp_change += n;
+                else if (f === 'new') row.is_new = true;
+                else if (f === 'del') row.is_deleted = true;
+            }
+            return charDeltas;
         }
         
         async function loadBaseline(baselineDate) {
@@ -3454,6 +3614,29 @@ def generate_delta_history(base_dir):
             outputDiv.innerHTML = '<p>Loading deltas and baselines for ' + start + ' and ' + end + '...</p>';
             
             try {
+                let invDeltas;
+                let charChanges;
+                let startState = {};
+                let endState = {};
+                let omitRangeLeaderboards = false;
+                let usedFallbackBaseline = false;
+                let eventSourceNote = '';
+                let dumpBeforeBaselineAny = false;
+                let baselineMismatch = false;
+                let dumpBeforeBaselineStart = false;
+                let dumpBeforeBaselineEnd = false;
+                let dqBadStart = false;
+                let dqBadEnd = false;
+
+                if (USE_GEAR_EVENTS && GEAR_EVENT_SHARD_MONTHS.length > 0) {
+                    outputDiv.innerHTML = '<p>Loading gear events for ' + start + ' to ' + end + '...</p>';
+                    const { gear, char } = await loadEventsInRange(start, end);
+                    invDeltas = foldGearEventsToInvDeltas(gear);
+                    const rangeCharDeltas = foldCharEventsToCharDeltas(char);
+                    charChanges = charDeltasToChanges(rangeCharDeltas);
+                    eventSourceNote = `gear event log (${gear.length} inventory events, ${char.length} stat events)`;
+                } else {
+                // Legacy: cumulative daily JSON endpoints
                 // Load deltas and baselines for both dates
                 const [startDelta, endDelta] = await Promise.all([
                     loadDeltaJSON(start),
@@ -3466,16 +3649,16 @@ def generate_delta_history(base_dir):
                 }
                 
                 // Check if baselines match
-                const baselineMismatch = startDelta.baseline_date !== endDelta.baseline_date;
-                const dumpBeforeBaselineStart = startDelta.date && startDelta.baseline_date && startDelta.baseline_date !== 'Unknown' && String(startDelta.date) < String(startDelta.baseline_date);
-                const dumpBeforeBaselineEnd = endDelta.date && endDelta.baseline_date && endDelta.baseline_date !== 'Unknown' && String(endDelta.date) < String(endDelta.baseline_date);
-                const dqBadStart = !!(startDelta.data_quality && startDelta.data_quality.dump_before_baseline);
-                const dqBadEnd = !!(endDelta.data_quality && endDelta.data_quality.dump_before_baseline);
-                const dumpBeforeBaselineAny = dumpBeforeBaselineStart || dumpBeforeBaselineEnd || dqBadStart || dqBadEnd;
+                baselineMismatch = startDelta.baseline_date !== endDelta.baseline_date;
+                dumpBeforeBaselineStart = startDelta.date && startDelta.baseline_date && startDelta.baseline_date !== 'Unknown' && String(startDelta.date) < String(startDelta.baseline_date);
+                dumpBeforeBaselineEnd = endDelta.date && endDelta.baseline_date && endDelta.baseline_date !== 'Unknown' && String(endDelta.date) < String(endDelta.baseline_date);
+                dqBadStart = !!(startDelta.data_quality && startDelta.data_quality.dump_before_baseline);
+                dqBadEnd = !!(endDelta.data_quality && endDelta.data_quality.dump_before_baseline);
+                dumpBeforeBaselineAny = dumpBeforeBaselineStart || dumpBeforeBaselineEnd || dqBadStart || dqBadEnd;
                 // Leaderboard AA/HP is endState - startState. Across different baseline_date (rotation),
                 // sparse char_deltas can leave start AA equal to an old baseline snapshot while end shows
                 // full cumulative vs the new baseline — looks like multi-day "gains" that are mostly rotation math.
-                const omitRangeLeaderboards = dumpBeforeBaselineAny || baselineMismatch;
+                omitRangeLeaderboards = dumpBeforeBaselineAny || baselineMismatch;
                 
                 // Load baselines (needed to reconstruct full character states)
                 outputDiv.innerHTML = '<p>Loading baselines... (this may take a moment)</p>';
@@ -3490,12 +3673,12 @@ def generate_delta_history(base_dir):
                 }
                 const startBaseline = startResult.baseline;
                 const endBaseline = endResult.baseline;
-                const usedFallbackBaseline = startResult.usedFallback || endResult.usedFallback;
+                usedFallbackBaseline = startResult.usedFallback || endResult.usedFallback;
                 
                 // Character changes: compare_delta_to_delta on endpoints (Python get_date_range_deltas); delta.html uses dump-vs-dump
                 outputDiv.innerHTML = '<p>Computing character changes...</p>';
-                const startState = reconstructCharacterState(startBaseline, startDelta);
-                const endState = reconstructCharacterState(endBaseline, endDelta);
+                startState = reconstructCharacterState(startBaseline, startDelta);
+                endState = reconstructCharacterState(endBaseline, endDelta);
                 let rangeCharDeltas;
                 if (baselineMismatch) {
                     rangeCharDeltas = compareDeltaToDeltaCharsCrossBaseline(
@@ -3506,13 +3689,13 @@ def generate_delta_history(base_dir):
                         startDelta, endDelta, startBaseline.characters || {}
                     );
                 }
-                const charChanges = charDeltasToChanges(rangeCharDeltas);
+                charChanges = charDeltasToChanges(rangeCharDeltas);
                 
                 // Inventory: rebuild absolute bags (baseline + cumulative inv delta), then diff.
                 // Matches Python get_date_range_deltas across baseline_date boundaries.
                 const absStartInv = reconstructInventoryAbsMap(startBaseline, startDelta);
                 const absEndInv = reconstructInventoryAbsMap(endBaseline, endDelta);
-                let invDeltas = diffInventoryAbsMaps(absStartInv, absEndInv, startDelta.inv_deltas, endDelta.inv_deltas);
+                invDeltas = diffInventoryAbsMaps(absStartInv, absEndInv, startDelta.inv_deltas, endDelta.inv_deltas);
                 const startInv = startDelta.inv_deltas || {};
                 const endInv = endDelta.inv_deltas || {};
                 for (const charName of Object.keys(invDeltas)) {
@@ -3553,6 +3736,8 @@ def generate_delta_history(base_dir):
                 for (const charName of corpseLootChars) {
                     delete invDeltas[charName];
                 }
+                }
+
                 const invDeltasLevel1 = {};
                 const invDeltasOthers = {};
                 for (const [charName, delta] of Object.entries(invDeltas)) {
@@ -3619,9 +3804,14 @@ def generate_delta_history(base_dir):
                 }
                 
                 // Generate HTML report matching delta.html formatting
-                const endBaselineResetDay = (endDelta.baseline_date === end) &&
-                    Object.keys(endDelta.inv_deltas || {}).length === 0;
+                let endBaselineResetDay = false;
                 let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
+                if (eventSourceNote) {
+                    reportHTML += `<p style="color: #555; margin-bottom: 12px;"><em>Source: ${eventSourceNote}</em></p>`;
+                }
+                if (!eventSourceNote) {
+                endBaselineResetDay = (endDelta.baseline_date === end) &&
+                    Object.keys(endDelta.inv_deltas || {}).length === 0;
                 if (dumpBeforeBaselineAny) {
                     const bits = [];
                     if (dumpBeforeBaselineStart || dqBadStart) bits.push(`start ${startDelta.date} (baseline ${startDelta.baseline_date})`);
@@ -3650,6 +3840,7 @@ def generate_delta_history(base_dir):
                         <strong>Baseline reset (end date):</strong> The end date matches the new master baseline; that day's <code>inv_deltas</code> are often empty because inventories match the fresh baseline. Range inventory below is still computed from reconstructed absolute inventories, so changes since the start date can still appear.
                     </p>`;
                 }
+                }
                 // Collect all visibility-change names once (show once at top; sections below show only actual changes)
                 const sortedLevel1 = Object.keys(invDeltasLevel1).sort().slice(0, 500);
                 const visLevel1 = sortedLevel1.filter(c => invDeltasLevel1[c] && invDeltasLevel1[c].is_visibility_change === true);
@@ -3663,6 +3854,7 @@ def generate_delta_history(base_dir):
                 const allVisNames = [...new Set([...visLevel1, ...visOthers, ...visTracked])].sort();
                 // Leaderboards: chars with rows on both days (match delta_storage.get_leaderboard_totals_from_date_range)
                 const charsInBoth = new Set();
+                if (!eventSourceNote) {
                 if (!baselineMismatch) {
                     const sk = Object.keys(startDelta.char_deltas || {});
                     const ek = new Set(Object.keys(endDelta.char_deltas || {}));
@@ -3675,6 +3867,7 @@ def generate_delta_history(base_dir):
                     for (const c of Object.keys(startState)) {
                         if (c in endState) charsInBoth.add(c);
                     }
+                }
                 }
                 reportHTML += `<p style="margin: 10px 0;">${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}
                     <a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
@@ -4412,122 +4605,41 @@ def main():
             print(f"  Created master baseline from current data (date: {date_str})")
             baseline = load_master_baseline(delta_snapshots_dir)
         
-        # Step 2: Compare today vs baseline and save daily delta
-        print(f"Comparing today ({date_str}) vs baseline ({baseline['baseline_date']})...")
+        # Step 2: Append gear/stat events from true day-over-day dump diff (not baseline cumulative)
+        print(f"Appending gear events for {date_str} (previous vs current Magelo dumps)...")
         try:
-            # Do not auto-rotate baseline here: quarterly reset vs an old embedded
-            # baseline_master.json.gz date fights manual rotation (e.g. May 2026 era) and can
-            # create a surprise new baseline_date mid-run so yesterday/today dailies mismatch
-            # and delta.html skips JSON compare. Rotations use workflows/materialize/regenerate.
-            daily_delta_path = save_daily_delta_from_baseline(
+            gear_n, char_n = append_day_events(
+                previous_char_data,
+                previous_inventories,
                 current_char_data,
                 current_inventories,
                 date_str,
                 delta_snapshots_dir,
-                auto_reset_baseline=False,
+                baseline_date=baseline.get('baseline_date') if baseline else None,
             )
-            print(f"Saved daily delta JSON: {daily_delta_path}")
+            print(f"  Saved gear_events: {gear_n} inventory rows, {char_n} stat rows")
         except Exception as e:
-            print(f"Warning: Could not save daily delta JSON: {e}")
+            print(f"Warning: Could not append gear events: {e}")
             import traceback
             traceback.print_exc()
-            # Fall back to old method if baseline comparison fails
-            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
-            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
-            delta_data = {'char_deltas': char_deltas, 'inv_deltas': inv_deltas}
-            daily_delta_path = save_daily_delta_json(delta_data, date_str, delta_snapshots_dir)
         
-        # Step 3: Generate delta HTML by comparing today's delta vs yesterday's delta (default to 1 day)
-        # Load today's and yesterday's deltas
-        today_delta = load_daily_delta_json(date_str, delta_snapshots_dir)
-        
-        # Calculate yesterday's date
-        today_dt = datetime.strptime(date_str, '%Y-%m-%d')
-        yesterday_dt = today_dt - timedelta(days=1)
-        yesterday_date_str = yesterday_dt.strftime('%Y-%m-%d')
-        
-        yesterday_delta = load_daily_delta_json(yesterday_date_str, delta_snapshots_dir)
-        
+        # Step 3: Generate delta HTML (prefer gear event log for this calendar day)
         corpse_loot_override = None
-        if today_delta and yesterday_delta:
-            # Quarterly baseline reset: daily JSONs are cumulative vs different baselines; today's file
-            # omits unchanged chars so compare_delta_to_delta mis-reads missing keys as zeros.
-            baseline_y = yesterday_delta.get('baseline_date')
-            baseline_t = today_delta.get('baseline_date')
-            if baseline_y != baseline_t:
-                print(
-                    f"Baseline transition ({baseline_y} -> {baseline_t}); "
-                    "using previous vs current Magelo files for delta.html"
-                )
-                char_deltas = compare_character_data(current_char_data, previous_char_data, None)
-                inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
-                corpse_loot_override = chars_corpse_loot_excluded(
-                    current_inventories, previous_inventories
-                )
-                for _cn in corpse_loot_override:
-                    inv_deltas.pop(_cn, None)
-            else:
-                # Same baseline_date: prefer daily JSON day-over-day (matches delta-history) when safe.
-                # Magelo dump caches can carry wrong-era file content under a correct cache key; JSONs are
-                # built from the right dump at write time. Fall back to dump-vs-dump when JSON is unsafe.
-                baseline_chars = None
-                bl = load_baseline_for_date(baseline_y, delta_snapshots_dir)
-                if bl:
-                    baseline_chars = bl.get('characters')
-                if daily_json_pair_usable_for_delta_html_json_compare(
-                    yesterday_delta, today_delta, baseline_chars
-                ):
-                    json_diff = compare_delta_to_delta(
-                        yesterday_delta, today_delta, baseline_chars
-                    )
-                    char_deltas = json_diff.get('char_deltas') or {}
-                    inv_deltas = json_diff.get('inv_deltas') or {}
-                    em_y = yesterday_delta.get('equipped_worn_by_char') or {}
-                    em_t = today_delta.get('equipped_worn_by_char') or {}
-                    if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
-                        corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
-                            yesterday_delta, today_delta
-                        )
-                    else:
-                        corpse_loot_override = chars_corpse_loot_excluded(
-                            current_inventories, previous_inventories
-                        )
-                    for _cn in corpse_loot_override:
-                        inv_deltas.pop(_cn, None)
-                    print(
-                        f"Generated delta comparison from daily JSON "
-                        f"({yesterday_date_str} to {date_str}, baseline {baseline_y}); "
-                        "same path as delta-history date range."
-                    )
-                else:
-                    char_deltas = compare_character_data(
-                        current_char_data, previous_char_data, None
-                    )
-                    inv_deltas = compare_inventories(
-                        current_inventories, previous_inventories, None
-                    )
-                    em_y = yesterday_delta.get('equipped_worn_by_char') or {}
-                    em_t = today_delta.get('equipped_worn_by_char') or {}
-                    if em_y and em_t and isinstance(em_y, dict) and isinstance(em_t, dict):
-                        corpse_loot_override = _corpse_loot_chars_from_equipped_meta(
-                            yesterday_delta, today_delta
-                        )
-                    else:
-                        corpse_loot_override = chars_corpse_loot_excluded(
-                            current_inventories, previous_inventories
-                        )
-                    for _cn in corpse_loot_override:
-                        inv_deltas.pop(_cn, None)
-                    print(
-                        f"Generated delta comparison from Magelo dumps ({yesterday_date_str} to {date_str}); "
-                        "daily JSON pair not safe for compare_delta_to_delta (degenerate prior or missing baseline)."
-                    )
-        elif today_delta:
-            # Today's JSON is cumulative vs baseline — never use it for the daily HTML report when
-            # yesterday's delta file is missing (would show the full baseline window, e.g. ~90 days).
+        if gear_events_available(delta_snapshots_dir) and date_str in list_available_event_dates(
+            delta_snapshots_dir
+        ):
+            event_day = get_day_delta_from_events(date_str, delta_snapshots_dir)
+            char_deltas = event_day.get('char_deltas') or {}
+            inv_deltas = event_day.get('inv_deltas') or {}
+            corpse_loot_override = chars_corpse_loot_excluded(
+                current_inventories, previous_inventories
+            )
+            for _cn in corpse_loot_override:
+                inv_deltas.pop(_cn, None)
+            print(f"Generated delta comparison from gear event log ({date_str})")
+        else:
             print(
-                f"Yesterday's delta JSON missing ({yesterday_date_str}); "
-                "using previous vs current Magelo files for delta.html"
+                f"No gear events for {date_str}; using previous vs current Magelo files for delta.html"
             )
             char_deltas = compare_character_data(current_char_data, previous_char_data, None)
             inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
@@ -4536,35 +4648,27 @@ def main():
             )
             for _cn in corpse_loot_override:
                 inv_deltas.pop(_cn, None)
-        else:
-            # Fall back to comparing current vs previous files (backward compatibility)
-            print("Warning: Daily deltas not available, falling back to file comparison")
-            char_deltas = compare_character_data(current_char_data, previous_char_data, None)
-            inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
         
-        # Ensure visibility change (anon 0 vs large AA/level) is set when char_deltas came from JSON/delta-to-delta
+        # Legacy cumulative daily JSON (optional; disabled by default — use gear_events/)
+        if os.environ.get('MAGELO_WRITE_CUMULATIVE_DAILY', '').strip() in ('1', 'true', 'yes'):
+            print(f"MAGELO_WRITE_CUMULATIVE_DAILY set — also writing cumulative delta_daily JSON...")
+            try:
+                daily_delta_path = save_daily_delta_from_baseline(
+                    current_char_data,
+                    current_inventories,
+                    date_str,
+                    delta_snapshots_dir,
+                    auto_reset_baseline=False,
+                )
+                print(f"Saved daily delta JSON: {daily_delta_path}")
+            except Exception as e:
+                print(f"Warning: Could not save daily delta JSON: {e}")
+        
+        # Ensure visibility change (anon 0 vs large AA/level) is set when char_deltas came from events/diff
         apply_visibility_change_to_char_deltas(char_deltas)
         
         # Get item names for inventory deltas
-        all_item_ids = set()
-        for char_delta in inv_deltas.values():
-            all_item_ids.update(char_delta.get('added', {}).keys())
-            all_item_ids.update(char_delta.get('removed', {}).keys())
-        
-        item_names = {}
-        for char_name, items in current_inventories.items():
-            for item in items:
-                if item['item_id'] in all_item_ids:
-                    item_names[item['item_id']] = item['item_name']
-        
-        # Populate item names in deltas
-        for char_delta in inv_deltas.values():
-            for item_id in char_delta.get('added', {}):
-                if item_id in item_names:
-                    char_delta.setdefault('item_names', {})[item_id] = item_names[item_id]
-            for item_id in char_delta.get('removed', {}):
-                if item_id in item_names:
-                    char_delta.setdefault('item_names', {})[item_id] = item_names[item_id]
+        populate_item_names_for_inv_deltas(inv_deltas, current_inventories)
         
         # Generate delta HTML (and append mob deaths for tracker when we have zone loot)
         mob_tracker_path = os.path.join(base_dir, "mob_tracker_deaths.json")
