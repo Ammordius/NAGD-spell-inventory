@@ -26,6 +26,7 @@ from generate_spell_page import (  # noqa: E402
 )
 from gear_event_storage import (  # noqa: E402
     append_day_events_from_deltas,
+    build_tracked_gear_event_log_rows,
     char_deltas_to_stat_events,
     char_events_to_char_deltas,
     populate_item_names_for_inv_deltas,
@@ -92,6 +93,69 @@ class TestGenerateDeltaHistoryGuildEmbed(unittest.TestCase):
         self.assertIn("GEAR_EVENT_CACHE_TTL_MS", html)
         self.assertIn("caches.open", html)
         self.assertIn("await fetchGzJsonCached(url)", html)
+        self.assertIn("function buildRangeTrackedRows", html)
+        self.assertIn("function filterTrackedRows", html)
+        self.assertIn("function filterEventsForChar", html)
+        self.assertIn("trackedRowsByChar", html)
+        self.assertIn("hasTrackedEventDates", html)
+        self.assertIn("tracked-items-table", html)
+        self.assertIn("<th>Date</th><th>Change</th><th>Item</th><th>Source</th>", html)
+
+
+class TestRangeTrackedRows(unittest.TestCase):
+    """Python mirror of delta-history buildRangeTrackedRows (range-start holdings)."""
+
+    TRACKED = {"100", "200"}
+    SOURCE = {"100": "Boss (Plane of Time)", "200": "elemental armor"}
+    NAMES = {"100": "Raid Sword", "200": "Elem Helm"}
+
+    def test_dated_rows_from_range_events(self):
+        events = [
+            {"d": "2026-07-01", "c": "Alice", "i": "100", "s": 1, "n": 1, "v": 0},
+            {"d": "2026-07-02", "c": "Alice", "i": "200", "s": -1, "n": 1, "v": 0},
+        ]
+        rows = build_tracked_gear_event_log_rows(
+            events,
+            "Alice",
+            self.TRACKED,
+            self.NAMES,
+            initial_holdings={},
+            source_label=self.SOURCE,
+        )
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["date"], "2026-07-01")
+        self.assertEqual(rows[0]["sign"], 1)
+        self.assertEqual(rows[1]["date"], "2026-07-02")
+        self.assertEqual(rows[1]["sign"], -1)
+
+    def test_lore_reacquire_suppressed_at_range_start(self):
+        events = [
+            {"d": "2026-07-03", "c": "Alice", "i": "100", "s": 1, "n": 1, "v": 0},
+        ]
+        rows = build_tracked_gear_event_log_rows(
+            events,
+            "Alice",
+            self.TRACKED,
+            self.NAMES,
+            unique_tracked_ids={"100"},
+            initial_holdings={"100": 1},
+            source_label=self.SOURCE,
+        )
+        self.assertEqual(rows, [])
+
+    def test_visibility_events_skipped(self):
+        events = [
+            {"d": "2026-07-01", "c": "Alice", "i": "100", "s": 1, "n": 1, "v": 1},
+        ]
+        rows = build_tracked_gear_event_log_rows(
+            events,
+            "Alice",
+            self.TRACKED,
+            self.NAMES,
+            initial_holdings={},
+            source_label=self.SOURCE,
+        )
+        self.assertEqual(rows, [])
 
 
 class TestLootFilterHelpers(unittest.TestCase):

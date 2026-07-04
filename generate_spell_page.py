@@ -3635,6 +3635,25 @@ def generate_delta_history(base_dir):
             font-size: 0.9em;
             color: #4527a0;
         }
+        .tracked-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 0.95em;
+        }
+        .tracked-items-table th,
+        .tracked-items-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        .tracked-items-table th {
+            background: #fafafa;
+            color: #555;
+            font-weight: bold;
+        }
+        .tracked-items-table .pos { color: #2e7d32; font-weight: bold; }
+        .tracked-items-table .neg { color: #c62828; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -4640,6 +4659,53 @@ def generate_delta_history(base_dir):
             return out;
         }
 
+        function filterEventsForChar(events, charName) {
+            return (events || []).filter(ev => ev.c === charName);
+        }
+
+        function buildRangeTrackedRows(gearEvents, charName, startHoldings) {
+            if (!TRACKED_ITEM_IDS || !TRACKED_ITEM_IDS.size) return [];
+            const holdings = {};
+            for (const [itemId, cnt] of Object.entries(startHoldings || {})) {
+                const n = Number(cnt) || 0;
+                if (n > 0) holdings[String(itemId)] = n;
+            }
+            const rows = [];
+            const sorted = filterEventsForChar(gearEvents, charName)
+                .sort((a, b) => (a.d || '').localeCompare(b.d || '') || String(a.i).localeCompare(String(b.i)));
+            for (const ev of sorted) {
+                if (ev.v) continue;
+                const sign = Number(ev.s);
+                const n = Number(ev.n) || 0;
+                const iid = String(ev.i);
+                if (!iid || n <= 0 || (sign !== 1 && sign !== -1) || NO_RENT_ITEMS.has(iid)) continue;
+                const isTracked = TRACKED_ITEM_IDS.has(iid);
+                if (isTracked && sign > 0 && UNIQUE_TRACKED_IDS.has(iid) && (holdings[iid] || 0) > 0) continue;
+                if (isTracked) {
+                    rows.push({
+                        date: ev.d || '',
+                        sign: sign,
+                        count: n,
+                        itemId: iid,
+                        itemName: (ITEM_ID_TO_NAME && ITEM_ID_TO_NAME[iid]) || ('Item ' + iid),
+                        source: (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[iid]) || ''
+                    });
+                }
+                if (sign > 0) holdings[iid] = (holdings[iid] || 0) + n;
+                else {
+                    holdings[iid] = (holdings[iid] || 0) - n;
+                    if (holdings[iid] <= 0) delete holdings[iid];
+                }
+            }
+            return rows;
+        }
+
+        function filterTrackedRows(rows, lootFilters) {
+            const lf = normalizeLootFilters(lootFilters);
+            if (!lf.zone && !lf.mob && !lf.itemId && !lf.itemName) return rows || [];
+            return (rows || []).filter(row => itemMatchesLootFilters(row.itemId, lf));
+        }
+
         function getLootFiltersFromUI() {
             const itemEl = document.getElementById('loot-filter-item');
             return {
@@ -5193,9 +5259,17 @@ def generate_delta_history(base_dir):
             if (displayNonVisTracked.length > 0) {
                 reportHTML += `
                 <h2 id="tracked-items" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
-                <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
+                <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these${ctx.hasTrackedEventDates ? ', with the date each change occurred' : ''}.</em></p>`;
+                let trackedSectionRendered = false;
                 for (const charName of displayNonVisTracked) {
                     const delta = displayTrackedDeltas[charName];
+                    const charRows = (ctx.trackedRowsByChar && ctx.trackedRowsByChar[charName]) || null;
+                    const datedRows = charRows
+                        ? filterTrackedRows(charRows, lootFilters).sort((a, b) =>
+                            (a.date || '').localeCompare(b.date || '') || String(a.itemId).localeCompare(String(b.itemId)))
+                        : null;
+                    if (datedRows && !datedRows.length) continue;
+                    trackedSectionRendered = true;
                     const state = charStateForName(charName, startState, endState);
                     const level = state.level || '?';
                     const charDisplay = formatCharDisplay(charName, state);
@@ -5204,31 +5278,58 @@ def generate_delta_history(base_dir):
                     reportHTML += `
                 <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
                     <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(charName)} <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
-                    if (Object.keys(delta.added || {}).length > 0) {
+                    if (datedRows && datedRows.length) {
                         reportHTML += `
+                    <table class="tracked-items-table">
+                        <thead><tr><th>Date</th><th>Change</th><th>Item</th><th>Source</th></tr></thead>
+                        <tbody>`;
+                        for (const row of datedRows) {
+                            const signClass = row.sign > 0 ? 'pos' : 'neg';
+                            const signLabel = row.sign > 0 ? '+' + row.count : '-' + row.count;
+                            const qty = row.count > 1 ? ' x' + row.count : '';
+                            const badgeBg = row.sign > 0 ? '#e8f5e9' : '#ffebee';
+                            const linkColor = row.sign > 0 ? '#2e7d32' : '#c62828';
+                            reportHTML += `
+                            <tr>
+                                <td>${escapeHtmlText(row.date || '—')}</td>
+                                <td><span class="${signClass}">${signLabel}</span></td>
+                                <td><span style="display: inline-block; padding: 2px 8px; background: ${badgeBg}; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${row.itemId}" target="_blank" style="color: ${linkColor}; text-decoration: none;">${escapeHtmlText(row.itemName)}</a>${qty}</span></td>
+                                <td style="color: #666;">${escapeHtmlText(row.source || '—')}</td>
+                            </tr>`;
+                        }
+                        reportHTML += `
+                        </tbody>
+                    </table>`;
+                    } else {
+                        if (Object.keys(delta.added || {}).length > 0) {
+                            reportHTML += `
                     <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Acquired:</strong><div style="margin-top: 5px;">`;
-                        for (const itemId of Object.keys(delta.added).sort()) {
-                            const count = delta.added[itemId];
-                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                            const countText = count > 1 ? ' x' + count : '';
-                            const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
-                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                            for (const itemId of Object.keys(delta.added).sort()) {
+                                const count = delta.added[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                            }
+                            reportHTML += `</div></div>`;
                         }
-                        reportHTML += `</div></div>`;
-                    }
-                    if (Object.keys(delta.removed || {}).length > 0) {
-                        reportHTML += `
+                        if (Object.keys(delta.removed || {}).length > 0) {
+                            reportHTML += `
                     <div style="margin: 10px 0;"><strong style="color: #f44336;">Lost:</strong><div style="margin-top: 5px;">`;
-                        for (const itemId of Object.keys(delta.removed).sort()) {
-                            const count = delta.removed[itemId];
-                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                            const countText = count > 1 ? ' x' + count : '';
-                            const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
-                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                            for (const itemId of Object.keys(delta.removed).sort()) {
+                                const count = delta.removed[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                const countText = count > 1 ? ' x' + count : '';
+                                const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                            }
+                            reportHTML += `</div></div>`;
                         }
-                        reportHTML += `</div></div>`;
                     }
                     reportHTML += `</div>`;
+                }
+                if (!trackedSectionRendered && hasLootFilters && nonVisTracked.length > 0) {
+                    reportHTML += `<p style="color: #999; font-style: italic;">No tracked items match the current loot filters.</p>`;
                 }
             } else if (hasLootFilters && nonVisTracked.length > 0) {
                 reportHTML += `
@@ -5296,10 +5397,12 @@ def generate_delta_history(base_dir):
                 let endBaselineDateGear = null;
                 let absStartInv = {};
                 let absEndInv = {};
+                let rangeGearEvents = [];
 
                 if (USE_GEAR_EVENTS && GEAR_EVENT_SHARD_MONTHS.length > 0) {
                     outputDiv.innerHTML = '<p>Loading gear events for ' + start + ' to ' + end + '...</p>';
                     const { gear, char } = await loadEventsInRange(start, end);
+                    rangeGearEvents = gear;
                     rangeCharDeltas = foldCharEventsToCharDeltas(char);
                     charChanges = charDeltasToChanges(rangeCharDeltas);
                     enrichCharChangesFromFoldedDeltas(charChanges, rangeCharDeltas);
@@ -5503,6 +5606,16 @@ def generate_delta_history(base_dir):
                         }
                     }
                 }
+
+                const trackedRowsByChar = {};
+                if (rangeGearEvents.length > 0) {
+                    for (const charName of Object.keys(trackedDeltas)) {
+                        const delta = trackedDeltas[charName];
+                        if (delta.is_visibility_change || corpseLootChars.has(charName)) continue;
+                        const rows = buildRangeTrackedRows(rangeGearEvents, charName, absStartInv[charName] || {});
+                        if (rows.length) trackedRowsByChar[charName] = rows;
+                    }
+                }
                 
                 // Items by zone: only chars in BOTH snapshots (exclude visibility-change); only raid zones
                 // For non-no-drop tracked loot, only add (zone, mob) when serverwide net change for that item is positive
@@ -5623,6 +5736,8 @@ def generate_delta_history(base_dir):
                     endDelta: endDelta || null,
                     invDeltas, invDeltasLevel1, invDeltasOthers,
                     trackedDeltas, zoneEntries,
+                    trackedRowsByChar,
+                    hasTrackedEventDates: rangeGearEvents.length > 0,
                     charChanges, charsInBoth, corpseLootChars,
                     allVisNames, nonVisLevel1, nonVisOthers, nonVisTracked,
                     aaLeaderboard, hpLeaderboard,

@@ -951,6 +951,7 @@ def build_tracked_gear_event_log_rows(
     *,
     unique_tracked_ids: set[str] | None = None,
     baseline: dict | None = None,
+    initial_holdings: dict[str, int] | None = None,
     no_rent: set[str] | None = None,
     source_label: dict | None = None,
 ) -> list[dict]:
@@ -964,12 +965,18 @@ def build_tracked_gear_event_log_rows(
     source_label = source_label or {}
 
     holdings: dict[str, int] = {}
-    baseline_items = ((baseline or {}).get("inventories") or {}).get(char_name) or []
-    for item in baseline_items:
-        iid = str(item.get("item_id", ""))
-        if not iid or iid.upper() == "NULL" or iid == "0" or iid in no_rent:
-            continue
-        holdings[iid] = holdings.get(iid, 0) + 1
+    if initial_holdings is not None:
+        for iid, cnt in initial_holdings.items():
+            n = int(cnt or 0)
+            if n > 0:
+                holdings[str(iid)] = n
+    else:
+        baseline_items = ((baseline or {}).get("inventories") or {}).get(char_name) or []
+        for item in baseline_items:
+            iid = str(item.get("item_id", ""))
+            if not iid or iid.upper() == "NULL" or iid == "0" or iid in no_rent:
+                continue
+            holdings[iid] = holdings.get(iid, 0) + 1
 
     rows: list[dict] = []
     char_events = sorted(
