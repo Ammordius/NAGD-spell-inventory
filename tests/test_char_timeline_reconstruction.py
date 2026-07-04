@@ -123,6 +123,10 @@ class TestCharTimelineReconstruction(unittest.TestCase):
         self.assertIn("tracked-tab", html)
         self.assertIn("TRACKED_ITEM_IDS", html)
         self.assertIn("tracked-source-label", html)
+        self.assertIn("fetchGzJsonCached", html)
+        self.assertIn("GEAR_EVENT_CACHE_TTL_MS", html)
+        self.assertIn("caches.open", html)
+        self.assertIn("your browser caches it for 24 hours", html)
 
 
 class TestTrackedGearTimeline(unittest.TestCase):

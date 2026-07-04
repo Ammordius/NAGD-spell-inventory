@@ -3028,6 +3028,59 @@ def _gear_event_page_embed_config(base_dir: str) -> dict:
     }
 
 
+def _gear_event_fetch_client_js() -> str:
+    """Shared browser Cache API helpers for gzip JSON under delta_snapshots/."""
+    return """
+        const GEAR_EVENT_CACHE_NAME = 'takp-gear-events-v1';
+        const GEAR_EVENT_CACHE_TTL_MS = 86400000;
+
+        function inflateGzArrayBuffer(arrayBuffer) {
+            return JSON.parse(pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' }));
+        }
+
+        async function readCachedGzJson(cache, url) {
+            const cached = await cache.match(url);
+            if (!cached) return null;
+            const ts = parseInt(cached.headers.get('x-cached-at') || '0', 10);
+            if (!ts || (Date.now() - ts) >= GEAR_EVENT_CACHE_TTL_MS) {
+                await cache.delete(url);
+                return null;
+            }
+            return inflateGzArrayBuffer(await cached.arrayBuffer());
+        }
+
+        async function storeCachedGz(cache, url, arrayBuffer) {
+            const headers = new Headers();
+            headers.set('Content-Type', 'application/gzip');
+            headers.set('x-cached-at', String(Date.now()));
+            await cache.put(url, new Response(arrayBuffer, { headers }));
+        }
+
+        async function fetchGzJsonCached(url, { optional = false } = {}) {
+            let cache = null;
+            try {
+                cache = await caches.open(GEAR_EVENT_CACHE_NAME);
+                const fromCache = await readCachedGzJson(cache, url);
+                if (fromCache !== null) return fromCache;
+            } catch (e) {
+                cache = null;
+            }
+            const response = await fetch(url);
+            if (!response.ok) {
+                if (optional) return null;
+                throw new Error('Failed to load: ' + url + ' (HTTP ' + response.status + ')');
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            if (cache) {
+                try {
+                    await storeCachedGz(cache, url, arrayBuffer);
+                } catch (e) { /* ignore cache write errors */ }
+            }
+            return inflateGzArrayBuffer(arrayBuffer);
+        }
+"""
+
+
 def normalize_loot_filters(filters, item_id_to_name=None):
     """Normalize loot filter dict from delta-history UI (zone / mob / item)."""
     item_id_to_name = item_id_to_name or {}
@@ -3788,6 +3841,7 @@ def generate_delta_history(base_dir):
             }
         }
 
+""" + _gear_event_fetch_client_js() + """
         let loadedGearShards = new Map();
         let loadedCharShards = new Map();
 
@@ -3809,11 +3863,7 @@ def generate_delta_history(base_dir):
         async function loadGearShard(month) {
             if (loadedGearShards.has(month)) return loadedGearShards.get(month);
             const url = `delta_snapshots/gear_events/gear_${month}.json.gz`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Gear shard not found: ${url}`);
-            const arrayBuffer = await response.arrayBuffer();
-            const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
-            const events = JSON.parse(decompressed);
+            const events = await fetchGzJsonCached(url);
             loadedGearShards.set(month, events);
             return events;
         }
@@ -3821,13 +3871,10 @@ def generate_delta_history(base_dir):
         async function loadCharShard(month) {
             if (loadedCharShards.has(month)) return loadedCharShards.get(month);
             const url = `delta_snapshots/gear_events/char_${month}.json.gz`;
-            const response = await fetch(url);
-            if (!response.ok) return [];
-            const arrayBuffer = await response.arrayBuffer();
-            const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
-            const events = JSON.parse(decompressed);
-            loadedCharShards.set(month, events);
-            return events;
+            const events = await fetchGzJsonCached(url, { optional: true });
+            const result = events || [];
+            loadedCharShards.set(month, result);
+            return result;
         }
 
         async function loadEventsInRange(start, end) {
@@ -4158,26 +4205,15 @@ def generate_delta_history(base_dir):
             }
 
             try {
-                let response = null;
-                try {
-                    response = await fetch(archivedUrl);
-                } catch (e) {
-                    // Network or other error on archived URL; will try current below
-                }
-                if (response && response.ok) {
-                    const arrayBuffer = await response.arrayBuffer();
-                    const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
-                    const baseline = JSON.parse(decompressed);
+                let baseline = await fetchGzJsonCached(archivedUrl, { optional: true });
+                if (baseline) {
                     checkEmbeddedOrThrow(baseline, archivedUrl, false);
                     return finish(baseline, false);
                 }
 
                 // Archive missing: only accept baseline_master.json.gz if embedded baseline_date matches
-                response = await fetch(currentUrl);
-                if (response && response.ok) {
-                    const arrayBuffer = await response.arrayBuffer();
-                    const decompressed = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
-                    const baseline = JSON.parse(decompressed);
+                baseline = await fetchGzJsonCached(currentUrl, { optional: true });
+                if (baseline) {
                     checkEmbeddedOrThrow(baseline, currentUrl, true);
                     return finish(baseline, true);
                 }
@@ -5647,7 +5683,7 @@ def generate_char_timeline(base_dir):
         <div class="note">
             <strong>Notes:</strong> AA and gear history are reconstructed from the gear event log plus the master baseline.
             Items held since the baseline era without inventory events are labeled accordingly.
-            Gear events track item counts, not equipment slots. First load may download ~20MB of shard data (browser-cached afterward).
+            Gear events track item counts, not equipment slots. First load may download several MB of compressed shard data; your browser caches it for 24 hours after the first load.
         </div>
     </div>
     <script type="application/json" id="gear-event-shard-months">""" + cfg["gear_shard_months_json"].replace("</", "<\\/") + """</script>
@@ -5677,6 +5713,7 @@ def generate_char_timeline(base_dir):
         const params = new URLSearchParams(window.location.search);
         const CHAR_NAME = params.get('c') || '';
 
+""" + _gear_event_fetch_client_js() + """
         let loadedGearShards = new Map();
         let loadedCharShards = new Map();
         let loadedBaselines = new Map();
@@ -5696,10 +5733,7 @@ def generate_char_timeline(base_dir):
         async function loadGearShard(month) {
             if (loadedGearShards.has(month)) return loadedGearShards.get(month);
             const url = `delta_snapshots/gear_events/gear_${month}.json.gz`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Gear shard not found: ' + url);
-            const decompressed = pako.inflate(new Uint8Array(await response.arrayBuffer()), { to: 'string' });
-            const events = JSON.parse(decompressed);
+            const events = await fetchGzJsonCached(url);
             loadedGearShards.set(month, events);
             return events;
         }
@@ -5707,12 +5741,10 @@ def generate_char_timeline(base_dir):
         async function loadCharShard(month) {
             if (loadedCharShards.has(month)) return loadedCharShards.get(month);
             const url = `delta_snapshots/gear_events/char_${month}.json.gz`;
-            const response = await fetch(url);
-            if (!response.ok) return [];
-            const decompressed = pako.inflate(new Uint8Array(await response.arrayBuffer()), { to: 'string' });
-            const events = JSON.parse(decompressed);
-            loadedCharShards.set(month, events);
-            return events;
+            const events = await fetchGzJsonCached(url, { optional: true });
+            const result = events || [];
+            loadedCharShards.set(month, result);
+            return result;
         }
 
         function gearManifestFirstEventMonthForDate(dateStr) {
@@ -5757,11 +5789,13 @@ def generate_char_timeline(base_dir):
             if (loadedBaselines.has(cacheKey)) return loadedBaselines.get(cacheKey);
             const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
             const currentUrl = 'delta_snapshots/baseline_master.json.gz';
-            let response = await fetch(archivedUrl);
-            if (!response.ok) response = await fetch(currentUrl);
-            if (!response.ok) throw new Error('Baseline not found for ' + baselineDate);
-            const baseline = JSON.parse(pako.inflate(new Uint8Array(await response.arrayBuffer()), { to: 'string' }));
-            const result = { baseline, usedFallback: !response.url.includes('_' + want) };
+            let baseline = await fetchGzJsonCached(archivedUrl, { optional: true });
+            let usedFallback = false;
+            if (!baseline) {
+                baseline = await fetchGzJsonCached(currentUrl);
+                usedFallback = true;
+            }
+            const result = { baseline, usedFallback };
             loadedBaselines.set(cacheKey, result);
             return result;
         }

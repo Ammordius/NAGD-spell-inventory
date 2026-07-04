@@ -88,6 +88,10 @@ class TestGenerateDeltaHistoryGuildEmbed(unittest.TestCase):
         self.assertIn("buildReportHTML", html)
         self.assertIn("buildRangeFilterIndex", html)
         self.assertIn("loot-filter-zone", html)
+        self.assertIn("fetchGzJsonCached", html)
+        self.assertIn("GEAR_EVENT_CACHE_TTL_MS", html)
+        self.assertIn("caches.open", html)
+        self.assertIn("await fetchGzJsonCached(url)", html)
 
 
 class TestLootFilterHelpers(unittest.TestCase):
