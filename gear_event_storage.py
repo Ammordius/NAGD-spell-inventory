@@ -771,18 +771,34 @@ def manifest_latest_date(manifest: dict | None) -> str:
     return max(days.keys()) if days else ""
 
 
+def load_item_id_to_name_map(base_dir: str | None = None) -> dict[str, str]:
+    """Load full item_id -> name map from data/item_id_to_name.json."""
+    root = base_dir or os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(root, "data", "item_id_to_name.json")
+    if not os.path.isfile(path):
+        return {}
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return {str(k): str(v).strip() for k, v in data.items() if v}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 def build_item_name_map_for_char(
     baseline: dict,
     char_name: str,
     extra: dict | None = None,
 ) -> dict[str, str]:
-    """Resolve item id -> name for one character from baseline inventory + extras."""
-    name_map = dict(extra or {})
+    """Resolve item id -> name for one character from global map, baseline inventory, extras."""
+    name_map = load_item_id_to_name_map()
     for item in ((baseline or {}).get("inventories") or {}).get(char_name, []):
         iid = str(item.get("item_id", ""))
         iname = (item.get("item_name") or "").strip()
-        if iid and iname and iid not in name_map:
+        if iid and iname:
             name_map[iid] = iname
+    if extra:
+        name_map.update(extra)
     return name_map
 
 
@@ -1236,6 +1252,12 @@ def populate_item_names_for_inv_deltas(
                 if iid in all_ids:
                     name_map[iid] = item.get("item_name", "")
     base_dir = os.path.dirname(os.path.abspath(__file__))
+    if len(name_map) < len(all_ids):
+        for iid in all_ids:
+            if iid not in name_map:
+                global_name = load_item_id_to_name_map(base_dir).get(iid)
+                if global_name:
+                    name_map[iid] = global_name
     if len(name_map) < len(all_ids):
         path = os.path.join(base_dir, "data", "item_name_to_id.json")
         if os.path.exists(path):

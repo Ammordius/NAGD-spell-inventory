@@ -580,6 +580,15 @@ jobs:
           echo "⚠ data/item_name_to_id.json not found (item cards may not resolve on live site)"
         fi
 
+    - name: Merge Magelo inventory names into item_id_to_name.json
+      run: |
+        if [ ! -f "data/item_id_to_name.json" ]; then
+          echo "::error::data/item_id_to_name.json is missing - run scripts/build_item_id_to_name.py locally and commit"
+          exit 1
+        fi
+        python scripts/build_item_id_to_name.py --skip-db --inventory inventory/TAKP_character_inventory.txt
+        echo "✓ item_id_to_name.json ready ($(python -c "import json; print(len(json.load(open('data/item_id_to_name.json'))))") entries)"
+
     - name: Prepare for deployment
       run: |
         # Create a clean directory with the HTML files
@@ -668,6 +677,12 @@ jobs:
         else
           echo "::warning::data/item_name_to_id.json missing - item cards (e.g. Cap of Flowing Time) will not resolve on live site"
         fi
+        if [ ! -f "data/item_id_to_name.json" ]; then
+          echo "::error::data/item_id_to_name.json is missing - char timeline will show Item IDs"
+          exit 1
+        fi
+        cp data/item_id_to_name.json deploy/data/item_id_to_name.json
+        echo "✓ Copied data/item_id_to_name.json to deploy (id→name resolution for char timeline)"
         # Copy elemental_display_names.json for class rankings (elemental piece display names when item_stats has no name)
         if [ -f "data/elemental_display_names.json" ]; then
           cp data/elemental_display_names.json deploy/data/elemental_display_names.json

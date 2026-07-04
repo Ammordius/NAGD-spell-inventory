@@ -19,6 +19,7 @@ from gear_event_storage import (  # noqa: E402
     build_gear_event_log_rows,
     build_item_name_map_for_char,
     filter_events_for_char,
+    load_item_id_to_name_map,
     reconstruct_holdings_for_char,
 )
 
@@ -86,6 +87,13 @@ class TestCharTimelineReconstruction(unittest.TestCase):
         self.assertEqual(len(rows), 3)
         self.assertEqual(rows[0]["item_name"], "New Item")
         self.assertEqual(rows[0]["sign"], 1)
+
+    def test_build_item_name_map_from_global_file(self):
+        names = load_item_id_to_name_map(_MAGelo_ROOT)
+        if not names:
+            self.skipTest("item_id_to_name.json not present")
+        name_map = build_item_name_map_for_char({"inventories": {}}, "Nobody")
+        self.assertIn("10037", name_map)
 
     def test_char_timeline_link(self):
         link = char_timeline_link("Alice Test")

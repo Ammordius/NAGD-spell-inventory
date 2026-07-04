@@ -2894,6 +2894,19 @@ def _warn_if_event_dump_divergence(event_day, dump_char, dump_inv, date_str):
         )
 
 
+def load_item_id_to_name(base_dir):
+    """Load full item_id -> name map from data/item_id_to_name.json."""
+    path = os.path.join(base_dir, 'data', 'item_id_to_name.json')
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return {str(k): str(v).strip() for k, v in data.items() if v}
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 def build_tracked_item_id_to_name(base_dir, tracked_ids=None):
     """Build id -> display name map for tracked items (delta-history client embed)."""
     if tracked_ids is None:
@@ -3002,7 +3015,7 @@ def _gear_event_page_embed_config(base_dir: str) -> dict:
         "gear_shard_months_json": json.dumps(gear_shard_months),
         "use_gear_events_json": "true" if use_gear_events else "false",
         "gear_event_manifest_json": json.dumps(gear_event_manifest),
-        "item_id_to_name_json": json.dumps(build_tracked_item_id_to_name(base_dir, tracked_ids)),
+        "item_id_to_name_json": json.dumps(load_item_id_to_name(base_dir)),
         "char_guild_map_json": json.dumps(build_char_guild_map(char_file_for_guild)),
         "no_rent_json": json.dumps(no_rent_for_js),
         "sorted_dates_asc": sorted_dates_asc,
