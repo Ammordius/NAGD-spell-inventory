@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 """CI helper: ensure previous vs current Magelo export stamps are within max_span_days."""
+from __future__ import annotations
+
 import os
 import re
 import sys
 from datetime import datetime
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from magelo_dump_fingerprint import (  # noqa: E402
+    load_fingerprint,
+    verify_fingerprint,
+)
 
 
 def parse_stamp(s: str):
@@ -42,6 +51,51 @@ def check_dump_content_plausible(max_line_delta_ratio: float = 0.10) -> int:
             f"{ratio * 100:.1f}% (max {max_line_delta_ratio * 100:.0f}%). "
             f"Previous: {prev_lines} lines, current: {cur_lines} lines. "
             "Likely stale magelo-dump-* cache content despite aligned stamp."
+        )
+        return 1
+    return 0
+
+
+def check_inventory_line_counts(max_line_delta_ratio: float = 0.10) -> int:
+    """Fail when inventory dump line counts diverge sharply."""
+    prev_inv = Path("inventory/TAKP_character_inventory_previous.txt")
+    cur_inv = Path("inventory/TAKP_character_inventory.txt")
+    if not prev_inv.is_file() or not cur_inv.is_file():
+        return 0
+    prev_lines = _count_lines(prev_inv)
+    cur_lines = _count_lines(cur_inv)
+    if prev_lines < 100 or cur_lines < 100:
+        return 0
+    ratio = abs(cur_lines - prev_lines) / max(prev_lines, cur_lines)
+    if ratio > max_line_delta_ratio:
+        print(
+            "::error::Previous vs current inventory dump line counts differ by "
+            f"{ratio * 100:.1f}% (max {max_line_delta_ratio * 100:.0f}%). "
+            f"Previous: {prev_lines} lines, current: {cur_lines} lines. "
+            "Likely stale magelo-dump-* cache content."
+        )
+        return 1
+    return 0
+
+
+def check_previous_fingerprint() -> int:
+    """Verify _previous files still match yesterday's cache fingerprint when present."""
+    expected = (os.environ.get("EXPECTED_PREVIOUS_DATE") or "").strip()
+    if not expected:
+        return 0
+    fp = load_fingerprint(Path("magelo_dump_fingerprint.json"))
+    if not fp:
+        return 0
+    prev_char = Path("character/TAKP_character_previous.txt")
+    prev_inv = Path("inventory/TAKP_character_inventory_previous.txt")
+    if not prev_char.is_file() or not prev_inv.is_file():
+        return 0
+    errors = verify_fingerprint(fp, prev_char, prev_inv, expected)
+    if errors:
+        for err in errors:
+            print(f"::error::{err}")
+        print(
+            "_previous files no longer match magelo_dump_fingerprint.json after cache refresh."
         )
         return 1
     return 0
@@ -92,9 +146,14 @@ def main() -> int:
         return 1
 
     print("✓ Magelo export date span OK: %d calendar day(s) between previous and current." % days)
-    content_rc = check_dump_content_plausible()
-    if content_rc != 0:
-        return content_rc
+    for check in (
+        check_dump_content_plausible,
+        check_inventory_line_counts,
+        check_previous_fingerprint,
+    ):
+        rc = check()
+        if rc != 0:
+            return rc
     return 0
 
 

@@ -108,6 +108,7 @@ jobs:
           character/TAKP_character.txt
           inventory/TAKP_character_inventory.txt
           .magelo_update_date
+          magelo_dump_fingerprint.json
         # Never use an empty date segment (would become key "magelo-dump-" and match unrelated caches).
         key: magelo-dump-${{ steps.yesterday.outputs.yesterday_date || format('invalid-no-yesterday-{0}', github.run_id) }}
     
@@ -186,6 +187,7 @@ jobs:
           character/TAKP_character.txt
           inventory/TAKP_character_inventory.txt
           .magelo_update_date
+          magelo_dump_fingerprint.json
         key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
         restore-keys: |
           magelo-dump-
@@ -267,6 +269,12 @@ jobs:
         else
           echo "⚠ Error: Failed to save update date file"
         fi
+
+    - name: Write Magelo dump fingerprint
+      if: steps.check-update.outputs.normalized_date != 'unknown'
+      env:
+        EXPECTED_DATE: ${{ steps.check-update.outputs.normalized_date }}
+      run: python3 scripts/magelo_dump_fingerprint.py write
     
     # Note: We do NOT save current files as previous here because:
     # 1. We already copied yesterday's Actions cache to _previous when cache-yesterday hit (see "Copy yesterday's files").
@@ -380,6 +388,7 @@ jobs:
           character/TAKP_character.txt
           inventory/TAKP_character_inventory.txt
           .magelo_update_date
+          magelo_dump_fingerprint.json
         key: magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}
     
     - name: Fail if yesterday Magelo cache missing for delta
@@ -800,6 +809,12 @@ jobs:
         restore-keys: |
           magelo-baseline-
     
+    - name: Write Magelo dump fingerprint for cache
+      if: steps.check-update.outputs.normalized_date != 'unknown'
+      env:
+        EXPECTED_DATE: ${{ steps.check-update.outputs.normalized_date }}
+      run: python3 scripts/magelo_dump_fingerprint.py write
+
     - name: Cache current files for next run
       uses: actions/cache@v5
       with:
@@ -807,6 +822,8 @@ jobs:
           character/TAKP_character.txt
           inventory/TAKP_character_inventory.txt
           .magelo_update_date
+          magelo_dump_fingerprint.json
+          character/.magelo_dump_index.json
         key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
         restore-keys: |
           magelo-dump-

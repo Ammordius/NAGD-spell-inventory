@@ -1228,7 +1228,9 @@ def reconstruct_char_data_at_date(
         for name, bc in baseline_chars.items()
     }
 
-    char_events = load_char_events(base_dir, end_date=up_to_date)
+    char_events = load_char_events(
+        base_dir, start_date=baseline_date or None, end_date=up_to_date
+    )
     era_events = filter_char_events_for_baseline(char_events, baseline_date)
     deleted: set[str] = set()
 
@@ -1301,7 +1303,10 @@ def day_deltas_from_event_reconstruction(
     from generate_spell_page import compare_character_data, load_no_rent_items
 
     baseline_inv = (baseline or {}).get("inventories") or {}
-    all_gear = load_gear_events(base_dir, end_date=prev_date)
+    baseline_date = (baseline or {}).get("baseline_date")
+    all_gear = load_gear_events(
+        base_dir, start_date=baseline_date, end_date=prev_date
+    )
     try:
         no_rent = load_no_rent_items()
     except ImportError:

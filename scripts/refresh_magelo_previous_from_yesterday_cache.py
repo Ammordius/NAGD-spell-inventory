@@ -1,31 +1,45 @@
 #!/usr/bin/env python3
 """After restoring magelo-dump-YYYY-MM-DD into workspace, copy dumps to _previous files.
 
-The Actions cache key is the calendar day of the export; ``.magelo_update_date`` inside
-an old cache blob can still carry an earlier stamp (e.g. Feb 7 under key 2026-05-14).
-We always align ``.magelo_previous_dump_date.txt`` to EXPECTED_YESTERDAY_DATE when they differ.
+Verifies cache content via ``magelo_dump_fingerprint.json`` (or legacy stamp/index checks)
+before copying. Does not rewrite stamps to hide stale cache content.
 """
+from __future__ import annotations
+
 import os
-import re
 import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
 
+# Allow import when run as scripts/refresh_magelo_previous_from_yesterday_cache.py
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-def parse_stamp(s: str):
-    s = re.sub(r"\s+", " ", (s or "").strip())
-    if not s or s.lower() == "unknown":
-        return None
-    try:
-        return datetime.strptime(s, "%a %b %d %H:%M:%S UTC %Y")
-    except ValueError:
-        return None
+from magelo_dump_fingerprint import (  # noqa: E402
+    DEFAULT_CHAR,
+    DEFAULT_INV,
+    DEFAULT_STAMP,
+    FINGERPRINT_FILENAME,
+    load_fingerprint,
+    parse_stamp,
+    verify_dump_against_index,
+    verify_fingerprint,
+    verify_legacy_stamp,
+)
 
 
 def format_takp_stamp(dt: datetime) -> str:
     """Match TAKP export page: 'Sat Feb 7 16:30:25 UTC 2026'."""
     return dt.strftime("%a %b ") + str(dt.day) + dt.strftime(" 16:30:25 UTC %Y")
+
+
+def verify_yesterday_cache(expected: str, char_src: Path, inv_src: Path) -> list[str]:
+    fp = load_fingerprint(Path(FINGERPRINT_FILENAME))
+    if fp:
+        return verify_fingerprint(fp, char_src, inv_src, expected)
+    errors = verify_legacy_stamp(DEFAULT_STAMP, expected)
+    errors.extend(verify_dump_against_index(char_src, inv_src, expected))
+    return errors
 
 
 def main() -> int:
@@ -40,12 +54,22 @@ def main() -> int:
         print(f"::error::Invalid EXPECTED_YESTERDAY_DATE: {expected!r}")
         return 1
 
-    char_src = Path("character/TAKP_character.txt")
-    inv_src = Path("inventory/TAKP_character_inventory.txt")
+    char_src = DEFAULT_CHAR
+    inv_src = DEFAULT_INV
     if not char_src.is_file() or not inv_src.is_file():
         print(
             "::error::Yesterday cache restore did not provide character/inventory files "
             f"(expected magelo-dump-{expected})"
+        )
+        return 1
+
+    errors = verify_yesterday_cache(expected, char_src, inv_src)
+    if errors:
+        for err in errors:
+            print(f"::error::{err}")
+        print(
+            f"Refusing to copy stale magelo-dump-{expected} into _previous. "
+            "Re-seed Actions cache with verified export files."
         )
         return 1
 
@@ -55,8 +79,9 @@ def main() -> int:
     shutil.copy2(inv_src, inv_prev)
     print(f"✓ Copied yesterday cache into _previous (key magelo-dump-{expected})")
 
-    stamp_path = Path(".magelo_update_date")
-    stamp_from_cache = stamp_path.read_text(encoding="utf-8").strip() if stamp_path.is_file() else ""
+    stamp_from_cache = (
+        DEFAULT_STAMP.read_text(encoding="utf-8").strip() if DEFAULT_STAMP.is_file() else ""
+    )
     parsed = parse_stamp(stamp_from_cache)
     if parsed and parsed.date() == expected_dt.date():
         final_stamp = stamp_from_cache
@@ -64,8 +89,8 @@ def main() -> int:
     else:
         final_stamp = format_takp_stamp(expected_dt)
         print(
-            f"::warning::Cache .magelo_update_date {stamp_from_cache!r} does not match "
-            f"magelo-dump-{expected}; writing {final_stamp!r} to .magelo_previous_dump_date.txt"
+            f"::warning::Cache .magelo_update_date {stamp_from_cache!r} missing or mismatched; "
+            f"using verified cache key date stamp {final_stamp!r} for .magelo_previous_dump_date.txt"
         )
 
     Path(".magelo_previous_dump_date.txt").write_text(final_stamp + "\n", encoding="utf-8")

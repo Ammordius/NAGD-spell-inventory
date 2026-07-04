@@ -161,6 +161,22 @@ class TestGearEventRoundTrip(unittest.TestCase):
             105,
         )
 
+    def test_load_gear_events_spans_months_with_start_date(self):
+        td = tempfile.mkdtemp()
+        base = os.path.join(td, "delta_snapshots")
+        ge = os.path.join(base, "gear_events")
+        os.makedirs(ge)
+        with gzip.open(os.path.join(ge, "gear_2026-06.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump([{"d": "2026-06-30", "c": "Alice", "i": "1", "s": 1, "n": 1}], f)
+        with gzip.open(os.path.join(ge, "gear_2026-07.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump([{"d": "2026-07-03", "c": "Bob", "i": "2", "s": 1, "n": 1}], f)
+        end_only = load_gear_events(base, end_date="2026-07-03")
+        era = load_gear_events(
+            base, start_date="2026-02-09", end_date="2026-07-03"
+        )
+        self.assertEqual(len(end_only), 1)
+        self.assertEqual(len(era), 2)
+
 
 class TestGearEventInflationGuard(unittest.TestCase):
     def test_manifest_median_ignores_target_day(self):

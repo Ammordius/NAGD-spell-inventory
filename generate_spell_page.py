@@ -28,7 +28,6 @@ from delta_storage import (
 from gear_event_storage import (
     append_day_events_from_deltas,
     build_possession_map,
-    day_deltas_from_event_reconstruction,
     delta_shape_to_events,
     filter_unique_reacquires_in_inv_deltas,
     gear_events_available,
@@ -2815,6 +2814,45 @@ def _estimate_delta_event_total(char_deltas, inv_deltas, date_str):
     return len(gear_events) + len(char_events)
 
 
+def _count_file_lines(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return sum(1 for _ in f)
+    except OSError:
+        return 0
+
+
+def _dump_line_counts_look_stale(
+    previous_char_file,
+    previous_inv_file,
+    current_char_file,
+    current_inv_file,
+    *,
+    max_line_delta_ratio=0.05,
+):
+    """Cheap pre-check: consecutive-day dumps should not diverge sharply in line counts."""
+    pairs = (
+        (previous_char_file, current_char_file, "character"),
+        (previous_inv_file, current_inv_file, "inventory"),
+    )
+    for prev_path, curr_path, label in pairs:
+        if not prev_path or not curr_path:
+            continue
+        if not os.path.isfile(prev_path) or not os.path.isfile(curr_path):
+            continue
+        prev_lines = _count_file_lines(prev_path)
+        curr_lines = _count_file_lines(curr_path)
+        if prev_lines < 100 or curr_lines < 100:
+            continue
+        ratio = abs(curr_lines - prev_lines) / max(prev_lines, curr_lines)
+        if ratio > max_line_delta_ratio:
+            return True, (
+                f"{label} dump line counts differ by {ratio * 100:.1f}% "
+                f"(previous {prev_lines}, current {curr_lines})"
+            )
+    return False, None
+
+
 def _dump_diff_looks_inflated(
     char_deltas,
     inv_deltas,
@@ -2918,26 +2956,11 @@ def _resolve_day_over_day_deltas(
         )
         return daily_char, daily_inv
 
-    manifest_dates = list_available_event_dates(delta_snapshots_dir)
-    if gear_events_available(delta_snapshots_dir) and prev_date in manifest_dates:
-        recon_char, recon_inv = day_deltas_from_event_reconstruction(
-            current_char_data,
-            current_inventories,
-            prev_date,
-            date_str,
-            delta_snapshots_dir,
-            baseline,
-        )
-        recon_inv_n = _count_inv_event_rows(recon_inv)
-        recon_char_n = _count_meaningful_char_deltas(recon_char)
-        print(
-            f"Warning: dump diff for {date_str} looks inflated "
-            f"({dump_inv_n} inv rows, {dump_char_n} char rows); "
-            f"using gear-event reconstruction for gear events and delta.html "
-            f"({recon_inv_n} inv rows, {recon_char_n} char rows)"
-        )
-        return recon_char, recon_inv
-
+    print(
+        f"::error::Dump diff for {date_str} looks inflated "
+        f"({dump_inv_n} inv rows, {dump_char_n} char rows) and no usable delta_daily pair. "
+        "Fix magelo-dump-* cache content (see magelo_dump_fingerprint.json verification)."
+    )
     return char_deltas, inv_deltas
 
 
@@ -6725,8 +6748,21 @@ def main():
                 print("[WARNING] Previous and current files are identical (same hash) - no changes to show")
             else:
                 print(f"Files are different (prev hash: {prev_hash[:8]}..., curr hash: {curr_hash[:8]}...)")
-        
-        # Parse ALL inventories (serverwide)
+
+        stale, stale_reason = _dump_line_counts_look_stale(
+            previous_char_file,
+            previous_inv_file,
+            current_char_file,
+            current_inv_file,
+        )
+        skip_gear_events = False
+        if stale:
+            print(
+                f"::error::Refusing heavy inventory diff: {stale_reason}. "
+                "Fix magelo-dump-* cache (fingerprint verification)."
+            )
+            skip_gear_events = True
+
         previous_char_ids = {}
         current_char_ids = {}
         with open(previous_char_file, 'r', encoding='utf-8') as f:
@@ -6737,7 +6773,7 @@ def main():
                     name = parts[0]
                     char_id = parts[8]
                     previous_char_ids[name] = char_id
-        
+
         with open(current_char_file, 'r', encoding='utf-8') as f:
             next(f)  # Skip header
             for line in f:
@@ -6746,11 +6782,22 @@ def main():
                     name = parts[0]
                     char_id = parts[8]
                     current_char_ids[name] = char_id
-        
-        # Parse all inventories
-        previous_inventories = parse_inventory_file(previous_inv_file, previous_char_ids) if previous_char_ids else {}
-        current_inventories = parse_inventory_file(current_inv_file, current_char_ids) if current_char_ids else {}
-        print(f"Found {len(previous_inventories)} characters with inventory in previous, {len(current_inventories)} in current")
+
+        if skip_gear_events:
+            previous_inventories = {}
+        else:
+            previous_inventories = (
+                parse_inventory_file(previous_inv_file, previous_char_ids)
+                if previous_char_ids
+                else {}
+            )
+        current_inventories = (
+            parse_inventory_file(current_inv_file, current_char_ids) if current_char_ids else {}
+        )
+        print(
+            f"Found {len(previous_inventories)} characters with inventory in previous, "
+            f"{len(current_inventories)} in current"
+        )
         
         # Get magelo update date
         magelo_update_date = os.environ.get('MAGELO_UPDATE_DATE', 'Unknown')
@@ -6779,40 +6826,44 @@ def main():
             baseline = load_master_baseline(delta_snapshots_dir)
         
         # Step 2: Append gear/stat events from day-over-day deltas (dump diff, with daily JSON fallback)
-        print(f"Appending gear events for {date_str} (previous vs current Magelo dumps)...")
-        char_deltas, inv_deltas = _resolve_day_over_day_deltas(
-            previous_char_data,
-            previous_inventories,
-            current_char_data,
-            current_inventories,
-            date_str,
-            base_dir,
-            baseline,
-        )
-        corpse_loot_override = chars_corpse_loot_excluded(
-            current_inventories, previous_inventories
-        )
-        for _cn in corpse_loot_override:
-            char_deltas.pop(_cn, None)
-            inv_deltas.pop(_cn, None)
-        tracked_ids, _, _, _ = load_tracked_item_ids()
-        unique_tracked = load_unique_tracked_item_ids(tracked_ids)
-        possession_yesterday = possession_from_inv_snapshot(previous_inventories)
-        filter_unique_reacquires_in_inv_deltas(inv_deltas, possession_yesterday, unique_tracked)
-        try:
-            gear_n, char_n = append_day_events_from_deltas(
-                char_deltas,
-                inv_deltas,
+        if skip_gear_events:
+            print(f"Skipping gear events for {date_str} due to stale _previous cache detection.")
+            char_deltas, inv_deltas = {}, {}
+        else:
+            print(f"Appending gear events for {date_str} (previous vs current Magelo dumps)...")
+            char_deltas, inv_deltas = _resolve_day_over_day_deltas(
+                previous_char_data,
+                previous_inventories,
+                current_char_data,
+                current_inventories,
                 date_str,
-                delta_snapshots_dir,
-                baseline_date=baseline.get("baseline_date") if baseline else None,
-                unique_tracked_ids=unique_tracked,
+                base_dir,
+                baseline,
             )
-            print(f"  Saved gear_events: {gear_n} inventory rows, {char_n} stat rows")
-        except Exception as e:
-            print(f"Warning: Could not append gear events: {e}")
-            import traceback
-            traceback.print_exc()
+            corpse_loot_override = chars_corpse_loot_excluded(
+                current_inventories, previous_inventories
+            )
+            for _cn in corpse_loot_override:
+                char_deltas.pop(_cn, None)
+                inv_deltas.pop(_cn, None)
+            tracked_ids, _, _, _ = load_tracked_item_ids()
+            unique_tracked = load_unique_tracked_item_ids(tracked_ids)
+            possession_yesterday = possession_from_inv_snapshot(previous_inventories)
+            filter_unique_reacquires_in_inv_deltas(inv_deltas, possession_yesterday, unique_tracked)
+            try:
+                gear_n, char_n = append_day_events_from_deltas(
+                    char_deltas,
+                    inv_deltas,
+                    date_str,
+                    delta_snapshots_dir,
+                    baseline_date=baseline.get("baseline_date") if baseline else None,
+                    unique_tracked_ids=unique_tracked,
+                )
+                print(f"  Saved gear_events: {gear_n} inventory rows, {char_n} stat rows")
+            except Exception as e:
+                print(f"Warning: Could not append gear events: {e}")
+                import traceback
+                traceback.print_exc()
 
         # Step 3: Generate delta HTML from the same day-over-day deltas as gear events.
         print(f"Generating delta.html from previous vs current Magelo dumps ({date_str})...")

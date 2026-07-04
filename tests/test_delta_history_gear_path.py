@@ -572,7 +572,8 @@ class TestResolveDayOverDayDeltas(unittest.TestCase):
         self.assertIn("Alice", inv_d)
         self.assertIn("200", inv_d["Alice"]["added"])
 
-    def test_falls_back_to_gear_event_reconstruction_when_dump_inflated(self):
+    def test_does_not_use_gear_event_reconstruction_when_dump_inflated(self):
+        """Inflated dump diff is returned as-is; reconstruction is not a CI fallback."""
         td = tempfile.mkdtemp()
         snap = os.path.join(td, "delta_snapshots")
         ge = os.path.join(snap, "gear_events")
@@ -633,9 +634,12 @@ class TestResolveDayOverDayDeltas(unittest.TestCase):
             td,
             baseline,
         )
+        inv_rows = sum(
+            len((row.get("added") or {})) + len((row.get("removed") or {}))
+            for row in (inv_d or {}).values()
+        )
+        self.assertGreater(inv_rows, 1000)
         self.assertIn("Alice", inv_d)
-        self.assertIn("50003", inv_d["Alice"]["added"])
-        self.assertNotIn("50002", inv_d["Alice"].get("added", {}))
 
 
 class TestDeltaHtmlDumpFirstHelpers(unittest.TestCase):
