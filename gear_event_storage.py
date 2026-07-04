@@ -760,6 +760,150 @@ def char_item_history(
     ]
 
 
+def filter_events_for_char(events: list[dict], char_name: str) -> list[dict]:
+    """Return events whose character field matches ``char_name``."""
+    return [e for e in (events or []) if e.get("c") == char_name]
+
+
+def manifest_latest_date(manifest: dict | None) -> str:
+    """Latest calendar date key from gear_events manifest, or empty string."""
+    days = (manifest or {}).get("days") or {}
+    return max(days.keys()) if days else ""
+
+
+def build_item_name_map_for_char(
+    baseline: dict,
+    char_name: str,
+    extra: dict | None = None,
+) -> dict[str, str]:
+    """Resolve item id -> name for one character from baseline inventory + extras."""
+    name_map = dict(extra or {})
+    for item in ((baseline or {}).get("inventories") or {}).get(char_name, []):
+        iid = str(item.get("item_id", ""))
+        iname = (item.get("item_name") or "").strip()
+        if iid and iname and iid not in name_map:
+            name_map[iid] = iname
+    return name_map
+
+
+def reconstruct_holdings_for_char(
+    baseline: dict,
+    gear_events: list[dict],
+    char_name: str,
+    no_rent: set[str] | None = None,
+) -> dict[str, int]:
+    """Absolute item_id -> count for one character: baseline inventory + gear events."""
+    no_rent = no_rent or set()
+    inv_base = (baseline or {}).get("inventories") or {}
+    baseline_items = inv_base.get(char_name) or []
+    char_gear = filter_events_for_char(gear_events, char_name)
+    if not baseline_items and not char_gear:
+        return {}
+    counts: dict[str, int] = {}
+    for item in baseline_items:
+        iid = str(item.get("item_id", ""))
+        if not iid or iid.upper() == "NULL" or iid == "0":
+            continue
+        if iid in no_rent:
+            continue
+        counts[iid] = counts.get(iid, 0) + 1
+    for ev in sorted(char_gear, key=lambda e: e.get("d") or ""):
+        iid = str(ev.get("i", ""))
+        sign = int(ev.get("s") or 0)
+        n = int(ev.get("n") or 0)
+        if not iid or n <= 0 or sign not in (1, -1):
+            continue
+        if iid in no_rent:
+            continue
+        if sign > 0:
+            counts[iid] = counts.get(iid, 0) + n
+        else:
+            counts[iid] = counts.get(iid, 0) - n
+            if counts[iid] <= 0:
+                del counts[iid]
+    return {k: v for k, v in counts.items() if v > 0}
+
+
+def build_aa_timeline(
+    baseline: dict,
+    char_events: list[dict],
+    char_name: str,
+) -> list[dict]:
+    """Chronological AA rows: baseline snapshot then dated ``f:aa`` events."""
+    baseline_chars = (baseline or {}).get("characters") or {}
+    bl = baseline_chars.get(char_name) or {}
+    running = int(bl.get("aa_unspent") or 0) + int(bl.get("aa_spent") or 0)
+    baseline_date = (baseline or {}).get("baseline_date") or ""
+    rows: list[dict] = []
+    if char_name in baseline_chars or running > 0:
+        rows.append(
+            {
+                "date": baseline_date,
+                "delta": 0,
+                "total": running,
+                "is_baseline": True,
+            }
+        )
+    aa_events = sorted(
+        [e for e in char_events if e.get("c") == char_name and e.get("f") == "aa"],
+        key=lambda e: e.get("d") or "",
+    )
+    for ev in aa_events:
+        n = int(ev.get("n") or 0)
+        running += n
+        if ev.get("aa") is not None:
+            running = int(ev["aa"])
+        rows.append(
+            {
+                "date": ev.get("d") or "",
+                "delta": n,
+                "total": running,
+                "is_baseline": False,
+            }
+        )
+    return rows
+
+
+def build_gear_event_log_rows(
+    gear_events: list[dict],
+    char_name: str,
+    name_map: dict | None = None,
+) -> list[dict]:
+    """Dated gear +/- rows for one character (client timeline log)."""
+    name_map = name_map or {}
+    rows: list[dict] = []
+    for ev in sorted(
+        filter_events_for_char(gear_events, char_name),
+        key=lambda e: (e.get("d") or "", str(e.get("i") or "")),
+    ):
+        sign = int(ev.get("s") or 0)
+        n = int(ev.get("n") or 0)
+        iid = str(ev.get("i", ""))
+        if not iid or n <= 0 or sign not in (1, -1):
+            continue
+        rows.append(
+            {
+                "date": ev.get("d") or "",
+                "sign": sign,
+                "count": n,
+                "item_id": iid,
+                "item_name": name_map.get(iid) or f"Item {iid}",
+                "visibility": bool(ev.get("v")),
+            }
+        )
+    return rows
+
+
+def baseline_only_item_ids(
+    holdings: dict[str, int],
+    gear_events: list[dict],
+    char_name: str,
+) -> dict[str, int]:
+    """Items in holdings that never appear in gear events for this character."""
+    touched = {str(e.get("i")) for e in filter_events_for_char(gear_events, char_name)}
+    return {iid: cnt for iid, cnt in holdings.items() if iid not in touched}
+
+
 def _days_between(date_a: str | None, date_b: str | None) -> int:
     """Absolute calendar-day gap between two YYYY-MM-DD strings."""
     if not date_a or not date_b:

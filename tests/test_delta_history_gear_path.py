@@ -13,6 +13,7 @@ if _MAGelo_ROOT not in sys.path:
 from generate_spell_page import (  # noqa: E402
     build_char_guild_map,
     build_tracked_item_id_to_name,
+    generate_char_timeline,
     generate_delta_history,
     _count_meaningful_char_deltas,
     _resolve_day_over_day_deltas,

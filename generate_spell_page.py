@@ -11,6 +11,7 @@ import re
 from html import escape
 from collections import defaultdict
 from datetime import datetime, timedelta
+from urllib.parse import quote
 from delta_storage import (
     save_delta_snapshot, load_delta_snapshot,
     get_week_start, get_month_start,
@@ -2192,7 +2193,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     char_slug = char_name.lower().replace(' ', '_')
                     item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
                     magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
-                    html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
+                    html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a>{char_timeline_link(char_name)} — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
                 html += """
             </ul>
 """
@@ -2223,7 +2224,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             html += f"""
                     <tr>
                         <td><span class="rank-badge {rank_class}">{idx}</span></td>
-                        <td><strong>{entry['name']}</strong></td>
+                        <td><strong>{entry['name']}</strong>{char_timeline_link(entry['name'])}</td>
                         <td>{entry['class']}</td>
                         <td>{entry['level']}</td>
                         <td style="color: #4CAF50; font-weight: bold;">+{entry['aa_gain']}</td>
@@ -2259,7 +2260,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             html += f"""
                     <tr>
                         <td><span class="rank-badge {rank_class}">{idx}</span></td>
-                        <td><strong>{entry['name']}</strong></td>
+                        <td><strong>{entry['name']}</strong>{char_timeline_link(entry['name'])}</td>
                         <td>{entry['class']}</td>
                         <td>{entry['level']}</td>
                         <td style="color: #fff; font-weight: bold;">+{entry['hp_gain']}</td>
@@ -2302,9 +2303,9 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             
             # Character name display - mark deleted characters
             if is_deleted:
-                char_display = f'<strong style="color: #999; text-decoration: line-through;">{char_name}</strong> <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>'
+                char_display = f'<strong style="color: #999; text-decoration: line-through;">{char_name}</strong>{char_timeline_link(char_name)} <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>'
             else:
-                char_display = f'<strong>{char_name}</strong>'
+                char_display = f'<strong>{char_name}</strong>{char_timeline_link(char_name)}'
             
             # Level change display (only hide if they were already 65 in previous dump)
             # Characters leveling 50-65 should show level changes
@@ -2397,7 +2398,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             delta = inv_deltas_level1[char_name]
             html += f"""
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
-            <h3><strong>{char_name}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1 - Mule/Trader)</span></h3>
+            <h3><strong>{char_name}</strong>{char_timeline_link(char_name)} <span style="color: #666; font-size: 0.9em;">(Level 1 - Mule/Trader)</span></h3>
 """
             if delta['added']:
                 html += """
@@ -2443,7 +2444,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             delta = inv_deltas_others[char_name]
             html += f"""
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <h3><strong>{char_name}</strong></h3>
+            <h3><strong>{char_name}</strong>{char_timeline_link(char_name)}</h3>
 """
             if delta['added']:
                     html += """
@@ -2499,7 +2500,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
             html += f"""
         <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
-            <h3><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a> <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
+            <h3><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a>{char_timeline_link(char_name)} <span style="color: #666; font-size: 0.9em;">(Level {char_level})</span></h3>
 """
             if delta['added']:
                 html += """
@@ -2646,7 +2647,7 @@ def generate_leaderboard_html(period_name, aa_leaderboard, hp_leaderboard, perio
             html += f"""
                     <tr>
                         <td><span class="rank-badge {rank_class}">{idx}</span></td>
-                        <td><strong>{entry['name']}</strong></td>
+                        <td><strong>{entry['name']}</strong>{char_timeline_link(entry['name'])}</td>
                         <td>{entry['class']}</td>
                         <td>{entry['level']}</td>
                         <td style="color: #fff; font-weight: bold;">+{entry['gain']}</td>
@@ -2680,7 +2681,7 @@ def generate_leaderboard_html(period_name, aa_leaderboard, hp_leaderboard, perio
             html += f"""
                     <tr>
                         <td><span class="rank-badge {rank_class}">{idx}</span></td>
-                        <td><strong>{entry['name']}</strong></td>
+                        <td><strong>{entry['name']}</strong>{char_timeline_link(entry['name'])}</td>
                         <td>{entry['class']}</td>
                         <td>{entry['level']}</td>
                         <td style="color: #fff; font-weight: bold;">+{entry['gain']}</td>
@@ -2947,6 +2948,65 @@ def build_char_guild_map(char_file):
         name: (row.get('guild') or '').strip()
         for name, row in char_data.items()
         if (row.get('guild') or '').strip()
+    }
+
+
+def char_timeline_link(char_name: str) -> str:
+    """HTML fragment: Δ link to on-demand character timeline page."""
+    url = "char.html?c=" + quote(char_name, safe="")
+    return (
+        f' <a href="{escape(url, quote=True)}" title="Character timeline" '
+        f'style="text-decoration:none;font-size:0.85em;">Δ</a>'
+    )
+
+
+def _gear_event_page_embed_config(base_dir: str) -> dict:
+    """Shared embed config for delta-history and char timeline pages."""
+    import glob
+
+    delta_snapshots_dir = os.path.join(base_dir, "delta_snapshots")
+    tracked_ids, _, _, _ = load_tracked_item_ids()
+    gear_shard_months: list[str] = []
+    use_gear_events = gear_events_available(delta_snapshots_dir)
+    gear_event_manifest: dict = {}
+    event_dates: list[str] = []
+    if use_gear_events:
+        event_dates = list_available_event_dates(delta_snapshots_dir)
+        gear_events_root = os.path.join(delta_snapshots_dir, "gear_events")
+        if os.path.isdir(gear_events_root):
+            for name in os.listdir(gear_events_root):
+                m = re.match(r"^gear_(\d{4}-\d{2})\.json\.gz$", name)
+                if m:
+                    gear_shard_months.append(m.group(1))
+            gear_shard_months.sort()
+        manifest_path = os.path.join(gear_events_root, "manifest.json")
+        if os.path.isfile(manifest_path):
+            try:
+                with open(manifest_path, "r", encoding="utf-8") as mf:
+                    gear_event_manifest = json.load(mf)
+            except (json.JSONDecodeError, OSError):
+                pass
+    dates_seen: set[str] = set(event_dates)
+    for filepath in glob.glob(os.path.join(delta_snapshots_dir, "delta_daily_*.json.gz")):
+        match = re.match(r"delta_daily_(\d{4}-\d{2}-\d{2})\.json(\.gz)?", os.path.basename(filepath))
+        if match:
+            dates_seen.add(match.group(1))
+    sorted_dates_asc = sorted(dates_seen)
+    char_dir = os.path.join(base_dir, "character")
+    char_file_for_guild = os.path.join(char_dir, "TAKP_character.txt")
+    if not os.path.isfile(char_file_for_guild):
+        char_file_for_guild = find_latest_magelo_file(char_dir, "TAKP_character")
+    no_rent_for_js = sorted(int(x) for x in (load_no_rent_items() or set()))
+    return {
+        "tracked_ids_json": json.dumps(list(tracked_ids)),
+        "gear_shard_months_json": json.dumps(gear_shard_months),
+        "use_gear_events_json": "true" if use_gear_events else "false",
+        "gear_event_manifest_json": json.dumps(gear_event_manifest),
+        "item_id_to_name_json": json.dumps(build_tracked_item_id_to_name(base_dir, tracked_ids)),
+        "char_guild_map_json": json.dumps(build_char_guild_map(char_file_for_guild)),
+        "no_rent_json": json.dumps(no_rent_for_js),
+        "sorted_dates_asc": sorted_dates_asc,
+        "latest_date": sorted_dates_asc[-1] if sorted_dates_asc else "",
     }
 
 
@@ -3301,6 +3361,10 @@ def generate_delta_history(base_dir):
         function formatCharDisplay(name, state) {
             const g = guildForChar(name, state);
             return g ? (name + ' &lt;' + g + '&gt;') : name;
+        }
+
+        function charTimelineLink(name) {
+            return ' <a href="char.html?c=' + encodeURIComponent(name) + '" title="Character timeline" style="text-decoration:none;font-size:0.85em;">Δ</a>';
         }
 
         function charStateForName(name, startState, endState) {
@@ -4441,7 +4505,7 @@ def generate_delta_history(base_dir):
                                 const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
                                 const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                                 const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
-                                reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                                reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(e.charName)} — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
                             }
                             reportHTML += `
                         </ul>`;
@@ -4528,7 +4592,7 @@ def generate_delta_history(base_dir):
                         reportHTML += `
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
-                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong></td>
+                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong>${charTimelineLink(entry.name)}</td>
                                     <td style="padding: 10px 12px;">${entry.class}</td>
                                     <td style="padding: 10px 12px;">${entry.level}</td>
                                     <td style="padding: 10px 12px; color: #4CAF50; font-weight: bold;">+${entry.aa_gain}</td>
@@ -4568,7 +4632,7 @@ def generate_delta_history(base_dir):
                         reportHTML += `
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
-                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong></td>
+                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong>${charTimelineLink(entry.name)}</td>
                                     <td style="padding: 10px 12px;">${entry.class}</td>
                                     <td style="padding: 10px 12px;">${entry.level}</td>
                                     <td style="padding: 10px 12px; color: #fff; font-weight: bold;">+${entry.hp_gain}</td>
@@ -4619,11 +4683,11 @@ def generate_delta_history(base_dir):
                         // Character name display
                         let charDisplay;
                         if (isDeleted) {
-                            charDisplay = `<strong style="color: #999; text-decoration: line-through;">${formatCharDisplay(charName, charState)}</strong> <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>`;
+                            charDisplay = `<strong style="color: #999; text-decoration: line-through;">${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)} <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>`;
                         } else if (isNew) {
-                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong> <span style="color: #4CAF50; font-size: 0.9em;">(New)</span>`;
+                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)} <span style="color: #4CAF50; font-size: 0.9em;">(New)</span>`;
                         } else {
-                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>`;
+                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)}`;
                         }
                         
                         // Level change display
@@ -4691,7 +4755,7 @@ def generate_delta_history(base_dir):
                         const delta = invDeltasLevel1[charName];
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
-                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
+                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong>${charTimelineLink(charName)} <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
                         if (Object.keys(delta.added || {}).length > 0) {
                             reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
@@ -4727,7 +4791,7 @@ def generate_delta_history(base_dir):
                         const delta = invDeltasOthers[charName];
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong></h3>`;
+                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong>${charTimelineLink(charName)}</h3>`;
                         if (Object.keys(delta.added || {}).length > 0) {
                                 reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
@@ -4772,7 +4836,7 @@ def generate_delta_history(base_dir):
                         const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
-                        <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a> <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
+                        <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(charName)} <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
                         if (Object.keys(delta.added || {}).length > 0) {
                             reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Acquired:</strong><div style="margin-top: 5px;">`;
@@ -4820,6 +4884,402 @@ def generate_delta_history(base_dir):
     with open(history_file, 'w', encoding='utf-8') as f:
         f.write(html)
     return history_file
+
+
+def generate_char_timeline(base_dir):
+    """Generate on-demand per-character AA/gear timeline page (char.html)."""
+    cfg = _gear_event_page_embed_config(base_dir)
+    latest_date = json.dumps(cfg["latest_date"])
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Character Timeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        h1 { margin-top: 0; color: #333; }
+        .meta { color: #666; margin-bottom: 20px; }
+        .loading { padding: 20px; background: #f5f5f5; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f0f0f0; }
+        .pos { color: #2e7d32; font-weight: bold; }
+        .neg { color: #c62828; font-weight: bold; }
+        .vis { color: #9e9e9e; font-style: italic; }
+        .note { font-size: 0.9em; color: #757575; background: #fafafa; padding: 10px; border-radius: 5px; border-left: 4px solid #9e9e9e; margin: 12px 0; }
+        a.back { color: #667eea; }
+        .item-badge { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e3f2fd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a></p>
+        <h1 id="page-title">Character Timeline</h1>
+        <div id="char-meta" class="meta"></div>
+        <div id="status" class="loading">Loading…</div>
+        <div id="content" style="display:none;"></div>
+        <div class="note">
+            <strong>Notes:</strong> AA and gear history are reconstructed from the gear event log plus the master baseline.
+            Items held since the baseline era without inventory events are labeled accordingly.
+            Gear events track item counts, not equipment slots. First load may download ~20MB of shard data (browser-cached afterward).
+        </div>
+    </div>
+    <script type="application/json" id="gear-event-shard-months">""" + cfg["gear_shard_months_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="gear-event-manifest">""" + cfg["gear_event_manifest_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="item-id-to-name">""" + cfg["item_id_to_name_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="char-guild-map">""" + cfg["char_guild_map_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="no-rent-item-ids">""" + cfg["no_rent_json"].replace("</", "<\\/") + """</script>
+    <script>
+        const GEAR_EVENT_SHARD_MONTHS = JSON.parse(document.getElementById('gear-event-shard-months').textContent);
+        const GEAR_EVENT_MANIFEST = JSON.parse(document.getElementById('gear-event-manifest').textContent);
+        const ITEM_ID_TO_NAME = JSON.parse(document.getElementById('item-id-to-name').textContent);
+        const CHAR_GUILD_MAP = JSON.parse(document.getElementById('char-guild-map').textContent);
+        const NO_RENT_ITEMS = new Set(JSON.parse(document.getElementById('no-rent-item-ids').textContent).map(String));
+        const LATEST_DATE = """ + latest_date + """;
+        const USE_GEAR_EVENTS = """ + cfg["use_gear_events_json"] + """;
+
+        const params = new URLSearchParams(window.location.search);
+        const CHAR_NAME = params.get('c') || '';
+
+        let loadedGearShards = new Map();
+        let loadedCharShards = new Map();
+        let loadedBaselines = new Map();
+
+        function monthsBetween(start, end) {
+            const out = [];
+            let y = parseInt(start.slice(0, 4), 10), m = parseInt(start.slice(5, 7), 10);
+            const ey = parseInt(end.slice(0, 4), 10), em = parseInt(end.slice(5, 7), 10);
+            while (y < ey || (y === ey && m <= em)) {
+                out.push(`${y}-${String(m).padStart(2, '0')}`);
+                m += 1;
+                if (m > 12) { m = 1; y += 1; }
+            }
+            return out;
+        }
+
+        async function loadGearShard(month) {
+            if (loadedGearShards.has(month)) return loadedGearShards.get(month);
+            const url = `delta_snapshots/gear_events/gear_${month}.json.gz`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Gear shard not found: ' + url);
+            const decompressed = pako.inflate(new Uint8Array(await response.arrayBuffer()), { to: 'string' });
+            const events = JSON.parse(decompressed);
+            loadedGearShards.set(month, events);
+            return events;
+        }
+
+        async function loadCharShard(month) {
+            if (loadedCharShards.has(month)) return loadedCharShards.get(month);
+            const url = `delta_snapshots/gear_events/char_${month}.json.gz`;
+            const response = await fetch(url);
+            if (!response.ok) return [];
+            const decompressed = pako.inflate(new Uint8Array(await response.arrayBuffer()), { to: 'string' });
+            const events = JSON.parse(decompressed);
+            loadedCharShards.set(month, events);
+            return events;
+        }
+
+        function gearManifestFirstEventMonthForDate(dateStr) {
+            const eras = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.eras) || [];
+            for (let i = eras.length - 1; i >= 0; i--) {
+                const era = eras[i];
+                if (era.first_event && era.first_event <= dateStr) return era.first_event.slice(0, 7);
+            }
+            return GEAR_EVENT_SHARD_MONTHS.length ? GEAR_EVENT_SHARD_MONTHS[0] : dateStr.slice(0, 7);
+        }
+
+        function gearManifestBaselineForDate(dateStr) {
+            const days = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.days) || {};
+            if (days[dateStr] && days[dateStr].baseline_date) return days[dateStr].baseline_date;
+            const eras = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.eras) || [];
+            for (let i = eras.length - 1; i >= 0; i--) {
+                const era = eras[i];
+                if (era.first_event && era.first_event <= dateStr && era.baseline_date) return era.baseline_date;
+            }
+            return null;
+        }
+
+        async function loadEventsUpTo(endDate, onProgress) {
+            const firstMonth = gearManifestFirstEventMonthForDate(endDate);
+            const months = monthsBetween(firstMonth, endDate.slice(0, 7))
+                .filter(m => GEAR_EVENT_SHARD_MONTHS.includes(m));
+            let done = 0;
+            const results = await Promise.all(months.map(async (month) => {
+                const [gear, chars] = await Promise.all([loadGearShard(month), loadCharShard(month)]);
+                done += 1;
+                if (onProgress) onProgress(done, months.length);
+                return { gear, chars };
+            }));
+            const gear = results.flatMap(r => r.gear).filter(ev => ev.d && ev.d <= endDate);
+            const chars = results.flatMap(r => r.chars).filter(ev => ev.d && ev.d <= endDate);
+            return { gear, chars };
+        }
+
+        async function loadBaseline(baselineDate) {
+            const want = String(baselineDate);
+            const cacheKey = 'baseline_' + want;
+            if (loadedBaselines.has(cacheKey)) return loadedBaselines.get(cacheKey);
+            const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
+            const currentUrl = 'delta_snapshots/baseline_master.json.gz';
+            let response = await fetch(archivedUrl);
+            if (!response.ok) response = await fetch(currentUrl);
+            if (!response.ok) throw new Error('Baseline not found for ' + baselineDate);
+            const baseline = JSON.parse(pako.inflate(new Uint8Array(await response.arrayBuffer()), { to: 'string' }));
+            const result = { baseline, usedFallback: !response.url.includes('_' + want) };
+            loadedBaselines.set(cacheKey, result);
+            return result;
+        }
+
+        function foldCharEventsToCharDeltas(charEvents) {
+            const charDeltas = {};
+            const sorted = [...(charEvents || [])].sort((a, b) => (a.d || '').localeCompare(b.d || '') || (a.c || '').localeCompare(b.c || ''));
+            for (const ev of sorted) {
+                const charName = ev.c;
+                if (!charName) continue;
+                if (!charDeltas[charName]) {
+                    charDeltas[charName] = { level_change: 0, aa_total_change: 0, hp_change: 0, class: '', is_deleted: false };
+                }
+                const row = charDeltas[charName];
+                if (ev.cl) row.class = ev.cl;
+                if (ev.f === 'lvl') row.level_change += Number(ev.n) || 0;
+                else if (ev.f === 'aa') row.aa_total_change += Number(ev.n) || 0;
+                else if (ev.f === 'hp') row.hp_change += Number(ev.n) || 0;
+                else if (ev.f === 'del') row.is_deleted = true;
+            }
+            return charDeltas;
+        }
+
+        function buildCharacterStateFromEvents(baseline, charEvents) {
+            const folded = foldCharEventsToCharDeltas(charEvents);
+            const baselineChars = (baseline && baseline.characters) || {};
+            const fullState = {};
+            for (const [charName, charData] of Object.entries(baselineChars)) {
+                fullState[charName] = {
+                    level: charData.level || 0,
+                    aa_total: (charData.aa_unspent || 0) + (charData.aa_spent || 0),
+                    hp: charData.hp_max_total || 0,
+                    class: charData.class || '',
+                    guild: charData.guild || ''
+                };
+            }
+            for (const [charName, deltaData] of Object.entries(folded)) {
+                if (deltaData.is_deleted) { delete fullState[charName]; continue; }
+                if (fullState[charName]) {
+                    fullState[charName].level += deltaData.level_change || 0;
+                    fullState[charName].aa_total += deltaData.aa_total_change || 0;
+                    fullState[charName].hp += deltaData.hp_change || 0;
+                    if (deltaData.class) fullState[charName].class = deltaData.class;
+                } else {
+                    fullState[charName] = {
+                        level: Math.max(0, deltaData.level_change || 0),
+                        aa_total: Math.max(0, deltaData.aa_total_change || 0),
+                        hp: Math.max(0, deltaData.hp_change || 0),
+                        class: deltaData.class || '',
+                        guild: ''
+                    };
+                }
+            }
+            return fullState;
+        }
+
+        function filterEventsForChar(events, charName) {
+            return (events || []).filter(ev => ev.c === charName);
+        }
+
+        function buildItemNameMap(baseline, charName) {
+            const map = Object.assign({}, ITEM_ID_TO_NAME);
+            for (const item of ((baseline.inventories || {})[charName] || [])) {
+                const id = String(item.item_id);
+                if (item.item_name && !map[id]) map[id] = item.item_name;
+            }
+            return map;
+        }
+
+        function buildAaTimeline(baseline, charEvents, charName) {
+            const bl = ((baseline.characters || {})[charName]) || {};
+            let running = (bl.aa_unspent || 0) + (bl.aa_spent || 0);
+            const baselineDate = baseline.baseline_date || '';
+            const rows = [];
+            if ((baseline.characters || {})[charName] || running > 0) {
+                rows.push({ date: baselineDate, delta: 0, total: running, isBaseline: true });
+            }
+            const aaEvents = filterEventsForChar(charEvents, charName)
+                .filter(ev => ev.f === 'aa')
+                .sort((a, b) => (a.d || '').localeCompare(b.d || ''));
+            for (const ev of aaEvents) {
+                const n = Number(ev.n) || 0;
+                running += n;
+                if (ev.aa != null) running = Number(ev.aa);
+                rows.push({ date: ev.d, delta: n, total: running, isBaseline: false });
+            }
+            return rows;
+        }
+
+        function buildCurrentHoldings(baseline, gearEvents, charName) {
+            const baselineItems = ((baseline.inventories || {})[charName] || []);
+            const charGear = filterEventsForChar(gearEvents, charName);
+            if (!baselineItems.length && !charGear.length) return {};
+            const counts = {};
+            for (const item of baselineItems) {
+                const id = String(item.item_id);
+                if (!id || id.toUpperCase() === 'NULL' || id === '0' || NO_RENT_ITEMS.has(id)) continue;
+                counts[id] = (counts[id] || 0) + 1;
+            }
+            for (const ev of charGear.sort((a, b) => (a.d || '').localeCompare(b.d || ''))) {
+                const id = String(ev.i);
+                const sign = Number(ev.s);
+                const n = Number(ev.n) || 0;
+                if (!id || n <= 0 || (sign !== 1 && sign !== -1) || NO_RENT_ITEMS.has(id)) continue;
+                if (sign > 0) counts[id] = (counts[id] || 0) + n;
+                else {
+                    counts[id] = (counts[id] || 0) - n;
+                    if (counts[id] <= 0) delete counts[id];
+                }
+            }
+            return counts;
+        }
+
+        function buildGearEventLog(gearEvents, charName, nameMap) {
+            return filterEventsForChar(gearEvents, charName)
+                .filter(ev => {
+                    const n = Number(ev.n) || 0;
+                    const sign = Number(ev.s);
+                    return n > 0 && (sign === 1 || sign === -1);
+                })
+                .sort((a, b) => (a.d || '').localeCompare(b.d || '') || String(a.i).localeCompare(String(b.i)))
+                .map(ev => ({
+                    date: ev.d,
+                    sign: Number(ev.s),
+                    count: Number(ev.n),
+                    itemId: String(ev.i),
+                    itemName: nameMap[String(ev.i)] || ('Item ' + ev.i),
+                    visibility: !!ev.v
+                }));
+        }
+
+        function baselineOnlyItems(holdings, gearEvents, charName) {
+            const touched = new Set(filterEventsForChar(gearEvents, charName).map(ev => String(ev.i)));
+            const out = {};
+            for (const [id, cnt] of Object.entries(holdings)) {
+                if (!touched.has(id)) out[id] = cnt;
+            }
+            return out;
+        }
+
+        function esc(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        async function render() {
+            const status = document.getElementById('status');
+            const content = document.getElementById('content');
+            const meta = document.getElementById('char-meta');
+            if (!CHAR_NAME) {
+                status.innerHTML = '<strong style="color:#c62828;">No character specified.</strong> Use <code>char.html?c=CharacterName</code>';
+                return;
+            }
+            if (!USE_GEAR_EVENTS || !GEAR_EVENT_SHARD_MONTHS.length) {
+                status.innerHTML = '<strong style="color:#c62828;">Gear event shards not available.</strong>';
+                return;
+            }
+            const endDate = LATEST_DATE || new Date().toISOString().slice(0, 10);
+            document.getElementById('page-title').textContent = CHAR_NAME + ' — Timeline';
+            try {
+                status.textContent = 'Loading baseline…';
+                const baselineDate = gearManifestBaselineForDate(endDate) || '2026-02-09';
+                const { baseline } = await loadBaseline(baselineDate);
+                status.textContent = 'Loading event shards…';
+                const { gear, chars } = await loadEventsUpTo(endDate, (done, total) => {
+                    status.textContent = 'Loading event shards (' + done + '/' + total + ')…';
+                });
+                const charEvents = filterEventsForChar(chars, CHAR_NAME);
+                const charGear = filterEventsForChar(gear, CHAR_NAME);
+                const stateMap = buildCharacterStateFromEvents(baseline, chars);
+                const state = stateMap[CHAR_NAME] || {};
+                const guild = state.guild || CHAR_GUILD_MAP[CHAR_NAME] || '';
+                const guildPart = guild ? ' &lt;' + esc(guild) + '&gt;' : '';
+                const mageloSlug = CHAR_NAME.toLowerCase().replace(/ /g, '_');
+                meta.innerHTML = '<strong>' + esc(CHAR_NAME) + guildPart + '</strong> · '
+                    + (state.class || '?') + ' · Level ' + (state.level || '?')
+                    + ' · ' + (state.aa_total != null ? state.aa_total + ' AA' : '? AA')
+                    + ' · through ' + esc(endDate)
+                    + ' · <a href="https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(mageloSlug) + '" target="_blank">Magelo</a>';
+
+                const nameMap = buildItemNameMap(baseline, CHAR_NAME);
+                const aaRows = buildAaTimeline(baseline, charEvents, CHAR_NAME);
+                const holdings = buildCurrentHoldings(baseline, charGear, CHAR_NAME);
+                const sinceBaseline = baselineOnlyItems(holdings, charGear, CHAR_NAME);
+                const gearLog = buildGearEventLog(charGear, CHAR_NAME, nameMap);
+
+                let html = '';
+                html += '<h2>AA History</h2>';
+                if (aaRows.length) {
+                    html += '<table><thead><tr><th>Date</th><th>Change</th><th>Total AA</th></tr></thead><tbody>';
+                    for (const row of aaRows) {
+                        const delta = row.isBaseline ? '<span class="vis">baseline</span>' : (row.delta > 0 ? '<span class="pos">+' + row.delta + '</span>' : (row.delta < 0 ? '<span class="neg">' + row.delta + '</span>' : '0'));
+                        html += '<tr><td>' + esc(row.date || '—') + '</td><td>' + delta + '</td><td>' + row.total + '</td></tr>';
+                    }
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p class="vis">No AA history for this character.</p>';
+                }
+
+                html += '<h2>Current Holdings</h2>';
+                if (Object.keys(holdings).length) {
+                    html += '<p>';
+                    for (const itemId of Object.keys(holdings).sort((a, b) => (nameMap[a] || a).localeCompare(nameMap[b] || b))) {
+                        const cnt = holdings[itemId];
+                        const nm = esc(nameMap[itemId] || ('Item ' + itemId));
+                        const qty = cnt > 1 ? ' x' + cnt : '';
+                        html += '<span class="item-badge"><a href="https://www.takproject.net/allaclone/item.php?id=' + itemId + '" target="_blank">' + nm + '</a>' + qty + '</span>';
+                    }
+                    html += '</p>';
+                } else {
+                    html += '<p class="vis">No items in reconstructed inventory.</p>';
+                }
+                if (Object.keys(sinceBaseline).length) {
+                    html += '<p class="note"><strong>Held since baseline (' + esc(baseline.baseline_date || baselineDate) + '):</strong> ';
+                    const parts = Object.keys(sinceBaseline).sort().map(id => esc(nameMap[id] || ('Item ' + id)) + (sinceBaseline[id] > 1 ? ' x' + sinceBaseline[id] : ''));
+                    html += parts.join(', ') + '</p>';
+                }
+
+                html += '<h2>Gear Acquisition / Loss Log</h2>';
+                if (gearLog.length) {
+                    html += '<table><thead><tr><th>Date</th><th>Change</th><th>Item</th></tr></thead><tbody>';
+                    for (const row of gearLog) {
+                        const sign = row.sign > 0 ? '<span class="pos">+' + row.count + '</span>' : '<span class="neg">-' + row.count + '</span>';
+                        const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
+                        html += '<tr' + (row.visibility ? ' class="vis"' : '') + '><td>' + esc(row.date) + '</td><td>' + sign + '</td><td>'
+                            + '<a href="https://www.takproject.net/allaclone/item.php?id=' + row.itemId + '" target="_blank">' + esc(row.itemName) + '</a>'
+                            + ' <span style="color:#999;font-size:0.85em;">(' + row.itemId + ')</span>' + vis + '</td></tr>';
+                    }
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p class="vis">No gear events recorded for this character.</p>';
+                }
+
+                content.innerHTML = html;
+                content.style.display = 'block';
+                status.style.display = 'none';
+            } catch (err) {
+                status.innerHTML = '<strong style="color:#c62828;">Error:</strong> ' + esc(err.message || err);
+            }
+        }
+
+        render();
+    </script>
+""" + GOATCOUNTER_SCRIPT + """
+</body>
+</html>
+"""
+    out_path = os.path.join(base_dir, "char.html")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    return out_path
+
 
 def find_latest_magelo_file(directory, pattern=None):
     """Find the latest magelo dump file in a directory."""
@@ -5267,6 +5727,14 @@ def main():
             print("Generated delta history page")
         except Exception as e:
             print(f"Warning: Could not generate delta history: {e}")
+            import traceback
+            traceback.print_exc()
+
+        try:
+            generate_char_timeline(base_dir)
+            print("Generated char timeline page")
+        except Exception as e:
+            print(f"Warning: Could not generate char timeline: {e}")
             import traceback
             traceback.print_exc()
         

@@ -735,6 +735,11 @@ jobs:
           cp delta-history.html deploy/delta-history.html
           echo "✓ Generated and copied delta-history.html to deploy directory"
         fi
+        python -c "from generate_spell_page import generate_char_timeline; import os; generate_char_timeline('.')"
+        if [ -f "char.html" ]; then
+          cp char.html deploy/char.html
+          echo "✓ Generated and copied char.html to deploy directory"
+        fi
         # Copy weekly/monthly leaderboard pages (all of them to preserve history)
         # First copy any existing leaderboards from previous runs (if keep_files is true)
         # Then copy newly generated ones
@@ -815,7 +820,7 @@ jobs:
           EXPORT_DATE: ${{ needs.update-spell-inventory.outputs.normalized_date }}
         run: |
           echo "Pages URL: $PAGES_URL/"
-          for path in index.html delta.html; do
+          for path in index.html delta.html char.html; do
             if curl -sfL "$PAGES_URL/$path" -o /dev/null; then
               echo "✓ $path"
             else
