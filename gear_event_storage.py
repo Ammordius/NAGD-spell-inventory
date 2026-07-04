@@ -1201,6 +1201,121 @@ def diff_absolute_possession_maps(
     return inv_deltas
 
 
+def _baseline_char_to_parse_shape(name: str, bc: dict) -> dict:
+    """Map baseline character row to ``parse_character_data`` dict shape."""
+    return {
+        "id": str(bc.get("id", "")),
+        "level": int(bc.get("level") or 0),
+        "aa_unspent": int(bc.get("aa_unspent") or 0),
+        "aa_spent": int(bc.get("aa_spent") or 0),
+        "hp_max_total": int(bc.get("hp_max_total") or 0),
+        "class": bc.get("class", ""),
+        "race": bc.get("race", ""),
+        "guild": bc.get("guild", ""),
+    }
+
+
+def reconstruct_char_data_at_date(
+    baseline: dict,
+    base_dir: str,
+    up_to_date: str,
+) -> dict:
+    """Reconstruct ``parse_character_data``-shaped dict at end of ``up_to_date``."""
+    baseline_date = (baseline or {}).get("baseline_date") or ""
+    baseline_chars = (baseline or {}).get("characters") or {}
+    result: dict[str, dict] = {
+        name: _baseline_char_to_parse_shape(name, bc)
+        for name, bc in baseline_chars.items()
+    }
+
+    char_events = load_char_events(base_dir, end_date=up_to_date)
+    era_events = filter_char_events_for_baseline(char_events, baseline_date)
+    deleted: set[str] = set()
+
+    for ev in sorted(era_events, key=lambda e: (e.get("d") or "", e.get("c") or "")):
+        char_name = ev.get("c", "")
+        if not char_name:
+            continue
+        field = ev.get("f", "")
+        n = int(ev.get("n") or 0)
+
+        if field == "new":
+            deleted.discard(char_name)
+            if char_name not in result:
+                result[char_name] = _baseline_char_to_parse_shape(char_name, {})
+            row = result[char_name]
+            if ev.get("cl"):
+                row["class"] = ev["cl"]
+            if ev.get("lv") is not None:
+                row["level"] = int(ev["lv"])
+            if ev.get("aa") is not None:
+                total_aa = int(ev["aa"])
+                row["aa_spent"] = max(0, total_aa - int(row.get("aa_unspent") or 0))
+            if ev.get("hp") is not None:
+                row["hp_max_total"] = int(ev["hp"])
+            continue
+
+        if field == "del":
+            deleted.add(char_name)
+            continue
+
+        if char_name in deleted:
+            continue
+        if char_name not in result:
+            result[char_name] = _baseline_char_to_parse_shape(char_name, {})
+
+        row = result[char_name]
+        if ev.get("cl"):
+            row["class"] = ev["cl"]
+        if field == "lvl":
+            if ev.get("lv") is not None:
+                row["level"] = int(ev["lv"])
+            else:
+                row["level"] = int(row.get("level") or 0) + n
+        elif field == "aa":
+            if ev.get("aa") is not None:
+                total_aa = int(ev["aa"])
+                row["aa_spent"] = max(0, total_aa - int(row.get("aa_unspent") or 0))
+            else:
+                row["aa_spent"] = int(row.get("aa_spent") or 0) + n
+        elif field == "hp":
+            if ev.get("hp") is not None:
+                row["hp_max_total"] = int(ev["hp"])
+            else:
+                row["hp_max_total"] = int(row.get("hp_max_total") or 0) + n
+
+    for char_name in deleted:
+        result.pop(char_name, None)
+    return result
+
+
+def day_deltas_from_event_reconstruction(
+    current_char_data: dict,
+    current_inv_data: dict,
+    prev_date: str,
+    date_str: str,
+    base_dir: str,
+    baseline: dict | None,
+) -> tuple[dict, dict]:
+    """Day-over-day deltas: baseline+events through ``prev_date`` vs current Magelo dump."""
+    from generate_spell_page import compare_character_data, load_no_rent_items
+
+    baseline_inv = (baseline or {}).get("inventories") or {}
+    all_gear = load_gear_events(base_dir, end_date=prev_date)
+    try:
+        no_rent = load_no_rent_items()
+    except ImportError:
+        no_rent = set()
+
+    abs_prev = build_possession_map(baseline_inv, all_gear, prev_date, no_rent=no_rent)
+    abs_curr = possession_from_inv_snapshot(current_inv_data)
+    inv_deltas = diff_absolute_possession_maps(abs_prev, abs_curr)
+
+    prev_char = reconstruct_char_data_at_date(baseline or {}, base_dir, prev_date)
+    char_deltas = compare_character_data(current_char_data, prev_char, None)
+    return char_deltas, inv_deltas
+
+
 def filter_unique_reacquires_in_inv_deltas(
     inv_deltas: dict,
     possession_before: dict[str, dict[str, int]],

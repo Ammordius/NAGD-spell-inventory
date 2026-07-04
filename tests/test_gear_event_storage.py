@@ -26,6 +26,7 @@ from gear_event_storage import (  # noqa: E402
     list_available_event_dates,
     load_gear_events,
     manifest_median_day_total,
+    reconstruct_char_data_at_date,
 )
 
 
@@ -125,6 +126,40 @@ class TestGearEventRoundTrip(unittest.TestCase):
         flags = detect_oscillations(hist, window_days=7)
         self.assertEqual(len(flags), 1)
         self.assertEqual(flags[0]["pattern"], [1, -1, 1])
+
+    def test_reconstruct_char_data_at_date(self):
+        td = tempfile.mkdtemp()
+        base = os.path.join(td, "delta_snapshots")
+        ge = os.path.join(base, "gear_events")
+        os.makedirs(ge)
+        baseline = {
+            "baseline_date": "2026-02-09",
+            "characters": {
+                "Alice": {
+                    "level": 60,
+                    "aa_unspent": 5,
+                    "aa_spent": 95,
+                    "hp_max_total": 1000,
+                    "class": "Wizard",
+                }
+            },
+        }
+        with gzip.open(os.path.join(ge, "char_2026-05.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump(
+                [
+                    {"d": "2026-05-10", "c": "Alice", "f": "aa", "n": 5, "aa": 105},
+                    {"d": "2026-05-11", "c": "Alice", "f": "lvl", "n": 1, "lv": 61},
+                ],
+                f,
+            )
+        with open(os.path.join(ge, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "days": {"2026-05-10": {"gear": 0, "char": 1}}}, f)
+        got = reconstruct_char_data_at_date(baseline, base, "2026-05-11")
+        self.assertEqual(got["Alice"]["level"], 61)
+        self.assertEqual(
+            int(got["Alice"]["aa_unspent"]) + int(got["Alice"]["aa_spent"]),
+            105,
+        )
 
 
 class TestGearEventInflationGuard(unittest.TestCase):

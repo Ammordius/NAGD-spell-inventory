@@ -17,6 +17,36 @@ def parse_stamp(s: str):
         return None
 
 
+def _count_lines(path: Path) -> int:
+    try:
+        with path.open(encoding="utf-8") as f:
+            return sum(1 for _ in f)
+    except OSError:
+        return 0
+
+
+def check_dump_content_plausible(max_line_delta_ratio: float = 0.10) -> int:
+    """Fail when character dump line counts diverge sharply (stale cache content)."""
+    prev_char = Path("character/TAKP_character_previous.txt")
+    cur_char = Path("character/TAKP_character.txt")
+    if not prev_char.is_file() or not cur_char.is_file():
+        return 0
+    prev_lines = _count_lines(prev_char)
+    cur_lines = _count_lines(cur_char)
+    if prev_lines < 100 or cur_lines < 100:
+        return 0
+    ratio = abs(cur_lines - prev_lines) / max(prev_lines, cur_lines)
+    if ratio > max_line_delta_ratio:
+        print(
+            "::error::Previous vs current character dump line counts differ by "
+            f"{ratio * 100:.1f}% (max {max_line_delta_ratio * 100:.0f}%). "
+            f"Previous: {prev_lines} lines, current: {cur_lines} lines. "
+            "Likely stale magelo-dump-* cache content despite aligned stamp."
+        )
+        return 1
+    return 0
+
+
 def main() -> int:
     prev_path = Path(".magelo_previous_dump_date.txt")
     cur_path = Path(".magelo_update_date")
@@ -62,6 +92,9 @@ def main() -> int:
         return 1
 
     print("✓ Magelo export date span OK: %d calendar day(s) between previous and current." % days)
+    content_rc = check_dump_content_plausible()
+    if content_rc != 0:
+        return content_rc
     return 0
 
 

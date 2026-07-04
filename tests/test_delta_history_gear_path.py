@@ -1,5 +1,6 @@
 """Tests for delta-history gear-events path helpers (Python side)."""
 
+import gzip
 import json
 import os
 import sys
@@ -570,6 +571,71 @@ class TestResolveDayOverDayDeltas(unittest.TestCase):
         )
         self.assertIn("Alice", inv_d)
         self.assertIn("200", inv_d["Alice"]["added"])
+
+    def test_falls_back_to_gear_event_reconstruction_when_dump_inflated(self):
+        td = tempfile.mkdtemp()
+        snap = os.path.join(td, "delta_snapshots")
+        ge = os.path.join(snap, "gear_events")
+        os.makedirs(ge)
+        prev_date, curr_date = "2026-07-03", "2026-07-04"
+        baseline = {
+            "baseline_date": "2026-02-09",
+            "characters": {
+                "Alice": {
+                    "level": 65,
+                    "aa_unspent": 0,
+                    "aa_spent": 100,
+                    "hp_max_total": 1000,
+                    "class": "Wizard",
+                }
+            },
+            "inventories": {
+                "Alice": [{"item_id": "50001", "item_name": "Base Item"}],
+            },
+        }
+        days = {f"2026-06-{i:02d}": {"gear": 900, "char": 100} for i in range(15, 31)}
+        days[prev_date] = {"gear": 900, "char": 100}
+        with open(os.path.join(ge, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "days": days}, f)
+        with gzip.open(os.path.join(ge, "gear_2026-07.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump(
+                [{"d": prev_date, "c": "Alice", "i": "50002", "s": 1, "n": 1, "v": 0}],
+                f,
+            )
+        with open(os.path.join(td, ".magelo_previous_dump_date.txt"), "w", encoding="utf-8") as f:
+            f.write("Thu Jul  3 16:30:25 UTC 2026\n")
+        huge_inv = {
+            f"Char{i}": [{"item_id": str(100000 + i * 50 + j)} for j in range(50)]
+            for i in range(600)
+        }
+        current_inv = {
+            "Alice": [
+                {"item_id": "50001", "item_name": "Base Item"},
+                {"item_id": "50002", "item_name": "Prior"},
+                {"item_id": "50003", "item_name": "New Today"},
+            ]
+        }
+        current_char = {
+            "Alice": {
+                "level": 65,
+                "aa_unspent": 0,
+                "aa_spent": 105,
+                "hp_max_total": 1000,
+                "class": "Wizard",
+            }
+        }
+        char_d, inv_d = _resolve_day_over_day_deltas(
+            {},
+            huge_inv,
+            current_char,
+            current_inv,
+            curr_date,
+            td,
+            baseline,
+        )
+        self.assertIn("Alice", inv_d)
+        self.assertIn("50003", inv_d["Alice"]["added"])
+        self.assertNotIn("50002", inv_d["Alice"].get("added", {}))
 
 
 class TestDeltaHtmlDumpFirstHelpers(unittest.TestCase):

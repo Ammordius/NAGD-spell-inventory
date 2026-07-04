@@ -28,10 +28,13 @@ from delta_storage import (
 from gear_event_storage import (
     append_day_events_from_deltas,
     build_possession_map,
+    day_deltas_from_event_reconstruction,
+    delta_shape_to_events,
     filter_unique_reacquires_in_inv_deltas,
     gear_events_available,
     get_day_delta_from_events,
     list_available_event_dates,
+    manifest_median_day_total,
     populate_item_names_for_inv_deltas,
     possession_from_inv_snapshot,
 )
@@ -2807,6 +2810,39 @@ def _count_inv_event_rows(inv_deltas):
     )
 
 
+def _estimate_delta_event_total(char_deltas, inv_deltas, date_str):
+    gear_events, char_events = delta_shape_to_events(char_deltas, inv_deltas, date_str)
+    return len(gear_events) + len(char_events)
+
+
+def _dump_diff_looks_inflated(
+    char_deltas,
+    inv_deltas,
+    date_str,
+    base_dir,
+    *,
+    daily_char_n=None,
+    daily_inv_n=None,
+    median_factor=5.0,
+    min_excess=2000,
+):
+    """True when dump diff event count is far above delta_daily or manifest median."""
+    dump_char_n = _count_meaningful_char_deltas(char_deltas)
+    dump_inv_n = _count_inv_event_rows(inv_deltas)
+    if daily_char_n is not None and daily_inv_n is not None:
+        if (dump_inv_n > daily_inv_n * 3 and dump_inv_n > daily_inv_n + 500) or (
+            dump_char_n > daily_char_n * 3 and dump_char_n > daily_char_n + 500
+        ):
+            return True
+    delta_snapshots_dir = os.path.join(base_dir, "delta_snapshots")
+    total = _estimate_delta_event_total(char_deltas, inv_deltas, date_str)
+    med = manifest_median_day_total(delta_snapshots_dir, date_str)
+    if med is not None and med > 0:
+        if total > med * median_factor and total > med + min_excess:
+            return True
+    return False
+
+
 def _previous_export_date_str(base_dir, date_str):
     path = os.path.join(base_dir, ".magelo_previous_dump_date.txt")
     if os.path.isfile(path):
@@ -2833,7 +2869,7 @@ def _resolve_day_over_day_deltas(
     base_dir,
     baseline,
 ):
-    """Prefer delta_daily pair when dump diff looks like stale-cache cumulative inflation."""
+    """Prefer delta_daily or gear-event reconstruction when dump diff looks inflated."""
     char_deltas = compare_character_data(current_char_data, previous_char_data, None)
     inv_deltas = compare_inventories(current_inventories, previous_inventories, None)
 
@@ -2845,30 +2881,63 @@ def _resolve_day_over_day_deltas(
     da = load_daily_delta_json(prev_date, delta_snapshots_dir)
     db = load_daily_delta_json(date_str, delta_snapshots_dir)
     baseline_chars = (baseline or {}).get("characters")
-    if not da or not db:
-        return char_deltas, inv_deltas
-    if da.get("baseline_date") != db.get("baseline_date"):
-        return char_deltas, inv_deltas
-    if not daily_json_pair_usable_for_delta_html_json_compare(da, db, baseline_chars):
+    daily_char_n = None
+    daily_inv_n = None
+    daily_char = None
+    daily_inv = None
+    if (
+        da
+        and db
+        and da.get("baseline_date") == db.get("baseline_date")
+        and daily_json_pair_usable_for_delta_html_json_compare(da, db, baseline_chars)
+    ):
+        daily_diff = compare_delta_to_delta(da, db, baseline_chars)
+        daily_char = daily_diff.get("char_deltas") or {}
+        daily_inv = daily_diff.get("inv_deltas") or {}
+        daily_char_n = _count_meaningful_char_deltas(daily_char)
+        daily_inv_n = _count_inv_event_rows(daily_inv)
+
+    if not _dump_diff_looks_inflated(
+        char_deltas,
+        inv_deltas,
+        date_str,
+        base_dir,
+        daily_char_n=daily_char_n,
+        daily_inv_n=daily_inv_n,
+    ):
         return char_deltas, inv_deltas
 
-    daily_diff = compare_delta_to_delta(da, db, baseline_chars)
-    daily_char = daily_diff.get("char_deltas") or {}
-    daily_inv = daily_diff.get("inv_deltas") or {}
-    dump_char_n = _count_meaningful_char_deltas(char_deltas)
-    daily_char_n = _count_meaningful_char_deltas(daily_char)
     dump_inv_n = _count_inv_event_rows(inv_deltas)
-    daily_inv_n = _count_inv_event_rows(daily_inv)
-    if (dump_inv_n > daily_inv_n * 3 and dump_inv_n > daily_inv_n + 500) or (
-        dump_char_n > daily_char_n * 3 and dump_char_n > daily_char_n + 500
-    ):
+    dump_char_n = _count_meaningful_char_deltas(char_deltas)
+
+    if daily_char is not None and daily_inv is not None:
         print(
             f"Warning: dump diff for {date_str} looks inflated "
             f"({dump_inv_n} inv rows vs {daily_inv_n} from delta_daily pair); "
             f"using delta_daily pair for gear events and delta.html"
         )
-        char_deltas = daily_char
-        inv_deltas = daily_inv
+        return daily_char, daily_inv
+
+    manifest_dates = list_available_event_dates(delta_snapshots_dir)
+    if gear_events_available(delta_snapshots_dir) and prev_date in manifest_dates:
+        recon_char, recon_inv = day_deltas_from_event_reconstruction(
+            current_char_data,
+            current_inventories,
+            prev_date,
+            date_str,
+            delta_snapshots_dir,
+            baseline,
+        )
+        recon_inv_n = _count_inv_event_rows(recon_inv)
+        recon_char_n = _count_meaningful_char_deltas(recon_char)
+        print(
+            f"Warning: dump diff for {date_str} looks inflated "
+            f"({dump_inv_n} inv rows, {dump_char_n} char rows); "
+            f"using gear-event reconstruction for gear events and delta.html "
+            f"({recon_inv_n} inv rows, {recon_char_n} char rows)"
+        )
+        return recon_char, recon_inv
+
     return char_deltas, inv_deltas
 
 
