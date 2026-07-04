@@ -11,7 +11,9 @@ if _MAGelo_ROOT not in sys.path:
     sys.path.insert(0, _MAGelo_ROOT)
 
 from generate_spell_page import (  # noqa: E402
+    build_char_guild_map,
     build_tracked_item_id_to_name,
+    generate_delta_history,
     _count_meaningful_char_deltas,
     _resolve_day_over_day_deltas,
     _warn_if_event_dump_divergence,
@@ -22,6 +24,53 @@ from gear_event_storage import (  # noqa: E402
     char_events_to_char_deltas,
     populate_item_names_for_inv_deltas,
 )
+
+
+class TestBuildCharGuildMap(unittest.TestCase):
+    @staticmethod
+    def _char_row(name, guild, level=65, klass="Wizard"):
+        parts = [""] * 29
+        parts[0] = name
+        parts[2] = guild
+        parts[3] = str(level)
+        parts[5] = klass
+        parts[10] = "0"
+        parts[11] = "0"
+        parts[28] = "1000"
+        return "\t".join(parts)
+
+    def test_returns_nonempty_guilds_only(self):
+        td = tempfile.mkdtemp()
+        char_path = os.path.join(td, "chars.txt")
+        with open(char_path, "w", encoding="utf-8") as f:
+            f.write(self._char_row("name", "guild") + "\n")
+            f.write(self._char_row("Clickie", "Destiny") + "\n")
+            f.write(self._char_row("Unguilded", "") + "\n")
+        guild_map = build_char_guild_map(char_path)
+        self.assertEqual(guild_map.get("Clickie"), "Destiny")
+        self.assertNotIn("Unguilded", guild_map)
+
+    def test_missing_file_returns_empty(self):
+        self.assertEqual(build_char_guild_map("/nonexistent/path.txt"), {})
+
+
+class TestGenerateDeltaHistoryGuildEmbed(unittest.TestCase):
+    def test_embeds_char_guild_map_script(self):
+        td = tempfile.mkdtemp()
+        char_dir = os.path.join(td, "character")
+        os.makedirs(char_dir)
+        char_path = os.path.join(char_dir, "TAKP_character.txt")
+        with open(char_path, "w", encoding="utf-8") as f:
+            f.write(TestBuildCharGuildMap._char_row("name", "guild") + "\n")
+            f.write(TestBuildCharGuildMap._char_row("Alice", "Temerity") + "\n")
+        out_path = generate_delta_history(td)
+        self.assertTrue(os.path.isfile(out_path))
+        with open(out_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn('id="char-guild-map"', html)
+        self.assertIn('"Alice": "Temerity"', html)
+        self.assertIn("function formatCharDisplay", html)
+        self.assertIn("CHAR_GUILD_MAP", html)
 
 
 class TestBuildTrackedItemIdToName(unittest.TestCase):

@@ -2911,6 +2911,18 @@ def build_tracked_item_id_to_name(base_dir, tracked_ids=None):
     return name_map
 
 
+def build_char_guild_map(char_file):
+    """Build name -> guild map for delta-history display (non-empty guilds only)."""
+    if not char_file or not os.path.isfile(char_file):
+        return {}
+    char_data = parse_character_data(char_file, None)
+    return {
+        name: (row.get('guild') or '').strip()
+        for name, row in char_data.items()
+        if (row.get('guild') or '').strip()
+    }
+
+
 def default_delta_history_range_endpoints(dates_asc, max_gap_days=14):
     """Pick default start/end dates for delta-history.html (see generate_delta_history).
 
@@ -3025,6 +3037,11 @@ def generate_delta_history(base_dir):
             except (json.JSONDecodeError, OSError):
                 pass
     item_id_to_name_json = json.dumps(build_tracked_item_id_to_name(base_dir, tracked_ids))
+    char_dir = os.path.join(base_dir, 'character')
+    char_file_for_guild = os.path.join(char_dir, 'TAKP_character.txt')
+    if not os.path.isfile(char_file_for_guild):
+        char_file_for_guild = find_latest_magelo_file(char_dir, 'TAKP_character')
+    char_guild_map_json = json.dumps(build_char_guild_map(char_file_for_guild))
     
     # Generate HTML with date-to-date comparison interface
     html = """<!DOCTYPE html>
@@ -3226,6 +3243,7 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="gear-event-shard-months">""" + gear_shard_months_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="gear-event-manifest">""" + gear_event_manifest_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="item-id-to-name">""" + item_id_to_name_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="char-guild-map">""" + char_guild_map_json.replace("</", "<\\/") + """</script>
     <script>
         const TRACKED_ITEM_IDS = new Set(JSON.parse((document.getElementById('tracked-item-ids') || { textContent: '[]' }).textContent));
         const TRACKED_SOURCE_LABEL = JSON.parse((document.getElementById('tracked-source-label') || { textContent: '{}' }).textContent);
@@ -3237,10 +3255,26 @@ def generate_delta_history(base_dir):
         const GEAR_EVENT_SHARD_MONTHS = JSON.parse((document.getElementById('gear-event-shard-months') || { textContent: '[]' }).textContent);
         const GEAR_EVENT_MANIFEST = JSON.parse((document.getElementById('gear-event-manifest') || { textContent: '{}' }).textContent);
         const ITEM_ID_TO_NAME = JSON.parse((document.getElementById('item-id-to-name') || { textContent: '{}' }).textContent);
+        const CHAR_GUILD_MAP = JSON.parse((document.getElementById('char-guild-map') || { textContent: '{}' }).textContent);
         const USE_GEAR_EVENTS = """ + use_gear_events_json + """;
         const DEFAULT_RANGE_START = """ + json.dumps(default_range_start) + """;
         const DEFAULT_RANGE_END = """ + json.dumps(default_range_end) + """;
         const MAX_RANGE_GAP_DAYS = 14;
+
+        function guildForChar(name, state) {
+            const fromState = state && state.guild;
+            if (fromState) return fromState;
+            return (CHAR_GUILD_MAP && CHAR_GUILD_MAP[name]) || '';
+        }
+
+        function formatCharDisplay(name, state) {
+            const g = guildForChar(name, state);
+            return g ? (name + ' &lt;' + g + '&gt;') : name;
+        }
+
+        function charStateForName(name, startState, endState) {
+            return (endState && endState[name]) || (startState && startState[name]) || {};
+        }
         
         function setDateRangeFromTile(endDate) {
             const idx = SORTED_AVAILABLE_DATES.indexOf(endDate);
@@ -4282,9 +4316,7 @@ def generate_delta_history(base_dir):
                             reportHTML += `
                         <ul style="margin: 0; padding-left: 20px;">`;
                             for (const e of entries) {
-                                const state = endState[e.charName] || startState[e.charName] || {};
-                                const guild = state.guild || '';
-                                const charDisplay = guild ? (e.charName + ' &lt;' + guild + '&gt;') : e.charName;
+                                const charDisplay = formatCharDisplay(e.charName, charStateForName(e.charName, startState, endState));
                                 const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
                                 const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                                 const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
@@ -4375,7 +4407,7 @@ def generate_delta_history(base_dir):
                         reportHTML += `
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
-                                    <td style="padding: 10px 12px;"><strong>${entry.name}</strong></td>
+                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong></td>
                                     <td style="padding: 10px 12px;">${entry.class}</td>
                                     <td style="padding: 10px 12px;">${entry.level}</td>
                                     <td style="padding: 10px 12px; color: #4CAF50; font-weight: bold;">+${entry.aa_gain}</td>
@@ -4415,7 +4447,7 @@ def generate_delta_history(base_dir):
                         reportHTML += `
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
-                                    <td style="padding: 10px 12px;"><strong>${entry.name}</strong></td>
+                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong></td>
                                     <td style="padding: 10px 12px;">${entry.class}</td>
                                     <td style="padding: 10px 12px;">${entry.level}</td>
                                     <td style="padding: 10px 12px; color: #fff; font-weight: bold;">+${entry.hp_gain}</td>
@@ -4462,14 +4494,15 @@ def generate_delta_history(base_dir):
                         const currentLevel = changes.current_level;
                         const previousLevel = changes.previous_level;
                         
+                        const charState = charStateForName(charName, startState, endState);
                         // Character name display
                         let charDisplay;
                         if (isDeleted) {
-                            charDisplay = `<strong style="color: #999; text-decoration: line-through;">${charName}</strong> <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>`;
+                            charDisplay = `<strong style="color: #999; text-decoration: line-through;">${formatCharDisplay(charName, charState)}</strong> <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>`;
                         } else if (isNew) {
-                            charDisplay = `<strong>${charName}</strong> <span style="color: #4CAF50; font-size: 0.9em;">(New)</span>`;
+                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong> <span style="color: #4CAF50; font-size: 0.9em;">(New)</span>`;
                         } else {
-                            charDisplay = `<strong>${charName}</strong>`;
+                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>`;
                         }
                         
                         // Level change display
@@ -4537,7 +4570,7 @@ def generate_delta_history(base_dir):
                         const delta = invDeltasLevel1[charName];
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
-                        <h3 style="margin-top: 0;"><strong>${charName}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
+                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong> <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
                         if (Object.keys(delta.added || {}).length > 0) {
                             reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
@@ -4573,7 +4606,7 @@ def generate_delta_history(base_dir):
                         const delta = invDeltasOthers[charName];
                         reportHTML += `
                     <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-                        <h3 style="margin-top: 0;"><strong>${charName}</strong></h3>`;
+                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong></h3>`;
                         if (Object.keys(delta.added || {}).length > 0) {
                                 reportHTML += `
                         <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
@@ -4611,10 +4644,9 @@ def generate_delta_history(base_dir):
                     <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
                     for (const charName of nonVisTracked) {
                         const delta = trackedDeltas[charName];
-                        const state = endState[charName] || startState[charName] || {};
+                        const state = charStateForName(charName, startState, endState);
                         const level = state.level || '?';
-                        const guild = state.guild || '';
-                        const charDisplay = guild ? (charName + ' &lt;' + guild + '&gt;') : charName;
+                        const charDisplay = formatCharDisplay(charName, state);
                         const charSlug = charName.toLowerCase().replace(/ /g, '_');
                         const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                         reportHTML += `
