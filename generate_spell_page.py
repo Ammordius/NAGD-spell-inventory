@@ -3351,34 +3351,43 @@ def generate_delta_history(base_dir):
         }
 
         async function loadEventsInRange(start, end) {
-            const months = monthsBetween(start.slice(0, 7), end.slice(0, 7));
-            const gear = [];
-            const chars = [];
-            for (const month of months) {
-                if (GEAR_EVENT_SHARD_MONTHS.length && !GEAR_EVENT_SHARD_MONTHS.includes(month)) continue;
-                try {
-                    gear.push(...(await loadGearShard(month)));
-                } catch (e) { /* shard may not exist for sparse months */ }
-                try {
-                    chars.push(...(await loadCharShard(month)));
-                } catch (e) { /* optional */ }
-            }
+            const months = monthsBetween(start.slice(0, 7), end.slice(0, 7))
+                .filter(m => !GEAR_EVENT_SHARD_MONTHS.length || GEAR_EVENT_SHARD_MONTHS.includes(m));
+            const gearShards = await Promise.all(
+                months.map(month => loadGearShard(month).catch(() => []))
+            );
+            const charShards = await Promise.all(months.map(month => loadCharShard(month)));
+            const gear = gearShards.flat();
+            const chars = charShards.flat();
             const gearFiltered = gear.filter(ev => ev.d > start && ev.d <= end);
             const charFiltered = chars.filter(ev => ev.d > start && ev.d <= end);
             return { gear: gearFiltered, char: charFiltered };
         }
 
-        async function loadCharEventsUpTo(endDate) {
-            if (!GEAR_EVENT_SHARD_MONTHS.length) return [];
-            const firstMonth = GEAR_EVENT_SHARD_MONTHS[0];
-            const months = monthsBetween(firstMonth, endDate.slice(0, 7));
-            const chars = [];
-            for (const month of months) {
-                if (!GEAR_EVENT_SHARD_MONTHS.includes(month)) continue;
-                try {
-                    chars.push(...(await loadCharShard(month)));
-                } catch (e) { /* optional shard */ }
+        function gearManifestFirstEventMonthForDate(dateStr) {
+            const eras = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.eras) || [];
+            for (let i = eras.length - 1; i >= 0; i--) {
+                const era = eras[i];
+                if (era.first_event && era.first_event <= dateStr) {
+                    return era.first_event.slice(0, 7);
+                }
             }
+            return (GEAR_EVENT_SHARD_MONTHS.length ? GEAR_EVENT_SHARD_MONTHS[0] : dateStr.slice(0, 7));
+        }
+
+        async function loadCharEventsUpTo(endDate, onProgress) {
+            if (!GEAR_EVENT_SHARD_MONTHS.length) return [];
+            const firstMonth = gearManifestFirstEventMonthForDate(endDate);
+            const months = monthsBetween(firstMonth, endDate.slice(0, 7))
+                .filter(m => GEAR_EVENT_SHARD_MONTHS.includes(m));
+            let done = 0;
+            const shardResults = await Promise.all(months.map(async (month) => {
+                const events = await loadCharShard(month);
+                done += 1;
+                if (onProgress) onProgress(done, months.length);
+                return events;
+            }));
+            const chars = shardResults.flat();
             return chars.filter(ev => ev.d && ev.d <= endDate);
         }
 
@@ -3478,9 +3487,22 @@ def generate_delta_history(base_dir):
             return invDeltas;
         }
 
+        function applyCharSnapshotFromEvent(row, ev) {
+            if (ev.lv != null) row.current_level = Number(ev.lv);
+            if (ev.aa != null) row.current_aa_total = Number(ev.aa);
+            if (ev.hp != null) row.current_hp = Number(ev.hp);
+            if (!row._hasPrevSnap) {
+                if (ev.plv != null) row.previous_level = Number(ev.plv);
+                if (ev.paa != null) row.previous_aa_total = Number(ev.paa);
+                if (ev.php != null) row.previous_hp = Number(ev.php);
+                if (ev.plv != null || ev.paa != null || ev.php != null) row._hasPrevSnap = true;
+            }
+        }
+
         function foldCharEventsToCharDeltas(charEvents) {
+            const sorted = [...charEvents].sort((a, b) => (a.d || '').localeCompare(b.d || ''));
             const charDeltas = {};
-            for (const ev of charEvents) {
+            for (const ev of sorted) {
                 const charName = ev.c;
                 if (!charName) continue;
                 if (!charDeltas[charName]) {
@@ -3501,8 +3523,54 @@ def generate_delta_history(base_dir):
                 else if (f === 'hp') row.hp_change += n;
                 else if (f === 'new') row.is_new = true;
                 else if (f === 'del') row.is_deleted = true;
+                applyCharSnapshotFromEvent(row, ev);
+            }
+            for (const row of Object.values(charDeltas)) {
+                delete row._hasPrevSnap;
             }
             return charDeltas;
+        }
+
+        function enrichCharChangesFromStates(charChanges, startState, endState, rangeCharDeltas) {
+            const names = new Set([
+                ...Object.keys(charChanges || {}),
+                ...Object.keys(startState || {}),
+                ...Object.keys(endState || {})
+            ]);
+            for (const charName of names) {
+                const s = startState[charName];
+                const e = endState[charName];
+                if (!s || !e) continue;
+                const rd = (rangeCharDeltas && rangeCharDeltas[charName]) || {};
+                const existing = (charChanges && charChanges[charName]) || {};
+                charChanges[charName] = {
+                    level: e.level - s.level,
+                    aa: e.aa_total - s.aa_total,
+                    hp: e.hp - s.hp,
+                    current_level: e.level,
+                    previous_level: s.level,
+                    current_aa_total: e.aa_total,
+                    class: e.class || rd.class || existing.class || '',
+                    is_new: !!(rd.is_new || existing.is_new),
+                    is_deleted: !!(rd.is_deleted || existing.is_deleted),
+                    is_visibility_change: !!(rd.is_visibility_change || existing.is_visibility_change)
+                };
+            }
+        }
+
+        function enrichCharChangesFromFoldedDeltas(charChanges, rangeCharDeltas) {
+            for (const [charName, d] of Object.entries(rangeCharDeltas || {})) {
+                if (d.current_level == null && d.current_aa_total == null && d.current_hp == null) continue;
+                const c = charChanges[charName] || (charChanges[charName] = charDeltasToChanges({ [charName]: d })[charName]);
+                if (d.current_level != null) c.current_level = d.current_level;
+                if (d.previous_level != null) c.previous_level = d.previous_level;
+                if (d.current_aa_total != null) c.current_aa_total = d.current_aa_total;
+                if (d.aa_total_change != null && c.aa == null) c.aa = d.aa_total_change;
+                if (d.hp_change != null && c.hp == null) c.hp = d.hp_change;
+                if (d.level_change != null && c.level == null) c.level = d.level_change;
+                if (d.is_visibility_change) c.is_visibility_change = true;
+                if (d.class) c.class = d.class;
+            }
         }
         
         async function loadBaseline(baselineDate) {
@@ -3703,7 +3771,8 @@ def generate_delta_history(base_dir):
                     current_aa_total: d.current_aa_total,
                     class: d.class || '',
                     is_new: !!d.is_new,
-                    is_deleted: !!d.is_deleted
+                    is_deleted: !!d.is_deleted,
+                    is_visibility_change: !!d.is_visibility_change
                 };
             }
             return charChanges;
@@ -3889,27 +3958,39 @@ def generate_delta_history(base_dir):
                 let dqBadEnd = false;
                 let corpseLootChars = new Set();
 
+                let rangeCharDeltas = null;
+                let startBaselineDateGear = null;
+                let endBaselineDateGear = null;
+
                 if (USE_GEAR_EVENTS && GEAR_EVENT_SHARD_MONTHS.length > 0) {
                     outputDiv.innerHTML = '<p>Loading gear events for ' + start + ' to ' + end + '...</p>';
                     const { gear, char } = await loadEventsInRange(start, end);
                     invDeltas = foldGearEventsToInvDeltas(gear);
                     resolveItemNames(invDeltas, ITEM_ID_TO_NAME);
-                    const rangeCharDeltas = foldCharEventsToCharDeltas(char);
+                    rangeCharDeltas = foldCharEventsToCharDeltas(char);
                     charChanges = charDeltasToChanges(rangeCharDeltas);
+                    enrichCharChangesFromFoldedDeltas(charChanges, rangeCharDeltas);
                     eventSourceNote = `gear event log (${gear.length} inventory events, ${char.length} stat events)`;
 
-                    const baselineDate = gearManifestBaselineForDate(end);
+                    startBaselineDateGear = gearManifestBaselineForDate(start);
+                    endBaselineDateGear = gearManifestBaselineForDate(end);
+                    baselineMismatch = !!(startBaselineDateGear && endBaselineDateGear
+                        && startBaselineDateGear !== endBaselineDateGear);
+                    omitRangeLeaderboards = baselineMismatch;
+
+                    const baselineDate = endBaselineDateGear;
                     if (baselineDate) {
                         outputDiv.innerHTML = '<p>Loading baseline for character state...</p>';
                         const baselineResult = await loadBaseline(baselineDate);
                         if (baselineResult && baselineResult.baseline) {
                             usedFallbackBaseline = baselineResult.usedFallback;
-                            const [charUpToStart, charUpToEnd] = await Promise.all([
-                                loadCharEventsUpTo(start),
-                                loadCharEventsUpTo(end)
-                            ]);
+                            const charUpToEnd = await loadCharEventsUpTo(end, (done, total) => {
+                                outputDiv.innerHTML = '<p>Loading char shards (' + done + '/' + total + ')...</p>';
+                            });
+                            const charUpToStart = charUpToEnd.filter(ev => ev.d && ev.d <= start);
                             startState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToStart);
                             endState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToEnd);
+                            enrichCharChangesFromStates(charChanges, startState, endState, rangeCharDeltas);
                             for (const charName of Object.keys(startState)) {
                                 if (charName in endState || charName in invDeltas) continue;
                                 invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: true };
@@ -4102,6 +4183,14 @@ def generate_delta_history(base_dir):
                 if (eventSourceNote) {
                     reportHTML += `<p style="color: #555; margin-bottom: 12px;"><em>Source: ${eventSourceNote}</em></p>`;
                 }
+                if (eventSourceNote && baselineMismatch) {
+                    const newerBaseline = startBaselineDateGear < endBaselineDateGear
+                        ? endBaselineDateGear : startBaselineDateGear;
+                    reportHTML += `<p style="background:#e3f2fd;padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196F3;">
+                        <strong>Different baselines:</strong> This range crosses <code>baseline_date</code> values (${startBaselineDateGear} vs ${endBaselineDateGear}).
+                        <strong>AA/HP top lists are omitted</strong> — pick both dates on or after the later baseline (<code>${newerBaseline}</code>) for comparable gainers.
+                    </p>`;
+                }
                 if (!eventSourceNote) {
                 endBaselineResetDay = (endDelta.baseline_date === end) &&
                     Object.keys(endDelta.inv_deltas || {}).length === 0;
@@ -4222,6 +4311,7 @@ def generate_delta_history(base_dir):
                 if (!omitRangeLeaderboards) {
                 for (const [charName, changes] of Object.entries(charChanges)) {
                     if (changes.is_deleted || changes.is_new) continue;
+                    if (changes.is_visibility_change) continue;
                     if (!charsInBoth.has(charName)) continue;
                     if (corpseLootChars.has(charName)) continue;
                     
@@ -4340,7 +4430,7 @@ def generate_delta_history(base_dir):
                 
                 if (dumpBeforeBaselineAny) {
                     reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — at least one endpoint <code>delta_daily_*.json.gz</code> was built with the wrong <code>baseline_era_date</code> (dump date before <code>baseline_date</code>). Regenerate that day with the <strong>Regenerate delta daily JSONs</strong> workflow using a <code>baseline_era_date</code> that matches the archive for that dump (for a single Feb-era anchor use <code>2026-02-09</code>), then redeploy.</p>`;
-                } else if (baselineMismatch) {
+                } else if (baselineMismatch && !eventSourceNote) {
                     const newerBaseline = startDelta.baseline_date < endDelta.baseline_date ? endDelta.baseline_date : startDelta.baseline_date;
                     reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — this range crosses different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Reconstructed AA/HP at the start uses the older era baseline plus sparse <code>char_deltas</code>; at the end it uses the newer era. Characters unchanged vs the old baseline often have <strong>no</strong> row on the start day, so their AA stays at the old baseline snapshot (e.g. 173) even if the calendar day is just before rotation, while the first post-rotation daily row can show a large cumulative jump vs the <em>new</em> baseline — top lists looked like huge short-window gains. For comparable top gainers, pick <strong>both dates on or after the later <code>baseline_date</code></strong> (here <code>${newerBaseline}</code>), or use <code>delta.html</code> day-over-day.</p>`;
                 }

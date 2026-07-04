@@ -14,6 +14,7 @@ if _MAGELO_ROOT not in sys.path:
 from delta_storage import compare_delta_to_delta  # noqa: E402
 from gear_event_storage import (  # noqa: E402
     append_day_events_from_deltas,
+    char_deltas_to_stat_events,
     char_events_to_char_deltas,
     detect_oscillations,
     events_to_delta_shape,
@@ -68,6 +69,33 @@ class TestGearEventRoundTrip(unittest.TestCase):
         self.assertIn("Bob", day["inv_deltas"])
         self.assertIn("Bob", day["char_deltas"])
         self.assertEqual(day["char_deltas"]["Bob"]["level_change"], 1)
+
+    def test_append_emits_snapshot_fields(self):
+        td = tempfile.mkdtemp()
+        base = os.path.join(td, "delta_snapshots")
+        os.makedirs(base)
+        char_deltas = {
+            "Bob": {
+                "name": "Bob",
+                "level_change": 0,
+                "aa_total_change": 5,
+                "hp_change": 100,
+                "current_level": 65,
+                "previous_level": 65,
+                "current_aa_total": 205,
+                "previous_aa_total": 200,
+                "current_hp": 5100,
+                "previous_hp": 5000,
+                "class": "Warrior",
+            }
+        }
+        append_day_events_from_deltas(char_deltas, {}, "2026-05-10", base, "2026-02-09")
+        events = char_deltas_to_stat_events(char_deltas, "2026-05-10", "2026-02-09")
+        aa_ev = next(e for e in events if e["f"] == "aa")
+        self.assertEqual(aa_ev.get("lv"), 65)
+        self.assertEqual(aa_ev.get("aa"), 205)
+        folded = get_day_delta_from_events("2026-05-10", base)
+        self.assertEqual(folded["char_deltas"]["Bob"]["current_aa_total"], 205)
 
     def test_range_exclusive_start(self):
         td = tempfile.mkdtemp()

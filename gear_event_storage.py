@@ -85,6 +85,24 @@ def inv_deltas_to_gear_events(
     return events
 
 
+def _attach_char_snapshot_fields(ev: dict[str, Any], row: dict) -> None:
+    """Attach end-of-day absolutes and previous_* for leaderboard folding (optional on events)."""
+    if row.get("is_deleted"):
+        return
+    if row.get("current_level") is not None:
+        ev["lv"] = int(row.get("current_level") or 0)
+    if row.get("current_aa_total") is not None:
+        ev["aa"] = int(row.get("current_aa_total") or 0)
+    if row.get("current_hp") is not None:
+        ev["hp"] = int(row.get("current_hp") or 0)
+    if row.get("previous_level") is not None:
+        ev["plv"] = int(row.get("previous_level") or 0)
+    if row.get("previous_aa_total") is not None:
+        ev["paa"] = int(row.get("previous_aa_total") or 0)
+    if row.get("previous_hp") is not None:
+        ev["php"] = int(row.get("previous_hp") or 0)
+
+
 def char_deltas_to_stat_events(
     char_deltas: dict,
     date_str: str,
@@ -117,6 +135,7 @@ def char_deltas_to_stat_events(
                 ev["del"] = 1
             if row.get("is_visibility_change"):
                 ev["v"] = 1
+            _attach_char_snapshot_fields(ev, row)
             events.append(ev)
         if row.get("is_new") and not any(
             int(row.get(k) or 0) != 0 for k in ("level_change", "aa_total_change", "hp_change")
@@ -124,6 +143,11 @@ def char_deltas_to_stat_events(
             ev = {"d": date_str, "c": char_name, "f": "new", "n": 1}
             if baseline_date:
                 ev["b"] = baseline_date
+            if row.get("class"):
+                ev["cl"] = row["class"]
+            if row.get("is_visibility_change"):
+                ev["v"] = 1
+            _attach_char_snapshot_fields(ev, row)
             events.append(ev)
         if row.get("is_deleted") and not any(
             int(row.get(k) or 0) != 0 for k in ("level_change", "aa_total_change", "hp_change")
@@ -131,6 +155,8 @@ def char_deltas_to_stat_events(
             ev = {"d": date_str, "c": char_name, "f": "del", "n": 1}
             if baseline_date:
                 ev["b"] = baseline_date
+            if row.get("is_visibility_change"):
+                ev["v"] = 1
             events.append(ev)
     return events
 
@@ -436,10 +462,30 @@ def gear_events_to_inv_deltas(
     return inv_deltas
 
 
+def _apply_char_snapshot_from_event(row: dict, ev: dict) -> None:
+    """Update current_* from latest event; previous_* from first event with snapshots."""
+    if ev.get("lv") is not None:
+        row["current_level"] = int(ev["lv"])
+    if ev.get("aa") is not None:
+        row["current_aa_total"] = int(ev["aa"])
+    if ev.get("hp") is not None:
+        row["current_hp"] = int(ev["hp"])
+    if not row.get("_has_prev_snap"):
+        if ev.get("plv") is not None:
+            row["previous_level"] = int(ev["plv"])
+        if ev.get("paa") is not None:
+            row["previous_aa_total"] = int(ev["paa"])
+        if ev.get("php") is not None:
+            row["previous_hp"] = int(ev["php"])
+        if ev.get("plv") is not None or ev.get("paa") is not None or ev.get("php") is not None:
+            row["_has_prev_snap"] = True
+
+
 def char_events_to_char_deltas(char_events: list[dict]) -> dict:
     """Fold char stat events into legacy char_deltas shape."""
     char_deltas: dict[str, dict] = {}
-    for ev in char_events:
+    sorted_events = sorted(char_events, key=lambda e: (e.get("d") or "", e.get("c") or ""))
+    for ev in sorted_events:
         char_name = ev.get("c", "")
         if not char_name:
             continue
@@ -478,6 +524,9 @@ def char_events_to_char_deltas(char_events: list[dict]) -> dict:
             row["is_new"] = True
         elif field == "del":
             row["is_deleted"] = True
+        _apply_char_snapshot_from_event(row, ev)
+    for row in char_deltas.values():
+        row.pop("_has_prev_snap", None)
     char_deltas = {k: v for k, v in char_deltas.items() if _char_row_has_signal(v)}
     return char_deltas
 

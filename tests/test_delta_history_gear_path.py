@@ -18,6 +18,7 @@ from generate_spell_page import (  # noqa: E402
 )
 from gear_event_storage import (  # noqa: E402
     append_day_events_from_deltas,
+    char_deltas_to_stat_events,
     char_events_to_char_deltas,
     populate_item_names_for_inv_deltas,
 )
@@ -102,6 +103,117 @@ class TestCharStateFromEvents(unittest.TestCase):
         }
         self.assertEqual(state["guild"], "Imperium")
         self.assertEqual(state["aa_total"], 115)
+
+
+def _enrich_char_changes_from_states(char_changes, start_state, end_state, range_char_deltas):
+    """Python mirror of delta-history JS enrichCharChangesFromStates."""
+    names = set(char_changes) | set(start_state) | set(end_state)
+    for char_name in names:
+        s = start_state.get(char_name)
+        e = end_state.get(char_name)
+        if not s or not e:
+            continue
+        rd = (range_char_deltas or {}).get(char_name, {})
+        existing = char_changes.get(char_name, {})
+        char_changes[char_name] = {
+            "level": e["level"] - s["level"],
+            "aa": e["aa_total"] - s["aa_total"],
+            "hp": e["hp"] - s["hp"],
+            "current_level": e["level"],
+            "previous_level": s["level"],
+            "current_aa_total": e["aa_total"],
+            "class": e.get("class") or rd.get("class") or existing.get("class", ""),
+            "is_new": bool(rd.get("is_new") or existing.get("is_new")),
+            "is_deleted": bool(rd.get("is_deleted") or existing.get("is_deleted")),
+            "is_visibility_change": bool(
+                rd.get("is_visibility_change") or existing.get("is_visibility_change")
+            ),
+        }
+
+
+class TestEnrichCharChangesFromStates(unittest.TestCase):
+    def test_endpoint_diff_for_leaderboard(self):
+        start_state = {
+            "Alice": {"level": 65, "aa_total": 100, "hp": 2000, "class": "Wizard"},
+        }
+        end_state = {
+            "Alice": {"level": 65, "aa_total": 108, "hp": 2100, "class": "Wizard"},
+        }
+        char_changes = {}
+        _enrich_char_changes_from_states(char_changes, start_state, end_state, {})
+        c = char_changes["Alice"]
+        self.assertEqual(c["current_level"], 65)
+        self.assertEqual(c["aa"], 8)
+        self.assertEqual(c["hp"], 100)
+        self.assertEqual(c["current_aa_total"], 108)
+
+    def test_visibility_flag_from_range_events(self):
+        start_state = {"Bob": {"level": 65, "aa_total": 0, "hp": 0}}
+        end_state = {"Bob": {"level": 65, "aa_total": 500, "hp": 3000}}
+        char_changes = {}
+        _enrich_char_changes_from_states(
+            char_changes,
+            start_state,
+            end_state,
+            {"Bob": {"is_visibility_change": True}},
+        )
+        self.assertTrue(char_changes["Bob"]["is_visibility_change"])
+
+
+class TestCharSnapshotOnEvents(unittest.TestCase):
+    def test_stat_events_carry_absolutes(self):
+        row = {
+            "level_change": 0,
+            "aa_total_change": 5,
+            "hp_change": 50,
+            "current_level": 65,
+            "previous_level": 65,
+            "current_aa_total": 115,
+            "previous_aa_total": 110,
+            "current_hp": 5050,
+            "previous_hp": 5000,
+            "class": "Warrior",
+        }
+        events = char_deltas_to_stat_events({"Hammurabi": row}, "2026-07-01")
+        aa_ev = next(e for e in events if e["f"] == "aa")
+        self.assertEqual(aa_ev["n"], 5)
+        self.assertEqual(aa_ev["lv"], 65)
+        self.assertEqual(aa_ev["aa"], 115)
+        self.assertEqual(aa_ev["hp"], 5050)
+        self.assertEqual(aa_ev["plv"], 65)
+        self.assertEqual(aa_ev["paa"], 110)
+        self.assertEqual(aa_ev["php"], 5000)
+
+    def test_fold_propagates_latest_absolutes(self):
+        events = [
+            {
+                "d": "2026-07-01",
+                "c": "Alice",
+                "f": "aa",
+                "n": 3,
+                "lv": 60,
+                "aa": 103,
+                "hp": 1000,
+                "plv": 59,
+                "paa": 100,
+                "php": 950,
+            },
+            {
+                "d": "2026-07-02",
+                "c": "Alice",
+                "f": "aa",
+                "n": 2,
+                "lv": 61,
+                "aa": 105,
+                "hp": 1100,
+            },
+        ]
+        folded = char_events_to_char_deltas(events)
+        self.assertEqual(folded["Alice"]["aa_total_change"], 5)
+        self.assertEqual(folded["Alice"]["current_level"], 61)
+        self.assertEqual(folded["Alice"]["current_aa_total"], 105)
+        self.assertEqual(folded["Alice"]["previous_level"], 59)
+        self.assertEqual(folded["Alice"]["previous_aa_total"], 100)
 
 
 class TestResolveDayOverDayDeltas(unittest.TestCase):
