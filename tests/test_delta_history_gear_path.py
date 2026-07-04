@@ -29,6 +29,7 @@ from gear_event_storage import (  # noqa: E402
     build_tracked_gear_event_log_rows,
     char_deltas_to_stat_events,
     char_events_to_char_deltas,
+    group_tracked_rows_by_zone,
     populate_item_names_for_inv_deltas,
 )
 
@@ -100,6 +101,41 @@ class TestGenerateDeltaHistoryGuildEmbed(unittest.TestCase):
         self.assertIn("hasTrackedEventDates", html)
         self.assertIn("tracked-items-table", html)
         self.assertIn("<th>Date</th><th>Change</th><th>Item</th><th>Source</th>", html)
+        self.assertIn("function buildZoneEntriesFromTrackedRows", html)
+        self.assertIn("e.date", html)
+        self.assertIn("date the loot occurred", html)
+
+
+class TestZoneEntriesFromTrackedRows(unittest.TestCase):
+    """Python mirror of delta-history buildZoneEntriesFromTrackedRows."""
+
+    ZONE_MAP = {"100": "Akheva Ruins", "200": "Praesterium"}
+    MOB_MAP = {"100": "Shei_Vinitras_", "200": ""}
+
+    def test_group_by_zone_retains_date(self):
+        rows = [
+            {
+                "date": "2026-05-14",
+                "sign": 1,
+                "count": 1,
+                "item_id": "100",
+                "item_name": "frizzniks robe of tinkering",
+                "source": "",
+            },
+            {
+                "date": "2026-05-16",
+                "sign": 1,
+                "count": 1,
+                "item_id": "200",
+                "item_name": "Shard of the Hand",
+                "source": "",
+            },
+        ]
+        grouped = group_tracked_rows_by_zone(rows, self.ZONE_MAP, self.MOB_MAP)
+        self.assertIn("Akheva Ruins", grouped)
+        self.assertEqual(grouped["Akheva Ruins"]["Shei_Vinitras_"][0]["date"], "2026-05-14")
+        self.assertIn("Praesterium", grouped)
+        self.assertEqual(grouped["Praesterium"][""][0]["date"], "2026-05-16")
 
 
 class TestRangeTrackedRows(unittest.TestCase):

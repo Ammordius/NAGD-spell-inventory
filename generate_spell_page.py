@@ -4706,6 +4706,39 @@ def generate_delta_history(base_dir):
             return (rows || []).filter(row => itemMatchesLootFilters(row.itemId, lf));
         }
 
+        function buildZoneEntriesFromTrackedRows(trackedRowsByChar, startState, endState, netChangeTracked) {
+            const zoneEntries = {};
+            for (const [charName, rows] of Object.entries(trackedRowsByChar || {})) {
+                if (!startState[charName] || !endState[charName]) continue;
+                for (const row of rows) {
+                    if (row.sign <= 0) continue;
+                    const itemId = row.itemId;
+                    if (!NO_DROP_TRACKED_IDS.has(String(itemId)) && (netChangeTracked[itemId] || 0) <= 0) continue;
+                    const zone = TRACKED_ITEM_ZONE[String(itemId)];
+                    if (!zone) continue;
+                    const mob = (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[String(itemId)]) || '';
+                    if (!zoneEntries[zone]) zoneEntries[zone] = {};
+                    if (!zoneEntries[zone][mob]) zoneEntries[zone][mob] = [];
+                    zoneEntries[zone][mob].push({
+                        charName,
+                        itemId,
+                        name: row.itemName,
+                        date: row.date || ''
+                    });
+                }
+            }
+            for (const zone of Object.keys(zoneEntries)) {
+                for (const mob of Object.keys(zoneEntries[zone])) {
+                    zoneEntries[zone][mob].sort((a, b) =>
+                        (a.date || '').localeCompare(b.date || '') ||
+                        (a.charName || '').localeCompare(b.charName || '') ||
+                        String(a.itemId).localeCompare(String(b.itemId))
+                    );
+                }
+            }
+            return zoneEntries;
+        }
+
         function getLootFiltersFromUI() {
             const itemEl = document.getElementById('loot-filter-item');
             return {
@@ -4983,7 +5016,7 @@ def generate_delta_history(base_dir):
             if (Object.keys(displayZoneEntries).length > 0) {
                 reportHTML += `
                 <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone</h2>
-                <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone and mob. Only characters present in both snapshots.</em></p>`;
+                <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone and mob. Only characters present in both snapshots.${ctx.hasTrackedEventDates ? ' Each line shows the date the loot occurred.' : ''}</em></p>`;
                 for (const zone of Object.keys(displayZoneEntries).sort()) {
                     const mobs = displayZoneEntries[zone];
                     reportHTML += `
@@ -5001,7 +5034,10 @@ def generate_delta_history(base_dir):
                             const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
                             const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
                             const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
-                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(e.charName)} — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                            const datePrefix = e.date
+                                ? `<span style="color:#666;">${escapeHtmlText(e.date)}</span> — `
+                                : '';
+                            reportHTML += `<li>${datePrefix}<a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(e.charName)} — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
                         }
                         reportHTML += `
                     </ul>`;
@@ -5630,24 +5666,33 @@ def generate_delta_history(base_dir):
                 }
                 const zoneEntries = {};
                 if (TRACKED_ITEM_ZONE && typeof TRACKED_ITEM_ZONE === 'object') {
-                    for (const [charName, delta] of Object.entries(trackedDeltas)) {
-                        if (!startState[charName] || !endState[charName] || delta.is_visibility_change) continue;
-                        for (const itemId of Object.keys(delta.added || {})) {
-                            if (UNIQUE_TRACKED_IDS.has(String(itemId))) {
-                                const sid = String(itemId);
-                                const startCount = (absStartInv[charName] && absStartInv[charName][sid]) || 0;
-                                const endCount = (absEndInv[charName] && absEndInv[charName][sid]) || 0;
-                                if (endCount <= startCount) continue;
+                    if (rangeGearEvents.length > 0 && Object.keys(trackedRowsByChar).length > 0) {
+                        Object.assign(
+                            zoneEntries,
+                            buildZoneEntriesFromTrackedRows(
+                                trackedRowsByChar, startState, endState, netChangeTracked
+                            )
+                        );
+                    } else {
+                        for (const [charName, delta] of Object.entries(trackedDeltas)) {
+                            if (!startState[charName] || !endState[charName] || delta.is_visibility_change) continue;
+                            for (const itemId of Object.keys(delta.added || {})) {
+                                if (UNIQUE_TRACKED_IDS.has(String(itemId))) {
+                                    const sid = String(itemId);
+                                    const startCount = (absStartInv[charName] && absStartInv[charName][sid]) || 0;
+                                    const endCount = (absEndInv[charName] && absEndInv[charName][sid]) || 0;
+                                    if (endCount <= startCount) continue;
+                                }
+                                if (!NO_DROP_TRACKED_IDS.has(String(itemId)) && (netChangeTracked[itemId] || 0) <= 0) continue;
+                                const zone = TRACKED_ITEM_ZONE[String(itemId)];
+                                if (!zone) continue;
+                                const mob = (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[String(itemId)]) || '';
+                                const count = delta.added[itemId];
+                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                                if (!zoneEntries[zone]) zoneEntries[zone] = {};
+                                if (!zoneEntries[zone][mob]) zoneEntries[zone][mob] = [];
+                                for (let i = 0; i < count; i++) zoneEntries[zone][mob].push({ charName, itemId, name });
                             }
-                            if (!NO_DROP_TRACKED_IDS.has(String(itemId)) && (netChangeTracked[itemId] || 0) <= 0) continue;
-                            const zone = TRACKED_ITEM_ZONE[String(itemId)];
-                            if (!zone) continue;
-                            const mob = (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[String(itemId)]) || '';
-                            const count = delta.added[itemId];
-                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                            if (!zoneEntries[zone]) zoneEntries[zone] = {};
-                            if (!zoneEntries[zone][mob]) zoneEntries[zone][mob] = [];
-                            for (let i = 0; i < count; i++) zoneEntries[zone][mob].push({ charName, itemId, name });
                         }
                     }
                 }
