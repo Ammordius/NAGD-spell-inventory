@@ -130,20 +130,18 @@ jobs:
             echo "Yesterday's date from cache: $YESTERDAY_DATE"
           fi
           
-          cp character/TAKP_character.txt character/TAKP_character_previous.txt
           cp character/TAKP_character.txt character/.delta_yesterday_character.txt
-          echo "✓ Copied yesterday's character file to previous and backup"
-          ls -lh character/TAKP_character_previous.txt
-          echo "File size: $(wc -l < character/TAKP_character_previous.txt) lines"
+          echo "✓ Backed up yesterday character dump (verify before _previous copy)"
+          ls -lh character/.delta_yesterday_character.txt
+          echo "File size: $(wc -l < character/.delta_yesterday_character.txt) lines"
           if [ -f ".magelo_update_date" ]; then
-            cp .magelo_update_date .magelo_previous_dump_date.txt
             cp .magelo_update_date .delta_yesterday_magelo_date.txt
-            echo "✓ Saved Magelo stamp for previous dump:"; head -1 .magelo_previous_dump_date.txt
+            echo "✓ Backed up yesterday stamp:"; head -1 .delta_yesterday_magelo_date.txt
           fi
           
-          # Verify the copy succeeded
-          if [ ! -f "character/TAKP_character_previous.txt" ]; then
-            echo "⚠ ERROR: Failed to create previous character file"
+          # Verify the backup succeeded
+          if [ ! -f "character/.delta_yesterday_character.txt" ]; then
+            echo "⚠ ERROR: Failed to create yesterday character backup"
             exit 1
           fi
         else
@@ -153,26 +151,23 @@ jobs:
         fi
         
         if [ -f "inventory/TAKP_character_inventory.txt" ]; then
-          cp inventory/TAKP_character_inventory.txt inventory/TAKP_character_inventory_previous.txt
           cp inventory/TAKP_character_inventory.txt inventory/.delta_yesterday_inventory.txt
-          echo "✓ Copied yesterday's inventory file to previous and backup"
-          ls -lh inventory/TAKP_character_inventory_previous.txt
-          echo "File size: $(wc -l < inventory/TAKP_character_inventory_previous.txt) lines"
+          echo "✓ Backed up yesterday inventory dump"
+          ls -lh inventory/.delta_yesterday_inventory.txt
+          echo "File size: $(wc -l < inventory/.delta_yesterday_inventory.txt) lines"
           
-          # Verify the copy succeeded
-          if [ ! -f "inventory/TAKP_character_inventory_previous.txt" ]; then
-            echo "⚠ ERROR: Failed to create previous inventory file"
+          if [ ! -f "inventory/.delta_yesterday_inventory.txt" ]; then
+            echo "⚠ ERROR: Failed to create yesterday inventory backup"
             exit 1
           fi
         else
           echo "⚠ Yesterday's inventory file not found in cache"
         fi
         
-        if [ -f "character/TAKP_character_previous.txt" ] && [ -f "inventory/TAKP_character_inventory_previous.txt" ]; then
-          echo "✓ Previous files ready for delta comparison"
-          echo "These files contain YESTERDAY's data and will be compared against TODAY's data"
+        if [ -f "character/.delta_yesterday_character.txt" ] && [ -f "inventory/.delta_yesterday_inventory.txt" ]; then
+          echo "✓ Yesterday backups ready for fingerprint verify (not copied to _previous yet)"
         else
-          echo "⚠ No previous files found - delta page will not be generated"
+          echo "⚠ No yesterday backups - delta page will not be generated"
           echo "This is expected if yesterday's cache doesn't exist or expired"
         fi
     
@@ -376,6 +371,8 @@ jobs:
         exit 1
 
     - name: Copy yesterday backup into _previous (fingerprint verify)
+      id: refresh-previous
+      continue-on-error: true
       if: steps.yesterday.outputs.yesterday_date != '' && steps.cache-yesterday.outputs.cache-hit == 'true'
       env:
         EXPECTED_YESTERDAY_DATE: ${{ steps.yesterday.outputs.yesterday_date }}
@@ -384,8 +381,28 @@ jobs:
         YESTERDAY_STAMP: .delta_yesterday_magelo_date.txt
       run: |
         python3 scripts/refresh_magelo_previous_from_yesterday_cache.py
+
+    - name: Fallback when yesterday cache content is stale
+      id: stale-yesterday-fallback
+      if: steps.yesterday.outputs.yesterday_date != '' && steps.cache-yesterday.outputs.cache-hit == 'true' && steps.refresh-previous.outcome == 'failure'
+      env:
+        EXPORT_DATE: ${{ steps.check-update.outputs.normalized_date }}
+      run: |
+        rm -f character/TAKP_character_previous.txt inventory/TAKP_character_inventory_previous.txt .magelo_previous_dump_date.txt
+        if [ -z "$EXPORT_DATE" ] || [ "$EXPORT_DATE" = "unknown" ]; then
+          echo "::error::Yesterday cache failed verify and export date unknown — cannot fall back."
+          exit 1
+        fi
+        if python3 scripts/check_gear_manifest_date.py --date "$EXPORT_DATE"; then
+          echo "::warning::magelo-dump-${{ steps.yesterday.outputs.yesterday_date }} failed fingerprint/stamp verify (likely wrong-era blob under cache key). Skipping dump diff; gear_events manifest already has $EXPORT_DATE."
+          echo "skip_dump_delta=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "::error::Yesterday cache failed verify and gear_events manifest lacks $EXPORT_DATE. Cannot proceed without valid _previous."
+          exit 1
+        fi
     
     - name: Verify current vs previous (delta input check)
+      if: steps.stale-yesterday-fallback.outputs.skip_dump_delta != 'true'
       run: |
         echo "=== Delta input check: current vs previous ==="
         if [ ! -f "character/TAKP_character_previous.txt" ] || [ ! -f "character/TAKP_character.txt" ]; then
