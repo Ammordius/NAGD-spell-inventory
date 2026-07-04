@@ -29,6 +29,99 @@ LORE_ITEM = "90001"
 NON_LORE_ITEM = "90002"
 
 
+def _build_possession_map_naive(
+    baseline_inv: dict,
+    gear_events: list[dict],
+    up_to_date: str,
+    *,
+    no_rent: set | None = None,
+) -> dict[str, dict[str, int]]:
+    """Reference O(chars × events) implementation for parity checks."""
+    from collections import defaultdict
+
+    no_rent = no_rent or set()
+    counts_by_char: dict[str, dict[str, int]] = {}
+    all_chars = set((baseline_inv or {}).keys())
+    for ev in gear_events or []:
+        d = ev.get("d", "")
+        if d and d <= up_to_date and ev.get("c"):
+            all_chars.add(ev["c"])
+
+    for char_name in all_chars:
+        counts: dict[str, int] = defaultdict(int)
+        for item in (baseline_inv or {}).get(char_name, []):
+            iid = str(item.get("item_id", "")).strip()
+            if not iid or iid.upper() == "NULL":
+                continue
+            try:
+                if int(iid) in no_rent:
+                    continue
+            except (ValueError, TypeError):
+                pass
+            try:
+                if int(iid) == 0:
+                    continue
+            except (ValueError, TypeError):
+                pass
+            counts[iid] += 1
+
+        for ev in sorted(
+            gear_events or [],
+            key=lambda e: (e.get("d", ""), e.get("c", ""), e.get("i", "")),
+        ):
+            if ev.get("c") != char_name:
+                continue
+            d = ev.get("d", "")
+            if not d or d > up_to_date:
+                continue
+            item_id = str(ev.get("i", ""))
+            if not item_id:
+                continue
+            try:
+                if int(item_id) in no_rent:
+                    continue
+            except (ValueError, TypeError):
+                pass
+            sign = int(ev.get("s") or 0)
+            n = int(ev.get("n") or 0)
+            if n <= 0 or sign not in (1, -1):
+                continue
+            if sign > 0:
+                counts[item_id] += n
+            else:
+                counts[item_id] -= n
+                if counts[item_id] <= 0:
+                    counts.pop(item_id, None)
+
+        cleaned = {k: v for k, v in counts.items() if v > 0}
+        if cleaned:
+            counts_by_char[char_name] = cleaned
+    return counts_by_char
+
+
+class TestBuildPossessionMapIndexed(unittest.TestCase):
+    """Indexed build_possession_map matches naive reference on small fixtures."""
+
+    def test_matches_naive_multi_char_fixture(self):
+        baseline_inv = {
+            "Alice": [{"item_id": "100"}, {"item_id": "100"}],
+            "Bob": [{"item_id": "200"}],
+            "Empty": [],
+        }
+        gear_events = [
+            {"d": "2026-06-01", "c": "Alice", "i": "100", "s": -1, "n": 1},
+            {"d": "2026-06-02", "c": "Alice", "i": "300", "s": 1, "n": 2},
+            {"d": "2026-06-02", "c": "Bob", "i": "200", "s": -1, "n": 1},
+            {"d": "2026-06-03", "c": "Bob", "i": "400", "s": 1, "n": 1},
+            {"d": "2026-06-04", "c": "Carol", "i": "500", "s": 1, "n": 1},
+            {"d": "2026-06-05", "c": "Alice", "i": "300", "s": -1, "n": 1},
+        ]
+        for up_to in ("2026-06-01", "2026-06-03", "2026-06-05"):
+            expected = _build_possession_map_naive(baseline_inv, gear_events, up_to)
+            actual = build_possession_map(baseline_inv, gear_events, up_to)
+            self.assertEqual(actual, expected, msg=f"up_to={up_to}")
+
+
 class TestUniqueLootReacquire(unittest.TestCase):
     def test_cancel_paired_unique_events_drops_both(self):
         existing = [

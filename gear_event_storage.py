@@ -792,6 +792,23 @@ def possession_from_inv_snapshot(inv_data: dict | None) -> dict[str, dict[str, i
     return out
 
 
+def _gear_events_by_char_up_to(
+    gear_events: list[dict],
+    up_to_date: str,
+) -> dict[str, list[dict]]:
+    """Index gear events by character, keeping only rows with ``d <= up_to_date``."""
+    by_char: dict[str, list[dict]] = defaultdict(list)
+    for ev in gear_events or []:
+        d = ev.get("d", "")
+        char_name = ev.get("c")
+        if not char_name or not d or d > up_to_date:
+            continue
+        by_char[char_name].append(ev)
+    for events in by_char.values():
+        events.sort(key=lambda e: (e.get("d", ""), str(e.get("i", "")), int(e.get("s") or 0)))
+    return by_char
+
+
 def build_possession_map(
     baseline_inv: dict,
     gear_events: list[dict],
@@ -802,15 +819,16 @@ def build_possession_map(
     """Absolute item counts per character at end of ``up_to_date`` (baseline + events)."""
     no_rent = no_rent or set()
     counts_by_char: dict[str, dict[str, int]] = {}
-    all_chars = set((baseline_inv or {}).keys())
-    for ev in gear_events or []:
-        d = ev.get("d", "")
-        if d and d <= up_to_date and ev.get("c"):
-            all_chars.add(ev["c"])
+    events_by_char = _gear_events_by_char_up_to(gear_events, up_to_date)
+    all_chars = set((baseline_inv or {}).keys()) | set(events_by_char.keys())
 
     for char_name in all_chars:
+        baseline_items = (baseline_inv or {}).get(char_name, [])
+        char_events = events_by_char.get(char_name, [])
+        if not baseline_items and not char_events:
+            continue
         counts: dict[str, int] = defaultdict(int)
-        for item in (baseline_inv or {}).get(char_name, []):
+        for item in baseline_items:
             iid = str(item.get("item_id", "")).strip()
             if not iid or iid.upper() == "NULL":
                 continue
@@ -826,12 +844,7 @@ def build_possession_map(
                 pass
             counts[iid] += 1
 
-        for ev in sorted(gear_events or [], key=lambda e: (e.get("d", ""), e.get("c", ""), e.get("i", ""))):
-            if ev.get("c") != char_name:
-                continue
-            d = ev.get("d", "")
-            if not d or d > up_to_date:
-                continue
+        for ev in char_events:
             item_id = str(ev.get("i", ""))
             if not item_id:
                 continue

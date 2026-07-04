@@ -3472,23 +3472,35 @@ def generate_delta_history(base_dir):
             return gear.filter(ev => ev.d && ev.d <= endDate);
         }
 
+        function indexGearEventsByChar(gearEventsUpTo) {
+            const eventsByChar = new Map();
+            for (const ev of gearEventsUpTo || []) {
+                const c = ev.c;
+                if (!c) continue;
+                if (!eventsByChar.has(c)) eventsByChar.set(c, []);
+                eventsByChar.get(c).push(ev);
+            }
+            return eventsByChar;
+        }
+
         function buildInventoryAbsMapFromEvents(baseline, gearEventsUpTo) {
             const invBase = (baseline && baseline.inventories) || {};
+            const eventsByChar = indexGearEventsByChar(gearEventsUpTo);
             const allChars = new Set(Object.keys(invBase));
-            for (const ev of gearEventsUpTo || []) {
-                if (ev.c) allChars.add(ev.c);
-            }
+            for (const c of eventsByChar.keys()) allChars.add(c);
             const out = {};
             for (const charName of allChars) {
+                const baselineItems = invBase[charName] || [];
+                const charEvents = eventsByChar.get(charName) || [];
+                if (!baselineItems.length && !charEvents.length) continue;
                 const counts = {};
-                for (const item of (invBase[charName] || [])) {
+                for (const item of baselineItems) {
                     let id = String(item.item_id);
                     if (NO_RENT_ITEMS.has(id)) continue;
                     if (!id || id.toUpperCase() === 'NULL' || id === '0') continue;
                     counts[id] = (counts[id] || 0) + 1;
                 }
-                for (const ev of gearEventsUpTo || []) {
-                    if (ev.c !== charName) continue;
+                for (const ev of charEvents) {
                     const itemId = String(ev.i);
                     const sign = Number(ev.s);
                     const n = Number(ev.n) || 0;
@@ -4113,6 +4125,8 @@ def generate_delta_history(base_dir):
                             ]);
                             const charUpToStart = charUpToEnd.filter(ev => ev.d && ev.d <= start);
                             const gearUpToStart = gearUpToEnd.filter(ev => ev.d && ev.d <= start);
+                            outputDiv.innerHTML = '<p>Computing inventory snapshots...</p>';
+                            await new Promise(r => setTimeout(r, 0));
                             startState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToStart);
                             endState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToEnd);
                             absStartInv = buildInventoryAbsMapFromEvents(baselineResult.baseline, gearUpToStart);

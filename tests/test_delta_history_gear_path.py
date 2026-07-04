@@ -74,6 +74,9 @@ class TestGenerateDeltaHistoryGuildEmbed(unittest.TestCase):
         self.assertIn('id="unique-tracked-ids"', html)
         self.assertIn("UNIQUE_TRACKED_IDS", html)
         self.assertIn("buildInventoryAbsMapFromEvents", html)
+        self.assertIn("indexGearEventsByChar", html)
+        self.assertIn("eventsByChar", html)
+        self.assertIn("Computing inventory snapshots", html)
         self.assertIn("loadGearEventsUpTo", html)
 
 
