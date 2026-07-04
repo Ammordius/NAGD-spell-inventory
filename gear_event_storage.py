@@ -13,6 +13,7 @@ import gzip
 import json
 import os
 import re
+import statistics
 from collections import defaultdict
 from datetime import datetime
 from typing import Any
@@ -21,6 +22,91 @@ GEAR_EVENTS_DIR = "gear_events"
 GEAR_SHARD_RE = re.compile(r"^gear_(\d{4}-\d{2})\.json\.gz$")
 CHAR_SHARD_RE = re.compile(r"^char_(\d{4}-\d{2})\.json\.gz$")
 MANIFEST_FILE = "manifest.json"
+
+# Match scripts/audit_gear_events.py default anomaly threshold.
+DEFAULT_EVENT_INFLATION_MEDIAN_FACTOR = 5.0
+
+
+class GearEventInflationError(RuntimeError):
+    """Raised when a day-over-day delta would write far more events than recent history."""
+
+
+def manifest_median_day_total(
+    base_dir: str,
+    date_str: str,
+    *,
+    window: int = 14,
+    min_samples: int = 7,
+) -> float | None:
+    """Median gear+char event count for manifest days strictly before ``date_str``."""
+    path = _manifest_path(base_dir)
+    if not os.path.isfile(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+    days_meta = manifest.get("days") or {}
+    totals: list[int] = []
+    for d in sorted(days_meta.keys()):
+        if d >= date_str:
+            continue
+        meta = days_meta[d] or {}
+        totals.append(int(meta.get("gear") or 0) + int(meta.get("char") or 0))
+    recent = totals[-window:]
+    if len(recent) < min_samples:
+        return None
+    return float(statistics.median(recent))
+
+
+def _manifest_day_total(base_dir: str, date_str: str) -> int | None:
+    path = _manifest_path(base_dir)
+    if not os.path.isfile(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+    meta = (manifest.get("days") or {}).get(date_str) or {}
+    if not meta:
+        return None
+    return int(meta.get("gear") or 0) + int(meta.get("char") or 0)
+
+
+def guard_gear_event_write(
+    char_deltas: dict,
+    inv_deltas: dict,
+    date_str: str,
+    base_dir: str,
+    baseline_date: str | None = None,
+    *,
+    median_factor: float = DEFAULT_EVENT_INFLATION_MEDIAN_FACTOR,
+    min_excess: int = 2000,
+) -> None:
+    """Refuse writes that look like stale-cache / wrong-era dump inflation."""
+    gear_events, char_events = delta_shape_to_events(
+        char_deltas, inv_deltas, date_str, baseline_date
+    )
+    total = len(gear_events) + len(char_events)
+    existing = _manifest_day_total(base_dir, date_str)
+    if existing and existing > 0:
+        if total > existing * median_factor and total > existing + min_excess:
+            raise GearEventInflationError(
+                f"Refusing gear-event rewrite for {date_str}: estimated {total} events "
+                f"vs existing manifest {existing} ({total / existing:.1f}x). "
+                "Keeping prior shard; check Magelo _previous cache alignment."
+            )
+    med = manifest_median_day_total(base_dir, date_str)
+    if med is None or med <= 0:
+        return
+    if total > med * median_factor and total > med + min_excess:
+        raise GearEventInflationError(
+            f"Refusing gear-event write for {date_str}: estimated {total} events "
+            f"vs recent manifest median {med:.0f} ({total / med:.1f}x). "
+            "Check Magelo _previous cache alignment or dump date span."
+        )
 
 
 def _month_key(date_str: str) -> str:
@@ -183,6 +269,13 @@ def append_day_events_from_deltas(
     unique_tracked_ids: set[str] | None = None,
 ) -> tuple[int, int]:
     """Append gear/stat events for one calendar day from precomputed day-over-day deltas."""
+    try:
+        guard_gear_event_write(
+            char_deltas, inv_deltas, date_str, base_dir, baseline_date
+        )
+    except GearEventInflationError as e:
+        print(f"::warning::{e}")
+        return 0, 0
     gear_events, char_events = delta_shape_to_events(
         char_deltas, inv_deltas, date_str, baseline_date
     )

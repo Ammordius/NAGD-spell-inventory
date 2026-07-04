@@ -21,9 +21,11 @@ from gear_event_storage import (  # noqa: E402
     gear_events_to_inv_deltas,
     get_day_delta_from_events,
     get_range_delta_from_events,
+    guard_gear_event_write,
     inv_deltas_to_gear_events,
     list_available_event_dates,
     load_gear_events,
+    manifest_median_day_total,
 )
 
 
@@ -123,6 +125,61 @@ class TestGearEventRoundTrip(unittest.TestCase):
         flags = detect_oscillations(hist, window_days=7)
         self.assertEqual(len(flags), 1)
         self.assertEqual(flags[0]["pattern"], [1, -1, 1])
+
+
+class TestGearEventInflationGuard(unittest.TestCase):
+    def test_manifest_median_ignores_target_day(self):
+        td = tempfile.mkdtemp()
+        base = os.path.join(td, "delta_snapshots", "gear_events")
+        os.makedirs(base)
+        days = {}
+        for i in range(1, 15):
+            d = f"2026-06-{i:02d}"
+            days[d] = {"gear": 900, "char": 100}
+        days["2026-06-15"] = {"gear": 50000, "char": 8000}
+        with open(os.path.join(base, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "days": days}, f)
+        med = manifest_median_day_total(os.path.join(td, "delta_snapshots"), "2026-06-15")
+        self.assertAlmostEqual(med, 1000.0)
+
+    def test_guard_rejects_inflated_write(self):
+        td = tempfile.mkdtemp()
+        snap = os.path.join(td, "delta_snapshots")
+        ge = os.path.join(snap, "gear_events")
+        os.makedirs(ge)
+        days = {f"2026-06-{i:02d}": {"gear": 900, "char": 100} for i in range(1, 15)}
+        with open(os.path.join(ge, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "days": days}, f)
+        huge_inv = {
+            f"Char{n}": {"added": {str(i): 1 for i in range(200)}, "removed": {}, "item_names": {}}
+            for n in range(300)
+        }
+        gear_n, char_n = append_day_events_from_deltas(
+            {}, huge_inv, "2026-06-15", snap, "2026-02-09"
+        )
+        self.assertEqual((gear_n, char_n), (0, 0))
+
+    def test_guard_keeps_existing_sane_day(self):
+        td = tempfile.mkdtemp()
+        snap = os.path.join(td, "delta_snapshots")
+        ge = os.path.join(snap, "gear_events")
+        os.makedirs(ge)
+        days = {f"2026-06-{i:02d}": {"gear": 900, "char": 100} for i in range(1, 15)}
+        days["2026-06-15"] = {"gear": 920, "char": 130}
+        with open(os.path.join(ge, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "days": days}, f)
+        with gzip.open(os.path.join(ge, "gear_2026-06.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump([{"d": "2026-06-15", "c": "A", "i": "1", "s": 1, "n": 1, "v": 0}], f)
+        huge_inv = {
+            f"Char{n}": {"added": {str(i): 1 for i in range(200)}, "removed": {}, "item_names": {}}
+            for n in range(300)
+        }
+        gear_n, char_n = append_day_events_from_deltas(
+            {}, huge_inv, "2026-06-15", snap, "2026-02-09"
+        )
+        self.assertEqual((gear_n, char_n), (0, 0))
+        with gzip.open(os.path.join(ge, "gear_2026-06.json.gz"), "rt", encoding="utf-8") as f:
+            self.assertEqual(len(json.load(f)), 1)
 
 
 class TestGearEventParityWithRepo(unittest.TestCase):
