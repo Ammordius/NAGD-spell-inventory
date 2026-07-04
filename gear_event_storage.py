@@ -920,6 +920,116 @@ def baseline_only_item_ids(
     return {iid: cnt for iid, cnt in holdings.items() if iid not in touched}
 
 
+def build_tracked_gear_event_log_rows(
+    gear_events: list[dict],
+    char_name: str,
+    tracked_ids: set[str] | frozenset,
+    name_map: dict | None = None,
+    *,
+    unique_tracked_ids: set[str] | None = None,
+    baseline: dict | None = None,
+    no_rent: set[str] | None = None,
+    source_label: dict | None = None,
+) -> list[dict]:
+    """Dated tracked-item +/- rows for one character (lore reacquire guard applied)."""
+    tracked_ids = {str(i) for i in (tracked_ids or set())}
+    if not tracked_ids:
+        return []
+    unique_tracked_ids = {str(i) for i in (unique_tracked_ids or set())}
+    no_rent = {str(i) for i in (no_rent or set())}
+    name_map = name_map or {}
+    source_label = source_label or {}
+
+    holdings: dict[str, int] = {}
+    baseline_items = ((baseline or {}).get("inventories") or {}).get(char_name) or []
+    for item in baseline_items:
+        iid = str(item.get("item_id", ""))
+        if not iid or iid.upper() == "NULL" or iid == "0" or iid in no_rent:
+            continue
+        holdings[iid] = holdings.get(iid, 0) + 1
+
+    rows: list[dict] = []
+    char_events = sorted(
+        filter_events_for_char(gear_events, char_name),
+        key=lambda e: (e.get("d") or "", str(e.get("i") or "")),
+    )
+
+    for ev in char_events:
+        if ev.get("v"):
+            continue
+        sign = int(ev.get("s") or 0)
+        n = int(ev.get("n") or 0)
+        iid = str(ev.get("i", ""))
+        if not iid or n <= 0 or sign not in (1, -1) or iid in no_rent:
+            continue
+
+        is_tracked = iid in tracked_ids
+        if is_tracked and sign > 0 and iid in unique_tracked_ids and holdings.get(iid, 0) > 0:
+            continue
+
+        if is_tracked:
+            rows.append(
+                {
+                    "date": ev.get("d") or "",
+                    "sign": sign,
+                    "count": n,
+                    "item_id": iid,
+                    "item_name": name_map.get(iid) or f"Item {iid}",
+                    "source": source_label.get(iid, ""),
+                }
+            )
+
+        if sign > 0:
+            holdings[iid] = holdings.get(iid, 0) + n
+        else:
+            holdings[iid] = holdings.get(iid, 0) - n
+            if holdings.get(iid, 0) <= 0:
+                holdings.pop(iid, None)
+
+    return rows
+
+
+def group_tracked_rows_by_date(rows: list[dict]) -> dict[str, dict[str, list[dict]]]:
+    """Group tracked log rows by date into acquired and lost lists."""
+    grouped: dict[str, dict[str, list[dict]]] = {}
+    for row in rows or []:
+        date_key = row.get("date") or ""
+        if date_key not in grouped:
+            grouped[date_key] = {"acquired": [], "lost": []}
+        bucket = "acquired" if int(row.get("sign") or 0) > 0 else "lost"
+        grouped[date_key][bucket].append(row)
+    return grouped
+
+
+def group_tracked_rows_by_zone(
+    rows: list[dict],
+    item_zone: dict | None = None,
+    item_mob: dict | None = None,
+) -> dict[str, dict[str, list[dict]]]:
+    """Group tracked log rows by zone then mob (delta Items-by-Zone shape)."""
+    item_zone = item_zone or {}
+    item_mob = item_mob or {}
+    out: dict[str, dict[str, list[dict]]] = {}
+    for row in rows or []:
+        iid = str(row.get("item_id") or "")
+        zone = item_zone.get(iid) or "Other"
+        mob = item_mob.get(iid) or ""
+        out.setdefault(zone, {}).setdefault(mob, []).append(row)
+    return out
+
+
+def baseline_only_tracked_item_ids(
+    holdings: dict[str, int],
+    gear_events: list[dict],
+    char_name: str,
+    tracked_ids: set[str] | frozenset,
+) -> dict[str, int]:
+    """Tracked items held since baseline with no gear events for this character."""
+    tracked_ids = {str(i) for i in (tracked_ids or set())}
+    only = baseline_only_item_ids(holdings, gear_events, char_name)
+    return {iid: cnt for iid, cnt in only.items() if iid in tracked_ids}
+
+
 def _days_between(date_a: str | None, date_b: str | None) -> int:
     """Absolute calendar-day gap between two YYYY-MM-DD strings."""
     if not date_a or not date_b:

@@ -2978,7 +2978,8 @@ def _gear_event_page_embed_config(base_dir: str) -> dict:
     import glob
 
     delta_snapshots_dir = os.path.join(base_dir, "delta_snapshots")
-    tracked_ids, _, _, _ = load_tracked_item_ids()
+    tracked_ids, tracked_source_label, item_zone, item_mob = load_tracked_item_ids()
+    unique_tracked = load_unique_tracked_item_ids(tracked_ids)
     gear_shard_months: list[str] = []
     use_gear_events = gear_events_available(delta_snapshots_dir)
     gear_event_manifest: dict = {}
@@ -3012,6 +3013,10 @@ def _gear_event_page_embed_config(base_dir: str) -> dict:
     no_rent_for_js = sorted(int(x) for x in (load_no_rent_items() or set()))
     return {
         "tracked_ids_json": json.dumps(list(tracked_ids)),
+        "tracked_source_label_json": json.dumps(tracked_source_label),
+        "tracked_item_zone_json": json.dumps(item_zone),
+        "tracked_item_mob_json": json.dumps(item_mob),
+        "unique_tracked_ids_json": json.dumps(list(unique_tracked)),
         "gear_shard_months_json": json.dumps(gear_shard_months),
         "use_gear_events_json": "true" if use_gear_events else "false",
         "gear_event_manifest_json": json.dumps(gear_event_manifest),
@@ -5623,6 +5628,13 @@ def generate_char_timeline(base_dir):
         .note { font-size: 0.9em; color: #757575; background: #fafafa; padding: 10px; border-radius: 5px; border-left: 4px solid #9e9e9e; margin: 12px 0; }
         a.back { color: #667eea; }
         .item-badge { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e3f2fd; border-radius: 4px; }
+        .tracked-section { margin: 20px 0 28px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1; }
+        .tracked-tabs { margin: 12px 0; }
+        .tracked-tab { display: inline-block; padding: 8px 16px; margin-right: 8px; border: 1px solid #FF9800; border-radius: 4px; background: #fff; cursor: pointer; font-weight: bold; color: #555; }
+        .tracked-tab.active { background: #FF9800; color: #fff; border-color: #FF9800; }
+        .tracked-zone-card { margin: 16px 0; padding: 12px; border: 1px solid #ddd; border-radius: 5px; background: #f5f5f5; }
+        .item-added { background: #e8f5e9; }
+        .item-removed { background: #ffebee; }
     </style>
 </head>
 <body>
@@ -5643,12 +5655,22 @@ def generate_char_timeline(base_dir):
     <script type="application/json" id="item-id-to-name">""" + cfg["item_id_to_name_json"].replace("</", "<\\/") + """</script>
     <script type="application/json" id="char-guild-map">""" + cfg["char_guild_map_json"].replace("</", "<\\/") + """</script>
     <script type="application/json" id="no-rent-item-ids">""" + cfg["no_rent_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="tracked-item-ids">""" + cfg["tracked_ids_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="tracked-source-label">""" + cfg["tracked_source_label_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="tracked-item-zone">""" + cfg["tracked_item_zone_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="tracked-item-mob">""" + cfg["tracked_item_mob_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="unique-tracked-ids">""" + cfg["unique_tracked_ids_json"].replace("</", "<\\/") + """</script>
     <script>
         const GEAR_EVENT_SHARD_MONTHS = JSON.parse(document.getElementById('gear-event-shard-months').textContent);
         const GEAR_EVENT_MANIFEST = JSON.parse(document.getElementById('gear-event-manifest').textContent);
         const ITEM_ID_TO_NAME = JSON.parse(document.getElementById('item-id-to-name').textContent);
         const CHAR_GUILD_MAP = JSON.parse(document.getElementById('char-guild-map').textContent);
         const NO_RENT_ITEMS = new Set(JSON.parse(document.getElementById('no-rent-item-ids').textContent).map(String));
+        const TRACKED_ITEM_IDS = new Set(JSON.parse(document.getElementById('tracked-item-ids').textContent).map(String));
+        const TRACKED_SOURCE_LABEL = JSON.parse(document.getElementById('tracked-source-label').textContent);
+        const TRACKED_ITEM_ZONE = JSON.parse(document.getElementById('tracked-item-zone').textContent);
+        const TRACKED_ITEM_MOB = JSON.parse(document.getElementById('tracked-item-mob').textContent);
+        const UNIQUE_TRACKED_IDS = new Set(JSON.parse(document.getElementById('unique-tracked-ids').textContent).map(String));
         const LATEST_DATE = """ + latest_date + """;
         const USE_GEAR_EVENTS = """ + cfg["use_gear_events_json"] + """;
 
@@ -5880,6 +5902,147 @@ def generate_char_timeline(base_dir):
             return out;
         }
 
+        function buildTrackedGearEventLog(gearEvents, charName, nameMap, baseline) {
+            if (!TRACKED_ITEM_IDS.size) return [];
+            const holdings = {};
+            for (const item of ((baseline.inventories || {})[charName] || [])) {
+                const id = String(item.item_id);
+                if (!id || id.toUpperCase() === 'NULL' || id === '0' || NO_RENT_ITEMS.has(id)) continue;
+                holdings[id] = (holdings[id] || 0) + 1;
+            }
+            const rows = [];
+            const sorted = filterEventsForChar(gearEvents, charName)
+                .sort((a, b) => (a.d || '').localeCompare(b.d || '') || String(a.i).localeCompare(String(b.i)));
+            for (const ev of sorted) {
+                if (ev.v) continue;
+                const sign = Number(ev.s);
+                const n = Number(ev.n) || 0;
+                const iid = String(ev.i);
+                if (!iid || n <= 0 || (sign !== 1 && sign !== -1) || NO_RENT_ITEMS.has(iid)) continue;
+                const isTracked = TRACKED_ITEM_IDS.has(iid);
+                if (isTracked && sign > 0 && UNIQUE_TRACKED_IDS.has(iid) && (holdings[iid] || 0) > 0) continue;
+                if (isTracked) {
+                    rows.push({
+                        date: ev.d,
+                        sign: sign,
+                        count: n,
+                        itemId: iid,
+                        itemName: nameMap[iid] || ('Item ' + iid),
+                        source: TRACKED_SOURCE_LABEL[iid] || ''
+                    });
+                }
+                if (sign > 0) holdings[iid] = (holdings[iid] || 0) + n;
+                else {
+                    holdings[iid] = (holdings[iid] || 0) - n;
+                    if (holdings[iid] <= 0) delete holdings[iid];
+                }
+            }
+            return rows;
+        }
+
+        function baselineOnlyTracked(holdings, gearEvents, charName) {
+            const only = baselineOnlyItems(holdings, gearEvents, charName);
+            const out = {};
+            for (const [id, cnt] of Object.entries(only)) {
+                if (TRACKED_ITEM_IDS.has(id)) out[id] = cnt;
+            }
+            return out;
+        }
+
+        function renderTrackedItemsSection(trackedRows, sinceBaselineTracked, baselineDateStr, nameMap) {
+            if (!TRACKED_ITEM_IDS.size) return '';
+            let html = '<div class="tracked-section" id="tracked-items">';
+            html += '<h2 style="margin-top:0;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>';
+            html += '<p><em>Raid loot, elemental armor, and praesterium items for this character.</em></p>';
+            html += '<div class="tracked-tabs">';
+            html += '<button type="button" class="tracked-tab active" data-tab="timeline">Timeline</button>';
+            html += '<button type="button" class="tracked-tab" data-tab="zone">By Zone</button>';
+            html += '</div>';
+
+            html += '<div id="tracked-timeline-view">';
+            if (trackedRows.length) {
+                html += '<table><thead><tr><th>Date</th><th>Change</th><th>Item</th><th>Source</th></tr></thead><tbody>';
+                for (const row of trackedRows) {
+                    const sign = row.sign > 0
+                        ? '<span class="pos">+' + row.count + '</span>'
+                        : '<span class="neg">-' + row.count + '</span>';
+                    const badgeClass = row.sign > 0 ? 'item-added' : 'item-removed';
+                    const qty = row.count > 1 ? ' x' + row.count : '';
+                    html += '<tr><td>' + esc(row.date) + '</td><td>' + sign + '</td><td>'
+                        + '<span class="item-badge ' + badgeClass + '"><a href="https://www.takproject.net/allaclone/item.php?id=' + row.itemId + '" target="_blank">'
+                        + esc(row.itemName) + '</a>' + qty + '</span></td><td>'
+                        + esc(row.source || '—') + '</td></tr>';
+                }
+                html += '</tbody></table>';
+            } else {
+                html += '<p class="vis">No tracked item changes recorded for this character.</p>';
+            }
+            html += '</div>';
+
+            html += '<div id="tracked-zone-view" style="display:none;">';
+            if (trackedRows.length) {
+                const byZone = {};
+                for (const row of trackedRows) {
+                    const zone = TRACKED_ITEM_ZONE[row.itemId] || 'Other';
+                    const mob = TRACKED_ITEM_MOB[row.itemId] || '';
+                    if (!byZone[zone]) byZone[zone] = {};
+                    if (!byZone[zone][mob]) byZone[zone][mob] = [];
+                    byZone[zone][mob].push(row);
+                }
+                for (const zone of Object.keys(byZone).sort()) {
+                    html += '<div class="tracked-zone-card"><h3 style="margin-top:0;">' + esc(zone) + '</h3>';
+                    const mobKeys = Object.keys(byZone[zone]).sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)));
+                    for (const mob of mobKeys) {
+                        if (mob) html += '<h4 style="margin:12px 0 6px;font-size:1em;color:#555;">' + esc(mob) + '</h4>';
+                        html += '<ul style="margin:0;padding-left:20px;">';
+                        for (const row of byZone[zone][mob]) {
+                            const signLabel = row.sign > 0 ? '+' : '-';
+                            const qty = row.count > 1 ? ' x' + row.count : '';
+                            html += '<li><span style="color:#666;">' + esc(row.date) + '</span> — '
+                                + '<span class="' + (row.sign > 0 ? 'pos' : 'neg') + '">' + signLabel + row.count + '</span> '
+                                + '<a href="https://www.takproject.net/allaclone/item.php?id=' + row.itemId + '" target="_blank" style="color:#2e7d32;">'
+                                + esc(row.itemName) + '</a>' + qty + '</li>';
+                        }
+                        html += '</ul>';
+                    }
+                    html += '</div>';
+                }
+            } else {
+                html += '<p class="vis">No tracked item changes recorded for this character.</p>';
+            }
+            html += '</div>';
+
+            if (Object.keys(sinceBaselineTracked).length) {
+                html += '<p class="note" style="margin-bottom:0;"><strong>Held since baseline (' + esc(baselineDateStr) + '):</strong> ';
+                const parts = Object.keys(sinceBaselineTracked).sort((a, b) =>
+                    (nameMap[a] || a).localeCompare(nameMap[b] || b)
+                ).map(id => esc(nameMap[id] || ('Item ' + id)) + (sinceBaselineTracked[id] > 1 ? ' x' + sinceBaselineTracked[id] : ''));
+                html += parts.join(', ') + '</p>';
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function bindTrackedTabs() {
+            const tabs = document.querySelectorAll('.tracked-tab');
+            const timelineView = document.getElementById('tracked-timeline-view');
+            const zoneView = document.getElementById('tracked-zone-view');
+            tabs.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    btn.classList.add('active');
+                    const tab = btn.getAttribute('data-tab');
+                    if (tab === 'zone') {
+                        timelineView.style.display = 'none';
+                        zoneView.style.display = 'block';
+                    } else {
+                        timelineView.style.display = 'block';
+                        zoneView.style.display = 'none';
+                    }
+                });
+            });
+        }
+
         function esc(s) {
             return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
         }
@@ -5924,8 +6087,17 @@ def generate_char_timeline(base_dir):
                 const holdings = buildCurrentHoldings(baseline, charGear, CHAR_NAME);
                 const sinceBaseline = baselineOnlyItems(holdings, charGear, CHAR_NAME);
                 const gearLog = buildGearEventLog(charGear, CHAR_NAME, nameMap);
+                const trackedRows = buildTrackedGearEventLog(charGear, CHAR_NAME, nameMap, baseline);
+                const sinceBaselineTracked = baselineOnlyTracked(holdings, charGear, CHAR_NAME);
 
                 let html = '';
+                html += renderTrackedItemsSection(
+                    trackedRows,
+                    sinceBaselineTracked,
+                    baseline.baseline_date || baselineDate,
+                    nameMap
+                );
+
                 html += '<h2>AA History</h2>';
                 if (aaRows.length) {
                     html += '<table><thead><tr><th>Date</th><th>Change</th><th>Total AA</th></tr></thead><tbody>';
@@ -5974,6 +6146,7 @@ def generate_char_timeline(base_dir):
 
                 content.innerHTML = html;
                 content.style.display = 'block';
+                bindTrackedTabs();
                 status.style.display = 'none';
             } catch (err) {
                 status.innerHTML = '<strong style="color:#c62828;">Error:</strong> ' + esc(err.message || err);
