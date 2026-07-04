@@ -12,9 +12,14 @@ if _MAGelo_ROOT not in sys.path:
 
 from generate_spell_page import (  # noqa: E402
     build_char_guild_map,
+    build_range_filter_index,
     build_tracked_item_id_to_name,
+    filter_tracked_deltas,
+    filter_zone_entries,
     generate_char_timeline,
     generate_delta_history,
+    item_matches_loot_filters,
+    normalize_loot_filters,
     _count_meaningful_char_deltas,
     _resolve_day_over_day_deltas,
     _warn_if_event_dump_divergence,
@@ -79,6 +84,152 @@ class TestGenerateDeltaHistoryGuildEmbed(unittest.TestCase):
         self.assertIn("eventsByChar", html)
         self.assertIn("Computing inventory snapshots", html)
         self.assertIn("loadGearEventsUpTo", html)
+        self.assertIn('id="report-filters"', html)
+        self.assertIn("buildReportHTML", html)
+        self.assertIn("buildRangeFilterIndex", html)
+        self.assertIn("loot-filter-zone", html)
+
+
+class TestLootFilterHelpers(unittest.TestCase):
+    """Python mirrors of delta-history loot filter JS helpers."""
+
+    ZONE_MAP = {"100": "Plane of Time", "200": "Praesterium", "300": "Kunark"}
+    MOB_MAP = {"100": "Emperor Salaris", "200": "", "300": "Trakanon"}
+    NAME_MAP = {"100": "Crown of Deceit", "200": "Shard of the Hand", "300": "Bone Chips"}
+
+    def _sample_zone_entries(self):
+        return {
+            "Plane of Time": {
+                "Emperor Salaris": [
+                    {"charName": "Alice", "itemId": "100", "name": "Crown of Deceit"},
+                ],
+            },
+            "Praesterium": {
+                "": [
+                    {"charName": "Bob", "itemId": "200", "name": "Shard of the Hand"},
+                ],
+            },
+        }
+
+    def _sample_tracked_deltas(self):
+        return {
+            "Alice": {
+                "added": {"100": 1},
+                "removed": {},
+                "item_names": {"100": "Crown of Deceit"},
+                "is_visibility_change": False,
+            },
+            "Bob": {
+                "added": {"200": 1, "300": 2},
+                "removed": {"100": 1},
+                "item_names": {
+                    "200": "Shard of the Hand",
+                    "300": "Bone Chips",
+                    "100": "Crown of Deceit",
+                },
+                "is_visibility_change": False,
+            },
+            "Ghost": {
+                "added": {"100": 1},
+                "removed": {},
+                "item_names": {"100": "Crown of Deceit"},
+                "is_visibility_change": True,
+            },
+        }
+
+    def test_build_range_filter_index_from_zone_entries(self):
+        idx = build_range_filter_index(
+            self._sample_zone_entries(),
+            self._sample_tracked_deltas(),
+            self.NAME_MAP,
+            self.ZONE_MAP,
+            self.MOB_MAP,
+        )
+        self.assertEqual(idx["zones"], ["Plane of Time", "Praesterium"])
+        self.assertIn("Emperor Salaris", idx["mobsByZone"]["Plane of Time"])
+        names = {it["name"] for it in idx["items"]}
+        self.assertIn("Crown of Deceit", names)
+        self.assertIn("Shard of the Hand", names)
+        self.assertIn("Bone Chips", names)
+
+    def test_filter_zone_by_zone_substring(self):
+        filtered = filter_zone_entries(
+            self._sample_zone_entries(),
+            {"zone": "plane"},
+            self.ZONE_MAP,
+            self.MOB_MAP,
+            self.NAME_MAP,
+        )
+        self.assertEqual(list(filtered.keys()), ["Plane of Time"])
+        self.assertNotIn("Praesterium", filtered)
+
+    def test_filter_zone_by_mob_and_item_combined(self):
+        filtered = filter_zone_entries(
+            self._sample_zone_entries(),
+            {"mob": "emperor", "itemId": "100"},
+            self.ZONE_MAP,
+            self.MOB_MAP,
+            self.NAME_MAP,
+        )
+        self.assertEqual(len(filtered), 1)
+        entries = filtered["Plane of Time"]["Emperor Salaris"]
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["itemId"], "100")
+
+    def test_filter_tracked_deltas_by_item_name(self):
+        filtered = filter_tracked_deltas(
+            self._sample_tracked_deltas(),
+            {"itemName": "shard"},
+            self.ZONE_MAP,
+            self.MOB_MAP,
+            self.NAME_MAP,
+        )
+        self.assertEqual(list(filtered.keys()), ["Bob"])
+        self.assertIn("200", filtered["Bob"]["added"])
+        self.assertNotIn("300", filtered["Bob"]["added"])
+
+    def test_filter_no_matches_empty(self):
+        filtered = filter_zone_entries(
+            self._sample_zone_entries(),
+            {"zone": "Velious"},
+            self.ZONE_MAP,
+            self.MOB_MAP,
+            self.NAME_MAP,
+        )
+        self.assertEqual(filtered, {})
+        tracked = filter_tracked_deltas(
+            self._sample_tracked_deltas(),
+            {"itemId": "999"},
+            self.ZONE_MAP,
+            self.MOB_MAP,
+            self.NAME_MAP,
+        )
+        self.assertEqual(tracked, {})
+
+    def test_item_matches_and_normalize(self):
+        lf = normalize_loot_filters(
+            {"itemName": "Crown of Deceit"},
+            self.NAME_MAP,
+        )
+        self.assertEqual(lf["itemId"], "100")
+        self.assertTrue(
+            item_matches_loot_filters(
+                "100",
+                {"zone": "time", "mob": "salaris"},
+                self.ZONE_MAP,
+                self.MOB_MAP,
+                self.NAME_MAP,
+            )
+        )
+        self.assertFalse(
+            item_matches_loot_filters(
+                "200",
+                {"zone": "Plane of Time"},
+                self.ZONE_MAP,
+                self.MOB_MAP,
+                self.NAME_MAP,
+            )
+        )
 
 
 class TestBuildTrackedItemIdToName(unittest.TestCase):

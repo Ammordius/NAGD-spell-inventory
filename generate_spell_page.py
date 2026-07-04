@@ -3023,6 +3023,212 @@ def _gear_event_page_embed_config(base_dir: str) -> dict:
     }
 
 
+def normalize_loot_filters(filters, item_id_to_name=None):
+    """Normalize loot filter dict from delta-history UI (zone / mob / item)."""
+    item_id_to_name = item_id_to_name or {}
+    zone = (filters.get("zone") or "").strip()
+    mob = (filters.get("mob") or "").strip()
+    item_id = str(filters.get("itemId") or filters.get("item_id") or "").strip()
+    item_name = (filters.get("itemName") or filters.get("item_name") or "").strip()
+    if not item_id and item_name:
+        needle = item_name.lower()
+        for iid, name in item_id_to_name.items():
+            if (name or "").lower() == needle:
+                item_id = str(iid)
+                break
+    return {"zone": zone, "mob": mob, "itemId": item_id, "itemName": item_name}
+
+
+def item_matches_loot_filters(
+    item_id,
+    loot_filters,
+    tracked_item_zone,
+    tracked_item_mob,
+    item_id_to_name=None,
+):
+    """Return True if item passes active loot filters (AND logic)."""
+    item_id_to_name = item_id_to_name or {}
+    tracked_item_zone = tracked_item_zone or {}
+    tracked_item_mob = tracked_item_mob or {}
+    zone_f = loot_filters.get("zone") or ""
+    mob_f = loot_filters.get("mob") or ""
+    item_id_f = loot_filters.get("itemId") or ""
+    item_name_f = loot_filters.get("itemName") or ""
+    if not zone_f and not mob_f and not item_id_f and not item_name_f:
+        return True
+    sid = str(item_id)
+    if zone_f:
+        item_zone = tracked_item_zone.get(sid, "")
+        if zone_f.lower() not in item_zone.lower():
+            return False
+    if mob_f:
+        item_mob = tracked_item_mob.get(sid, "")
+        if mob_f.lower() not in item_mob.lower():
+            return False
+    if item_id_f:
+        if sid != str(item_id_f):
+            return False
+    elif item_name_f:
+        name = item_id_to_name.get(sid) or f"Item {sid}"
+        if item_name_f.lower() not in name.lower():
+            return False
+    return True
+
+
+def build_range_filter_index(
+    zone_entries,
+    tracked_deltas,
+    item_id_to_name=None,
+    tracked_item_zone=None,
+    tracked_item_mob=None,
+):
+    """Build autocomplete index from range report loot (zones, mobs, items present)."""
+    item_id_to_name = item_id_to_name or {}
+    tracked_item_zone = tracked_item_zone or {}
+    tracked_item_mob = tracked_item_mob or {}
+    zones = sorted(zone_entries.keys())
+    mobs_by_zone = {}
+    all_mobs = set()
+    items_seen = set()
+    items = []
+
+    for zone, mobs in zone_entries.items():
+        mob_list = []
+        for mob, entries in mobs.items():
+            mob_key = mob or ""
+            if mob_key not in mob_list:
+                mob_list.append(mob_key)
+            if mob_key:
+                all_mobs.add(mob_key)
+            for entry in entries:
+                iid = str(entry.get("itemId") or entry.get("item_id") or "")
+                if not iid or iid in items_seen:
+                    continue
+                items_seen.add(iid)
+                items.append(
+                    {
+                        "id": iid,
+                        "name": entry.get("name") or item_id_to_name.get(iid) or f"Item {iid}",
+                        "zone": zone,
+                        "mob": mob_key,
+                    }
+                )
+        mobs_by_zone[zone] = sorted(mob_list, key=lambda x: (x == "", x))
+
+    for _char_name, delta in (tracked_deltas or {}).items():
+        item_names = delta.get("item_names") or {}
+        for item_id in (delta.get("added") or {}):
+            sid = str(item_id)
+            if sid in items_seen:
+                continue
+            items_seen.add(sid)
+            items.append(
+                {
+                    "id": sid,
+                    "name": item_names.get(item_id)
+                    or item_names.get(sid)
+                    or item_id_to_name.get(sid)
+                    or f"Item {sid}",
+                    "zone": tracked_item_zone.get(sid, ""),
+                    "mob": tracked_item_mob.get(sid, ""),
+                }
+            )
+
+    items.sort(key=lambda x: x["name"].lower())
+    return {
+        "zones": zones,
+        "mobsByZone": mobs_by_zone,
+        "allMobs": sorted(all_mobs),
+        "items": items,
+    }
+
+
+def filter_zone_entries(
+    zone_entries,
+    loot_filters,
+    tracked_item_zone,
+    tracked_item_mob,
+    item_id_to_name=None,
+):
+    """Filter Items-by-Zone tree by loot filters."""
+    loot_filters = normalize_loot_filters(loot_filters, item_id_to_name)
+    if not any(loot_filters.get(k) for k in ("zone", "mob", "itemId", "itemName")):
+        return zone_entries
+    out = {}
+    zone_f = loot_filters.get("zone") or ""
+    mob_f = loot_filters.get("mob") or ""
+    for zone, mobs in zone_entries.items():
+        if zone_f and zone_f.lower() not in zone.lower():
+            continue
+        filtered_mobs = {}
+        for mob, entries in mobs.items():
+            mob_str = mob or ""
+            if mob_f and mob_f.lower() not in mob_str.lower():
+                continue
+            filtered_entries = [
+                e
+                for e in entries
+                if item_matches_loot_filters(
+                    e.get("itemId"),
+                    loot_filters,
+                    tracked_item_zone,
+                    tracked_item_mob,
+                    item_id_to_name,
+                )
+            ]
+            if filtered_entries:
+                filtered_mobs[mob] = filtered_entries
+        if filtered_mobs:
+            out[zone] = filtered_mobs
+    return out
+
+
+def filter_tracked_deltas(
+    tracked_deltas,
+    loot_filters,
+    tracked_item_zone,
+    tracked_item_mob,
+    item_id_to_name=None,
+):
+    """Filter tracked item deltas by loot filters; drops visibility-only rows."""
+    loot_filters = normalize_loot_filters(loot_filters, item_id_to_name)
+    if not any(loot_filters.get(k) for k in ("zone", "mob", "itemId", "itemName")):
+        return tracked_deltas
+    out = {}
+    for char_name, delta in (tracked_deltas or {}).items():
+        if delta.get("is_visibility_change"):
+            continue
+        added = {}
+        removed = {}
+        item_names = dict(delta.get("item_names") or {})
+        for item_id, count in (delta.get("added") or {}).items():
+            if item_matches_loot_filters(
+                item_id,
+                loot_filters,
+                tracked_item_zone,
+                tracked_item_mob,
+                item_id_to_name,
+            ):
+                added[item_id] = count
+        for item_id, count in (delta.get("removed") or {}).items():
+            if item_matches_loot_filters(
+                item_id,
+                loot_filters,
+                tracked_item_zone,
+                tracked_item_mob,
+                item_id_to_name,
+            ):
+                removed[item_id] = count
+        if added or removed:
+            out[char_name] = {
+                "added": added,
+                "removed": removed,
+                "item_names": item_names,
+                "is_visibility_change": False,
+            }
+    return out
+
+
 def default_delta_history_range_endpoints(dates_asc, max_gap_days=14):
     """Pick default start/end dates for delta-history.html (see generate_delta_history).
 
@@ -3273,6 +3479,104 @@ def generate_delta_history(base_dir):
         .info-box strong {
             color: #856404;
         }
+        .report-filters {
+            background: #f3e5f5;
+            padding: 16px 20px;
+            border-radius: 5px;
+            margin: 16px 0 0 0;
+            border-left: 4px solid #9c27b0;
+        }
+        .report-filters h4 {
+            margin: 0 0 8px 0;
+            color: #6a1b9a;
+        }
+        .report-filters .filter-hint {
+            margin: 0 0 12px 0;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .loot-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .loot-filter-field {
+            flex: 1 1 220px;
+            min-width: 200px;
+        }
+        .loot-filter-field label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #333;
+        }
+        .loot-filter-wrap {
+            position: relative;
+        }
+        .loot-filter-wrap input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #9c27b0;
+            border-radius: 4px;
+            font-size: 0.95em;
+            box-sizing: border-box;
+        }
+        .loot-filter-wrap input:focus {
+            outline: none;
+            border-color: #7b1fa2;
+        }
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            background: white;
+            border: 2px solid #9c27b0;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            z-index: 100;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .autocomplete-list li {
+            padding: 8px 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9em;
+        }
+        .autocomplete-list li:hover,
+        .autocomplete-list li.selected {
+            background: #f3e5f5;
+        }
+        .autocomplete-list li:last-child {
+            border-bottom: none;
+        }
+        #clear-loot-filters {
+            padding: 8px 16px;
+            background: #757575;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        #clear-loot-filters:hover {
+            background: #616161;
+        }
+        #loot-filter-active-banner {
+            margin: 10px 0 0 0;
+            padding: 8px 12px;
+            background: #ede7f6;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #4527a0;
+        }
     </style>
 </head>
 <body>
@@ -3301,6 +3605,35 @@ def generate_delta_history(base_dir):
             </div>
             <div class="form-group">
                 <button type="button" onclick="generateDateRangeReport()" style="background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Generate Report</button>
+            </div>
+            <div id="report-filters" class="report-filters" style="display:none;">
+                <h4>Filter loot in this report</h4>
+                <p class="filter-hint">Narrow <strong>Items by Zone</strong> and <strong>Tracked Items</strong> only (AA/HP leaderboards, character changes, and inventory lists stay unchanged).</p>
+                <div class="loot-filter-row">
+                    <div class="loot-filter-field">
+                        <label for="loot-filter-zone">Zone / raid</label>
+                        <div class="loot-filter-wrap">
+                            <input type="text" id="loot-filter-zone" autocomplete="off" placeholder="e.g. Plane of Time">
+                            <ul class="autocomplete-list" id="loot-filter-zone-list" style="display:none;"></ul>
+                        </div>
+                    </div>
+                    <div class="loot-filter-field">
+                        <label for="loot-filter-mob">Mob</label>
+                        <div class="loot-filter-wrap">
+                            <input type="text" id="loot-filter-mob" autocomplete="off" placeholder="e.g. Emperor Salaris">
+                            <ul class="autocomplete-list" id="loot-filter-mob-list" style="display:none;"></ul>
+                        </div>
+                    </div>
+                    <div class="loot-filter-field">
+                        <label for="loot-filter-item">Item</label>
+                        <div class="loot-filter-wrap">
+                            <input type="text" id="loot-filter-item" autocomplete="off" placeholder="e.g. Crown of Deceit">
+                            <ul class="autocomplete-list" id="loot-filter-item-list" style="display:none;"></ul>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="clear-loot-filters">Clear filters</button>
+                <p id="loot-filter-active-banner" style="display:none;"></p>
             </div>
             <div id="date_range_output" style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; min-height: 50px;"></div>
         </div>
@@ -4117,6 +4450,743 @@ def generate_delta_history(base_dir):
             }
             return invDeltas;
         }
+
+        let lastReportContext = null;
+        let lastFilterIndex = null;
+        let lootFilterAutocompleteBound = false;
+
+        function escapeHtmlText(s) {
+            const div = document.createElement('div');
+            div.textContent = s;
+            return div.innerHTML;
+        }
+
+        function normalizeLootFilters(filters) {
+            const zone = (filters.zone || '').trim();
+            const mob = (filters.mob || '').trim();
+            let itemId = String(filters.itemId || '').trim();
+            const itemName = (filters.itemName || '').trim();
+            if (!itemId && itemName) {
+                const needle = itemName.toLowerCase();
+                for (const [iid, name] of Object.entries(ITEM_ID_TO_NAME || {})) {
+                    if ((name || '').toLowerCase() === needle) {
+                        itemId = String(iid);
+                        break;
+                    }
+                }
+            }
+            return { zone, mob, itemId, itemName };
+        }
+
+        function itemMatchesLootFilters(itemId, lootFilters) {
+            const zoneF = lootFilters.zone || '';
+            const mobF = lootFilters.mob || '';
+            const itemIdF = lootFilters.itemId || '';
+            const itemNameF = lootFilters.itemName || '';
+            if (!zoneF && !mobF && !itemIdF && !itemNameF) return true;
+            const sid = String(itemId);
+            if (zoneF) {
+                const itemZone = (TRACKED_ITEM_ZONE && TRACKED_ITEM_ZONE[sid]) || '';
+                if (itemZone.toLowerCase().indexOf(zoneF.toLowerCase()) === -1) return false;
+            }
+            if (mobF) {
+                const itemMob = (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[sid]) || '';
+                if (itemMob.toLowerCase().indexOf(mobF.toLowerCase()) === -1) return false;
+            }
+            if (itemIdF) {
+                if (sid !== String(itemIdF)) return false;
+            } else if (itemNameF) {
+                const name = (ITEM_ID_TO_NAME && ITEM_ID_TO_NAME[sid]) || ('Item ' + sid);
+                if (name.toLowerCase().indexOf(itemNameF.toLowerCase()) === -1) return false;
+            }
+            return true;
+        }
+
+        function buildRangeFilterIndex(zoneEntries, trackedDeltas) {
+            const zones = Object.keys(zoneEntries || {}).sort();
+            const mobsByZone = {};
+            const allMobs = new Set();
+            const itemsSeen = new Set();
+            const items = [];
+            for (const zone of zones) {
+                const mobs = zoneEntries[zone] || {};
+                const mobList = [];
+                for (const mob of Object.keys(mobs)) {
+                    const mobKey = mob || '';
+                    if (!mobList.includes(mobKey)) mobList.push(mobKey);
+                    if (mobKey) allMobs.add(mobKey);
+                    for (const entry of (mobs[mob] || [])) {
+                        const iid = String(entry.itemId || '');
+                        if (!iid || itemsSeen.has(iid)) continue;
+                        itemsSeen.add(iid);
+                        items.push({
+                            id: iid,
+                            name: entry.name || (ITEM_ID_TO_NAME && ITEM_ID_TO_NAME[iid]) || ('Item ' + iid),
+                            zone,
+                            mob: mobKey
+                        });
+                    }
+                }
+                mobsByZone[zone] = mobList.sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)));
+            }
+            for (const delta of Object.values(trackedDeltas || {})) {
+                const inames = delta.item_names || {};
+                for (const itemId of Object.keys(delta.added || {})) {
+                    const sid = String(itemId);
+                    if (itemsSeen.has(sid)) continue;
+                    itemsSeen.add(sid);
+                    items.push({
+                        id: sid,
+                        name: inames[itemId] || inames[sid] || (ITEM_ID_TO_NAME && ITEM_ID_TO_NAME[sid]) || ('Item ' + sid),
+                        zone: (TRACKED_ITEM_ZONE && TRACKED_ITEM_ZONE[sid]) || '',
+                        mob: (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[sid]) || ''
+                    });
+                }
+            }
+            items.sort((a, b) => a.name.localeCompare(b.name));
+            return { zones, mobsByZone, allMobs: [...allMobs].sort(), items };
+        }
+
+        function filterZoneEntries(zoneEntries, lootFilters) {
+            const lf = normalizeLootFilters(lootFilters);
+            if (!lf.zone && !lf.mob && !lf.itemId && !lf.itemName) return zoneEntries;
+            const out = {};
+            for (const zone of Object.keys(zoneEntries || {})) {
+                if (lf.zone && zone.toLowerCase().indexOf(lf.zone.toLowerCase()) === -1) continue;
+                const filteredMobs = {};
+                for (const mob of Object.keys(zoneEntries[zone])) {
+                    const mobStr = mob || '';
+                    if (lf.mob && mobStr.toLowerCase().indexOf(lf.mob.toLowerCase()) === -1) continue;
+                    const filteredEntries = (zoneEntries[zone][mob] || []).filter(e =>
+                        itemMatchesLootFilters(e.itemId, lf)
+                    );
+                    if (filteredEntries.length) filteredMobs[mob] = filteredEntries;
+                }
+                if (Object.keys(filteredMobs).length) out[zone] = filteredMobs;
+            }
+            return out;
+        }
+
+        function filterTrackedDeltas(trackedDeltas, lootFilters) {
+            const lf = normalizeLootFilters(lootFilters);
+            if (!lf.zone && !lf.mob && !lf.itemId && !lf.itemName) return trackedDeltas;
+            const out = {};
+            for (const [charName, delta] of Object.entries(trackedDeltas || {})) {
+                if (delta.is_visibility_change) continue;
+                const added = {};
+                const removed = {};
+                const itemNames = { ...(delta.item_names || {}) };
+                for (const itemId of Object.keys(delta.added || {})) {
+                    if (itemMatchesLootFilters(itemId, lf)) added[itemId] = delta.added[itemId];
+                }
+                for (const itemId of Object.keys(delta.removed || {})) {
+                    if (itemMatchesLootFilters(itemId, lf)) removed[itemId] = delta.removed[itemId];
+                }
+                if (Object.keys(added).length || Object.keys(removed).length) {
+                    out[charName] = { added, removed, item_names: itemNames, is_visibility_change: false };
+                }
+            }
+            return out;
+        }
+
+        function getLootFiltersFromUI() {
+            const itemEl = document.getElementById('loot-filter-item');
+            return {
+                zone: (document.getElementById('loot-filter-zone') || {}).value.trim(),
+                mob: (document.getElementById('loot-filter-mob') || {}).value.trim(),
+                itemId: itemEl ? (itemEl.getAttribute('data-item-id') || '') : '',
+                itemName: itemEl ? itemEl.value.trim() : ''
+            };
+        }
+
+        function updateLootFilterBanner(filters) {
+            const banner = document.getElementById('loot-filter-active-banner');
+            if (!banner) return;
+            const lf = normalizeLootFilters(filters);
+            const parts = [];
+            if (lf.zone) parts.push('zone: ' + lf.zone);
+            if (lf.mob) parts.push('mob: ' + lf.mob);
+            if (lf.itemId || lf.itemName) parts.push('item: ' + (lf.itemName || lf.itemId));
+            if (!parts.length) {
+                banner.style.display = 'none';
+                banner.textContent = '';
+                return;
+            }
+            banner.style.display = 'block';
+            banner.innerHTML = '<strong>Showing loot for:</strong> ' + escapeHtmlText(parts.join(' / '));
+        }
+
+        function rerenderReport() {
+            if (!lastReportContext) return;
+            const filters = getLootFiltersFromUI();
+            document.getElementById('date_range_output').innerHTML = buildReportHTML(lastReportContext, filters);
+            updateLootFilterBanner(filters);
+        }
+
+        function clearLootFilters(rerender) {
+            ['loot-filter-zone', 'loot-filter-mob', 'loot-filter-item'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.value = '';
+                el.removeAttribute('data-item-id');
+            });
+            ['loot-filter-zone-list', 'loot-filter-mob-list', 'loot-filter-item-list'].forEach(id => {
+                const list = document.getElementById(id);
+                if (list) { list.style.display = 'none'; list.innerHTML = ''; }
+            });
+            if (rerender !== false) rerenderReport();
+            else updateLootFilterBanner({});
+        }
+
+        function showReportFilterBar(filterIndex) {
+            lastFilterIndex = filterIndex;
+            const bar = document.getElementById('report-filters');
+            if (bar) bar.style.display = 'block';
+            clearLootFilters(false);
+            bindLootFilterAutocomplete();
+        }
+
+        function bindLootFilterAutocomplete() {
+            if (lootFilterAutocompleteBound) return;
+            lootFilterAutocompleteBound = true;
+            const clearBtn = document.getElementById('clear-loot-filters');
+            if (clearBtn) clearBtn.addEventListener('click', () => clearLootFilters(true));
+
+            function setupAutocomplete(inputId, listId, getSuggestions, onSelect) {
+                const input = document.getElementById(inputId);
+                const listEl = document.getElementById(listId);
+                if (!input || !listEl) return;
+                let selectedIdx = -1;
+
+                function hideList() {
+                    listEl.style.display = 'none';
+                    listEl.innerHTML = '';
+                    selectedIdx = -1;
+                }
+
+                function showList(matches) {
+                    if (!matches.length) { hideList(); return; }
+                    listEl.innerHTML = matches.slice(0, 80).map((m, i) => {
+                        const label = typeof m === 'string' ? m : m.label;
+                        const value = typeof m === 'string' ? m : m.value;
+                        const extra = typeof m === 'string' ? '' : (m.extra || '');
+                        return '<li data-value="' + escapeHtmlText(value).replace(/"/g, '&quot;') +
+                            '" data-extra="' + escapeHtmlText(extra || '').replace(/"/g, '&quot;') +
+                            '" data-idx="' + i + '">' + escapeHtmlText(label) + '</li>';
+                    }).join('');
+                    listEl.style.display = 'block';
+                    selectedIdx = 0;
+                    const items = listEl.querySelectorAll('li');
+                    if (items[0]) items[0].classList.add('selected');
+                }
+
+                input.addEventListener('input', () => {
+                    if (inputId === 'loot-filter-item') input.removeAttribute('data-item-id');
+                    showList(getSuggestions(input.value.trim()));
+                });
+                input.addEventListener('keydown', (ev) => {
+                    const items = listEl.querySelectorAll('li');
+                    if (ev.key === 'ArrowDown' && items.length) {
+                        ev.preventDefault();
+                        selectedIdx = Math.min(selectedIdx + 1, items.length - 1);
+                        items.forEach((li, i) => li.classList.toggle('selected', i === selectedIdx));
+                        items[selectedIdx].scrollIntoView({ block: 'nearest' });
+                    } else if (ev.key === 'ArrowUp' && items.length) {
+                        ev.preventDefault();
+                        selectedIdx = Math.max(selectedIdx - 1, 0);
+                        items.forEach((li, i) => li.classList.toggle('selected', i === selectedIdx));
+                        items[selectedIdx].scrollIntoView({ block: 'nearest' });
+                    } else if (ev.key === 'Enter') {
+                        if (items.length && selectedIdx >= 0) {
+                            ev.preventDefault();
+                            items[selectedIdx].click();
+                        } else {
+                            rerenderReport();
+                        }
+                    } else if (ev.key === 'Escape') {
+                        hideList();
+                    }
+                });
+                input.addEventListener('blur', () => {
+                    setTimeout(hideList, 150);
+                    rerenderReport();
+                });
+                listEl.addEventListener('mousedown', (ev) => ev.preventDefault());
+                listEl.addEventListener('click', (ev) => {
+                    const li = ev.target.closest('li');
+                    if (!li) return;
+                    onSelect(li.getAttribute('data-value') || '', li.getAttribute('data-extra') || '');
+                    hideList();
+                    rerenderReport();
+                });
+            }
+
+            setupAutocomplete('loot-filter-zone', 'loot-filter-zone-list', (query) => {
+                const zones = (lastFilterIndex && lastFilterIndex.zones) || [];
+                if (!query) return zones.map(z => ({ label: z, value: z }));
+                const q = query.toLowerCase();
+                return zones.filter(z => z.toLowerCase().indexOf(q) !== -1).map(z => ({ label: z, value: z }));
+            }, (value) => {
+                document.getElementById('loot-filter-zone').value = value;
+            });
+
+            setupAutocomplete('loot-filter-mob', 'loot-filter-mob-list', (query) => {
+                const zoneVal = (document.getElementById('loot-filter-zone') || {}).value.trim();
+                let mobs = [];
+                if (zoneVal && lastFilterIndex && lastFilterIndex.mobsByZone) {
+                    for (const [z, mobList] of Object.entries(lastFilterIndex.mobsByZone)) {
+                        if (z.toLowerCase().indexOf(zoneVal.toLowerCase()) !== -1) {
+                            mobs = mobs.concat(mobList.filter(m => m));
+                        }
+                    }
+                } else {
+                    mobs = (lastFilterIndex && lastFilterIndex.allMobs) || [];
+                }
+                mobs = [...new Set(mobs)].sort();
+                if (!query) return mobs.map(m => ({ label: m, value: m }));
+                const q = query.toLowerCase();
+                return mobs.filter(m => m.toLowerCase().indexOf(q) !== -1).map(m => ({ label: m, value: m }));
+            }, (value) => {
+                document.getElementById('loot-filter-mob').value = value;
+            });
+
+            setupAutocomplete('loot-filter-item', 'loot-filter-item-list', (query) => {
+                const items = (lastFilterIndex && lastFilterIndex.items) || [];
+                if (!query) return items.slice(0, 80).map(it => ({
+                    label: it.name + (it.zone ? ' (' + it.zone + ')' : ''),
+                    value: it.name,
+                    extra: it.id
+                }));
+                const q = query.toLowerCase();
+                return items.filter(it => it.name.toLowerCase().indexOf(q) !== -1).slice(0, 80).map(it => ({
+                    label: it.name + (it.zone ? ' (' + it.zone + ')' : ''),
+                    value: it.name,
+                    extra: it.id
+                }));
+            }, (value, extra) => {
+                const el = document.getElementById('loot-filter-item');
+                el.value = value;
+                if (extra) el.setAttribute('data-item-id', extra);
+            });
+        }
+
+        function buildReportHTML(ctx, filters) {
+            const lootFilters = normalizeLootFilters(filters || {});
+            const hasLootFilters = !!(lootFilters.zone || lootFilters.mob || lootFilters.itemId || lootFilters.itemName);
+            const displayZoneEntries = hasLootFilters ? filterZoneEntries(ctx.zoneEntries, lootFilters) : ctx.zoneEntries;
+            const displayTrackedDeltas = hasLootFilters ? filterTrackedDeltas(ctx.trackedDeltas, lootFilters) : ctx.trackedDeltas;
+            const displayNonVisTracked = Object.keys(displayTrackedDeltas).filter(
+                c => !displayTrackedDeltas[c].is_visibility_change
+            ).sort();
+
+            const start = ctx.start;
+            const end = ctx.end;
+            const startState = ctx.startState;
+            const endState = ctx.endState;
+            const eventSourceNote = ctx.eventSourceNote;
+            const baselineMismatch = ctx.baselineMismatch;
+            const omitRangeLeaderboards = ctx.omitRangeLeaderboards;
+            const dumpBeforeBaselineAny = ctx.dumpBeforeBaselineAny;
+            const startDelta = ctx.startDelta;
+            const endDelta = ctx.endDelta;
+            const invDeltas = ctx.invDeltas;
+            const invDeltasLevel1 = ctx.invDeltasLevel1;
+            const invDeltasOthers = ctx.invDeltasOthers;
+            const trackedDeltas = ctx.trackedDeltas;
+            const charChanges = ctx.charChanges;
+            const charsInBoth = ctx.charsInBoth;
+            const corpseLootChars = ctx.corpseLootChars;
+            const allVisNames = ctx.allVisNames;
+            const nonVisLevel1 = ctx.nonVisLevel1;
+            const nonVisOthers = ctx.nonVisOthers;
+            const nonVisTracked = ctx.nonVisTracked;
+            const aaLeaderboard = ctx.aaLeaderboard;
+            const hpLeaderboard = ctx.hpLeaderboard;
+
+            let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
+            if (eventSourceNote) {
+                reportHTML += `<p style="color: #555; margin-bottom: 12px;"><em>Source: ${eventSourceNote}</em></p>`;
+            }
+            if (eventSourceNote && baselineMismatch) {
+                const newerBaseline = ctx.startBaselineDateGear < ctx.endBaselineDateGear
+                    ? ctx.endBaselineDateGear : ctx.startBaselineDateGear;
+                reportHTML += `<p style="background:#e3f2fd;padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196F3;">
+                    <strong>Different baselines:</strong> This range crosses <code>baseline_date</code> values (${ctx.startBaselineDateGear} vs ${ctx.endBaselineDateGear}).
+                    <strong>AA/HP top lists are omitted</strong> — pick both dates on or after the later baseline (<code>${newerBaseline}</code>) for comparable gainers.
+                </p>`;
+            }
+            if (!eventSourceNote) {
+                if (dumpBeforeBaselineAny) {
+                    const bits = [];
+                    if (ctx.dumpBeforeBaselineStart || ctx.dqBadStart) bits.push(`start ${startDelta.date} (baseline ${startDelta.baseline_date})`);
+                    if (ctx.dumpBeforeBaselineEnd || ctx.dqBadEnd) bits.push(`end ${endDelta.date} (baseline ${endDelta.baseline_date})`);
+                    reportHTML += `<p style="background: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #f44336;">
+                        <strong>Unreliable range:</strong> At least one endpoint daily JSON was built with <code>date</code> before <code>baseline_date</code> (${bits.join('; ')}).
+                        Character AA/HP in those files can be inconsistent with the archived baseline, so <strong>character deltas and any old top lists could look like months of gains over a day or two</strong>.
+                        <strong>AA and HP leaderboards are omitted</strong> for this report until the bad file is fixed.
+                        Regenerate the affected <code>delta_daily_*.json.gz</code> with the correct Magelo dump for that calendar day and <code>baseline_era_date</code> (see <code>regenerate-delta-days.yml</code>).
+                    </p>`;
+                }
+                if (ctx.usedFallbackBaseline) {
+                    reportHTML += `<p style="background: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ff9800;">
+                        <strong>⚠️ Historical baseline not found.</strong> The archived baseline for one or both dates (for example baseline_master_${startDelta.baseline_date}.json.gz) was not available (404), so the <em>current</em> baseline file was used as a fallback. Character levels/AAs, visibility, and <em>reconstructed inventory</em> for affected dates may be wrong. Ensure dated <code>baseline_master_*.json.gz</code> files are deployed under <code>delta_snapshots/</code>.
+                    </p>`;
+                }
+                if (baselineMismatch) {
+                    reportHTML += `<p style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #2196F3;">
+                        <strong>Different baselines:</strong> These dates use different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Character changes compare reconstructed snapshot states (each date's baseline + daily delta). Inventory and tracked items compare absolute item counts rebuilt the same way, then net-changed across the range (same model as server-side range deltas).
+                        <strong>AA/HP top lists are omitted</strong> for this range (see note below): sparse rows plus rotation can inflate apparent AA/HP gains.
+                    </p>`;
+                }
+                if (ctx.endBaselineResetDay) {
+                    reportHTML += `<p style="background: #fff8e1; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107;">
+                        <strong>Baseline reset (end date):</strong> The end date matches the new master baseline; that day's <code>inv_deltas</code> are often empty because inventories match the fresh baseline. Range inventory below is still computed from reconstructed absolute inventories, so changes since the start date can still appear.
+                    </p>`;
+                }
+            }
+
+            const hasZoneSection = Object.keys(displayZoneEntries).length > 0 || Object.keys(ctx.zoneEntries).length > 0;
+            reportHTML += `<p style="margin: 10px 0;">${hasZoneSection ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}
+                <a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
+                <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
+                <a href="#character-changes" style="margin-right: 10px;">Character Changes</a>
+                ${allVisNames.length > 0 ? '<a href="#visibility-note" style="margin-right: 10px; color: #757575;">Visibility (anon)</a>' : ''}
+                ${nonVisLevel1.length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
+                <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a>
+                ${(displayNonVisTracked.length > 0 || nonVisTracked.length > 0) ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}</p>`;
+
+            if (allVisNames.length > 0) {
+                reportHTML += `<details id="visibility-note" style="color: #757575; margin: 15px 0; padding: 10px; background: #fafafa; border-radius: 5px; border-left: 4px solid #9e9e9e;"><summary style="cursor: pointer; font-style: italic;"><strong>Visibility change (anon ↔ not anon)</strong> — ${allVisNames.length} character(s); their inventory and tracked item deltas are not listed below. Click to expand names.</summary><p style="margin: 8px 0 0 0; font-size: 0.9em;">${allVisNames.join(', ')}</p></details>`;
+            }
+
+            if (hasLootFilters && !Object.keys(displayZoneEntries).length && !displayNonVisTracked.length) {
+                reportHTML += `<p style="color: #757575; font-style: italic; margin: 10px 0; padding: 10px; background: #fafafa; border-radius: 5px;">No matching loot for the current filters in this date range.</p>`;
+            }
+
+            if (Object.keys(displayZoneEntries).length > 0) {
+                reportHTML += `
+                <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone</h2>
+                <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone and mob. Only characters present in both snapshots.</em></p>`;
+                for (const zone of Object.keys(displayZoneEntries).sort()) {
+                    const mobs = displayZoneEntries[zone];
+                    reportHTML += `
+                <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
+                    <h3 style="margin-top: 0;">${zone}</h3>`;
+                    const mobKeys = Object.keys(mobs).sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)));
+                    for (const mob of mobKeys) {
+                        const entries = mobs[mob];
+                        if (mob) reportHTML += `
+                    <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">${mob}</h4>`;
+                        reportHTML += `
+                    <ul style="margin: 0; padding-left: 20px;">`;
+                        for (const e of entries) {
+                            const charDisplay = formatCharDisplay(e.charName, charStateForName(e.charName, startState, endState));
+                            const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
+                            const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
+                            const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
+                            reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(e.charName)} — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                        }
+                        reportHTML += `
+                    </ul>`;
+                    }
+                    reportHTML += `
+                </div>`;
+                }
+            } else if (hasLootFilters && Object.keys(ctx.zoneEntries).length > 0) {
+                reportHTML += `
+                <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone</h2>
+                <p style="color: #999; font-style: italic;">No items match the current loot filters.</p>`;
+            }
+
+            const noInventoryOrTrackedBlocks = nonVisLevel1.length === 0 && nonVisOthers.length === 0 && nonVisTracked.length === 0;
+            if (noInventoryOrTrackedBlocks && (Object.keys(invDeltasLevel1).length > 0 || Object.keys(invDeltasOthers).length > 0 || Object.keys(trackedDeltas).length > 0)) {
+                reportHTML += `<p style="color: #757575; font-style: italic; margin: 10px 0;">No inventory or tracked item changes to list for this range. For date ranges outside the current baseline period, delta files from that time may not include inventory data, or all changes in this range are visibility-only (see above).</p>`;
+            }
+
+            if (aaLeaderboard.length > 0) {
+                reportHTML += `
+                <div class="leaderboard" id="aa-leaderboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-top: 0;">🏆 Top AA Gainers</h2>
+                    <table class="leaderboard-table" style="width: 100%; border-collapse: collapse; background-color: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
+                        <thead>
+                            <tr>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Rank</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Character</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Class</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Level</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">AA Gained</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Total AA</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                for (let idx = 0; idx < Math.min(20, aaLeaderboard.length); idx++) {
+                    const entry = aaLeaderboard[idx];
+                    const rankStyle = idx === 0 ? 'background-color: #FFD700; color: #000;' :
+                                     idx === 1 ? 'background-color: #C0C0C0; color: #000;' :
+                                     idx === 2 ? 'background-color: #CD7F32; color: #fff;' :
+                                     'background-color: rgba(255,255,255,0.3); color: #fff;';
+                    reportHTML += `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
+                                <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong>${charTimelineLink(entry.name)}</td>
+                                <td style="padding: 10px 12px;">${entry.class}</td>
+                                <td style="padding: 10px 12px;">${entry.level}</td>
+                                <td style="padding: 10px 12px; color: #4CAF50; font-weight: bold;">+${entry.aa_gain}</td>
+                                <td style="padding: 10px 12px;">${entry.aa_total || '—'}</td>
+                            </tr>`;
+                }
+                reportHTML += `
+                        </tbody>
+                    </table>
+                </div>`;
+            }
+
+            if (hpLeaderboard.length > 0) {
+                reportHTML += `
+                <div class="leaderboard" id="hp-leaderboard" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-top: 0;">❤️ Top HP Gainers</h2>
+                    <table class="leaderboard-table" style="width: 100%; border-collapse: collapse; background-color: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
+                        <thead>
+                            <tr>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Rank</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Character</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Class</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Level</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">HP Gained</th>
+                                <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Total HP</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                for (let idx = 0; idx < Math.min(20, hpLeaderboard.length); idx++) {
+                    const entry = hpLeaderboard[idx];
+                    const rankStyle = idx === 0 ? 'background-color: #FFD700; color: #000;' :
+                                     idx === 1 ? 'background-color: #C0C0C0; color: #000;' :
+                                     idx === 2 ? 'background-color: #CD7F32; color: #fff;' :
+                                     'background-color: rgba(255,255,255,0.3); color: #fff;';
+                    reportHTML += `
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
+                                <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong>${charTimelineLink(entry.name)}</td>
+                                <td style="padding: 10px 12px;">${entry.class}</td>
+                                <td style="padding: 10px 12px;">${entry.level}</td>
+                                <td style="padding: 10px 12px; color: #fff; font-weight: bold;">+${entry.hp_gain}</td>
+                                <td style="padding: 10px 12px;">${entry.hp_total || '—'}</td>
+                            </tr>`;
+                }
+                reportHTML += `
+                        </tbody>
+                    </table>
+                </div>`;
+            }
+
+            if (dumpBeforeBaselineAny) {
+                reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — at least one endpoint <code>delta_daily_*.json.gz</code> was built with the wrong <code>baseline_era_date</code> (dump date before <code>baseline_date</code>). Regenerate that day with the <strong>Regenerate delta daily JSONs</strong> workflow using a <code>baseline_era_date</code> that matches the archive for that dump (for a single Feb-era anchor use <code>2026-02-09</code>), then redeploy.</p>`;
+            } else if (baselineMismatch && !eventSourceNote) {
+                const newerBaseline = startDelta.baseline_date < endDelta.baseline_date ? endDelta.baseline_date : startDelta.baseline_date;
+                reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — this range crosses different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Reconstructed AA/HP at the start uses the older era baseline plus sparse <code>char_deltas</code>; at the end it uses the newer era. Characters unchanged vs the old baseline often have <strong>no</strong> row on the start day, so their AA stays at the old baseline snapshot (e.g. 173) even if the calendar day is just before rotation, while the first post-rotation daily row can show a large cumulative jump vs the <em>new</em> baseline — top lists looked like huge short-window gains. For comparable top gainers, pick <strong>both dates on or after the later <code>baseline_date</code></strong> (here <code>${newerBaseline}</code>), or use <code>delta.html</code> day-over-day.</p>`;
+            }
+
+            if (Object.keys(charChanges).length > 0) {
+                reportHTML += `
+                <h2 id="character-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Character Level & AA Changes</h2>
+                <table class="delta-table" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Character</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Class</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Level</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Level Change</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Total AA</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">AA Total Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                for (const charName of Object.keys(charChanges).sort()) {
+                    const changes = charChanges[charName];
+                    if (!charsInBoth.has(charName)) continue;
+                    const isDeleted = changes.is_deleted;
+                    const isNew = changes.is_new;
+                    const currentLevel = changes.current_level;
+                    const previousLevel = changes.previous_level;
+                    const charState = charStateForName(charName, startState, endState);
+                    let charDisplay;
+                    if (isDeleted) {
+                        charDisplay = `<strong style="color: #999; text-decoration: line-through;">${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)} <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>`;
+                    } else if (isNew) {
+                        charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)} <span style="color: #4CAF50; font-size: 0.9em;">(New)</span>`;
+                    } else {
+                        charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)}`;
+                    }
+                    let levelDisplay;
+                    if (isDeleted) {
+                        levelDisplay = `<span style="color: #f44336; font-weight: bold;">Deleted (was ${previousLevel})</span>`;
+                    } else if (previousLevel === 65) {
+                        levelDisplay = `<span style="color: #666;">—</span>`;
+                    } else {
+                        const levelClass = changes.level > 0 ? 'color: #4CAF50; font-weight: bold;' : changes.level < 0 ? 'color: #f44336; font-weight: bold;' : 'color: #666;';
+                        const levelText = changes.level > 0 ? `+${changes.level}` : String(changes.level);
+                        levelDisplay = `<span style="${levelClass}">${levelText} (${previousLevel} → ${currentLevel})</span>`;
+                    }
+                    let totalAADisplay;
+                    if (isDeleted) {
+                        totalAADisplay = `<span style="color: #999;">—</span>`;
+                    } else if (currentLevel >= 50 || previousLevel >= 50) {
+                        const endChar = endState[charName];
+                        totalAADisplay = String(endChar ? endChar.aa_total : '—');
+                    } else {
+                        totalAADisplay = `<span style="color: #666;">—</span>`;
+                    }
+                    let aaDisplay;
+                    if (isDeleted) {
+                        aaDisplay = `<span style="color: #f44336; font-weight: bold;">—</span>`;
+                    } else if (currentLevel >= 50 || previousLevel >= 50) {
+                        const aaClass = changes.aa > 0 ? 'color: #4CAF50; font-weight: bold;' : changes.aa < 0 ? 'color: #f44336; font-weight: bold;' : 'color: #666;';
+                        const aaText = changes.aa > 0 ? `+${changes.aa}` : String(changes.aa);
+                        aaDisplay = `<span style="${aaClass}">${aaText}</span>`;
+                    } else {
+                        aaDisplay = `<span style="color: #666;">—</span>`;
+                    }
+                    reportHTML += `
+                        <tr>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${charDisplay}</td>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${changes.class || 'Unknown'}</td>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${isDeleted ? previousLevel : currentLevel}</td>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${levelDisplay}</td>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${totalAADisplay}</td>
+                            <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${aaDisplay}</td>
+                        </tr>`;
+                }
+                reportHTML += `
+                    </tbody>
+                </table>`;
+            } else {
+                reportHTML += `
+                <h2 id="character-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Character Level & AA Changes</h2>
+                <p style="color: #999; font-style: italic;">No level or AA changes detected.</p>`;
+            }
+
+            if (nonVisLevel1.length > 0) {
+                reportHTML += `
+                <h2 id="inventory-changes-level1" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Level 1 Inventory Changes (Mules/Traders)</h2>
+                <p><em>Showing level 1 characters with inventory changes (limited to 500)</em></p>`;
+                for (const charName of nonVisLevel1) {
+                    const delta = invDeltasLevel1[charName];
+                    reportHTML += `
+                <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
+                    <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong>${charTimelineLink(charName)} <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
+                    if (Object.keys(delta.added || {}).length > 0) {
+                        reportHTML += `
+                    <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
+                        for (const itemId of Object.keys(delta.added).sort()) {
+                            const count = delta.added[itemId];
+                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                            const countText = count > 1 ? ' x' + count : '';
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                        }
+                        reportHTML += `</div></div>`;
+                    }
+                    if (Object.keys(delta.removed || {}).length > 0) {
+                        reportHTML += `
+                    <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
+                        for (const itemId of Object.keys(delta.removed).sort()) {
+                            const count = delta.removed[itemId];
+                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                            const countText = count > 1 ? ' x' + count : '';
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                        }
+                        reportHTML += `</div></div>`;
+                    }
+                    reportHTML += `</div>`;
+                }
+            }
+
+            if (nonVisOthers.length > 0) {
+                reportHTML += `
+                <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
+                <p><em>Showing characters with inventory changes (limited to 500)</em></p>`;
+                for (const charName of nonVisOthers) {
+                    const delta = invDeltasOthers[charName];
+                    reportHTML += `
+                <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                    <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong>${charTimelineLink(charName)}</h3>`;
+                    if (Object.keys(delta.added || {}).length > 0) {
+                        reportHTML += `
+                    <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
+                        for (const itemId of Object.keys(delta.added).sort()) {
+                            const count = delta.added[itemId];
+                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                            const countText = count > 1 ? ' x' + count : '';
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                        }
+                        reportHTML += `</div></div>`;
+                    }
+                    if (Object.keys(delta.removed || {}).length > 0) {
+                        reportHTML += `
+                    <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
+                        for (const itemId of Object.keys(delta.removed).sort()) {
+                            const count = delta.removed[itemId];
+                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                            const countText = count > 1 ? ' x' + count : '';
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                        }
+                        reportHTML += `</div></div>`;
+                    }
+                    reportHTML += `</div>`;
+                }
+            } else {
+                reportHTML += `
+                <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
+                <p style="color: #999; font-style: italic;">${Object.keys(invDeltas).length === 0 ? 'No inventory changes detected.' : 'No inventory changes to list (only visibility changes in this range).'}</p>`;
+            }
+
+            if (displayNonVisTracked.length > 0) {
+                reportHTML += `
+                <h2 id="tracked-items" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
+                <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
+                for (const charName of displayNonVisTracked) {
+                    const delta = displayTrackedDeltas[charName];
+                    const state = charStateForName(charName, startState, endState);
+                    const level = state.level || '?';
+                    const charDisplay = formatCharDisplay(charName, state);
+                    const charSlug = charName.toLowerCase().replace(/ /g, '_');
+                    const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
+                    reportHTML += `
+                <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
+                    <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(charName)} <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
+                    if (Object.keys(delta.added || {}).length > 0) {
+                        reportHTML += `
+                    <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Acquired:</strong><div style="margin-top: 5px;">`;
+                        for (const itemId of Object.keys(delta.added).sort()) {
+                            const count = delta.added[itemId];
+                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                            const countText = count > 1 ? ' x' + count : '';
+                            const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                        }
+                        reportHTML += `</div></div>`;
+                    }
+                    if (Object.keys(delta.removed || {}).length > 0) {
+                        reportHTML += `
+                    <div style="margin: 10px 0;"><strong style="color: #f44336;">Lost:</strong><div style="margin-top: 5px;">`;
+                        for (const itemId of Object.keys(delta.removed).sort()) {
+                            const count = delta.removed[itemId];
+                            const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
+                            const countText = count > 1 ? ' x' + count : '';
+                            const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                        }
+                        reportHTML += `</div></div>`;
+                    }
+                    reportHTML += `</div>`;
+                }
+            } else if (hasLootFilters && nonVisTracked.length > 0) {
+                reportHTML += `
+                <h2 id="tracked-items" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
+                <p style="color: #999; font-style: italic;">No tracked items match the current loot filters.</p>`;
+            }
+
+            return reportHTML;
+        }
         
         async function generateDateRangeReport() {
             let start = document.getElementById('start_date').value;
@@ -4148,6 +5218,8 @@ def generate_delta_history(base_dir):
             }
             
             const outputDiv = document.getElementById('date_range_output');
+            const filterBar = document.getElementById('report-filters');
+            if (filterBar) filterBar.style.display = 'none';
             outputDiv.innerHTML = '<p>Loading deltas and baselines for ' + start + ' and ' + end + '...</p>';
             
             try {
@@ -4155,6 +5227,8 @@ def generate_delta_history(base_dir):
                 let charChanges;
                 let startState = {};
                 let endState = {};
+                let startDelta = null;
+                let endDelta = null;
                 let omitRangeLeaderboards = false;
                 let usedFallbackBaseline = false;
                 let eventSourceNote = '';
@@ -4409,53 +5483,12 @@ def generate_delta_history(base_dir):
                     }
                 }
                 
-                // Generate HTML report matching delta.html formatting
                 let endBaselineResetDay = false;
-                let reportHTML = `<h2 style="color: #333; border-bottom: 3px solid #2196F3; padding-bottom: 10px;">Date Range Report: ${start} to ${end}</h2>`;
-                if (eventSourceNote) {
-                    reportHTML += `<p style="color: #555; margin-bottom: 12px;"><em>Source: ${eventSourceNote}</em></p>`;
+                if (!eventSourceNote && endDelta) {
+                    endBaselineResetDay = (endDelta.baseline_date === end) &&
+                        Object.keys(endDelta.inv_deltas || {}).length === 0;
                 }
-                if (eventSourceNote && baselineMismatch) {
-                    const newerBaseline = startBaselineDateGear < endBaselineDateGear
-                        ? endBaselineDateGear : startBaselineDateGear;
-                    reportHTML += `<p style="background:#e3f2fd;padding:10px;border-radius:5px;margin:10px 0;border-left:4px solid #2196F3;">
-                        <strong>Different baselines:</strong> This range crosses <code>baseline_date</code> values (${startBaselineDateGear} vs ${endBaselineDateGear}).
-                        <strong>AA/HP top lists are omitted</strong> — pick both dates on or after the later baseline (<code>${newerBaseline}</code>) for comparable gainers.
-                    </p>`;
-                }
-                if (!eventSourceNote) {
-                endBaselineResetDay = (endDelta.baseline_date === end) &&
-                    Object.keys(endDelta.inv_deltas || {}).length === 0;
-                if (dumpBeforeBaselineAny) {
-                    const bits = [];
-                    if (dumpBeforeBaselineStart || dqBadStart) bits.push(`start ${startDelta.date} (baseline ${startDelta.baseline_date})`);
-                    if (dumpBeforeBaselineEnd || dqBadEnd) bits.push(`end ${endDelta.date} (baseline ${endDelta.baseline_date})`);
-                    reportHTML += `<p style="background: #ffebee; padding: 12px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #f44336;">
-                        <strong>Unreliable range:</strong> At least one endpoint daily JSON was built with <code>date</code> before <code>baseline_date</code> (${bits.join('; ')}).
-                        Character AA/HP in those files can be inconsistent with the archived baseline, so <strong>character deltas and any old top lists could look like months of gains over a day or two</strong>.
-                        <strong>AA and HP leaderboards are omitted</strong> for this report until the bad file is fixed.
-                        Regenerate the affected <code>delta_daily_*.json.gz</code> with the correct Magelo dump for that calendar day and <code>baseline_era_date</code> (see <code>regenerate-delta-days.yml</code>).
-                    </p>`;
-                }
-                
-                if (usedFallbackBaseline) {
-                    reportHTML += `<p style="background: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ff9800;">
-                        <strong>⚠️ Historical baseline not found.</strong> The archived baseline for one or both dates (for example baseline_master_${startDelta.baseline_date}.json.gz) was not available (404), so the <em>current</em> baseline file was used as a fallback. Character levels/AAs, visibility, and <em>reconstructed inventory</em> for affected dates may be wrong. Ensure dated <code>baseline_master_*.json.gz</code> files are deployed under <code>delta_snapshots/</code>.
-                    </p>`;
-                }
-                if (baselineMismatch) {
-                    reportHTML += `<p style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #2196F3;">
-                        <strong>Different baselines:</strong> These dates use different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Character changes compare reconstructed snapshot states (each date's baseline + daily delta). Inventory and tracked items compare absolute item counts rebuilt the same way, then net-changed across the range (same model as server-side range deltas).
-                        <strong>AA/HP top lists are omitted</strong> for this range (see note below): sparse rows plus rotation can inflate apparent AA/HP gains.
-                    </p>`;
-                }
-                if (endBaselineResetDay) {
-                    reportHTML += `<p style="background: #fff8e1; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ffc107;">
-                        <strong>Baseline reset (end date):</strong> The end date matches the new master baseline; that day's <code>inv_deltas</code> are often empty because inventories match the fresh baseline. Range inventory below is still computed from reconstructed absolute inventories, so changes since the start date can still appear.
-                    </p>`;
-                }
-                }
-                // Collect all visibility-change names once (show once at top; sections below show only actual changes)
+
                 const sortedLevel1 = Object.keys(invDeltasLevel1).sort().slice(0, 500);
                 const visLevel1 = sortedLevel1.filter(c => invDeltasLevel1[c] && invDeltasLevel1[c].is_visibility_change === true);
                 const nonVisLevel1 = sortedLevel1.filter(c => !invDeltasLevel1[c] || invDeltasLevel1[c].is_visibility_change !== true);
@@ -4466,13 +5499,13 @@ def generate_delta_history(base_dir):
                 const visTracked = sortedTracked.filter(c => trackedDeltas[c] && trackedDeltas[c].is_visibility_change === true);
                 const nonVisTracked = sortedTracked.filter(c => !trackedDeltas[c] || trackedDeltas[c].is_visibility_change !== true);
                 const allVisNames = [...new Set([...visLevel1, ...visOthers, ...visTracked])].sort();
-                // Leaderboards: chars with rows on both days (match delta_storage.get_leaderboard_totals_from_date_range)
+
                 const charsInBoth = new Set();
                 if (eventSourceNote) {
                     for (const c of Object.keys(startState)) {
                         if (c in endState) charsInBoth.add(c);
                     }
-                } else if (!baselineMismatch) {
+                } else if (!baselineMismatch && startDelta && endDelta) {
                     const sk = Object.keys(startDelta.char_deltas || {});
                     const ek = new Set(Object.keys(endDelta.char_deltas || {}));
                     for (const c of sk) {
@@ -4485,401 +5518,66 @@ def generate_delta_history(base_dir):
                         if (c in endState) charsInBoth.add(c);
                     }
                 }
-                reportHTML += `<p style="margin: 10px 0;">${Object.keys(zoneEntries).length > 0 ? '<a href="#items-by-zone" style="margin-right: 10px;">📍 Items by Zone</a>' : ''}
-                    <a href="#aa-leaderboard" style="margin-right: 10px;">🏆 AA Leaderboard</a>
-                    <a href="#hp-leaderboard" style="margin-right: 10px;">❤️ HP Leaderboard</a>
-                    <a href="#character-changes" style="margin-right: 10px;">Character Changes</a>
-                    ${allVisNames.length > 0 ? '<a href="#visibility-note" style="margin-right: 10px; color: #757575;">Visibility (anon)</a>' : ''}
-                    ${nonVisLevel1.length > 0 ? '<a href="#inventory-changes-level1" style="margin-right: 10px;">Level 1 (Mules)</a>' : ''}
-                    <a href="#inventory-changes" style="margin-right: 10px;">Inventory Changes</a>
-                    ${nonVisTracked.length > 0 ? '<a href="#tracked-items" style="margin-right: 10px; background-color: #FF9800;">📌 Tracked Items</a>' : ''}</p>`;
-                if (allVisNames.length > 0) {
-                    reportHTML += `<details id="visibility-note" style="color: #757575; margin: 15px 0; padding: 10px; background: #fafafa; border-radius: 5px; border-left: 4px solid #9e9e9e;"><summary style="cursor: pointer; font-style: italic;"><strong>Visibility change (anon ↔ not anon)</strong> — ${allVisNames.length} character(s); their inventory and tracked item deltas are not listed below. Click to expand names.</summary><p style="margin: 8px 0 0 0; font-size: 0.9em;">${allVisNames.join(', ')}</p></details>`;
-                }
-                // Items by zone (at top; raid + elemental + praesterium), with mob subheadings
-                if (Object.keys(zoneEntries).length > 0) {
-                    reportHTML += `
-                    <h2 id="items-by-zone" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📍 Items by Zone</h2>
-                    <p><em>Tracked loot (raid, elemental, praesterium) acquired this period, grouped by zone and mob. Only characters present in both snapshots.</em></p>`;
-                    for (const zone of Object.keys(zoneEntries).sort()) {
-                        const mobs = zoneEntries[zone];
-                        reportHTML += `
-                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f5f5f5;">
-                        <h3 style="margin-top: 0;">${zone}</h3>`;
-                        const mobKeys = Object.keys(mobs).sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)));
-                        for (const mob of mobKeys) {
-                            const entries = mobs[mob];
-                            if (mob) reportHTML += `
-                        <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">${mob}</h4>`;
-                            reportHTML += `
-                        <ul style="margin: 0; padding-left: 20px;">`;
-                            for (const e of entries) {
-                                const charDisplay = formatCharDisplay(e.charName, charStateForName(e.charName, startState, endState));
-                                const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
-                                const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
-                                const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
-                                reportHTML += `<li><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(e.charName)} — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
-                            }
-                            reportHTML += `
-                        </ul>`;
-                        }
-                        reportHTML += `
-                    </div>`;
-                    }
-                }
-                const noInventoryOrTrackedBlocks = nonVisLevel1.length === 0 && nonVisOthers.length === 0 && nonVisTracked.length === 0;
-                if (noInventoryOrTrackedBlocks && (Object.keys(invDeltasLevel1).length > 0 || Object.keys(invDeltasOthers).length > 0 || Object.keys(trackedDeltas).length > 0)) {
-                    reportHTML += `<p style="color: #757575; font-style: italic; margin: 10px 0;">No inventory or tracked item changes to list for this range. For date ranges outside the current baseline period, delta files from that time may not include inventory data, or all changes in this range are visibility-only (see above).</p>`;
-                }
-                
-                // Calculate leaderboards (matching delta.html format). Skip when an endpoint is
-                // wrong-era (date < baseline_date), or when baseline_date differs across the range
-                // (rotation boundary — top lists are misleading vs calendar-window gains).
+
                 const aaLeaderboard = [];
                 const hpLeaderboard = [];
-                
                 if (!omitRangeLeaderboards) {
-                for (const [charName, changes] of Object.entries(charChanges)) {
-                    if (changes.is_deleted || changes.is_new) continue;
-                    if (changes.is_visibility_change) continue;
-                    if (!charsInBoth.has(charName)) continue;
-                    if (corpseLootChars.has(charName)) continue;
-                    
-                    const currentLevel = changes.current_level;
-                    const previousLevel = changes.previous_level;
-                    const aaGain = changes.aa;
-                    const hpGain = changes.hp;
-                    
-                    // AA leaderboard (level 50+)
-                    if ((currentLevel >= 50 || previousLevel >= 50) && aaGain > 0) {
-                        aaLeaderboard.push({
-                            name: charName,
-                            class: changes.class || 'Unknown',
-                            level: currentLevel,
-                            aa_gain: aaGain,
-                            aa_total: changes.current_aa_total != null ? changes.current_aa_total : 0
-                        });
-                    }
-                    
-                    // HP leaderboard (any level)
-                    if (hpGain > 0) {
-                        hpLeaderboard.push({
-                            name: charName,
-                            class: changes.class || 'Unknown',
-                            level: currentLevel,
-                            hp_gain: hpGain,
-                            hp_total: endState[charName]?.hp || 0
-                        });
-                    }
-                }
-                }
-                
-                // Sort leaderboards
-                aaLeaderboard.sort((a, b) => b.aa_gain - a.aa_gain);
-                hpLeaderboard.sort((a, b) => b.hp_gain - a.hp_gain);
-                
-                // AA Leaderboard
-                if (aaLeaderboard.length > 0) {
-                    reportHTML += `
-                    <div class="leaderboard" id="aa-leaderboard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                        <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-top: 0;">🏆 Top AA Gainers</h2>
-                        <table class="leaderboard-table" style="width: 100%; border-collapse: collapse; background-color: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
-                            <thead>
-                                <tr>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Rank</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Character</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Class</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Level</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">AA Gained</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Total AA</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-                    for (let idx = 0; idx < Math.min(20, aaLeaderboard.length); idx++) {
-                        const entry = aaLeaderboard[idx];
-                        const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : 'rank-other';
-                        const rankStyle = idx === 0 ? 'background-color: #FFD700; color: #000;' : 
-                                         idx === 1 ? 'background-color: #C0C0C0; color: #000;' : 
-                                         idx === 2 ? 'background-color: #CD7F32; color: #fff;' : 
-                                         'background-color: rgba(255,255,255,0.3); color: #fff;';
-                        reportHTML += `
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                    <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
-                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong>${charTimelineLink(entry.name)}</td>
-                                    <td style="padding: 10px 12px;">${entry.class}</td>
-                                    <td style="padding: 10px 12px;">${entry.level}</td>
-                                    <td style="padding: 10px 12px; color: #4CAF50; font-weight: bold;">+${entry.aa_gain}</td>
-                                    <td style="padding: 10px 12px;">${entry.aa_total || '—'}</td>
-                                </tr>`;
-                    }
-                    reportHTML += `
-                            </tbody>
-                        </table>
-                    </div>`;
-                }
-                
-                // HP Leaderboard
-                if (hpLeaderboard.length > 0) {
-                    reportHTML += `
-                    <div class="leaderboard" id="hp-leaderboard" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                        <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 10px; margin-top: 0;">❤️ Top HP Gainers</h2>
-                        <table class="leaderboard-table" style="width: 100%; border-collapse: collapse; background-color: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
-                            <thead>
-                                <tr>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Rank</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Character</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Class</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Level</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">HP Gained</th>
-                                    <th style="background-color: rgba(255,255,255,0.2); padding: 12px; text-align: left; font-weight: bold;">Total HP</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-                    for (let idx = 0; idx < Math.min(20, hpLeaderboard.length); idx++) {
-                        const entry = hpLeaderboard[idx];
-                        const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : 'rank-other';
-                        const rankStyle = idx === 0 ? 'background-color: #FFD700; color: #000;' : 
-                                         idx === 1 ? 'background-color: #C0C0C0; color: #000;' : 
-                                         idx === 2 ? 'background-color: #CD7F32; color: #fff;' : 
-                                         'background-color: rgba(255,255,255,0.3); color: #fff;';
-                        reportHTML += `
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                    <td style="padding: 10px 12px;"><span style="display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; ${rankStyle}">${idx + 1}</span></td>
-                                    <td style="padding: 10px 12px;"><strong>${formatCharDisplay(entry.name, charStateForName(entry.name, startState, endState))}</strong>${charTimelineLink(entry.name)}</td>
-                                    <td style="padding: 10px 12px;">${entry.class}</td>
-                                    <td style="padding: 10px 12px;">${entry.level}</td>
-                                    <td style="padding: 10px 12px; color: #fff; font-weight: bold;">+${entry.hp_gain}</td>
-                                    <td style="padding: 10px 12px;">${entry.hp_total || '—'}</td>
-                                </tr>`;
-                    }
-                    reportHTML += `
-                            </tbody>
-                        </table>
-                    </div>`;
-                }
-                
-                if (dumpBeforeBaselineAny) {
-                    reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — at least one endpoint <code>delta_daily_*.json.gz</code> was built with the wrong <code>baseline_era_date</code> (dump date before <code>baseline_date</code>). Regenerate that day with the <strong>Regenerate delta daily JSONs</strong> workflow using a <code>baseline_era_date</code> that matches the archive for that dump (for a single Feb-era anchor use <code>2026-02-09</code>), then redeploy.</p>`;
-                } else if (baselineMismatch && !eventSourceNote) {
-                    const newerBaseline = startDelta.baseline_date < endDelta.baseline_date ? endDelta.baseline_date : startDelta.baseline_date;
-                    reportHTML += `<p style="background:#fce4ec;padding:12px;border-radius:5px;margin:12px 0;border-left:4px solid #c2185b;"><strong>AA/HP leaderboards omitted</strong> — this range crosses different <code>baseline_date</code> values (${startDelta.baseline_date} vs ${endDelta.baseline_date}). Reconstructed AA/HP at the start uses the older era baseline plus sparse <code>char_deltas</code>; at the end it uses the newer era. Characters unchanged vs the old baseline often have <strong>no</strong> row on the start day, so their AA stays at the old baseline snapshot (e.g. 173) even if the calendar day is just before rotation, while the first post-rotation daily row can show a large cumulative jump vs the <em>new</em> baseline — top lists looked like huge short-window gains. For comparable top gainers, pick <strong>both dates on or after the later <code>baseline_date</code></strong> (here <code>${newerBaseline}</code>), or use <code>delta.html</code> day-over-day.</p>`;
-                }
-                
-                // Character Changes Table (matching delta.html format)
-                if (Object.keys(charChanges).length > 0) {
-                    reportHTML += `
-                    <h2 id="character-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Character Level & AA Changes</h2>
-                    <table class="delta-table" style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                        <thead>
-                            <tr>
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Character</th>
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Class</th>
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Level</th>
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Level Change</th>
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">Total AA</th>
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd; background-color: #f0f0f0; font-weight: bold;">AA Total Change</th>
-                            </tr>
-                        </thead>
-                        <tbody>`;
-                    
-                    // Sort characters alphabetically
-                    const sortedCharNames = Object.keys(charChanges).sort();
-                    for (const charName of sortedCharNames) {
-                        const changes = charChanges[charName];
+                    for (const [charName, changes] of Object.entries(charChanges)) {
+                        if (changes.is_deleted || changes.is_new) continue;
+                        if (changes.is_visibility_change) continue;
                         if (!charsInBoth.has(charName)) continue;
-                        const isDeleted = changes.is_deleted;
-                        const isNew = changes.is_new;
+                        if (corpseLootChars.has(charName)) continue;
                         const currentLevel = changes.current_level;
                         const previousLevel = changes.previous_level;
-                        
-                        const charState = charStateForName(charName, startState, endState);
-                        // Character name display
-                        let charDisplay;
-                        if (isDeleted) {
-                            charDisplay = `<strong style="color: #999; text-decoration: line-through;">${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)} <span style="color: #f44336; font-size: 0.9em;">(Deleted)</span>`;
-                        } else if (isNew) {
-                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)} <span style="color: #4CAF50; font-size: 0.9em;">(New)</span>`;
-                        } else {
-                            charDisplay = `<strong>${formatCharDisplay(charName, charState)}</strong>${charTimelineLink(charName)}`;
+                        const aaGain = changes.aa;
+                        const hpGain = changes.hp;
+                        if ((currentLevel >= 50 || previousLevel >= 50) && aaGain > 0) {
+                            aaLeaderboard.push({
+                                name: charName,
+                                class: changes.class || 'Unknown',
+                                level: currentLevel,
+                                aa_gain: aaGain,
+                                aa_total: changes.current_aa_total != null ? changes.current_aa_total : 0
+                            });
                         }
-                        
-                        // Level change display
-                        let levelDisplay;
-                        if (isDeleted) {
-                            levelDisplay = `<span style="color: #f44336; font-weight: bold;">Deleted (was ${previousLevel})</span>`;
-                        } else if (previousLevel === 65) {
-                            levelDisplay = `<span style="color: #666;">—</span>`;
-                        } else {
-                            const levelClass = changes.level > 0 ? 'color: #4CAF50; font-weight: bold;' : changes.level < 0 ? 'color: #f44336; font-weight: bold;' : 'color: #666;';
-                            const levelText = changes.level > 0 ? `+${changes.level}` : String(changes.level);
-                            levelDisplay = `<span style="${levelClass}">${levelText} (${previousLevel} → ${currentLevel})</span>`;
+                        if (hpGain > 0) {
+                            hpLeaderboard.push({
+                                name: charName,
+                                class: changes.class || 'Unknown',
+                                level: currentLevel,
+                                hp_gain: hpGain,
+                                hp_total: endState[charName]?.hp || 0
+                            });
                         }
-                        
-                        // Total AA display
-                        let totalAADisplay;
-                        if (isDeleted) {
-                            totalAADisplay = `<span style="color: #999;">—</span>`;
-                        } else if (currentLevel >= 50 || previousLevel >= 50) {
-                            // Need to calculate total AA from end state
-                            const endChar = endState[charName];
-                            totalAADisplay = String(endChar ? endChar.aa_total : '—');
-                        } else {
-                            totalAADisplay = `<span style="color: #666;">—</span>`;
-                        }
-                        
-                        // AA change display
-                        let aaDisplay;
-                        if (isDeleted) {
-                            aaDisplay = `<span style="color: #f44336; font-weight: bold;">—</span>`;
-                        } else if (currentLevel >= 50 || previousLevel >= 50) {
-                            const aaClass = changes.aa > 0 ? 'color: #4CAF50; font-weight: bold;' : changes.aa < 0 ? 'color: #f44336; font-weight: bold;' : 'color: #666;';
-                            const aaText = changes.aa > 0 ? `+${changes.aa}` : String(changes.aa);
-                            aaDisplay = `<span style="${aaClass}">${aaText}</span>`;
-                        } else {
-                            aaDisplay = `<span style="color: #666;">—</span>`;
-                        }
-                        
-                        reportHTML += `
-                            <tr>
-                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${charDisplay}</td>
-                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${changes.class || 'Unknown'}</td>
-                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${isDeleted ? previousLevel : currentLevel}</td>
-                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${levelDisplay}</td>
-                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${totalAADisplay}</td>
-                                <td style="padding: 10px; text-align: left; border-bottom: 1px solid #ddd;">${aaDisplay}</td>
-                            </tr>`;
-                    }
-                    
-                    reportHTML += `
-                        </tbody>
-                    </table>`;
-                } else {
-                    reportHTML += `
-                    <h2 id="character-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Character Level & AA Changes</h2>
-                    <p style="color: #999; font-style: italic;">No level or AA changes detected.</p>`;
-                }
-                
-                // Level 1 inventory changes (mules/traders) — only actual changes (visibility list shown once above); skip section if no blocks
-                if (nonVisLevel1.length > 0) {
-                    reportHTML += `
-                    <h2 id="inventory-changes-level1" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Level 1 Inventory Changes (Mules/Traders)</h2>
-                    <p><em>Showing level 1 characters with inventory changes (limited to 500)</em></p>`;
-                    for (const charName of nonVisLevel1) {
-                        const delta = invDeltasLevel1[charName];
-                        reportHTML += `
-                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff9e6;">
-                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong>${charTimelineLink(charName)} <span style="color: #666; font-size: 0.9em;">(Level 1)</span></h3>`;
-                        if (Object.keys(delta.added || {}).length > 0) {
-                            reportHTML += `
-                        <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
-                            for (const itemId of Object.keys(delta.added).sort()) {
-                                const count = delta.added[itemId];
-                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                const countText = count > 1 ? ' x' + count : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
-                            }
-                            reportHTML += `</div></div>`;
-                        }
-                        if (Object.keys(delta.removed || {}).length > 0) {
-                            reportHTML += `
-                        <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
-                            for (const itemId of Object.keys(delta.removed).sort()) {
-                                const count = delta.removed[itemId];
-                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                const countText = count > 1 ? ' x' + count : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
-                            }
-                            reportHTML += `</div></div>`;
-                        }
-                        reportHTML += `</div>`;
                     }
                 }
-                
-                // Regular inventory changes (non-level 1) — only actual changes; show section with message when no blocks
-                if (nonVisOthers.length > 0) {
-                    reportHTML += `
-                    <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
-                    <p><em>Showing characters with inventory changes (limited to 500)</em></p>`;
-                    for (const charName of nonVisOthers) {
-                        const delta = invDeltasOthers[charName];
-                        reportHTML += `
-                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-                        <h3 style="margin-top: 0;"><strong>${formatCharDisplay(charName, charStateForName(charName, startState, endState))}</strong>${charTimelineLink(charName)}</h3>`;
-                        if (Object.keys(delta.added || {}).length > 0) {
-                                reportHTML += `
-                        <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Items Added:</strong><div style="margin-top: 5px;">`;
-                                for (const itemId of Object.keys(delta.added).sort()) {
-                                    const count = delta.added[itemId];
-                                    const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                    const countText = count > 1 ? ' x' + count : '';
-                                    reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
-                                }
-                                reportHTML += `</div></div>`;
-                        }
-                        if (Object.keys(delta.removed || {}).length > 0) {
-                            reportHTML += `
-                        <div style="margin: 10px 0;"><strong style="color: #f44336;">Items Removed:</strong><div style="margin-top: 5px;">`;
-                            for (const itemId of Object.keys(delta.removed).sort()) {
-                                const count = delta.removed[itemId];
-                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                const countText = count > 1 ? ' x' + count : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
-                            }
-                            reportHTML += `</div></div>`;
-                        }
-                        reportHTML += `</div>`;
-                    }
-                } else {
-                    reportHTML += `
-                    <h2 id="inventory-changes" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Inventory Changes</h2>
-                    <p style="color: #999; font-style: italic;">${Object.keys(invDeltas).length === 0 ? 'No inventory changes detected.' : 'No inventory changes to list (only visibility changes in this range).'}</p>`;
-                }
-                
-                // Tracked Items section — only actual changes; skip section if no blocks
-                if (nonVisTracked.length > 0) {
-                    reportHTML += `
-                    <h2 id="tracked-items" style="color: #555; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px;">📌 Tracked Items (Raid / Elemental Armor / Praesterium)</h2>
-                    <p><em>Changes in raid loot, elemental armor, and praesterium items — see who acquired or lost these.</em></p>`;
-                    for (const charName of nonVisTracked) {
-                        const delta = trackedDeltas[charName];
-                        const state = charStateForName(charName, startState, endState);
-                        const level = state.level || '?';
-                        const charDisplay = formatCharDisplay(charName, state);
-                        const charSlug = charName.toLowerCase().replace(/ /g, '_');
-                        const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
-                        reportHTML += `
-                    <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8e1;">
-                        <h3 style="margin-top: 0;"><a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(charName)} <span style="color: #666; font-size: 0.9em;">(Level ${level})</span></h3>`;
-                        if (Object.keys(delta.added || {}).length > 0) {
-                            reportHTML += `
-                        <div style="margin: 10px 0;"><strong style="color: #4CAF50;">Acquired:</strong><div style="margin-top: 5px;">`;
-                            for (const itemId of Object.keys(delta.added).sort()) {
-                                const count = delta.added[itemId];
-                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                const countText = count > 1 ? ' x' + count : '';
-                                const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
-                            }
-                            reportHTML += `</div></div>`;
-                        }
-                        if (Object.keys(delta.removed || {}).length > 0) {
-                            reportHTML += `
-                        <div style="margin: 10px 0;"><strong style="color: #f44336;">Lost:</strong><div style="margin-top: 5px;">`;
-                            for (const itemId of Object.keys(delta.removed).sort()) {
-                                const count = delta.removed[itemId];
-                                const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
-                                const countText = count > 1 ? ' x' + count : '';
-                                const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
-                            }
-                            reportHTML += `</div></div>`;
-                        }
-                        reportHTML += `</div>`;
-                    }
-                }
-                
-                outputDiv.innerHTML = reportHTML;
+                aaLeaderboard.sort((a, b) => b.aa_gain - a.aa_gain);
+                hpLeaderboard.sort((a, b) => b.hp_gain - a.hp_gain);
+
+                const filterIndex = buildRangeFilterIndex(zoneEntries, trackedDeltas);
+                lastReportContext = {
+                    start, end,
+                    eventSourceNote, baselineMismatch, omitRangeLeaderboards,
+                    usedFallbackBaseline, dumpBeforeBaselineAny,
+                    dumpBeforeBaselineStart, dumpBeforeBaselineEnd, dqBadStart, dqBadEnd,
+                    startBaselineDateGear, endBaselineDateGear,
+                    endBaselineResetDay,
+                    startState, endState,
+                    startDelta: startDelta || null,
+                    endDelta: endDelta || null,
+                    invDeltas, invDeltasLevel1, invDeltasOthers,
+                    trackedDeltas, zoneEntries,
+                    charChanges, charsInBoth, corpseLootChars,
+                    allVisNames, nonVisLevel1, nonVisOthers, nonVisTracked,
+                    aaLeaderboard, hpLeaderboard,
+                    filterIndex
+                };
+                showReportFilterBar(filterIndex);
+                outputDiv.innerHTML = buildReportHTML(lastReportContext, getLootFiltersFromUI());
+                updateLootFilterBanner(getLootFiltersFromUI());
             } catch (error) {
+                if (filterBar) filterBar.style.display = 'none';
+                lastReportContext = null;
                 outputDiv.innerHTML = `<p style="color: red; padding: 15px; background: #ffebee; border-radius: 5px;">
                     <strong>Error:</strong> ${error.message}<br>
                     <small>Available dates are listed below. Please select dates from the list.</small>
