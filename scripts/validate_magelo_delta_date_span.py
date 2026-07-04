@@ -85,14 +85,9 @@ def check_previous_fingerprint() -> int:
     if not expected:
         return 0
     fp = load_fingerprint(
-        Path("magelo_dump_fingerprint.json"),
         stamp_path=Path(".delta_yesterday_magelo_date.txt"),
+        stamp_only=True,
     )
-    if not fp:
-        fp = load_fingerprint(
-            Path("magelo_dump_fingerprint.json"),
-            stamp_path=Path(".magelo_update_date"),
-        )
     if not fp:
         return 0
     prev_char = Path("character/TAKP_character_previous.txt")

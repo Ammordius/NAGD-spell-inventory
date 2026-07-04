@@ -166,22 +166,32 @@ def verify_fingerprint(
 def load_fingerprint(
     path: Path = Path(FINGERPRINT_FILENAME),
     stamp_path: Path = DEFAULT_STAMP,
+    *,
+    stamp_only: bool = False,
 ) -> dict | None:
+    """Load fingerprint from stamp line 2 and/or standalone JSON file.
+
+    When verifying yesterday's cache backup, pass ``stamp_only=True`` so a
+    fingerprint written for today's export mid-job is not mistaken for yesterday's.
+    """
+    if stamp_path.is_file():
+        try:
+            lines = stamp_path.read_text(encoding="utf-8").splitlines()
+            if len(lines) >= 2:
+                fp = json.loads(lines[1])
+                if fp:
+                    return fp
+        except (OSError, json.JSONDecodeError):
+            pass
+    if stamp_only:
+        return None
     if path.is_file():
         try:
             with path.open(encoding="utf-8") as f:
                 return json.load(f)
         except (OSError, json.JSONDecodeError):
             pass
-    if not stamp_path.is_file():
-        return None
-    try:
-        lines = stamp_path.read_text(encoding="utf-8").splitlines()
-        if len(lines) < 2:
-            return None
-        return json.loads(lines[1])
-    except (OSError, json.JSONDecodeError):
-        return None
+    return None
 
 
 def verify_legacy_stamp(stamp_path: Path, expected_date: str) -> list[str]:

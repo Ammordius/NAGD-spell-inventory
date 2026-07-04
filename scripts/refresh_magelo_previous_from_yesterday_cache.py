@@ -50,7 +50,7 @@ def verify_yesterday_cache(
     inv_src: Path,
     stamp_src: Path,
 ) -> list[str]:
-    fp = load_fingerprint(Path(FINGERPRINT_FILENAME), stamp_path=stamp_src)
+    fp = load_fingerprint(stamp_path=stamp_src, stamp_only=True)
     if fp:
         return verify_fingerprint(fp, char_src, inv_src, expected)
     errors = verify_legacy_stamp(stamp_src, expected)
