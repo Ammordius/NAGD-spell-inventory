@@ -26,10 +26,13 @@ from delta_storage import (
 )
 from gear_event_storage import (
     append_day_events_from_deltas,
+    build_possession_map,
+    filter_unique_reacquires_in_inv_deltas,
     gear_events_available,
     get_day_delta_from_events,
     list_available_event_dates,
     populate_item_names_for_inv_deltas,
+    possession_from_inv_snapshot,
 )
 
 # Character names to look for
@@ -1197,11 +1200,10 @@ def load_no_rent_items():
         return set()
 
 
-def load_no_drop_tracked_item_ids():
-    """Load set of tracked item IDs that are NO DROP (from data/item_stats.json flags).
-    Used to only count mob kills from non-no-drop loot when serverwide net change is positive."""
+def _load_item_ids_with_flag(flag_name: str) -> set:
+    """Load item IDs from item_stats.json whose flags contain flag_name (e.g. NO DROP, LORE)."""
     base_dir = os.path.dirname(__file__)
-    no_drop = set()
+    matched = set()
     for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
         if not os.path.exists(path):
             continue
@@ -1212,13 +1214,31 @@ def load_no_drop_tracked_item_ids():
                 flags = entry.get('flags') or []
                 if isinstance(flags, str):
                     flags = [f.strip() for f in flags.split('|')]
-                if 'NO DROP' in flags:
-                    no_drop.add(str(item_id_str))
-            return no_drop
+                if flag_name in flags:
+                    matched.add(str(item_id_str))
+            return matched
         except Exception as e:
-            print(f"Warning: Could not load item_stats for no_drop: {e}")
+            print(f"Warning: Could not load item_stats for {flag_name!r}: {e}")
             return set()
     return set()
+
+
+def load_no_drop_tracked_item_ids():
+    """Load set of tracked item IDs that are NO DROP (from data/item_stats.json flags).
+    Used to only count mob kills from non-no-drop loot when serverwide net change is positive."""
+    return _load_item_ids_with_flag('NO DROP')
+
+
+def load_lore_item_ids():
+    """Load item IDs flagged LORE in item_stats.json (max one per character)."""
+    return _load_item_ids_with_flag('LORE')
+
+
+def load_unique_tracked_item_ids(tracked_ids=None):
+    """Tracked raid/elemental/praesterium items that are LORE (unique per character)."""
+    if tracked_ids is None:
+        tracked_ids, _, _, _ = load_tracked_item_ids()
+    return set(tracked_ids) & load_lore_item_ids() if tracked_ids else set()
 
 
 def load_tracked_item_ids():
@@ -1767,6 +1787,9 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     
     # Load tracked item IDs (raid / elemental armor / praesterium) and filter deltas for that set
     tracked_ids, tracked_source_label, item_zone, item_mob = load_tracked_item_ids()
+    unique_tracked = load_unique_tracked_item_ids(tracked_ids) if tracked_ids else set()
+    prev_possession = possession_from_inv_snapshot(previous_inv)
+    filter_unique_reacquires_in_inv_deltas(inv_deltas, prev_possession, unique_tracked)
     tracked_deltas = {}
     if tracked_ids:
         for char_name, delta in inv_deltas.items():
@@ -1805,6 +1828,10 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             continue
         delta = tracked_deltas[char_name]
         for item_id, count in (delta.get('added') or {}).items():
+            # Lore tracked loot: only count as new if character did not possess it yesterday
+            if str(item_id) in unique_tracked:
+                if int(prev_possession.get(char_name, {}).get(str(item_id), 0) or 0) > 0:
+                    continue
             # Non-no-drop tracked loot: only count toward mob kill if serverwide net change is positive
             if str(item_id) not in no_drop_tracked and net_change_tracked.get(item_id, 0) <= 0:
                 continue
@@ -2958,6 +2985,8 @@ def generate_delta_history(base_dir):
     # Tracked item IDs that are NO DROP (for mob kill verification: non-no-drop only counts when net change > 0)
     no_drop_tracked = load_no_drop_tracked_item_ids() & tracked_ids if tracked_ids else set()
     no_drop_tracked_json = json.dumps(list(no_drop_tracked))
+    unique_tracked = load_unique_tracked_item_ids(tracked_ids) if tracked_ids else set()
+    unique_tracked_json = json.dumps(list(unique_tracked))
     no_rent_for_js = sorted(int(x) for x in (load_no_rent_items() or set()))
     no_rent_json = json.dumps(no_rent_for_js)
     
@@ -3238,6 +3267,7 @@ def generate_delta_history(base_dir):
     <script type="application/json" id="tracked-item-zone">""" + tracked_item_zone_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="tracked-item-mob">""" + tracked_item_mob_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="no-drop-tracked-ids">""" + no_drop_tracked_json.replace("</", "<\\/") + """</script>
+    <script type="application/json" id="unique-tracked-ids">""" + unique_tracked_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="no-rent-item-ids">""" + no_rent_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="sorted-available-dates">""" + sorted_dates_json.replace("</", "<\\/") + """</script>
     <script type="application/json" id="gear-event-shard-months">""" + gear_shard_months_json.replace("</", "<\\/") + """</script>
@@ -3250,6 +3280,7 @@ def generate_delta_history(base_dir):
         const TRACKED_ITEM_ZONE = JSON.parse((document.getElementById('tracked-item-zone') || { textContent: '{}' }).textContent);
         const TRACKED_ITEM_MOB = JSON.parse((document.getElementById('tracked-item-mob') || { textContent: '{}' }).textContent);
         const NO_DROP_TRACKED_IDS = new Set(JSON.parse((document.getElementById('no-drop-tracked-ids') || { textContent: '[]' }).textContent));
+        const UNIQUE_TRACKED_IDS = new Set(JSON.parse((document.getElementById('unique-tracked-ids') || { textContent: '[]' }).textContent));
         const NO_RENT_ITEMS = new Set(JSON.parse((document.getElementById('no-rent-item-ids') || { textContent: '[]' }).textContent).map(String));
         const SORTED_AVAILABLE_DATES = JSON.parse((document.getElementById('sorted-available-dates') || { textContent: '[]' }).textContent);
         const GEAR_EVENT_SHARD_MONTHS = JSON.parse((document.getElementById('gear-event-shard-months') || { textContent: '[]' }).textContent);
@@ -3423,6 +3454,60 @@ def generate_delta_history(base_dir):
             }));
             const chars = shardResults.flat();
             return chars.filter(ev => ev.d && ev.d <= endDate);
+        }
+
+        async function loadGearEventsUpTo(endDate, onProgress) {
+            if (!GEAR_EVENT_SHARD_MONTHS.length) return [];
+            const firstMonth = gearManifestFirstEventMonthForDate(endDate);
+            const months = monthsBetween(firstMonth, endDate.slice(0, 7))
+                .filter(m => GEAR_EVENT_SHARD_MONTHS.includes(m));
+            let done = 0;
+            const shardResults = await Promise.all(months.map(async (month) => {
+                const events = await loadGearShard(month);
+                done += 1;
+                if (onProgress) onProgress(done, months.length);
+                return events;
+            }));
+            const gear = shardResults.flat();
+            return gear.filter(ev => ev.d && ev.d <= endDate);
+        }
+
+        function buildInventoryAbsMapFromEvents(baseline, gearEventsUpTo) {
+            const invBase = (baseline && baseline.inventories) || {};
+            const allChars = new Set(Object.keys(invBase));
+            for (const ev of gearEventsUpTo || []) {
+                if (ev.c) allChars.add(ev.c);
+            }
+            const out = {};
+            for (const charName of allChars) {
+                const counts = {};
+                for (const item of (invBase[charName] || [])) {
+                    let id = String(item.item_id);
+                    if (NO_RENT_ITEMS.has(id)) continue;
+                    if (!id || id.toUpperCase() === 'NULL' || id === '0') continue;
+                    counts[id] = (counts[id] || 0) + 1;
+                }
+                for (const ev of gearEventsUpTo || []) {
+                    if (ev.c !== charName) continue;
+                    const itemId = String(ev.i);
+                    const sign = Number(ev.s);
+                    const n = Number(ev.n) || 0;
+                    if (!itemId || n <= 0 || (sign !== 1 && sign !== -1)) continue;
+                    if (NO_RENT_ITEMS.has(itemId)) continue;
+                    if (sign > 0) {
+                        counts[itemId] = (counts[itemId] || 0) + n;
+                    } else {
+                        counts[itemId] = (counts[itemId] || 0) - n;
+                        if (counts[itemId] <= 0) delete counts[itemId];
+                    }
+                }
+                const cleaned = {};
+                for (const [k, v] of Object.entries(counts)) {
+                    if (v > 0) cleaned[k] = v;
+                }
+                if (Object.keys(cleaned).length) out[charName] = cleaned;
+            }
+            return out;
         }
 
         function resolveItemNames(invDeltas, nameMap) {
@@ -3995,16 +4080,16 @@ def generate_delta_history(base_dir):
                 let rangeCharDeltas = null;
                 let startBaselineDateGear = null;
                 let endBaselineDateGear = null;
+                let absStartInv = {};
+                let absEndInv = {};
 
                 if (USE_GEAR_EVENTS && GEAR_EVENT_SHARD_MONTHS.length > 0) {
                     outputDiv.innerHTML = '<p>Loading gear events for ' + start + ' to ' + end + '...</p>';
                     const { gear, char } = await loadEventsInRange(start, end);
-                    invDeltas = foldGearEventsToInvDeltas(gear);
-                    resolveItemNames(invDeltas, ITEM_ID_TO_NAME);
                     rangeCharDeltas = foldCharEventsToCharDeltas(char);
                     charChanges = charDeltasToChanges(rangeCharDeltas);
                     enrichCharChangesFromFoldedDeltas(charChanges, rangeCharDeltas);
-                    eventSourceNote = `gear event log (${gear.length} inventory events, ${char.length} stat events)`;
+                    eventSourceNote = `gear event log (endpoint inventory diff; ${gear.length} range events, ${char.length} stat events)`;
 
                     startBaselineDateGear = gearManifestBaselineForDate(start);
                     endBaselineDateGear = gearManifestBaselineForDate(end);
@@ -4014,16 +4099,26 @@ def generate_delta_history(base_dir):
 
                     const baselineDate = endBaselineDateGear;
                     if (baselineDate) {
-                        outputDiv.innerHTML = '<p>Loading baseline for character state...</p>';
+                        outputDiv.innerHTML = '<p>Loading baseline for character and inventory state...</p>';
                         const baselineResult = await loadBaseline(baselineDate);
                         if (baselineResult && baselineResult.baseline) {
                             usedFallbackBaseline = baselineResult.usedFallback;
-                            const charUpToEnd = await loadCharEventsUpTo(end, (done, total) => {
-                                outputDiv.innerHTML = '<p>Loading char shards (' + done + '/' + total + ')...</p>';
-                            });
+                            const [charUpToEnd, gearUpToEnd] = await Promise.all([
+                                loadCharEventsUpTo(end, (done, total) => {
+                                    outputDiv.innerHTML = '<p>Loading char shards (' + done + '/' + total + ')...</p>';
+                                }),
+                                loadGearEventsUpTo(end, (done, total) => {
+                                    outputDiv.innerHTML = '<p>Loading gear shards (' + done + '/' + total + ')...</p>';
+                                }),
+                            ]);
                             const charUpToStart = charUpToEnd.filter(ev => ev.d && ev.d <= start);
+                            const gearUpToStart = gearUpToEnd.filter(ev => ev.d && ev.d <= start);
                             startState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToStart);
                             endState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToEnd);
+                            absStartInv = buildInventoryAbsMapFromEvents(baselineResult.baseline, gearUpToStart);
+                            absEndInv = buildInventoryAbsMapFromEvents(baselineResult.baseline, gearUpToEnd);
+                            invDeltas = diffInventoryAbsMaps(absStartInv, absEndInv, {}, {});
+                            resolveItemNames(invDeltas, ITEM_ID_TO_NAME);
                             enrichCharChangesFromStates(charChanges, startState, endState, rangeCharDeltas);
                             for (const charName of Object.keys(startState)) {
                                 if (charName in endState || charName in invDeltas) continue;
@@ -4041,7 +4136,13 @@ def generate_delta_history(base_dir):
                                     delta.is_visibility_change = (inStart && !inEnd) || (!inStart && inEnd);
                                 }
                             }
+                        } else {
+                            invDeltas = foldGearEventsToInvDeltas(gear);
+                            resolveItemNames(invDeltas, ITEM_ID_TO_NAME);
                         }
+                    } else {
+                        invDeltas = foldGearEventsToInvDeltas(gear);
+                        resolveItemNames(invDeltas, ITEM_ID_TO_NAME);
                     }
                 } else {
                 // Legacy: cumulative daily JSON endpoints
@@ -4101,8 +4202,8 @@ def generate_delta_history(base_dir):
                 
                 // Inventory: rebuild absolute bags (baseline + cumulative inv delta), then diff.
                 // Matches Python get_date_range_deltas across baseline_date boundaries.
-                const absStartInv = reconstructInventoryAbsMap(startBaseline, startDelta);
-                const absEndInv = reconstructInventoryAbsMap(endBaseline, endDelta);
+                absStartInv = reconstructInventoryAbsMap(startBaseline, startDelta);
+                absEndInv = reconstructInventoryAbsMap(endBaseline, endDelta);
                 invDeltas = diffInventoryAbsMaps(absStartInv, absEndInv, startDelta.inv_deltas, endDelta.inv_deltas);
                 const startInv = startDelta.inv_deltas || {};
                 const endInv = endDelta.inv_deltas || {};
@@ -4198,6 +4299,12 @@ def generate_delta_history(base_dir):
                     for (const [charName, delta] of Object.entries(trackedDeltas)) {
                         if (!startState[charName] || !endState[charName] || delta.is_visibility_change) continue;
                         for (const itemId of Object.keys(delta.added || {})) {
+                            if (UNIQUE_TRACKED_IDS.has(String(itemId))) {
+                                const sid = String(itemId);
+                                const startCount = (absStartInv[charName] && absStartInv[charName][sid]) || 0;
+                                const endCount = (absEndInv[charName] && absEndInv[charName][sid]) || 0;
+                                if (endCount <= startCount) continue;
+                            }
                             if (!NO_DROP_TRACKED_IDS.has(String(itemId)) && (netChangeTracked[itemId] || 0) <= 0) continue;
                             const zone = TRACKED_ITEM_ZONE[String(itemId)];
                             if (!zone) continue;
@@ -5039,6 +5146,10 @@ def main():
         for _cn in corpse_loot_override:
             char_deltas.pop(_cn, None)
             inv_deltas.pop(_cn, None)
+        tracked_ids, _, _, _ = load_tracked_item_ids()
+        unique_tracked = load_unique_tracked_item_ids(tracked_ids)
+        possession_yesterday = possession_from_inv_snapshot(previous_inventories)
+        filter_unique_reacquires_in_inv_deltas(inv_deltas, possession_yesterday, unique_tracked)
         try:
             gear_n, char_n = append_day_events_from_deltas(
                 char_deltas,
@@ -5046,6 +5157,7 @@ def main():
                 date_str,
                 delta_snapshots_dir,
                 baseline_date=baseline.get("baseline_date") if baseline else None,
+                unique_tracked_ids=unique_tracked,
             )
             print(f"  Saved gear_events: {gear_n} inventory rows, {char_n} stat rows")
         except Exception as e:

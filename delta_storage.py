@@ -1271,7 +1271,17 @@ def get_date_range_deltas(start_date, end_date, base_dir='delta_snapshots'):
         if gear_events_available(base_dir):
             event_dates = set(list_available_event_dates(base_dir))
             if start_date in event_dates and end_date in event_dates:
-                return get_range_delta_from_events(start_date, end_date, base_dir)
+                unique_tracked_ids = None
+                try:
+                    from generate_spell_page import load_tracked_item_ids, load_unique_tracked_item_ids
+
+                    tracked_ids, _, _, _ = load_tracked_item_ids()
+                    unique_tracked_ids = load_unique_tracked_item_ids(tracked_ids)
+                except ImportError:
+                    pass
+                return get_range_delta_from_events(
+                    start_date, end_date, base_dir, unique_tracked_ids=unique_tracked_ids
+                )
     except ImportError:
         pass
 

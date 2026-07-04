@@ -71,6 +71,10 @@ class TestGenerateDeltaHistoryGuildEmbed(unittest.TestCase):
         self.assertIn('"Alice": "Temerity"', html)
         self.assertIn("function formatCharDisplay", html)
         self.assertIn("CHAR_GUILD_MAP", html)
+        self.assertIn('id="unique-tracked-ids"', html)
+        self.assertIn("UNIQUE_TRACKED_IDS", html)
+        self.assertIn("buildInventoryAbsMapFromEvents", html)
+        self.assertIn("loadGearEventsUpTo", html)
 
 
 class TestBuildTrackedItemIdToName(unittest.TestCase):

@@ -180,14 +180,17 @@ def append_day_events_from_deltas(
     date_str: str,
     base_dir: str = "delta_snapshots",
     baseline_date: str | None = None,
+    unique_tracked_ids: set[str] | None = None,
 ) -> tuple[int, int]:
     """Append gear/stat events for one calendar day from precomputed day-over-day deltas."""
     gear_events, char_events = delta_shape_to_events(
         char_deltas, inv_deltas, date_str, baseline_date
     )
-    _append_shard_events(base_dir, date_str, gear_events, char_events)
-    _update_manifest(base_dir, date_str, baseline_date, len(gear_events), len(char_events))
-    return len(gear_events), len(char_events)
+    gear_count = _append_shard_events(
+        base_dir, date_str, gear_events, char_events, unique_tracked_ids=unique_tracked_ids
+    )
+    _update_manifest(base_dir, date_str, baseline_date, gear_count, len(char_events))
+    return gear_count, len(char_events)
 
 
 def append_day_events(
@@ -239,7 +242,8 @@ def _append_shard_events(
     date_str: str,
     gear_events: list[dict],
     char_events: list[dict],
-) -> None:
+    unique_tracked_ids: set[str] | None = None,
+) -> int:
     month = _month_key(date_str)
     gear_path = _gear_shard_path(base_dir, month)
     char_path = _char_shard_path(base_dir, month)
@@ -248,6 +252,14 @@ def _append_shard_events(
     existing_char = _load_shard_gz(char_path)
     existing_gear = [e for e in existing_gear if e.get("d") != date_str]
     existing_char = [e for e in existing_char if e.get("d") != date_str]
+    if unique_tracked_ids:
+        existing_gear, gear_events = cancel_paired_unique_events(
+            existing_gear,
+            gear_events,
+            unique_tracked_ids,
+            window_days=14,
+            current_date=date_str,
+        )
     existing_gear.extend(gear_events)
     existing_char.extend(char_events)
     existing_gear.sort(key=lambda e: (e.get("d", ""), e.get("c", ""), e.get("i", "")))
@@ -255,6 +267,7 @@ def _append_shard_events(
 
     _save_shard_gz(gear_path, existing_gear)
     _save_shard_gz(char_path, existing_char)
+    return sum(1 for e in existing_gear if e.get("d") == date_str)
 
 
 def _update_manifest(
@@ -571,6 +584,7 @@ def get_range_delta_from_events(
     end_date: str,
     base_dir: str = "delta_snapshots",
     item_names: dict | None = None,
+    unique_tracked_ids: set[str] | None = None,
 ) -> dict:
     """Range delta matching get_date_range_deltas semantics (exclusive start, inclusive end)."""
     if start_date == end_date:
@@ -582,16 +596,49 @@ def get_range_delta_from_events(
         }
     if start_date > end_date:
         start_date, end_date = end_date, start_date
-    gear = load_gear_events(
-        base_dir, start_date=start_date, end_date=end_date, exclusive_start=True
-    )
     char = load_char_events(
         base_dir, start_date=start_date, end_date=end_date, exclusive_start=True
     )
-    result = events_to_delta_shape(gear, char, item_names)
-    result["start_date"] = start_date
-    result["end_date"] = end_date
-    return result
+    char_deltas = char_events_to_char_deltas(char)
+
+    baseline_date = _manifest_baseline_for_date(base_dir, end_date)
+    baseline_inv: dict = {}
+    if baseline_date:
+        try:
+            from delta_storage import load_baseline_for_date
+
+            bl = load_baseline_for_date(baseline_date, base_dir)
+            if bl:
+                baseline_inv = bl.get("inventories") or {}
+        except ImportError:
+            pass
+
+    try:
+        from generate_spell_page import load_no_rent_items
+
+        no_rent = load_no_rent_items()
+    except ImportError:
+        no_rent = set()
+
+    all_gear = load_gear_events(base_dir, end_date=end_date)
+    abs_start = build_possession_map(baseline_inv, all_gear, start_date, no_rent=no_rent)
+    abs_end = build_possession_map(baseline_inv, all_gear, end_date, no_rent=no_rent)
+    inv_deltas = diff_absolute_possession_maps(abs_start, abs_end)
+    if unique_tracked_ids:
+        filter_inv_deltas_for_display(inv_deltas, abs_start, abs_end, unique_tracked_ids)
+    if item_names:
+        for row in inv_deltas.values():
+            inames = row.setdefault("item_names", {})
+            for iid in list((row.get("added") or {}).keys()) + list((row.get("removed") or {}).keys()):
+                if iid in item_names:
+                    inames[iid] = item_names[iid]
+
+    return {
+        "char_deltas": char_deltas,
+        "inv_deltas": inv_deltas,
+        "start_date": start_date,
+        "end_date": end_date,
+    }
 
 
 def item_history(
@@ -618,6 +665,263 @@ def char_item_history(
         for ev in load_gear_events(base_dir)
         if ev.get("c") == char_name and str(ev.get("i")) == item_id
     ]
+
+
+def _days_between(date_a: str | None, date_b: str | None) -> int:
+    """Absolute calendar-day gap between two YYYY-MM-DD strings."""
+    if not date_a or not date_b:
+        return 9999
+    try:
+        a = datetime.strptime(date_a, "%Y-%m-%d")
+        b = datetime.strptime(date_b, "%Y-%m-%d")
+        return abs((b - a).days)
+    except ValueError:
+        return 9999
+
+
+def possession_from_inv_snapshot(inv_data: dict | None) -> dict[str, dict[str, int]]:
+    """Build {char_name: {item_id: count}} from Magelo inventory rows."""
+    out: dict[str, dict[str, int]] = {}
+    for char_name, items in (inv_data or {}).items():
+        counts: dict[str, int] = defaultdict(int)
+        for item in items:
+            iid = str(item.get("item_id", "")).strip()
+            if not iid or iid.upper() == "NULL":
+                continue
+            try:
+                if int(iid) == 0:
+                    continue
+            except (ValueError, TypeError):
+                pass
+            counts[iid] += 1
+        if counts:
+            out[char_name] = dict(counts)
+    return out
+
+
+def build_possession_map(
+    baseline_inv: dict,
+    gear_events: list[dict],
+    up_to_date: str,
+    *,
+    no_rent: set | None = None,
+) -> dict[str, dict[str, int]]:
+    """Absolute item counts per character at end of ``up_to_date`` (baseline + events)."""
+    no_rent = no_rent or set()
+    counts_by_char: dict[str, dict[str, int]] = {}
+    all_chars = set((baseline_inv or {}).keys())
+    for ev in gear_events or []:
+        d = ev.get("d", "")
+        if d and d <= up_to_date and ev.get("c"):
+            all_chars.add(ev["c"])
+
+    for char_name in all_chars:
+        counts: dict[str, int] = defaultdict(int)
+        for item in (baseline_inv or {}).get(char_name, []):
+            iid = str(item.get("item_id", "")).strip()
+            if not iid or iid.upper() == "NULL":
+                continue
+            try:
+                if int(iid) in no_rent:
+                    continue
+            except (ValueError, TypeError):
+                pass
+            try:
+                if int(iid) == 0:
+                    continue
+            except (ValueError, TypeError):
+                pass
+            counts[iid] += 1
+
+        for ev in sorted(gear_events or [], key=lambda e: (e.get("d", ""), e.get("c", ""), e.get("i", ""))):
+            if ev.get("c") != char_name:
+                continue
+            d = ev.get("d", "")
+            if not d or d > up_to_date:
+                continue
+            item_id = str(ev.get("i", ""))
+            if not item_id:
+                continue
+            try:
+                if int(item_id) in no_rent:
+                    continue
+            except (ValueError, TypeError):
+                pass
+            sign = int(ev.get("s") or 0)
+            n = int(ev.get("n") or 0)
+            if n <= 0 or sign not in (1, -1):
+                continue
+            if sign > 0:
+                counts[item_id] += n
+            else:
+                counts[item_id] -= n
+                if counts[item_id] <= 0:
+                    counts.pop(item_id, None)
+
+        cleaned = {k: v for k, v in counts.items() if v > 0}
+        if cleaned:
+            counts_by_char[char_name] = cleaned
+    return counts_by_char
+
+
+def diff_absolute_possession_maps(
+    abs_start: dict[str, dict[str, int]],
+    abs_end: dict[str, dict[str, int]],
+) -> dict:
+    """Net inventory change between two per-character item-count maps."""
+    inv_deltas: dict[str, dict] = {}
+    all_chars = set(abs_start.keys()) | set(abs_end.keys())
+    for char_name in all_chars:
+        a = abs_start.get(char_name, {})
+        b = abs_end.get(char_name, {})
+        all_ids = set(a.keys()) | set(b.keys())
+        added_items: dict[str, int] = {}
+        removed_items: dict[str, int] = {}
+        for item_id in all_ids:
+            sid = str(item_id)
+            ca = int(a.get(sid, 0) or 0)
+            cb = int(b.get(sid, 0) or 0)
+            net = cb - ca
+            if net > 0:
+                added_items[sid] = net
+            elif net < 0:
+                removed_items[sid] = -net
+        if added_items or removed_items:
+            inv_deltas[char_name] = {
+                "added": added_items,
+                "removed": removed_items,
+                "item_names": {},
+            }
+    return inv_deltas
+
+
+def filter_unique_reacquires_in_inv_deltas(
+    inv_deltas: dict,
+    possession_before: dict[str, dict[str, int]],
+    unique_ids: set[str],
+) -> None:
+    """Drop spurious ``added`` rows for lore tracked items the character already possessed."""
+    if not unique_ids:
+        return
+    unique_ids = {str(i) for i in unique_ids}
+    empty_chars: list[str] = []
+    for char_name, row in (inv_deltas or {}).items():
+        added = row.get("added") or {}
+        prev = possession_before.get(char_name, {})
+        for item_id in list(added.keys()):
+            if str(item_id) not in unique_ids:
+                continue
+            if int(prev.get(str(item_id), 0) or 0) > 0:
+                del added[item_id]
+        if not added and not (row.get("removed") or {}):
+            empty_chars.append(char_name)
+    for char_name in empty_chars:
+        inv_deltas.pop(char_name, None)
+
+
+def filter_inv_deltas_for_display(
+    inv_deltas: dict,
+    abs_start: dict[str, dict[str, int]],
+    abs_end: dict[str, dict[str, int]],
+    unique_ids: set[str],
+) -> None:
+    """Remove unique-item ``added`` rows when possession did not net-increase across the range."""
+    if not unique_ids:
+        return
+    unique_ids = {str(i) for i in unique_ids}
+    empty_chars: list[str] = []
+    for char_name, row in (inv_deltas or {}).items():
+        added = row.get("added") or {}
+        for item_id in list(added.keys()):
+            if str(item_id) not in unique_ids:
+                continue
+            start_c = int((abs_start.get(char_name) or {}).get(str(item_id), 0) or 0)
+            end_c = int((abs_end.get(char_name) or {}).get(str(item_id), 0) or 0)
+            if end_c <= start_c:
+                del added[item_id]
+        if not added and not (row.get("removed") or {}):
+            empty_chars.append(char_name)
+    for char_name in empty_chars:
+        inv_deltas.pop(char_name, None)
+
+
+def cancel_paired_unique_events(
+    existing_gear: list[dict],
+    new_events: list[dict],
+    unique_ids: set[str],
+    *,
+    window_days: int = 14,
+    current_date: str,
+) -> tuple[list[dict], list[dict]]:
+    """Cancel reacquire (+1) by dropping today's gain and the prior loss within window_days."""
+    if not unique_ids:
+        return existing_gear, new_events
+    unique_ids = {str(i) for i in unique_ids}
+    losses_to_remove: set[tuple] = set()
+    filtered_new: list[dict] = []
+
+    for nev in new_events:
+        item_id = str(nev.get("i", ""))
+        char_name = nev.get("c", "")
+        sign = int(nev.get("s") or 0)
+        if item_id not in unique_ids or sign != 1 or not char_name:
+            filtered_new.append(nev)
+            continue
+
+        candidates = [
+            e
+            for e in existing_gear
+            if e.get("c") == char_name
+            and str(e.get("i")) == item_id
+            and int(e.get("s") or 0) == -1
+            and e.get("d", "") < current_date
+            and _days_between(e.get("d"), current_date) <= window_days
+        ]
+        if not candidates:
+            filtered_new.append(nev)
+            continue
+
+        loss_ev = max(candidates, key=lambda e: e.get("d", ""))
+        losses_to_remove.add(
+            (
+                loss_ev.get("d"),
+                loss_ev.get("c"),
+                str(loss_ev.get("i")),
+                int(loss_ev.get("s") or 0),
+                int(loss_ev.get("n") or 0),
+            )
+        )
+
+    def _event_key(e: dict) -> tuple:
+        return (
+            e.get("d"),
+            e.get("c"),
+            str(e.get("i")),
+            int(e.get("s") or 0),
+            int(e.get("n") or 0),
+        )
+
+    pruned_existing = [e for e in existing_gear if _event_key(e) not in losses_to_remove]
+    return pruned_existing, filtered_new
+
+
+def _manifest_baseline_for_date(base_dir: str, date_str: str) -> str | None:
+    path = _manifest_path(base_dir)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+    days = manifest.get("days") or {}
+    if date_str in days and days[date_str].get("baseline_date"):
+        return days[date_str]["baseline_date"]
+    for era in reversed(manifest.get("eras") or []):
+        first = era.get("first_event")
+        if first and first <= date_str and era.get("baseline_date"):
+            return era["baseline_date"]
+    return None
 
 
 def detect_oscillations(
