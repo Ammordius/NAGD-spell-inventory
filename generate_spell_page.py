@@ -3997,6 +3997,16 @@ def generate_delta_history(base_dir):
             }
         }
 
+        function filterCharEventsForBaseline(events, baselineDate) {
+            if (!baselineDate) return events || [];
+            return (events || []).filter(ev => {
+                if (ev.b != null && ev.b !== baselineDate) return false;
+                if (ev.b == null && (ev.f === 'aa' || ev.f === 'lvl' || ev.f === 'hp')
+                    && (ev.d || '') < baselineDate) return false;
+                return true;
+            });
+        }
+
         function buildCharacterStateFromEvents(baseline, charEvents) {
             const folded = foldCharEventsToCharDeltas(charEvents);
             const baselineChars = (baseline && baseline.characters) || {};
@@ -5315,12 +5325,17 @@ def generate_delta_history(base_dir):
                                     outputDiv.innerHTML = '<p>Loading gear shards (' + done + '/' + total + ')...</p>';
                                 }),
                             ]);
-                            const charUpToStart = charUpToEnd.filter(ev => ev.d && ev.d <= start);
+                            const eraBaselineDate = baselineResult.baseline.baseline_date || baselineDate;
+                            const charUpToStart = filterCharEventsForBaseline(
+                                charUpToEnd.filter(ev => ev.d && ev.d <= start),
+                                eraBaselineDate
+                            );
+                            const charUpToEndEra = filterCharEventsForBaseline(charUpToEnd, eraBaselineDate);
                             const gearUpToStart = gearUpToEnd.filter(ev => ev.d && ev.d <= start);
                             outputDiv.innerHTML = '<p>Computing inventory snapshots...</p>';
                             await new Promise(r => setTimeout(r, 0));
                             startState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToStart);
-                            endState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToEnd);
+                            endState = buildCharacterStateFromEvents(baselineResult.baseline, charUpToEndEra);
                             absStartInv = buildInventoryAbsMapFromEvents(baselineResult.baseline, gearUpToStart);
                             absEndInv = buildInventoryAbsMapFromEvents(baselineResult.baseline, gearUpToEnd);
                             invDeltas = diffInventoryAbsMaps(absStartInv, absEndInv, {}, {});
@@ -5856,6 +5871,16 @@ def generate_char_timeline(base_dir):
             return (events || []).filter(ev => ev.c === charName);
         }
 
+        function filterCharEventsForBaseline(events, baselineDate) {
+            if (!baselineDate) return events || [];
+            return (events || []).filter(ev => {
+                if (ev.b != null && ev.b !== baselineDate) return false;
+                if (ev.b == null && (ev.f === 'aa' || ev.f === 'lvl' || ev.f === 'hp')
+                    && (ev.d || '') < baselineDate) return false;
+                return true;
+            });
+        }
+
         function buildItemNameMap(baseline, charName) {
             const map = Object.assign({}, ITEM_ID_TO_NAME);
             for (const item of ((baseline.inventories || {})[charName] || [])) {
@@ -5873,7 +5898,8 @@ def generate_char_timeline(base_dir):
             if ((baseline.characters || {})[charName] || running > 0) {
                 rows.push({ date: baselineDate, delta: 0, total: running, isBaseline: true });
             }
-            const aaEvents = filterEventsForChar(charEvents, charName)
+            const eraEvents = filterCharEventsForBaseline(charEvents, baselineDate);
+            const aaEvents = filterEventsForChar(eraEvents, charName)
                 .filter(ev => ev.f === 'aa')
                 .sort((a, b) => (a.d || '').localeCompare(b.d || ''));
             for (const ev of aaEvents) {
@@ -6103,9 +6129,11 @@ def generate_char_timeline(base_dir):
                 const { gear, chars } = await loadEventsUpTo(endDate, (done, total) => {
                     status.textContent = 'Loading event shards (' + done + '/' + total + ')…';
                 });
-                const charEvents = filterEventsForChar(chars, CHAR_NAME);
+                const eraBaselineDate = baseline.baseline_date || baselineDate;
+                const eraChars = filterCharEventsForBaseline(chars, eraBaselineDate);
+                const charEvents = filterEventsForChar(eraChars, CHAR_NAME);
                 const charGear = filterEventsForChar(gear, CHAR_NAME);
-                const stateMap = buildCharacterStateFromEvents(baseline, chars);
+                const stateMap = buildCharacterStateFromEvents(baseline, eraChars);
                 const state = stateMap[CHAR_NAME] || {};
                 const guild = state.guild || CHAR_GUILD_MAP[CHAR_NAME] || '';
                 const guildPart = guild ? ' &lt;' + esc(guild) + '&gt;' : '';

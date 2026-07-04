@@ -765,6 +765,28 @@ def filter_events_for_char(events: list[dict], char_name: str) -> list[dict]:
     return [e for e in (events or []) if e.get("c") == char_name]
 
 
+def filter_char_events_for_baseline(
+    events: list[dict],
+    baseline_date: str,
+) -> list[dict]:
+    """Drop stat events from a prior baseline era (``ev.b`` != ``baseline_date``)."""
+    if not baseline_date:
+        return list(events or [])
+    out: list[dict] = []
+    for ev in events or []:
+        b = ev.get("b")
+        if b is not None and b != baseline_date:
+            continue
+        if (
+            b is None
+            and ev.get("f") in ("aa", "lvl", "hp")
+            and (ev.get("d") or "") < baseline_date
+        ):
+            continue
+        out.append(ev)
+    return out
+
+
 def manifest_latest_date(manifest: dict | None) -> str:
     """Latest calendar date key from gear_events manifest, or empty string."""
     days = (manifest or {}).get("days") or {}
@@ -860,8 +882,9 @@ def build_aa_timeline(
                 "is_baseline": True,
             }
         )
+    era_events = filter_char_events_for_baseline(char_events, baseline_date)
     aa_events = sorted(
-        [e for e in char_events if e.get("c") == char_name and e.get("f") == "aa"],
+        [e for e in era_events if e.get("c") == char_name and e.get("f") == "aa"],
         key=lambda e: e.get("d") or "",
     )
     for ev in aa_events:

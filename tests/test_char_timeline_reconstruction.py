@@ -20,6 +20,7 @@ from gear_event_storage import (  # noqa: E402
     build_gear_event_log_rows,
     build_item_name_map_for_char,
     build_tracked_gear_event_log_rows,
+    filter_char_events_for_baseline,
     filter_events_for_char,
     group_tracked_rows_by_date,
     group_tracked_rows_by_zone,
@@ -73,6 +74,43 @@ class TestCharTimelineReconstruction(unittest.TestCase):
         self.assertEqual(rows[1]["total"], 205)
         self.assertEqual(rows[2]["delta"], 3)
         self.assertEqual(rows[2]["total"], 208)
+
+    def test_build_aa_timeline_excludes_prior_era_events(self):
+        """Hellacious: +347 on 2026-02-06 (b=2024-01-14) must not stack on Feb 2026 baseline."""
+        baseline = {
+            "baseline_date": "2026-02-09",
+            "characters": {
+                "Hellacious": {
+                    "level": 65,
+                    "aa_unspent": 3,
+                    "aa_spent": 368,
+                    "class": "Necromancer",
+                }
+            },
+        }
+        events = [
+            {"d": "2026-02-06", "c": "Hellacious", "f": "aa", "n": 347, "b": "2024-01-14"},
+            {"d": "2026-05-01", "c": "Hellacious", "f": "aa", "n": 1, "b": "2026-02-09"},
+            {"d": "2026-05-02", "c": "Hellacious", "f": "aa", "n": 10, "b": "2026-02-09"},
+            {"d": "2026-05-03", "c": "Hellacious", "f": "aa", "n": 4, "b": "2026-02-09"},
+            {"d": "2026-05-04", "c": "Hellacious", "f": "aa", "n": 4, "b": "2026-02-09"},
+            {"d": "2026-05-07", "c": "Hellacious", "f": "aa", "n": 6, "b": "2026-02-09"},
+            {"d": "2026-06-28", "c": "Hellacious", "f": "aa", "n": 2, "b": "2026-02-09"},
+        ]
+        rows = build_aa_timeline(baseline, events, "Hellacious")
+        self.assertEqual(rows[0]["total"], 371)
+        dates = [r["date"] for r in rows if not r.get("is_baseline")]
+        self.assertNotIn("2026-02-06", dates)
+        self.assertEqual(rows[-1]["total"], 398)
+
+    def test_filter_char_events_for_baseline(self):
+        events = [
+            {"d": "2026-02-06", "c": "Hellacious", "f": "aa", "n": 347, "b": "2024-01-14"},
+            {"d": "2026-05-01", "c": "Hellacious", "f": "aa", "n": 1, "b": "2026-02-09"},
+        ]
+        filtered = filter_char_events_for_baseline(events, "2026-02-09")
+        self.assertEqual(len(filtered), 1)
+        self.assertEqual(filtered[0]["d"], "2026-05-01")
 
     def test_reconstruct_holdings_for_char(self):
         holdings = reconstruct_holdings_for_char(self.BASELINE, self.GEAR_EVENTS, "Alice")
