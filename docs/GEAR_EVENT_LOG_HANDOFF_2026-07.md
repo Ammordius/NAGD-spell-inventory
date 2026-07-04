@@ -55,11 +55,13 @@ Events are created only from **true day-over-day Magelo dump diffs** (`append_da
 
 ## Operator commands
 
-**Backfill / refresh shards from committed `delta_daily_*.json.gz`:**
+**Backfill / refresh shards from legacy cumulative dailies (offline archive):**
+
+Point `--base-dir` at a folder containing archived `delta_daily_*.json.gz` (removed from git July 2026; kept locally e.g. `magelo-archive/delta_daily_legacy/`):
 
 ```bash
 cd magelo
-python scripts/backfill_gear_events_from_dailies.py --base-dir delta_snapshots --clear --parity
+python scripts/backfill_gear_events_from_dailies.py --base-dir /path/to/delta_daily_legacy --clear --parity
 ```
 
 **Audit:**
@@ -86,7 +88,7 @@ Default: cumulative dailies are **not** written.
 3. Deploy copies `gear_events/` + baselines to GitHub Pages.
 4. Smoke check curls `delta_snapshots/gear_events/gear_YYYY-MM.json.gz` for export month.
 
-Legacy `delta_daily_*.json.gz` in the repo are still deployed as fallback for `delta-history.html` when `USE_GEAR_EVENTS` is false in generated HTML (no shards on Pages).
+Legacy `delta_daily_*.json.gz` are **not in the repo** (gitignored). `delta-history.html` falls back to cumulative JSON only when gear shards are missing on Pages.
 
 ---
 
@@ -101,8 +103,8 @@ When gear shards exist at build time, generated HTML sets `USE_GEAR_EVENTS = tru
 ## Gaps / follow-ups
 
 1. **`ABANDONED_DATES.txt`** (2026-05-09 … 05-13): no events until regen dumps exist; backfill skips those days.
-2. **Cross-era ranges:** event log does not yet replace `compare_delta_to_delta_reconstructed` for ranges spanning baseline rotation — legacy daily JSON + baselines still needed for that edge case in Python until era tags are used end-to-end in JS.
-3. **Git history:** old `delta_daily_*.json.gz` remain in history (~76 MB); optional `git filter-repo` cleanup is separate.
+2. **Cross-era ranges:** event log does not yet replace `compare_delta_to_delta_reconstructed` for ranges spanning baseline rotation — legacy cumulative JSON from offline archive + baselines still needed for that edge case in Python until era tags are used end-to-end in JS.
+3. **Git history:** old `delta_daily_*.json.gz` remain in history (~76 MB); optional `git filter-repo` cleanup is separate. **Repo tip (Jul 2026):** ~150 daily files removed from tree; archive locally before any regen.
 4. **Item timelines in UI:** `item_history()` / `detect_oscillations()` exist in Python; no dedicated UI yet (phase 2).
 5. **Local branch:** pull/rebase before push if behind `origin/main` (CI bot commits).
 6. **Backfill regen after inflation fix:** if `delta.html` or audit flagged inflated days, re-run:

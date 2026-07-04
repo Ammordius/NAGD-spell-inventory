@@ -131,15 +131,19 @@ class TestGearEventParityWithRepo(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.snap = os.path.join(_MAGELO_ROOT, "delta_snapshots")
-        cls.has_dailies = os.path.isdir(cls.snap) and any(
-            f.startswith("delta_daily_") for f in os.listdir(cls.snap)
-        )
+        cls.has_dailies = os.path.isdir(cls.snap) and sum(
+            1
+            for f in os.listdir(cls.snap)
+            if f.startswith("delta_daily_") and f.endswith(".json.gz")
+        ) >= 2
 
     @unittest.skipUnless(
         os.path.isdir(os.path.join(_MAGELO_ROOT, "delta_snapshots")),
         "delta_snapshots not present",
     )
     def test_backfill_parity_sample(self):
+        if not self.has_dailies:
+            self.skipTest("delta_daily_*.json.gz not in repo (archived offline; gear_events is canonical)")
         from scripts.backfill_gear_events_from_dailies import backfill, parity_check
 
         td = tempfile.mkdtemp()

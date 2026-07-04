@@ -1,3 +1,7 @@
+# LEGACY (July 2026+): Regenerates cumulative delta_daily_YYYY-MM-DD.json.gz for offline
+# archive / audit only. Files are NOT committed to the repo (gear_events/ is canonical).
+# Output: workflow artifacts — download and store locally if needed.
+#
 # Regenerate delta_daily_YYYY-MM-DD.json.gz from cached Magelo dumps (magelo-dump-<date>).
 # Use when delta files exist but are empty/wrong while the dump is still in Actions cache.
 #
@@ -41,10 +45,10 @@ on:
         type: boolean
         default: true
       commit_changes:
-        description: "Commit and push regenerated delta_daily_*.json.gz to main"
+        description: "Commit and push regenerated delta_daily_*.json.gz to main (deprecated — use artifacts for offline archive)"
         required: false
         type: boolean
-        default: true
+        default: false
 
 concurrency:
   group: regenerate-delta-days

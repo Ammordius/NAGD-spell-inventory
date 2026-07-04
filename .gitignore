@@ -33,9 +33,9 @@ scoring_explanation.html
 leaderboard_week_*.html
 leaderboard_month_*.html
 
-# Uncompressed delta files (use .json.gz compressed versions instead)
+# Legacy cumulative daily deltas (superseded by gear_events/; archive offline)
 delta_snapshots/delta_daily_*.json
-!delta_snapshots/delta_daily_*.json.gz
+delta_snapshots/delta_daily_*.json.gz
 
 # IDE files
 .vscode/
