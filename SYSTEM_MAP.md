@@ -58,7 +58,7 @@
 3. **Cache choreography** — GitHub Actions `actions/cache` on paths under `character/`, `inventory/`, `.magelo_update_date`, and `magelo_dump_fingerprint.json`:
    - Restore **yesterday’s** dump → copy to `TAKP_character_previous.txt` / `TAKP_character_inventory_previous.txt` **before** today’s files overwrite them (enables real diffs).
    - Restore or **download** today’s `TAKP_character.txt` and `TAKP_character_inventory.txt` from fixed export URLs when the cache key says data is stale.
-   - **Re-restore yesterday’s cache** into `_previous` via `scripts/refresh_magelo_previous_from_yesterday_cache.py` (verifies `magelo_dump_fingerprint.json` MD5/stamp before copy); validate span with `scripts/validate_magelo_delta_date_span.py`.
+   - **Re-verify yesterday** via `scripts/refresh_magelo_previous_from_yesterday_cache.py` using `.delta_yesterday_*` workspace backups (one Actions cache restore per key per job; fingerprint embedded as line 2 of `.magelo_update_date`).
 4. **Baseline cache** — restore `delta_snapshots/baseline_master*.json.gz`; sync dated archives; **align `baseline_master.json.gz` to `baseline_master_2026-02-09.json.gz`** (single-era policy). See `delta_snapshots/ABANDONED_DATES.txt` for the intentional gap **2026-05-09 … 2026-05-13** (no gear events until regen from dump caches).
 5. **`generate_spell_page.py`** — env `MAGELO_UPDATE_DATE` set from the export page. Diffs previous vs current Magelo dumps; appends `gear_events/` shards.
 6. **`scripts/verify_delta_baseline_archives.py`** — fails on unresolvable `baseline_date` in any remaining daily JSON (optional; typically no dailies in repo).

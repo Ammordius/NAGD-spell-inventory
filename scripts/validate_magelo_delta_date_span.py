@@ -12,12 +12,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from magelo_dump_fingerprint import (  # noqa: E402
     load_fingerprint,
+    read_stamp_line,
     verify_fingerprint,
 )
 
 
 def parse_stamp(s: str):
-    s = re.sub(r"\s+", " ", (s or "").strip())
+    s = re.sub(r"\s+", " ", ((s or "").splitlines()[0] if s else "").strip())
     if not s or s.lower() == "unknown":
         return None
     try:
@@ -83,7 +84,15 @@ def check_previous_fingerprint() -> int:
     expected = (os.environ.get("EXPECTED_PREVIOUS_DATE") or "").strip()
     if not expected:
         return 0
-    fp = load_fingerprint(Path("magelo_dump_fingerprint.json"))
+    fp = load_fingerprint(
+        Path("magelo_dump_fingerprint.json"),
+        stamp_path=Path(".delta_yesterday_magelo_date.txt"),
+    )
+    if not fp:
+        fp = load_fingerprint(
+            Path("magelo_dump_fingerprint.json"),
+            stamp_path=Path(".magelo_update_date"),
+        )
     if not fp:
         return 0
     prev_char = Path("character/TAKP_character_previous.txt")
@@ -108,8 +117,8 @@ def main() -> int:
         print("No previous/current stamp files; skipping span check.")
         return 0
 
-    prev_raw = prev_path.read_text(encoding="utf-8")
-    cur_raw = cur_path.read_text(encoding="utf-8")
+    prev_raw = read_stamp_line(prev_path)
+    cur_raw = read_stamp_line(cur_path)
     pt = parse_stamp(prev_raw)
     ct = parse_stamp(cur_raw)
     if not pt or not ct:

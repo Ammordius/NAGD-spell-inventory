@@ -18,14 +18,37 @@ DUMP_INDEX_PATH = Path("character/.magelo_dump_index.json")
 DUMP_INDEX_MAX_DAYS = 14
 
 
+def read_stamp_line(stamp_path: Path = DEFAULT_STAMP) -> str:
+    """First line of stamp file (ignores embedded fingerprint JSON on line 2)."""
+    if not stamp_path.is_file():
+        return ""
+    with stamp_path.open(encoding="utf-8") as f:
+        for line in f:
+            stripped = line.strip()
+            if stripped:
+                return stripped
+    return ""
+
+
 def parse_stamp(s: str) -> datetime | None:
-    s = re.sub(r"\s+", " ", (s or "").strip())
+    first = (s or "").splitlines()[0] if s else ""
+    s = re.sub(r"\s+", " ", first.strip())
     if not s or s.lower() == "unknown":
         return None
     try:
         return datetime.strptime(s, "%a %b %d %H:%M:%S UTC %Y")
     except ValueError:
         return None
+
+
+def embed_fingerprint_in_stamp(stamp_path: Path, fp: dict) -> None:
+    """Append fingerprint JSON to stamp file (cached via existing .magelo_update_date path)."""
+    stamp_line = read_stamp_line(stamp_path) or (fp.get("export_stamp_raw") or "")
+    payload = {k: v for k, v in fp.items() if k != "export_stamp_raw"}
+    with stamp_path.open("w", encoding="utf-8") as f:
+        f.write(stamp_line.rstrip() + "\n")
+        json.dump(payload, f, separators=(",", ":"))
+        f.write("\n")
 
 
 def _file_md5(path: Path) -> str:
@@ -54,7 +77,7 @@ def compute_fingerprint(
     if not inv_path.is_file():
         raise FileNotFoundError(f"Inventory dump missing: {inv_path}")
 
-    stamp_raw = stamp_path.read_text(encoding="utf-8").strip() if stamp_path.is_file() else ""
+    stamp_raw = read_stamp_line(stamp_path)
     parsed = parse_stamp(stamp_raw)
     export_stamp_date = parsed.strftime("%Y-%m-%d") if parsed else None
 
@@ -140,12 +163,23 @@ def verify_fingerprint(
     return errors
 
 
-def load_fingerprint(path: Path = Path(FINGERPRINT_FILENAME)) -> dict | None:
-    if not path.is_file():
+def load_fingerprint(
+    path: Path = Path(FINGERPRINT_FILENAME),
+    stamp_path: Path = DEFAULT_STAMP,
+) -> dict | None:
+    if path.is_file():
+        try:
+            with path.open(encoding="utf-8") as f:
+                return json.load(f)
+        except (OSError, json.JSONDecodeError):
+            pass
+    if not stamp_path.is_file():
         return None
     try:
-        with path.open(encoding="utf-8") as f:
-            return json.load(f)
+        lines = stamp_path.read_text(encoding="utf-8").splitlines()
+        if len(lines) < 2:
+            return None
+        return json.loads(lines[1])
     except (OSError, json.JSONDecodeError):
         return None
 
@@ -154,7 +188,7 @@ def verify_legacy_stamp(stamp_path: Path, expected_date: str) -> list[str]:
     """For caches saved before fingerprints existed."""
     if not stamp_path.is_file():
         return [f"export stamp missing: {stamp_path}"]
-    raw = stamp_path.read_text(encoding="utf-8").strip()
+    raw = read_stamp_line(stamp_path)
     parsed = parse_stamp(raw)
     if not parsed:
         return [f"could not parse export stamp: {raw!r}"]
@@ -232,7 +266,8 @@ def cmd_write() -> int:
     expected = (os.environ.get("EXPECTED_DATE") or "").strip()
     out = Path(FINGERPRINT_FILENAME)
     fp = write_fingerprint(out, cache_key_date=expected or None)
-    print(f"OK Wrote {out}")
+    embed_fingerprint_in_stamp(DEFAULT_STAMP, fp)
+    print(f"OK Wrote {out} and embedded fingerprint in {DEFAULT_STAMP}")
     print(
         f"  cache_key_date={fp.get('cache_key_date')} "
         f"export_stamp_date={fp.get('export_stamp_date')} "
