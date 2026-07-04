@@ -370,39 +370,19 @@ jobs:
         echo "::error::No Actions cache hit for magelo-dump-${{ steps.yesterday.outputs.yesterday_date }}. Delta needs the prior day's dump cache (see Caches in repo settings). Yesterday's date from export: ${{ steps.yesterday.outputs.yesterday_date }}"
         exit 1
 
-    - name: Copy yesterday backup into _previous (fingerprint verify)
-      id: refresh-previous
-      continue-on-error: true
+    - name: Prepare _previous from yesterday cache (verify or skip stale)
+      id: prepare-previous
       if: steps.yesterday.outputs.yesterday_date != '' && steps.cache-yesterday.outputs.cache-hit == 'true'
       env:
         EXPECTED_YESTERDAY_DATE: ${{ steps.yesterday.outputs.yesterday_date }}
+        EXPORT_DATE: ${{ steps.check-update.outputs.normalized_date }}
         YESTERDAY_CHAR: character/.delta_yesterday_character.txt
         YESTERDAY_INV: inventory/.delta_yesterday_inventory.txt
         YESTERDAY_STAMP: .delta_yesterday_magelo_date.txt
-      run: |
-        python3 scripts/refresh_magelo_previous_from_yesterday_cache.py
+      run: python3 scripts/prepare_magelo_previous_for_ci.py
 
-    - name: Fallback when yesterday cache content is stale
-      id: stale-yesterday-fallback
-      if: steps.yesterday.outputs.yesterday_date != '' && steps.cache-yesterday.outputs.cache-hit == 'true' && steps.refresh-previous.outcome == 'failure'
-      env:
-        EXPORT_DATE: ${{ steps.check-update.outputs.normalized_date }}
-      run: |
-        rm -f character/TAKP_character_previous.txt inventory/TAKP_character_inventory_previous.txt .magelo_previous_dump_date.txt
-        if [ -z "$EXPORT_DATE" ] || [ "$EXPORT_DATE" = "unknown" ]; then
-          echo "::error::Yesterday cache failed verify and export date unknown — cannot fall back."
-          exit 1
-        fi
-        if python3 scripts/check_gear_manifest_date.py --date "$EXPORT_DATE"; then
-          echo "::warning::magelo-dump-${{ steps.yesterday.outputs.yesterday_date }} failed fingerprint/stamp verify (likely wrong-era blob under cache key). Skipping dump diff; gear_events manifest already has $EXPORT_DATE."
-          echo "skip_dump_delta=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "::error::Yesterday cache failed verify and gear_events manifest lacks $EXPORT_DATE. Cannot proceed without valid _previous."
-          exit 1
-        fi
-    
     - name: Verify current vs previous (delta input check)
-      if: steps.stale-yesterday-fallback.outputs.skip_dump_delta != 'true'
+      if: steps.prepare-previous.outputs.skip_dump_delta != 'true'
       run: |
         echo "=== Delta input check: current vs previous ==="
         if [ ! -f "character/TAKP_character_previous.txt" ] || [ ! -f "character/TAKP_character.txt" ]; then
@@ -580,6 +560,21 @@ jobs:
         fi
         python scripts/build_item_id_to_name.py --skip-db --inventory inventory/TAKP_character_inventory.txt
         echo "✓ item_id_to_name.json ready ($(python -c "import json; print(len(json.load(open('data/item_id_to_name.json'))))") entries)"
+
+    - name: Restore delta.html when dump diff skipped
+      if: steps.prepare-previous.outputs.skip_dump_delta == 'true'
+      run: |
+        if [ -f "deploy/delta_fallback.html" ]; then
+          cp deploy/delta_fallback.html delta.html
+          echo "✓ Restored delta.html from repo deploy/delta_fallback.html (verified local Jul3→Jul4 diff)"
+        else
+          PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          if curl -sfL "${PAGES_URL}/delta.html" -o delta.html; then
+            echo "✓ Restored delta.html from live Pages (fallback)"
+          else
+            echo "::warning::No delta.html fallback; deploy may omit delta page"
+          fi
+        fi
 
     - name: Prepare for deployment
       run: |

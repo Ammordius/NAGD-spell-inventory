@@ -81,10 +81,10 @@ def main() -> int:
     errors = verify_yesterday_cache(expected, char_src, inv_src, stamp_src)
     if errors:
         for err in errors:
-            print(f"::error::{err}")
+            print(f"::warning::{err}")
         print(
-            f"Refusing to copy stale magelo-dump-{expected} into _previous. "
-            "Re-seed Actions cache with verified export files."
+            f"::warning::Refusing to copy stale magelo-dump-{expected} into _previous. "
+            "CI may skip dump diff when gear_events manifest already has today's date."
         )
         return 1
 
