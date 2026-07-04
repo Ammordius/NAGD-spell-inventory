@@ -3887,6 +3887,7 @@ def generate_delta_history(base_dir):
                 let dumpBeforeBaselineEnd = false;
                 let dqBadStart = false;
                 let dqBadEnd = false;
+                let corpseLootChars = new Set();
 
                 if (USE_GEAR_EVENTS && GEAR_EVENT_SHARD_MONTHS.length > 0) {
                     outputDiv.innerHTML = '<p>Loading gear events for ' + start + ' to ' + end + '...</p>';
@@ -4012,7 +4013,7 @@ def generate_delta_history(base_dir):
                     invDeltas[charName] = { added: {}, removed: {}, item_names: {}, is_visibility_change: true };
                 }
                 // Corpse-loot exclusion: 0 real worn at range start -> any worn at end (match delta.html); requires equipped_worn_by_char on both daily JSONs
-                const corpseLootChars = new Set();
+                corpseLootChars = new Set();
                 const emStart = startDelta.equipped_worn_by_char;
                 const emEnd = endDelta.equipped_worn_by_char;
                 if (emStart && emEnd && typeof emStart === 'object' && typeof emEnd === 'object') {
@@ -4561,7 +4562,7 @@ def generate_delta_history(base_dir):
             } catch (error) {
                 outputDiv.innerHTML = `<p style="color: red; padding: 15px; background: #ffebee; border-radius: 5px;">
                     <strong>Error:</strong> ${error.message}<br>
-                    <small>Available dates are listed below. Please select dates that have delta JSON files.</small>
+                    <small>Available dates are listed below. Please select dates from the list.</small>
                 </p>`;
             }
         }
