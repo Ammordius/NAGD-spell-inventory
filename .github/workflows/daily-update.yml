@@ -100,7 +100,7 @@ jobs:
         fi
     
     - name: Restore yesterday's cache (to get previous files)
-      uses: actions/cache@v5
+      uses: actions/cache/restore@v5
       id: cache-yesterday
       continue-on-error: true
       with:
@@ -176,8 +176,8 @@ jobs:
       run: |
         echo "::warning::Yesterday Actions cache miss for magelo-dump-${{ steps.yesterday.outputs.yesterday_date }} — not populating _previous from workspace files (avoids quarter-scale delta.html). Delta will be skipped unless dated local archives exist."
     
-    - name: Cache magelo dump files (current - this will overwrite yesterday's files)
-      uses: actions/cache@v5
+    - name: Restore today's magelo dump cache (exact key only)
+      uses: actions/cache/restore@v5
       id: cache-magelo
       with:
         path: |
@@ -185,8 +185,6 @@ jobs:
           inventory/TAKP_character_inventory.txt
           .magelo_update_date
         key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
-        restore-keys: |
-          magelo-dump-
     
     - name: Check if update is needed
       id: need-update
@@ -201,12 +199,17 @@ jobs:
         fi
         
         if [ "${{ steps.cache-magelo.outputs.cache-hit }}" == "true" ]; then
-          # Check if cached date matches current date
+          # Stamp match alone is not enough — poisoned caches can have aligned stamps with wrong-era files.
           if [ -f ".magelo_update_date" ]; then
             CACHED_DATE=$(head -1 .magelo_update_date)
             if [ "$CACHED_DATE" == "$CURRENT_DATE" ]; then
-              echo "✓ Magelo dump is up to date (date: $CACHED_DATE)"
-              echo "needs_update=false" >> $GITHUB_OUTPUT
+              if EXPECTED_DATE="${{ steps.check-update.outputs.normalized_date }}" python3 scripts/magelo_dump_fingerprint.py verify; then
+                echo "✓ Magelo dump cache verified (date: $CACHED_DATE)"
+                echo "needs_update=false" >> $GITHUB_OUTPUT
+              else
+                echo "Magelo dump cache stamp matches but fingerprint/audit verify failed — re-downloading"
+                echo "needs_update=true" >> $GITHUB_OUTPUT
+              fi
             else
               echo "Magelo dump needs update (cached: $CACHED_DATE, current: $CURRENT_DATE)"
               echo "needs_update=true" >> $GITHUB_OUTPUT
@@ -787,22 +790,21 @@ jobs:
         restore-keys: |
           magelo-baseline-
     
-    - name: Write Magelo dump fingerprint for cache
+    - name: Verify magelo dump before cache save
       if: steps.check-update.outputs.normalized_date != 'unknown'
       env:
         EXPECTED_DATE: ${{ steps.check-update.outputs.normalized_date }}
-      run: python3 scripts/magelo_dump_fingerprint.py write
+      run: python3 scripts/magelo_dump_fingerprint.py verify
 
-    - name: Cache current files for next run
-      uses: actions/cache@v5
+    - name: Save magelo dump cache for next run
+      if: steps.check-update.outputs.normalized_date != 'unknown'
+      uses: actions/cache/save@v5
       with:
         path: |
           character/TAKP_character.txt
           inventory/TAKP_character_inventory.txt
           .magelo_update_date
         key: magelo-dump-${{ steps.check-update.outputs.normalized_date }}
-        restore-keys: |
-          magelo-dump-
 
   deploy:
     needs: update-spell-inventory

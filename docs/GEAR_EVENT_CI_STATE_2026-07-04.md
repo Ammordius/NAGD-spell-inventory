@@ -117,6 +117,20 @@ Result: `Saved gear_events: 1794 inventory rows, 115 stat rows` — committed in
 
 ---
 
+## Root cause (cache poisoning) — fixed 2026-07-05
+
+Three bugs in `daily-update.yml` caused **Feb-era file content under Jul cache keys**:
+
+1. **End-of-job `actions/cache` with `restore-keys: magelo-dump-`** — the save step **restored** an arbitrary old blob into the workspace, then **saved it** under today's key. (`regenerate-delta-days.yml` already documented "exact key only" for dumps; daily-update did not.)
+2. **Start-of-job `cache-magelo` also used `restore-keys`** — on exact-key miss, any prior day's dump could land in `TAKP_character.txt` before the need-update check.
+3. **`need-update` compared stamp line 1 only** — if a poisoned blob's stamp was rewritten to match scrape date, download was skipped and wrong char/inv were kept.
+
+**Fix:** `cache/restore` exact key only (no `restore-keys` on dumps); `need-update` requires fingerprint/audit verify before skip-download; end job uses `cache/save` only (no restore-before-save).
+
+Verification on **read** (`prepare_magelo_previous_for_ci.py`) was working; **write** path was re-poisoning the cache every run.
+
+---
+
 ## Known open issues
 
 ### 1. Stale `magelo-dump-2026-07-03` Actions cache
