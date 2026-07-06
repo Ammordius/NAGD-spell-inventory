@@ -55,6 +55,7 @@ def audit(base_dir: Path, min_events_after: str | None, *, anomaly_median_factor
             issues.append(f"{shard.name}: read error {e}")
 
     dates = list_available_event_dates(str(base_dir))
+    days_meta = manifest.get("days") or {}
     if min_events_after and dates:
         for d in dates:
             if d >= min_events_after:
@@ -67,10 +68,13 @@ def audit(base_dir: Path, min_events_after: str | None, *, anomaly_median_factor
                             if ev.get("d") == d:
                                 day_events += 1
                 if day_events == 0:
+                    meta = days_meta.get(d) or {}
+                    manifest_total = int(meta.get("gear") or 0) + int(meta.get("char") or 0)
+                    if manifest_total == 0:
+                        continue
                     issues.append(f"no gear events for {d}")
 
     day_counts: list[tuple[str, int]] = []
-    days_meta = manifest.get("days") or {}
     for d in sorted(days_meta.keys()):
         meta = days_meta[d] or {}
         total = int(meta.get("gear") or 0) + int(meta.get("char") or 0)
