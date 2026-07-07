@@ -7,6 +7,7 @@ spells from PoK turn-ins (items 29112, 29131, 29132).
 import json
 import math
 import os
+import sys
 import re
 from html import escape
 from collections import defaultdict
@@ -6850,6 +6851,26 @@ def main():
             unique_tracked = load_unique_tracked_item_ids(tracked_ids)
             possession_yesterday = possession_from_inv_snapshot(previous_inventories)
             filter_unique_reacquires_in_inv_deltas(inv_deltas, possession_yesterday, unique_tracked)
+            est_events = _estimate_delta_event_total(char_deltas, inv_deltas, date_str)
+            prev_manifest_date = _previous_export_date_str(base_dir, date_str)
+            if est_events == 0 and prev_manifest_date:
+                import hashlib
+                prev_hash = hashlib.md5(open(previous_char_file, "rb").read()).hexdigest()
+                curr_hash = hashlib.md5(open(current_char_file, "rb").read()).hexdigest()
+                dumps_identical = prev_hash == curr_hash
+                manifest_path = os.path.join(delta_snapshots_dir, "gear_events", "manifest.json")
+                if not dumps_identical and os.path.isfile(manifest_path):
+                    with open(manifest_path, "r", encoding="utf-8") as mf:
+                        days_meta = (json.load(mf).get("days") or {})
+                    meta = days_meta.get(prev_manifest_date) or {}
+                    prior_total = int(meta.get("gear") or 0) + int(meta.get("char") or 0)
+                    if prior_total > 0:
+                        print(
+                            f"::error::Dump diff for {date_str} is 0 events but manifest "
+                            f"{prev_manifest_date} has {prior_total} events and dump files differ. "
+                            "Run scripts/backfill_gear_day_from_event_belief.py locally and commit shards."
+                        )
+                        sys.exit(1)
             try:
                 gear_n, char_n = append_day_events_from_deltas(
                     char_deltas,
