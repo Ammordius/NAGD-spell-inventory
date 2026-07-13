@@ -210,6 +210,22 @@ class TestTrackedGearTimeline(unittest.TestCase):
         )
         self.assertEqual(rows, [])
 
+    def test_death_recovery_pair_nulled(self):
+        events = [
+            {"d": "2026-05-14", "c": "Alice", "i": "100", "s": -1, "n": 1, "v": 0},
+            {"d": "2026-05-15", "c": "Alice", "i": "100", "s": 1, "n": 1, "v": 0},
+        ]
+        rows = build_tracked_gear_event_log_rows(
+            events,
+            "Alice",
+            self.TRACKED,
+            {"100": "Raid Sword"},
+            unique_tracked_ids={"100"},
+            baseline=self.BASELINE,
+            source_label=self.SOURCE,
+        )
+        self.assertEqual(rows, [])
+
     def test_group_by_date(self):
         rows = [
             {"date": "2026-05-10", "sign": 1, "count": 1, "item_id": "999", "item_name": "X", "source": ""},

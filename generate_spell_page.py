@@ -1204,8 +1204,23 @@ def load_no_rent_items():
         return set()
 
 
+def _flag_matches(flag_entry: str, flag_name: str) -> bool:
+    """True if a flag token matches flag_name (exact or prefix, e.g. LORE ≈ LORE ITEM)."""
+    entry = (flag_entry or "").strip().upper()
+    name = (flag_name or "").strip().upper()
+    if not entry or not name:
+        return False
+    if entry == name:
+        return True
+    # item_stats uses "LORE ITEM" / "NO DROP" style; accept stem match
+    return entry.startswith(name + " ") or entry.startswith(name + "_")
+
+
 def _load_item_ids_with_flag(flag_name: str) -> set:
-    """Load item IDs from item_stats.json whose flags contain flag_name (e.g. NO DROP, LORE)."""
+    """Load item IDs from item_stats.json whose flags match flag_name (e.g. NO DROP, LORE).
+
+    Matches exact tokens and suffixes like ``LORE ITEM`` when looking up ``LORE``.
+    """
     base_dir = os.path.dirname(__file__)
     matched = set()
     for path in [os.path.join(base_dir, 'data', 'item_stats.json'), 'data/item_stats.json']:
@@ -1218,7 +1233,7 @@ def _load_item_ids_with_flag(flag_name: str) -> set:
                 flags = entry.get('flags') or []
                 if isinstance(flags, str):
                     flags = [f.strip() for f in flags.split('|')]
-                if flag_name in flags:
+                if any(_flag_matches(f, flag_name) for f in flags):
                     matched.add(str(item_id_str))
             return matched
         except Exception as e:
@@ -1234,15 +1249,23 @@ def load_no_drop_tracked_item_ids():
 
 
 def load_lore_item_ids():
-    """Load item IDs flagged LORE in item_stats.json (max one per character)."""
+    """Load item IDs flagged LORE / LORE ITEM in item_stats.json (max one per character)."""
     return _load_item_ids_with_flag('LORE')
 
 
 def load_unique_tracked_item_ids(tracked_ids=None):
-    """Tracked raid/elemental/praesterium items that are LORE (unique per character)."""
-    if tracked_ids is None:
-        tracked_ids, _, _, _ = load_tracked_item_ids()
-    return set(tracked_ids) & load_lore_item_ids() if tracked_ids else set()
+    """Tracked raid/elemental/praesterium items that are LORE or NO DROP (unique per character).
+
+    Used for corpse/over-reset reacquire cancel and timeline first-acquire guards.
+    """
+    if not tracked_ids:
+        if tracked_ids is None:
+            tracked_ids, _, _, _ = load_tracked_item_ids()
+        else:
+            return set()
+    tracked = {str(i) for i in tracked_ids}
+    unique_flags = load_lore_item_ids() | _load_item_ids_with_flag('NO DROP')
+    return tracked & unique_flags
 
 
 def load_tracked_item_ids():
@@ -4756,6 +4779,27 @@ def generate_delta_history(base_dir):
             return (events || []).filter(ev => ev.c === charName);
         }
 
+        function daysBetweenYmd(dateA, dateB) {
+            if (!dateA || !dateB) return 9999;
+            const a = Date.parse(dateA + 'T00:00:00Z');
+            const b = Date.parse(dateB + 'T00:00:00Z');
+            if (Number.isNaN(a) || Number.isNaN(b)) return 9999;
+            return Math.abs(Math.round((b - a) / 86400000));
+        }
+
+        function cancelPriorTrackedLossRow(rows, itemId, currentDate, windowDays) {
+            const win = windowDays == null ? 14 : windowDays;
+            for (let i = rows.length - 1; i >= 0; i--) {
+                const row = rows[i];
+                if (String(row.itemId) !== String(itemId) || Number(row.sign) !== -1) continue;
+                if (daysBetweenYmd(row.date, currentDate) <= win) {
+                    rows.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         function buildRangeTrackedRows(gearEvents, charName, startHoldings) {
             if (!TRACKED_ITEM_IDS || !TRACKED_ITEM_IDS.size) return [];
             const holdings = {};
@@ -4763,6 +4807,7 @@ def generate_delta_history(base_dir):
                 const n = Number(cnt) || 0;
                 if (n > 0) holdings[String(itemId)] = n;
             }
+            const everHeld = new Set(Object.keys(holdings));
             const rows = [];
             const sorted = filterEventsForChar(gearEvents, charName)
                 .sort((a, b) => (a.d || '').localeCompare(b.d || '') || String(a.i).localeCompare(String(b.i)));
@@ -4773,10 +4818,20 @@ def generate_delta_history(base_dir):
                 const iid = String(ev.i);
                 if (!iid || n <= 0 || (sign !== 1 && sign !== -1) || NO_RENT_ITEMS.has(iid)) continue;
                 const isTracked = TRACKED_ITEM_IDS.has(iid);
-                if (isTracked && sign > 0 && UNIQUE_TRACKED_IDS.has(iid) && (holdings[iid] || 0) > 0) continue;
+                const isUnique = UNIQUE_TRACKED_IDS.has(iid);
+                const dateStr = ev.d || '';
+                if (isTracked && sign > 0 && isUnique && everHeld.has(iid)) {
+                    cancelPriorTrackedLossRow(rows, iid, dateStr, 14);
+                    holdings[iid] = (holdings[iid] || 0) + n;
+                    continue;
+                }
+                if (isTracked && sign > 0 && isUnique && (holdings[iid] || 0) > 0) {
+                    holdings[iid] = (holdings[iid] || 0) + n;
+                    continue;
+                }
                 if (isTracked) {
                     rows.push({
-                        date: ev.d || '',
+                        date: dateStr,
                         sign: sign,
                         count: n,
                         itemId: iid,
@@ -4784,8 +4839,10 @@ def generate_delta_history(base_dir):
                         source: (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[iid]) || ''
                     });
                 }
-                if (sign > 0) holdings[iid] = (holdings[iid] || 0) + n;
-                else {
+                if (sign > 0) {
+                    holdings[iid] = (holdings[iid] || 0) + n;
+                    everHeld.add(iid);
+                } else {
                     holdings[iid] = (holdings[iid] || 0) - n;
                     if (holdings[iid] <= 0) delete holdings[iid];
                 }
@@ -6215,6 +6272,27 @@ def generate_char_timeline(base_dir):
             return out;
         }
 
+        function daysBetweenYmd(dateA, dateB) {
+            if (!dateA || !dateB) return 9999;
+            const a = Date.parse(dateA + 'T00:00:00Z');
+            const b = Date.parse(dateB + 'T00:00:00Z');
+            if (Number.isNaN(a) || Number.isNaN(b)) return 9999;
+            return Math.abs(Math.round((b - a) / 86400000));
+        }
+
+        function cancelPriorTrackedLossRow(rows, itemId, currentDate, windowDays) {
+            const win = windowDays == null ? 14 : windowDays;
+            for (let i = rows.length - 1; i >= 0; i--) {
+                const row = rows[i];
+                if (String(row.itemId) !== String(itemId) || Number(row.sign) !== -1) continue;
+                if (daysBetweenYmd(row.date, currentDate) <= win) {
+                    rows.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         function buildTrackedGearEventLog(gearEvents, charName, nameMap, baseline) {
             if (!TRACKED_ITEM_IDS.size) return [];
             const holdings = {};
@@ -6223,6 +6301,7 @@ def generate_char_timeline(base_dir):
                 if (!id || id.toUpperCase() === 'NULL' || id === '0' || NO_RENT_ITEMS.has(id)) continue;
                 holdings[id] = (holdings[id] || 0) + 1;
             }
+            const everHeld = new Set(Object.keys(holdings));
             const rows = [];
             const sorted = filterEventsForChar(gearEvents, charName)
                 .sort((a, b) => (a.d || '').localeCompare(b.d || '') || String(a.i).localeCompare(String(b.i)));
@@ -6233,10 +6312,20 @@ def generate_char_timeline(base_dir):
                 const iid = String(ev.i);
                 if (!iid || n <= 0 || (sign !== 1 && sign !== -1) || NO_RENT_ITEMS.has(iid)) continue;
                 const isTracked = TRACKED_ITEM_IDS.has(iid);
-                if (isTracked && sign > 0 && UNIQUE_TRACKED_IDS.has(iid) && (holdings[iid] || 0) > 0) continue;
+                const isUnique = UNIQUE_TRACKED_IDS.has(iid);
+                const dateStr = ev.d || '';
+                if (isTracked && sign > 0 && isUnique && everHeld.has(iid)) {
+                    cancelPriorTrackedLossRow(rows, iid, dateStr, 14);
+                    holdings[iid] = (holdings[iid] || 0) + n;
+                    continue;
+                }
+                if (isTracked && sign > 0 && isUnique && (holdings[iid] || 0) > 0) {
+                    holdings[iid] = (holdings[iid] || 0) + n;
+                    continue;
+                }
                 if (isTracked) {
                     rows.push({
-                        date: ev.d,
+                        date: dateStr,
                         sign: sign,
                         count: n,
                         itemId: iid,
@@ -6244,8 +6333,10 @@ def generate_char_timeline(base_dir):
                         source: TRACKED_SOURCE_LABEL[iid] || ''
                     });
                 }
-                if (sign > 0) holdings[iid] = (holdings[iid] || 0) + n;
-                else {
+                if (sign > 0) {
+                    holdings[iid] = (holdings[iid] || 0) + n;
+                    everHeld.add(iid);
+                } else {
                     holdings[iid] = (holdings[iid] || 0) - n;
                     if (holdings[iid] <= 0) delete holdings[iid];
                 }

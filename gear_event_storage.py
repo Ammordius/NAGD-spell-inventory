@@ -943,6 +943,24 @@ def baseline_only_item_ids(
     return {iid: cnt for iid, cnt in holdings.items() if iid not in touched}
 
 
+def _cancel_prior_tracked_loss_row(
+    rows: list[dict],
+    item_id: str,
+    current_date: str,
+    *,
+    window_days: int = 14,
+) -> bool:
+    """Remove the latest ``-`` row for item_id within window_days (corpse/recovery pair)."""
+    for i in range(len(rows) - 1, -1, -1):
+        row = rows[i]
+        if str(row.get("item_id")) != item_id or int(row.get("sign") or 0) != -1:
+            continue
+        if _days_between(row.get("date"), current_date) <= window_days:
+            rows.pop(i)
+            return True
+    return False
+
+
 def build_tracked_gear_event_log_rows(
     gear_events: list[dict],
     char_name: str,
@@ -954,8 +972,13 @@ def build_tracked_gear_event_log_rows(
     initial_holdings: dict[str, int] | None = None,
     no_rent: set[str] | None = None,
     source_label: dict | None = None,
+    window_days: int = 14,
 ) -> list[dict]:
-    """Dated tracked-item +/- rows for one character (lore reacquire guard applied)."""
+    """Dated tracked-item +/- rows for one character.
+
+    Unique tracked items: only the first acquisition since baseline is emitted as ``+``.
+    Reacquires suppress ``+`` and cancel a prior ``-`` within ``window_days`` (corpse/over-reset).
+    """
     tracked_ids = {str(i) for i in (tracked_ids or set())}
     if not tracked_ids:
         return []
@@ -978,6 +1001,8 @@ def build_tracked_gear_event_log_rows(
                 continue
             holdings[iid] = holdings.get(iid, 0) + 1
 
+    ever_held: set[str] = {iid for iid, cnt in holdings.items() if cnt > 0}
+
     rows: list[dict] = []
     char_events = sorted(
         filter_events_for_char(gear_events, char_name),
@@ -994,13 +1019,25 @@ def build_tracked_gear_event_log_rows(
             continue
 
         is_tracked = iid in tracked_ids
-        if is_tracked and sign > 0 and iid in unique_tracked_ids and holdings.get(iid, 0) > 0:
+        is_unique = iid in unique_tracked_ids
+        date_str = ev.get("d") or ""
+
+        if is_tracked and sign > 0 and is_unique and iid in ever_held:
+            # Corpse / dump-gap reacquire: null out paired prior loss if any
+            _cancel_prior_tracked_loss_row(
+                rows, iid, date_str, window_days=window_days
+            )
+            holdings[iid] = holdings.get(iid, 0) + n
+            continue
+
+        if is_tracked and sign > 0 and is_unique and holdings.get(iid, 0) > 0:
+            holdings[iid] = holdings.get(iid, 0) + n
             continue
 
         if is_tracked:
             rows.append(
                 {
-                    "date": ev.get("d") or "",
+                    "date": date_str,
                     "sign": sign,
                     "count": n,
                     "item_id": iid,
@@ -1011,6 +1048,7 @@ def build_tracked_gear_event_log_rows(
 
         if sign > 0:
             holdings[iid] = holdings.get(iid, 0) + n
+            ever_held.add(iid)
         else:
             holdings[iid] = holdings.get(iid, 0) - n
             if holdings.get(iid, 0) <= 0:
@@ -1018,6 +1056,94 @@ def build_tracked_gear_event_log_rows(
 
     return rows
 
+
+def prune_unique_reacquire_events(
+    gear_events: list[dict],
+    unique_ids: set[str],
+    baseline_inv: dict | None = None,
+    *,
+    window_days: int = 14,
+    no_rent: set[str] | None = None,
+) -> list[dict]:
+    """Drop unique tracked corpse/over-reset pairs and duplicate first-acquires from a global event list.
+
+    Preserves chronological order of remaining events. Uses baseline inventories when provided
+    so baseline-held items do not emit a recovery ``+`` (and cancel a prior ``-``).
+    """
+    if not unique_ids:
+        return list(gear_events or [])
+    unique_ids = {str(i) for i in unique_ids}
+    no_rent = {str(i) for i in (no_rent or set())}
+    baseline_inv = baseline_inv or {}
+
+    # Per-char ever_held from baseline
+    ever_held: dict[str, set[str]] = {}
+    for char_name, items in baseline_inv.items():
+        held: set[str] = set()
+        for item in items or []:
+            iid = str(item.get("item_id", "")).strip()
+            if not iid or iid.upper() == "NULL" or iid == "0" or iid in no_rent:
+                continue
+            held.add(iid)
+        if held:
+            ever_held[char_name] = held
+
+    sorted_events = sorted(
+        gear_events or [],
+        key=lambda e: (e.get("d") or "", e.get("c") or "", str(e.get("i") or ""), int(e.get("s") or 0)),
+    )
+    kept: list[dict] = []
+    # Indices in kept of unmatched losses: (char, item) -> list of kept indices
+    loss_idx: dict[tuple[str, str], list[int]] = {}
+
+    for ev in sorted_events:
+        if ev.get("v"):
+            kept.append(ev)
+            continue
+        char_name = ev.get("c") or ""
+        iid = str(ev.get("i") or "")
+        sign = int(ev.get("s") or 0)
+        n = int(ev.get("n") or 0)
+        date_str = ev.get("d") or ""
+        if not char_name or not iid or n <= 0 or sign not in (1, -1):
+            kept.append(ev)
+            continue
+        if iid in no_rent or iid not in unique_ids:
+            kept.append(ev)
+            if sign > 0:
+                ever_held.setdefault(char_name, set()).add(iid)
+            continue
+
+        held = ever_held.setdefault(char_name, set())
+        key = (char_name, iid)
+
+        if sign > 0 and iid in held:
+            # Reacquire: drop this + and nearest prior - within window
+            candidates = loss_idx.get(key) or []
+            matched_i = None
+            for li in reversed(candidates):
+                prior = kept[li] if 0 <= li < len(kept) else None
+                if not prior:
+                    continue
+                if _days_between(prior.get("d"), date_str) <= window_days:
+                    matched_i = li
+                    break
+            if matched_i is not None:
+                kept[matched_i] = None  # type: ignore[assignment]
+                candidates.remove(matched_i)
+            # Drop the +
+            continue
+
+        if sign > 0:
+            held.add(iid)
+            kept.append(ev)
+            continue
+
+        # Loss
+        kept.append(ev)
+        loss_idx.setdefault(key, []).append(len(kept) - 1)
+
+    return [e for e in kept if e is not None]
 
 def group_tracked_rows_by_date(rows: list[dict]) -> dict[str, dict[str, list[dict]]]:
     """Group tracked log rows by date into acquired and lost lists."""

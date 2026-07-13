@@ -18,6 +18,8 @@ from gear_event_storage import (  # noqa: E402
     filter_unique_reacquires_in_inv_deltas,
     get_range_delta_from_events,
     load_gear_events,
+    build_tracked_gear_event_log_rows,
+    prune_unique_reacquire_events,
 )
 from generate_spell_page import (  # noqa: E402
     load_lore_item_ids,
@@ -232,14 +234,98 @@ class TestLoreMetadataHelpers(unittest.TestCase):
         lore = load_lore_item_ids()
         self.assertIsInstance(lore, set)
 
-    def test_unique_tracked_subset_of_tracked_and_lore(self):
-        from generate_spell_page import load_tracked_item_ids
+    def test_lore_item_flag_matches_lore_item_token(self):
+        lore = load_lore_item_ids()
+        self.assertGreater(len(lore), 0)
+        # Wristband of the Rathe is flagged LORE ITEM in item_stats.json
+        self.assertIn("11054", lore)
+
+    def test_unique_tracked_subset_of_tracked_and_lore_or_nodrop(self):
+        from generate_spell_page import load_tracked_item_ids, _load_item_ids_with_flag
 
         tracked, _, _, _ = load_tracked_item_ids()
         unique = load_unique_tracked_item_ids(tracked)
         self.assertTrue(unique.issubset(tracked))
         lore = load_lore_item_ids()
-        self.assertTrue(unique.issubset(lore))
+        nodrop = _load_item_ids_with_flag("NO DROP")
+        self.assertTrue(unique.issubset(lore | nodrop))
+        self.assertGreater(len(unique), 0)
+        # Lore raid loot + NO DROP non-lore (e.g. Great Helm) both eligible
+        self.assertIn("11054", unique)  # Wristband (LORE ITEM)
+        self.assertIn("26581", unique)  # Great Helm (NO DROP)
+
+    def test_double_plus_dump_gap_suppressed_in_timeline(self):
+        """Anemal-style: first + kept, second + with no intervening - dropped."""
+        baseline = {"inventories": {}, "baseline_date": "2026-02-09"}
+        events = [
+            {"d": "2026-03-20", "c": "Anemal", "i": LORE_ITEM, "s": 1, "n": 1, "v": 0},
+            {"d": "2026-06-17", "c": "Anemal", "i": LORE_ITEM, "s": 1, "n": 1, "v": 0},
+        ]
+        rows = build_tracked_gear_event_log_rows(
+            events,
+            "Anemal",
+            {LORE_ITEM},
+            {LORE_ITEM: "Fangs"},
+            unique_tracked_ids={LORE_ITEM},
+            baseline=baseline,
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["date"], "2026-03-20")
+        self.assertEqual(rows[0]["sign"], 1)
+
+    def test_death_recovery_pair_nulled_in_timeline(self):
+        """Baseline-held unique item: - then + within 14d leaves no timeline rows."""
+        baseline = {
+            "inventories": {
+                "Anemal": [{"item_id": LORE_ITEM, "item_name": "Helm"}],
+            },
+            "baseline_date": "2026-02-09",
+        }
+        events = [
+            {"d": "2026-06-16", "c": "Anemal", "i": LORE_ITEM, "s": -1, "n": 1, "v": 0},
+            {"d": "2026-06-17", "c": "Anemal", "i": LORE_ITEM, "s": 1, "n": 1, "v": 0},
+        ]
+        rows = build_tracked_gear_event_log_rows(
+            events,
+            "Anemal",
+            {LORE_ITEM},
+            {LORE_ITEM: "Helm"},
+            unique_tracked_ids={LORE_ITEM},
+            baseline=baseline,
+        )
+        self.assertEqual(rows, [])
+
+    def test_true_acquire_then_death_recovery_keeps_first_plus(self):
+        baseline = {"inventories": {}, "baseline_date": "2026-02-09"}
+        events = [
+            {"d": "2026-05-25", "c": "Anemal", "i": LORE_ITEM, "s": 1, "n": 1, "v": 0},
+            {"d": "2026-06-16", "c": "Anemal", "i": LORE_ITEM, "s": -1, "n": 1, "v": 0},
+            {"d": "2026-06-17", "c": "Anemal", "i": LORE_ITEM, "s": 1, "n": 1, "v": 0},
+        ]
+        rows = build_tracked_gear_event_log_rows(
+            events,
+            "Anemal",
+            {LORE_ITEM},
+            {LORE_ITEM: "Vest"},
+            unique_tracked_ids={LORE_ITEM},
+            baseline=baseline,
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["date"], "2026-05-25")
+        self.assertEqual(rows[0]["sign"], 1)
+
+    def test_prune_unique_reacquire_events_drops_pairs(self):
+        baseline_inv = {"Anemal": [{"item_id": LORE_ITEM}]}
+        events = [
+            {"d": "2026-06-16", "c": "Anemal", "i": LORE_ITEM, "s": -1, "n": 1, "v": 0},
+            {"d": "2026-06-17", "c": "Anemal", "i": LORE_ITEM, "s": 1, "n": 1, "v": 0},
+            {"d": "2026-06-17", "c": "Other", "i": NON_LORE_ITEM, "s": 1, "n": 1, "v": 0},
+        ]
+        pruned = prune_unique_reacquire_events(
+            events, {LORE_ITEM}, baseline_inv, window_days=14
+        )
+        self.assertEqual(len(pruned), 1)
+        self.assertEqual(pruned[0]["c"], "Other")
 
 
 if __name__ == "__main__":
