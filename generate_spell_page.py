@@ -30,10 +30,12 @@ from gear_event_storage import (
     append_day_events_from_deltas,
     build_possession_map,
     delta_shape_to_events,
+    ever_held_from_baseline_and_events,
     filter_unique_reacquires_in_inv_deltas,
     gear_events_available,
     get_day_delta_from_events,
     list_available_event_dates,
+    load_gear_events,
     manifest_median_day_total,
     populate_item_names_for_inv_deltas,
     possession_from_inv_snapshot,
@@ -1772,7 +1774,8 @@ def save_mob_deaths_from_delta(zone_entries, output_path, observed_at=None, max_
 def generate_delta_html(current_char_data, previous_char_data, current_inv, previous_inv, 
                         magelo_update_date, serverwide=True, char_deltas=None, inv_deltas=None,
                         mob_tracker_deaths_path=None, observed_at=None, raid_item_sources_path=None,
-                        corpse_loot_chars=None, previous_export_date=None):
+                        corpse_loot_chars=None, previous_export_date=None, base_dir=None,
+                        current_date=None):
     """Generate HTML page showing deltas between current and previous magelo dump.
     If serverwide is True, compares all characters, otherwise only mules.
     If char_deltas and inv_deltas are provided, uses those instead of recalculating.
@@ -1780,7 +1783,9 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     If raid_item_sources_path is set, used to drop deaths 1 day after repop window ends.
     If corpse_loot_chars is set, use it instead of inferring from current_inv vs previous_inv.
     If previous_export_date is set (e.g. from CI .magelo_previous_dump_date.txt), the page header
-    shows both export timestamps for transparency."""
+    shows both export timestamps for transparency.
+    ``base_dir`` / ``current_date`` enable ever_held unique-reacquire filtering for Items by Zone
+    (dump-wipe restores of previously held unique gear are not credited as kills)."""
     
     # Compare character data (serverwide) if not provided
     if char_deltas is None:
@@ -1816,7 +1821,36 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     tracked_ids, tracked_source_label, item_zone, item_mob = load_tracked_item_ids()
     unique_tracked = load_unique_tracked_item_ids(tracked_ids) if tracked_ids else set()
     prev_possession = possession_from_inv_snapshot(previous_inv)
-    filter_unique_reacquires_in_inv_deltas(inv_deltas, prev_possession, unique_tracked)
+    ever_held = None
+    root = base_dir or os.path.dirname(os.path.abspath(__file__))
+    delta_snapshots_dir = os.path.join(root, "delta_snapshots")
+    date_for_ever = current_date
+    if not date_for_ever and magelo_update_date and magelo_update_date != "Unknown":
+        try:
+            date_for_ever = datetime.strptime(
+                magelo_update_date, "%a %b %d %H:%M:%S UTC %Y"
+            ).strftime("%Y-%m-%d")
+        except ValueError:
+            date_for_ever = None
+    if unique_tracked and date_for_ever and gear_events_available(delta_snapshots_dir):
+        try:
+            baseline = load_master_baseline(delta_snapshots_dir) or {}
+            ever_held = ever_held_from_baseline_and_events(
+                baseline.get("inventories") or {},
+                load_gear_events(
+                    delta_snapshots_dir,
+                    end_date=date_for_ever,
+                    inclusive_end=False,
+                ),
+                before_date=date_for_ever,
+                no_rent=load_no_rent_items(),
+            )
+        except Exception as e:
+            print(f"Warning: Could not build ever_held for unique reacquire filter: {e}")
+            ever_held = None
+    filter_unique_reacquires_in_inv_deltas(
+        inv_deltas, prev_possession, unique_tracked, ever_held=ever_held
+    )
     tracked_deltas = {}
     if tracked_ids:
         for char_name, delta in inv_deltas.items():
@@ -3403,20 +3437,25 @@ def filter_tracked_deltas(
     return out
 
 
-def default_delta_history_range_endpoints(dates_asc, max_gap_days=14):
+def default_delta_history_range_endpoints(dates_asc, max_gap_days=14, empty_dates=None):
     """Pick default start/end dates for delta-history.html (see generate_delta_history).
 
     Avoid defaulting to ``dates_asc[-2:]`` when the two newest files are far apart on
     the calendar (sparse repo), which makes the UI look like a multi-month gain.
+
+    ``empty_dates`` (optional) are skipped as range end / start so a known zero-event
+    day cannot be the default end even if still present in ``dates_asc``.
     """
-    if not dates_asc:
+    empty = set(empty_dates or ())
+    usable = [d for d in (dates_asc or []) if d not in empty]
+    if not usable:
         return '', ''
-    end = dates_asc[-1]
-    if len(dates_asc) < 2:
+    end = usable[-1]
+    if len(usable) < 2:
         return end, end
     d_end = datetime.strptime(end, '%Y-%m-%d')
-    for i in range(len(dates_asc) - 2, -1, -1):
-        cand = dates_asc[i]
+    for i in range(len(usable) - 2, -1, -1):
+        cand = usable[i]
         gap = (d_end - datetime.strptime(cand, '%Y-%m-%d')).days
         if 0 < gap <= max_gap_days:
             return cand, end
@@ -7040,6 +7079,8 @@ def main():
             raid_item_sources_path=raid_sources_path,
             corpse_loot_chars=corpse_loot_override,
             previous_export_date=prev_export_date,
+            base_dir=base_dir,
+            current_date=date_str,
         )
         
         delta_file = os.path.join(base_dir, "delta.html")

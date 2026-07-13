@@ -174,6 +174,7 @@ def _format_takp_stamp(dt: datetime) -> str:
 def _write_delta_html(
     result: dict,
     prev_date: str,
+    curr_date: str,
     base_dir: Path,
     magelo_stamp: str,
     output_path: Path,
@@ -204,6 +205,8 @@ def _write_delta_html(
         inv_deltas=inv_d,
         corpse_loot_chars=corpse_loot,
         previous_export_date=prev_stamp,
+        base_dir=str(MAGELO_ROOT),
+        current_date=curr_date,
     )
     output_path.write_text(html, encoding="utf-8")
 
@@ -324,7 +327,9 @@ def main() -> int:
         stamp = _format_takp_stamp(curr_dt)
 
     delta_path = MAGELO_ROOT / "delta.html"
-    _write_delta_html(result, args.prev_date, args.base_dir, stamp, delta_path)
+    _write_delta_html(
+        result, args.prev_date, args.curr_date, args.base_dir, stamp, delta_path
+    )
     print(f"Wrote {delta_path}")
 
     audit = subprocess.call(

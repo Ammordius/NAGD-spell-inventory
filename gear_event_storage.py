@@ -498,14 +498,26 @@ def load_char_events(
 
 
 def list_available_event_dates(base_dir: str = "delta_snapshots") -> list[str]:
-    """Dates with at least one gear event row (from manifest or shards)."""
+    """Dates with at least one gear or char event (from manifest or shards).
+
+    Manifest days with ``gear + char == 0`` (e.g. known empty dump days) are omitted so
+    delta-history defaults cannot land on a null range end.
+    """
     manifest_path = _manifest_path(base_dir)
     if os.path.exists(manifest_path):
         with open(manifest_path, "r", encoding="utf-8") as f:
             manifest = json.load(f)
         days = manifest.get("days") or {}
         if days:
-            return sorted(days.keys())
+            eventful = [
+                d
+                for d, meta in days.items()
+                if isinstance(meta, dict)
+                and (int(meta.get("gear") or 0) + int(meta.get("char") or 0)) > 0
+            ]
+            if eventful:
+                return sorted(eventful)
+            # All days empty in manifest — fall through to shard scan
     dates: set[str] = set()
     for month in _list_all_shard_months(base_dir, GEAR_SHARD_RE):
         for ev in _load_shard_gz(_gear_shard_path(base_dir, month)):
@@ -1447,23 +1459,72 @@ def day_deltas_from_event_reconstruction(
     return char_deltas, inv_deltas
 
 
+def ever_held_from_baseline_and_events(
+    baseline_inv: dict | None,
+    gear_events: list[dict] | None,
+    *,
+    before_date: str | None = None,
+    no_rent: set[str] | None = None,
+) -> dict[str, set[str]]:
+    """Per-character set of item IDs ever held (baseline or any prior ``+``).
+
+    Unlike possession maps, losses do not remove an ID — once seen, it stays in the set.
+    When ``before_date`` is set, only events with ``d < before_date`` are considered
+    (so today's first acquire is not treated as a reacquire).
+    """
+    no_rent = {str(i) for i in (no_rent or set())}
+    ever_held: dict[str, set[str]] = {}
+
+    for char_name, items in (baseline_inv or {}).items():
+        held: set[str] = set()
+        for item in items or []:
+            iid = str(item.get("item_id", "")).strip()
+            if not iid or iid.upper() == "NULL" or iid == "0" or iid in no_rent:
+                continue
+            held.add(iid)
+        if held:
+            ever_held[char_name] = held
+
+    for ev in gear_events or []:
+        d = ev.get("d") or ""
+        if before_date and (not d or d >= before_date):
+            continue
+        if int(ev.get("s") or 0) <= 0:
+            continue
+        char_name = ev.get("c") or ""
+        iid = str(ev.get("i") or "")
+        if not char_name or not iid or iid in no_rent:
+            continue
+        ever_held.setdefault(char_name, set()).add(iid)
+
+    return ever_held
+
+
 def filter_unique_reacquires_in_inv_deltas(
     inv_deltas: dict,
     possession_before: dict[str, dict[str, int]],
     unique_ids: set[str],
+    ever_held: dict[str, set[str]] | None = None,
 ) -> None:
-    """Drop spurious ``added`` rows for lore tracked items the character already possessed."""
+    """Drop spurious ``added`` rows for unique tracked items already known to the character.
+
+    Drops when yesterday's possession still has the item, or (when ``ever_held`` is provided)
+    when the character ever held it earlier — so dump-wipe restores are not credited as kills.
+    """
     if not unique_ids:
         return
     unique_ids = {str(i) for i in unique_ids}
+    ever_held = ever_held or {}
     empty_chars: list[str] = []
     for char_name, row in (inv_deltas or {}).items():
         added = row.get("added") or {}
         prev = possession_before.get(char_name, {})
+        held = ever_held.get(char_name) or set()
         for item_id in list(added.keys()):
-            if str(item_id) not in unique_ids:
+            iid = str(item_id)
+            if iid not in unique_ids:
                 continue
-            if int(prev.get(str(item_id), 0) or 0) > 0:
+            if int(prev.get(iid, 0) or 0) > 0 or iid in held:
                 del added[item_id]
         if not added and not (row.get("removed") or {}):
             empty_chars.append(char_name)

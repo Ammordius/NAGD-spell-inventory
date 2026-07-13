@@ -14,6 +14,7 @@ from gear_event_storage import (  # noqa: E402
     build_possession_map,
     cancel_paired_unique_events,
     diff_absolute_possession_maps,
+    ever_held_from_baseline_and_events,
     filter_inv_deltas_for_display,
     filter_unique_reacquires_in_inv_deltas,
     get_range_delta_from_events,
@@ -327,6 +328,59 @@ class TestLoreMetadataHelpers(unittest.TestCase):
         self.assertEqual(len(pruned), 1)
         self.assertEqual(pruned[0]["c"], "Other")
 
+    def test_ever_held_filter_drops_dump_wipe_restore_not_true_new(self):
+        """Anemal-style: wipe day empties yesterday possession; ever_held still blocks restore."""
+        owned = "90001"
+        true_new = "90003"
+        unique = {owned, true_new}
+        prior_events = [
+            {"d": "2026-06-25", "c": "Anemal", "i": owned, "s": 1, "n": 1},
+            {"d": "2026-07-12", "c": "Anemal", "i": owned, "s": -1, "n": 1},
+        ]
+        ever_held = ever_held_from_baseline_and_events(
+            {}, prior_events, before_date="2026-07-13"
+        )
+        self.assertIn(owned, ever_held["Anemal"])
+        self.assertNotIn(true_new, ever_held.get("Anemal", set()))
+        # Yesterday dump after wipe: empty bag
+        possession_yesterday = {}
+        inv = {
+            "Anemal": {
+                "added": {owned: 1, true_new: 1},
+                "removed": {},
+                "item_names": {},
+            }
+        }
+        filter_unique_reacquires_in_inv_deltas(
+            inv, possession_yesterday, unique, ever_held=ever_held
+        )
+        self.assertNotIn(owned, inv["Anemal"]["added"])
+        self.assertEqual(inv["Anemal"]["added"][true_new], 1)
+
+    def test_anemal_mass_wipe_prune_keeps_true_new_gains(self):
+        """74-loss then overlapping restores cancelled; non-overlapping + kept."""
+        restore_ids = [f"9{i:04d}" for i in range(1, 5)]
+        true_new_ids = [f"8{i:04d}" for i in range(1, 3)]
+        unique = set(restore_ids) | set(true_new_ids)
+        events = []
+        for iid in restore_ids:
+            events.append({"d": "2026-06-01", "c": "Anemal", "i": iid, "s": 1, "n": 1})
+            events.append({"d": "2026-07-12", "c": "Anemal", "i": iid, "s": -1, "n": 1})
+            events.append({"d": "2026-07-13", "c": "Anemal", "i": iid, "s": 1, "n": 1})
+        for iid in true_new_ids:
+            events.append({"d": "2026-07-13", "c": "Anemal", "i": iid, "s": 1, "n": 1})
+        pruned = prune_unique_reacquire_events(events, unique, {}, window_days=14)
+        by_key = {
+            (e.get("d"), e.get("c"), str(e.get("i")), int(e.get("s") or 0)) for e in pruned
+        }
+        for iid in restore_ids:
+            self.assertNotIn(("2026-07-12", "Anemal", iid, -1), by_key)
+            self.assertNotIn(("2026-07-13", "Anemal", iid, 1), by_key)
+            self.assertIn(("2026-06-01", "Anemal", iid, 1), by_key)
+        for iid in true_new_ids:
+            self.assertIn(("2026-07-13", "Anemal", iid, 1), by_key)
+
 
 if __name__ == "__main__":
     unittest.main()
+
