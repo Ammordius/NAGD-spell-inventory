@@ -525,6 +525,12 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        # Refuse committing an N→0 wipe of today's export date (same-day push re-runs).
+        NORM="${{ steps.check-update.outputs.normalized_date }}"
+        if [ -n "$NORM" ] && [ "$NORM" != "unknown" ]; then
+          python scripts/refuse_empty_gear_day_commit.py --date "$NORM"
+        fi
         
         git add delta_snapshots/gear_events/ 2>/dev/null || true
         git add delta_snapshots/baseline_master_*.json.gz 2>/dev/null || true

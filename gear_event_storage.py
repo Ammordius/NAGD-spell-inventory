@@ -25,10 +25,17 @@ MANIFEST_FILE = "manifest.json"
 
 # Match scripts/audit_gear_events.py default anomaly threshold.
 DEFAULT_EVENT_INFLATION_MEDIAN_FACTOR = 5.0
+# Refuse emptying or collapsing a previously non-empty day (identical-dump CI re-runs).
+DEFAULT_EVENT_DEFLATION_RATIO = 0.15
+DEFAULT_EVENT_DEFLATION_MIN_EXISTING = 50
 
 
 class GearEventInflationError(RuntimeError):
     """Raised when a day-over-day delta would write far more events than recent history."""
+
+
+class GearEventDeflationError(RuntimeError):
+    """Raised when a rewrite would wipe or severely shrink an existing non-empty day."""
 
 
 def manifest_median_day_total(
@@ -84,8 +91,11 @@ def guard_gear_event_write(
     *,
     median_factor: float = DEFAULT_EVENT_INFLATION_MEDIAN_FACTOR,
     min_excess: int = 2000,
+    deflation_ratio: float = DEFAULT_EVENT_DEFLATION_RATIO,
+    deflation_min_existing: int = DEFAULT_EVENT_DEFLATION_MIN_EXISTING,
+    allow_empty_rewrite: bool = False,
 ) -> None:
-    """Refuse writes that look like stale-cache / wrong-era dump inflation."""
+    """Refuse writes that look like stale-cache inflation or accidental empty rewrites."""
     gear_events, char_events = delta_shape_to_events(
         char_deltas, inv_deltas, date_str, baseline_date
     )
@@ -97,6 +107,16 @@ def guard_gear_event_write(
                 f"Refusing gear-event rewrite for {date_str}: estimated {total} events "
                 f"vs existing manifest {existing} ({total / existing:.1f}x). "
                 "Keeping prior shard; check Magelo _previous cache alignment."
+            )
+        if (
+            not allow_empty_rewrite
+            and existing >= deflation_min_existing
+            and total < existing * deflation_ratio
+        ):
+            raise GearEventDeflationError(
+                f"Refusing gear-event rewrite for {date_str}: estimated {total} events "
+                f"vs existing manifest {existing} ({total / existing:.2f}x). "
+                "Keeping prior shard (identical dumps must leave shards alone, not clear the day)."
             )
     med = manifest_median_day_total(base_dir, date_str)
     if med is None or med <= 0:
@@ -267,14 +287,31 @@ def append_day_events_from_deltas(
     base_dir: str = "delta_snapshots",
     baseline_date: str | None = None,
     unique_tracked_ids: set[str] | None = None,
+    *,
+    allow_empty_rewrite: bool = False,
 ) -> tuple[int, int]:
-    """Append gear/stat events for one calendar day from precomputed day-over-day deltas."""
+    """Append gear/stat events for one calendar day from precomputed day-over-day deltas.
+
+    On inflation/deflation refuse, returns the existing manifest counts without mutating shards.
+    """
+    existing_total = _manifest_day_total(base_dir, date_str) or 0
     try:
         guard_gear_event_write(
-            char_deltas, inv_deltas, date_str, base_dir, baseline_date
+            char_deltas,
+            inv_deltas,
+            date_str,
+            base_dir,
+            baseline_date,
+            allow_empty_rewrite=allow_empty_rewrite,
         )
-    except GearEventInflationError as e:
+    except (GearEventInflationError, GearEventDeflationError) as e:
         print(f"::warning::{e}")
+        if existing_total > 0:
+            path = _manifest_path(base_dir)
+            if os.path.isfile(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    meta = (json.load(f).get("days") or {}).get(date_str) or {}
+                return int(meta.get("gear") or 0), int(meta.get("char") or 0)
         return 0, 0
     gear_events, char_events = delta_shape_to_events(
         char_deltas, inv_deltas, date_str, baseline_date

@@ -66,6 +66,23 @@ class TestAuditGearEventsScoping(unittest.TestCase):
         inflated = [i for i in issues if "2026-07-03" in i]
         self.assertEqual(len(inflated), 1)
 
+    def test_flags_newest_day_empty_wipe_among_healthy_neighbors(self):
+        days = {f"2026-07-0{i}": {"gear": 800, "char": 50} for i in range(1, 8)}
+        days["2026-07-08"] = {"gear": 0, "char": 0}
+        _write_minimal_gear_tree(self.base, days)
+        issues = audit(self.base, "2026-07-01")
+        wipe = [i for i in issues if "2026-07-08" in i and "empty rewrite wipe" in i]
+        self.assertEqual(len(wipe), 1)
+
+    def test_known_empty_non_newest_day_not_flagged_as_wipe(self):
+        days = {f"2026-07-0{i}": {"gear": 800, "char": 50} for i in range(1, 8)}
+        days["2026-07-04"] = {"gear": 0, "char": 0}  # middle empty day
+        days["2026-07-08"] = {"gear": 900, "char": 40}
+        _write_minimal_gear_tree(self.base, days)
+        issues = audit(self.base, "2026-07-01")
+        wipe = [i for i in issues if "empty rewrite wipe" in i]
+        self.assertEqual(wipe, [])
+
 
 if __name__ == "__main__":
     unittest.main()

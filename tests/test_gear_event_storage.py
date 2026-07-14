@@ -228,9 +228,68 @@ class TestGearEventInflationGuard(unittest.TestCase):
         gear_n, char_n = append_day_events_from_deltas(
             {}, huge_inv, "2026-06-15", snap, "2026-02-09"
         )
-        self.assertEqual((gear_n, char_n), (0, 0))
+        self.assertEqual((gear_n, char_n), (920, 130))
         with gzip.open(os.path.join(ge, "gear_2026-06.json.gz"), "rt", encoding="utf-8") as f:
             self.assertEqual(len(json.load(f)), 1)
+
+    def test_guard_refuses_empty_rewrite_of_nonempty_day(self):
+        td = tempfile.mkdtemp()
+        snap = os.path.join(td, "delta_snapshots")
+        ge = os.path.join(snap, "gear_events")
+        os.makedirs(ge)
+        days = {f"2026-06-{i:02d}": {"gear": 900, "char": 100} for i in range(1, 15)}
+        days["2026-06-15"] = {"gear": 120, "char": 10}
+        with open(os.path.join(ge, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "days": days}, f)
+        prior = [
+            {"d": "2026-06-15", "c": "A", "i": str(i), "s": 1, "n": 1, "v": 0}
+            for i in range(120)
+        ]
+        with gzip.open(os.path.join(ge, "gear_2026-06.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump(prior, f)
+        with gzip.open(os.path.join(ge, "char_2026-06.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump(
+                [
+                    {
+                        "d": "2026-06-15",
+                        "c": "A",
+                        "f": "level",
+                        "s": 1,
+                        "n": 1,
+                        "v": 60,
+                    }
+                ]
+                * 10,
+                f,
+            )
+        gear_n, char_n = append_day_events_from_deltas(
+            {}, {}, "2026-06-15", snap, "2026-02-09"
+        )
+        self.assertEqual((gear_n, char_n), (120, 10))
+        with gzip.open(os.path.join(ge, "gear_2026-06.json.gz"), "rt", encoding="utf-8") as f:
+            self.assertEqual(len(json.load(f)), 120)
+        with open(os.path.join(ge, "manifest.json"), encoding="utf-8") as f:
+            meta = json.load(f)["days"]["2026-06-15"]
+        self.assertEqual(meta["gear"], 120)
+        self.assertEqual(meta["char"], 10)
+
+    def test_guard_allows_empty_write_for_new_day(self):
+        td = tempfile.mkdtemp()
+        snap = os.path.join(td, "delta_snapshots")
+        ge = os.path.join(snap, "gear_events")
+        os.makedirs(ge)
+        days = {f"2026-06-{i:02d}": {"gear": 900, "char": 100} for i in range(1, 15)}
+        with open(os.path.join(ge, "manifest.json"), "w", encoding="utf-8") as f:
+            json.dump({"version": 1, "days": days}, f)
+        with gzip.open(os.path.join(ge, "gear_2026-06.json.gz"), "wt", encoding="utf-8") as f:
+            json.dump([], f)
+        gear_n, char_n = append_day_events_from_deltas(
+            {}, {}, "2026-06-15", snap, "2026-02-09"
+        )
+        self.assertEqual((gear_n, char_n), (0, 0))
+        with open(os.path.join(ge, "manifest.json"), encoding="utf-8") as f:
+            meta = json.load(f)["days"]["2026-06-15"]
+        self.assertEqual(int(meta.get("gear") or 0) + int(meta.get("char") or 0), 0)
 
 
 class TestGearEventParityWithRepo(unittest.TestCase):

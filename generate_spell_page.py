@@ -27,6 +27,7 @@ from delta_storage import (
     _corpse_loot_chars_from_equipped_meta,
 )
 from gear_event_storage import (
+    _manifest_day_total,
     append_day_events_from_deltas,
     build_possession_map,
     delta_shape_to_events,
@@ -6982,6 +6983,7 @@ def main():
             possession_yesterday = possession_from_inv_snapshot(previous_inventories)
             filter_unique_reacquires_in_inv_deltas(inv_deltas, possession_yesterday, unique_tracked)
             est_events = _estimate_delta_event_total(char_deltas, inv_deltas, date_str)
+            existing_today = _manifest_day_total(delta_snapshots_dir, date_str) or 0
             prev_manifest_date = _previous_export_date_str(base_dir, date_str)
             if est_events == 0 and prev_manifest_date:
                 import hashlib
@@ -7001,20 +7003,28 @@ def main():
                             "Run scripts/backfill_gear_day_from_event_belief.py locally and commit shards."
                         )
                         sys.exit(1)
-            try:
-                gear_n, char_n = append_day_events_from_deltas(
-                    char_deltas,
-                    inv_deltas,
-                    date_str,
-                    delta_snapshots_dir,
-                    baseline_date=baseline.get("baseline_date") if baseline else None,
-                    unique_tracked_ids=unique_tracked,
+            skip_empty_rewrite = est_events == 0 and existing_today > 0
+            if skip_empty_rewrite:
+                print(
+                    f"::warning::Dump diff for {date_str} is 0 events but manifest already has "
+                    f"{existing_today} events — leaving gear_events shards alone "
+                    "(identical dumps must not clear the day)."
                 )
-                print(f"  Saved gear_events: {gear_n} inventory rows, {char_n} stat rows")
-            except Exception as e:
-                print(f"Warning: Could not append gear events: {e}")
-                import traceback
-                traceback.print_exc()
+            else:
+                try:
+                    gear_n, char_n = append_day_events_from_deltas(
+                        char_deltas,
+                        inv_deltas,
+                        date_str,
+                        delta_snapshots_dir,
+                        baseline_date=baseline.get("baseline_date") if baseline else None,
+                        unique_tracked_ids=unique_tracked,
+                    )
+                    print(f"  Saved gear_events: {gear_n} inventory rows, {char_n} stat rows")
+                except Exception as e:
+                    print(f"Warning: Could not append gear events: {e}")
+                    import traceback
+                    traceback.print_exc()
 
         # Step 3: Generate delta HTML from the same day-over-day deltas as gear events.
         print(f"Generating delta.html from previous vs current Magelo dumps ({date_str})...")
@@ -7023,9 +7033,25 @@ def main():
         ):
             try:
                 event_day = get_day_delta_from_events(date_str, delta_snapshots_dir)
-                _warn_if_event_dump_divergence(
-                    event_day, char_deltas, inv_deltas, date_str
+                dump_empty = (
+                    _estimate_delta_event_total(char_deltas, inv_deltas, date_str) == 0
                 )
+                event_nonempty = bool(
+                    (event_day.get("char_deltas") or {})
+                    or (event_day.get("inv_deltas") or {})
+                )
+                if dump_empty and event_nonempty:
+                    print(
+                        f"Dump diff empty but gear_events for {date_str} are non-empty — "
+                        "seeding delta.html from events."
+                    )
+                    char_deltas = event_day.get("char_deltas") or {}
+                    inv_deltas = event_day.get("inv_deltas") or {}
+                    populate_item_names_for_inv_deltas(inv_deltas, current_inventories)
+                else:
+                    _warn_if_event_dump_divergence(
+                        event_day, char_deltas, inv_deltas, date_str
+                    )
             except Exception as e:
                 print(f"Warning: Could not cross-check gear events vs dump diff: {e}")
         

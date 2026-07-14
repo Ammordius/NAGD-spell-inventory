@@ -71,6 +71,8 @@ def audit(base_dir: Path, min_events_after: str | None, *, anomaly_median_factor
                     meta = days_meta.get(d) or {}
                     manifest_total = int(meta.get("gear") or 0) + int(meta.get("char") or 0)
                     if manifest_total == 0:
+                        # Blind-skip only for known empty days that are not the newest
+                        # day surrounded by healthy neighbors (N→0 wipe detection).
                         continue
                     issues.append(f"no gear events for {d}")
 
@@ -79,6 +81,24 @@ def audit(base_dir: Path, min_events_after: str | None, *, anomaly_median_factor
         meta = days_meta[d] or {}
         total = int(meta.get("gear") or 0) + int(meta.get("char") or 0)
         day_counts.append((d, total))
+
+    # Flag newest-day wipe: manifest 0 while recent neighbors are healthy.
+    if day_counts:
+        newest_d, newest_total = day_counts[-1]
+        if min_events_after is None or newest_d >= min_events_after:
+            neighbors = [
+                total
+                for d, total in day_counts[-8:-1]
+                if (min_events_after is None or d >= min_events_after)
+            ]
+            healthy_neighbors = [t for t in neighbors if t >= 50]
+            if newest_total == 0 and len(healthy_neighbors) >= 2:
+                issues.append(
+                    f"{newest_d}: 0 events but {len(healthy_neighbors)} recent neighbor "
+                    f"days average {sum(healthy_neighbors) / len(healthy_neighbors):.0f} "
+                    "(possible empty rewrite wipe)"
+                )
+
     if len(day_counts) >= 7:
         import statistics
 
