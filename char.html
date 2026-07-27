@@ -256,8 +256,36 @@
             return fullState;
         }
 
+        function namesEqual(a, b) {
+            return String(a || '').toLowerCase() === String(b || '').toLowerCase();
+        }
+
+        function findKeyCI(obj, name) {
+            if (!obj || name == null || name === '') return null;
+            if (Object.prototype.hasOwnProperty.call(obj, name)) return name;
+            const needle = String(name).toLowerCase();
+            for (const k of Object.keys(obj)) {
+                if (String(k).toLowerCase() === needle) return k;
+            }
+            return null;
+        }
+
+        function resolveCharName(query, baseline, stateMap) {
+            const sources = [
+                (baseline && baseline.characters) || null,
+                (baseline && baseline.inventories) || null,
+                stateMap || null,
+                CHAR_GUILD_MAP || null,
+            ];
+            for (const obj of sources) {
+                const hit = findKeyCI(obj, query);
+                if (hit) return hit;
+            }
+            return query;
+        }
+
         function filterEventsForChar(events, charName) {
-            return (events || []).filter(ev => ev.c === charName);
+            return (events || []).filter(ev => namesEqual(ev.c, charName));
         }
 
         function filterCharEventsForBaseline(events, baselineDate) {
@@ -272,7 +300,8 @@
 
         function buildItemNameMap(baseline, charName) {
             const map = Object.assign({}, ITEM_ID_TO_NAME);
-            for (const item of ((baseline.inventories || {})[charName] || [])) {
+            const invKey = findKeyCI((baseline.inventories || {}), charName) || charName;
+            for (const item of ((baseline.inventories || {})[invKey] || [])) {
                 const id = String(item.item_id);
                 if (item.item_name && !map[id]) map[id] = item.item_name;
             }
@@ -280,11 +309,12 @@
         }
 
         function buildAaTimeline(baseline, charEvents, charName) {
-            const bl = ((baseline.characters || {})[charName]) || {};
+            const charKey = findKeyCI((baseline.characters || {}), charName) || charName;
+            const bl = ((baseline.characters || {})[charKey]) || {};
             let running = (bl.aa_unspent || 0) + (bl.aa_spent || 0);
             const baselineDate = baseline.baseline_date || '';
             const rows = [];
-            if ((baseline.characters || {})[charName] || running > 0) {
+            if ((baseline.characters || {})[charKey] || running > 0) {
                 rows.push({ date: baselineDate, delta: 0, total: running, isBaseline: true });
             }
             const eraEvents = filterCharEventsForBaseline(charEvents, baselineDate);
@@ -301,7 +331,8 @@
         }
 
         function buildCurrentHoldings(baseline, gearEvents, charName) {
-            const baselineItems = ((baseline.inventories || {})[charName] || []);
+            const invKey = findKeyCI((baseline.inventories || {}), charName) || charName;
+            const baselineItems = ((baseline.inventories || {})[invKey] || []);
             const charGear = filterEventsForChar(gearEvents, charName);
             if (!baselineItems.length && !charGear.length) return {};
             const counts = {};
@@ -375,7 +406,8 @@
         function buildTrackedGearEventLog(gearEvents, charName, nameMap, baseline) {
             if (!TRACKED_ITEM_IDS.size) return [];
             const holdings = {};
-            for (const item of ((baseline.inventories || {})[charName] || [])) {
+            const invKey = findKeyCI((baseline.inventories || {}), charName) || charName;
+            for (const item of ((baseline.inventories || {})[invKey] || [])) {
                 const id = String(item.item_id);
                 if (!id || id.toUpperCase() === 'NULL' || id === '0' || NO_RENT_ITEMS.has(id)) continue;
                 holdings[id] = (holdings[id] || 0) + 1;
@@ -554,26 +586,29 @@
                 });
                 const eraBaselineDate = baseline.baseline_date || baselineDate;
                 const eraChars = filterCharEventsForBaseline(chars, eraBaselineDate);
-                const charEvents = filterEventsForChar(eraChars, CHAR_NAME);
-                const charGear = filterEventsForChar(gear, CHAR_NAME);
                 const stateMap = buildCharacterStateFromEvents(baseline, eraChars);
-                const state = stateMap[CHAR_NAME] || {};
-                const guild = state.guild || CHAR_GUILD_MAP[CHAR_NAME] || '';
+                const charName = resolveCharName(CHAR_NAME, baseline, stateMap);
+                document.getElementById('page-title').textContent = charName + ' — Timeline';
+                const charEvents = filterEventsForChar(eraChars, charName);
+                const charGear = filterEventsForChar(gear, charName);
+                const state = stateMap[charName] || {};
+                const guildKey = findKeyCI(CHAR_GUILD_MAP, charName) || charName;
+                const guild = state.guild || CHAR_GUILD_MAP[guildKey] || '';
                 const guildPart = guild ? ' &lt;' + esc(guild) + '&gt;' : '';
-                const mageloSlug = CHAR_NAME.toLowerCase().replace(/ /g, '_');
-                meta.innerHTML = '<strong>' + esc(CHAR_NAME) + guildPart + '</strong> · '
+                const mageloSlug = charName.toLowerCase().replace(/ /g, '_');
+                meta.innerHTML = '<strong>' + esc(charName) + guildPart + '</strong> · '
                     + (state.class || '?') + ' · Level ' + (state.level || '?')
                     + ' · ' + (state.aa_total != null ? state.aa_total + ' AA' : '? AA')
                     + ' · through ' + esc(endDate)
                     + ' · <a href="https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(mageloSlug) + '" target="_blank">Magelo</a>';
 
-                const nameMap = buildItemNameMap(baseline, CHAR_NAME);
-                const aaRows = buildAaTimeline(baseline, charEvents, CHAR_NAME);
-                const holdings = buildCurrentHoldings(baseline, charGear, CHAR_NAME);
-                const sinceBaseline = baselineOnlyItems(holdings, charGear, CHAR_NAME);
-                const gearLog = buildGearEventLog(charGear, CHAR_NAME, nameMap);
-                const trackedRows = buildTrackedGearEventLog(charGear, CHAR_NAME, nameMap, baseline);
-                const sinceBaselineTracked = baselineOnlyTracked(holdings, charGear, CHAR_NAME);
+                const nameMap = buildItemNameMap(baseline, charName);
+                const aaRows = buildAaTimeline(baseline, charEvents, charName);
+                const holdings = buildCurrentHoldings(baseline, charGear, charName);
+                const sinceBaseline = baselineOnlyItems(holdings, charGear, charName);
+                const gearLog = buildGearEventLog(charGear, charName, nameMap);
+                const trackedRows = buildTrackedGearEventLog(charGear, charName, nameMap, baseline);
+                const sinceBaselineTracked = baselineOnlyTracked(holdings, charGear, charName);
 
                 let html = '';
                 html += renderTrackedItemsSection(

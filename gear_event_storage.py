@@ -809,9 +809,36 @@ def char_item_history(
     ]
 
 
+def find_key_ci(mapping: dict | None, name: str | None) -> str | None:
+    """Return the real key in ``mapping`` that matches ``name`` case-insensitively."""
+    if not mapping or name is None or name == "":
+        return None
+    if name in mapping:
+        return name
+    needle = str(name).lower()
+    for key in mapping:
+        if str(key).lower() == needle:
+            return key
+    return None
+
+
+def resolve_char_name(query: str, *dicts: dict | None) -> str:
+    """Resolve ``query`` to the canonical casing found in any of ``dicts``."""
+    for mapping in dicts:
+        hit = find_key_ci(mapping, query)
+        if hit is not None:
+            return hit
+    return query
+
+
 def filter_events_for_char(events: list[dict], char_name: str) -> list[dict]:
-    """Return events whose character field matches ``char_name``."""
-    return [e for e in (events or []) if e.get("c") == char_name]
+    """Return events whose character field matches ``char_name`` (case-insensitive)."""
+    needle = str(char_name or "").lower()
+    return [
+        e
+        for e in (events or [])
+        if str(e.get("c") or "").lower() == needle
+    ]
 
 
 def filter_char_events_for_baseline(
@@ -863,7 +890,9 @@ def build_item_name_map_for_char(
 ) -> dict[str, str]:
     """Resolve item id -> name for one character from global map, baseline inventory, extras."""
     name_map = load_item_id_to_name_map()
-    for item in ((baseline or {}).get("inventories") or {}).get(char_name, []):
+    inventories = (baseline or {}).get("inventories") or {}
+    inv_key = find_key_ci(inventories, char_name) or char_name
+    for item in inventories.get(inv_key, []):
         iid = str(item.get("item_id", ""))
         iname = (item.get("item_name") or "").strip()
         if iid and iname:
@@ -882,7 +911,8 @@ def reconstruct_holdings_for_char(
     """Absolute item_id -> count for one character: baseline inventory + gear events."""
     no_rent = no_rent or set()
     inv_base = (baseline or {}).get("inventories") or {}
-    baseline_items = inv_base.get(char_name) or []
+    inv_key = find_key_ci(inv_base, char_name) or char_name
+    baseline_items = inv_base.get(inv_key) or []
     char_gear = filter_events_for_char(gear_events, char_name)
     if not baseline_items and not char_gear:
         return {}
@@ -918,11 +948,12 @@ def build_aa_timeline(
 ) -> list[dict]:
     """Chronological AA rows: baseline snapshot then dated ``f:aa`` events."""
     baseline_chars = (baseline or {}).get("characters") or {}
-    bl = baseline_chars.get(char_name) or {}
+    char_key = find_key_ci(baseline_chars, char_name) or char_name
+    bl = baseline_chars.get(char_key) or {}
     running = int(bl.get("aa_unspent") or 0) + int(bl.get("aa_spent") or 0)
     baseline_date = (baseline or {}).get("baseline_date") or ""
     rows: list[dict] = []
-    if char_name in baseline_chars or running > 0:
+    if char_key in baseline_chars or running > 0:
         rows.append(
             {
                 "date": baseline_date,
@@ -932,8 +963,13 @@ def build_aa_timeline(
             }
         )
     era_events = filter_char_events_for_baseline(char_events, baseline_date)
+    needle = str(char_name or "").lower()
     aa_events = sorted(
-        [e for e in era_events if e.get("c") == char_name and e.get("f") == "aa"],
+        [
+            e
+            for e in era_events
+            if str(e.get("c") or "").lower() == needle and e.get("f") == "aa"
+        ],
         key=lambda e: e.get("d") or "",
     )
     for ev in aa_events:
@@ -1043,7 +1079,9 @@ def build_tracked_gear_event_log_rows(
             if n > 0:
                 holdings[str(iid)] = n
     else:
-        baseline_items = ((baseline or {}).get("inventories") or {}).get(char_name) or []
+        inventories = ((baseline or {}).get("inventories") or {})
+        inv_key = find_key_ci(inventories, char_name) or char_name
+        baseline_items = inventories.get(inv_key) or []
         for item in baseline_items:
             iid = str(item.get("item_id", ""))
             if not iid or iid.upper() == "NULL" or iid == "0" or iid in no_rent:

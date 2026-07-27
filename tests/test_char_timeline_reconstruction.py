@@ -22,10 +22,12 @@ from gear_event_storage import (  # noqa: E402
     build_tracked_gear_event_log_rows,
     filter_char_events_for_baseline,
     filter_events_for_char,
+    find_key_ci,
     group_tracked_rows_by_date,
     group_tracked_rows_by_zone,
     load_item_id_to_name_map,
     reconstruct_holdings_for_char,
+    resolve_char_name,
 )
 
 
@@ -65,6 +67,37 @@ class TestCharTimelineReconstruction(unittest.TestCase):
         filtered = filter_events_for_char(events, "Alice")
         self.assertEqual(len(filtered), 2)
         self.assertTrue(all(e["c"] == "Alice" for e in filtered))
+
+    def test_filter_events_for_char_case_insensitive(self):
+        events = self.CHAR_EVENTS + [{"d": "2026-05-10", "c": "Bob", "f": "aa", "n": 1}]
+        filtered = filter_events_for_char(events, "alice")
+        self.assertEqual(len(filtered), 2)
+        self.assertTrue(all(e["c"] == "Alice" for e in filtered))
+
+    def test_resolve_char_name_case_insensitive(self):
+        self.assertEqual(find_key_ci(self.BASELINE["characters"], "alice"), "Alice")
+        self.assertEqual(
+            resolve_char_name(
+                "ALICE",
+                self.BASELINE["characters"],
+                self.BASELINE["inventories"],
+            ),
+            "Alice",
+        )
+        self.assertEqual(resolve_char_name("Nobody", self.BASELINE["characters"]), "Nobody")
+
+    def test_reconstruction_case_insensitive_query(self):
+        rows = build_aa_timeline(self.BASELINE, self.CHAR_EVENTS, "alice")
+        self.assertEqual(rows[0]["total"], 200)
+        self.assertEqual(rows[-1]["total"], 208)
+        holdings = reconstruct_holdings_for_char(self.BASELINE, self.GEAR_EVENTS, "ALICE")
+        self.assertEqual(holdings["100"], 1)
+        self.assertEqual(holdings["200"], 1)
+        self.assertEqual(holdings["999"], 1)
+        name_map = build_item_name_map_for_char(self.BASELINE, "alice", {"999": "New Item"})
+        self.assertEqual(name_map["100"], "Old Sword")
+        gear_log = build_gear_event_log_rows(self.GEAR_EVENTS, "alice", name_map)
+        self.assertEqual(len(gear_log), 3)
 
     def test_build_aa_timeline(self):
         rows = build_aa_timeline(self.BASELINE, self.CHAR_EVENTS, "Alice")
@@ -165,6 +198,9 @@ class TestCharTimelineReconstruction(unittest.TestCase):
         self.assertIn("GEAR_EVENT_CACHE_TTL_MS", html)
         self.assertIn("caches.open", html)
         self.assertIn("your browser caches it for 24 hours", html)
+        self.assertIn("function resolveCharName", html)
+        self.assertIn("function namesEqual", html)
+        self.assertIn("namesEqual(ev.c, charName)", html)
 
 
 class TestTrackedGearTimeline(unittest.TestCase):
