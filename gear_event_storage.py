@@ -1018,6 +1018,145 @@ def build_gear_event_log_rows(
     return rows
 
 
+def filter_events_for_item(events: list[dict], item_id: str) -> list[dict]:
+    """Return events whose item id matches ``item_id`` (string-normalized)."""
+    needle = str(item_id or "")
+    if not needle:
+        return []
+    return [e for e in (events or []) if str(e.get("i") or "") == needle]
+
+
+def resolve_item_id(
+    query: str,
+    id_to_name: dict | None,
+    name_to_id: dict | None = None,
+) -> str | None:
+    """Resolve numeric id or case-insensitive item name to a canonical item id string.
+
+    Prefer an exact id hit in ``id_to_name`` (or bare numeric query). Otherwise match
+    names case-insensitively via ``name_to_id`` then a reverse scan of ``id_to_name``.
+    """
+    q = (query or "").strip()
+    if not q:
+        return None
+    id_to_name = id_to_name or {}
+    if q in id_to_name:
+        return str(q)
+    if q.isdigit():
+        # Preserve map key form when present (e.g. leading zeros); else normalize.
+        normalized = str(int(q))
+        if normalized in id_to_name:
+            return normalized
+        return normalized
+    needle = q.lower()
+    if name_to_id:
+        if needle in name_to_id:
+            return str(name_to_id[needle])
+        for key, val in name_to_id.items():
+            if str(key).lower() == needle:
+                return str(val)
+    for iid, name in id_to_name.items():
+        if str(name).lower() == needle:
+            return str(iid)
+    return None
+
+
+def reconstruct_holders_for_item(
+    baseline_inv: dict | None,
+    item_events: list[dict],
+    item_id: str,
+    *,
+    no_rent: set[str] | None = None,
+) -> dict[str, int]:
+    """Character -> count for one item: baseline inventories + item-scoped gear events."""
+    item_id = str(item_id or "")
+    if not item_id:
+        return {}
+    no_rent = {str(x) for x in (no_rent or set())}
+    if item_id in no_rent:
+        return {}
+    counts: dict[str, int] = {}
+    for char_name, items in (baseline_inv or {}).items():
+        n = 0
+        for item in items or []:
+            iid = str(item.get("item_id", ""))
+            if not iid or iid.upper() == "NULL" or iid == "0":
+                continue
+            if iid == item_id:
+                n += 1
+        if n > 0:
+            counts[char_name] = n
+    for ev in sorted(item_events or [], key=lambda e: (e.get("d") or "", e.get("c") or "")):
+        if str(ev.get("i") or "") != item_id:
+            continue
+        char_name = ev.get("c") or ""
+        if not char_name:
+            continue
+        sign = int(ev.get("s") or 0)
+        n = int(ev.get("n") or 0)
+        if n <= 0 or sign not in (1, -1):
+            continue
+        if sign > 0:
+            counts[char_name] = counts.get(char_name, 0) + n
+        else:
+            counts[char_name] = counts.get(char_name, 0) - n
+            if counts[char_name] <= 0:
+                del counts[char_name]
+    return {k: v for k, v in counts.items() if v > 0}
+
+
+def build_item_event_log_rows(
+    item_events: list[dict],
+    item_id: str | None = None,
+) -> list[dict]:
+    """Dated ownership +/- rows for one item across characters."""
+    events = item_events or []
+    if item_id is not None:
+        events = filter_events_for_item(events, item_id)
+    rows: list[dict] = []
+    for ev in sorted(
+        events,
+        key=lambda e: (e.get("d") or "", e.get("c") or ""),
+    ):
+        sign = int(ev.get("s") or 0)
+        n = int(ev.get("n") or 0)
+        iid = str(ev.get("i", ""))
+        char_name = ev.get("c") or ""
+        if not iid or not char_name or n <= 0 or sign not in (1, -1):
+            continue
+        rows.append(
+            {
+                "date": ev.get("d") or "",
+                "char": char_name,
+                "sign": sign,
+                "count": n,
+                "item_id": iid,
+                "visibility": bool(ev.get("v")),
+            }
+        )
+    return rows
+
+
+def baseline_only_holders_for_item(
+    holders: dict[str, int],
+    item_events: list[dict],
+    item_id: str,
+) -> dict[str, int]:
+    """Holders present in reconstructed counts who never appear in item events."""
+    item_id = str(item_id or "")
+    touched = {
+        str(e.get("c") or "")
+        for e in filter_events_for_item(item_events, item_id)
+        if e.get("c")
+    }
+    touched_lower = {t.lower() for t in touched}
+    return {
+        char: cnt
+        for char, cnt in (holders or {}).items()
+        if char.lower() not in touched_lower
+    }
+
+
 def baseline_only_item_ids(
     holdings: dict[str, int],
     gear_events: list[dict],

@@ -2219,6 +2219,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
         nav_links.append(f'<a href="leaderboard_month_{month_start}.html" style="background-color: #9C27B0;">📆 Monthly Leaderboard</a>')
     # Add delta history link (for date range queries)
     nav_links.append('<a href="delta-history.html" style="background-color: #607D8B;">📜 Delta History</a>')
+    nav_links.append('<a href="item.html" style="background-color: #00897B;">🔎 Item Timeline</a>')
     # Raid mob repop tracker (deaths + repop windows)
     nav_links.append('<a href="mob_tracker.html" style="background-color: #795548;">⏱ Raid Mob Repop Tracker</a>')
     
@@ -2252,9 +2253,13 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     guild = (current_char_data.get(char_name, {}) or {}).get('guild', '')
                     char_display = f"{char_name} &lt;{guild}&gt;" if guild else char_name
                     char_slug = char_name.lower().replace(' ', '_')
-                    item_url = f"https://www.takproject.net/allaclone/item.php?id={item_id}"
                     magelo_url = f"https://www.takproject.net/magelo/character.php?char={char_slug}"
-                    html += f'                <li><a href="{magelo_url}" target="_blank" style="text-decoration: none; font-weight: bold;">{char_display}</a>{char_timeline_link(char_name)} — <a href="{item_url}" target="_blank" style="color: #2e7d32;">{item_name}</a></li>\n'
+                    html += (
+                        f'                <li><a href="{magelo_url}" target="_blank" '
+                        f'style="text-decoration: none; font-weight: bold;">{char_display}</a>'
+                        f'{char_timeline_link(char_name)} — '
+                        f'{item_timeline_link(item_id, item_name, color="#2e7d32")}</li>\n'
+                    )
                 html += """
             </ul>
 """
@@ -2470,7 +2475,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 for item_id, count in sorted(delta['added'].items()):
                     item_name = delta['item_names'].get(item_id, f"Item {item_id}")
                     count_text = f" x{count}" if count > 1 else ""
-                    html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                    html += (
+                        f'<span class="item-badge item-added">'
+                        f'{item_timeline_link(item_id, item_name, color="#2e7d32")}'
+                        f'{count_text}</span>'
+                    )
                 html += """
                 </div>
             </div>
@@ -2484,7 +2493,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 for item_id, count in sorted(delta['removed'].items()):
                     item_name = delta['item_names'].get(item_id, f"Item {item_id}")
                     count_text = f" x{count}" if count > 1 else ""
-                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                    html += (
+                        f'<span class="item-badge item-removed">'
+                        f'{item_timeline_link(item_id, item_name, color="#c62828")}'
+                        f'{count_text}</span>'
+                    )
                 html += """
                 </div>
             </div>
@@ -2516,7 +2529,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     for item_id, count in sorted(delta['added'].items()):
                         item_name = delta['item_names'].get(item_id, f"Item {item_id}")
                         count_text = f" x{count}" if count > 1 else ""
-                        html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                        html += (
+                            f'<span class="item-badge item-added">'
+                            f'{item_timeline_link(item_id, item_name, color="#2e7d32")}'
+                            f'{count_text}</span>'
+                        )
                     html += """
                 </div>
             </div>
@@ -2530,7 +2547,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                 for item_id, count in sorted(delta['removed'].items()):
                     item_name = delta['item_names'].get(item_id, f"Item {item_id}")
                     count_text = f" x{count}" if count > 1 else ""
-                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}</span>'
+                    html += (
+                        f'<span class="item-badge item-removed">'
+                        f'{item_timeline_link(item_id, item_name, color="#c62828")}'
+                        f'{count_text}</span>'
+                    )
                 html += """
                 </div>
             </div>
@@ -2574,7 +2595,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     source = tracked_source_label.get(str(item_id), "")
                     count_text = f" x{count}" if count > 1 else ""
                     label = f" ({source})" if source else ""
-                    html += f'<span class="item-badge item-added"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #2e7d32; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                    html += (
+                        f'<span class="item-badge item-added">'
+                        f'{item_timeline_link(item_id, item_name, color="#2e7d32")}'
+                        f'{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                    )
                 html += """
                 </div>
             </div>
@@ -2590,7 +2615,11 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
                     source = tracked_source_label.get(str(item_id), "")
                     count_text = f" x{count}" if count > 1 else ""
                     label = f" ({source})" if source else ""
-                    html += f'<span class="item-badge item-removed"><a href="https://www.takproject.net/allaclone/item.php?id={item_id}" target="_blank" style="color: #c62828; text-decoration: none;">{item_name}</a>{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                    html += (
+                        f'<span class="item-badge item-removed">'
+                        f'{item_timeline_link(item_id, item_name, color="#c62828")}'
+                        f'{count_text}<span style="color: #888; font-size: 0.85em;">{label}</span></span>'
+                    )
                 html += """
                 </div>
             </div>
@@ -3121,6 +3150,28 @@ def char_timeline_link(char_name: str) -> str:
     return (
         f' <a href="{escape(url, quote=True)}" title="Character timeline" '
         f'style="text-decoration:none;font-size:0.85em;">Δ</a>'
+    )
+
+
+def item_timeline_link(
+    item_id: str,
+    item_name: str | None = None,
+    *,
+    color: str | None = None,
+) -> str:
+    """HTML fragment: primary link to item ownership timeline (+ Allaclone)."""
+    iid = str(item_id)
+    url = "item.html?i=" + quote(iid, safe="")
+    label = escape(item_name) if item_name else escape(f"Item {iid}")
+    style = "text-decoration: none;"
+    if color:
+        style += f" color: {color};"
+    allaclone = "https://www.takproject.net/allaclone/item.php?id=" + quote(iid, safe="")
+    return (
+        f'<a href="{escape(url, quote=True)}" title="Item ownership timeline" '
+        f'style="{style}">{label}</a>'
+        f' <a href="{escape(allaclone, quote=True)}" target="_blank" title="Allaclone" '
+        f'style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>'
     )
 
 
@@ -3817,6 +3868,7 @@ def generate_delta_history(base_dir):
         <h1>📜 TAKP Delta History & Date Range Generator</h1>
         <div class="nav-links">
             <a href="delta.html">← Current Delta Report</a>
+            <a href="item.html">🔎 Item Timeline</a>
             <a href="spell_inventory.html">← Spell Inventory</a>
         </div>
         
@@ -3944,6 +3996,18 @@ def generate_delta_history(base_dir):
 
         function charTimelineLink(name) {
             return ' <a href="char.html?c=' + encodeURIComponent(name) + '" title="Character timeline" style="text-decoration:none;font-size:0.85em;">Δ</a>';
+        }
+
+        function itemTimelineLink(itemId, itemName, color) {
+            const id = String(itemId);
+            const label = escapeHtmlText(itemName || ('Item ' + id));
+            const style = color
+                ? ('color: ' + color + '; text-decoration: none;')
+                : 'text-decoration: none;';
+            return '<a href="item.html?i=' + encodeURIComponent(id) + '" title="Item ownership timeline" style="' + style + '">'
+                + label + '</a>'
+                + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(id)
+                + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>';
         }
 
         function charStateForName(name, startState, endState) {
@@ -5223,11 +5287,10 @@ def generate_delta_history(base_dir):
                             const charDisplay = formatCharDisplay(e.charName, charStateForName(e.charName, startState, endState));
                             const charSlug = e.charName.toLowerCase().replace(/ /g, '_');
                             const mageloUrl = 'https://www.takproject.net/magelo/character.php?char=' + encodeURIComponent(charSlug);
-                            const itemUrl = 'https://www.takproject.net/allaclone/item.php?id=' + e.itemId;
                             const datePrefix = e.date
                                 ? `<span style="color:#666;">${escapeHtmlText(e.date)}</span> — `
                                 : '';
-                            reportHTML += `<li>${datePrefix}<a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(e.charName)} — <a href="${itemUrl}" target="_blank" style="color: #2e7d32;">${e.name}</a></li>`;
+                            reportHTML += `<li>${datePrefix}<a href="${mageloUrl}" target="_blank" style="text-decoration: none; font-weight: bold;">${charDisplay}</a>${charTimelineLink(e.charName)} — ${itemTimelineLink(e.itemId, e.name, '#2e7d32')}</li>`;
                         }
                         reportHTML += `
                     </ul>`;
@@ -5424,7 +5487,7 @@ def generate_delta_history(base_dir):
                             const count = delta.added[itemId];
                             const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
                             const countText = count > 1 ? ' x' + count : '';
-                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;">${itemTimelineLink(itemId, name, '#2e7d32')}${countText}</span>`;
                         }
                         reportHTML += `</div></div>`;
                     }
@@ -5435,7 +5498,7 @@ def generate_delta_history(base_dir):
                             const count = delta.removed[itemId];
                             const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
                             const countText = count > 1 ? ' x' + count : '';
-                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;">${itemTimelineLink(itemId, name, '#c62828')}${countText}</span>`;
                         }
                         reportHTML += `</div></div>`;
                     }
@@ -5459,7 +5522,7 @@ def generate_delta_history(base_dir):
                             const count = delta.added[itemId];
                             const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
                             const countText = count > 1 ? ' x' + count : '';
-                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}</span>`;
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;">${itemTimelineLink(itemId, name, '#2e7d32')}${countText}</span>`;
                         }
                         reportHTML += `</div></div>`;
                     }
@@ -5470,7 +5533,7 @@ def generate_delta_history(base_dir):
                             const count = delta.removed[itemId];
                             const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
                             const countText = count > 1 ? ' x' + count : '';
-                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}</span>`;
+                            reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;">${itemTimelineLink(itemId, name, '#c62828')}${countText}</span>`;
                         }
                         reportHTML += `</div></div>`;
                     }
@@ -5519,7 +5582,7 @@ def generate_delta_history(base_dir):
                             <tr>
                                 <td>${escapeHtmlText(row.date || '—')}</td>
                                 <td><span class="${signClass}">${signLabel}</span></td>
-                                <td><span style="display: inline-block; padding: 2px 8px; background: ${badgeBg}; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${row.itemId}" target="_blank" style="color: ${linkColor}; text-decoration: none;">${escapeHtmlText(row.itemName)}</a>${qty}</span></td>
+                                <td><span style="display: inline-block; padding: 2px 8px; background: ${badgeBg}; border-radius: 4px;">${itemTimelineLink(row.itemId, row.itemName, linkColor)}${qty}</span></td>
                                 <td style="color: #666;">${escapeHtmlText(row.source || '—')}</td>
                             </tr>`;
                         }
@@ -5535,7 +5598,7 @@ def generate_delta_history(base_dir):
                                 const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
                                 const countText = count > 1 ? ' x' + count : '';
                                 const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #2e7d32;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #e8f5e9; border-radius: 4px;">${itemTimelineLink(itemId, name, '#2e7d32')}${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
                             }
                             reportHTML += `</div></div>`;
                         }
@@ -5547,7 +5610,7 @@ def generate_delta_history(base_dir):
                                 const name = (delta.item_names && delta.item_names[itemId]) || ('Item ' + itemId);
                                 const countText = count > 1 ? ' x' + count : '';
                                 const source = (TRACKED_SOURCE_LABEL && TRACKED_SOURCE_LABEL[String(itemId)]) ? ' (' + TRACKED_SOURCE_LABEL[String(itemId)] + ')' : '';
-                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;"><a href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" style="color: #c62828;">${name}</a>${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
+                                reportHTML += `<span style="display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; background: #ffebee; border-radius: 4px;">${itemTimelineLink(itemId, name, '#c62828')}${countText}<span style="color: #888; font-size: 0.85em;">${source}</span></span>`;
                             }
                             reportHTML += `</div></div>`;
                         }
@@ -6040,7 +6103,7 @@ def generate_char_timeline(base_dir):
 </head>
 <body>
     <div class="container">
-        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a></p>
+        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a> · <a class="back" href="item.html">Item search</a></p>
         <h1 id="page-title">Character Timeline</h1>
         <div id="char-meta" class="meta"></div>
         <div id="status" class="loading">Loading…</div>
@@ -6445,8 +6508,11 @@ def generate_char_timeline(base_dir):
                     const badgeClass = row.sign > 0 ? 'item-added' : 'item-removed';
                     const qty = row.count > 1 ? ' x' + row.count : '';
                     html += '<tr><td>' + esc(row.date) + '</td><td>' + sign + '</td><td>'
-                        + '<span class="item-badge ' + badgeClass + '"><a href="https://www.takproject.net/allaclone/item.php?id=' + row.itemId + '" target="_blank">'
-                        + esc(row.itemName) + '</a>' + qty + '</span></td><td>'
+                        + '<span class="item-badge ' + badgeClass + '"><a href="item.html?i=' + encodeURIComponent(row.itemId)
+                        + '" title="Item ownership timeline">' + esc(row.itemName) + '</a>'
+                        + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(row.itemId)
+                        + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>'
+                        + qty + '</span></td><td>'
                         + esc(row.source || '—') + '</td></tr>';
                 }
                 html += '</tbody></table>';
@@ -6476,8 +6542,12 @@ def generate_char_timeline(base_dir):
                             const qty = row.count > 1 ? ' x' + row.count : '';
                             html += '<li><span style="color:#666;">' + esc(row.date) + '</span> — '
                                 + '<span class="' + (row.sign > 0 ? 'pos' : 'neg') + '">' + signLabel + row.count + '</span> '
-                                + '<a href="https://www.takproject.net/allaclone/item.php?id=' + row.itemId + '" target="_blank" style="color:#2e7d32;">'
-                                + esc(row.itemName) + '</a>' + qty + '</li>';
+                                + '<a href="item.html?i=' + encodeURIComponent(row.itemId)
+                                + '" title="Item ownership timeline" style="color:#2e7d32;">'
+                                + esc(row.itemName) + '</a>'
+                                + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(row.itemId)
+                                + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>'
+                                + qty + '</li>';
                         }
                         html += '</ul>';
                     }
@@ -6598,7 +6668,11 @@ def generate_char_timeline(base_dir):
                         const cnt = holdings[itemId];
                         const nm = esc(nameMap[itemId] || ('Item ' + itemId));
                         const qty = cnt > 1 ? ' x' + cnt : '';
-                        html += '<span class="item-badge"><a href="https://www.takproject.net/allaclone/item.php?id=' + itemId + '" target="_blank">' + nm + '</a>' + qty + '</span>';
+                        html += '<span class="item-badge"><a href="item.html?i=' + encodeURIComponent(itemId)
+                            + '" title="Item ownership timeline">' + nm + '</a>'
+                            + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(itemId)
+                            + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>'
+                            + qty + '</span>';
                     }
                     html += '</p>';
                 } else {
@@ -6617,7 +6691,10 @@ def generate_char_timeline(base_dir):
                         const sign = row.sign > 0 ? '<span class="pos">+' + row.count + '</span>' : '<span class="neg">-' + row.count + '</span>';
                         const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
                         html += '<tr' + (row.visibility ? ' class="vis"' : '') + '><td>' + esc(row.date) + '</td><td>' + sign + '</td><td>'
-                            + '<a href="https://www.takproject.net/allaclone/item.php?id=' + row.itemId + '" target="_blank">' + esc(row.itemName) + '</a>'
+                            + '<a href="item.html?i=' + encodeURIComponent(row.itemId)
+                            + '" title="Item ownership timeline">' + esc(row.itemName) + '</a>'
+                            + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(row.itemId)
+                            + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>'
                             + ' <span style="color:#999;font-size:0.85em;">(' + row.itemId + ')</span>' + vis + '</td></tr>';
                     }
                     html += '</tbody></table>';
@@ -6641,6 +6718,490 @@ def generate_char_timeline(base_dir):
 </html>
 """
     out_path = os.path.join(base_dir, "char.html")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    return out_path
+
+
+def generate_item_timeline(base_dir):
+    """Generate on-demand per-item ownership timeline page (item.html)."""
+    cfg = _gear_event_page_embed_config(base_dir)
+    latest_date = json.dumps(cfg["latest_date"])
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Item Timeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        h1 { margin-top: 0; color: #333; }
+        .meta { color: #666; margin-bottom: 20px; }
+        .loading { padding: 20px; background: #f5f5f5; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f0f0f0; }
+        .pos { color: #2e7d32; font-weight: bold; }
+        .neg { color: #c62828; font-weight: bold; }
+        .vis { color: #9e9e9e; font-style: italic; }
+        .note { font-size: 0.9em; color: #757575; background: #fafafa; padding: 10px; border-radius: 5px; border-left: 4px solid #9e9e9e; margin: 12px 0; }
+        a.back { color: #667eea; }
+        .search-box { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; align-items: center; }
+        .search-box input[type="text"] { flex: 1; min-width: 200px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        .search-box button { padding: 8px 16px; background: #667eea; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .search-box button:hover { background: #5a6fd6; }
+        #suggest { list-style: none; margin: 0; padding: 0; border: 1px solid #ddd; border-radius: 4px; max-height: 240px; overflow-y: auto; display: none; }
+        #suggest li { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+        #suggest li:hover, #suggest li.active { background: #e3f2fd; }
+        .toggle { margin: 12px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a> · <a class="back" href="item.html">Item search</a></p>
+        <h1 id="page-title">Item Ownership Timeline</h1>
+        <div id="item-meta" class="meta"></div>
+        <div id="search-panel">
+            <div class="search-box">
+                <input type="text" id="item-search" placeholder="Item name or id…" autocomplete="off" />
+                <button type="button" id="item-search-btn">Search</button>
+            </div>
+            <ul id="suggest"></ul>
+        </div>
+        <div id="status" class="loading" style="display:none;">Loading…</div>
+        <div id="content" style="display:none;"></div>
+        <div class="note">
+            <strong>Notes:</strong> Current holders are reconstructed from the master baseline plus gear events for this item.
+            Characters who held the item since the baseline era with no ownership events are listed separately.
+            Gear events track item counts, not equipment slots. First load may download several MB of compressed shard data; your browser caches it for 24 hours after the first load.
+        </div>
+    </div>
+    <script type="application/json" id="gear-event-shard-months">""" + cfg["gear_shard_months_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="gear-event-manifest">""" + cfg["gear_event_manifest_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="item-id-to-name">""" + cfg["item_id_to_name_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="char-guild-map">""" + cfg["char_guild_map_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="no-rent-item-ids">""" + cfg["no_rent_json"].replace("</", "<\\/") + """</script>
+    <script>
+        const GEAR_EVENT_SHARD_MONTHS = JSON.parse(document.getElementById('gear-event-shard-months').textContent);
+        const GEAR_EVENT_MANIFEST = JSON.parse(document.getElementById('gear-event-manifest').textContent);
+        const ITEM_ID_TO_NAME = JSON.parse(document.getElementById('item-id-to-name').textContent);
+        const CHAR_GUILD_MAP = JSON.parse(document.getElementById('char-guild-map').textContent);
+        const NO_RENT_ITEMS = new Set(JSON.parse(document.getElementById('no-rent-item-ids').textContent).map(String));
+        const LATEST_DATE = """ + latest_date + """;
+        const USE_GEAR_EVENTS = """ + cfg["use_gear_events_json"] + """;
+
+        const params = new URLSearchParams(window.location.search);
+        const ITEM_ID_PARAM = params.get('i') || '';
+        const ITEM_NAME_PARAM = params.get('n') || params.get('name') || '';
+
+""" + _gear_event_fetch_client_js() + """
+        let loadedGearShards = new Map();
+        let loadedBaselines = new Map();
+
+        const ITEM_NAME_ENTRIES = Object.keys(ITEM_ID_TO_NAME).map(id => ({
+            id: String(id),
+            name: String(ITEM_ID_TO_NAME[id] || ''),
+            nameLower: String(ITEM_ID_TO_NAME[id] || '').toLowerCase()
+        })).filter(e => e.name);
+
+        function monthsBetween(start, end) {
+            const out = [];
+            let y = parseInt(start.slice(0, 4), 10), m = parseInt(start.slice(5, 7), 10);
+            const ey = parseInt(end.slice(0, 4), 10), em = parseInt(end.slice(5, 7), 10);
+            while (y < ey || (y === ey && m <= em)) {
+                out.push(`${y}-${String(m).padStart(2, '0')}`);
+                m += 1;
+                if (m > 12) { m = 1; y += 1; }
+            }
+            return out;
+        }
+
+        async function loadGearShard(month) {
+            if (loadedGearShards.has(month)) return loadedGearShards.get(month);
+            const url = `delta_snapshots/gear_events/gear_${month}.json.gz`;
+            const events = await fetchGzJsonCached(url);
+            loadedGearShards.set(month, events);
+            return events;
+        }
+
+        function gearManifestFirstEventMonthForDate(dateStr) {
+            const eras = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.eras) || [];
+            for (let i = eras.length - 1; i >= 0; i--) {
+                const era = eras[i];
+                if (era.first_event && era.first_event <= dateStr) return era.first_event.slice(0, 7);
+            }
+            return GEAR_EVENT_SHARD_MONTHS.length ? GEAR_EVENT_SHARD_MONTHS[0] : dateStr.slice(0, 7);
+        }
+
+        function gearManifestBaselineForDate(dateStr) {
+            const days = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.days) || {};
+            if (days[dateStr] && days[dateStr].baseline_date) return days[dateStr].baseline_date;
+            const eras = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.eras) || [];
+            for (let i = eras.length - 1; i >= 0; i--) {
+                const era = eras[i];
+                if (era.first_event && era.first_event <= dateStr && era.baseline_date) return era.baseline_date;
+            }
+            return null;
+        }
+
+        async function loadEventsUpTo(endDate, onProgress) {
+            const firstMonth = gearManifestFirstEventMonthForDate(endDate);
+            const months = monthsBetween(firstMonth, endDate.slice(0, 7))
+                .filter(m => GEAR_EVENT_SHARD_MONTHS.includes(m));
+            let done = 0;
+            const results = await Promise.all(months.map(async (month) => {
+                const gear = await loadGearShard(month);
+                done += 1;
+                if (onProgress) onProgress(done, months.length);
+                return gear;
+            }));
+            return results.flat().filter(ev => ev.d && ev.d <= endDate);
+        }
+
+        async function loadBaseline(baselineDate) {
+            const want = String(baselineDate);
+            const cacheKey = 'baseline_' + want;
+            if (loadedBaselines.has(cacheKey)) return loadedBaselines.get(cacheKey);
+            const archivedUrl = `delta_snapshots/baseline_master_${baselineDate}.json.gz`;
+            const currentUrl = 'delta_snapshots/baseline_master.json.gz';
+            let baseline = await fetchGzJsonCached(archivedUrl, { optional: true });
+            let usedFallback = false;
+            if (!baseline) {
+                baseline = await fetchGzJsonCached(currentUrl);
+                usedFallback = true;
+            }
+            const result = { baseline, usedFallback };
+            loadedBaselines.set(cacheKey, result);
+            return result;
+        }
+
+        function resolveItemId(query) {
+            const q = String(query || '').trim();
+            if (!q) return null;
+            if (Object.prototype.hasOwnProperty.call(ITEM_ID_TO_NAME, q)) return q;
+            if (/^\\d+$/.test(q)) {
+                const normalized = String(parseInt(q, 10));
+                return normalized;
+            }
+            const needle = q.toLowerCase();
+            for (let i = 0; i < ITEM_NAME_ENTRIES.length; i++) {
+                if (ITEM_NAME_ENTRIES[i].nameLower === needle) return ITEM_NAME_ENTRIES[i].id;
+            }
+            return null;
+        }
+
+        function filterEventsForItem(events, itemId) {
+            const id = String(itemId);
+            return (events || []).filter(ev => String(ev.i) === id);
+        }
+
+        function reconstructHoldersForItem(baseline, itemEvents, itemId) {
+            const id = String(itemId);
+            if (NO_RENT_ITEMS.has(id)) return {};
+            const counts = {};
+            const inv = (baseline && baseline.inventories) || {};
+            for (const [charName, items] of Object.entries(inv)) {
+                let n = 0;
+                for (const item of (items || [])) {
+                    const iid = String(item.item_id || '');
+                    if (!iid || iid.toUpperCase() === 'NULL' || iid === '0') continue;
+                    if (iid === id) n += 1;
+                }
+                if (n > 0) counts[charName] = n;
+            }
+            const sorted = [...(itemEvents || [])].sort((a, b) =>
+                (a.d || '').localeCompare(b.d || '') || (a.c || '').localeCompare(b.c || '')
+            );
+            for (const ev of sorted) {
+                if (String(ev.i) !== id) continue;
+                const charName = ev.c;
+                if (!charName) continue;
+                const sign = Number(ev.s);
+                const n = Number(ev.n) || 0;
+                if (n <= 0 || (sign !== 1 && sign !== -1)) continue;
+                if (sign > 0) counts[charName] = (counts[charName] || 0) + n;
+                else {
+                    counts[charName] = (counts[charName] || 0) - n;
+                    if (counts[charName] <= 0) delete counts[charName];
+                }
+            }
+            const out = {};
+            for (const [k, v] of Object.entries(counts)) {
+                if (v > 0) out[k] = v;
+            }
+            return out;
+        }
+
+        function buildItemEventLog(itemEvents) {
+            const rows = [];
+            const sorted = [...(itemEvents || [])].sort((a, b) =>
+                (a.d || '').localeCompare(b.d || '') || (a.c || '').localeCompare(b.c || '')
+            );
+            for (const ev of sorted) {
+                const sign = Number(ev.s);
+                const n = Number(ev.n) || 0;
+                const iid = String(ev.i || '');
+                const charName = ev.c || '';
+                if (!iid || !charName || n <= 0 || (sign !== 1 && sign !== -1)) continue;
+                rows.push({
+                    date: ev.d || '',
+                    char: charName,
+                    sign: sign,
+                    count: n,
+                    itemId: iid,
+                    visibility: !!ev.v
+                });
+            }
+            return rows;
+        }
+
+        function baselineOnlyHolders(holders, itemEvents) {
+            const touched = new Set();
+            for (const ev of (itemEvents || [])) {
+                if (ev.c) touched.add(String(ev.c).toLowerCase());
+            }
+            const out = {};
+            for (const [char, cnt] of Object.entries(holders || {})) {
+                if (!touched.has(String(char).toLowerCase())) out[char] = cnt;
+            }
+            return out;
+        }
+
+        function esc(s) {
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function formatCharDisplay(name) {
+            const g = (CHAR_GUILD_MAP && CHAR_GUILD_MAP[name]) || '';
+            return g ? (esc(name) + ' &lt;' + esc(g) + '&gt;') : esc(name);
+        }
+
+        function charTimelineHref(name) {
+            return 'char.html?c=' + encodeURIComponent(name);
+        }
+
+        function navigateToItem(itemId) {
+            window.location.search = '?i=' + encodeURIComponent(itemId);
+        }
+
+        function bindSearch() {
+            const input = document.getElementById('item-search');
+            const btn = document.getElementById('item-search-btn');
+            const suggest = document.getElementById('suggest');
+            let activeIdx = -1;
+
+            function hideSuggest() {
+                suggest.style.display = 'none';
+                suggest.innerHTML = '';
+                activeIdx = -1;
+            }
+
+            function showMatches(q) {
+                const needle = String(q || '').trim().toLowerCase();
+                if (!needle) { hideSuggest(); return; }
+                const matches = [];
+                if (/^\\d+$/.test(needle)) {
+                    const hit = ITEM_NAME_ENTRIES.find(e => e.id === needle || e.id === String(parseInt(needle, 10)));
+                    if (hit) matches.push(hit);
+                }
+                for (const e of ITEM_NAME_ENTRIES) {
+                    if (e.nameLower.indexOf(needle) !== -1) {
+                        matches.push(e);
+                        if (matches.length >= 30) break;
+                    }
+                }
+                if (!matches.length) { hideSuggest(); return; }
+                suggest.innerHTML = matches.map((e, i) =>
+                    '<li data-id="' + esc(e.id) + '" class="' + (i === 0 ? 'active' : '') + '">'
+                    + esc(e.name) + ' <span style="color:#999;">(' + esc(e.id) + ')</span></li>'
+                ).join('');
+                suggest.style.display = 'block';
+                activeIdx = 0;
+                suggest.querySelectorAll('li').forEach(li => {
+                    li.addEventListener('click', () => navigateToItem(li.getAttribute('data-id')));
+                });
+            }
+
+            function submitSearch() {
+                const q = input.value.trim();
+                if (!q) return;
+                const id = resolveItemId(q);
+                if (id) {
+                    navigateToItem(id);
+                    return;
+                }
+                const needle = q.toLowerCase();
+                const partial = ITEM_NAME_ENTRIES.find(e => e.nameLower.indexOf(needle) !== -1);
+                if (partial) {
+                    navigateToItem(partial.id);
+                    return;
+                }
+                document.getElementById('status').style.display = 'block';
+                document.getElementById('status').innerHTML =
+                    '<strong style="color:#c62828;">Item not found:</strong> ' + esc(q);
+            }
+
+            input.addEventListener('input', () => showMatches(input.value));
+            input.addEventListener('keydown', (ev) => {
+                const items = suggest.querySelectorAll('li');
+                if (ev.key === 'ArrowDown' && items.length) {
+                    ev.preventDefault();
+                    activeIdx = Math.min(activeIdx + 1, items.length - 1);
+                    items.forEach((li, i) => li.classList.toggle('active', i === activeIdx));
+                } else if (ev.key === 'ArrowUp' && items.length) {
+                    ev.preventDefault();
+                    activeIdx = Math.max(activeIdx - 1, 0);
+                    items.forEach((li, i) => li.classList.toggle('active', i === activeIdx));
+                } else if (ev.key === 'Enter') {
+                    ev.preventDefault();
+                    if (activeIdx >= 0 && items[activeIdx]) {
+                        navigateToItem(items[activeIdx].getAttribute('data-id'));
+                    } else {
+                        submitSearch();
+                    }
+                } else if (ev.key === 'Escape') {
+                    hideSuggest();
+                }
+            });
+            btn.addEventListener('click', submitSearch);
+            document.addEventListener('click', (ev) => {
+                if (!suggest.contains(ev.target) && ev.target !== input) hideSuggest();
+            });
+        }
+
+        async function renderItem(itemId) {
+            const status = document.getElementById('status');
+            const content = document.getElementById('content');
+            const meta = document.getElementById('item-meta');
+            status.style.display = 'block';
+            content.style.display = 'none';
+            if (!USE_GEAR_EVENTS || !GEAR_EVENT_SHARD_MONTHS.length) {
+                status.innerHTML = '<strong style="color:#c62828;">Gear event shards not available.</strong>';
+                return;
+            }
+            const endDate = LATEST_DATE || new Date().toISOString().slice(0, 10);
+            const displayName = ITEM_ID_TO_NAME[itemId] || ('Item ' + itemId);
+            document.getElementById('page-title').textContent = displayName + ' — Ownership';
+            document.title = displayName + ' — Item Timeline';
+            try {
+                status.textContent = 'Loading baseline…';
+                const baselineDate = gearManifestBaselineForDate(endDate) || '2026-02-09';
+                const { baseline } = await loadBaseline(baselineDate);
+                status.textContent = 'Loading event shards…';
+                const gear = await loadEventsUpTo(endDate, (done, total) => {
+                    status.textContent = 'Loading event shards (' + done + '/' + total + ')…';
+                });
+                const itemEvents = filterEventsForItem(gear, itemId);
+                const holders = reconstructHoldersForItem(baseline, itemEvents, itemId);
+                const sinceBaseline = baselineOnlyHolders(holders, itemEvents);
+                const logRows = buildItemEventLog(itemEvents);
+                const allaclone = 'https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(itemId);
+
+                meta.innerHTML = '<strong>' + esc(displayName) + '</strong> · id '
+                    + esc(itemId)
+                    + ' · through ' + esc(endDate)
+                    + ' · <a href="' + allaclone + '" target="_blank">Allaclone</a>'
+                    + ' · ' + Object.keys(holders).length + ' current holder'
+                    + (Object.keys(holders).length === 1 ? '' : 's')
+                    + ' · ' + logRows.length + ' ownership event'
+                    + (logRows.length === 1 ? '' : 's');
+
+                let html = '';
+                html += '<div class="toggle"><label><input type="checkbox" id="hide-vis" checked> Hide visibility/anon toggles</label></div>';
+
+                html += '<h2>Current Holders</h2>';
+                const holderNames = Object.keys(holders).sort((a, b) => {
+                    const dc = holders[b] - holders[a];
+                    return dc !== 0 ? dc : a.localeCompare(b);
+                });
+                if (holderNames.length) {
+                    html += '<table><thead><tr><th>Character</th><th>Count</th></tr></thead><tbody>';
+                    for (const name of holderNames) {
+                        html += '<tr><td><a href="' + charTimelineHref(name) + '">' + formatCharDisplay(name)
+                            + '</a></td><td>' + holders[name] + '</td></tr>';
+                    }
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p class="vis">No current holders in reconstructed inventories.</p>';
+                }
+                if (Object.keys(sinceBaseline).length) {
+                    html += '<p class="note"><strong>Held since baseline ('
+                        + esc(baseline.baseline_date || baselineDate) + ') with no ownership events:</strong> ';
+                    html += Object.keys(sinceBaseline).sort().map(n =>
+                        '<a href="' + charTimelineHref(n) + '">' + esc(n) + '</a>'
+                        + (sinceBaseline[n] > 1 ? ' x' + sinceBaseline[n] : '')
+                    ).join(', ');
+                    html += '</p>';
+                }
+
+                html += '<h2>Ownership Log</h2>';
+                if (logRows.length) {
+                    html += '<table id="own-log"><thead><tr><th>Date</th><th>Character</th><th>Change</th></tr></thead><tbody>';
+                    for (const row of logRows) {
+                        const sign = row.sign > 0
+                            ? '<span class="pos">+' + row.count + '</span>'
+                            : '<span class="neg">-' + row.count + '</span>';
+                        const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
+                        html += '<tr class="' + (row.visibility ? 'vis-row vis' : '') + '"><td>'
+                            + esc(row.date) + '</td><td><a href="' + charTimelineHref(row.char) + '">'
+                            + formatCharDisplay(row.char) + '</a></td><td>' + sign + vis + '</td></tr>';
+                    }
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p class="vis">No ownership events recorded for this item.</p>';
+                }
+
+                content.innerHTML = html;
+                content.style.display = 'block';
+                status.style.display = 'none';
+                const hideVis = document.getElementById('hide-vis');
+                if (hideVis) {
+                    const applyHide = () => {
+                        document.querySelectorAll('#own-log tr.vis-row').forEach(tr => {
+                            tr.style.display = hideVis.checked ? 'none' : '';
+                        });
+                    };
+                    hideVis.addEventListener('change', applyHide);
+                    applyHide();
+                }
+            } catch (err) {
+                status.innerHTML = '<strong style="color:#c62828;">Error:</strong> ' + esc(err.message || err);
+            }
+        }
+
+        async function render() {
+            bindSearch();
+            let itemId = ITEM_ID_PARAM ? resolveItemId(ITEM_ID_PARAM) : null;
+            if (!itemId && ITEM_NAME_PARAM) itemId = resolveItemId(ITEM_NAME_PARAM);
+            if (!itemId && ITEM_ID_PARAM && /^\\d+$/.test(ITEM_ID_PARAM.trim())) {
+                itemId = String(parseInt(ITEM_ID_PARAM.trim(), 10));
+            }
+            if (!itemId) {
+                document.getElementById('status').style.display = 'none';
+                if (ITEM_ID_PARAM || ITEM_NAME_PARAM) {
+                    document.getElementById('status').style.display = 'block';
+                    document.getElementById('status').innerHTML =
+                        '<strong style="color:#c62828;">Item not found.</strong> Try a name or id search below.';
+                    document.getElementById('item-search').value = ITEM_NAME_PARAM || ITEM_ID_PARAM;
+                }
+                return;
+            }
+            if (ITEM_NAME_PARAM || (ITEM_ID_PARAM && ITEM_ID_PARAM !== itemId)) {
+                // Normalize URL to ?i= canonical id without reload loop when already set
+            }
+            document.getElementById('item-search').value = ITEM_ID_TO_NAME[itemId] || itemId;
+            await renderItem(itemId);
+        }
+
+        render();
+    </script>
+""" + GOATCOUNTER_SCRIPT + """
+</body>
+</html>
+"""
+    out_path = os.path.join(base_dir, "item.html")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
     return out_path
@@ -7175,6 +7736,14 @@ def main():
             print("Generated char timeline page")
         except Exception as e:
             print(f"Warning: Could not generate char timeline: {e}")
+            import traceback
+            traceback.print_exc()
+
+        try:
+            generate_item_timeline(base_dir)
+            print("Generated item timeline page")
+        except Exception as e:
+            print(f"Warning: Could not generate item timeline: {e}")
             import traceback
             traceback.print_exc()
         
