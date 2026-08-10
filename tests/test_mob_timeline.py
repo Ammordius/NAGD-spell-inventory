@@ -67,6 +67,10 @@ class TestMobTimeline(unittest.TestCase):
         self.assertIn("mob-search", html)
         self.assertIn("Loot Table", html)
         self.assertIn("Acquisition Log", html)
+        self.assertIn("sortable", html)
+        self.assertIn("renderAcquisitionLogTable", html)
+        self.assertIn("acqSort", html)
+        self.assertIn("dir: 'desc'", html)
         self.assertIn('id="mob-items"', html)
         self.assertIn('id="mob-zones"', html)
         # Embedded JSON scripts must be parseable when present

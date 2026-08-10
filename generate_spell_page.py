@@ -6818,6 +6818,9 @@ def generate_item_timeline(base_dir):
         table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; }
         th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #f0f0f0; }
+        th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+        th.sortable:hover { background: #e0e0e0; }
+        th.sortable .sort-ind { color: #667eea; font-size: 0.85em; }
         .pos { color: #2e7d32; font-weight: bold; }
         .neg { color: #c62828; font-weight: bold; }
         .vis { color: #9e9e9e; font-style: italic; }
@@ -7061,6 +7064,112 @@ def generate_item_timeline(base_dir):
             window.location.search = '?i=' + encodeURIComponent(itemId);
         }
 
+        let ownershipLogRows = [];
+        let ownSort = { key: 'date', dir: 'desc' };
+        let holdersSort = { key: 'count', dir: 'desc' };
+        let holdersData = {};
+
+        function defaultSortDir(key) {
+            return (key === 'date' || key === 'count' || key === 'change') ? 'desc' : 'asc';
+        }
+
+        function sortHeaderHtml(label, key, sort) {
+            const active = sort.key === key;
+            const ind = active
+                ? (' <span class="sort-ind">' + (sort.dir === 'asc' ? '▲' : '▼') + '</span>')
+                : '';
+            return '<th class="sortable" data-sort="' + key + '" title="Sort by ' + label + '">'
+                + label + ind + '</th>';
+        }
+
+        function compareLogRows(a, b, key, dir) {
+            const mul = dir === 'asc' ? 1 : -1;
+            let cmp = 0;
+            if (key === 'date') cmp = (a.date || '').localeCompare(b.date || '');
+            else if (key === 'char') cmp = (a.char || '').localeCompare(b.char || '', undefined, { sensitivity: 'base' });
+            else if (key === 'change') cmp = ((a.sign || 0) * (a.count || 0)) - ((b.sign || 0) * (b.count || 0));
+            else cmp = String(a[key] || '').localeCompare(String(b[key] || ''));
+            if (cmp !== 0) return cmp * mul;
+            const d = (b.date || '').localeCompare(a.date || '');
+            if (d !== 0) return d;
+            return (a.char || '').localeCompare(b.char || '');
+        }
+
+        function sortedOwnershipRows() {
+            return [...ownershipLogRows].sort((a, b) => compareLogRows(a, b, ownSort.key, ownSort.dir));
+        }
+
+        function ownershipRowHtml(row) {
+            const sign = row.sign > 0
+                ? '<span class="pos">+' + row.count + '</span>'
+                : '<span class="neg">-' + row.count + '</span>';
+            const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
+            return '<tr class="' + (row.visibility ? 'vis-row vis' : '') + '"><td>'
+                + esc(row.date) + '</td><td><a href="' + charTimelineHref(row.char) + '">'
+                + formatCharDisplay(row.char) + '</a></td><td>' + sign + vis + '</td></tr>';
+        }
+
+        function renderOwnershipLogTable() {
+            const table = document.getElementById('own-log');
+            if (!table) return;
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            thead.innerHTML = sortHeaderHtml('Date', 'date', ownSort)
+                + sortHeaderHtml('Character', 'char', ownSort)
+                + sortHeaderHtml('Change', 'change', ownSort);
+            tbody.innerHTML = sortedOwnershipRows().map(ownershipRowHtml).join('');
+            thead.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.getAttribute('data-sort');
+                    if (ownSort.key === key) ownSort.dir = ownSort.dir === 'asc' ? 'desc' : 'asc';
+                    else { ownSort.key = key; ownSort.dir = defaultSortDir(key); }
+                    renderOwnershipLogTable();
+                    applyOwnVisHide();
+                });
+            });
+        }
+
+        function applyOwnVisHide() {
+            const hideVis = document.getElementById('hide-vis');
+            if (!hideVis) return;
+            document.querySelectorAll('#own-log tr.vis-row').forEach(tr => {
+                tr.style.display = hideVis.checked ? 'none' : '';
+            });
+        }
+
+        function sortedHolderNames() {
+            const names = Object.keys(holdersData);
+            const mul = holdersSort.dir === 'asc' ? 1 : -1;
+            return names.sort((a, b) => {
+                let cmp = 0;
+                if (holdersSort.key === 'count') cmp = (holdersData[a] || 0) - (holdersData[b] || 0);
+                else cmp = a.localeCompare(b, undefined, { sensitivity: 'base' });
+                if (cmp !== 0) return cmp * mul;
+                return a.localeCompare(b);
+            });
+        }
+
+        function renderHoldersTable() {
+            const table = document.getElementById('holders-table');
+            if (!table) return;
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            thead.innerHTML = sortHeaderHtml('Character', 'char', holdersSort)
+                + sortHeaderHtml('Count', 'count', holdersSort);
+            tbody.innerHTML = sortedHolderNames().map(name =>
+                '<tr><td><a href="' + charTimelineHref(name) + '">' + formatCharDisplay(name)
+                + '</a></td><td>' + holdersData[name] + '</td></tr>'
+            ).join('');
+            thead.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.getAttribute('data-sort');
+                    if (holdersSort.key === key) holdersSort.dir = holdersSort.dir === 'asc' ? 'desc' : 'asc';
+                    else { holdersSort.key = key; holdersSort.dir = defaultSortDir(key); }
+                    renderHoldersTable();
+                });
+            });
+        }
+
         function bindSearch() {
             const input = document.getElementById('item-search');
             const btn = document.getElementById('item-search-btn');
@@ -7187,17 +7296,10 @@ def generate_item_timeline(base_dir):
                 html += '<div class="toggle"><label><input type="checkbox" id="hide-vis" checked> Hide visibility/anon toggles</label></div>';
 
                 html += '<h2>Current Holders</h2>';
-                const holderNames = Object.keys(holders).sort((a, b) => {
-                    const dc = holders[b] - holders[a];
-                    return dc !== 0 ? dc : a.localeCompare(b);
-                });
-                if (holderNames.length) {
-                    html += '<table><thead><tr><th>Character</th><th>Count</th></tr></thead><tbody>';
-                    for (const name of holderNames) {
-                        html += '<tr><td><a href="' + charTimelineHref(name) + '">' + formatCharDisplay(name)
-                            + '</a></td><td>' + holders[name] + '</td></tr>';
-                    }
-                    html += '</tbody></table>';
+                holdersData = holders;
+                holdersSort = { key: 'count', dir: 'desc' };
+                if (Object.keys(holders).length) {
+                    html += '<table id="holders-table"><thead><tr></tr></thead><tbody></tbody></table>';
                 } else {
                     html += '<p class="vis">No current holders in reconstructed inventories.</p>';
                 }
@@ -7212,18 +7314,10 @@ def generate_item_timeline(base_dir):
                 }
 
                 html += '<h2>Ownership Log</h2>';
+                ownershipLogRows = logRows;
+                ownSort = { key: 'date', dir: 'desc' };
                 if (logRows.length) {
-                    html += '<table id="own-log"><thead><tr><th>Date</th><th>Character</th><th>Change</th></tr></thead><tbody>';
-                    for (const row of logRows) {
-                        const sign = row.sign > 0
-                            ? '<span class="pos">+' + row.count + '</span>'
-                            : '<span class="neg">-' + row.count + '</span>';
-                        const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
-                        html += '<tr class="' + (row.visibility ? 'vis-row vis' : '') + '"><td>'
-                            + esc(row.date) + '</td><td><a href="' + charTimelineHref(row.char) + '">'
-                            + formatCharDisplay(row.char) + '</a></td><td>' + sign + vis + '</td></tr>';
-                    }
-                    html += '</tbody></table>';
+                    html += '<table id="own-log"><thead><tr></tr></thead><tbody></tbody></table>';
                 } else {
                     html += '<p class="vis">No ownership events recorded for this item.</p>';
                 }
@@ -7231,15 +7325,12 @@ def generate_item_timeline(base_dir):
                 content.innerHTML = html;
                 content.style.display = 'block';
                 status.style.display = 'none';
+                if (Object.keys(holders).length) renderHoldersTable();
+                if (logRows.length) renderOwnershipLogTable();
                 const hideVis = document.getElementById('hide-vis');
                 if (hideVis) {
-                    const applyHide = () => {
-                        document.querySelectorAll('#own-log tr.vis-row').forEach(tr => {
-                            tr.style.display = hideVis.checked ? 'none' : '';
-                        });
-                    };
-                    hideVis.addEventListener('change', applyHide);
-                    applyHide();
+                    hideVis.addEventListener('change', applyOwnVisHide);
+                    applyOwnVisHide();
                 }
             } catch (err) {
                 status.innerHTML = '<strong style="color:#c62828;">Error:</strong> ' + esc(err.message || err);
@@ -7302,6 +7393,9 @@ def generate_mob_timeline(base_dir):
         table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; }
         th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #f0f0f0; }
+        th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+        th.sortable:hover { background: #e0e0e0; }
+        th.sortable .sort-ind { color: #5D4037; font-size: 0.85em; }
         .pos { color: #2e7d32; font-weight: bold; }
         .vis { color: #9e9e9e; font-style: italic; }
         .note { font-size: 0.9em; color: #757575; background: #fafafa; padding: 10px; border-radius: 5px; border-left: 4px solid #9e9e9e; margin: 12px 0; }
@@ -7452,6 +7546,119 @@ def generate_mob_timeline(base_dir):
 
         function navigateToMob(mobName) {
             window.location.search = '?m=' + encodeURIComponent(mobName);
+        }
+
+        let acquisitionLogRows = [];
+        let acqSort = { key: 'date', dir: 'desc' };
+        let lootSort = { key: 'item', dir: 'asc' };
+        let lootItemIds = [];
+
+        function defaultSortDir(key) {
+            return (key === 'date' || key === 'count' || key === 'change' || key === 'id') ? 'desc' : 'asc';
+        }
+
+        function sortHeaderHtml(label, key, sort) {
+            const active = sort.key === key;
+            const ind = active
+                ? (' <span class="sort-ind">' + (sort.dir === 'asc' ? '▲' : '▼') + '</span>')
+                : '';
+            return '<th class="sortable" data-sort="' + key + '" title="Sort by ' + label + '">'
+                + label + ind + '</th>';
+        }
+
+        function compareAcqRows(a, b, key, dir) {
+            const mul = dir === 'asc' ? 1 : -1;
+            let cmp = 0;
+            if (key === 'date') cmp = (a.date || '').localeCompare(b.date || '');
+            else if (key === 'char') cmp = (a.char || '').localeCompare(b.char || '', undefined, { sensitivity: 'base' });
+            else if (key === 'item') cmp = (a.itemName || '').localeCompare(b.itemName || '', undefined, { sensitivity: 'base' });
+            else if (key === 'change') cmp = (a.count || 0) - (b.count || 0);
+            else cmp = String(a[key] || '').localeCompare(String(b[key] || ''));
+            if (cmp !== 0) return cmp * mul;
+            const d = (b.date || '').localeCompare(a.date || '');
+            if (d !== 0) return d;
+            return (a.char || '').localeCompare(b.char || '');
+        }
+
+        function sortedAcquisitionRows() {
+            return [...acquisitionLogRows].sort((a, b) => compareAcqRows(a, b, acqSort.key, acqSort.dir));
+        }
+
+        function acquisitionRowHtml(row) {
+            const sign = '<span class="pos">+' + row.count + '</span>';
+            const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
+            return '<tr class="' + (row.visibility ? 'vis-row vis' : '') + '"><td>'
+                + esc(row.date) + '</td><td><a href="' + charTimelineHref(row.char) + '">'
+                + formatCharDisplay(row.char) + '</a></td><td>'
+                + itemTimelineHref(row.itemId, row.itemName) + '</td><td>'
+                + sign + vis + '</td></tr>';
+        }
+
+        function renderAcquisitionLogTable() {
+            const table = document.getElementById('acq-log');
+            if (!table) return;
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            thead.innerHTML = sortHeaderHtml('Date', 'date', acqSort)
+                + sortHeaderHtml('Character', 'char', acqSort)
+                + sortHeaderHtml('Item', 'item', acqSort)
+                + sortHeaderHtml('Change', 'change', acqSort);
+            tbody.innerHTML = sortedAcquisitionRows().map(acquisitionRowHtml).join('');
+            thead.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.getAttribute('data-sort');
+                    if (acqSort.key === key) acqSort.dir = acqSort.dir === 'asc' ? 'desc' : 'asc';
+                    else { acqSort.key = key; acqSort.dir = defaultSortDir(key); }
+                    renderAcquisitionLogTable();
+                    applyAcqVisHide();
+                });
+            });
+        }
+
+        function applyAcqVisHide() {
+            const hideVis = document.getElementById('hide-vis');
+            if (!hideVis) return;
+            document.querySelectorAll('#acq-log tr.vis-row').forEach(tr => {
+                tr.style.display = hideVis.checked ? 'none' : '';
+            });
+        }
+
+        function sortedLootIds() {
+            const mul = lootSort.dir === 'asc' ? 1 : -1;
+            return lootItemIds.slice().sort((a, b) => {
+                let cmp = 0;
+                if (lootSort.key === 'id') {
+                    const na = parseInt(a, 10), nb = parseInt(b, 10);
+                    cmp = (isNaN(na) ? 0 : na) - (isNaN(nb) ? 0 : nb);
+                } else {
+                    const na = ITEM_ID_TO_NAME[a] || ('Item ' + a);
+                    const nb = ITEM_ID_TO_NAME[b] || ('Item ' + b);
+                    cmp = na.localeCompare(nb, undefined, { sensitivity: 'base' });
+                }
+                if (cmp !== 0) return cmp * mul;
+                return String(a).localeCompare(String(b));
+            });
+        }
+
+        function renderLootTable() {
+            const table = document.getElementById('loot-table');
+            if (!table) return;
+            const thead = table.querySelector('thead tr');
+            const tbody = table.querySelector('tbody');
+            thead.innerHTML = sortHeaderHtml('Item', 'item', lootSort)
+                + sortHeaderHtml('Id', 'id', lootSort);
+            tbody.innerHTML = sortedLootIds().map(iid => {
+                const name = ITEM_ID_TO_NAME[iid] || ('Item ' + iid);
+                return '<tr><td>' + itemTimelineHref(iid, name) + '</td><td>' + esc(iid) + '</td></tr>';
+            }).join('');
+            thead.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.getAttribute('data-sort');
+                    if (lootSort.key === key) lootSort.dir = lootSort.dir === 'asc' ? 'desc' : 'asc';
+                    else { lootSort.key = key; lootSort.dir = defaultSortDir(key); }
+                    renderLootTable();
+                });
+            });
         }
 
         function filterAcquisitionEvents(events, itemIdSet) {
@@ -7607,31 +7814,15 @@ def generate_mob_timeline(base_dir):
                 html += '<div class="toggle"><label><input type="checkbox" id="hide-vis" checked> Hide visibility/anon toggles</label></div>';
 
                 html += '<h2>Loot Table</h2>';
-                html += '<table><thead><tr><th>Item</th><th>Id</th></tr></thead><tbody>';
-                const sortedLoot = itemIds.slice().sort((a, b) => {
-                    const na = ITEM_ID_TO_NAME[a] || ('Item ' + a);
-                    const nb = ITEM_ID_TO_NAME[b] || ('Item ' + b);
-                    return na.localeCompare(nb);
-                });
-                for (const iid of sortedLoot) {
-                    const name = ITEM_ID_TO_NAME[iid] || ('Item ' + iid);
-                    html += '<tr><td>' + itemTimelineHref(iid, name) + '</td><td>' + esc(iid) + '</td></tr>';
-                }
-                html += '</tbody></table>';
+                lootItemIds = itemIds.slice();
+                lootSort = { key: 'item', dir: 'asc' };
+                html += '<table id="loot-table"><thead><tr></tr></thead><tbody></tbody></table>';
 
                 html += '<h2>Acquisition Log</h2>';
+                acquisitionLogRows = logRows;
+                acqSort = { key: 'date', dir: 'desc' };
                 if (logRows.length) {
-                    html += '<table id="acq-log"><thead><tr><th>Date</th><th>Character</th><th>Item</th><th>Change</th></tr></thead><tbody>';
-                    for (const row of logRows) {
-                        const sign = '<span class="pos">+' + row.count + '</span>';
-                        const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
-                        html += '<tr class="' + (row.visibility ? 'vis-row vis' : '') + '"><td>'
-                            + esc(row.date) + '</td><td><a href="' + charTimelineHref(row.char) + '">'
-                            + formatCharDisplay(row.char) + '</a></td><td>'
-                            + itemTimelineHref(row.itemId, row.itemName) + '</td><td>'
-                            + sign + vis + '</td></tr>';
-                    }
-                    html += '</tbody></table>';
+                    html += '<table id="acq-log"><thead><tr></tr></thead><tbody></tbody></table>';
                 } else {
                     html += "<p class=\\"vis\\">No acquisitions recorded for this mob's tracked loot.</p>";
                 }
@@ -7639,15 +7830,12 @@ def generate_mob_timeline(base_dir):
                 content.innerHTML = html;
                 content.style.display = 'block';
                 status.style.display = 'none';
+                renderLootTable();
+                if (logRows.length) renderAcquisitionLogTable();
                 const hideVis = document.getElementById('hide-vis');
                 if (hideVis) {
-                    const applyHide = () => {
-                        document.querySelectorAll('#acq-log tr.vis-row').forEach(tr => {
-                            tr.style.display = hideVis.checked ? 'none' : '';
-                        });
-                    };
-                    hideVis.addEventListener('change', applyHide);
-                    applyHide();
+                    hideVis.addEventListener('change', applyAcqVisHide);
+                    applyAcqVisHide();
                 }
             } catch (err) {
                 status.innerHTML = '<strong style="color:#c62828;">Error:</strong> ' + esc(err.message || err);

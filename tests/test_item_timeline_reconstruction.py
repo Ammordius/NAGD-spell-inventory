@@ -131,6 +131,10 @@ class TestItemTimelineReconstruction(unittest.TestCase):
         self.assertIn("item-search", html)
         self.assertIn("Current Holders", html)
         self.assertIn("Ownership Log", html)
+        self.assertIn("sortable", html)
+        self.assertIn("renderOwnershipLogTable", html)
+        self.assertIn("ownSort", html)
+        self.assertIn("dir: 'desc'", html)
 
 
 if __name__ == "__main__":
