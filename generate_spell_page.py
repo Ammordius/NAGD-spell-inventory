@@ -2220,6 +2220,7 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
     # Add delta history link (for date range queries)
     nav_links.append('<a href="delta-history.html" style="background-color: #607D8B;">📜 Delta History</a>')
     nav_links.append('<a href="item.html" style="background-color: #00897B;">🔎 Item Timeline</a>')
+    nav_links.append('<a href="mob.html" style="background-color: #5D4037;">🐉 Mob Timeline</a>')
     # Raid mob repop tracker (deaths + repop windows)
     nav_links.append('<a href="mob_tracker.html" style="background-color: #795548;">⏱ Raid Mob Repop Tracker</a>')
     
@@ -2245,7 +2246,10 @@ def generate_delta_html(current_char_data, previous_char_data, current_inv, prev
             for mob in sorted(mobs.keys(), key=lambda m: (m == "", m)):
                 entries = mobs[mob]
                 if mob:
-                    html += f'            <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">{mob}</h4>\n'
+                    html += (
+                        f'            <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">'
+                        f'{mob_timeline_link(mob)}</h4>\n'
+                    )
                 html += """
             <ul style="margin: 0; padding-left: 20px;">
 """
@@ -3175,6 +3179,41 @@ def item_timeline_link(
     )
 
 
+def mob_timeline_link(mob_name: str | None, *, color: str | None = None) -> str:
+    """HTML fragment: link to per-mob loot acquisition timeline."""
+    if not mob_name:
+        return ""
+    url = "mob.html?m=" + quote(mob_name, safe="")
+    label = escape(mob_name)
+    style = "text-decoration: none;"
+    if color:
+        style += f" color: {color};"
+    return (
+        f'<a href="{escape(url, quote=True)}" title="Mob loot timeline" '
+        f'style="{style}">{label}</a>'
+    )
+
+
+def build_mob_item_maps(item_mob: dict | None, item_zone: dict | None = None) -> tuple[dict, dict]:
+    """Build reverse maps: mob -> [item_ids], mob -> [zones] from tracked item lookups."""
+    item_mob = item_mob or {}
+    item_zone = item_zone or {}
+    mob_items: dict[str, list[str]] = {}
+    mob_zones: dict[str, set[str]] = {}
+    for iid, mob in item_mob.items():
+        if not mob:
+            continue
+        sid = str(iid)
+        mob_items.setdefault(mob, []).append(sid)
+        zone = item_zone.get(sid) or item_zone.get(iid) or ""
+        if zone:
+            mob_zones.setdefault(mob, set()).add(zone)
+    for mob in mob_items:
+        mob_items[mob] = sorted(set(mob_items[mob]), key=lambda x: int(x) if str(x).isdigit() else 0)
+    mob_zones_out = {m: sorted(zs) for m, zs in mob_zones.items()}
+    return mob_items, mob_zones_out
+
+
 def _gear_event_page_embed_config(base_dir: str) -> dict:
     """Shared embed config for delta-history and char timeline pages."""
     import glob
@@ -3213,11 +3252,14 @@ def _gear_event_page_embed_config(base_dir: str) -> dict:
     if not os.path.isfile(char_file_for_guild):
         char_file_for_guild = find_latest_magelo_file(char_dir, "TAKP_character")
     no_rent_for_js = sorted(int(x) for x in (load_no_rent_items() or set()))
+    mob_items, mob_zones = build_mob_item_maps(item_mob, item_zone)
     return {
         "tracked_ids_json": json.dumps(list(tracked_ids)),
         "tracked_source_label_json": json.dumps(tracked_source_label),
         "tracked_item_zone_json": json.dumps(item_zone),
         "tracked_item_mob_json": json.dumps(item_mob),
+        "mob_items_json": json.dumps(mob_items),
+        "mob_zones_json": json.dumps(mob_zones),
         "unique_tracked_ids_json": json.dumps(list(unique_tracked)),
         "gear_shard_months_json": json.dumps(gear_shard_months),
         "use_gear_events_json": "true" if use_gear_events else "false",
@@ -3869,6 +3911,7 @@ def generate_delta_history(base_dir):
         <div class="nav-links">
             <a href="delta.html">← Current Delta Report</a>
             <a href="item.html">🔎 Item Timeline</a>
+            <a href="mob.html">🐉 Mob Timeline</a>
             <a href="spell_inventory.html">← Spell Inventory</a>
         </div>
         
@@ -4008,6 +4051,26 @@ def generate_delta_history(base_dir):
                 + label + '</a>'
                 + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(id)
                 + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>';
+        }
+
+        function mobTimelineLink(mobName, color) {
+            if (!mobName) return '';
+            const style = color
+                ? ('color: ' + color + '; text-decoration: none;')
+                : 'text-decoration: none;';
+            return '<a href="mob.html?m=' + encodeURIComponent(mobName) + '" title="Mob loot timeline" style="' + style + '">'
+                + escapeHtmlText(mobName) + '</a>';
+        }
+
+        function trackedSourceHtml(itemId, sourceLabel) {
+            const mob = (TRACKED_ITEM_MOB && TRACKED_ITEM_MOB[String(itemId)]) || '';
+            const zone = (TRACKED_ITEM_ZONE && TRACKED_ITEM_ZONE[String(itemId)]) || '';
+            if (mob) {
+                let html = mobTimelineLink(mob);
+                if (zone) html += ' (' + escapeHtmlText(zone) + ')';
+                return html;
+            }
+            return escapeHtmlText(sourceLabel || '—');
         }
 
         function charStateForName(name, startState, endState) {
@@ -5280,7 +5343,7 @@ def generate_delta_history(base_dir):
                     for (const mob of mobKeys) {
                         const entries = mobs[mob];
                         if (mob) reportHTML += `
-                    <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">${mob}</h4>`;
+                    <h4 style="margin: 12px 0 6px 0; font-size: 1em; color: #555;">${mobTimelineLink(mob)}</h4>`;
                         reportHTML += `
                     <ul style="margin: 0; padding-left: 20px;">`;
                         for (const e of entries) {
@@ -5583,7 +5646,7 @@ def generate_delta_history(base_dir):
                                 <td>${escapeHtmlText(row.date || '—')}</td>
                                 <td><span class="${signClass}">${signLabel}</span></td>
                                 <td><span style="display: inline-block; padding: 2px 8px; background: ${badgeBg}; border-radius: 4px;">${itemTimelineLink(row.itemId, row.itemName, linkColor)}${qty}</span></td>
-                                <td style="color: #666;">${escapeHtmlText(row.source || '—')}</td>
+                                <td style="color: #666;">${trackedSourceHtml(row.itemId, row.source)}</td>
                             </tr>`;
                         }
                         reportHTML += `
@@ -6103,7 +6166,7 @@ def generate_char_timeline(base_dir):
 </head>
 <body>
     <div class="container">
-        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a> · <a class="back" href="item.html">Item search</a></p>
+        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a> · <a class="back" href="item.html">Item search</a> · <a class="back" href="mob.html">Mob search</a></p>
         <h1 id="page-title">Character Timeline</h1>
         <div id="char-meta" class="meta"></div>
         <div id="status" class="loading">Loading…</div>
@@ -6507,13 +6570,23 @@ def generate_char_timeline(base_dir):
                         : '<span class="neg">-' + row.count + '</span>';
                     const badgeClass = row.sign > 0 ? 'item-added' : 'item-removed';
                     const qty = row.count > 1 ? ' x' + row.count : '';
+                    const mob = TRACKED_ITEM_MOB[row.itemId] || '';
+                    const zone = TRACKED_ITEM_ZONE[row.itemId] || '';
+                    let sourceHtml = '—';
+                    if (mob) {
+                        sourceHtml = '<a href="mob.html?m=' + encodeURIComponent(mob)
+                            + '" title="Mob loot timeline">' + esc(mob) + '</a>';
+                        if (zone) sourceHtml += ' (' + esc(zone) + ')';
+                    } else if (row.source) {
+                        sourceHtml = esc(row.source);
+                    }
                     html += '<tr><td>' + esc(row.date) + '</td><td>' + sign + '</td><td>'
                         + '<span class="item-badge ' + badgeClass + '"><a href="item.html?i=' + encodeURIComponent(row.itemId)
                         + '" title="Item ownership timeline">' + esc(row.itemName) + '</a>'
                         + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(row.itemId)
                         + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>'
                         + qty + '</span></td><td>'
-                        + esc(row.source || '—') + '</td></tr>';
+                        + sourceHtml + '</td></tr>';
                 }
                 html += '</tbody></table>';
             } else {
@@ -6535,7 +6608,9 @@ def generate_char_timeline(base_dir):
                     html += '<div class="tracked-zone-card"><h3 style="margin-top:0;">' + esc(zone) + '</h3>';
                     const mobKeys = Object.keys(byZone[zone]).sort((a, b) => (a === '' ? 1 : b === '' ? -1 : a.localeCompare(b)));
                     for (const mob of mobKeys) {
-                        if (mob) html += '<h4 style="margin:12px 0 6px;font-size:1em;color:#555;">' + esc(mob) + '</h4>';
+                        if (mob) html += '<h4 style="margin:12px 0 6px;font-size:1em;color:#555;"><a href="mob.html?m='
+                            + encodeURIComponent(mob) + '" title="Mob loot timeline" style="text-decoration:none;color:#555;">'
+                            + esc(mob) + '</a></h4>';
                         html += '<ul style="margin:0;padding-left:20px;">';
                         for (const row of byZone[zone][mob]) {
                             const signLabel = row.sign > 0 ? '+' : '-';
@@ -6760,7 +6835,7 @@ def generate_item_timeline(base_dir):
 </head>
 <body>
     <div class="container">
-        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a> · <a class="back" href="item.html">Item search</a></p>
+        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a> · <a class="back" href="item.html">Item search</a> · <a class="back" href="mob.html">Mob search</a></p>
         <h1 id="page-title">Item Ownership Timeline</h1>
         <div id="item-meta" class="meta"></div>
         <div id="search-panel">
@@ -7202,6 +7277,407 @@ def generate_item_timeline(base_dir):
 </html>
 """
     out_path = os.path.join(base_dir, "item.html")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    return out_path
+
+
+def generate_mob_timeline(base_dir):
+    """Generate on-demand per-mob loot acquisition timeline page (mob.html)."""
+    cfg = _gear_event_page_embed_config(base_dir)
+    latest_date = json.dumps(cfg["latest_date"])
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Mob Timeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: linear-gradient(135deg, #5D4037 0%, #8D6E63 100%); min-height: 100vh; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        h1 { margin-top: 0; color: #333; }
+        .meta { color: #666; margin-bottom: 20px; }
+        .loading { padding: 20px; background: #f5f5f5; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0 24px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f0f0f0; }
+        .pos { color: #2e7d32; font-weight: bold; }
+        .vis { color: #9e9e9e; font-style: italic; }
+        .note { font-size: 0.9em; color: #757575; background: #fafafa; padding: 10px; border-radius: 5px; border-left: 4px solid #9e9e9e; margin: 12px 0; }
+        a.back { color: #5D4037; }
+        .search-box { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; align-items: center; }
+        .search-box input[type="text"], .search-box select { flex: 1; min-width: 200px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        .search-box button { padding: 8px 16px; background: #5D4037; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .search-box button:hover { background: #4E342E; }
+        #suggest { list-style: none; margin: 0; padding: 0; border: 1px solid #ddd; border-radius: 4px; max-height: 240px; overflow-y: auto; display: none; }
+        #suggest li { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+        #suggest li:hover, #suggest li.active { background: #efebe9; }
+        .toggle { margin: 12px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <p><a class="back" href="delta.html">← Daily delta</a> · <a class="back" href="delta-history.html">Delta history</a> · <a class="back" href="item.html">Item search</a> · <a class="back" href="mob.html">Mob search</a></p>
+        <h1 id="page-title">Mob Loot Timeline</h1>
+        <div id="mob-meta" class="meta"></div>
+        <div id="search-panel">
+            <div class="search-box">
+                <select id="mob-select">
+                    <option value="">Select a mob…</option>
+                </select>
+                <input type="text" id="mob-search" placeholder="Search mob name…" autocomplete="off" />
+                <button type="button" id="mob-search-btn">Go</button>
+            </div>
+            <ul id="suggest"></ul>
+        </div>
+        <div id="status" class="loading" style="display:none;">Loading…</div>
+        <div id="content" style="display:none;"></div>
+        <div class="note">
+            <strong>Notes:</strong> Acquisitions are inferred from gear events for tracked raid items whose canonical dropper is this mob
+            (static item→mob map), not from observed kills. Elemental/Praesterium loot without a named mob is omitted.
+            First load may download several MB of compressed shard data; your browser caches it for 24 hours after the first load.
+        </div>
+    </div>
+    <script type="application/json" id="gear-event-shard-months">""" + cfg["gear_shard_months_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="gear-event-manifest">""" + cfg["gear_event_manifest_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="item-id-to-name">""" + cfg["item_id_to_name_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="char-guild-map">""" + cfg["char_guild_map_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="mob-items">""" + cfg["mob_items_json"].replace("</", "<\\/") + """</script>
+    <script type="application/json" id="mob-zones">""" + cfg["mob_zones_json"].replace("</", "<\\/") + """</script>
+    <script>
+        const GEAR_EVENT_SHARD_MONTHS = JSON.parse(document.getElementById('gear-event-shard-months').textContent);
+        const GEAR_EVENT_MANIFEST = JSON.parse(document.getElementById('gear-event-manifest').textContent);
+        const ITEM_ID_TO_NAME = JSON.parse(document.getElementById('item-id-to-name').textContent);
+        const CHAR_GUILD_MAP = JSON.parse(document.getElementById('char-guild-map').textContent);
+        const MOB_ITEMS = JSON.parse(document.getElementById('mob-items').textContent);
+        const MOB_ZONES = JSON.parse(document.getElementById('mob-zones').textContent);
+        const LATEST_DATE = """ + latest_date + """;
+        const USE_GEAR_EVENTS = """ + cfg["use_gear_events_json"] + """;
+
+        const params = new URLSearchParams(window.location.search);
+        const MOB_PARAM = params.get('m') || params.get('mob') || '';
+
+""" + _gear_event_fetch_client_js() + """
+        let loadedGearShards = new Map();
+
+        const MOB_ENTRIES = Object.keys(MOB_ITEMS).map(name => ({
+            name: String(name),
+            nameLower: String(name).toLowerCase(),
+            display: String(name).replace(/^#/, '').replace(/_/g, ' '),
+            displayLower: String(name).replace(/^#/, '').replace(/_/g, ' ').toLowerCase(),
+            itemCount: (MOB_ITEMS[name] || []).length
+        })).sort((a, b) => a.display.localeCompare(b.display));
+
+        function monthsBetween(start, end) {
+            const out = [];
+            let y = parseInt(start.slice(0, 4), 10), m = parseInt(start.slice(5, 7), 10);
+            const ey = parseInt(end.slice(0, 4), 10), em = parseInt(end.slice(5, 7), 10);
+            while (y < ey || (y === ey && m <= em)) {
+                out.push(`${y}-${String(m).padStart(2, '0')}`);
+                m += 1;
+                if (m > 12) { m = 1; y += 1; }
+            }
+            return out;
+        }
+
+        async function loadGearShard(month) {
+            if (loadedGearShards.has(month)) return loadedGearShards.get(month);
+            const url = `delta_snapshots/gear_events/gear_${month}.json.gz`;
+            const events = await fetchGzJsonCached(url);
+            loadedGearShards.set(month, events);
+            return events;
+        }
+
+        function gearManifestFirstEventMonthForDate(dateStr) {
+            const eras = (GEAR_EVENT_MANIFEST && GEAR_EVENT_MANIFEST.eras) || [];
+            for (let i = eras.length - 1; i >= 0; i--) {
+                const era = eras[i];
+                if (era.first_event && era.first_event <= dateStr) return era.first_event.slice(0, 7);
+            }
+            return GEAR_EVENT_SHARD_MONTHS.length ? GEAR_EVENT_SHARD_MONTHS[0] : dateStr.slice(0, 7);
+        }
+
+        async function loadEventsUpTo(endDate, onProgress) {
+            const firstMonth = gearManifestFirstEventMonthForDate(endDate);
+            const months = monthsBetween(firstMonth, endDate.slice(0, 7))
+                .filter(m => GEAR_EVENT_SHARD_MONTHS.includes(m));
+            let done = 0;
+            const results = await Promise.all(months.map(async (month) => {
+                const gear = await loadGearShard(month);
+                done += 1;
+                if (onProgress) onProgress(done, months.length);
+                return gear;
+            }));
+            return results.flat().filter(ev => ev.d && ev.d <= endDate);
+        }
+
+        function esc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function formatCharDisplay(name) {
+            const g = (CHAR_GUILD_MAP && CHAR_GUILD_MAP[name]) || '';
+            return g ? (esc(name) + ' &lt;' + esc(g) + '&gt;') : esc(name);
+        }
+
+        function charTimelineHref(name) {
+            return 'char.html?c=' + encodeURIComponent(name);
+        }
+
+        function itemTimelineHref(itemId, itemName) {
+            const id = String(itemId);
+            const label = esc(itemName || ('Item ' + id));
+            return '<a href="item.html?i=' + encodeURIComponent(id) + '" title="Item ownership timeline" style="text-decoration:none;color:#2e7d32;">'
+                + label + '</a>'
+                + ' <a href="https://www.takproject.net/allaclone/item.php?id=' + encodeURIComponent(id)
+                + '" target="_blank" title="Allaclone" style="text-decoration:none;font-size:0.8em;color:#999;">↗</a>';
+        }
+
+        function resolveMobName(query) {
+            const q = String(query || '').trim();
+            if (!q) return null;
+            if (Object.prototype.hasOwnProperty.call(MOB_ITEMS, q)) return q;
+            const needle = q.toLowerCase();
+            for (const e of MOB_ENTRIES) {
+                if (e.nameLower === needle || e.displayLower === needle) return e.name;
+            }
+            for (const e of MOB_ENTRIES) {
+                if (e.nameLower.indexOf(needle) !== -1 || e.displayLower.indexOf(needle) !== -1) return e.name;
+            }
+            return null;
+        }
+
+        function navigateToMob(mobName) {
+            window.location.search = '?m=' + encodeURIComponent(mobName);
+        }
+
+        function filterAcquisitionEvents(events, itemIdSet) {
+            const rows = [];
+            const sorted = [...(events || [])].sort((a, b) =>
+                (a.d || '').localeCompare(b.d || '')
+                || (a.c || '').localeCompare(b.c || '')
+                || String(a.i || '').localeCompare(String(b.i || ''))
+            );
+            for (const ev of sorted) {
+                const iid = String(ev.i || '');
+                if (!itemIdSet.has(iid)) continue;
+                const sign = Number(ev.s);
+                const n = Number(ev.n) || 0;
+                if (sign !== 1 || n <= 0) continue;
+                rows.push({
+                    date: ev.d || '',
+                    char: ev.c || '',
+                    itemId: iid,
+                    itemName: ITEM_ID_TO_NAME[iid] || ('Item ' + iid),
+                    count: n,
+                    visibility: !!ev.v
+                });
+            }
+            return rows;
+        }
+
+        function populateSelect() {
+            const sel = document.getElementById('mob-select');
+            for (const e of MOB_ENTRIES) {
+                const opt = document.createElement('option');
+                opt.value = e.name;
+                opt.textContent = e.display + ' (' + e.itemCount + ' items)';
+                sel.appendChild(opt);
+            }
+            sel.addEventListener('change', () => {
+                if (sel.value) navigateToMob(sel.value);
+            });
+        }
+
+        function bindSearch() {
+            const input = document.getElementById('mob-search');
+            const btn = document.getElementById('mob-search-btn');
+            const suggest = document.getElementById('suggest');
+            let activeIdx = -1;
+
+            function hideSuggest() {
+                suggest.style.display = 'none';
+                suggest.innerHTML = '';
+                activeIdx = -1;
+            }
+
+            function showMatches(q) {
+                const needle = String(q || '').trim().toLowerCase();
+                if (!needle) { hideSuggest(); return; }
+                const matches = [];
+                for (const e of MOB_ENTRIES) {
+                    if (e.nameLower.indexOf(needle) !== -1 || e.displayLower.indexOf(needle) !== -1) {
+                        matches.push(e);
+                        if (matches.length >= 30) break;
+                    }
+                }
+                if (!matches.length) { hideSuggest(); return; }
+                suggest.innerHTML = matches.map((e, i) =>
+                    '<li data-name="' + esc(e.name) + '" class="' + (i === 0 ? 'active' : '') + '">'
+                    + esc(e.display) + ' <span style="color:#999;">(' + e.itemCount + ' items)</span></li>'
+                ).join('');
+                suggest.style.display = 'block';
+                activeIdx = 0;
+                suggest.querySelectorAll('li').forEach(li => {
+                    li.addEventListener('click', () => navigateToMob(li.getAttribute('data-name')));
+                });
+            }
+
+            function submitSearch() {
+                const q = input.value.trim();
+                if (!q) return;
+                const mob = resolveMobName(q);
+                if (mob) {
+                    navigateToMob(mob);
+                    return;
+                }
+                document.getElementById('status').style.display = 'block';
+                document.getElementById('status').innerHTML =
+                    '<strong style="color:#c62828;">Mob not found:</strong> ' + esc(q);
+            }
+
+            input.addEventListener('input', () => showMatches(input.value));
+            input.addEventListener('keydown', (ev) => {
+                const items = suggest.querySelectorAll('li');
+                if (ev.key === 'ArrowDown' && items.length) {
+                    ev.preventDefault();
+                    activeIdx = Math.min(activeIdx + 1, items.length - 1);
+                    items.forEach((li, i) => li.classList.toggle('active', i === activeIdx));
+                } else if (ev.key === 'ArrowUp' && items.length) {
+                    ev.preventDefault();
+                    activeIdx = Math.max(activeIdx - 1, 0);
+                    items.forEach((li, i) => li.classList.toggle('active', i === activeIdx));
+                } else if (ev.key === 'Enter') {
+                    ev.preventDefault();
+                    if (activeIdx >= 0 && items[activeIdx]) {
+                        navigateToMob(items[activeIdx].getAttribute('data-name'));
+                    } else {
+                        submitSearch();
+                    }
+                } else if (ev.key === 'Escape') {
+                    hideSuggest();
+                }
+            });
+            btn.addEventListener('click', submitSearch);
+            document.addEventListener('click', (ev) => {
+                if (!suggest.contains(ev.target) && ev.target !== input) hideSuggest();
+            });
+        }
+
+        async function renderMob(mobName) {
+            const status = document.getElementById('status');
+            const content = document.getElementById('content');
+            const meta = document.getElementById('mob-meta');
+            status.style.display = 'block';
+            content.style.display = 'none';
+            if (!USE_GEAR_EVENTS || !GEAR_EVENT_SHARD_MONTHS.length) {
+                status.innerHTML = '<strong style="color:#c62828;">Gear event shards not available.</strong>';
+                return;
+            }
+            const itemIds = MOB_ITEMS[mobName] || [];
+            if (!itemIds.length) {
+                status.innerHTML = '<strong style="color:#c62828;">No tracked loot for this mob.</strong>';
+                return;
+            }
+            const itemIdSet = new Set(itemIds.map(String));
+            const endDate = LATEST_DATE || new Date().toISOString().slice(0, 10);
+            const displayName = mobName.replace(/^#/, '').replace(/_/g, ' ');
+            const zones = (MOB_ZONES[mobName] || []).slice().sort();
+            document.getElementById('page-title').textContent = displayName + ' — Loot';
+            document.title = displayName + ' — Mob Timeline';
+            document.getElementById('mob-select').value = mobName;
+            document.getElementById('mob-search').value = displayName;
+            try {
+                status.textContent = 'Loading event shards…';
+                const gear = await loadEventsUpTo(endDate, (done, total) => {
+                    status.textContent = 'Loading event shards (' + done + '/' + total + ')…';
+                });
+                const logRows = filterAcquisitionEvents(gear, itemIdSet);
+
+                meta.innerHTML = '<strong>' + esc(displayName) + '</strong>'
+                    + (zones.length ? (' · ' + esc(zones.join(', '))) : '')
+                    + ' · through ' + esc(endDate)
+                    + ' · ' + itemIds.length + ' tracked item' + (itemIds.length === 1 ? '' : 's')
+                    + ' · ' + logRows.length + ' acquisition' + (logRows.length === 1 ? '' : 's');
+
+                let html = '';
+                html += '<div class="toggle"><label><input type="checkbox" id="hide-vis" checked> Hide visibility/anon toggles</label></div>';
+
+                html += '<h2>Loot Table</h2>';
+                html += '<table><thead><tr><th>Item</th><th>Id</th></tr></thead><tbody>';
+                const sortedLoot = itemIds.slice().sort((a, b) => {
+                    const na = ITEM_ID_TO_NAME[a] || ('Item ' + a);
+                    const nb = ITEM_ID_TO_NAME[b] || ('Item ' + b);
+                    return na.localeCompare(nb);
+                });
+                for (const iid of sortedLoot) {
+                    const name = ITEM_ID_TO_NAME[iid] || ('Item ' + iid);
+                    html += '<tr><td>' + itemTimelineHref(iid, name) + '</td><td>' + esc(iid) + '</td></tr>';
+                }
+                html += '</tbody></table>';
+
+                html += '<h2>Acquisition Log</h2>';
+                if (logRows.length) {
+                    html += '<table id="acq-log"><thead><tr><th>Date</th><th>Character</th><th>Item</th><th>Change</th></tr></thead><tbody>';
+                    for (const row of logRows) {
+                        const sign = '<span class="pos">+' + row.count + '</span>';
+                        const vis = row.visibility ? ' <span class="vis">(visibility)</span>' : '';
+                        html += '<tr class="' + (row.visibility ? 'vis-row vis' : '') + '"><td>'
+                            + esc(row.date) + '</td><td><a href="' + charTimelineHref(row.char) + '">'
+                            + formatCharDisplay(row.char) + '</a></td><td>'
+                            + itemTimelineHref(row.itemId, row.itemName) + '</td><td>'
+                            + sign + vis + '</td></tr>';
+                    }
+                    html += '</tbody></table>';
+                } else {
+                    html += "<p class=\\"vis\\">No acquisitions recorded for this mob's tracked loot.</p>";
+                }
+
+                content.innerHTML = html;
+                content.style.display = 'block';
+                status.style.display = 'none';
+                const hideVis = document.getElementById('hide-vis');
+                if (hideVis) {
+                    const applyHide = () => {
+                        document.querySelectorAll('#acq-log tr.vis-row').forEach(tr => {
+                            tr.style.display = hideVis.checked ? 'none' : '';
+                        });
+                    };
+                    hideVis.addEventListener('change', applyHide);
+                    applyHide();
+                }
+            } catch (err) {
+                status.innerHTML = '<strong style="color:#c62828;">Error:</strong> ' + esc(err.message || err);
+            }
+        }
+
+        async function render() {
+            populateSelect();
+            bindSearch();
+            const mobName = MOB_PARAM ? resolveMobName(MOB_PARAM) : null;
+            if (!mobName) {
+                document.getElementById('status').style.display = 'none';
+                if (MOB_PARAM) {
+                    document.getElementById('status').style.display = 'block';
+                    document.getElementById('status').innerHTML =
+                        '<strong style="color:#c62828;">Mob not found.</strong> Try the dropdown or search below.';
+                    document.getElementById('mob-search').value = MOB_PARAM;
+                }
+                return;
+            }
+            await renderMob(mobName);
+        }
+
+        render();
+    </script>
+""" + GOATCOUNTER_SCRIPT + """
+</body>
+</html>
+"""
+    out_path = os.path.join(base_dir, "mob.html")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(html)
     return out_path
@@ -7744,6 +8220,14 @@ def main():
             print("Generated item timeline page")
         except Exception as e:
             print(f"Warning: Could not generate item timeline: {e}")
+            import traceback
+            traceback.print_exc()
+
+        try:
+            generate_mob_timeline(base_dir)
+            print("Generated mob timeline page")
+        except Exception as e:
+            print(f"Warning: Could not generate mob timeline: {e}")
             import traceback
             traceback.print_exc()
         
