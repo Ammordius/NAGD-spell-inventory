@@ -194,9 +194,10 @@
                     <tr><th>Level mod</th><td id="outLevelMod">—</td></tr>
                     <tr><th>ResistDiff (incl. CHA / manual)</th><td id="outResistDiff">—</td></tr>
                     <tr><th>resist_chance (pre-roll)</th><td id="outChance">—</td></tr>
+                    <tr><th>Min resist floor</th><td id="outMinFloor">—</td></tr>
                     <tr><th>Effective caster level</th><td id="outCasterLvl">—</td></tr>
                 </table>
-                <p class="hint" style="margin-top:12px;">Roll is uniform on 0–200 (201 outcomes). Full land when roll &gt; resist_chance. 200-scale fails are full resists; 600-scale (damage-first) can partial.</p>
+                <p class="hint" style="margin-top:12px;">Roll is uniform on 0–200 (201 outcomes). Full land when roll &gt; resist_chance. Resistable spells floor <code>resist_chance</code> at <strong>5</strong> (~3% fail / never a guaranteed land; Server tick-save floor). 200-scale fails are full resists; 600-scale (damage-first) can partial.</p>
             </div>
         </div>
     </div>
@@ -427,6 +428,7 @@
       el('outLevelMod').textContent = '—';
       el('outResistDiff').textContent = '—';
       el('outChance').textContent = 'n/a (always lands)';
+      el('outMinFloor').textContent = 'n/a (unresistable)';
       el('outCasterLvl').textContent = String(parseInt(el('casterLevel').value, 10) || 65);
     } else {
       el('outResistKey').textContent = result.resistKey + ' (' + (ResistCalc.RESIST_TYPE[spell.resisttype] || '') + ')';
@@ -434,7 +436,13 @@
       el('outDebuffDelta').textContent = String(result.debuffDelta);
       el('outLevelMod').textContent = String(result.levelMod);
       el('outResistDiff').textContent = String(result.resistDiff);
-      el('outChance').textContent = String(result.resistChance);
+      el('outChance').textContent = String(result.resistChance)
+        + (result.minFloorApplied
+          ? ' (raw ' + result.rawResistChance + ', floored)'
+          : '');
+      el('outMinFloor').textContent = result.minFloorApplied
+        ? ('applied (min ' + result.minResistFloor + '; ~3% fail on 0–200)')
+        : ('not applied (raw ≥ ' + result.minResistFloor + ')');
       el('outCasterLvl').textContent = String(result.effectiveCasterLevel);
     }
   }

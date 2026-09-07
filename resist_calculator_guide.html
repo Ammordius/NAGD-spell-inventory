@@ -36,6 +36,7 @@ effective_target_resist = mob[MR|FR|CR|DR|PR] + sum(debuff deltas)
         <li><strong>Lull / Harmony / Pacify</strong> casts override target resist to <strong>15</strong> (PoP+).</li>
         <li><strong>Enchanter mez/charm</strong>: if CHA &gt; 75, <code>ResistDiff -= (CHA-75)/8</code> (initial cast only).</li>
         <li><strong>Tick save</strong>: treats caster level as +4 (DoT ticks).</li>
+        <li><strong>Min resist floor</strong>: <code>resist_chance</code> is floored at <strong>5</strong> (Server tick-save path: <code>CharmMinResist</code> / <code>RootMinResist</code> / generic). On the 0–200 roll that is ~3% failure (commonly described as a “you can’t always succeed” floor). Unresistable spells (resisttype 0) still land 100%.</li>
     </ul>
 
     <h2>200-scale vs 600-scale</h2>

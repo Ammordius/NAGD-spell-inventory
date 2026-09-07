@@ -157,20 +157,23 @@
     );
 
     let resist_chance = target_resist + level_mod + resist_modifier;
+    const rawResistChance = resist_chance;
 
-    // Tick save floor
-    if (tickSave) {
-      if (spell.charm) {
-        if (resist_chance < 5) resist_chance = 5;
-      } else if (spell.root) {
-        if (resist_chance < 5) resist_chance = 5;
-      } else if (resist_chance < 5) {
-        resist_chance = 5;
-      }
+    // Minimum resist floor: Server floors resist_chance at 5 on tick saves
+    // (CharmMinResist / RootMinResist / generic). On 0–200 that is ~3% fail
+    // (rolls 0..5). Applied to all resistable checks here so land never hits 100%.
+    const MIN_RESIST_CHANCE = 5;
+    let minFloorApplied = false;
+    if (resist_chance < MIN_RESIST_CHANCE) {
+      resist_chance = MIN_RESIST_CHANCE;
+      minFloorApplied = true;
     }
 
     return {
       resistChance: resist_chance,
+      rawResistChance,
+      minFloorApplied,
+      minResistFloor: MIN_RESIST_CHANCE,
       unresistable: false,
       targetResist: target_resist,
       levelMod: level_mod,
