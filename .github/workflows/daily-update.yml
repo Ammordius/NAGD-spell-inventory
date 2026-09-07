@@ -723,6 +723,27 @@ jobs:
           cp data/DPS_CALCULATOR_THREAT.md deploy/data/DPS_CALCULATOR_THREAT.md
           echo "✓ Copied data/DPS_CALCULATOR_THREAT.md to deploy (DPS calculator threat doc link)"
         fi
+        # Copy Spell Land Rate calculator pages and data
+        if [ -f "resist_calculator.html" ]; then
+          cp resist_calculator.html deploy/resist_calculator.html
+          echo "✓ Copied resist_calculator.html to deploy directory"
+        fi
+        if [ -f "resist_calculator_guide.html" ]; then
+          cp resist_calculator_guide.html deploy/resist_calculator_guide.html
+          echo "✓ Copied resist_calculator_guide.html to deploy directory"
+        fi
+        if [ -f "data/spells_resist.json" ]; then
+          cp data/spells_resist.json deploy/data/spells_resist.json
+          echo "✓ Copied data/spells_resist.json to deploy (land rate spell catalog)"
+        fi
+        if [ -f "data/resist_debuffs.json" ]; then
+          cp data/resist_debuffs.json deploy/data/resist_debuffs.json
+          echo "✓ Copied data/resist_debuffs.json to deploy (land rate debuff toggles)"
+        fi
+        if [ -f "data/resist_calc.js" ]; then
+          cp data/resist_calc.js deploy/data/resist_calc.js
+          echo "✓ Copied data/resist_calc.js to deploy (land rate formula)"
+        fi
         # Copy scoring explanation page
         if [ -f "scoring_explanation.html" ]; then
           cp scoring_explanation.html deploy/scoring_explanation.html

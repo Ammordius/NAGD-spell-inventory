@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAKP Spell Land Rate Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #2c5282 0%, #2b6cb0 50%, #3182ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        header h1 { font-size: 2em; margin-bottom: 8px; }
+        header p { font-size: 0.9em; opacity: 0.95; }
+        header a { color: white; text-decoration: underline; margin: 0 8px; display: inline-block; margin-top: 8px; }
+        .content { padding: 24px; }
+        .section { margin-bottom: 24px; }
+        .section h2 { font-size: 1.2em; color: #2c5282; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin-bottom: 12px; }
+        .field { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+        .field label { font-weight: 600; font-size: 0.9em; }
+        .field select, .field input[type="number"], .field input[type="text"] {
+            padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95em;
+        }
+        .field.grow { flex: 1; min-width: 220px; }
+        .debuff-toggles { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+        .debuff-toggles label { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-weight: normal; font-size: 0.9em; }
+        .debuff-toggles input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; }
+        .debuff-toggles .delta { color: #666; font-size: 0.8em; }
+        .results { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-top: 12px; }
+        .results h3 { color: #2c5282; margin-bottom: 12px; }
+        .results table { width: 100%; border-collapse: collapse; }
+        .results th, .results td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
+        .results th { font-weight: 600; color: #555; width: 45%; }
+        .results-summary { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 16px; }
+        .results-summary .result-item strong { display: block; font-size: 0.85em; color: #555; margin-bottom: 2px; }
+        .results-summary .result-item .value { font-size: 1.5em; font-weight: 700; color: #2c5282; }
+        .badge {
+            display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.75em; font-weight: 700;
+            background: #edf2f7; color: #2d3748; margin-left: 6px;
+        }
+        .badge.s600 { background: #feebc8; color: #7b341e; }
+        .badge.s200 { background: #bee3f8; color: #2a4365; }
+        .badge.unres { background: #c6f6d5; color: #22543d; }
+        .btn { padding: 10px 20px; background: linear-gradient(135deg, #2c5282, #3182ce); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn:hover { opacity: 0.9; }
+        .btn-sm { padding: 6px 12px; font-size: 0.85em; }
+        .hint { font-size: 0.85em; color: #666; margin-top: 4px; }
+        .load-warn { display:none; margin-top:12px; padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; font-size:0.9em; }
+        #spellSelect { max-width: 100%; }
+        .spell-meta { font-size: 0.85em; color: #555; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TAKP Spell Land Rate Calculator</h1>
+            <p>Caster level + spell vs mob resists. Server CheckResistSpell (PoP-on, NPC target).</p>
+            <a href="dps_calculator.html">DPS Calculator</a>
+            <a href="class_rankings.html">Class Rankings</a>
+            <a href="resist_calculator_guide.html">How it works</a>
+            <div id="loadWarning" class="load-warn"></div>
+        </header>
+        <div class="content">
+            <div class="section">
+                <h2>Caster &amp; spell</h2>
+                <div class="row">
+                    <div class="field">
+                        <label>Class</label>
+                        <select id="casterClass"></select>
+                    </div>
+                    <div class="field">
+                        <label>Caster level</label>
+                        <input type="number" id="casterLevel" value="65" min="1" max="70" />
+                    </div>
+                    <div class="field">
+                        <label>CHA (mez/charm)</label>
+                        <input type="number" id="casterCha" value="200" min="0" max="500" title="Enchanter mez/charm only: resistDiff -= (CHA-75)/8" />
+                    </div>
+                    <div class="field grow">
+                        <label>Spell filter</label>
+                        <input type="text" id="spellFilter" placeholder="Type to filter…" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field grow">
+                        <label>Spell</label>
+                        <select id="spellSelect" size="8"></select>
+                        <div class="spell-meta" id="spellMeta">—</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field" style="flex-direction:row; align-items:center; gap:8px;">
+                        <label style="font-weight:normal;"><input type="checkbox" id="tickSave" /> Tick save (+4 caster level)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Mob (fillable)</h2>
+                <div class="row">
+                    <div class="field">
+                        <label>Mob level</label>
+                        <input type="number" id="mobLevel" value="65" min="1" max="100" />
+                    </div>
+                    <div class="field">
+                        <label>MR</label>
+                        <input type="number" id="mobMR" value="200" min="-500" max="1000" />
+                    </div>
+                    <div class="field">
+                        <label>FR</label>
+                        <input type="number" id="mobFR" value="200" min="-500" max="1000" />
+                    </div>
+                    <div class="field">
+                        <label>CR</label>
+                        <input type="number" id="mobCR" value="200" min="-500" max="1000" />
+                    </div>
+                    <div class="field">
+                        <label>DR</label>
+                        <input type="number" id="mobDR" value="200" min="-500" max="1000" />
+                    </div>
+                    <div class="field">
+                        <label>PR</label>
+                        <input type="number" id="mobPR" value="200" min="-500" max="1000" />
+                    </div>
+                    <div class="field">
+                        <label>Manual ResistDiff adjust</label>
+                        <input type="number" id="manualAdjust" value="0" min="-500" max="500" title="Added to spell ResistDiff (negative = easier to land)" />
+                    </div>
+                </div>
+                <p class="hint">No per-mob catalog in v1 — plug in known resists (Zeal / #npcstats / parses). Default 200 is a generic hard target.</p>
+            </div>
+
+            <div class="section">
+                <h2>Debuff toggles</h2>
+                <div class="row">
+                    <div class="field">
+                        <label>Drum / instrument mod</label>
+                        <input type="number" id="drumMod" value="3.1" min="1.0" max="3.8" step="0.1" title="Applied to instrument-moddable songs: base × mod (3.1 → ×31/10)" />
+                    </div>
+                    <div class="field" style="justify-content:flex-end;">
+                        <button type="button" class="btn btn-sm" id="debuffsOff">All debuffs off</button>
+                    </div>
+                </div>
+                <div class="debuff-toggles" id="debuffToggles"></div>
+                <p class="hint" id="debuffSummary"></p>
+            </div>
+
+            <div class="section">
+                <button type="button" class="btn" id="btnCompute">Compute land rate</button>
+            </div>
+
+            <div class="results" id="results" style="display:none;">
+                <h3>Results <span id="scaleBadge" class="badge"></span></h3>
+                <div class="results-summary">
+                    <div class="result-item">
+                        <strong>Full land</strong>
+                        <span class="value" id="outFullLand">—</span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Full resist</strong>
+                        <span class="value" id="outFullResist">—</span>
+                    </div>
+                    <div class="result-item" id="partialWrap">
+                        <strong>Partial (600-scale)</strong>
+                        <span class="value" id="outPartial">—</span>
+                    </div>
+                    <div class="result-item" id="effWrap">
+                        <strong>Expected effectiveness</strong>
+                        <span class="value" id="outEff">—</span>
+                    </div>
+                </div>
+                <table>
+                    <tr><th>Resist used</th><td id="outResistKey">—</td></tr>
+                    <tr><th>Effective target resist</th><td id="outTargetResist">—</td></tr>
+                    <tr><th>Debuff delta (this resist)</th><td id="outDebuffDelta">—</td></tr>
+                    <tr><th>Level mod</th><td id="outLevelMod">—</td></tr>
+                    <tr><th>ResistDiff (incl. CHA / manual)</th><td id="outResistDiff">—</td></tr>
+                    <tr><th>resist_chance (pre-roll)</th><td id="outChance">—</td></tr>
+                    <tr><th>Effective caster level</th><td id="outCasterLvl">—</td></tr>
+                </table>
+                <p class="hint" style="margin-top:12px;">Roll is uniform on 0–200 (201 outcomes). Full land when roll &gt; resist_chance. 200-scale fails are full resists; 600-scale (damage-first) can partial.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="data/resist_calc.js"></script>
+    <script>
+(function () {
+  const CASTER_FIRST = [
+    'Wizard','Magician','Necromancer','Enchanter','Druid','Shaman','Cleric',
+    'Bard','Beastlord','Ranger','Paladin','Shadow Knight','Warrior','Monk','Rogue'
+  ];
+
+  let spellsData = null;
+  let debuffsData = null;
+  let classIndex = {};
+
+  const el = (id) => document.getElementById(id);
+
+
+  function clampDrum(raw) {
+    const meta = (debuffsData && debuffsData._meta) || {};
+    const lo = meta.instrumentModMin != null ? meta.instrumentModMin : 1.0;
+    const hi = meta.instrumentModMax != null ? meta.instrumentModMax : 3.8;
+    let v = Number.isFinite(raw) ? raw : (meta.instrumentModDefault != null ? meta.instrumentModDefault : 3.1);
+    if (v < lo) v = lo;
+    if (v > hi) v = hi;
+    return v;
+  }
+
+  function enforceExclusiveGroup(changedId) {
+    const changed = debuffsData.debuffs.find((d) => d.id === changedId);
+    if (!changed || !changed.exclusiveGroup) return;
+    const cb = el('debuff_' + changedId);
+    if (!cb || !cb.checked) return;
+    for (const d of debuffsData.debuffs) {
+      if (d.id === changedId) continue;
+      if (d.exclusiveGroup === changed.exclusiveGroup) {
+        const other = el('debuff_' + d.id);
+        if (other) other.checked = false;
+      }
+    }
+  }
+
+  function showLoadWarning(msg) {
+    const w = el('loadWarning');
+    w.style.display = 'block';
+    w.textContent = msg;
+  }
+
+  function fmtPct(x) {
+    if (x == null || Number.isNaN(x)) return '—';
+    return x.toFixed(2) + '%';
+  }
+
+  function populateClasses() {
+    const sel = el('casterClass');
+    sel.innerHTML = '';
+    for (const name of CASTER_FIRST) {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      if (name === 'Wizard') opt.selected = true;
+      sel.appendChild(opt);
+    }
+  }
+
+  function classSpellLevel(spell, className) {
+    const idx = classIndex[className];
+    if (idx == null) return 255;
+    return spell.classes[idx];
+  }
+
+  function filteredSpells() {
+    const className = el('casterClass').value;
+    const casterLevel = parseInt(el('casterLevel').value, 10) || 65;
+    const q = (el('spellFilter').value || '').trim().toLowerCase();
+    const list = Object.values(spellsData.spells);
+    return list
+      .filter((s) => {
+        const req = classSpellLevel(s, className);
+        if (req >= 255 || req > casterLevel) return false;
+        if (q && !s.name.toLowerCase().includes(q) && String(s.id) !== q) return false;
+        return true;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name) || a.id - b.id);
+  }
+
+  function refreshSpellList(keepId) {
+    const sel = el('spellSelect');
+    const spells = filteredSpells();
+    const prev = keepId != null ? keepId : (sel.value ? parseInt(sel.value, 10) : null);
+    sel.innerHTML = '';
+    for (const s of spells) {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      const rname = (spellsData._meta.resistTypes || {})[String(s.resisttype)] || s.resisttype;
+      const scale = s.partialCapable ? '600' : (s.resisttype === 0 ? 'UR' : '200');
+      opt.textContent = s.name + '  [' + rname + ', ' + scale + ', RD ' + s.resistDiff + ']';
+      sel.appendChild(opt);
+    }
+    if (prev != null && [...sel.options].some((o) => parseInt(o.value, 10) === prev)) {
+      sel.value = String(prev);
+    } else if (sel.options.length) {
+      sel.selectedIndex = 0;
+    }
+    updateSpellMeta();
+  }
+
+  function selectedSpell() {
+    const id = el('spellSelect').value;
+    if (!id || !spellsData) return null;
+    return spellsData.spells[id] || null;
+  }
+
+  function updateSpellMeta() {
+    const s = selectedSpell();
+    const meta = el('spellMeta');
+    if (!s) { meta.textContent = 'No spell selected'; return; }
+    const rname = (spellsData._meta.resistTypes || {})[String(s.resisttype)] || s.resisttype;
+    const scale = s.resisttype === 0 && !s.harmony ? 'Unresistable' : (s.partialCapable ? '600-scale (partial)' : '200-scale (binary)');
+    const flags = [];
+    if (s.harmony) flags.push('lull/harmony');
+    if (s.mez) flags.push('mez');
+    if (s.charm) flags.push('charm');
+    if (s.directDamage) flags.push('direct damage');
+    meta.textContent = '#' + s.id + ' · ' + rname + ' · ResistDiff ' + s.resistDiff + ' · ' + scale
+      + (flags.length ? ' · ' + flags.join(', ') : '');
+  }
+
+  function renderDebuffs(preserveChecked) {
+    const prev = {};
+    if (preserveChecked) {
+      for (const d of debuffsData.debuffs) {
+        const existing = el('debuff_' + d.id);
+        if (existing) prev[d.id] = existing.checked;
+      }
+    }
+    const box = el('debuffToggles');
+    box.innerHTML = '';
+    const drum = clampDrum(parseFloat(el('drumMod').value));
+    for (const d of debuffsData.debuffs) {
+      const label = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = 'debuff_' + d.id;
+      cb.dataset.debuffId = d.id;
+      cb.checked = preserveChecked && Object.prototype.hasOwnProperty.call(prev, d.id) ? prev[d.id] : !!d.defaultOn;
+      cb.addEventListener('change', () => { enforceExclusiveGroup(d.id); updateDebuffSummary(); compute(); });
+      const deltas = Object.entries(d.deltas).map(([k, v]) => {
+        const applied = d.instrumentModdable ? ResistCalc.applyInstrumentMod(v, drum) : v;
+        return k + ' ' + applied + (d.instrumentModdable ? ' (base ' + v + ')' : '');
+      }).join(', ');
+      const span = document.createElement('span');
+      span.innerHTML = '<strong>' + d.name + '</strong>'
+        + (d.instrumentModdable ? ' <em>drum</em>' : '')
+        + '<div class="delta">' + deltas + '</div>';
+      label.appendChild(cb);
+      label.appendChild(span);
+      box.appendChild(label);
+    }
+    updateDebuffSummary();
+  }
+
+  function activeDebuffs() {
+    return debuffsData.debuffs.filter((d) => {
+      const cb = el('debuff_' + d.id);
+      return cb && cb.checked;
+    });
+  }
+
+  function updateDebuffSummary() {
+    const drum = clampDrum(parseFloat(el('drumMod').value));
+    const keys = ['MR','FR','CR','DR','PR'];
+    const totals = {};
+    for (const k of keys) {
+      totals[k] = ResistCalc.sumDebuffDelta(activeDebuffs(), k, drum);
+    }
+    el('debuffSummary').textContent = 'Active deltas → '
+      + keys.map((k) => k + ' ' + totals[k]).join(', ')
+      + ' · drum mod ' + drum;
+  }
+
+  function compute() {
+    const spell = selectedSpell();
+    if (!spell || !window.ResistCalc) return;
+
+    const drum = clampDrum(parseFloat(el('drumMod').value));
+    const resistKey = ResistCalc.RESIST_KEY[spell.resisttype] || 'MR';
+    const debuffDelta = spell.harmony ? 0 : ResistCalc.sumDebuffDelta(activeDebuffs(), resistKey, drum);
+
+    const result = ResistCalc.evaluate({
+      casterLevel: parseInt(el('casterLevel').value, 10) || 65,
+      targetLevel: parseInt(el('mobLevel').value, 10) || 65,
+      targetResists: {
+        MR: parseInt(el('mobMR').value, 10) || 0,
+        FR: parseInt(el('mobFR').value, 10) || 0,
+        CR: parseInt(el('mobCR').value, 10) || 0,
+        DR: parseInt(el('mobDR').value, 10) || 0,
+        PR: parseInt(el('mobPR').value, 10) || 0,
+      },
+      spell,
+      debuffDelta,
+      tickSave: el('tickSave').checked,
+      cha: parseInt(el('casterCha').value, 10) || 0,
+      casterClass: el('casterClass').value,
+      manualAdjust: parseInt(el('manualAdjust').value, 10) || 0,
+    });
+
+    el('results').style.display = 'block';
+    const rates = result.rates;
+    const badge = el('scaleBadge');
+    badge.className = 'badge';
+    if (rates.scale === '600') { badge.textContent = '600-scale'; badge.classList.add('s600'); }
+    else if (rates.scale === '200') { badge.textContent = '200-scale'; badge.classList.add('s200'); }
+    else { badge.textContent = 'Unresistable'; badge.classList.add('unres'); }
+
+    el('outFullLand').textContent = fmtPct(rates.fullLandPct);
+    el('outFullResist').textContent = fmtPct(rates.fullResistPct);
+    el('outPartial').textContent = fmtPct(rates.partialPct);
+    el('outEff').textContent = rates.expectedEffectiveness.toFixed(2) + '%';
+    el('partialWrap').style.display = rates.scale === '600' ? '' : 'none';
+    el('effWrap').style.display = rates.scale === '600' ? '' : 'none';
+
+    if (result.unresistable) {
+      el('outResistKey').textContent = '— (unresistable)';
+      el('outTargetResist').textContent = '—';
+      el('outDebuffDelta').textContent = '—';
+      el('outLevelMod').textContent = '—';
+      el('outResistDiff').textContent = '—';
+      el('outChance').textContent = 'n/a (always lands)';
+      el('outCasterLvl').textContent = String(parseInt(el('casterLevel').value, 10) || 65);
+    } else {
+      el('outResistKey').textContent = result.resistKey + ' (' + (ResistCalc.RESIST_TYPE[spell.resisttype] || '') + ')';
+      el('outTargetResist').textContent = String(result.targetResist);
+      el('outDebuffDelta').textContent = String(result.debuffDelta);
+      el('outLevelMod').textContent = String(result.levelMod);
+      el('outResistDiff').textContent = String(result.resistDiff);
+      el('outChance').textContent = String(result.resistChance);
+      el('outCasterLvl').textContent = String(result.effectiveCasterLevel);
+    }
+  }
+
+  async function init() {
+    populateClasses();
+    try {
+      const [spellsRes, debuffsRes] = await Promise.all([
+        fetch('data/spells_resist.json'),
+        fetch('data/resist_debuffs.json'),
+      ]);
+      if (!spellsRes.ok || !debuffsRes.ok) {
+        throw new Error('HTTP ' + spellsRes.status + '/' + debuffsRes.status);
+      }
+      spellsData = await spellsRes.json();
+      debuffsData = await debuffsRes.json();
+      classIndex = spellsData._meta.classIndex || {};
+      if (debuffsData._meta && debuffsData._meta.instrumentModDefault != null) {
+        el('drumMod').value = debuffsData._meta.instrumentModDefault;
+      }
+      renderDebuffs();
+      refreshSpellList();
+      compute();
+    } catch (err) {
+      showLoadWarning('Failed to load data JSON (serve over HTTP, not file://). ' + err.message);
+      console.error(err);
+    }
+
+    el('casterClass').addEventListener('change', () => { refreshSpellList(); compute(); });
+    el('casterLevel').addEventListener('input', () => { refreshSpellList(selectedSpell() && selectedSpell().id); compute(); });
+    el('spellFilter').addEventListener('input', () => refreshSpellList(selectedSpell() && selectedSpell().id));
+    el('spellSelect').addEventListener('change', () => { updateSpellMeta(); compute(); });
+    ['mobLevel','mobMR','mobFR','mobCR','mobDR','mobPR','manualAdjust','casterCha','drumMod'].forEach((id) => {
+      el(id).addEventListener('input', () => {
+        if (id === 'drumMod') { el('drumMod').value = String(clampDrum(parseFloat(el('drumMod').value))); renderDebuffs(true); }
+        else updateDebuffSummary();
+        compute();
+      });
+    });
+    el('tickSave').addEventListener('change', compute);
+    el('btnCompute').addEventListener('click', compute);
+    el('debuffsOff').addEventListener('click', () => {
+      for (const d of debuffsData.debuffs) {
+        const cb = el('debuff_' + d.id);
+        if (cb) cb.checked = false;
+      }
+      updateDebuffSummary();
+      compute();
+    });
+  }
+
+  init();
+})();
+    </script>
+</body>
+</html>

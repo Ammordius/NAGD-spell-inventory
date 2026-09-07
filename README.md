@@ -21,6 +21,7 @@ Tools for [TAKP](https://www.takproject.net/) magelo/export data: spell inventor
 - **Spell inventory** — HTML of PoK spell availability per mule (from `spell_exchange_list.json`).
 - **Class rankings** — Gear and focus rankings: `class_rankings.html`, `class_rankings.json`, `class_rankings.txt`. Data is JSON-driven (`class_rankings.json`, `data/item_stats.json`, `data/elemental_slot_options.json`); the UI supports user-customizable stat/focus weights with client-side persistence (localStorage). Per-class priorities and focus lists are configurable in code; all relevant spell foci are tracked. See `FOCUS_CONFIG_REFERENCE.md`.
 - **DPS Calculator** — A parameterized, per-class DPS estimator (`dps_calculator.html`) built on the same mined item/stat inputs as the rankings pipeline. Supports AA/ability toggles, weapon configurations (MH/OH, 2H, bow+ammo for Ranger), mob level/AC/haste, and class-specific mechanics (e.g., backstab). Model inputs live in `data/item_stats.json` and `data/dps_config.json`; formulas and assumptions are documented in `dps_formulas.md`.
+- **Spell Land Rate Calculator** — Fillable mob resists + class/spell picker with debuff toggles (`resist_calculator.html`). Ports Server `CheckResistSpell` (PoP-on, NPC target); data from `data/spells_resist.json` (rebuild via `scripts/build_spells_resist_json.py`) and `data/resist_debuffs.json`. See `resist_calculator_guide.html`.
 - **Historical snapshots** — Baseline snapshot plus compact incremental change artifacts; stored as one full snapshot (~50 MB) and daily diffs (~300 KB). Change reports support audit and debugging of upstream/data drift. Date-range views load two deltas and diff them (no full reconstruction).
 
 **Live site** (GitHub Pages):
@@ -28,6 +29,7 @@ Tools for [TAKP](https://www.takproject.net/) magelo/export data: spell inventor
 - [Spell inventory (index)](https://ammordius.github.io/NAGD-spell-inventory/)
 - [Class rankings](https://ammordius.github.io/NAGD-spell-inventory/class_rankings)
 - [DPS Calculator](https://ammordius.github.io/NAGD-spell-inventory/dps_calculator.html)
+- [Spell Land Rate Calculator](https://ammordius.github.io/NAGD-spell-inventory/resist_calculator.html)
 
 ## Setup
 

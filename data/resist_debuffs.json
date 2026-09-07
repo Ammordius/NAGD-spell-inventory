@@ -1,0 +1,151 @@
+{
+  "_meta": {
+    "notes": "Debuff toggles for resist_calculator.html. Instrument songs: effect*mod/10 (mod 31=3.1x). Drum clamp 1.0-3.8. exclusiveGroup malo = only one of Malosinia/Malos/Mala. Malo-line deltas are all-but-disease. Magnitudes from player/Lucy corrections.",
+    "instrumentModDefault": 3.1,
+    "instrumentModMin": 1.0,
+    "instrumentModMax": 3.8
+  },
+  "debuffs": [
+    {
+      "id": "malosinia",
+      "spellId": 3387,
+      "name": "Malosinia",
+      "instrumentModdable": false,
+      "exclusiveGroup": "malo",
+      "deltas": {
+        "MR": -70,
+        "FR": -70,
+        "CR": -70,
+        "PR": -70
+      },
+      "defaultOn": false,
+      "note": "All but disease; exclusive with Malos/Mala"
+    },
+    {
+      "id": "malos",
+      "spellId": 3395,
+      "name": "Malos",
+      "instrumentModdable": false,
+      "exclusiveGroup": "malo",
+      "deltas": {
+        "MR": -55,
+        "FR": -55,
+        "CR": -55,
+        "PR": -55
+      },
+      "defaultOn": false,
+      "note": "All but disease; does not stack with Malosinia"
+    },
+    {
+      "id": "mala",
+      "spellId": 1772,
+      "name": "Mala",
+      "instrumentModdable": false,
+      "exclusiveGroup": "malo",
+      "deltas": {
+        "MR": -35,
+        "FR": -35,
+        "CR": -35,
+        "PR": -35
+      },
+      "defaultOn": false,
+      "note": "All but disease; exclusive with Malosinia/Malos"
+    },
+    {
+      "id": "malicious_decay",
+      "spellId": 3386,
+      "name": "Malicious Decay",
+      "instrumentModdable": false,
+      "deltas": {
+        "DR": -52
+      },
+      "defaultOn": false
+    },
+    {
+      "id": "howl_of_tashan",
+      "spellId": 3342,
+      "name": "Howl of Tashan",
+      "instrumentModdable": false,
+      "deltas": {
+        "MR": -50
+      },
+      "defaultOn": false
+    },
+    {
+      "id": "harmony_of_sound",
+      "spellId": 3375,
+      "name": "Harmony of Sound",
+      "instrumentModdable": true,
+      "deltas": {
+        "MR": -15,
+        "FR": -15,
+        "CR": -15
+      },
+      "defaultOn": false
+    },
+    {
+      "id": "occlusion_of_sound",
+      "spellId": 1451,
+      "name": "Occlusion of Sound",
+      "instrumentModdable": true,
+      "deltas": {
+        "MR": -10,
+        "FR": -10,
+        "CR": -10
+      },
+      "defaultOn": false
+    },
+    {
+      "id": "fufils_curtailing_chant",
+      "spellId": 707,
+      "name": "Fufil's Curtailing Chant",
+      "instrumentModdable": true,
+      "deltas": {
+        "MR": -18
+      },
+      "defaultOn": false,
+      "note": "Lucy AlKabor L65 base before instrument mod",
+      "ref": "https://lucy.alkabor.com/spell_707.html"
+    },
+    {
+      "id": "tuyens_chant_of_fire",
+      "spellId": 3367,
+      "name": "Tuyen's Chant of Fire",
+      "instrumentModdable": true,
+      "deltas": {
+        "FR": -22
+      },
+      "defaultOn": false
+    },
+    {
+      "id": "tuyens_chant_of_ice",
+      "spellId": 3373,
+      "name": "Tuyen's Chant of Ice",
+      "instrumentModdable": true,
+      "deltas": {
+        "CR": -22
+      },
+      "defaultOn": false
+    },
+    {
+      "id": "tuyens_chant_of_venom",
+      "spellId": 3370,
+      "name": "Tuyen's Chant of Venom",
+      "instrumentModdable": true,
+      "deltas": {
+        "PR": -22
+      },
+      "defaultOn": false
+    },
+    {
+      "id": "tuyens_chant_of_the_plague",
+      "spellId": 3363,
+      "name": "Tuyen's Chant of the Plague",
+      "instrumentModdable": true,
+      "deltas": {
+        "DR": -22
+      },
+      "defaultOn": false
+    }
+  ]
+}

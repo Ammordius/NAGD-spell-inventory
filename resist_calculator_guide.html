@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spell Land Rate Calculator — How it works</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.55; color: #222; }
+        h1 { color: #2c5282; }
+        h2 { color: #2b6cb0; margin-top: 1.6em; }
+        code { background: #edf2f7; padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+        a { color: #2b6cb0; }
+        ul { padding-left: 1.3em; }
+        .note { background: #ebf8ff; border-left: 4px solid #3182ce; padding: 12px 16px; margin: 16px 0; }
+        pre { background: #f7fafc; padding: 12px; overflow-x: auto; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <p><a href="resist_calculator.html">&larr; Spell Land Rate Calculator</a></p>
+    <h1>How spell land rate works (TAKP)</h1>
+    <p>This page documents the v1 calculator assumptions. The formula is a client&rarr;NPC port of Server <code>Mob::CheckResistSpell</code> in <code>zone/spells.cpp</code> with PoP-on rules (no classic softcap curve, no PvP bow curve).</p>
+
+    <div class="note">
+        Roll is always on <strong>0–200</strong> (201 discrete outcomes). Full land when <code>roll &gt; resist_chance</code>.
+        Roughly: 2 points of resist ≈ 1% on that scale.
+    </div>
+
+    <h2>Core formula</h2>
+    <pre>resist_chance = effective_target_resist + level_mod + ResistDiff
+
+effective_target_resist = mob[MR|FR|CR|DR|PR] + sum(debuff deltas)
+</pre>
+    <ul>
+        <li><strong>ResistDiff</strong> comes from the spell row (negative = easier to land).</li>
+        <li><strong>Debuffs</strong> (Malo, Tashan, Harmony of Sound, chants) lower the mob’s resist stats; they do not change ResistDiff.</li>
+        <li><strong>Lull / Harmony / Pacify</strong> casts override target resist to <strong>15</strong> (PoP+).</li>
+        <li><strong>Enchanter mez/charm</strong>: if CHA &gt; 75, <code>ResistDiff -= (CHA-75)/8</code> (initial cast only).</li>
+        <li><strong>Tick save</strong>: treats caster level as +4 (DoT ticks).</li>
+    </ul>
+
+    <h2>200-scale vs 600-scale</h2>
+    <p>From <code>IsPartialCapableSpell</code>:</p>
+    <ul>
+        <li><strong>600-scale (partial)</strong> — first non-blank effect is HP damage (<code>SE_CurrentHP</code> / <code>SE_CurrentHPOnce</code> with negative base), and the spell is not flagged <code>no_partial_resist</code>. Failed rolls can still deal reduced damage.</li>
+        <li><strong>200-scale (binary)</strong> — everything else (most debuffs, snares, mez). Fail = full resist.</li>
+    </ul>
+    <p>The calculator reports exact full-land / full-resist / partial percentages by enumerating all 201 rolls. For 600-scale it also shows expected average effectiveness.</p>
+
+    <h2>Level modifier (NPC)</h2>
+    <p>Uses the Server NPC branch: quadratic level-diff term (floored at −9), ResistFalloff 67, high-level “bump” when the mob is well above the caster, and an extra <code>+2 × level_diff</code> for direct-damage spells.</p>
+
+    <h2>Instrument mod (drum)</h2>
+    <p>Bard resist songs use <code>effect × mod / 10</code> with integer truncation (C++ style). Default drum <strong>3.1</strong> → mod <strong>31</strong>. UI clamps multiplier to <strong>1.0–3.8</strong>.</p>
+    <p>Example: Harmony of Sound base −15 → <code>−15 × 31 / 10 = −46</code> to MR/FR/CR. Tuyen’s top chants base −22 → <code>−68</code> at 3.1.</p>
+
+    <h2>Debuff magnitudes</h2>
+    <ul>
+        <li><strong>Malosinia</strong> −70 MR/FR/CR/PR (not disease); exclusive with Malos/Mala</li>
+        <li><strong>Malos</strong> −55 MR/FR/CR/PR (not disease); does not stack with Malosinia</li>
+        <li><strong>Mala</strong> −35 MR/FR/CR/PR (not disease)</li>
+        <li><strong>Malicious Decay</strong> −52 DR</li>
+        <li><strong>Howl of Tashan</strong> −50 MR</li>
+        <li><strong>Harmony of Sound</strong> −15 MR/FR/CR × drum</li>
+        <li><strong>Occlusion of Sound</strong> −10 MR/FR/CR × drum</li>
+        <li><strong>Fufil’s Curtailing Chant</strong> −18 MR × drum (<a href="https://lucy.alkabor.com/spell_707.html">Lucy</a>)</li>
+        <li><strong>Tuyen’s top chants</strong> (Fire/Ice/Venom/Plague) −22 on matching resist × drum</li>
+    </ul>
+
+    <h2>Data</h2>
+    <ul>
+        <li><code>data/spells_resist.json</code> — built from Server <code>spells_en</code> via <code>scripts/build_spells_resist_json.py</code></li>
+        <li><code>data/resist_debuffs.json</code> — toggle definitions</li>
+        <li><code>data/resist_calc.js</code> — formula implementation</li>
+    </ul>
+    <p>Mob resists are fillable only in v1 (no Zeal/NPC dump on the site). Plug in values from parses or in-game tools.</p>
+
+    <h2>Out of scope (v1)</h2>
+    <ul>
+        <li>Classic-era resist softcaps</li>
+        <li>Focus effects that change ResistDiff</li>
+        <li>Sanctification / fear resists / rain innate 20%</li>
+        <li>Full NPC resist catalog</li>
+    </ul>
+</body>
+</html>
