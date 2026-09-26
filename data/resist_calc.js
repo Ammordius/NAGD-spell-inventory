@@ -139,14 +139,17 @@
       target_resist = 15;
     }
 
-    let resist_modifier = spell.resistDiff || 0;
-    if (manualAdjust) resist_modifier += manualAdjust;
+    const spellResistDiff = spell.resistDiff || 0;
+    const manual = manualAdjust || 0;
+    let chaAdjust = 0;
+    let resist_modifier = spellResistDiff + manual;
 
     // Enchanter CHA for mez/charm (initial cast only, not tick_save)
     if (!tickSave && casterClass === 'Enchanter' && (spell.mez || spell.charm)) {
       const c = cha || 0;
       if (c > 75) {
-        resist_modifier -= cTruncDiv(c - 75, 8);
+        chaAdjust = -cTruncDiv(c - 75, 8);
+        resist_modifier += chaAdjust;
       }
     }
 
@@ -159,12 +162,12 @@
     let resist_chance = target_resist + level_mod + resist_modifier;
     const rawResistChance = resist_chance;
 
-    // Minimum resist floor: Server floors resist_chance at 5 on tick saves
+    // Server floors resist_chance at 5 only on tick saves
     // (CharmMinResist / RootMinResist / generic). On 0–200 that is ~3% fail
-    // (rolls 0..5). Applied to all resistable checks here so land never hits 100%.
+    // (rolls 0..5). Initial casts are unclamped, including negative chance.
     const MIN_RESIST_CHANCE = 5;
     let minFloorApplied = false;
-    if (resist_chance < MIN_RESIST_CHANCE) {
+    if (tickSave && resist_chance < MIN_RESIST_CHANCE) {
       resist_chance = MIN_RESIST_CHANCE;
       minFloorApplied = true;
     }
@@ -178,6 +181,9 @@
       targetResist: target_resist,
       levelMod: level_mod,
       resistDiff: resist_modifier,
+      spellResistDiff,
+      manualAdjust: manual,
+      chaAdjust,
       debuffDelta: debuffDelta || 0,
       resistKey,
       effectiveCasterLevel,

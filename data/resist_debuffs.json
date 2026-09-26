@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "notes": "Debuff toggles for resist_calculator.html. Instrument songs: effect*mod/10 (mod 31=3.1x). Drum clamp 1.0-3.8. exclusiveGroup malo = only one of Malosinia/Malos/Mala. Malo-line deltas are all-but-disease. Magnitudes from player/Lucy corrections.",
+    "notes": "Debuff toggles for resist_calculator.html. Instrument songs: effect*mod/10 (mod 31=3.1x). Drum clamp 1.0-3.8. exclusiveGroup malo = only one of Malosinia/Malos/Mala. Malo-line deltas are all-but-disease. Magnitudes from player/Lucy corrections. exclusiveGroup tash = only one of Howl of Tashan/Tashani/Tashania.",
     "instrumentModDefault": 3.1,
     "instrumentModMin": 1.0,
     "instrumentModMax": 3.8
@@ -69,7 +69,33 @@
       "deltas": {
         "MR": -50
       },
-      "defaultOn": false
+      "defaultOn": false,
+      "exclusiveGroup": "tash",
+      "note": "MR only; exclusive with Tashani/Tashania"
+    },
+    {
+      "id": "tashani",
+      "spellId": 677,
+      "name": "Tashani",
+      "instrumentModdable": false,
+      "exclusiveGroup": "tash",
+      "deltas": {
+        "MR": -23
+      },
+      "defaultOn": false,
+      "note": "SE_ResistMagic cap 23; exclusive with Howl of Tashan/Tashania"
+    },
+    {
+      "id": "tashania",
+      "spellId": 678,
+      "name": "Tashania",
+      "instrumentModdable": false,
+      "exclusiveGroup": "tash",
+      "deltas": {
+        "MR": -33
+      },
+      "defaultOn": false,
+      "note": "SE_ResistMagic cap 33; exclusive with Howl of Tashan/Tashani"
     },
     {
       "id": "harmony_of_sound",

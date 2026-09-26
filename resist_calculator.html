@@ -52,6 +52,7 @@
         .results-summary { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 16px; }
         .results-summary .result-item strong { display: block; font-size: 0.85em; color: #555; margin-bottom: 2px; }
         .results-summary .result-item .value { font-size: 1.5em; font-weight: 700; color: #2c5282; }
+        .chance-formula { font-size: 0.95em; font-weight: 600; color: #2c5282; margin: 0 0 16px; }
         .badge {
             display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.75em; font-weight: 700;
             background: #edf2f7; color: #2d3748; margin-left: 6px;
@@ -178,6 +179,10 @@
                         <strong>Full resist</strong>
                         <span class="value" id="outFullResist">—</span>
                     </div>
+                    <div class="result-item">
+                        <strong>resist_chance</strong>
+                        <span class="value" id="outChanceHeadline">—</span>
+                    </div>
                     <div class="result-item" id="partialWrap">
                         <strong>Partial (600-scale)</strong>
                         <span class="value" id="outPartial">—</span>
@@ -187,6 +192,7 @@
                         <span class="value" id="outEff">—</span>
                     </div>
                 </div>
+                <p class="chance-formula" id="outChanceFormula"></p>
                 <table>
                     <tr><th>Resist used</th><td id="outResistKey">—</td></tr>
                     <tr><th>Effective target resist</th><td id="outTargetResist">—</td></tr>
@@ -197,7 +203,7 @@
                     <tr><th>Min resist floor</th><td id="outMinFloor">—</td></tr>
                     <tr><th>Effective caster level</th><td id="outCasterLvl">—</td></tr>
                 </table>
-                <p class="hint" style="margin-top:12px;">Roll is uniform on 0–200 (201 outcomes). Full land when roll &gt; resist_chance. Resistable spells floor <code>resist_chance</code> at <strong>5</strong> (~3% fail / never a guaranteed land; Server tick-save floor). 200-scale fails are full resists; 600-scale (damage-first) can partial.</p>
+                <p class="hint" style="margin-top:12px;">Roll is uniform on 0–200 (201 outcomes). Full land when roll &gt; resist_chance. Full resist stays 100% while resist_chance is 200 or higher. The floor of <strong>5</strong> applies on tick save only. 200-scale fails are full resists; 600-scale (damage-first) can partial.</p>
             </div>
         </div>
     </div>
@@ -380,6 +386,33 @@
       + ' · drum mod ' + drum;
   }
 
+  function fmtSigned(n) {
+    const v = Number(n) || 0;
+    return v < 0 ? '\u2212' + Math.abs(v) : String(v);
+  }
+
+  function chanceFormula(result) {
+    const terms = [
+      [result.targetResist, 'target'],
+      [result.levelMod, 'level'],
+      [result.spellResistDiff, 'ResistDiff'],
+      [result.manualAdjust, 'manual'],
+    ];
+    if (result.chaAdjust) terms.push([result.chaAdjust, 'CHA']);
+    let text = '';
+    terms.forEach(([value, label], i) => {
+      const n = Number(value) || 0;
+      const body = Math.abs(n) + ' ' + label;
+      if (i === 0) text += (n < 0 ? '\u2212' : '') + body;
+      else text += (n < 0 ? ' \u2212 ' : ' + ') + body;
+    });
+    text += ' = ' + fmtSigned(result.rawResistChance);
+    if (result.minFloorApplied) {
+      text += ', used ' + result.resistChance + ' (tick-save floor)';
+    }
+    return text;
+  }
+
   function compute() {
     const spell = selectedSpell();
     if (!spell || !window.ResistCalc) return;
@@ -422,6 +455,8 @@
     el('effWrap').style.display = rates.scale === '600' ? '' : 'none';
 
     if (result.unresistable) {
+      el('outChanceHeadline').textContent = 'n/a';
+      el('outChanceFormula').textContent = 'Unresistable — always lands.';
       el('outResistKey').textContent = '— (unresistable)';
       el('outTargetResist').textContent = '—';
       el('outDebuffDelta').textContent = '—';
@@ -431,6 +466,8 @@
       el('outMinFloor').textContent = 'n/a (unresistable)';
       el('outCasterLvl').textContent = String(parseInt(el('casterLevel').value, 10) || 65);
     } else {
+      el('outChanceHeadline').textContent = String(result.resistChance);
+      el('outChanceFormula').textContent = chanceFormula(result);
       el('outResistKey').textContent = result.resistKey + ' (' + (ResistCalc.RESIST_TYPE[spell.resisttype] || '') + ')';
       el('outTargetResist').textContent = String(result.targetResist);
       el('outDebuffDelta').textContent = String(result.debuffDelta);
@@ -441,8 +478,10 @@
           ? ' (raw ' + result.rawResistChance + ', floored)'
           : '');
       el('outMinFloor').textContent = result.minFloorApplied
-        ? ('applied (min ' + result.minResistFloor + '; ~3% fail on 0–200)')
-        : ('not applied (raw ≥ ' + result.minResistFloor + ')');
+        ? ('applied (min ' + result.minResistFloor + ' on tick save)')
+        : (el('tickSave').checked
+          ? ('not applied (raw \u2265 ' + result.minResistFloor + ')')
+          : 'not applied (initial cast)');
       el('outCasterLvl').textContent = String(result.effectiveCasterLevel);
     }
   }

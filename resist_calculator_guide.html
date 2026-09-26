@@ -26,17 +26,18 @@
     </div>
 
     <h2>Core formula</h2>
-    <pre>resist_chance = effective_target_resist + level_mod + ResistDiff
+    <pre>resist_chance = effective_target_resist + level_mod + ResistDiff + manual
 
 effective_target_resist = mob[MR|FR|CR|DR|PR] + sum(debuff deltas)
 </pre>
     <ul>
-        <li><strong>ResistDiff</strong> comes from the spell row (negative = easier to land).</li>
-        <li><strong>Debuffs</strong> (Malo, Tashan, Harmony of Sound, chants) lower the mob’s resist stats; they do not change ResistDiff.</li>
+        <li><strong>ResistDiff</strong> comes from the spell row (negative = easier to land). <strong>Manual ResistDiff adjust</strong> is added on top of it.</li>
+        <li><strong>Debuffs</strong> (Malo, Tashani, Tashania, Harmony of Sound, chants) lower the mob’s resist stats; they do not change ResistDiff.</li>
         <li><strong>Lull / Harmony / Pacify</strong> casts override target resist to <strong>15</strong> (PoP+).</li>
         <li><strong>Enchanter mez/charm</strong>: if CHA &gt; 75, <code>ResistDiff -= (CHA-75)/8</code> (initial cast only).</li>
         <li><strong>Tick save</strong>: treats caster level as +4 (DoT ticks).</li>
-        <li><strong>Min resist floor</strong>: <code>resist_chance</code> is floored at <strong>5</strong> (Server tick-save path: <code>CharmMinResist</code> / <code>RootMinResist</code> / generic). On the 0–200 roll that is ~3% failure (commonly described as a “you can’t always succeed” floor). Unresistable spells (resisttype 0) still land 100%.</li>
+        <li><strong>Full resist stays 100%</strong> while <code>resist_chance</code> is 200 or higher. The roll only goes to 200, so a manual adjust that leaves the chance at or above 200 does not change the full-resist rate.</li>
+        <li><strong>Min resist floor</strong>: on tick save only, <code>resist_chance</code> is floored at <strong>5</strong> (Server: <code>CharmMinResist</code> / <code>RootMinResist</code> / generic). On the 0–200 roll that is ~3% failure. Initial casts are not floored, so a negative chance is a guaranteed land. Unresistable spells (resisttype 0) still land 100%.</li>
     </ul>
 
     <h2>200-scale vs 600-scale</h2>
@@ -60,7 +61,9 @@ effective_target_resist = mob[MR|FR|CR|DR|PR] + sum(debuff deltas)
         <li><strong>Malos</strong> −55 MR/FR/CR/PR (not disease); does not stack with Malosinia</li>
         <li><strong>Mala</strong> −35 MR/FR/CR/PR (not disease)</li>
         <li><strong>Malicious Decay</strong> −52 DR</li>
-        <li><strong>Howl of Tashan</strong> −50 MR</li>
+        <li><strong>Howl of Tashan</strong> −50 MR; does not stack with Tashani/Tashania</li>
+        <li><strong>Tashani</strong> −23 MR; exclusive with Howl of Tashan and Tashania</li>
+        <li><strong>Tashania</strong> −33 MR; exclusive with Howl of Tashan and Tashani</li>
         <li><strong>Harmony of Sound</strong> −15 MR/FR/CR × drum</li>
         <li><strong>Occlusion of Sound</strong> −10 MR/FR/CR × drum</li>
         <li><strong>Fufil’s Curtailing Chant</strong> −18 MR × drum (<a href="https://lucy.alkabor.com/spell_707.html">Lucy</a>)</li>
