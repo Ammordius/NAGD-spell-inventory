@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "notes": "Field status is verified, quest, illustrative, or unavailable. Unavailable values are null and are not filled with guesses. A user edit on the simulator page is user-entered and is not written back to this file.",
+  "completeHealPreset": {
+    "name": "Illustrative four-healer chain",
+    "verified": false,
+    "status": "illustrative",
+    "amount": 7500,
+    "healers": 4,
+    "castMs": 10000,
+    "spacingMs": 3000,
+    "note": "Complete Heal cast time and healed amount were not confirmed from a spell row in this tree. Four healers with 3 seconds between planned landings have a 12 second personal cycle, which covers a 10 second cast."
+  },
+  "encounters": [
+    {
+      "id": "quarm",
+      "name": "Quarm",
+      "notes": "Read from local npc_types id 223008. Phase6.lua still only overrides resists and AC, which do not change incoming melee. attack_count -1 is one primary swing because DoMainHandRound treats a count of 1 or less as a single Attack. Enrage is on the row and is not modeled: it depends on Quarm's own HP. Area rampage is ability 4 with chance 5 and damage percent 10. This source hits the current target when the hate list has one entry. Flurry is absent.",
+      "fields": {
+        "minHit": {
+          "value": 1140,
+          "status": "verified",
+          "source": "npc_types 223008 mindmg"
+        },
+        "maxHit": {
+          "value": 3800,
+          "status": "verified",
+          "source": "npc_types 223008 maxdmg"
+        },
+        "atk": {
+          "value": 500,
+          "status": "verified",
+          "source": "npc_types 223008 ATK"
+        },
+        "accuracy": {
+          "value": 750,
+          "status": "verified",
+          "source": "npc_types 223008 Accuracy"
+        },
+        "level": {
+          "value": 80,
+          "status": "verified",
+          "source": "npc_types 223008 level"
+        },
+        "attackDelay": {
+          "value": 38,
+          "status": "verified",
+          "source": "npc_types 223008 attack_delay. Values under 401 are deciseconds, so 3800 ms before haste."
+        },
+        "slowMitigation": {
+          "value": 25,
+          "status": "verified",
+          "source": "npc_types 223008 slow_mitigation"
+        },
+        "attackCount": {
+          "value": 1,
+          "status": "verified",
+          "source": "npc_types attack_count is -1. DoMainHandRound uses one swing when the count is 1 or less."
+        },
+        "className": {
+          "value": "Warrior",
+          "status": "verified",
+          "source": "npc_types 223008 class 1. Level 80 warriors can triple attack after a double."
+        },
+        "flurryChance": {
+          "value": null,
+          "status": "verified",
+          "source": "special_abilities has no Flurry (5)."
+        },
+        "dualWield": {
+          "value": true,
+          "status": "verified",
+          "source": "special_abilities includes DualWield (7,1)."
+        },
+        "areaRampageChance": {
+          "value": 5,
+          "status": "verified",
+          "source": "special_abilities 4,1,5,0,10. Param 0 is the chance."
+        },
+        "areaRampageDamagePct": {
+          "value": 10,
+          "status": "verified",
+          "source": "special_abilities 4,1,5,0,10. Param 2 is the damage percent. Applied only for a one-target hate list."
+        }
+      }
+    },
+    {
+      "id": "pop-boss",
+      "name": "PoP boss (illustrative)",
+      "fields": {
+        "db": {
+          "value": 600,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row. Not a parsed npc_types min/max."
+        },
+        "di": {
+          "value": 220,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row. baseDamage is DI * 10."
+        },
+        "level": {
+          "value": 70,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row."
+        },
+        "atk": {
+          "value": 250,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row."
+        },
+        "accuracy": {
+          "value": 150,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row."
+        },
+        "attackDelay": {
+          "value": 30,
+          "status": "illustrative",
+          "source": "Placeholder deciseconds (3.0s). Not a parsed boss delay."
+        },
+        "slowMitigation": {
+          "value": null,
+          "status": "unavailable",
+          "source": "Not documented for this row."
+        },
+        "attackCount": {
+          "value": 1,
+          "status": "illustrative",
+          "source": "Placeholder. Not a parsed attack_count."
+        },
+        "className": {
+          "value": null,
+          "status": "unavailable",
+          "source": "Triple attack is not assumed."
+        },
+        "flurryChance": {
+          "value": null,
+          "status": "unavailable",
+          "source": "No specials row."
+        },
+        "dualWield": {
+          "value": false,
+          "status": "illustrative",
+          "source": "Off until a specials row says otherwise."
+        }
+      }
+    },
+    {
+      "id": "potime-trash",
+      "name": "PoTime raid trash (illustrative)",
+      "fields": {
+        "db": {
+          "value": 180,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row. Not a parsed npc_types min/max."
+        },
+        "di": {
+          "value": 60,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row. baseDamage is DI * 10."
+        },
+        "level": {
+          "value": 65,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row."
+        },
+        "atk": {
+          "value": 150,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row."
+        },
+        "accuracy": {
+          "value": 50,
+          "status": "illustrative",
+          "source": "Mod2 illustrative row."
+        },
+        "attackDelay": {
+          "value": 25,
+          "status": "illustrative",
+          "source": "Placeholder deciseconds (2.5s). Not a parsed trash delay."
+        },
+        "slowMitigation": {
+          "value": null,
+          "status": "unavailable",
+          "source": "Not documented for this row."
+        },
+        "attackCount": {
+          "value": 1,
+          "status": "illustrative",
+          "source": "Placeholder. Not a parsed attack_count."
+        },
+        "className": {
+          "value": null,
+          "status": "unavailable",
+          "source": "Triple attack is not assumed."
+        },
+        "flurryChance": {
+          "value": null,
+          "status": "unavailable",
+          "source": "No specials row."
+        },
+        "dualWield": {
+          "value": false,
+          "status": "illustrative",
+          "source": "Off until a specials row says otherwise."
+        }
+      }
+    }
+  ]
+}

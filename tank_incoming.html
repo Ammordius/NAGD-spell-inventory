@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tank incoming</title>
+<style>
+:root { color-scheme: light dark; --line: #8884; --ink: CanvasText; --bg: Canvas; --accent: #1d4e89; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.45 system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+main { max-width: 960px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 1.4rem; margin: 0 0 8px; }
+h2 { font-size: 1.05rem; margin: 20px 0 8px; }
+p.note, .assumptions { font-size: 0.92rem; }
+.banner { border: 1px solid var(--line); padding: 10px 12px; margin: 10px 0; }
+.primary { font-size: 1.8rem; font-weight: 700; margin: 4px 0; }
+label { display: block; margin: 8px 0 4px; font-size: 0.92rem; }
+input, select, button, textarea { font: inherit; width: 100%; max-width: 100%; padding: 8px; }
+button { width: auto; background: var(--accent); color: white; border: 0; border-radius: 4px; cursor: pointer; }
+button.secondary { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 720px) {
+  .row.two { grid-template-columns: 1fr 1fr; }
+  .row.three { grid-template-columns: 1fr 1fr 1fr; }
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.bad { color: #a33; }
+.ok { color: #174; }
+svg { width: 100%; height: auto; background: #0001; }
+.timeline { max-height: 280px; overflow: auto; font-family: ui-monospace, monospace; font-size: 0.82rem; }
+</style>
+</head>
+<body>
+<main>
+<h1>Tank incoming</h1>
+<p class="note">Estimated survival for one tank and one mob over a finite fight. Average DPS and HPS are diagnostics. This page is not linked from the rankings.</p>
+<div id="status" class="banner">Loading character and encounter files…</div>
+
+<h2>Character</h2>
+<label for="charPick">Level 65 character</label>
+<select id="charPick"></select>
+<div id="sheet"></div>
+
+<h2>Encounter</h2>
+<label for="encPick">Profile</label>
+<select id="encPick"></select>
+<p id="encNotes" class="note"></p>
+<div id="encFields"></div>
+<div class="row two">
+  <div>
+    <label for="slowed">Slowed</label>
+    <select id="slowed"><option value="no">No</option><option value="yes">Yes</option></select>
+  </div>
+  <div>
+    <label for="slowPct">Slow percent (spell). 75 means effect value 25.</label>
+    <input id="slowPct" type="number" value="75" min="0" max="100">
+  </div>
+</div>
+<p class="note">Effective slow uses the mob's slow mitigation with the server's integer formula. The percent is the spell you chose. It is not a property of the mob.</p>
+
+<h2>Buffs</h2>
+<p class="note">AA toggles default off. The export records points spent, not which AAs are owned, so turning one on is an assumption.</p>
+<div class="row three" id="buffs"></div>
+<div class="row two">
+  <div><label for="spellAc">Spell AC, separate from item AC</label><input id="spellAc" type="number" value="0"></div>
+  <div><label for="spellMit">Spell mitigation effect. Negative reduces the interval. -50 is a user-entered defensive discipline.</label><input id="spellMit" type="number" value="0"></div>
+  <div><label for="avoidPct">Avoidance percent on the miss check</label><input id="avoidPct" type="number" value="0"></div>
+  <div><label for="facing">Facing</label><select id="facing"><option value="front">In front</option><option value="behind">Behind</option></select></div>
+</div>
+
+<h2>Experimental Mod2s</h2>
+<label><input id="mod2" type="checkbox" style="width:auto"> Enable experimental Mod2s — off by default</label>
+<p class="note">Off is current combat. Equipped totals still show below and do not change damage. On is labeled experimental. Shielding then reduces the damage bonus, capped at 35, and leaves the interval unchanged. That reduction is a hypothesis. Worn avoidance is added as a miss-check percent, also a hypothesis, using the server's best-value rule against the avoidance percent above. Accuracy and other offensive totals do not reduce incoming damage.</p>
+<div id="mod2Totals"></div>
+
+<h2>Healing chain</h2>
+<label for="healMode">Mode</label>
+<select id="healMode">
+  <option value="fixed">Fixed healing chain</option>
+  <option value="none">No healing</option>
+</select>
+<div class="row three">
+  <div><label for="healAmt">Heal amount</label><input id="healAmt" type="number" value="7500"></div>
+  <div><label for="healers">Healers</label><input id="healers" type="number" value="4" min="1"></div>
+  <div><label for="castMs">Cast ms</label><input id="castMs" type="number" value="10000"></div>
+  <div><label for="spacing">Chain spacing ms</label><input id="spacing" type="number" value="3000"></div>
+  <div><label for="jitter">Jitter ± ms, uniform, not a standard deviation</label><input id="jitter" type="number" value="500"></div>
+  <div><label for="startMode">Chain start</label><select id="startMode"><option value="steady">Steady state</option><option value="cold">Cold start</option></select></div>
+</div>
+<p id="presetNote" class="note"></p>
+<label><input id="randPhase" type="checkbox" style="width:auto"> Randomize the opening phase between the attack timer and the chain</label>
+<div class="row three">
+  <div><label for="horizon">Fight seconds</label><input id="horizon" type="number" value="180"></div>
+  <div><label for="trials">Trials</label><input id="trials" type="number" value="10000" min="1"></div>
+  <div><label for="seed">Seed</label><input id="seed" type="number" value="14650"></div>
+  <div><label for="target">Survival target for the spacing search</label><select id="target"><option value="0.95">95%</option><option value="0.99" selected>99%</option></select></div>
+</div>
+<p>
+  <button id="run" type="button">Run fight</button>
+  <button id="compareMod2" class="secondary" type="button">Compare Mod2 off and on</button>
+  <button id="search" class="secondary" type="button">Search chain spacing</button>
+</p>
+
+<h2>Results</h2>
+<div id="results"></div>
+<h2>HP over time</h2>
+<div id="plots"></div>
+<h2>Failure timeline</h2>
+<div id="timeline" class="timeline"></div>
+
+<h2>Comparisons</h2>
+<p class="note">Item swap and the marginal strip use the same seed, trial count, encounter, and healing chain as the run.</p>
+<div class="row three">
+  <div><label for="swapHp">Modified max HP</label><input id="swapHp" type="number"></div>
+  <div><label for="swapAc">Modified item AC</label><input id="swapAc" type="number"></div>
+  <div><label for="swapShield">Modified shield AC</label><input id="swapShield" type="number"></div>
+</div>
+<p><button id="swap" class="secondary" type="button">Compare item swap</button></p>
+<div id="compare"></div>
+
+<h2 class="assumptions">Assumptions</h2>
+<ul class="assumptions">
+  <li>Death is client HP below -10. HP of -10 stays up on that check. A later heal does not revive a dead tank.</li>
+  <li>Swings in one round share a timestamp. A heal at that same time is applied after the attacks.</li>
+  <li>Jitter is uniform on the closed millisecond range from minus the setting to plus the setting.</li>
+  <li>Defense is the level-65 class cap. Item skill mods are not in the item file, so none are applied.</li>
+  <li>Quarm's enrage is on the database row and is not modeled, because it depends on Quarm's HP.</li>
+  <li>Area rampage hits this tank only under the one-target hate list branch in this source.</li>
+  <li>A finite horizon is not indefinite survival. Results stay estimated.</li>
+</ul>
+</main>
+<script src="tank_simulator.js"></script>
+<script>
+(function () {
+  var rankings = null;
+  var items = null;
+  var mod2Table = null;
+  var encounters = null;
+  var lastScenario = null;
+  var buffIds = [
+    ['combatStability', 'Combat Stability +10 softcap'],
+    ['innateDefense', 'Innate Defense +15 softcap'],
+    ['combatAgility', 'Combat Agility +10 avoidance'],
+    ['lightningReflexes', 'Lightning Reflexes +15 avoidance']
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  function num(id) { return Number($(id).value); }
+
+  function loadJson(url) {
+    return fetch(url).then(function (res) {
+      if (!res.ok) throw new Error(url);
+      return res.json();
+    });
+  }
+
+  buffIds.forEach(function (pair) {
+    var wrap = document.createElement('label');
+    wrap.innerHTML = '<input type="checkbox" id="' + pair[0] + '" style="width:auto"> ' + pair[1];
+    $('buffs').appendChild(wrap);
+  });
+
+  Promise.all([
+    loadJson('class_rankings.json'),
+    loadJson('data/item_stats.json'),
+    loadJson('data/item_mod2.json'),
+    loadJson('data/tank_encounters.json')
+  ]).then(function (files) {
+    rankings = files[0];
+    items = files[1];
+    mod2Table = files[2];
+    encounters = files[3];
+    var chars = rankings.characters || [];
+    var pick = $('charPick');
+    chars.forEach(function (c) {
+      var opt = document.createElement('option');
+      opt.value = String(c.id);
+      opt.textContent = c.name + ' (' + c.class + ')';
+      pick.appendChild(opt);
+    });
+    var params = new URLSearchParams(location.search);
+    var wanted = params.get('id');
+    if (wanted && chars.some(function (c) { return String(c.id) === wanted; })) pick.value = wanted;
+    encounters.encounters.forEach(function (enc) {
+      var opt = document.createElement('option');
+      opt.value = enc.id;
+      opt.textContent = enc.name;
+      $('encPick').appendChild(opt);
+    });
+    var preset = encounters.completeHealPreset;
+    $('presetNote').textContent = preset.name + ' is ' + preset.status + '. ' + preset.note;
+    $('status').textContent = 'Loaded ' + chars.length + ' characters. Outcomes stay estimated.';
+    renderEncounter();
+    renderCharacter();
+  }).catch(function (err) {
+    $('status').textContent = 'Could not load data files. Open this page from the site root so class_rankings.json and data/ are reachable. ' + err.message;
+  });
+
+  function selectedChar() {
+    var id = $('charPick').value;
+    return (rankings.characters || []).find(function (c) { return String(c.id) === id; });
+  }
+
+  function selectedEncounter() {
+    return encounters.encounters.find(function (enc) { return enc.id === $('encPick').value; });
+  }
+
+  function worn(char) {
+    return TankSim.wornSlots(char.inventory || []);
+  }
+
+  function itemAcSum(char) {
+    var sum = 0;
+    var missing = 0;
+    worn(char).forEach(function (row) {
+      var item = items[String(row.item_id)];
+      if (!item) { missing += 1; return; }
+      sum += Number(item.ac) || 0;
+    });
+    return { sum: sum, missing: missing };
+  }
+
+  function shieldAcOf(char) {
+    var row = worn(char).find(function (r) { return Number(r.slot_id) === 14; });
+    if (!row) return { ac: 0, known: true };
+    var item = items[String(row.item_id)];
+    if (!item) return { ac: null, known: false };
+    var slot = String(item.slot || '');
+    var dmg = Number(item.dmg) || 0;
+    if (slot.indexOf('SECONDARY') >= 0 && dmg === 0) return { ac: Number(item.ac) || 0, known: true };
+    return { ac: 0, known: true, weapon: true };
+  }
+
+  function renderCharacter() {
+    var char = selectedChar();
+    if (!char) return;
+    var sheet = char.sheet || {};
+    var ac = itemAcSum(char);
+    var shield = shieldAcOf(char);
+    var audit = TankSim.auditSheet({
+      className: char.class,
+      race: char.race,
+      level: 65,
+      agi: char.stats && char.stats.AGI,
+      itemAc: sheet.ac_item != null ? sheet.ac_item : ac.sum,
+      shieldAc: sheet.ac_shield != null ? sheet.ac_shield : (shield.ac || 0),
+      weight: sheet.weight || 0,
+      summedItemAc: ac.sum,
+      exported: sheet
+    });
+    var lines = ['<p><strong>' + char.name + '</strong> ' + char.race + ' ' + char.class +
+      ' · HP ' + (char.stats.hp || 0) + ' · displayed AC ' + (char.stats.ac || 0) +
+      ' · AGI ' + (char.stats.AGI || 0) + '</p>'];
+    lines.push('<p class="note">Worn slots are ear through ammo. ' + ac.missing + ' worn item id(s) are missing from item stats. Bags are ignored.</p>');
+    lines.push('<table><tr><th>Column</th><th>Export</th><th>Rebuilt</th><th>Delta</th></tr>');
+    ['ac_item', 'ac_shield', 'ac_avoidance', 'ac_mitigation', 'ac_total'].forEach(function (key) {
+      var exported = sheet[key];
+      var rebuilt = audit.reconstructed[key];
+      var delta = audit.deltas[key];
+      lines.push('<tr><td>' + key + '</td><td>' + (exported == null ? 'not in this rankings file' : exported) +
+        '</td><td>' + (rebuilt == null ? '' : rebuilt) + '</td><td>' + (delta == null ? '' : delta) + '</td></tr>');
+    });
+    lines.push('</table>');
+    lines.push('<p class="note">Rebuilt avoidance uses the level-65 defense cap (' + (TankSim.skillCaps(char.class).defense || 0) + '), marked assumed. Displayed AC is not combat mitigation. Combat mitigation for this unbuffed sheet is ' +
+      TankSim.defenderProfile(baseScenario()).mitigation + '.</p>');
+    $('sheet').innerHTML = lines.join('');
+    var mod = TankSim.sumMod2(mod2Table, worn(char).map(function (r) { return r.item_id; }));
+    var bits = Object.keys(mod.totals).map(function (k) { return k + ' ' + mod.totals[k]; }).join(' · ');
+    $('mod2Totals').textContent = 'Equipped Mod2 totals (informational): ' + bits;
+    if (!$('swapHp').value) $('swapHp').value = char.stats.hp || 0;
+    if (!$('swapAc').value) $('swapAc').value = sheet.ac_item != null ? sheet.ac_item : ac.sum;
+    if (!$('swapShield').value) $('swapShield').value = sheet.ac_shield != null ? sheet.ac_shield : (shield.ac || 0);
+  }
+
+  function renderEncounter() {
+    var enc = selectedEncounter();
+    $('encNotes').textContent = enc.notes || '';
+    var box = $('encFields');
+    box.innerHTML = '';
+    Object.keys(enc.fields).forEach(function (key) {
+      var field = enc.fields[key];
+      var wrap = document.createElement('label');
+      wrap.textContent = key + ' (' + field.status + ')';
+      var input = document.createElement('input');
+      input.dataset.key = key;
+      input.dataset.status = field.status;
+      input.value = field.value == null ? '' : field.value;
+      input.title = field.source || '';
+      wrap.appendChild(input);
+      box.appendChild(wrap);
+    });
+  }
+
+  function mobFromForm() {
+    var mob = {};
+    var notes = [];
+    Array.prototype.forEach.call($('encFields').querySelectorAll('input'), function (input) {
+      var raw = input.value.trim();
+      var enc = selectedEncounter().fields[input.dataset.key];
+      var changed = String(enc.value == null ? '' : enc.value) !== raw;
+      if (raw === '') {
+        mob[input.dataset.key] = null;
+        if (enc.status !== 'unavailable' || changed) notes.push(input.dataset.key + ': unavailable');
+      } else if (raw === 'true' || raw === 'false') {
+        mob[input.dataset.key] = raw === 'true';
+      } else if (input.dataset.key === 'className') {
+        mob[input.dataset.key] = raw;
+      } else if (!isNaN(Number(raw))) {
+        mob[input.dataset.key] = Number(raw);
+      } else {
+        mob[input.dataset.key] = raw;
+      }
+      if (changed) notes.push(input.dataset.key + ': user-entered');
+    });
+    mob._notes = notes;
+    return mob;
+  }
+
+  function healingFromForm() {
+    return {
+      mode: $('healMode').value,
+      amount: num('healAmt'),
+      healers: num('healers'),
+      castMs: num('castMs'),
+      spacingMs: num('spacing'),
+      jitterMs: num('jitter'),
+      start: $('startMode').value,
+      randomizePhase: $('randPhase').checked
+    };
+  }
+
+  function baseScenario() {
+    var char = selectedChar();
+    var sheet = (char && char.sheet) || {};
+    var ac = char ? itemAcSum(char) : { sum: 0 };
+    var shield = char ? shieldAcOf(char) : { ac: 0 };
+    var scenario = {
+      className: char ? char.class : 'Warrior',
+      race: char ? char.race : '',
+      level: 65,
+      maxHp: char && char.stats ? char.stats.hp : 1,
+      agi: char && char.stats ? char.stats.AGI : 0,
+      itemAc: sheet.ac_item != null ? sheet.ac_item : ac.sum,
+      shieldAc: sheet.ac_shield != null ? sheet.ac_shield : (shield.ac || 0),
+      weight: sheet.weight || 0,
+      inFront: $('facing').value !== 'behind',
+      experimentalMod2: $('mod2').checked,
+      mod2: char ? TankSim.sumMod2(mod2Table, worn(char).map(function (r) { return r.item_id; })).totals : {},
+      spellAc: num('spellAc'),
+      spellMitigationEffect: num('spellMit'),
+      avoidancePct: num('avoidPct'),
+      slowed: $('slowed').value === 'yes',
+      slowPercent: num('slowPct'),
+      healing: healingFromForm(),
+      horizonMs: Math.round(num('horizon') * 1000),
+      trials: num('trials'),
+      seed: num('seed'),
+      includeTraces: true,
+      mob: mobFromForm()
+    };
+    buffIds.forEach(function (pair) { scenario[pair[0]] = $(pair[0]).checked; });
+    return scenario;
+  }
+
+  function fmtPct(p) {
+    if (p == null || isNaN(p)) return '—';
+    return (p * 100).toFixed(2) + '%';
+  }
+  function fmt(n) {
+    if (n == null || isNaN(n)) return '—';
+    return Math.round(n).toLocaleString();
+  }
+
+  function resultHtml(run) {
+    if (!run || !run.runnable) {
+      var missing = (run && run.missing) ? run.missing.join(', ') : (run && run.reason) || 'missing inputs';
+      var per = run && run.perHit && run.perHit.available ? '<p>Per-hit math is still available. Expected landed hit ' + fmt(run.perHit.expectedLanded) + '.</p>' : '';
+      return '<p class="bad">Survival is not computed. Missing or rejected: ' + missing + '.</p>' + per;
+    }
+    var ci = run.deathInterval;
+    var html = '<p class="note">' + run.label + ' · horizon ' + (run.horizonMs / 1000) + 's · ' + run.trials + ' trials · seed ' + run.seed + '</p>';
+    html += '<p class="primary">' + fmtPct(run.survivalProbability) + ' survive the full fight</p>';
+    html += '<p>' + run.deaths + ' / ' + run.trials + ' trials died (' + fmtPct(run.deathProbability) + '). Death probability interval ' +
+      fmtPct(ci.low) + ' to ' + fmtPct(ci.high) + '.</p>';
+    html += '<p>Time to death among failures, median ' + fmt(run.timeToDeathMs.median) + ' ms. Minimum HP median ' +
+      fmt(run.minHp.median) + ', p5 ' + fmt(run.minHp.p5) + ', p1 ' + fmt(run.minHp.p1) + '.</p>';
+    var s = run.secondary;
+    html += '<h2>Diagnostics</h2><table>';
+    html += '<tr><td>Average incoming melee DPS</td><td>' + fmt(s.averageIncomingDps) + '</td></tr>';
+    html += '<tr><td>Mean landed hit</td><td>' + fmt(s.meanLandedHit) + '</td></tr>';
+    html += '<tr><td>Land rate / avoidance</td><td>' + fmtPct(s.landRate) + ' / ' + fmtPct(s.avoidanceRate) + '</td></tr>';
+    html += '<tr><td>Swing timer</td><td>' + fmt(s.intervalMs) + ' ms · haste ' + (s.haste ? s.haste.haste : '—') + '</td></tr>';
+    html += '<tr><td>Swings per second</td><td>' + (s.swingsPerSecond == null ? '—' : s.swingsPerSecond.toFixed(3)) + '</td></tr>';
+    html += '<tr><td>8s / 13s / 20s p95 burst</td><td>' + fmt(s.windowP95[8]) + ' / ' + fmt(s.windowP95[13]) + ' / ' + fmt(s.windowP95[20]) + '</td></tr>';
+    html += '<tr><td>8s / 13s / 20s p99 burst</td><td>' + fmt(s.windowP99[8]) + ' / ' + fmt(s.windowP99[13]) + ' / ' + fmt(s.windowP99[20]) + '</td></tr>';
+    html += '<tr><td>Scheduled HPS / effective HPS / overheal</td><td>' + fmt(s.scheduledHps) + ' / ' + fmt(s.effectiveHps) + ' / ' + fmt(s.overheal) + '</td></tr>';
+    html += '<tr><td>Max damaging hits between heals</td><td>' + s.maxDamagingHitsBetweenHeals + '</td></tr>';
+    html += '</table>';
+    if (run.perHit && run.perHit.available) {
+      html += '<p class="note">Analytic expected landed hit ' + fmt(run.perHit.expectedLanded) + ' before avoidance. Combat mitigation ' + run.perHit.combatMitigation + '.</p>';
+    }
+    return html;
+  }
+
+  function plot(trace, title) {
+    if (!trace || !trace.length) return '<p class="note">' + title + ': no trace.</p>';
+    var pts = trace.filter(function (ev) { return ev.hpAfter != null; });
+    if (!pts.length) return '';
+    var maxT = pts[pts.length - 1].t || 1;
+    var minY = 0;
+    var maxY = 1;
+    pts.forEach(function (ev) {
+      if (ev.hpAfter < minY) minY = ev.hpAfter;
+      if (ev.hpAfter > maxY) maxY = ev.hpAfter;
+    });
+    var w = 640;
+    var h = 180;
+    function x(t) { return 24 + (t / maxT) * (w - 36); }
+    function y(hp) { return 10 + (1 - (hp - minY) / (maxY - minY || 1)) * (h - 24); }
+    var d = pts.map(function (ev, i) { return (i ? 'L' : 'M') + x(ev.t).toFixed(1) + ' ' + y(ev.hpAfter).toFixed(1); }).join(' ');
+    var marks = trace.filter(function (ev) { return ev.kind === 'heal'; }).map(function (ev) {
+      return '<circle cx="' + x(ev.t).toFixed(1) + '" cy="' + y(ev.hpAfter).toFixed(1) + '" r="3" fill="#1d4e89"/>';
+    }).join('');
+    return '<p>' + title + '</p><svg viewBox="0 0 ' + w + ' ' + h + '" role="img"><path d="' + d + '" fill="none" stroke="currentColor" stroke-width="1.5"/>' + marks + '</svg>';
+  }
+
+  function timeline(trace) {
+    if (!trace) return 'No death in the representative sample.';
+    return trace.map(function (ev) {
+      var bit = (ev.t / 1000).toFixed(3) + 's ' + (ev.kind || ev.outcome || '');
+      if (ev.outcome) bit += ' ' + ev.outcome;
+      if (ev.damage) bit += ' ' + ev.damage;
+      if (ev.healed != null && ev.kind === 'heal') bit += ' heal ' + ev.healed;
+      if (ev.hpAfter != null) bit += ' hp ' + ev.hpAfter;
+      return bit;
+    }).join('\n');
+  }
+
+  function showRun(run) {
+    $('results').innerHTML = resultHtml(run);
+    if (!run || !run.runnable) {
+      $('plots').innerHTML = '';
+      $('timeline').textContent = '';
+      return;
+    }
+    var traces = run.traces || {};
+    $('plots').innerHTML = plot(traces.survival, 'A representative survival. Dots are heals.') +
+      plot(traces.death, 'A representative death.');
+    $('timeline').textContent = timeline(traces.death);
+  }
+
+  function runScenario(scenario) {
+    var check = scenario.healing.mode === 'fixed' ? TankSim.chainFeasibility(scenario.healing) : { feasible: true };
+    if (!check.feasible) return { runnable: false, reason: check.reason, missing: ['healing chain'] };
+    return TankSim.simulate(scenario);
+  }
+
+  $('charPick').addEventListener('change', function () {
+    $('swapHp').value = '';
+    $('swapAc').value = '';
+    $('swapShield').value = '';
+    renderCharacter();
+  });
+  $('encPick').addEventListener('change', renderEncounter);
+
+  $('run').addEventListener('click', function () {
+    lastScenario = baseScenario();
+    $('status').textContent = 'Running ' + lastScenario.trials + ' trials…';
+    setTimeout(function () {
+      var run = runScenario(lastScenario);
+      showRun(run);
+      $('status').textContent = run.runnable ? 'Run finished. Survival is for this horizon only.' : 'Run did not produce a survival probability.';
+      marginal(lastScenario, run);
+    }, 20);
+  });
+
+  $('compareMod2').addEventListener('click', function () {
+    var off = baseScenario();
+    off.experimentalMod2 = false;
+    off.includeTraces = false;
+    var on = baseScenario();
+    on.experimentalMod2 = true;
+    on.includeTraces = false;
+    var cmp = TankSim.compare(off, on);
+    if (!cmp.runnable) {
+      $('compare').innerHTML = resultHtml(cmp.left && cmp.left.runnable ? cmp.right : cmp.left);
+      return;
+    }
+    $('compare').innerHTML = '<p><strong>Mod2 off</strong> survival ' + fmtPct(cmp.left.survivalProbability) +
+      ' · <strong>Mod2 on</strong> ' + fmtPct(cmp.right.survivalProbability) +
+      ' · delta ' + fmtPct(cmp.survivalDelta) + '</p>' +
+      '<p class="note">On is an experimental scenario. The same seed and healing chain were used.</p>';
+  });
+
+  $('swap').addEventListener('click', function () {
+    var base = lastScenario || baseScenario();
+    base.includeTraces = false;
+    var changed = Object.assign({}, base, {
+      maxHp: num('swapHp'),
+      itemAc: num('swapAc'),
+      shieldAc: num('swapShield'),
+      includeTraces: false
+    });
+    var cmp = TankSim.compare(base, changed);
+    if (!cmp.runnable) {
+      $('compare').innerHTML = '<p class="bad">The swap needs the same runnable encounter as the fight.</p>';
+      return;
+    }
+    $('compare').innerHTML = '<p>Baseline survival ' + fmtPct(cmp.left.survivalProbability) +
+      ' · swapped ' + fmtPct(cmp.right.survivalProbability) +
+      ' · delta ' + fmtPct(cmp.right.survivalProbability - cmp.left.survivalProbability) + '</p>';
+  });
+
+  function marginal(scenario, baseRun) {
+    if (!baseRun || !baseRun.runnable) return;
+    var patches = [
+      ['+100 HP', { maxHp: scenario.maxHp + 100 }],
+      ['+10 pre-softcap AC', { preSoftcapBonus: 10 }],
+      ['+1% spell mitigation', { spellMitigationEffect: (scenario.spellMitigationEffect || 0) - 1 }],
+      ['+1 avoidance percent', { avoidancePct: (scenario.avoidancePct || 0) + 1 }]
+    ];
+    var rows = patches.map(function (patch) {
+      var next = Object.assign({}, scenario, patch[1], { includeTraces: false });
+      var run = TankSim.simulate(next);
+      var d = run.runnable ? (run.survivalProbability - baseRun.survivalProbability) : null;
+      return '<tr><td>' + patch[0] + '</td><td>' + fmtPct(run.survivalProbability) + '</td><td>' + fmtPct(d) + '</td></tr>';
+    });
+    $('compare').innerHTML = '<table><tr><th>Change</th><th>Survival</th><th>Delta vs baseline</th></tr>' + rows.join('') + '</table>' +
+      '<p class="note">Extra AC is applied to the pre-softcap mitigation sum. Past the softcap the class returns shrink that point.</p>';
+  }
+
+  $('search').addEventListener('click', function () {
+    var scenario = baseScenario();
+    scenario.includeTraces = false;
+    $('status').textContent = 'Searching chain spacing…';
+    setTimeout(function () {
+      var found = TankSim.searchSpacing(scenario, {
+        target: Number($('target').value),
+        trials: Math.min(scenario.trials, 400)
+      });
+      if (!found.runnable) {
+        $('results').innerHTML = '<p class="bad">' + (found.reason || 'Search could not run.') + '</p>';
+      } else if (!found.found) {
+        $('results').innerHTML = '<p>' + found.note + '</p><p>Tightest feasible survival ' + fmtPct(found.tightest.survivalProbability) + ' at ' + found.tightest.spacingMs + ' ms.</p>';
+      } else {
+        $('results').innerHTML = '<p class="primary">Longest searched spacing ' + found.spacingMs + ' ms</p>' +
+          '<p>Target ' + fmtPct(found.target) + ' over ' + (found.horizonMs / 1000) + 's. Point survival ' + fmtPct(found.survivalProbability) +
+          '. Scheduled HPS ' + fmt(found.scheduledHps) + '.</p><p class="note">' + found.note + ' Seeds ' + found.seeds.join(', ') +
+          ' · ' + found.trialsPerSeed + ' trials each. This is not average incoming DPS.</p>';
+      }
+      $('status').textContent = 'Spacing search finished.';
+    }, 20);
+  });
+})();
+</script>
+</body>
+</html>

@@ -79,6 +79,48 @@ def _row_get(row, preferred_key, default=''):
     return default
 
 
+# Unbuffed Magelo snapshot columns used by the tank simulator. Ranking scores
+# keep using stats.hp and stats.ac. These fields are stored only when the
+# export actually has the column and a numeric value.
+TANK_SHEET_KEYS = (
+    'ac_item',
+    'ac_shield',
+    'ac_avoidance',
+    'ac_mitigation',
+    'ac_total',
+    'weight',
+    'hp_max_item',
+    'AGI_base',
+    'AGI_item',
+    'AGI_aa',
+    'AGI_total',
+)
+
+
+def tank_sheet_from_row(row):
+    """Pass through sheet AC components. Missing columns are omitted, not zeroed."""
+    if not row:
+        return {}
+    folded = {}
+    for key in row.keys():
+        if not key:
+            continue
+        folded[key.lstrip('\ufeff').lower()] = key
+    sheet = {}
+    for key in TANK_SHEET_KEYS:
+        src = folded.get(key.lower())
+        if src is None:
+            continue
+        raw = row.get(src)
+        if raw is None or raw == '' or raw == 'NULL':
+            continue
+        try:
+            sheet[key] = int(raw)
+        except (TypeError, ValueError):
+            continue
+    return sheet
+
+
 # Normalize item name for matching (handle apostrophes, case, etc.) — must match frontend normalizeItemNameForLookup
 def normalize_item_name(name):
     """Normalize item name for matching (same rules as class_rankings.html)"""
@@ -2687,7 +2729,8 @@ def main():
                             'WIS': safe_int(_row_get(row, 'WIS_total', 0)),
                             'INT': safe_int(_row_get(row, 'INT_total', 0)),
                             'CHA': safe_int(_row_get(row, 'CHA_total', 0)),
-                        }
+                        },
+                        'sheet': tank_sheet_from_row(row),
                     }
                 except Exception as e:
                     print(f"Error processing character {char_id}: {e}")
@@ -2919,7 +2962,8 @@ def main():
             'duration_cats': char_duration_cats,  # Duration by category
             'scores': scores,  # Percentage scores (includes focus_scores and focus_items)
             'overall_score': round(overall_score, 2),  # Overall ranking score
-            'inventory': char_inventory  # Inventory items for item links
+            'inventory': char_inventory,  # Inventory items for item links
+            'sheet': char_data.get('sheet') or {},
         })
     
     # Normalize focus score to (focus total points / top total focus points in class) so it reflects class-relative focus, not a weighted average that overweights spell damage

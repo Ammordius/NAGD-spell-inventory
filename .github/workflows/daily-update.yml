@@ -722,6 +722,18 @@ jobs:
           cp dps_calculator.html deploy/dps_calculator.html
           echo "✓ Copied dps_calculator.html to deploy directory"
         fi
+        if [ -f "tank_incoming.html" ]; then
+          cp tank_incoming.html deploy/tank_incoming.html
+          echo "✓ Copied tank_incoming.html to deploy directory"
+        fi
+        if [ -f "tank_simulator.js" ]; then
+          cp tank_simulator.js deploy/tank_simulator.js
+          echo "✓ Copied tank_simulator.js to deploy directory"
+        fi
+        if [ -f "data/tank_encounters.json" ]; then
+          cp data/tank_encounters.json deploy/data/tank_encounters.json
+          echo "✓ Copied data/tank_encounters.json to deploy directory"
+        fi
         if [ -f "dps_calculator_guide.html" ]; then
           cp dps_calculator_guide.html deploy/dps_calculator_guide.html
           echo "✓ Copied dps_calculator_guide.html to deploy directory"
@@ -767,6 +779,13 @@ jobs:
         if [ -f "scoring_explanation.html" ]; then
           cp scoring_explanation.html deploy/scoring_explanation.html
           echo "✓ Copied scoring_explanation.html to deploy directory"
+        fi
+        # Copy Mod2 weight explanation (linked from class_rankings.html?mod2=true)
+        if [ -f "mod2_guide.html" ]; then
+          cp mod2_guide.html deploy/mod2_guide.html
+          echo "✓ Copied mod2_guide.html to deploy directory"
+        else
+          echo "::warning::mod2_guide.html missing - Mod2 rankings will have no weight explanation link target"
         fi
         # Copy delta history page if it was generated
         if [ -f "delta-history.html" ]; then
