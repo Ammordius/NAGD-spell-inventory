@@ -212,8 +212,93 @@
         });
     }
 
+    function statRows(className, itemIds) {
+        if (!isReady() || !config.classes[className]) return [];
+        const scored = scoreIds(className, itemIds);
+        const weights = activeWeights(className);
+        return STATS.map(function (stat) {
+            const raw = Number(scored.raw[stat]) || 0;
+            const capped = Number(scored.capped[stat]) || 0;
+            const cap = Number(config.caps[stat]) || 0;
+            const weight = 100 * (Number(weights[stat]) || 0);
+            const points = weight * utility(stat, capped);
+            return {
+                stat: stat,
+                label: LABELS[stat],
+                raw: raw,
+                capped: capped,
+                cap: cap,
+                scorePct: cap > 0 ? (100 * utility(stat, capped)) : 0,
+                weight: weight,
+                points: points
+            };
+        });
+    }
+
+    function signedMod(stat, delta) {
+        const n = Number(delta) || 0;
+        return (n > 0 ? '+' : '') + formatMod(stat, n);
+    }
+
+    function deltaNote(className, beforeIds, afterIds) {
+        if (!isReady() || !config.classes[className]) return '';
+        const before = scoreIds(className, beforeIds);
+        const after = scoreIds(className, afterIds);
+        const parts = [];
+        STATS.forEach(function (stat) {
+            const delta = (Number(after.raw[stat]) || 0) - (Number(before.raw[stat]) || 0);
+            if (delta) parts.push(LABELS[stat] + ' ' + signedMod(stat, delta));
+        });
+        if (!parts.length) return '';
+        const pts = after.points - before.points;
+        return parts.join(', ') + ' (' + (pts > 0 ? '+' : '') + pts.toFixed(2) + ')';
+    }
+
+    function scoresTableHtml(className, itemIds, corePoints) {
+        const rows = statRows(className, itemIds).slice().sort(function (a, b) {
+            return b.points - a.points || b.weight - a.weight;
+        });
+        if (!rows.length) return '';
+        const modTotal = rows.reduce(function (sum, row) { return sum + row.points; }, 0);
+        const denom = (Number(corePoints) || 0) + modTotal;
+        let html = '<h3>Mod2 Scores</h3>';
+        html += '<table><thead><tr><th>Mod2</th><th>Value</th><th>Score %</th><th>Weight</th><th>Points</th><th>% of total</th></tr></thead><tbody>';
+        rows.forEach(function (row) {
+            const value = formatMod(row.stat, row.capped) + (row.raw > row.cap ? ' (raw ' + formatMod(row.stat, row.raw) + ')' : '') + ' / ' + formatMod(row.stat, row.cap);
+            const share = denom > 0 ? (row.points / denom * 100).toFixed(1) : '0.0';
+            html += '<tr><td>' + row.label + '</td><td>' + value + '</td><td>' + row.scorePct.toFixed(1) + '%</td><td>' + row.weight.toFixed(2) + '</td><td>' + row.points.toFixed(2) + '</td><td>' + share + '%</td></tr>';
+        });
+        const totalShare = denom > 0 ? (modTotal / denom * 100).toFixed(1) : '0.0';
+        html += '<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Mod2 Total</strong></td><td colspan="3"></td><td><strong>' + modTotal.toFixed(2) + '</strong></td><td><strong>' + totalShare + '%</strong></td></tr>';
+        html += '</tbody></table>';
+        html += '<p style="color: #6c757d; font-size: 0.9em;">Value is equipped / cap. Weight is the full-cap point budget for this class. % of total uses stat + focus + Mod2 points.</p>';
+        return html;
+    }
+
+    function compareTableHtml(className, beforeIds, afterIds) {
+        const before = statRows(className, beforeIds);
+        const after = statRows(className, afterIds);
+        if (!before.length || !after.length) return '';
+        const afterByStat = {};
+        after.forEach(function (row) { afterByStat[row.stat] = row; });
+        const rows = before.map(function (row) {
+            const next = afterByStat[row.stat];
+            return { label: row.label, stat: row.stat, current: row.capped, delta: next.capped - row.capped, next: next.capped, weight: next.weight, points: next.points };
+        }).sort(function (a, b) { return b.points - a.points || b.weight - a.weight; });
+        const total = rows.reduce(function (sum, row) { return sum + row.points; }, 0);
+        let html = '<div class="focus-breakdown-section" style="margin-top:12px;"><h3 style="font-size:1.05em;margin-top:0;">Mod2 (virtual)</h3>';
+        html += '<table><thead><tr><th>Mod2</th><th>Current</th><th>Delta</th><th>New</th><th>Weight</th><th>Points</th></tr></thead><tbody>';
+        rows.forEach(function (row) {
+            const deltaStr = row.delta === 0 ? '—' : signedMod(row.stat, row.delta);
+            html += '<tr><td>' + row.label + '</td><td>' + formatMod(row.stat, row.current) + '</td><td>' + deltaStr + '</td><td>' + formatMod(row.stat, row.next) + '</td><td>' + row.weight.toFixed(2) + '</td><td>' + row.points.toFixed(2) + '</td></tr>';
+        });
+        html += '<tr style="border-top: 2px solid #333; font-weight: bold;"><td><strong>Mod2 Total</strong></td><td colspan="4"></td><td><strong>' + total.toFixed(2) + '</strong></td></tr>';
+        html += '</tbody></table></div>';
+        return html;
+    }
+
     function upgradeDetail(className, equipped, slotId, currentItemId, candidateId, is2h) {
-        if (!isReady() || !config.classes[className]) return { item: 0, display: 0 };
+        if (!isReady() || !config.classes[className]) return { item: 0, display: 0, note: '' };
         const before = wornIds(equipped);
         const afterRows = (equipped || []).filter(function (row) {
             if (Number(row.slot_id) === Number(slotId)) return false;
@@ -223,7 +308,11 @@
         const after = afterRows.map(function (row) { return row.item_id; });
         after.push(candidateId);
         const display = scoreIds(className, after).points - scoreIds(className, before).points;
-        return { item: display * (Number(config.classes[className].upgrade_scale) || 0), display: display };
+        return {
+            item: display * (Number(config.classes[className].upgrade_scale) || 0),
+            display: display,
+            note: deltaNote(className, before, after)
+        };
     }
 
     function upgradeAdjustment(className, equipped, slotId, currentItemId, candidateId, is2h) {
@@ -270,6 +359,12 @@
         upgradeAdjustment: upgradeAdjustment,
         upgradeDetail: upgradeDetail,
         itemLine: itemLine,
+        itemModsLabel: function (itemId) {
+            const line = itemLine(itemId);
+            return line.indexOf('Mod2: ') === 0 ? line.slice(6) : line;
+        },
+        scoresTableHtml: scoresTableHtml,
+        compareTableHtml: compareTableHtml,
         breakdownText: breakdownText,
         combined: combined,
         utility: utility,

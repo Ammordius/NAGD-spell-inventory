@@ -985,6 +985,13 @@
             return { norm, focusWeights: norm.focus || {} };
         }
 
+        function mod2ScoresSection(char) {
+            if (!mod2Enabled || !window.Mod2Scoring || !Mod2Scoring.isReady() || !Mod2Scoring.scoresTableHtml) return '';
+            const ids = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 22).map(item => item.item_id);
+            const corePoints = char.total_points != null ? char.total_points : ((Number(char.stat_points) || 0) + (Number(char.focus_points) || 0));
+            return Mod2Scoring.scoresTableHtml(char.class, ids, corePoints);
+        }
+
         /** Item IDs on the virtual loadout (slots 1–22); offhand excluded when main hand is 2H. */
         function getVirtualWornItemIds(virtualLoadout, itemStatsCache) {
             const ids = [];
@@ -1481,9 +1488,9 @@
                     }
                     const mod2Detail = (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady())
                         ? Mod2Scoring.upgradeDetail(charClass, equippedOnly, slotId, currentItemId, id, is2her)
-                        : { item: 0, display: 0 };
+                        : { item: 0, display: 0, note: '' };
                     const delta = score - baselineScore + mod2Detail.item;
-                    if (mod2Detail.display) deltas.mod2Note = 'Mod2 ' + (mod2Detail.display > 0 ? '+' : '') + mod2Detail.display.toFixed(2);
+                    if (mod2Detail.note) deltas.mod2Note = mod2Detail.note;
                     if (!includeDowngrades && delta <= 0) continue;
 
                     const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
@@ -1526,9 +1533,9 @@
                     const deltas = getItemStatDeltas(null, stats);
                     const mod2Detail = (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady())
                         ? Mod2Scoring.upgradeDetail(charClass, equippedOnly, slotId, null, id, false)
-                        : { item: 0, display: 0 };
+                        : { item: 0, display: 0, note: '' };
                     const delta = score + mod2Detail.item;
-                    if (mod2Detail.display) deltas.mod2Note = 'Mod2 ' + (mod2Detail.display > 0 ? '+' : '') + mod2Detail.display.toFixed(2);
+                    if (mod2Detail.note) deltas.mod2Note = mod2Detail.note;
                     if (!includeDowngrades && delta <= 0) continue;
                     const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
                     candidates.push({
@@ -3997,6 +4004,7 @@
                 // Overall total = Stat Total + Focus Total (from recalculateScores; works with dynamic reweighting)
                 // This ensures consistency with the ranking calculation
                 const overallTotal = char.total_points !== undefined ? char.total_points : (totalStatPoints + totalFocusPoints);
+                html += mod2ScoresSection(char);
                 html += `<h3 style="margin-top: 20px;">Overall Total: ${overallTotal.toFixed(2)} points</h3>`;
                 html += `<p style="color: #6c757d; font-size: 0.9em;">Overall Total = Stat Total + Focus Total (sum of all row Points above).</p>`;
                 // Calculate class maximum safely
@@ -4010,6 +4018,7 @@
                 html += `<p style="color: #6c757d; font-size: 0.9em;">Overall Score: ${formatScore(char.overall_score)}% (normalized by class maximum of ${classMaxDisplay} points)</p>`;
             } else {
                 // No focus scores, just show stat total
+                html += mod2ScoresSection(char);
                 const overallTotal = char.total_points !== undefined ? char.total_points : totalStatPoints;
                 html += `<h3 style="margin-top: 20px;">Overall Total: ${overallTotal.toFixed(2)} points</h3>`;
                 if (char.overall_score > 0 && char.total_points !== undefined) {
@@ -4024,12 +4033,6 @@
                 }
             }
             
-            if (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady() && char.mod2) {
-                html += `<h3 style="margin-top: 16px;">Mod2</h3>`;
-                html += `<p style="color: #333;">${escapeHtml(Mod2Scoring.breakdownText(char))}</p>`;
-                html += `<p style="color: #6c757d; font-size: 0.9em;">Core is the existing stat and focus score. Mod2 points use the same 100-point class scale. The total percentage divides by 100 plus this class's reference Mod2 loadout, so a fully geared reference character stays at 100%.</p>`;
-            }
-
             // Gear display with item links (worn slots 1-22 only)
             const equippedOnly = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 22);
             if (equippedOnly.length > 0) {
@@ -4285,7 +4288,13 @@
                             });
                             focusBlock += '</div>';
                         }
-                        extras.innerHTML = focusBlock +
+                        let mod2Block = '';
+                        if (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady() && Mod2Scoring.compareTableHtml) {
+                            const equippedIds = getEquippedWornItemIds(char);
+                            const virtualIds = getVirtualWornItemIds(itemPickerState.virtualLoadout, itemStatsCache);
+                            mod2Block = Mod2Scoring.compareTableHtml(char.class, equippedIds, virtualIds);
+                        }
+                        extras.innerHTML = focusBlock + mod2Block +
                             `<table style="margin-bottom:0;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody>` +
                             `<tr><td>FT (mana regen item)</td><td>${fmtSlash(gear.ft)}</td><td>${fmtD(gear.ft.delta)}</td><td>${gear.ft.new} / ${gear.ft.cap}</td></tr>` +
                             `<tr><td>Worn ATK</td><td>${fmtSlash(gear.atk)}</td><td>${fmtD(gear.atk.delta)}</td><td>${gear.atk.new} / ${gear.atk.cap}</td></tr>` +
@@ -4384,7 +4393,9 @@
                         if (options.length === 0) pickerHtml += `<option value=""${selectedId === '' ? ' selected' : ''}>— None —</option>`;
                         else options.forEach(opt => {
                             const suffix = (opt.id === currentItemId ? ' (equipped)' : (opt.delta != null && opt.delta <= 0 ? ' (downgrade)' : ''));
-                            const label = escapeHtml(opt.name) + suffix;
+                            const mod2Label = (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady() && opt.id !== '' && opt.id != null)
+                                ? Mod2Scoring.itemModsLabel(opt.id) : '';
+                            const label = escapeHtml(opt.name) + suffix + (mod2Label ? ' · ' + escapeHtml(mod2Label) : '');
                             pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`;
                         });
                         pickerHtml += `</select>`;
