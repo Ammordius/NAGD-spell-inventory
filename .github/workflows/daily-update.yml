@@ -698,6 +698,25 @@ jobs:
         else
           echo "Optional: data/dkp_prices.json not found - ?dkp_val=true on class rankings will show no DKP data"
         fi
+        # Copy Mod2 scorer and launch-item data for class_rankings.html?mod2=true
+        if [ -f "mod2_rankings.js" ]; then
+          cp mod2_rankings.js deploy/mod2_rankings.js
+          echo "✓ Copied mod2_rankings.js to deploy"
+        else
+          echo "::warning::mod2_rankings.js missing - ?mod2=true will keep legacy scores"
+        fi
+        if [ -f "data/item_mod2.json" ]; then
+          cp data/item_mod2.json deploy/data/item_mod2.json
+          echo "✓ Copied data/item_mod2.json to deploy"
+        else
+          echo "::warning::data/item_mod2.json missing - ?mod2=true will keep legacy scores"
+        fi
+        if [ -f "data/mod2_config.json" ]; then
+          cp data/mod2_config.json deploy/data/mod2_config.json
+          echo "✓ Copied data/mod2_config.json to deploy"
+        else
+          echo "::warning::data/mod2_config.json missing - ?mod2=true will keep legacy scores"
+        fi
         # Copy DPS calculator pages and data (weapon_procs.json proc DPS; weapon_threat_server.json for hate; dps_config for AAs)
         if [ -f "dps_calculator.html" ]; then
           cp dps_calculator.html deploy/dps_calculator.html
