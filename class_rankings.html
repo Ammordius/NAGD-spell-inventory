@@ -563,6 +563,7 @@
         </div>
     </div>
 
+    <script src="mod2_rankings.js"></script>
     <script data-goatcounter="https://ammordius.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
     <script>
@@ -583,6 +584,8 @@
 
         // Hidden DKP feature: ?dkp_val=true shows last 3 DKP prices and HP/DKP on recommended upgrades
         const dkpValEnabled = (() => { const p = new URLSearchParams(window.location.search); return p.get('dkp_val') === 'true'; })();
+        // Independent of dkp_val. Missing or any value other than true keeps legacy scores.
+        const mod2Enabled = (() => { const p = new URLSearchParams(window.location.search); return p.get('mod2') === 'true'; })();
         let dkpPricesCache = {}; // item_id (string) -> { dkp_prices: [ { date, cost }, ... ] }
         let elementalDisplayNames = {}; // item_id (string) -> display name for elemental pieces missing name in item_stats (e.g. "16693" -> "Elemental Greaves Mold")
         let elementalSlotOptions = { by_slot_id: {} }; // slot_id -> [ { pattern_name, pattern_id, by_class: { ROG: magelo_id, ... } } ], from data/elemental_slot_options.json
@@ -1328,6 +1331,7 @@
             else if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
             let text = parts.join('  ');
             if (focusSpellName && focusSpellName.trim()) text += (text ? '  · ' : '') + 'Focus: ' + focusSpellName.trim();
+            if (deltas.mod2Note) text += (text ? '  · ' : '') + deltas.mod2Note;
             return text || '';
         }
 
@@ -1475,7 +1479,11 @@
                     } else {
                         deltas = getItemStatDeltas(currentStats, stats);
                     }
-                    const delta = score - baselineScore;
+                    const mod2Detail = (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady())
+                        ? Mod2Scoring.upgradeDetail(charClass, equippedOnly, slotId, currentItemId, id, is2her)
+                        : { item: 0, display: 0 };
+                    const delta = score - baselineScore + mod2Detail.item;
+                    if (mod2Detail.display) deltas.mod2Note = 'Mod2 ' + (mod2Detail.display > 0 ? '+' : '') + mod2Detail.display.toFixed(2);
                     if (!includeDowngrades && delta <= 0) continue;
 
                     const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
@@ -1516,7 +1524,11 @@
                     if (isItemLore(stats) && otherEquippedIds.has(id)) continue;
                     const score = scoreItemForUpgrade(stats, id, norm, focusWeights, focusValuesByItem);
                     const deltas = getItemStatDeltas(null, stats);
-                    const delta = score;
+                    const mod2Detail = (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady())
+                        ? Mod2Scoring.upgradeDetail(charClass, equippedOnly, slotId, null, id, false)
+                        : { item: 0, display: 0 };
+                    const delta = score + mod2Detail.item;
+                    if (mod2Detail.display) deltas.mod2Note = 'Mod2 ' + (mod2Detail.display > 0 ? '+' : '') + mod2Detail.display.toFixed(2);
                     if (!includeDowngrades && delta <= 0) continue;
                     const focusSpellName = (stats.focusSpellName != null && stats.focusSpellName !== '') ? String(stats.focusSpellName) : '';
                     candidates.push({
@@ -2389,6 +2401,10 @@
                     classChars[i].class_rank = classRank;
                 }
             });
+
+            if (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady()) {
+                Mod2Scoring.applyToCharacters(characters);
+            }
         }
         
         async function loadData() {
@@ -2951,6 +2967,7 @@
             if (resistPart) parts.push(resistPart);
             else if (deltas && deltas.svAllDelta != null && deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
             if (focusSpellName) parts.push('Focus: ' + focusSpellName);
+            if (deltas && deltas.mod2Note) parts.push(deltas.mod2Note);
             return parts.join(' ');
         }
 
@@ -4007,6 +4024,12 @@
                 }
             }
             
+            if (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady() && char.mod2) {
+                html += `<h3 style="margin-top: 16px;">Mod2</h3>`;
+                html += `<p style="color: #333;">${escapeHtml(Mod2Scoring.breakdownText(char))}</p>`;
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Core is the existing stat and focus score. Mod2 points use the same 100-point class scale. The total percentage divides by 100 plus this class's reference Mod2 loadout, so a fully geared reference character stays at 100%.</p>`;
+            }
+
             // Gear display with item links (worn slots 1-22 only)
             const equippedOnly = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 22);
             if (equippedOnly.length > 0) {
@@ -4879,6 +4902,10 @@
             if (effectSpellId != null || effectSpellName) inner += 'Effect: ' + spellLinkHtml(effectSpellId, effectSpellName) + (effectNote ? ' ' + escapeHtml(effectNote) : '') + '<br>';
             if (skillMod) inner += 'Skill Mod: ' + skillMod + '<br>';
             if (statsLine) inner += statsLine + '<br>';
+            if (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady()) {
+                const mod2Line = Mod2Scoring.itemLine(itemId);
+                if (mod2Line) inner += mod2Line + '<br>';
+            }
             if (resistsLine) inner += resistsLine + '<br>';
             instrumentMods.forEach(inst => {
                 inner += (inst.label != null && inst.label !== '' ? inst.label + ': ' : '') + inst.value + (inst.pct != null ? ' <i>(' + inst.pct + ')</i>' : '') + '<br>';
@@ -4987,7 +5014,10 @@
             itemCardHideTimer = setTimeout(hideItemCard, 150);
         });
 
-        loadData();
+        const mod2Boot = (mod2Enabled && window.Mod2Scoring)
+            ? Mod2Scoring.load().catch(function (err) { console.error('Mod2 data failed to load', err); })
+            : Promise.resolve();
+        mod2Boot.then(function () { loadData(); });
         // Preload item_stats so name→id resolution works on first hover (e.g. gear slots that lack item_id in JSON)
         Promise.all([loadItemStats(), loadItemSpellBonuses(), loadSpellFocii()]).then(() => {
             const hasNames = Object.keys(itemNameToId).length > 0;

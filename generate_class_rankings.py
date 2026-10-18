@@ -2977,6 +2977,14 @@ def main():
         'normalized_class_weights': normalized_by_class,
         'focus_candidates': focus_candidates,
     }
+    # Mod2 totals are informational. overall_score stays the legacy core score.
+    try:
+        import mod2_scoring
+        for char in output_data:
+            mod2_scoring.annotate_character(char)
+        output['mod2_config'] = mod2_scoring.public_config()
+    except Exception as exc:
+        print(f"Warning: mod2 annotation skipped: {exc}")
     # Helper function to round floats in nested structures
     def round_floats(obj):
         if isinstance(obj, float):

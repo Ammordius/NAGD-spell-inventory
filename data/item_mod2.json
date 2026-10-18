@@ -1,0 +1,589 @@
+{
+  "source": "Launch-era Plane of Time Mod2 additions. No other items currently have Mod2s.",
+  "items": {
+    "27990": {
+      "name": "Gauntlets of Disruption",
+      "db_name": "Gauntlets of Disruption",
+      "slots": 4096,
+      "classes": 151,
+      "mods": {
+        "strikethrough": 5
+      }
+    },
+    "21994": {
+      "name": "Protective Sleeves",
+      "db_name": "Protective Sleeves",
+      "slots": 128,
+      "classes": 31840,
+      "mods": {
+        "stun_resist": 5
+      }
+    },
+    "5760": {
+      "name": "Earring of Xaoth Kor",
+      "db_name": "Earring of Xaoth Kor",
+      "slots": 18,
+      "classes": 32767,
+      "mods": {
+        "combat_effects": 5
+      }
+    },
+    "29174": {
+      "name": "Mask of Strategic Insight",
+      "db_name": "Mask of Strategic Insight",
+      "slots": 8,
+      "classes": 16861,
+      "mods": {
+        "accuracy": 10
+      }
+    },
+    "20898": {
+      "name": "Symbol of the Planemasters",
+      "db_name": "Symbol of the Planemasters",
+      "slots": 2048,
+      "classes": 32767,
+      "mods": {
+        "stun_resist": 5
+      }
+    },
+    "26994": {
+      "name": "Ring of Evasion",
+      "db_name": "Ring of Evasion",
+      "slots": 98304,
+      "classes": 546,
+      "mods": {
+        "avoidance": 10
+      }
+    },
+    "26996": {
+      "name": "Gloves of the Unseen",
+      "db_name": "Gloves of the Unseen",
+      "slots": 4096,
+      "classes": 15360,
+      "mods": {
+        "spell_shielding": 4
+      }
+    },
+    "28667": {
+      "name": "Bracer of Precision",
+      "db_name": "Bracer of Precision",
+      "slots": 1536,
+      "classes": 17407,
+      "mods": {
+        "stun_resist": 5
+      }
+    },
+    "15815": {
+      "name": "Cloak of the Falling Skies",
+      "db_name": "Cloak of the Falling Skies",
+      "slots": 256,
+      "classes": 15906,
+      "mods": {
+        "avoidance": 10
+      }
+    },
+    "23498": {
+      "name": "Hopebringer",
+      "db_name": "Hopebringer",
+      "slots": 8192,
+      "classes": 4,
+      "mods": {
+        "strikethrough": 5
+      }
+    },
+    "26991": {
+      "name": "Band of Prismatic Focus",
+      "db_name": "Band of Prismatic Focus",
+      "slots": 98304,
+      "classes": 32767,
+      "mods": {
+        "combat_effects": 10
+      }
+    },
+    "28658": {
+      "name": "Mantle of Deadly Precision",
+      "db_name": "Mantle of Deadly Precision",
+      "slots": 64,
+      "classes": 16861,
+      "mods": {
+        "accuracy": 15
+      }
+    },
+    "26988": {
+      "name": "Winged Storm Boots",
+      "db_name": "Winged Storm Boots",
+      "slots": 524288,
+      "classes": 776,
+      "mods": {
+        "spell_shielding": 4
+      }
+    },
+    "28656": {
+      "name": "Tactician's Shield",
+      "db_name": "Tactician's Shield",
+      "slots": 16384,
+      "classes": 32767,
+      "mods": {
+        "spell_shielding": 5
+      }
+    },
+    "22890": {
+      "name": "Cudgel of Venomous Hatred",
+      "db_name": "Cudgel of Venomous Hatred",
+      "slots": 8192,
+      "classes": 16,
+      "mods": {
+        "strikethrough": 5
+      }
+    },
+    "21995": {
+      "name": "Armguards of the Brute",
+      "db_name": "Armguards of the Brute",
+      "slots": 128,
+      "classes": 151,
+      "mods": {
+        "spell_shielding": 4
+      }
+    },
+    "26740": {
+      "name": "Shinai of the Ancients",
+      "db_name": "Shinai of the Ancients",
+      "slots": 24576,
+      "classes": 16448,
+      "mods": {
+        "avoidance": 5
+      }
+    },
+    "26799": {
+      "name": "Globe of Mystical Protection",
+      "db_name": "Globe of Mystical Protection",
+      "slots": 2048,
+      "classes": 32767,
+      "mods": {
+        "avoidance": 10
+      }
+    },
+    "26986": {
+      "name": "Shoes of Fleeting Fury",
+      "db_name": "Shoes of Fleeting Fury",
+      "slots": 524288,
+      "classes": 16480,
+      "mods": {
+        "spell_shielding": 4
+      }
+    },
+    "8977": {
+      "name": "Collar of Catastrophe",
+      "db_name": "Collar of Catastrophe",
+      "slots": 32,
+      "classes": 16861,
+      "mods": {
+        "shielding": 2
+      }
+    },
+    "28651": {
+      "name": "Leggings of Furious Might",
+      "db_name": "Leggings of Furious Might",
+      "slots": 262144,
+      "classes": 776,
+      "mods": {
+        "shielding": 2,
+        "avoidance": 10
+      }
+    },
+    "25995": {
+      "name": "Boots of Despair",
+      "db_name": "Boots of Despair",
+      "slots": 524288,
+      "classes": 151,
+      "mods": {
+        "stun_resist": 5
+      }
+    },
+    "24573": {
+      "name": "Timespinner, Blade of the Hunter",
+      "db_name": "Timespinner, Blade of the Hunter",
+      "slots": 24576,
+      "classes": 8,
+      "mods": {
+        "accuracy": 5
+      }
+    },
+    "15927": {
+      "name": "Belt of Temporal Bindings",
+      "db_name": "Belt of Temporal Bindings",
+      "slots": 1048576,
+      "classes": 32767,
+      "mods": {
+        "spell_shielding": 5
+      }
+    },
+    "26980": {
+      "name": "Earring of Unseen Horrors",
+      "db_name": "Earring of Unseen Horrors",
+      "slots": 18,
+      "classes": 15906,
+      "mods": {
+        "stun_resist": 4
+      }
+    },
+    "28650": {
+      "name": "Greaves of Furious Might",
+      "db_name": "Greaves of Furious Might",
+      "slots": 262144,
+      "classes": 151,
+      "mods": {
+        "shielding": 4
+      }
+    },
+    "10948": {
+      "name": "Timestone Adorned Ring",
+      "db_name": "Timestone Adorned Ring",
+      "slots": 98304,
+      "classes": 16861,
+      "mods": {
+        "strikethrough": 5
+      }
+    },
+    "27000": {
+      "name": "Padded Tigerskin Gloves",
+      "db_name": "Padded Tigerskin Gloves",
+      "slots": 4096,
+      "classes": 17407,
+      "mods": {
+        "strikethrough": 10
+      }
+    },
+    "9289": {
+      "name": "Necklace of Eternal Visions",
+      "db_name": "Necklace of Eternal Visions",
+      "slots": 32,
+      "classes": 151,
+      "mods": {
+        "shielding": 2
+      }
+    },
+    "31603": {
+      "name": "Girdle of Stability",
+      "db_name": "Girdle of Stability",
+      "slots": 1048576,
+      "classes": 927,
+      "mods": {
+        "stun_resist": 5
+      }
+    },
+    "28246": {
+      "name": "Gloves of Airy Mists",
+      "db_name": "Gloves of Airy Mists",
+      "slots": 4096,
+      "classes": 927,
+      "mods": {
+        "strikethrough": 10
+      }
+    },
+    "24692": {
+      "name": "Jagged Timeforged Blade",
+      "db_name": "Jagged Timeforged Blade",
+      "slots": 24576,
+      "classes": 256,
+      "mods": {
+        "accuracy": 5
+      }
+    },
+    "13674": {
+      "name": "Shroud of Survival",
+      "db_name": "Shroud of Survival",
+      "slots": 64,
+      "classes": 16861,
+      "mods": {
+        "accuracy": 8
+      }
+    },
+    "27298": {
+      "name": "Shield of Strife",
+      "db_name": "Shield of Strife",
+      "slots": 16384,
+      "classes": 21,
+      "mods": {
+        "shielding": 3
+      }
+    },
+    "32610": {
+      "name": "Sandals of Empowerment",
+      "db_name": "Sandals of Empowerment",
+      "slots": 524288,
+      "classes": 15360,
+      "mods": {
+        "stun_resist": 5
+      }
+    },
+    "15824": {
+      "name": "Platinum Cloak of War",
+      "db_name": "Platinum Cloak of War",
+      "slots": 256,
+      "classes": 927,
+      "mods": {
+        "avoidance": 10
+      }
+    },
+    "22999": {
+      "name": "Darkblade of the Warlord",
+      "db_name": "Darkblade of the Warlord",
+      "slots": 8192,
+      "classes": 1,
+      "mods": {
+        "strikethrough": 5
+      }
+    },
+    "28652": {
+      "name": "Pants of Furious Might",
+      "db_name": "Pants of Furious Might",
+      "slots": 262144,
+      "classes": 16480,
+      "mods": {
+        "avoidance": 25
+      }
+    },
+    "15805": {
+      "name": "Shroud of Eternity",
+      "db_name": "Shroud of Eternity",
+      "slots": 256,
+      "classes": 32767,
+      "mods": {
+        "shielding": 4,
+        "damage_shield": 5
+      }
+    },
+    "21993": {
+      "name": "Bracer of the Inferno",
+      "db_name": "Bracer of the Inferno",
+      "slots": 1536,
+      "classes": 776,
+      "mods": {
+        "stun_resist": 4,
+        "accuracy": 15
+      }
+    },
+    "32100": {
+      "name": "Earthen Bracer of Fortitude",
+      "db_name": "Earthen Bracer of Fortitude",
+      "slots": 1536,
+      "classes": 151,
+      "mods": {
+        "shielding": 2,
+        "stun_resist": 4
+      }
+    },
+    "28649": {
+      "name": "Ethereal Silk Leggings",
+      "db_name": "Ethereal Silk Leggings",
+      "slots": 262144,
+      "classes": 15360,
+      "mods": {
+        "stun_resist": 5,
+        "avoidance": 20
+      }
+    },
+    "27280": {
+      "name": "Whorl of Unnatural Forces",
+      "db_name": "Whorl of Unnatural Forces",
+      "slots": 16384,
+      "classes": 546,
+      "mods": {
+        "stun_resist": 5
+      }
+    },
+    "32110": {
+      "name": "Wristband of Icy Vengeance",
+      "db_name": "Wristband of Icy Vengeance",
+      "slots": 1536,
+      "classes": 16480,
+      "mods": {
+        "avoidance": 15,
+        "accuracy": 15
+      }
+    },
+    "16156": {
+      "name": "Cord of Temporal Weavings",
+      "db_name": "Cord of Temporal Weavings",
+      "slots": 1048576,
+      "classes": 16861,
+      "mods": {
+        "strikethrough": 10
+      }
+    },
+    "28661": {
+      "name": "Shawl of Eternal Forces",
+      "db_name": "Shawl of Eternal Forces",
+      "slots": 64,
+      "classes": 15906,
+      "mods": {
+        "combat_effects": 15
+      }
+    },
+    "7123": {
+      "name": "Silver Hoop of Speed",
+      "db_name": "Silver Hoop of Speed",
+      "slots": 18,
+      "classes": 16861,
+      "mods": {
+        "combat_effects": 15
+      }
+    },
+    "26989": {
+      "name": "Prismatic Ring of Resistance",
+      "db_name": "Prismatic Ring of Resistance",
+      "slots": 98304,
+      "classes": 17407,
+      "mods": {
+        "spell_shielding": 6
+      }
+    },
+    "32602": {
+      "name": "Grimror's Guard of the Plagues",
+      "db_name": "Grimror's Guard of the Plagues",
+      "slots": 131072,
+      "classes": 16,
+      "mods": {
+        "shielding": 2
+      }
+    },
+    "32132": {
+      "name": "Trydan's Chestplate of Nobility",
+      "db_name": "Trydan's Chestplate of Nobility",
+      "slots": 131072,
+      "classes": 4,
+      "mods": {
+        "shielding": 2
+      }
+    },
+    "32129": {
+      "name": "Raex's Chestplate of Destruction",
+      "db_name": "Raex's Chestplate of Destruction",
+      "slots": 131072,
+      "classes": 1,
+      "mods": {
+        "shielding": 3
+      }
+    },
+    "32134": {
+      "name": "Rizlona's Fiery Chestplate",
+      "db_name": "Rizlona's Fiery Chestplate",
+      "slots": 131072,
+      "classes": 128,
+      "mods": {
+        "stun_resist": 7
+      }
+    },
+    "32603": {
+      "name": "Ultor's Chestguard of Faith",
+      "db_name": "Ultor's Chestguard of Faith",
+      "slots": 131072,
+      "classes": 2,
+      "mods": {
+        "stun_resist": 7
+      }
+    },
+    "32139": {
+      "name": "Kerasha's Sylvan Tunic",
+      "db_name": "Kerasha's Sylvan Tunic",
+      "slots": 131072,
+      "classes": 32,
+      "mods": {
+        "stun_resist": 7
+      }
+    },
+    "32138": {
+      "name": "Rosrak's Hauberk of the Primal",
+      "db_name": "Rosrak's Hauberk of the Primal",
+      "slots": 131072,
+      "classes": 512,
+      "mods": {
+        "stun_resist": 7
+      }
+    },
+    "32131": {
+      "name": "Ton Po's Chestwraps of Composure",
+      "db_name": "Ton Po's Chestwraps of Composure",
+      "slots": 131072,
+      "classes": 64,
+      "mods": {
+        "avoidance": 15
+      }
+    },
+    "32136": {
+      "name": "Dumul's Chestwraps of the Brute",
+      "db_name": "Dumul's Chestwraps of the Brute",
+      "slots": 131072,
+      "classes": 16384,
+      "mods": {
+        "avoidance": 15
+      }
+    },
+    "32130": {
+      "name": "Bidilis' Hauberk of the Elusive",
+      "db_name": "Bidilis' Hauberk of the Elusive",
+      "slots": 131072,
+      "classes": 256,
+      "mods": {
+        "accuracy": 15
+      }
+    },
+    "32604": {
+      "name": "Askr's Thunderous Chainmail",
+      "db_name": "Askr's Thunderous Chainmail",
+      "slots": 131072,
+      "classes": 8,
+      "mods": {
+        "accuracy": 15
+      }
+    },
+    "32142": {
+      "name": "Miragul's Shroud of Risen Souls",
+      "db_name": "Miragul's Shroud of Risen Souls",
+      "slots": 131072,
+      "classes": 1024,
+      "mods": {
+        "spell_shielding": 6
+      }
+    },
+    "32143": {
+      "name": "Maelin's Robe of Lore",
+      "db_name": "Maelin's Robe of Lore",
+      "slots": 131072,
+      "classes": 2048,
+      "mods": {
+        "spell_shielding": 6
+      }
+    },
+    "32141": {
+      "name": "Magi'Kot's Robe of Convergence",
+      "db_name": "Magi`Kot's Robe of Convergence",
+      "slots": 131072,
+      "classes": 4096,
+      "mods": {
+        "spell_shielding": 6
+      }
+    },
+    "32140": {
+      "name": "Romar's Robe of Visions",
+      "db_name": "Romar's Robe of Visions",
+      "slots": 131072,
+      "classes": 8192,
+      "mods": {
+        "spell_shielding": 6
+      }
+    }
+  },
+  "unresolved": [
+    {
+      "name": "Galladan's Stormwrath Tunic",
+      "db_name": "Galladan's Stormwrath Tunic",
+      "mods": {
+        "accuracy": 15
+      },
+      "matches": [],
+      "reason": "expected one equippable items row"
+    }
+  ]
+}

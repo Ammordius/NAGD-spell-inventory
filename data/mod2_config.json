@@ -1,0 +1,2374 @@
+{
+  "caps": {
+    "accuracy": 150.0,
+    "avoidance": 100.0,
+    "combat_effects": 100.0,
+    "damage_shield": 25.0,
+    "dot_shielding": 35.0,
+    "shielding": 35.0,
+    "spell_shielding": 35.0,
+    "strikethrough": 35.0,
+    "stun_resist": 35.0
+  },
+  "stats": [
+    "accuracy",
+    "avoidance",
+    "combat_effects",
+    "damage_shield",
+    "dot_shielding",
+    "shielding",
+    "spell_shielding",
+    "strikethrough",
+    "stun_resist"
+  ],
+  "default_scenario": {
+    "name": "pop_raid_partial_threat",
+    "stun_exposure": 0.2,
+    "action_exposure": 0.08,
+    "note": "Threat-limitation uses each class role default. Pass threat_limitation 0 to zero threat value."
+  },
+  "encounters": [
+    {
+      "name": "Quarm",
+      "status": "verified",
+      "weight": 0.5,
+      "db": 1000,
+      "di": 140,
+      "min_hit": 1140,
+      "max_hit": 3800,
+      "level": 80,
+      "atk": 500,
+      "accuracy": 750
+    },
+    {
+      "name": "PoP boss (illustrative)",
+      "status": "illustrative",
+      "weight": 0.3,
+      "db": 600,
+      "di": 220,
+      "level": 70,
+      "atk": 250,
+      "accuracy": 150
+    },
+    {
+      "name": "PoTime raid trash (illustrative)",
+      "status": "illustrative",
+      "weight": 0.2,
+      "db": 180,
+      "di": 60,
+      "level": 65,
+      "atk": 150,
+      "accuracy": 50
+    }
+  ],
+  "classes": {
+    "Warrior": {
+      "reference": {
+        "name": "Voracious",
+        "hp": 8992,
+        "ac": 2206,
+        "mana": 0,
+        "core_json": 91.79
+      },
+      "role": {
+        "melee_in": 0.8,
+        "spell_in": 0.12,
+        "dot_in": 0.08,
+        "threat": 0.35,
+        "offense": 0.2,
+        "behind": false,
+        "action": 0.05
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.038950031791966364,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.020357682422962386,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.011699999999999999,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.0078,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.006975064950787183,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.0022049999999999995,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.0,
+          "threat": 0.0021
+        },
+        "stun_resist": {
+          "other": 0.00039,
+          "threat": 0.006431249999999999
+        },
+        "damage_shield": {
+          "other": 0.0001640625,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28650",
+            "name": "Greaves of Furious Might"
+          },
+          {
+            "id": "27298",
+            "name": "Shield of Strife"
+          },
+          {
+            "id": "32129",
+            "name": "Raex's Chestplate of Destruction"
+          },
+          {
+            "id": "32100",
+            "name": "Earthen Bracer of Fortitude"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "21995",
+            "name": "Armguards of the Brute"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "25995",
+            "name": "Boots of Despair"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "10948",
+            "name": "Timestone Adorned Ring"
+          },
+          {
+            "id": "22999",
+            "name": "Darkblade of the Warlord"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 18.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 20.0,
+          "stun_resist": 14.0
+        },
+        "capped": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 18.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 20.0,
+          "stun_resist": 14.0
+        },
+        "points": 3.2685
+      },
+      "reference_mod2_points": 3.2685,
+      "upgrade_scale": 0.020248874,
+      "core_weights": {
+        "hp_pct": 0.2785714285714286,
+        "mana_pct": 0.0,
+        "ac_pct": 0.18571428571428572,
+        "resists_pct": 0.18571428571428572
+      }
+    },
+    "Cleric": {
+      "reference": {
+        "name": "Drudger",
+        "hp": 6335,
+        "ac": 1917,
+        "mana": 7312,
+        "core_json": 94.9
+      },
+      "role": {
+        "melee_in": 0.12,
+        "spell_in": 0.48,
+        "dot_in": 0.1,
+        "threat": 0.0,
+        "offense": 0.02,
+        "behind": false,
+        "action": 0.35
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.003067315003617351,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.0016031674908082874,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.034124999999999996,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.007109374999999999,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.0009300086601049577,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.00029399999999999994,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.00028,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.0019906249999999998,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 2.1875e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "21995",
+            "name": "Armguards of the Brute"
+          },
+          {
+            "id": "32100",
+            "name": "Earthen Bracer of Fortitude"
+          },
+          {
+            "id": "32603",
+            "name": "Ultor's Chestguard of Faith"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28650",
+            "name": "Greaves of Furious Might"
+          },
+          {
+            "id": "20898",
+            "name": "Symbol of the Planemasters"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "25995",
+            "name": "Boots of Despair"
+          },
+          {
+            "id": "26980",
+            "name": "Earring of Unseen Horrors"
+          },
+          {
+            "id": "9289",
+            "name": "Necklace of Eternal Visions"
+          },
+          {
+            "id": "26994",
+            "name": "Ring of Evasion"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "28661",
+            "name": "Shawl of Eternal Forces"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 12.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 10.0,
+          "stun_resist": 30.0
+        },
+        "capped": {
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 12.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 10.0,
+          "stun_resist": 30.0
+        },
+        "points": 2.2563
+      },
+      "reference_mod2_points": 2.2563,
+      "upgrade_scale": 0.013878176,
+      "core_weights": {
+        "hp_pct": 0.203125,
+        "mana_pct": 0.203125,
+        "ac_pct": 0.040625,
+        "resists_pct": 0.203125
+      }
+    },
+    "Paladin": {
+      "reference": {
+        "name": "Pigpen",
+        "hp": 7878,
+        "ac": 2128,
+        "mana": 6540,
+        "core_json": 89.34
+      },
+      "role": {
+        "melee_in": 0.62,
+        "spell_in": 0.22,
+        "dot_in": 0.08,
+        "threat": 0.25,
+        "offense": 0.28,
+        "behind": false,
+        "action": 0.12
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.026412990308927194,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.013805053393071367,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.01876875,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.006825,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.013020121241469408,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.004115999999999999,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.0,
+          "threat": 0.00392
+        },
+        "stun_resist": {
+          "other": 0.000819,
+          "threat": 0.006124999999999998
+        },
+        "damage_shield": {
+          "other": 0.00030625,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28650",
+            "name": "Greaves of Furious Might"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "32100",
+            "name": "Earthen Bracer of Fortitude"
+          },
+          {
+            "id": "21995",
+            "name": "Armguards of the Brute"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "32132",
+            "name": "Trydan's Chestplate of Nobility"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "25995",
+            "name": "Boots of Despair"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "23498",
+            "name": "Hopebringer"
+          },
+          {
+            "id": "10948",
+            "name": "Timestone Adorned Ring"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 14.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 20.0,
+          "stun_resist": 14.0
+        },
+        "capped": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 14.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 20.0,
+          "stun_resist": 14.0
+        },
+        "points": 3.0816
+      },
+      "reference_mod2_points": 3.0816,
+      "upgrade_scale": 0.019011552,
+      "core_weights": {
+        "hp_pct": 0.24375000000000002,
+        "mana_pct": 0.08125,
+        "ac_pct": 0.1625,
+        "resists_pct": 0.1625
+      }
+    },
+    "Ranger": {
+      "reference": {
+        "name": "Linkamus",
+        "hp": 7457,
+        "ac": 1815,
+        "mana": 6990,
+        "core_json": 98.47
+      },
+      "role": {
+        "melee_in": 0.3,
+        "spell_in": 0.14,
+        "dot_in": 0.06,
+        "threat": 0.05,
+        "offense": 0.62,
+        "behind": false,
+        "action": 0.04
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.012780479181738962,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.006679864545034531,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.011943750000000001,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.00511875,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.028830268463253688,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.009113999999999999,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.006075999999999999,
+          "threat": 0.0026039999999999995
+        },
+        "stun_resist": {
+          "other": 0.000273,
+          "threat": 0.0012249999999999997
+        },
+        "damage_shield": {
+          "other": 0.0006781249999999999,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "21993",
+            "name": "Bracer of the Inferno"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "32604",
+            "name": "Askr's Thunderous Chainmail"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "16156",
+            "name": "Cord of Temporal Weavings"
+          },
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28651",
+            "name": "Leggings of Furious Might"
+          },
+          {
+            "id": "26988",
+            "name": "Winged Storm Boots"
+          },
+          {
+            "id": "10948",
+            "name": "Timestone Adorned Ring"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          }
+        ],
+        "raw": {
+          "accuracy": 55.0,
+          "avoidance": 20.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 8.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 25.0,
+          "stun_resist": 9.0
+        },
+        "capped": {
+          "accuracy": 55.0,
+          "avoidance": 20.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 8.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 25.0,
+          "stun_resist": 9.0
+        },
+        "points": 2.8714
+      },
+      "reference_mod2_points": 2.8714,
+      "upgrade_scale": 0.014685815799999996,
+      "core_weights": {
+        "hp_pct": 0.24375000000000002,
+        "mana_pct": 0.08125,
+        "ac_pct": 0.1625,
+        "resists_pct": 0.1625
+      }
+    },
+    "Shadow Knight": {
+      "reference": {
+        "name": "Slouch",
+        "hp": 8428,
+        "ac": 2109,
+        "mana": 6975,
+        "core_json": 91.66
+      },
+      "role": {
+        "melee_in": 0.62,
+        "spell_in": 0.18,
+        "dot_in": 0.12,
+        "threat": 0.28,
+        "offense": 0.3,
+        "behind": false,
+        "action": 0.08
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.026412990308927194,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.013805053393071367,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.015356250000000002,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.0102375,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.013950129901574366,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.004409999999999999,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.0,
+          "threat": 0.0042
+        },
+        "stun_resist": {
+          "other": 0.000546,
+          "threat": 0.006859999999999999
+        },
+        "damage_shield": {
+          "other": 0.00032812499999999997,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28650",
+            "name": "Greaves of Furious Might"
+          },
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "32100",
+            "name": "Earthen Bracer of Fortitude"
+          },
+          {
+            "id": "27298",
+            "name": "Shield of Strife"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "21995",
+            "name": "Armguards of the Brute"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "32602",
+            "name": "Grimror's Guard of the Plagues"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "25995",
+            "name": "Boots of Despair"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "22890",
+            "name": "Cudgel of Venomous Hatred"
+          },
+          {
+            "id": "10948",
+            "name": "Timestone Adorned Ring"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 17.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 20.0,
+          "stun_resist": 14.0
+        },
+        "capped": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 17.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 20.0,
+          "stun_resist": 14.0
+        },
+        "points": 2.9504
+      },
+      "reference_mod2_points": 2.9504,
+      "upgrade_scale": 0.019331093999999997,
+      "core_weights": {
+        "hp_pct": 0.24375000000000002,
+        "mana_pct": 0.08125,
+        "ac_pct": 0.1625,
+        "resists_pct": 0.1625
+      }
+    },
+    "Druid": {
+      "reference": {
+        "name": "Baily",
+        "hp": 6357,
+        "ac": 1515,
+        "mana": 7502,
+        "core_json": 93.6
+      },
+      "role": {
+        "melee_in": 0.12,
+        "spell_in": 0.38,
+        "dot_in": 0.2,
+        "threat": 0.0,
+        "offense": 0.05,
+        "behind": false,
+        "action": 0.3
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.003067315003617351,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.0016031674908082874,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.027015624999999995,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.014218749999999999,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.002325021650262395,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.000735,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.0007000000000000001,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.0017062499999999999,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 5.4687500000000015e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "26986",
+            "name": "Shoes of Fleeting Fury"
+          },
+          {
+            "id": "32110",
+            "name": "Wristband of Icy Vengeance"
+          },
+          {
+            "id": "28652",
+            "name": "Pants of Furious Might"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "32139",
+            "name": "Kerasha's Sylvan Tunic"
+          },
+          {
+            "id": "21994",
+            "name": "Protective Sleeves"
+          },
+          {
+            "id": "20898",
+            "name": "Symbol of the Planemasters"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "26980",
+            "name": "Earring of Unseen Horrors"
+          },
+          {
+            "id": "26994",
+            "name": "Ring of Evasion"
+          },
+          {
+            "id": "28661",
+            "name": "Shawl of Eternal Forces"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "accuracy": 15.0,
+          "avoidance": 50.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 10.0,
+          "stun_resist": 26.0
+        },
+        "capped": {
+          "accuracy": 15.0,
+          "avoidance": 50.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 10.0,
+          "stun_resist": 26.0
+        },
+        "points": 1.8451
+      },
+      "reference_mod2_points": 1.8451,
+      "upgrade_scale": 0.014043743999999999,
+      "core_weights": {
+        "hp_pct": 0.203125,
+        "mana_pct": 0.203125,
+        "ac_pct": 0.040625,
+        "resists_pct": 0.203125
+      }
+    },
+    "Monk": {
+      "reference": {
+        "name": "Zentile",
+        "hp": 6969,
+        "ac": 1809,
+        "mana": 0,
+        "core_json": 97.35
+      },
+      "role": {
+        "melee_in": 0.28,
+        "spell_in": 0.08,
+        "dot_in": 0.05,
+        "threat": 0.0,
+        "offense": 0.75,
+        "behind": false,
+        "action": 0.02
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.010410281224398282,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.005441053302137218,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.00827272727272727,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.005170454545454544,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.03487532475393592,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.011025,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.010499999999999999,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.00016545454545454543,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 0.0008203125000000001,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "32110",
+            "name": "Wristband of Icy Vengeance"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "16156",
+            "name": "Cord of Temporal Weavings"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "10948",
+            "name": "Timestone Adorned Ring"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "28652",
+            "name": "Pants of Furious Might"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "26986",
+            "name": "Shoes of Fleeting Fury"
+          },
+          {
+            "id": "32131",
+            "name": "Ton Po's Chestwraps of Composure"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          },
+          {
+            "id": "21994",
+            "name": "Protective Sleeves"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          }
+        ],
+        "raw": {
+          "accuracy": 40.0,
+          "avoidance": 65.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 6.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 25.0,
+          "stun_resist": 10.0
+        },
+        "capped": {
+          "accuracy": 40.0,
+          "avoidance": 65.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 6.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 25.0,
+          "stun_resist": 10.0
+        },
+        "points": 2.8353
+      },
+      "reference_mod2_points": 2.8353,
+      "upgrade_scale": 0.013568642999999997,
+      "core_weights": {
+        "hp_pct": 0.2954545454545454,
+        "mana_pct": 0.0,
+        "ac_pct": 0.05909090909090908,
+        "resists_pct": 0.2954545454545454
+      }
+    },
+    "Bard": {
+      "reference": {
+        "name": "Taelor",
+        "hp": 6722,
+        "ac": 1997,
+        "mana": 6555,
+        "core_json": 93.6
+      },
+      "role": {
+        "melee_in": 0.22,
+        "spell_in": 0.22,
+        "dot_in": 0.08,
+        "threat": 0.1,
+        "offense": 0.4,
+        "behind": false,
+        "action": 0.15
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.00519084077535244,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.0027130526767524866,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.014437499999999997,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.005249999999999999,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.0030367629717712916,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.00096,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.0,
+          "threat": 0.0009142857142857144
+        },
+        "stun_resist": {
+          "other": 0.0007874999999999998,
+          "threat": 0.0007874999999999998
+        },
+        "damage_shield": {
+          "other": 7.142857142857145e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "21995",
+            "name": "Armguards of the Brute"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28650",
+            "name": "Greaves of Furious Might"
+          },
+          {
+            "id": "32100",
+            "name": "Earthen Bracer of Fortitude"
+          },
+          {
+            "id": "32134",
+            "name": "Rizlona's Fiery Chestplate"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "25995",
+            "name": "Boots of Despair"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "10948",
+            "name": "Timestone Adorned Ring"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 12.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 15.0,
+          "stun_resist": 21.0
+        },
+        "capped": {
+          "accuracy": 25.0,
+          "avoidance": 10.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 12.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 15.0,
+          "stun_resist": 21.0
+        },
+        "points": 1.2361
+      },
+      "reference_mod2_points": 1.2361,
+      "upgrade_scale": 0.012583584,
+      "core_weights": {
+        "hp_pct": 0.18749999999999997,
+        "mana_pct": 0.18749999999999997,
+        "ac_pct": 0.0375,
+        "resists_pct": 0.18749999999999997
+      }
+    },
+    "Rogue": {
+      "reference": {
+        "name": "Tarkon",
+        "hp": 7338,
+        "ac": 1883,
+        "mana": 0,
+        "core_json": 97.97
+      },
+      "role": {
+        "melee_in": 0.22,
+        "spell_in": 0.06,
+        "dot_in": 0.04,
+        "threat": 0.0,
+        "offense": 0.8,
+        "behind": true,
+        "action": 0.02
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.008179506676312936,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.0042751133088220995,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.006204545454545453,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.004136363636363635,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.037200346404198316,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.00196,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.0112,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.00016545454545454543,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 0.0008750000000000001,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "21993",
+            "name": "Bracer of the Inferno"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "32130",
+            "name": "Bidilis' Hauberk of the Elusive"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "24692",
+            "name": "Jagged Timeforged Blade"
+          },
+          {
+            "id": "26991",
+            "name": "Band of Prismatic Focus"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "28651",
+            "name": "Leggings of Furious Might"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "26988",
+            "name": "Winged Storm Boots"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          }
+        ],
+        "raw": {
+          "accuracy": 60.0,
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 8.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 10.0,
+          "stun_resist": 9.0
+        },
+        "capped": {
+          "accuracy": 60.0,
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 8.0,
+          "spell_shielding": 15.0,
+          "strikethrough": 10.0,
+          "stun_resist": 9.0
+        },
+        "points": 2.4401
+      },
+      "reference_mod2_points": 2.4401,
+      "upgrade_scale": 0.0143780772,
+      "core_weights": {
+        "hp_pct": 0.2954545454545454,
+        "mana_pct": 0.0,
+        "ac_pct": 0.05909090909090908,
+        "resists_pct": 0.2954545454545454
+      }
+    },
+    "Shaman": {
+      "reference": {
+        "name": "Ziva",
+        "hp": 6280,
+        "ac": 1765,
+        "mana": 7367,
+        "core_json": 94.27
+      },
+      "role": {
+        "melee_in": 0.15,
+        "spell_in": 0.32,
+        "dot_in": 0.22,
+        "threat": 0.0,
+        "offense": 0.08,
+        "behind": false,
+        "action": 0.3
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.003834143754521688,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.0020039593635103594,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.02275,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.015640625,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.0037200346404198305,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.0011759999999999995,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.00112,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.0017062499999999999,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 8.749999999999999e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "26988",
+            "name": "Winged Storm Boots"
+          },
+          {
+            "id": "21993",
+            "name": "Bracer of the Inferno"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "28651",
+            "name": "Leggings of Furious Might"
+          },
+          {
+            "id": "32138",
+            "name": "Rosrak's Hauberk of the Primal"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "20898",
+            "name": "Symbol of the Planemasters"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "26994",
+            "name": "Ring of Evasion"
+          },
+          {
+            "id": "26980",
+            "name": "Earring of Unseen Horrors"
+          },
+          {
+            "id": "28661",
+            "name": "Shawl of Eternal Forces"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "accuracy": 15.0,
+          "avoidance": 20.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 6.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 10.0,
+          "stun_resist": 25.0
+        },
+        "capped": {
+          "accuracy": 15.0,
+          "avoidance": 20.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 6.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 10.0,
+          "stun_resist": 25.0
+        },
+        "points": 1.6226
+      },
+      "reference_mod2_points": 1.6226,
+      "upgrade_scale": 0.0138897418,
+      "core_weights": {
+        "hp_pct": 0.203125,
+        "mana_pct": 0.203125,
+        "ac_pct": 0.040625,
+        "resists_pct": 0.203125
+      }
+    },
+    "Necromancer": {
+      "reference": {
+        "name": "Nark",
+        "hp": 5502,
+        "ac": 1144,
+        "mana": 7247,
+        "core_json": 90.99
+      },
+      "role": {
+        "melee_in": 0.08,
+        "spell_in": 0.28,
+        "dot_in": 0.36,
+        "threat": 0.0,
+        "offense": 0.02,
+        "behind": false,
+        "action": 0.22
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.002044876669078234,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.001068778327205525,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.01990625,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.02559375,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.0009300086601049579,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.000294,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.00028000000000000003,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.00125125,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 2.1875000000000003e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "32142",
+            "name": "Miragul's Shroud of Risen Souls"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "26996",
+            "name": "Gloves of the Unseen"
+          },
+          {
+            "id": "28649",
+            "name": "Ethereal Silk Leggings"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "21994",
+            "name": "Protective Sleeves"
+          },
+          {
+            "id": "20898",
+            "name": "Symbol of the Planemasters"
+          },
+          {
+            "id": "32610",
+            "name": "Sandals of Empowerment"
+          },
+          {
+            "id": "26980",
+            "name": "Earring of Unseen Horrors"
+          },
+          {
+            "id": "28661",
+            "name": "Shawl of Eternal Forces"
+          },
+          {
+            "id": "26991",
+            "name": "Band of Prismatic Focus"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "capped": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "points": 1.2769
+      },
+      "reference_mod2_points": 1.2769,
+      "upgrade_scale": 0.013188090599999999,
+      "core_weights": {
+        "hp_pct": 0.203125,
+        "mana_pct": 0.203125,
+        "ac_pct": 0.040625,
+        "resists_pct": 0.203125
+      }
+    },
+    "Wizard": {
+      "reference": {
+        "name": "Beldis",
+        "hp": 5299,
+        "ac": 1049,
+        "mana": 7097,
+        "core_json": 89.76
+      },
+      "role": {
+        "melee_in": 0.08,
+        "spell_in": 0.55,
+        "dot_in": 0.08,
+        "threat": 0.0,
+        "offense": 0.02,
+        "behind": false,
+        "action": 0.25
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.002044876669078234,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.001068778327205525,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.0391015625,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.0056875,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.0009300086601049577,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.00029399999999999994,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.00028,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.001421875,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 2.1875e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "32143",
+            "name": "Maelin's Robe of Lore"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "26996",
+            "name": "Gloves of the Unseen"
+          },
+          {
+            "id": "28649",
+            "name": "Ethereal Silk Leggings"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "21994",
+            "name": "Protective Sleeves"
+          },
+          {
+            "id": "20898",
+            "name": "Symbol of the Planemasters"
+          },
+          {
+            "id": "32610",
+            "name": "Sandals of Empowerment"
+          },
+          {
+            "id": "26980",
+            "name": "Earring of Unseen Horrors"
+          },
+          {
+            "id": "28661",
+            "name": "Shawl of Eternal Forces"
+          },
+          {
+            "id": "26991",
+            "name": "Band of Prismatic Focus"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "capped": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "points": 2.3855
+      },
+      "reference_mod2_points": 2.3855,
+      "upgrade_scale": 0.0127405344,
+      "core_weights": {
+        "hp_pct": 0.203125,
+        "mana_pct": 0.203125,
+        "ac_pct": 0.040625,
+        "resists_pct": 0.203125
+      }
+    },
+    "Magician": {
+      "reference": {
+        "name": "Starsha",
+        "hp": 5524,
+        "ac": 1015,
+        "mana": 7332,
+        "core_json": 91.57
+      },
+      "role": {
+        "melee_in": 0.08,
+        "spell_in": 0.45,
+        "dot_in": 0.12,
+        "threat": 0.0,
+        "offense": 0.02,
+        "behind": false,
+        "action": 0.22
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.002044876669078234,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.001068778327205525,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.0319921875,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.008531249999999999,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.0009300086601049577,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.00029399999999999994,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.00028,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.00125125,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 2.1875e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "32141",
+            "name": "Magi'Kot's Robe of Convergence"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "26996",
+            "name": "Gloves of the Unseen"
+          },
+          {
+            "id": "28649",
+            "name": "Ethereal Silk Leggings"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "21994",
+            "name": "Protective Sleeves"
+          },
+          {
+            "id": "20898",
+            "name": "Symbol of the Planemasters"
+          },
+          {
+            "id": "32610",
+            "name": "Sandals of Empowerment"
+          },
+          {
+            "id": "26980",
+            "name": "Earring of Unseen Horrors"
+          },
+          {
+            "id": "28661",
+            "name": "Shawl of Eternal Forces"
+          },
+          {
+            "id": "26991",
+            "name": "Band of Prismatic Focus"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "capped": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "points": 1.9675
+      },
+      "reference_mod2_points": 1.9675,
+      "upgrade_scale": 0.013427824800000002,
+      "core_weights": {
+        "hp_pct": 0.203125,
+        "mana_pct": 0.203125,
+        "ac_pct": 0.040625,
+        "resists_pct": 0.203125
+      }
+    },
+    "Enchanter": {
+      "reference": {
+        "name": "Diox",
+        "hp": 5755,
+        "ac": 1105,
+        "mana": 7437,
+        "core_json": 92.39
+      },
+      "role": {
+        "melee_in": 0.1,
+        "spell_in": 0.46,
+        "dot_in": 0.12,
+        "threat": 0.0,
+        "offense": 0.02,
+        "behind": false,
+        "action": 0.28
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.0025560958363477927,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.0013359729090069064,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.032703125,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.008531249999999999,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.0009300086601049577,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.00029399999999999994,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.00028,
+          "threat": 0.0
+        },
+        "stun_resist": {
+          "other": 0.0015925,
+          "threat": 0.0
+        },
+        "damage_shield": {
+          "other": 2.1875e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "32140",
+            "name": "Romar's Robe of Visions"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "26996",
+            "name": "Gloves of the Unseen"
+          },
+          {
+            "id": "28649",
+            "name": "Ethereal Silk Leggings"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "21994",
+            "name": "Protective Sleeves"
+          },
+          {
+            "id": "20898",
+            "name": "Symbol of the Planemasters"
+          },
+          {
+            "id": "32610",
+            "name": "Sandals of Empowerment"
+          },
+          {
+            "id": "26980",
+            "name": "Earring of Unseen Horrors"
+          },
+          {
+            "id": "28661",
+            "name": "Shawl of Eternal Forces"
+          },
+          {
+            "id": "26991",
+            "name": "Band of Prismatic Focus"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "capped": {
+          "avoidance": 20.0,
+          "combat_effects": 30.0,
+          "damage_shield": 5.0,
+          "shielding": 4.0,
+          "spell_shielding": 20.0,
+          "stun_resist": 24.0
+        },
+        "points": 2.0427
+      },
+      "reference_mod2_points": 2.0427,
+      "upgrade_scale": 0.0137420886,
+      "core_weights": {
+        "hp_pct": 0.203125,
+        "mana_pct": 0.203125,
+        "ac_pct": 0.040625,
+        "resists_pct": 0.203125
+      }
+    },
+    "Beastlord": {
+      "reference": {
+        "name": "Akbar",
+        "hp": 6913,
+        "ac": 1580,
+        "mana": 6715,
+        "core_json": 94.45
+      },
+      "role": {
+        "melee_in": 0.34,
+        "spell_in": 0.14,
+        "dot_in": 0.08,
+        "threat": 0.08,
+        "offense": 0.52,
+        "behind": false,
+        "action": 0.06
+      },
+      "weights": {
+        "shielding": {
+          "other": 0.014484543072637492,
+          "threat": 0.0
+        },
+        "avoidance": {
+          "other": 0.007570513151039136,
+          "threat": 0.0
+        },
+        "spell_shielding": {
+          "other": 0.011943750000000001,
+          "threat": 0.0
+        },
+        "dot_shielding": {
+          "other": 0.006825,
+          "threat": 0.0
+        },
+        "accuracy": {
+          "other": 0.004030037527121484,
+          "threat": 0.0
+        },
+        "strikethrough": {
+          "other": 0.001274,
+          "threat": 0.0
+        },
+        "combat_effects": {
+          "other": 0.0008493333333333333,
+          "threat": 0.000364
+        },
+        "stun_resist": {
+          "other": 0.0004095,
+          "threat": 0.0011375
+        },
+        "damage_shield": {
+          "other": 9.479166666666668e-05,
+          "threat": 0.0
+        }
+      },
+      "reference_loadout": {
+        "items": [
+          {
+            "id": "26989",
+            "name": "Prismatic Ring of Resistance"
+          },
+          {
+            "id": "28652",
+            "name": "Pants of Furious Might"
+          },
+          {
+            "id": "28656",
+            "name": "Tactician's Shield"
+          },
+          {
+            "id": "15927",
+            "name": "Belt of Temporal Bindings"
+          },
+          {
+            "id": "15805",
+            "name": "Shroud of Eternity"
+          },
+          {
+            "id": "32110",
+            "name": "Wristband of Icy Vengeance"
+          },
+          {
+            "id": "26986",
+            "name": "Shoes of Fleeting Fury"
+          },
+          {
+            "id": "32136",
+            "name": "Dumul's Chestwraps of the Brute"
+          },
+          {
+            "id": "8977",
+            "name": "Collar of Catastrophe"
+          },
+          {
+            "id": "26799",
+            "name": "Globe of Mystical Protection"
+          },
+          {
+            "id": "28658",
+            "name": "Mantle of Deadly Precision"
+          },
+          {
+            "id": "27000",
+            "name": "Padded Tigerskin Gloves"
+          },
+          {
+            "id": "29174",
+            "name": "Mask of Strategic Insight"
+          },
+          {
+            "id": "21994",
+            "name": "Protective Sleeves"
+          },
+          {
+            "id": "28667",
+            "name": "Bracer of Precision"
+          },
+          {
+            "id": "10948",
+            "name": "Timestone Adorned Ring"
+          },
+          {
+            "id": "7123",
+            "name": "Silver Hoop of Speed"
+          },
+          {
+            "id": "5760",
+            "name": "Earring of Xaoth Kor"
+          }
+        ],
+        "raw": {
+          "accuracy": 40.0,
+          "avoidance": 65.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 6.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 15.0,
+          "stun_resist": 10.0
+        },
+        "capped": {
+          "accuracy": 40.0,
+          "avoidance": 65.0,
+          "combat_effects": 20.0,
+          "damage_shield": 5.0,
+          "shielding": 6.0,
+          "spell_shielding": 20.0,
+          "strikethrough": 15.0,
+          "stun_resist": 10.0
+        },
+        "points": 1.6553
+      },
+      "reference_mod2_points": 1.6553,
+      "upgrade_scale": 0.013058656999999998,
+      "core_weights": {
+        "hp_pct": 0.24375000000000002,
+        "mana_pct": 0.08125,
+        "ac_pct": 0.1625,
+        "resists_pct": 0.1625
+      }
+    }
+  },
+  "calibration": {
+    "shielding_fraction_of_hit": 0.10486547020914021,
+    "avoidance_fraction_of_hits": 0.05480914498489872,
+    "accuracy_relative_gain": 0.13285838001499398,
+    "warrior_avoidance": 501,
+    "warrior_combat_mitigation": 742,
+    "quarm_db_di": [
+      1000.0,
+      140.0
+    ]
+  }
+}
