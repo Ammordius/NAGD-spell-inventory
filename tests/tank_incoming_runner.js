@@ -196,4 +196,54 @@ const sameRound = Tank.simulateTrial({
 eq(sameRound.dead, true, 'two hits before the simultaneous heal');
 eq(sameRound.healed, 0, 'heal does not land before the killing round');
 
+function quietMob(extra) {
+    return {
+        className: 'Warrior', level: 65, maxHp: 50000, itemAc: 0, agi: 200, alwaysHit: true,
+        phaseMs: 0, horizonMs: 1000, trace: true,
+        healing: { mode: 'none' },
+        mob: Object.assign({
+            level: 1, attackCount: 1, attackDelay: 100, fixedDamage: 10, atk: 0, accuracy: 0
+        }, extra || {})
+    };
+}
+const rampageOnly = Tank.simulateTrial(quietMob({ rampageChance: 100, rampageDamagePct: 50 }), 1);
+const rampHits = rampageOnly.trace.filter(function (ev) { return ev.kind === 'swing' && ev.outcome === 'hit'; });
+eq(rampHits.length, 2, 'rampage adds one swing');
+eq(rampHits[1].damage, 5, 'rampage damage percent');
+eq(rampageOnly.trace.some(function (ev) { return ev.kind === 'rampage'; }), true, 'rampage event');
+eq(rampageOnly.trace.some(function (ev) { return ev.kind === 'flurry'; }), false, 'rampage is not a flurry');
+
+const flurryFirst = Tank.simulateTrial(quietMob({ flurryChance: 100, rampageChance: 100, rampageDamagePct: 50 }), 1);
+const flurryHits = flurryFirst.trace.filter(function (ev) { return ev.kind === 'swing' && ev.outcome === 'hit'; });
+eq(flurryHits.length, 2, 'flurry is the only extra round');
+eq(flurryFirst.trace.some(function (ev) { return ev.kind === 'flurry'; }), true, 'flurry wins the special');
+eq(flurryFirst.trace.some(function (ev) { return ev.kind === 'rampage'; }), false, 'rampage does not follow flurry');
+
+const bare = Tank.simulateTrial(quietMob({ fixedDamage: 1000 }), 1);
+eq(bare.trace.find(function (ev) { return ev.outcome === 'hit'; }).damage, 1000, 'undefended hit');
+eq(Tank.simulateTrial(Object.assign(quietMob({ fixedDamage: 1000 }), { defensive: true }), 1).trace.find(function (ev) { return ev.outcome === 'hit'; }).damage, 700, 'defensive is 30 percent');
+
+const di = Tank.simulateTrial(Object.assign(quietMob({ fixedDamage: 8500 }), {
+    maxHp: 10000, divineIntervention: true, diChance: 100, horizonMs: 1000
+}), 1);
+eq(di.diProcs, 1, 'di procs under 16 percent');
+eq(di.dead, false, 'di heal keeps the tank up');
+const diSoon = Tank.simulateTrial(Object.assign(quietMob({ fixedDamage: 8500, attackDelay: 20 }), {
+    maxHp: 10000, divineIntervention: true, diChance: 100, diRecastMs: 10000, horizonMs: 2500
+}), 1);
+eq(diSoon.diProcs, 1, 'di recast blocks a second proc');
+
+var lateJitter = 0;
+var earlyJitter = 0;
+var seed;
+for (seed = 1; seed <= 40; seed++) {
+    Tank.plannedHeals({
+        healers: 1, spacingMs: 10000, castMs: 1, jitterMs: 500, amount: 1, start: 'steady'
+    }, 10000, Tank.makeStreams(seed)).landings.forEach(function (landing) {
+        if (landing.jitter > 0) lateJitter += 1;
+        else if (landing.jitter < 0) earlyJitter += 1;
+    });
+}
+assert.ok(lateJitter > earlyJitter, 'jitter trails more than it lands early: ' + lateJitter + ' vs ' + earlyJitter);
+
 console.log(JSON.stringify({ ok: true, deaths: repeatA.deaths }));

@@ -50,14 +50,12 @@
     };
 
     var COMPLETE_HEAL_PRESET = {
-        name: 'Illustrative four-healer chain',
-        verified: false,
-        status: 'illustrative',
+        name: 'Four-healer chain',
         amount: 7500,
         healers: 4,
         castMs: 10000,
         spacingMs: 3000,
-        note: 'Cast time and healed amount were not confirmed from a spell row in this tree. Four healers at 3 seconds between landings have a 12 second personal cycle, which covers a 10 second cast.'
+        note: 'Complete Heal cast time and amount were not loaded from a spell row. Four healers at 3 seconds between landings have a 12 second personal cycle, which covers a 10 second cast.'
     };
 
     function truncDiv(n, d) {
@@ -594,7 +592,7 @@
 
     function resolveSwing(scenario, mob, defender, rngs, hand, damagePct) {
         if (scenario.alwaysHit) {
-            return { outcome: 'hit', damage: scalePct(landedSwingDamage(scenario, mob, defender, rngs), damagePct), hand: hand };
+            return { outcome: 'hit', damage: mitigatedMelee(scenario, scalePct(landedSwingDamage(scenario, mob, defender, rngs), damagePct)), hand: hand };
         }
         var avoided = resolveAvoid(rngs.avoid, {
             className: defender.className,
@@ -608,9 +606,41 @@
         avoidance = truncDiv(avoidance * (100 + pct), 100);
         var chance = hitChance(toHit, avoidance);
         if (scenario.sitting || rngs.hit.real() < chance) {
-            return { outcome: 'hit', damage: scalePct(landedSwingDamage(scenario, mob, defender, rngs), damagePct), hand: hand, hitChance: chance };
+            return { outcome: 'hit', damage: mitigatedMelee(scenario, scalePct(landedSwingDamage(scenario, mob, defender, rngs), damagePct)), hand: hand, hitChance: chance };
         }
         return { outcome: 'miss', damage: 0, hand: hand, hitChance: chance };
+    }
+
+    function mitigatedMelee(scenario, damage) {
+        if (!scenario.defensive) return damage;
+        var reduced = truncDiv(damage * 70, 100);
+        if (damage > 0 && reduced < 1) reduced = 1;
+        return reduced;
+    }
+
+    function deathSaveChance(scenario) {
+        if (scenario.diChance != null) return scenario.diChance;
+        var cha = scenario.cha || 0;
+        if (cha < 97) return 30;
+        if (cha > 245) return 80;
+        return Math.trunc((cha * 3.2 + 1) / 10);
+    }
+
+    function tryDeathSave(scenario, rngs, state, events) {
+        if (!scenario.divineIntervention || state.hp < DEATH_HP) return;
+        var recast = scenario.diRecastMs == null ? 10000 : scenario.diRecastMs;
+        if (state.t >= state.diReadyAt) state.diUp = true;
+        if (!state.diUp) return;
+        var maxHp = scenario.maxHp || 1;
+        if (maxHp <= 0 || (state.hp / maxHp) * 100 >= 16) return;
+        if (rngs.special.int(0, 99) >= deathSaveChance(scenario)) return;
+        var room = Math.max(0, maxHp - state.hp);
+        var healed = Math.min(8000, room);
+        state.hp += healed;
+        state.diUp = false;
+        state.diReadyAt = state.t + recast;
+        state.diProcs += 1;
+        events.push({ t: state.t, kind: 'di', healed: healed, hpAfter: state.hp });
     }
 
     function mainHandSwings(scenario, mob, defender, rngs, events, state, damagePct) {
@@ -618,28 +648,28 @@
         var i;
         for (i = 0; i < count; i++) {
             if (state.dead) return;
-            applySwing(resolveSwing(scenario, mob, defender, rngs, 'primary', damagePct), events, state);
+            applySwing(resolveSwing(scenario, mob, defender, rngs, 'primary', damagePct), events, state, scenario, rngs);
         }
         if (state.dead || mob.noSpecials) return;
         if (checkDoubleAttack(rngs.special, mob.level || 1)) {
-            applySwing(resolveSwing(scenario, mob, defender, rngs, 'primary', damagePct), events, state);
+            applySwing(resolveSwing(scenario, mob, defender, rngs, 'primary', damagePct), events, state, scenario, rngs);
             var klass = mob.className;
             if (!state.dead && (klass === 'Warrior' || klass === 'Monk') && (mob.level || 0) >= 60) {
                 if (rngs.special.int(0, 999) < 135) {
-                    applySwing(resolveSwing(scenario, mob, defender, rngs, 'primary', damagePct), events, state);
+                    applySwing(resolveSwing(scenario, mob, defender, rngs, 'primary', damagePct), events, state, scenario, rngs);
                 }
             }
         }
     }
 
     function offhandSwings(scenario, mob, defender, rngs, events, state, damagePct) {
-        applySwing(resolveSwing(scenario, mob, defender, rngs, 'offhand', damagePct), events, state);
+        applySwing(resolveSwing(scenario, mob, defender, rngs, 'offhand', damagePct), events, state, scenario, rngs);
         if (!state.dead && !mob.noSpecials && npcDoubleAttackSkill(mob.level || 1) >= 150 && checkDoubleAttack(rngs.special, mob.level || 1)) {
-            applySwing(resolveSwing(scenario, mob, defender, rngs, 'offhand', damagePct), events, state);
+            applySwing(resolveSwing(scenario, mob, defender, rngs, 'offhand', damagePct), events, state, scenario, rngs);
         }
     }
 
-    function applySwing(swing, events, state) {
+    function applySwing(swing, events, state, scenario, rngs) {
         events.push({ t: state.t, kind: 'swing', outcome: swing.outcome, damage: swing.damage, hand: swing.hand, hpBefore: state.hp });
         state.swings += 1;
         if (swing.outcome === 'hit') {
@@ -655,6 +685,12 @@
         }
         events[events.length - 1].hpAfter = state.hp;
         events[events.length - 1].dead = state.dead;
+        if (swing.outcome === 'hit' && !state.dead && scenario && rngs) tryDeathSave(scenario, rngs, state, events);
+    }
+
+    function healJitter(rng, jitterMs) {
+        var early = Math.floor(jitterMs / 2);
+        return Math.floor(rng.real() * (early + jitterMs + 1)) - early;
     }
 
     function chainFeasibility(chain) {
@@ -691,10 +727,11 @@
         for (h = 0; h < healers; h++) {
             var planned = (start === 'cold' ? castMs : 0) + phase + h * spacing;
             var earliest = start === 'cold' ? castMs : 0;
-            while (planned - jitterMs <= durationMs) {
+            var earlyWindow = Math.floor(jitterMs / 2);
+            while (planned - earlyWindow <= durationMs) {
                 var jitter = 0;
                 if (jitterMs && rngs) {
-                    jitter = Math.floor(rngs.jitter.real() * (jitterMs * 2 + 1)) - jitterMs;
+                    jitter = healJitter(rngs.jitter, jitterMs);
                 } else if (chain.jitterOverride != null) {
                     jitter = chain.jitterOverride;
                 }
@@ -783,6 +820,9 @@
             healed: 0,
             overheal: 0,
             healCount: 0,
+            diUp: !!scenario.divineIntervention,
+            diReadyAt: 0,
+            diProcs: 0,
             hitsSinceHeal: 0,
             maxHitsBetween: 0,
             damageEvents: []
@@ -826,15 +866,25 @@
             }
             if (ev.kind === 'primary') {
                 mainHandSwings(scenario, mob, defender, rngs, trace, state, 100);
+                var specialed = false;
                 if (!state.dead && mob.flurryChance != null && rollPercent(rngs.special, mob.flurryChance)) {
+                    specialed = true;
                     trace.push({ t: state.t, kind: 'flurry' });
                     mainHandSwings(scenario, mob, defender, rngs, trace, state, 100);
                     if (!state.dead && mob.dualWield) offhandSwings(scenario, mob, defender, rngs, trace, state, 100);
                 }
-                if (!state.dead && mob.areaRampageChance != null && rollPercent(rngs.special, mob.areaRampageChance)) {
-                    trace.push({ t: state.t, kind: 'area-rampage', damagePct: mob.areaRampageDamagePct || 100 });
-                    mainHandSwings(scenario, mob, defender, rngs, trace, state, mob.areaRampageDamagePct || 100);
-                    if (!state.dead && mob.dualWield) offhandSwings(scenario, mob, defender, rngs, trace, state, mob.areaRampageDamagePct || 100);
+                if (!specialed && !state.dead && mob.rampageChance != null && rollPercent(rngs.special, mob.rampageChance)) {
+                    specialed = true;
+                    var rampPct = mob.rampageDamagePct || 100;
+                    trace.push({ t: state.t, kind: 'rampage', damagePct: rampPct });
+                    mainHandSwings(scenario, mob, defender, rngs, trace, state, rampPct);
+                    if (!state.dead && mob.dualWield) offhandSwings(scenario, mob, defender, rngs, trace, state, rampPct);
+                }
+                if (!specialed && !state.dead && mob.areaRampageChance != null && rollPercent(rngs.special, mob.areaRampageChance)) {
+                    var areaPct = mob.areaRampageDamagePct || 100;
+                    trace.push({ t: state.t, kind: 'area-rampage', damagePct: areaPct });
+                    mainHandSwings(scenario, mob, defender, rngs, trace, state, areaPct);
+                    if (!state.dead && mob.dualWield) offhandSwings(scenario, mob, defender, rngs, trace, state, areaPct);
                 }
                 if (!state.dead) push({ t: ev.t + interval.ms, kind: 'primary' });
             } else if (ev.kind === 'offhand') {
@@ -858,6 +908,7 @@
             healed: state.healed,
             overheal: state.overheal,
             healCount: state.healCount,
+            diProcs: state.diProcs,
             maxHitsBetween: state.maxHitsBetween,
             windowPeak: {
                 8000: slidingPeak(state.damageEvents, 8000),
@@ -903,6 +954,7 @@
         var healed = 0;
         var overheal = 0;
         var maxHits = 0;
+        var diProcs = 0;
         var peaks = { 8000: [], 13000: [], 20000: [] };
         var i;
         for (i = 0; i < rows.length; i++) {
@@ -920,6 +972,7 @@
             healed += row.healed;
             overheal += row.overheal;
             if (row.maxHitsBetween > maxHits) maxHits = row.maxHitsBetween;
+            diProcs += row.diProcs || 0;
             peaks[8000].push(row.windowPeak[8000]);
             peaks[13000].push(row.windowPeak[13000]);
             peaks[20000].push(row.windowPeak[20000]);
@@ -984,7 +1037,8 @@
                 scheduledHps: scheduledHps,
                 effectiveHps: seconds ? healed / seconds : 0,
                 overheal: overheal,
-                maxDamagingHitsBetweenHeals: maxHits
+                maxDamagingHitsBetweenHeals: maxHits,
+                diProcs: diProcs
             },
             experimentalMod2: !!scenario.experimentalMod2,
             label: scenario.experimentalMod2 ? 'Experimental Mod2 scenario' : 'Current TAKP combat',

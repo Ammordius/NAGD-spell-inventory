@@ -7,6 +7,7 @@ sheet pass-through and drives the Node assertions.
 from __future__ import annotations
 
 import importlib.util
+import json
 import shutil
 import subprocess
 import unittest
@@ -51,6 +52,35 @@ class TankSheetTests(unittest.TestCase):
         rankings = _rankings()
         sheet = rankings.tank_sheet_from_row({"ac_total": "10"})
         self.assertEqual(sheet, {"ac_total": 10})
+
+
+class TankEncounterTests(unittest.TestCase):
+    def test_quarm_row_comes_from_zeal(self):
+        payload = json.loads((ROOT / "data" / "tank_encounters.json").read_text(encoding="utf-8"))
+        quarm = [row for row in payload["encounters"] if row["npcId"] == 223008]
+        self.assertEqual(len(quarm), 1)
+        row = quarm[0]
+        self.assertEqual(row["zone"], "potimeb")
+        self.assertEqual(row["minHit"], 1140)
+        self.assertEqual(row["maxHit"], 3800)
+        self.assertEqual(row["atk"], 500)
+        self.assertEqual(row["accuracy"], 750)
+        self.assertEqual(row["level"], 80)
+        self.assertEqual(row["attackDelay"], 38)
+        self.assertEqual(row["slowMitigation"], 25)
+        self.assertEqual(row["attackCount"], 1)
+        self.assertEqual(row["className"], "Warrior")
+        self.assertTrue(row["dualWield"])
+        self.assertIsNone(row["flurryChance"])
+        self.assertEqual(row["areaRampageChance"], 5)
+        self.assertEqual(row["areaRampageDamagePct"], 10)
+        self.assertNotIn("status", row)
+        names = {enc["name"] for enc in payload["encounters"]}
+        self.assertNotIn("PoP boss (illustrative)", names)
+        upcoming = [enc for enc in payload["encounters"] if enc.get("future")]
+        self.assertEqual(len(upcoming), 19)
+        self.assertTrue(any(enc["name"].startswith("Pzo Adan") for enc in upcoming))
+        self.assertEqual(payload["unmatched"], [])
 
 
 class TankEngineTests(unittest.TestCase):

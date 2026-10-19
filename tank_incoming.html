@@ -43,10 +43,23 @@ svg { width: 100%; height: auto; background: #0001; }
 <div id="sheet"></div>
 
 <h2>Encounter</h2>
-<label for="encPick">Profile</label>
+<div class="row two">
+  <div>
+    <label for="zonePick">Zone</label>
+    <select id="zonePick"><option value="">All zones</option></select>
+  </div>
+  <div>
+    <label for="mobFilter">Find mob</label>
+    <input id="mobFilter" type="search" placeholder="Name">
+  </div>
+</div>
+<label for="encPick">Mob</label>
 <select id="encPick"></select>
-<p id="encNotes" class="note"></p>
-<div id="encFields"></div>
+<p id="encStats" class="note"></p>
+<details>
+  <summary>Edit this mob's numbers</summary>
+  <div id="encFields"></div>
+</details>
 <div class="row two">
   <div>
     <label for="slowed">Slowed</label>
@@ -57,11 +70,15 @@ svg { width: 100%; height: auto; background: #0001; }
     <input id="slowPct" type="number" value="75" min="0" max="100">
   </div>
 </div>
-<p class="note">Effective slow uses the mob's slow mitigation with the server's integer formula. The percent is the spell you chose. It is not a property of the mob.</p>
+<p id="slowReadout" class="note"></p>
+<p class="note">Slow mitigation uses the server's integer formula. 100 mitigation cancels the slow. A 75% slow at 25 mitigation becomes haste 43.</p>
 
 <h2>Buffs</h2>
-<p class="note">AA toggles default off. The export records points spent, not which AAs are owned, so turning one on is an assumption.</p>
+<p class="note">AA toggles start on. The export records points spent, not which AAs are owned.</p>
+<p id="avoidNote" class="note"></p>
 <div class="row three" id="buffs"></div>
+<label><input id="defensive" type="checkbox" style="width:auto" checked> Defensive, 30% less melee damage</label>
+<label><input id="di" type="checkbox" style="width:auto" checked> Divine Intervention clicky. 8000 heal when alive under 16% HP, then a 10 second recast</label>
 <div class="row two">
   <div><label for="spellAc">Spell AC, separate from item AC</label><input id="spellAc" type="number" value="0"></div>
   <div><label for="spellMit">Spell mitigation effect. Negative reduces the interval. -50 is a user-entered defensive discipline.</label><input id="spellMit" type="number" value="0"></div>
@@ -85,11 +102,11 @@ svg { width: 100%; height: auto; background: #0001; }
   <div><label for="healers">Healers</label><input id="healers" type="number" value="4" min="1"></div>
   <div><label for="castMs">Cast ms</label><input id="castMs" type="number" value="10000"></div>
   <div><label for="spacing">Chain spacing ms</label><input id="spacing" type="number" value="3000"></div>
-  <div><label for="jitter">Jitter ± ms, uniform, not a standard deviation</label><input id="jitter" type="number" value="500"></div>
+  <div><label for="jitter">Jitter ms. Up to half of this early, or this much late</label><input id="jitter" type="number" value="500"></div>
   <div><label for="startMode">Chain start</label><select id="startMode"><option value="steady">Steady state</option><option value="cold">Cold start</option></select></div>
 </div>
 <p id="presetNote" class="note"></p>
-<label><input id="randPhase" type="checkbox" style="width:auto"> Randomize the opening phase between the attack timer and the chain</label>
+<label><input id="randPhase" type="checkbox" style="width:auto" checked> Randomize the opening phase between the attack timer and the chain</label>
 <div class="row three">
   <div><label for="horizon">Fight seconds</label><input id="horizon" type="number" value="180"></div>
   <div><label for="trials">Trials</label><input id="trials" type="number" value="10000" min="1"></div>
@@ -123,9 +140,9 @@ svg { width: 100%; height: auto; background: #0001; }
 <ul class="assumptions">
   <li>Death is client HP below -10. HP of -10 stays up on that check. A later heal does not revive a dead tank.</li>
   <li>Swings in one round share a timestamp. A heal at that same time is applied after the attacks.</li>
-  <li>Jitter is uniform on the closed millisecond range from minus the setting to plus the setting.</li>
+  <li>Jitter lands from half the setting early through the full setting late.</li>
   <li>Defense is the level-65 class cap. Item skill mods are not in the item file, so none are applied.</li>
-  <li>Quarm's enrage is on the database row and is not modeled, because it depends on Quarm's HP.</li>
+  <li>Enrage is not modeled. It depends on the mob's own HP.</li>
   <li>Area rampage hits this tank only under the one-target hate list branch in this source.</li>
   <li>A finite horizon is not indefinite survival. Results stay estimated.</li>
 </ul>
@@ -141,8 +158,8 @@ svg { width: 100%; height: auto; background: #0001; }
   var buffIds = [
     ['combatStability', 'Combat Stability +10 softcap'],
     ['innateDefense', 'Innate Defense +15 softcap'],
-    ['combatAgility', 'Combat Agility +10 avoidance'],
-    ['lightningReflexes', 'Lightning Reflexes +15 avoidance']
+    ['combatAgility', 'Combat Agility, rank 3, +10% of avoidance'],
+    ['lightningReflexes', 'Lightning Reflexes, rank 5, +15% of avoidance']
   ];
 
   function $(id) { return document.getElementById(id); }
@@ -157,7 +174,7 @@ svg { width: 100%; height: auto; background: #0001; }
 
   buffIds.forEach(function (pair) {
     var wrap = document.createElement('label');
-    wrap.innerHTML = '<input type="checkbox" id="' + pair[0] + '" style="width:auto"> ' + pair[1];
+    wrap.innerHTML = '<input type="checkbox" id="' + pair[0] + '" style="width:auto" checked> ' + pair[1];
     $('buffs').appendChild(wrap);
   });
 
@@ -182,15 +199,15 @@ svg { width: 100%; height: auto; background: #0001; }
     var params = new URLSearchParams(location.search);
     var wanted = params.get('id');
     if (wanted && chars.some(function (c) { return String(c.id) === wanted; })) pick.value = wanted;
-    encounters.encounters.forEach(function (enc) {
-      var opt = document.createElement('option');
-      opt.value = enc.id;
-      opt.textContent = enc.name;
-      $('encPick').appendChild(opt);
-    });
-    var preset = encounters.completeHealPreset;
-    $('presetNote').textContent = preset.name + ' is ' + preset.status + '. ' + preset.note;
-    $('status').textContent = 'Loaded ' + chars.length + ' characters. Outcomes stay estimated.';
+    fillZones();
+    fillMobs();
+    var quarm = encounters.encounters.find(function (enc) { return enc.npcId === 223008; });
+    if (quarm) $('encPick').value = quarm.id;
+    var preset = encounters.completeHealPreset || {};
+    $('presetNote').textContent = preset.note || '';
+    $('status').textContent = 'Loaded ' + chars.length + ' characters and ' + encounters.encounters.length +
+      ' raid mobs. ' + (encounters.encounters || []).filter(function (enc) { return enc.future; }).length +
+      ' are upcoming and have no combat row yet. Outcomes stay estimated.';
     renderEncounter();
     renderCharacter();
   }).catch(function (err) {
@@ -253,17 +270,11 @@ svg { width: 100%; height: auto; background: #0001; }
       ' · HP ' + (char.stats.hp || 0) + ' · displayed AC ' + (char.stats.ac || 0) +
       ' · AGI ' + (char.stats.AGI || 0) + '</p>'];
     lines.push('<p class="note">Worn slots are ear through ammo. ' + ac.missing + ' worn item id(s) are missing from item stats. Bags are ignored.</p>');
-    lines.push('<table><tr><th>Column</th><th>Export</th><th>Rebuilt</th><th>Delta</th></tr>');
-    ['ac_item', 'ac_shield', 'ac_avoidance', 'ac_mitigation', 'ac_total'].forEach(function (key) {
-      var exported = sheet[key];
-      var rebuilt = audit.reconstructed[key];
-      var delta = audit.deltas[key];
-      lines.push('<tr><td>' + key + '</td><td>' + (exported == null ? 'not in this rankings file' : exported) +
-        '</td><td>' + (rebuilt == null ? '' : rebuilt) + '</td><td>' + (delta == null ? '' : delta) + '</td></tr>');
-    });
-    lines.push('</table>');
-    lines.push('<p class="note">Rebuilt avoidance uses the level-65 defense cap (' + (TankSim.skillCaps(char.class).defense || 0) + '), marked assumed. Displayed AC is not combat mitigation. Combat mitigation for this unbuffed sheet is ' +
-      TankSim.defenderProfile(baseScenario()).mitigation + '.</p>');
+    var rebuilt = audit.reconstructed;
+    lines.push('<p>Item AC ' + rebuilt.ac_item + ' · shield AC ' + rebuilt.ac_shield +
+      ' · avoidance ' + rebuilt.ac_avoidance + ' · mitigation ' + rebuilt.ac_mitigation +
+      ' · displayed AC ' + rebuilt.ac_total + ' · combat mitigation ' +
+      TankSim.defenderProfile(baseScenario()).mitigation + '</p>');
     $('sheet').innerHTML = lines.join('');
     var mod = TankSim.sumMod2(mod2Table, worn(char).map(function (r) { return r.item_id; }));
     var bits = Object.keys(mod.totals).map(function (k) { return k + ' ' + mod.totals[k]; }).join(' · ');
@@ -273,48 +284,184 @@ svg { width: 100%; height: auto; background: #0001; }
     if (!$('swapShield').value) $('swapShield').value = sheet.ac_shield != null ? sheet.ac_shield : (shield.ac || 0);
   }
 
+  var EDIT_FIELDS = [
+    ['minHit', 'Min hit'],
+    ['maxHit', 'Max hit'],
+    ['atk', 'ATK'],
+    ['accuracy', 'Accuracy'],
+    ['level', 'Level'],
+    ['className', 'Class'],
+    ['attackDelay', 'Attack delay'],
+    ['slowMitigation', 'Slow mitigation'],
+    ['attackCount', 'Attack count'],
+    ['dualWield', 'Dual wield'],
+    ['flurryChance', 'Flurry chance'],
+    ['rampageChance', 'Rampage chance'],
+    ['rampageDamagePct', 'Rampage damage percent'],
+    ['areaRampageChance', 'Area rampage chance'],
+    ['areaRampageDamagePct', 'Area rampage damage percent']
+  ];
+
+  function fillZones() {
+    var zones = {};
+    (encounters.encounters || []).forEach(function (enc) {
+      if (enc.zoneLabel) zones[enc.zoneLabel] = true;
+    });
+    var pick = $('zonePick');
+    var current = pick.value;
+    while (pick.options.length > 1) pick.remove(1);
+    Object.keys(zones).sort().forEach(function (zone) {
+      var opt = document.createElement('option');
+      opt.value = zone;
+      opt.textContent = zone;
+      pick.appendChild(opt);
+    });
+    if (current) pick.value = current;
+  }
+
+  function matchesFilter(enc) {
+    var zone = $('zonePick').value;
+    if (zone && enc.zoneLabel !== zone) return false;
+    var query = ($('mobFilter').value || '').trim().toLowerCase();
+    if (!query) return true;
+    return (enc.name || '').toLowerCase().indexOf(query) >= 0;
+  }
+
+  function fillMobs() {
+    var pick = $('encPick');
+    var current = pick.value;
+    var list = (encounters.encounters || []).filter(matchesFilter);
+    pick.innerHTML = '';
+    list.forEach(function (enc) {
+      var opt = document.createElement('option');
+      opt.value = enc.id;
+      opt.textContent = enc.name + (enc.zoneLabel ? ' — ' + enc.zoneLabel : '');
+      pick.appendChild(opt);
+    });
+    if (current && list.some(function (enc) { return enc.id === current; })) pick.value = current;
+    else if (list[0]) pick.value = list[0].id;
+  }
+
   function renderEncounter() {
     var enc = selectedEncounter();
-    $('encNotes').textContent = enc.notes || '';
     var box = $('encFields');
-    box.innerHTML = '';
-    Object.keys(enc.fields).forEach(function (key) {
-      var field = enc.fields[key];
-      var wrap = document.createElement('label');
-      wrap.textContent = key + ' (' + field.status + ')';
-      var input = document.createElement('input');
-      input.dataset.key = key;
-      input.dataset.status = field.status;
-      input.value = field.value == null ? '' : field.value;
-      input.title = field.source || '';
-      wrap.appendChild(input);
-      box.appendChild(wrap);
+    if (!box.querySelector('input')) {
+      EDIT_FIELDS.forEach(function (pair) {
+        var wrap = document.createElement('label');
+        wrap.textContent = pair[1];
+        var input = document.createElement('input');
+        input.dataset.key = pair[0];
+        wrap.appendChild(input);
+        box.appendChild(wrap);
+      });
+    }
+    if (!enc) {
+      $('encStats').textContent = 'No mob matches that filter.';
+      return;
+    }
+    EDIT_FIELDS.forEach(function (pair) {
+      var input = box.querySelector('input[data-key="' + pair[0] + '"]');
+      var value = enc[pair[0]];
+      input.value = value == null ? '' : value;
     });
+    refreshDerived();
   }
 
   function mobFromForm() {
     var mob = {};
-    var notes = [];
-    Array.prototype.forEach.call($('encFields').querySelectorAll('input'), function (input) {
+    var box = $('encFields');
+    if (!box) return mob;
+    Array.prototype.forEach.call(box.querySelectorAll('input'), function (input) {
       var raw = input.value.trim();
-      var enc = selectedEncounter().fields[input.dataset.key];
-      var changed = String(enc.value == null ? '' : enc.value) !== raw;
-      if (raw === '') {
-        mob[input.dataset.key] = null;
-        if (enc.status !== 'unavailable' || changed) notes.push(input.dataset.key + ': unavailable');
-      } else if (raw === 'true' || raw === 'false') {
-        mob[input.dataset.key] = raw === 'true';
-      } else if (input.dataset.key === 'className') {
-        mob[input.dataset.key] = raw;
-      } else if (!isNaN(Number(raw))) {
-        mob[input.dataset.key] = Number(raw);
-      } else {
-        mob[input.dataset.key] = raw;
-      }
-      if (changed) notes.push(input.dataset.key + ': user-entered');
+      var key = input.dataset.key;
+      if (raw === '') mob[key] = null;
+      else if (raw === 'true' || raw === 'false') mob[key] = raw === 'true';
+      else if (key === 'className') mob[key] = raw;
+      else if (!isNaN(Number(raw))) mob[key] = Number(raw);
+      else mob[key] = raw;
     });
-    mob._notes = notes;
     return mob;
+  }
+
+  function delayLabel(delay) {
+    if (delay == null || delay === '') return '';
+    var n = Number(delay);
+    var ms = n < 401 ? n * 100 : n;
+    return ' (' + ms + ' ms)';
+  }
+
+  function specialBits(mob) {
+    var bits = [];
+    if (mob.dualWield) bits.push('dual wield');
+    if (mob.flurryChance != null) bits.push('flurry ' + mob.flurryChance + '%');
+    if (mob.rampageChance != null) bits.push('rampage ' + mob.rampageChance + '% at ' + (mob.rampageDamagePct || 100) + '% damage');
+    if (mob.areaRampageChance != null) bits.push('area rampage ' + mob.areaRampageChance + '% at ' + (mob.areaRampageDamagePct || 100) + '% damage');
+    return bits.length ? bits.join(', ') : 'no flurry, rampage, or dual wield';
+  }
+
+  function renderStats() {
+    var enc = selectedEncounter();
+    var mob = mobFromForm();
+    if (enc && enc.future && mob.minHit == null && mob.maxHit == null) {
+      $('encStats').textContent = 'Upcoming expansion' + (enc.lootZone ? ', listed in ' + enc.lootZone : '') + '. No combat row in the current export.';
+      return;
+    }
+    $('encStats').textContent = 'Level ' + (mob.level == null ? '—' : mob.level) + ' ' + (mob.className || '') +
+      ' · hits ' + (mob.minHit == null ? '—' : mob.minHit) + '–' + (mob.maxHit == null ? '—' : mob.maxHit) +
+      ' · ATK ' + (mob.atk == null ? '—' : mob.atk) +
+      ' · accuracy ' + (mob.accuracy == null ? '—' : mob.accuracy) +
+      ' · delay ' + (mob.attackDelay == null ? '—' : mob.attackDelay) + delayLabel(mob.attackDelay) +
+      ' · slow mitigation ' + (mob.slowMitigation == null ? '—' : mob.slowMitigation) +
+      ' · ' + specialBits(mob);
+  }
+
+  function renderSlow() {
+    var mob = mobFromForm();
+    var on = $('slowed').value === 'yes';
+    var slow = TankSim.hasteFromSlow(on, num('slowPct'), mob.slowMitigation || 0);
+    if (!on) {
+      $('slowReadout').textContent = 'Unslowed haste 100.';
+      return;
+    }
+    var mit = mob.slowMitigation || 0;
+    var line = 'Haste ' + slow.haste + '.';
+    if (mit >= 100) line += ' Slow is cancelled.';
+    else line += ' The ' + num('slowPct') + '% slow becomes ' + slow.effectiveSlow + '% after ' + mit + ' slow mitigation.';
+    $('slowReadout').textContent = line;
+  }
+
+  function points(p) {
+    return (p * 100).toFixed(1);
+  }
+
+  function renderAvoid() {
+    var char = selectedChar();
+    var mob = mobFromForm();
+    if (!char || mob.level == null) {
+      $('avoidNote').textContent = '';
+      return;
+    }
+    var defense = TankSim.skillCaps(char.class).defense || 0;
+    var agi = char.stats && char.stats.AGI ? char.stats.AGI : 0;
+    var gear = TankSim.playerAvoidance(defense, agi, 65, 0);
+    var plus = gear + 100;
+    var lr = TankSim.playerAvoidance(defense, agi, 65, 15);
+    var toHit = TankSim.npcToHit(mob.level || 1, mob.accuracy || 0);
+    function miss(av) { return 1 - TankSim.hitChance(toHit, av); }
+    var gearMiss = miss(gear);
+    var plusMiss = miss(plus);
+    var lrMiss = miss(lr);
+    $('avoidNote').textContent = 'This mob to-hit is ' + toHit + '. Gear avoidance ' + gear +
+      ' misses ' + points(gearMiss) + '%. +100 avoidance rating misses ' + points(plusMiss) +
+      '% (' + points(plusMiss - gearMiss) + ' points). Lightning Reflexes rank 5 is +15% of that rating (' +
+      lr + ') and misses ' + points(lrMiss) + '% (' + points(lrMiss - gearMiss) +
+      ' points). The hit curve decides that. It is not 10% per 100 avoidance.';
+  }
+
+  function refreshDerived() {
+    renderStats();
+    renderSlow();
+    renderAvoid();
   }
 
   function healingFromForm() {
@@ -350,6 +497,9 @@ svg { width: 100%; height: auto; background: #0001; }
       spellAc: num('spellAc'),
       spellMitigationEffect: num('spellMit'),
       avoidancePct: num('avoidPct'),
+      defensive: $('defensive').checked,
+      divineIntervention: $('di').checked,
+      cha: char && char.stats ? char.stats.CHA : 0,
       slowed: $('slowed').value === 'yes',
       slowPercent: num('slowPct'),
       healing: healingFromForm(),
@@ -395,6 +545,7 @@ svg { width: 100%; height: auto; background: #0001; }
     html += '<tr><td>8s / 13s / 20s p95 burst</td><td>' + fmt(s.windowP95[8]) + ' / ' + fmt(s.windowP95[13]) + ' / ' + fmt(s.windowP95[20]) + '</td></tr>';
     html += '<tr><td>8s / 13s / 20s p99 burst</td><td>' + fmt(s.windowP99[8]) + ' / ' + fmt(s.windowP99[13]) + ' / ' + fmt(s.windowP99[20]) + '</td></tr>';
     html += '<tr><td>Scheduled HPS / effective HPS / overheal</td><td>' + fmt(s.scheduledHps) + ' / ' + fmt(s.effectiveHps) + ' / ' + fmt(s.overheal) + '</td></tr>';
+    if (s.diProcs) html += '<tr><td>Divine Intervention procs</td><td>' + s.diProcs + '</td></tr>';
     html += '<tr><td>Max damaging hits between heals</td><td>' + s.maxDamagingHitsBetweenHeals + '</td></tr>';
     html += '</table>';
     if (run.perHit && run.perHit.available) {
@@ -451,6 +602,10 @@ svg { width: 100%; height: auto; background: #0001; }
   }
 
   function runScenario(scenario) {
+    var enc = selectedEncounter();
+    if (enc && enc.future && scenario.mob.minHit == null) {
+      return { runnable: false, reason: enc.name + ' is an upcoming expansion fight. It has no combat row yet.' };
+    }
     var check = scenario.healing.mode === 'fixed' ? TankSim.chainFeasibility(scenario.healing) : { feasible: true };
     if (!check.feasible) return { runnable: false, reason: check.reason, missing: ['healing chain'] };
     return TankSim.simulate(scenario);
@@ -463,6 +618,23 @@ svg { width: 100%; height: auto; background: #0001; }
     renderCharacter();
   });
   $('encPick').addEventListener('change', renderEncounter);
+  $('zonePick').addEventListener('change', function () {
+    var before = $('encPick').value;
+    fillMobs();
+    if ($('encPick').value !== before) renderEncounter();
+  });
+  $('mobFilter').addEventListener('input', function () {
+    var before = $('encPick').value;
+    fillMobs();
+    if ($('encPick').value !== before) renderEncounter();
+    else refreshDerived();
+  });
+  $('encFields').addEventListener('input', refreshDerived);
+  $('slowed').addEventListener('change', renderSlow);
+  $('slowPct').addEventListener('input', renderSlow);
+  buffIds.forEach(function (pair) {
+    $(pair[0]).addEventListener('change', renderAvoid);
+  });
 
   $('run').addEventListener('click', function () {
     lastScenario = baseScenario();
