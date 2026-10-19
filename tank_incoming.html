@@ -29,6 +29,10 @@ th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line
 .ok { color: #174; }
 svg { width: 100%; height: auto; background: #0001; }
 .timeline { max-height: 280px; overflow: auto; font-family: ui-monospace, monospace; font-size: 0.82rem; }
+.suggest { position: relative; }
+.matches { position: absolute; z-index: 2; left: 0; right: 0; margin: 0; padding: 0; list-style: none; max-height: 240px; overflow: auto; border: 1px solid var(--line); background: var(--bg); }
+.matches button { display: block; width: 100%; text-align: left; background: transparent; color: inherit; border: 0; border-radius: 0; }
+.matches li.active button, .matches button:hover { background: #1d4e8922; }
 </style>
 </head>
 <body>
@@ -38,8 +42,11 @@ svg { width: 100%; height: auto; background: #0001; }
 <div id="status" class="banner">Loading character and encounter files…</div>
 
 <h2>Character</h2>
-<label for="charPick">Level 65 character</label>
-<select id="charPick"></select>
+<label for="charSearch">Level 65 character</label>
+<div class="suggest">
+  <input id="charSearch" type="search" placeholder="Search by name" autocomplete="off">
+  <ul id="charMatches" class="matches" hidden></ul>
+</div>
 <div id="sheet"></div>
 
 <h2>Encounter</h2>
@@ -151,6 +158,9 @@ svg { width: 100%; height: auto; background: #0001; }
 <script>
 (function () {
   var rankings = null;
+  var selectedCharId = '';
+  var nameCounts = {};
+  var matchIndex = -1;
   var items = null;
   var mod2Table = null;
   var encounters = null;
@@ -189,16 +199,16 @@ svg { width: 100%; height: auto; background: #0001; }
     mod2Table = files[2];
     encounters = files[3];
     var chars = rankings.characters || [];
-    var pick = $('charPick');
     chars.forEach(function (c) {
-      var opt = document.createElement('option');
-      opt.value = String(c.id);
-      opt.textContent = c.name + ' (' + c.class + ')';
-      pick.appendChild(opt);
+      var key = String(c.name || '').toLowerCase();
+      nameCounts[key] = (nameCounts[key] || 0) + 1;
     });
     var params = new URLSearchParams(location.search);
     var wanted = params.get('id');
-    if (wanted && chars.some(function (c) { return String(c.id) === wanted; })) pick.value = wanted;
+    if (wanted && chars.some(function (c) { return String(c.id) === wanted; })) {
+      selectedCharId = wanted;
+      $('charSearch').value = charLabel(chars.find(function (c) { return String(c.id) === wanted; }));
+    }
     fillZones();
     fillMobs();
     var quarm = encounters.encounters.find(function (enc) { return enc.npcId === 223008; });
@@ -214,9 +224,70 @@ svg { width: 100%; height: auto; background: #0001; }
     $('status').textContent = 'Could not load data files. Open this page from the site root so class_rankings.json and data/ are reachable. ' + err.message;
   });
 
+  function charLabel(c) {
+    var label = c.name + ' (' + c.class + ')';
+    if (nameCounts[String(c.name || '').toLowerCase()] > 1) label += ' #' + c.id;
+    return label;
+  }
+
   function selectedChar() {
-    var id = $('charPick').value;
-    return (rankings.characters || []).find(function (c) { return String(c.id) === id; });
+    return (rankings.characters || []).find(function (c) { return String(c.id) === selectedCharId; });
+  }
+
+  function hideMatches() {
+    matchIndex = -1;
+    $('charMatches').hidden = true;
+    $('charMatches').innerHTML = '';
+  }
+
+  function chooseCharacter(id) {
+    selectedCharId = id ? String(id) : '';
+    var char = selectedChar();
+    $('charSearch').value = char ? charLabel(char) : '';
+    hideMatches();
+    var url = new URL(location.href);
+    if (selectedCharId) url.searchParams.set('id', selectedCharId);
+    else url.searchParams.delete('id');
+    history.replaceState(null, '', url);
+    $('swapHp').value = '';
+    $('swapAc').value = '';
+    $('swapShield').value = '';
+    renderCharacter();
+  }
+
+  function showMatches(query) {
+    var q = query.trim().toLowerCase();
+    var list = $('charMatches');
+    matchIndex = -1;
+    if (!q) { hideMatches(); return; }
+    var hits = (rankings.characters || []).filter(function (c) {
+      return String(c.name || '').toLowerCase().indexOf(q) >= 0;
+    });
+    hits.sort(function (a, b) {
+      var an = String(a.name).toLowerCase();
+      var bn = String(b.name).toLowerCase();
+      var as = an.indexOf(q) === 0 ? 0 : 1;
+      var bs = bn.indexOf(q) === 0 ? 0 : 1;
+      if (as !== bs) return as - bs;
+      return an < bn ? -1 : an > bn ? 1 : 0;
+    });
+    hits = hits.slice(0, 12);
+    list.innerHTML = '';
+    if (!hits.length) { list.hidden = true; return; }
+    hits.forEach(function (c) {
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-id', String(c.id));
+      btn.textContent = charLabel(c);
+      btn.addEventListener('mousedown', function (ev) {
+        ev.preventDefault();
+        chooseCharacter(c.id);
+      });
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+    list.hidden = false;
   }
 
   function selectedEncounter() {
@@ -611,12 +682,37 @@ svg { width: 100%; height: auto; background: #0001; }
     return TankSim.simulate(scenario);
   }
 
-  $('charPick').addEventListener('change', function () {
-    $('swapHp').value = '';
-    $('swapAc').value = '';
-    $('swapShield').value = '';
-    renderCharacter();
+  $('charSearch').addEventListener('input', function () {
+    var char = selectedChar();
+    if (!char || $('charSearch').value !== charLabel(char)) {
+      selectedCharId = '';
+      $('sheet').innerHTML = '';
+    }
+    showMatches($('charSearch').value);
   });
+  $('charSearch').addEventListener('keydown', function (ev) {
+    var buttons = $('charMatches').querySelectorAll('button');
+    if (ev.key === 'Escape') { hideMatches(); return; }
+    if (ev.key === 'ArrowDown' && buttons.length) {
+      ev.preventDefault();
+      matchIndex = Math.min(buttons.length - 1, matchIndex + 1);
+    } else if (ev.key === 'ArrowUp' && buttons.length) {
+      ev.preventDefault();
+      matchIndex = Math.max(0, matchIndex - 1);
+    } else if (ev.key === 'Enter') {
+      ev.preventDefault();
+      if (matchIndex >= 0 && buttons[matchIndex]) chooseCharacter(buttons[matchIndex].getAttribute('data-id'));
+      else {
+        var q = $('charSearch').value.trim().toLowerCase();
+        var exact = (rankings.characters || []).filter(function (c) { return String(c.name || '').toLowerCase() === q; });
+        if (exact.length === 1) chooseCharacter(exact[0].id);
+      }
+      return;
+    } else return;
+    buttons.forEach(function (btn, i) { btn.parentNode.classList.toggle('active', i === matchIndex); });
+    if (buttons[matchIndex]) buttons[matchIndex].scrollIntoView({ block: 'nearest' });
+  });
+  $('charSearch').addEventListener('blur', function () { hideMatches(); });
   $('encPick').addEventListener('change', renderEncounter);
   $('zonePick').addEventListener('change', function () {
     var before = $('encPick').value;
