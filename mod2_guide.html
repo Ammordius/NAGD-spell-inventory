@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Mod2 Weights Work</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        header h1 { font-size: 1.75em; margin-bottom: 8px; }
+        header p { font-size: 0.9em; opacity: 0.95; }
+        header a { color: white; text-decoration: underline; margin: 0 8px; display: inline-block; margin-top: 8px; }
+        .content { padding: 28px; }
+        h2 { font-size: 1.25em; color: #667eea; margin: 24px 0 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        h2:first-child { margin-top: 0; }
+        h3 { font-size: 1.05em; color: #555; margin: 16px 0 8px; }
+        p, li { margin-bottom: 10px; line-height: 1.55; }
+        ul { margin-left: 20px; margin-bottom: 12px; }
+        code, .formula { font-family: 'Consolas', 'Monaco', monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        .formula { display: block; padding: 10px 12px; margin: 10px 0; white-space: pre-wrap; }
+        .note { font-size: 0.9em; color: #666; margin-top: 8px; }
+        .scroll { overflow-x: auto; margin: 12px 0 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
+        th, td { padding: 6px 8px; text-align: right; border-bottom: 1px solid #eee; white-space: nowrap; }
+        th:first-child, td:first-child { text-align: left; }
+        th { background: #f4f6fb; color: #444; font-weight: 600; }
+        tr:hover td { background: #fafbff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>How Mod2 Weights Work</h1>
+            <p>What each launch Mod2 is worth on class rankings, the data behind those numbers, and why the default stat order is what it is.</p>
+            <a href="class_rankings.html?mod2=true">← Class Rankings (Mod2)</a>
+            <a href="scoring_explanation.html">Core score</a>
+        </header>
+        <div class="content">
+
+            <h2>What the flag changes</h2>
+            <p>Open class rankings with <code>?mod2=true</code> and equipped launch Plane of Time items add a second score. The ordinary page does not. Only items on the launch list are counted. That list was matched to item ids in the item database: 63 items resolved. Galladan's Stormwrath Tunic has no name match and scores nothing. Later expansions score nothing until an item is added to that list.</p>
+            <p>Each Mod2 is linear from zero up to its cap. Past the cap it adds nothing. A full cap is worth <code>W × 100</code> points on the same 100-point scale as the core class score, where <code>W</code> comes from the combat math below and from that class's existing HP, AC, and focus weights.</p>
+            <code class="formula">displayed = 100 × (core + mod2 points) / (100 + reference mod2 points)</code>
+            <p>The reference is a greedy best launch loadout that class can wear, not every Mod2 at cap at once. Characters with none of those items keep their order and sit slightly under their old percentage, because the denominator grew and their numerator did not.</p>
+            <p class="note">These weights are a scoring model on top of verified formulas. They are not a claim that every Mod2 is stored on the item struct. On this server, the melee path does not multiply worn shielding into the damage bonus. Spell shield and DoT shield are applied in magical damage. Strikethrough on a riposte is AA-only. Combat Effects are not the weapon proc-rate field.</p>
+
+            <h2>The data</h2>
+            <p>The ranking sheet is unbuffed. Hit points are the no-buff maximum, and displayed AC is avoidance plus mitigation without combat agility. Each character's core score is a percentage of the best core total in that class, so the class leader is 100% before Mod2.</p>
+            <p>The calibration anchor is the current rank-1 warrior, Voracious: 8992 HP and 2206 displayed AC. That is not a buffed raid total and not an internal mitigation cap. With defense 252 and agility 200, warrior combat mitigation for that displayed AC is 742 before shield AC and Combat Stability. The softcap before those additions is 430, and level-65 warrior overcap returns are 3.</p>
+            <p>Incoming damage is a blend of three profiles. Only Quarm is a parsed row.</p>
+            <div class="scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Profile</th>
+                            <th>Status</th>
+                            <th>Blend</th>
+                            <th>Level</th>
+                            <th>Min hit</th>
+                            <th>Max hit</th>
+                            <th>DB</th>
+                            <th>DI</th>
+                            <th>ATK</th>
+                            <th>Accuracy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Quarm (npc 223008)</td><td>Verified</td><td>50%</td><td>80</td><td>1140</td><td>3800</td><td>1000</td><td>140</td><td>500</td><td>750</td></tr>
+                        <tr><td>PoP boss</td><td>Illustrative</td><td>30%</td><td>70</td><td></td><td></td><td>600</td><td>220</td><td>250</td><td>150</td></tr>
+                        <tr><td>PoTime raid trash</td><td>Illustrative</td><td>20%</td><td>65</td><td></td><td></td><td>180</td><td>60</td><td>150</td><td>50</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>On Quarm, one percent shielding prevents 10 damage per landed hit (<code>DB × percent / 100</code>). Four percent prevents 40. Points above 35% do not add benefit. The other two rows are not parsed boss rows. They keep some value for avoidance, which Quarm's accuracy of 750 flattens.</p>
+
+            <h2>Each Mod2</h2>
+
+            <h3>Shielding (cap 35%)</h3>
+            <p>Modeled as damage bonus removed from a landed hit: <code>prevented = DB × percent / 100</code>. A full cap removes about 10.5% of a landed hit on the blend above. That fraction is then multiplied by how much of the class's dangerous incoming damage is melee, and by that class's HP plus AC weight. Warrior melee incoming is 0.80, so shielding is the largest tank Mod2 (3.90 points at cap). It is still well under the whole HP category, about 28 points.</p>
+
+            <h3>Avoidance (cap 100)</h3>
+            <p>Worn avoidance is added to the avoidance rating and run through the avoidance check. It is not treated as 10 hit points per 100 avoidance. The unbuffed warrior rating used here is 501, from defense 252 and agility 200 with combat agility at 0. Full avoidance removes about 5.5% of hits on the blend. Quarm's accuracy does most of the flattening; the illustrative lower-accuracy profiles are why avoidance is still worth 2.04 warrior points at cap, second to shielding.</p>
+
+            <h3>Spell shielding (cap 35%)</h3>
+            <p>A full cap is 35% of the class's assumed spell incoming, scaled by that class's HP weight. Wizard spell incoming is 0.55, so full spell shielding is 3.91 points, the largest caster Mod2. It is still smaller than the focus block, which is 35 points of the core score. Cleric spell incoming is 0.48 (3.41 points). Tanks keep a smaller spell share: warrior 1.17, paladin and shadow knight higher because more of their incoming mix is spells.</p>
+
+            <h3>DoT shielding (cap 35%)</h3>
+            <p>Same shape as spell shielding, using the class's assumed DoT incoming. Necromancer DoT incoming is 0.36, so full DoT shielding is 2.56 points and outranks spell shielding for that class. Shaman is 1.56 and druid is 1.42. Classes with little DoT incoming stay under one point.</p>
+
+            <h3>Accuracy (cap 150)</h3>
+            <p>Relative melee hit gain versus an NPC avoidance cap of 460, using a 252/252 to-hit stand-in. Full accuracy raises that hit rate by about 13.3%. The gain is then scaled by the class offense role and by that class's weapon or focus share of the core score. That is why monk accuracy is 3.49 and rogue accuracy is 3.72, while wizard accuracy is 0.09. Offense roles: monk 0.75, rogue 0.80, ranger 0.62, warrior 0.20, pure casters 0.02.</p>
+
+            <h3>Strikethrough (cap 35%)</h3>
+            <p>The model treats a share of swings as a successful parry, riposte, dodge, or block: 12% from the front and 2% from behind. Full strikethrough is that share times 35%, then scaled by offense and the weapon or focus share. Rogues are the behind case, so rogue strikethrough is 0.20 while monk strikethrough is 1.10. The riposte path in combat code is AA-only; this line is the scoring assumption for worn strikethrough, not that AA check.</p>
+
+            <h3>Combat Effects (cap 100)</h3>
+            <p>Not the weapon proc-rate field. Full combat effects are about 4% of melee offense, scaled by the offense role and the weapon or focus share. If the class has no threat factor, the whole value is non-threat. If the class is an offense class (offense role at least 0.45), 70% stays non-threat and 30% is threat. Otherwise the whole 4% is threat. Threat value is zero when threat is not limiting. Rogue combat effects are 1.12 because the rogue offense role is high and threat is zero, so the points stay on the non-threat side. Warrior combat effects are 0.21.</p>
+
+            <h3>Stun resist (cap 35%)</h3>
+            <p>Split into a threat portion and an action portion. The default scenario is a Plane of Power raid where threat is sometimes relevant and stuns are not constant: stun exposure 0.20, action exposure 0.08. Threat points scale with the class threat factor (warrior 0.35, paladin 0.25, shadow knight 0.28, most casters 0). Action points scale with how much the class is interrupted by being locked (cleric 0.35, druid and shaman 0.30, warrior 0.05). Reaching 35% is not an extra bonus.</p>
+            <p>Default warrior stun threat at 35% is 0.64 points. The table total of 0.68 includes the small action portion. With threat limitation at 0, warrior stun threat is 0. With threat limitation at 1 and stun exposure at 0.8 it is 7.35. The published ranking uses the default 0.20 exposure, not that stress case.</p>
+
+            <h3>Damage shield (cap 25)</h3>
+            <p>Compared with a 400-point player white hit, at 5% uptime, then scaled by the offense role and the weapon or focus share. Full cap is 0.02 warrior points and 0.09 rogue points. It is kept small on purpose.</p>
+
+            <h2>Why the default Mod2 order is what it is</h2>
+            <p>Defensive mods scale with that class's existing HP plus AC weight and with how the incoming mix is split across melee, spells, and DoTs. Offensive mods scale with the offense role and with the weapon or focus share of the core score. Threat mods are zero when that class's threat factor is zero.</p>
+            <p>The incoming mix and roles used for every class:</p>
+            <div class="scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Melee in</th>
+                            <th>Spell in</th>
+                            <th>DoT in</th>
+                            <th>Threat</th>
+                            <th>Offense</th>
+                            <th>Behind</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Warrior</td><td>0.80</td><td>0.12</td><td>0.08</td><td>0.35</td><td>0.20</td><td>No</td><td>0.05</td></tr>
+                        <tr><td>Paladin</td><td>0.62</td><td>0.22</td><td>0.08</td><td>0.25</td><td>0.28</td><td>No</td><td>0.12</td></tr>
+                        <tr><td>Shadow Knight</td><td>0.62</td><td>0.18</td><td>0.12</td><td>0.28</td><td>0.30</td><td>No</td><td>0.08</td></tr>
+                        <tr><td>Ranger</td><td>0.30</td><td>0.14</td><td>0.06</td><td>0.05</td><td>0.62</td><td>No</td><td>0.04</td></tr>
+                        <tr><td>Monk</td><td>0.28</td><td>0.08</td><td>0.05</td><td>0</td><td>0.75</td><td>No</td><td>0.02</td></tr>
+                        <tr><td>Rogue</td><td>0.22</td><td>0.06</td><td>0.04</td><td>0</td><td>0.80</td><td>Yes</td><td>0.02</td></tr>
+                        <tr><td>Beastlord</td><td>0.34</td><td>0.14</td><td>0.08</td><td>0.08</td><td>0.52</td><td>No</td><td>0.06</td></tr>
+                        <tr><td>Bard</td><td>0.22</td><td>0.22</td><td>0.08</td><td>0.10</td><td>0.40</td><td>No</td><td>0.15</td></tr>
+                        <tr><td>Cleric</td><td>0.12</td><td>0.48</td><td>0.10</td><td>0</td><td>0.02</td><td>No</td><td>0.35</td></tr>
+                        <tr><td>Druid</td><td>0.12</td><td>0.38</td><td>0.20</td><td>0</td><td>0.05</td><td>No</td><td>0.30</td></tr>
+                        <tr><td>Shaman</td><td>0.15</td><td>0.32</td><td>0.22</td><td>0</td><td>0.08</td><td>No</td><td>0.30</td></tr>
+                        <tr><td>Necromancer</td><td>0.08</td><td>0.28</td><td>0.36</td><td>0</td><td>0.02</td><td>No</td><td>0.22</td></tr>
+                        <tr><td>Wizard</td><td>0.08</td><td>0.55</td><td>0.08</td><td>0</td><td>0.02</td><td>No</td><td>0.25</td></tr>
+                        <tr><td>Magician</td><td>0.08</td><td>0.45</td><td>0.12</td><td>0</td><td>0.02</td><td>No</td><td>0.22</td></tr>
+                        <tr><td>Enchanter</td><td>0.10</td><td>0.46</td><td>0.12</td><td>0</td><td>0.02</td><td>No</td><td>0.28</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>A full cap is worth the points below. Reference points are the best launch loadout, which is less than the sum of the caps because the items do not cover every stat at once.</p>
+            <div class="scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Reference</th>
+                            <th>Ref pts</th>
+                            <th>Shield</th>
+                            <th>Avoid</th>
+                            <th>Spell</th>
+                            <th>DoT</th>
+                            <th>Acc</th>
+                            <th>Strike</th>
+                            <th>CE</th>
+                            <th>Stun</th>
+                            <th>DS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Warrior</td><td>Voracious</td><td>3.27</td><td>3.90</td><td>2.04</td><td>1.17</td><td>0.78</td><td>0.70</td><td>0.22</td><td>0.21</td><td>0.68</td><td>0.02</td></tr>
+                        <tr><td>Cleric</td><td>Drudger</td><td>2.26</td><td>0.31</td><td>0.16</td><td>3.41</td><td>0.71</td><td>0.09</td><td>0.03</td><td>0.03</td><td>0.20</td><td>0.00</td></tr>
+                        <tr><td>Paladin</td><td>Pigpen</td><td>3.08</td><td>2.64</td><td>1.38</td><td>1.88</td><td>0.68</td><td>1.30</td><td>0.41</td><td>0.39</td><td>0.69</td><td>0.03</td></tr>
+                        <tr><td>Ranger</td><td>Linkamus</td><td>2.87</td><td>1.28</td><td>0.67</td><td>1.19</td><td>0.51</td><td>2.88</td><td>0.91</td><td>0.87</td><td>0.15</td><td>0.07</td></tr>
+                        <tr><td>Shadow Knight</td><td>Slouch</td><td>2.95</td><td>2.64</td><td>1.38</td><td>1.54</td><td>1.02</td><td>1.40</td><td>0.44</td><td>0.42</td><td>0.74</td><td>0.03</td></tr>
+                        <tr><td>Druid</td><td>Baily</td><td>1.85</td><td>0.31</td><td>0.16</td><td>2.70</td><td>1.42</td><td>0.23</td><td>0.07</td><td>0.07</td><td>0.17</td><td>0.01</td></tr>
+                        <tr><td>Monk</td><td>Zentile</td><td>2.84</td><td>1.04</td><td>0.54</td><td>0.83</td><td>0.52</td><td>3.49</td><td>1.10</td><td>1.05</td><td>0.02</td><td>0.08</td></tr>
+                        <tr><td>Bard</td><td>Taelor</td><td>1.24</td><td>0.52</td><td>0.27</td><td>1.44</td><td>0.52</td><td>0.30</td><td>0.10</td><td>0.09</td><td>0.16</td><td>0.01</td></tr>
+                        <tr><td>Rogue</td><td>Tarkon</td><td>2.44</td><td>0.82</td><td>0.43</td><td>0.62</td><td>0.41</td><td>3.72</td><td>0.20</td><td>1.12</td><td>0.02</td><td>0.09</td></tr>
+                        <tr><td>Shaman</td><td>Ziva</td><td>1.62</td><td>0.38</td><td>0.20</td><td>2.27</td><td>1.56</td><td>0.37</td><td>0.12</td><td>0.11</td><td>0.17</td><td>0.01</td></tr>
+                        <tr><td>Necromancer</td><td>Nark</td><td>1.28</td><td>0.20</td><td>0.11</td><td>1.99</td><td>2.56</td><td>0.09</td><td>0.03</td><td>0.03</td><td>0.13</td><td>0.00</td></tr>
+                        <tr><td>Wizard</td><td>Beldis</td><td>2.39</td><td>0.20</td><td>0.11</td><td>3.91</td><td>0.57</td><td>0.09</td><td>0.03</td><td>0.03</td><td>0.14</td><td>0.00</td></tr>
+                        <tr><td>Magician</td><td>Starsha</td><td>1.97</td><td>0.20</td><td>0.11</td><td>3.20</td><td>0.85</td><td>0.09</td><td>0.03</td><td>0.03</td><td>0.13</td><td>0.00</td></tr>
+                        <tr><td>Enchanter</td><td>Diox</td><td>2.04</td><td>0.26</td><td>0.13</td><td>3.27</td><td>0.85</td><td>0.09</td><td>0.03</td><td>0.03</td><td>0.16</td><td>0.00</td></tr>
+                        <tr><td>Beastlord</td><td>Akbar</td><td>1.66</td><td>1.45</td><td>0.76</td><td>1.19</td><td>0.68</td><td>0.40</td><td>0.13</td><td>0.12</td><td>0.15</td><td>0.01</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>On Voracious, +100 HP is 0.275 display points. +10 displayed AC is 0.092 and +30 displayed AC is 0.275. The AC slope is the existing ranking's linear displayed-AC term, not extra mitigation past the softcap. 4% shielding is 0.45 points (4/35 of 3.90). 2% shielding is 0.22. 10 avoidance is 0.20. 25 avoidance is 0.51. So 2% shielding is in the same range as +100 HP, and 4% shielding is ahead of +100 HP and ahead of +30 displayed AC. That is the intended tank result on this blend.</p>
+            <p>Tanks therefore rank shielding, then avoidance, then spell shielding. Monks and rogues rank accuracy first. Rogue strikethrough stays small because attacks are assumed from behind. Casters rank spell shielding first, except the necromancer, where DoT shielding is first. Damage shield is last for every class.</p>
+
+            <h2>Why the slider defaults are what they are</h2>
+            <p>Customize Weights, shown on the Mod2 rankings page, starts from the same relative weights the core score uses. Those relatives are scaled so stats are 65% of the bar and focus is 35%. Bards use a 40% focus target, so their stats are 60%. The slider number is the relative weight. The contribution percent next to it is that weight after the 65/35 scale. Changing a slider changes the core score for the selected class on this browser only. It does not change Mod2 caps or the per-class Mod2 weights in the table above.</p>
+            <div class="scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Group</th>
+                            <th>Classes</th>
+                            <th>HP</th>
+                            <th>Mana</th>
+                            <th>AC</th>
+                            <th>Resists</th>
+                            <th>After scaling</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Tank</td><td>Warrior</td><td>3</td><td>0</td><td>2</td><td>2</td><td>HP 27.9%, AC 18.6%, resists 18.6%, focus 35%</td></tr>
+                        <tr><td>Tank hybrid</td><td>Paladin, Shadow Knight, Ranger, Beastlord</td><td>3</td><td>1</td><td>2</td><td>2</td><td>HP 24.4%, mana 8.1%, AC 16.3%, resists 16.3%, focus 35%</td></tr>
+                        <tr><td>Melee</td><td>Monk, Rogue</td><td>1</td><td>0</td><td>0.2</td><td>1</td><td>HP 29.5%, AC 5.9%, resists 29.5%, focus 35%</td></tr>
+                        <tr><td>Caster</td><td>Cleric, Druid, Shaman, Necromancer, Wizard, Magician, Enchanter</td><td>1</td><td>1</td><td>0.2</td><td>1</td><td>HP 20.3%, mana 20.3%, AC 4.1%, resists 20.3%, focus 35%</td></tr>
+                        <tr><td>Bard</td><td>Bard</td><td>1</td><td>1</td><td>0.2</td><td>1</td><td>HP 18.8%, mana 18.8%, AC 3.8%, resists 18.8%, focus 40%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>HP is 3 for warriors and for the hybrids that are expected to take hits, because the stat block is mostly survival and the class leader's HP is the scale Mod2 defensive points are matched to. Mana is 0 for warrior, monk, and rogue, and 1 everywhere else, so a mana pool is equal to HP for casters and a smaller slice for tank hybrids. AC is 2 on the tank and tank-hybrid rows and 0.2 on everyone else: a small universal term, not a second health bar for casters. Resists are 2 on the tank rows and 1 otherwise, and that weight is the total across all five resists.</p>
+            <p>The focus third is what the class is for. Warriors, rangers, monks, and rogues put it on WeaponMetric (warrior also keeps a point on the Raex chest). Paladins and shadow knights keep Shield of Strife high, with haste, attack, and a smaller mana-efficiency term. Caster focus is led by Flowing Thought at 4, then the foci that define the class: beneficial spell haste and healing for priests, pet power for magician, necromancer, and beastlord, and the spell-damage types that class actually casts. Bard focus is instruments plus WeaponMetric and Flowing Thought, and the 40% target is there so those share the bar instead of being crushed by the 35% default.</p>
+            <p class="note">All classes get a small AC weight, including casters. Setting a slider to 0 turns that stat off for the selected class. Reset to Default restores the relatives above.</p>
+
+        </div>
+    </div>
+</body>
+</html>
