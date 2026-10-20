@@ -380,7 +380,7 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
         }
         .toon-upgrade-card .card-name { font-weight: 600; color: #667eea; margin-bottom: 6px; }
-        .toon-upgrade-card .card-deltas { color: #28a745; font-size: 0.9em; margin-bottom: 4px; }
+        .toon-upgrade-card .card-deltas { font-size: 0.9em; margin-bottom: 4px; }
         .toon-upgrade-card .card-score { color: #6c757d; font-size: 0.85em; margin-bottom: 4px; }
         .toon-upgrade-card .card-dkp { color: #17a2b8; font-size: 0.85em; }
         .toon-upgrade-tab {
@@ -1340,20 +1340,51 @@
             return `<span style="color:${color};font-weight:600;">${text}</span>`;
         }
 
-        /** Format upgrade deltas and optional focus for display, e.g. "+12 HP  +3 AC  +5 STR  +3 sv all  · Focus: Spell Haste III". */
-        function formatUpgradeDeltas(deltas, focusSpellName) {
+        /** Single colored "+N LABEL" / "-N LABEL" token for upgrade lists (HTML). */
+        function formatSignedStatPartHtml(delta, label) {
+            if (delta == null || delta === 0) return '';
+            const color = delta > 0 ? '#28a745' : '#dc3545';
+            const text = (delta > 0 ? '+' : '') + delta + ' ' + label;
+            return `<span style="color:${color}">${escapeHtml(text)}</span>`;
+        }
+
+        function formatPrimPartDeltasHtml(primDeltasByKey) {
+            if (!primDeltasByKey || typeof primDeltasByKey !== 'object') return '';
             const parts = [];
-            if (deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
-            if (deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
-            if (deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
-            const primPart = deltas.primDeltasByKey ? formatPrimPartDeltas(deltas.primDeltasByKey) : '';
+            PRIM_STAT_KEYS.forEach(k => {
+                const d = primDeltasByKey[k] || 0;
+                if (d !== 0) parts.push(formatSignedStatPartHtml(d, k));
+            });
+            return parts.join('  ');
+        }
+
+        function formatResistPartDeltasHtml(svDeltasByType) {
+            if (!svDeltasByType || typeof svDeltasByType !== 'object') return '';
+            const deltas = RESIST_ORDER.map(abbrev => svDeltasByType[abbrev] || 0);
+            const nonZero = deltas.filter(d => d !== 0);
+            if (nonZero.length === 0) return '';
+            const allSame = nonZero.length === 5 && nonZero.every(d => d === nonZero[0]);
+            if (allSame && nonZero[0] !== 0) return formatSignedStatPartHtml(nonZero[0], 'sv all');
+            return RESIST_ORDER.filter(abbrev => (svDeltasByType[abbrev] || 0) !== 0)
+                .map(abbrev => formatSignedStatPartHtml(svDeltasByType[abbrev] || 0, abbrev))
+                .join('  ');
+        }
+
+        /** Format upgrade deltas as HTML: green gains, red losses; focus/mod2 notes uncolored. */
+        function formatUpgradeDeltas(deltas, focusSpellName) {
+            if (!deltas) return '';
+            const parts = [];
+            if (deltas.hpDelta) parts.push(formatSignedStatPartHtml(deltas.hpDelta, 'HP'));
+            if (deltas.manaDelta) parts.push(formatSignedStatPartHtml(deltas.manaDelta, 'mana'));
+            if (deltas.acDelta) parts.push(formatSignedStatPartHtml(deltas.acDelta, 'AC'));
+            const primPart = deltas.primDeltasByKey ? formatPrimPartDeltasHtml(deltas.primDeltasByKey) : '';
             if (primPart) parts.push(primPart);
-            const resistPart = deltas.svDeltasByType ? formatResistPartDeltas(deltas.svDeltasByType) : '';
+            const resistPart = deltas.svDeltasByType ? formatResistPartDeltasHtml(deltas.svDeltasByType) : '';
             if (resistPart) parts.push(resistPart);
-            else if (deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
+            else if (deltas.svAllDelta) parts.push(formatSignedStatPartHtml(deltas.svAllDelta, 'sv'));
             let text = parts.join('  ');
-            if (focusSpellName && focusSpellName.trim()) text += (text ? '  · ' : '') + 'Focus: ' + focusSpellName.trim();
-            if (deltas.mod2Note) text += (text ? '  · ' : '') + deltas.mod2Note;
+            if (focusSpellName && focusSpellName.trim()) text += (text ? '  · ' : '') + escapeHtml('Focus: ' + focusSpellName.trim());
+            if (deltas.mod2Note) text += (text ? '  · ' : '') + escapeHtml(deltas.mod2Note);
             return text || '';
         }
 
@@ -2979,18 +3010,7 @@
         }
 
         function formatUpgradeDeltasShort(deltas, focusSpellName) {
-            const parts = [];
-            if (deltas && deltas.hpDelta != null && deltas.hpDelta !== 0) parts.push((deltas.hpDelta > 0 ? '+' : '') + deltas.hpDelta + ' HP');
-            if (deltas && deltas.manaDelta != null && deltas.manaDelta !== 0) parts.push((deltas.manaDelta > 0 ? '+' : '') + deltas.manaDelta + ' mana');
-            if (deltas && deltas.acDelta != null && deltas.acDelta !== 0) parts.push((deltas.acDelta > 0 ? '+' : '') + deltas.acDelta + ' AC');
-            const primPart = (deltas && deltas.primDeltasByKey) ? formatPrimPartDeltas(deltas.primDeltasByKey) : '';
-            if (primPart) parts.push(primPart);
-            const resistPart = (deltas && deltas.svDeltasByType) ? formatResistPartDeltas(deltas.svDeltasByType) : '';
-            if (resistPart) parts.push(resistPart);
-            else if (deltas && deltas.svAllDelta != null && deltas.svAllDelta !== 0) parts.push((deltas.svAllDelta > 0 ? '+' : '') + deltas.svAllDelta + ' sv');
-            if (focusSpellName) parts.push('Focus: ' + focusSpellName);
-            if (deltas && deltas.mod2Note) parts.push(deltas.mod2Note);
-            return parts.join(' ');
+            return formatUpgradeDeltas(deltas, focusSpellName);
         }
 
         function renderToonUpgradesStrip(char) {
@@ -3041,11 +3061,11 @@
                     } else {
                         const upgrade = (slot.upgrades || []).find(u => u.itemId === Number(mageloId));
                         if (upgrade) statsShort = formatUpgradeDeltasShort(upgrade.deltas || {}, upgrade.focusSpellName) || '—';
-                        else if (stats) statsShort = formatItemStatsAbsolute(stats);
+                        else if (stats) statsShort = escapeHtml(formatItemStatsAbsolute(stats));
                     }
                     html += `<div class="toon-upgrade-card toon-upgrade-card-elemental" data-item-id="${mageloId}" data-item-name="${escapeHtml(opt.pattern_name)}" data-slot-name="${escapeHtml(slot.slotName || '')}" data-slot-id="${slot.slotId != null ? slot.slotId : ''}" data-char-name="${escapeHtml(char.name)}">
   <div class="card-name">${escapeHtml(opt.pattern_name)}</div>
-  <div class="card-deltas">${escapeHtml(statsShort)}</div>
+  <div class="card-deltas">${statsShort}</div>
   <div class="card-score">${escapeHtml(classListStr)} — ${escapeHtml(slot.slotName || '')}</div>
   <div class="card-dkp">${dkpStr}</div>
 </div>`;
@@ -3061,7 +3081,7 @@
                     const hpDkpStr = hpPerDkp != null ? ` HP/DKP: ${hpPerDkp.toFixed(2)}` : '';
                     html += `<div class="toon-upgrade-card" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}" data-slot-name="${escapeHtml(slot.slotName || '')}" data-slot-id="${slot.slotId != null ? slot.slotId : ''}" data-delta="${(u.delta || 0).toFixed(2)}" data-hp-dkp="${hpPerDkp != null ? hpPerDkp.toFixed(2) : ''}" data-char-name="${escapeHtml(char.name)}">
   <div class="card-name">${escapeHtml(u.itemName || 'Item ' + u.itemId)}</div>
-  <div class="card-deltas">${escapeHtml(deltaStr || '—')}</div>
+  <div class="card-deltas">${deltaStr || '—'}</div>
   <div class="card-score">(score +${(u.delta || 0).toFixed(2)}) ${escapeHtml(slot.slotName || '')}</div>
   <div class="card-dkp">${dkpStr}${hpDkpStr}</div>
 </div>`;
@@ -3153,14 +3173,14 @@
                             const hpd = getHpPerDkpForUpgrade(u);
                             const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                             benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
-                            if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            if (statsFocus) benefit += ` · ${statsFocus}`;
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                         }
                         const others = slot.upgrades.filter(x => String(x.itemId) !== String(elementalItemId)).slice(0, upgradesPerSlot);
                         otherOptionsHtml = others.length ? others.map(o => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                             const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
                             return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                         }).join(', ') : '—';
                     }
@@ -3204,14 +3224,14 @@
                             const hpd = getHpPerDkpForUpgrade(u);
                             const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                             benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
-                            if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            if (statsFocus) benefit += ` · ${statsFocus}`;
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                         }
                         const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
                         otherOptionsHtml = others.length ? others.map(o => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                             const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
                             return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                         }).join(', ') : '—';
                     }
@@ -3358,13 +3378,13 @@
                             const hpd = getHpPerDkpForUpgrade(u);
                             const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                             benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
-                            if (statsFocus) benefit += ` · ${escapeHtml(statsFocus)}`;
+                            if (statsFocus) benefit += ` · ${statsFocus}`;
                             sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
                             const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
                             otherOptionsHtml = others.length ? others.map(o => {
                                 const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                                 const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                                const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                                const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
                                 return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                             }).join(', ') : '—';
                             break;
@@ -3380,7 +3400,7 @@
                         otherOptionsHtml = others.length ? others.map(o => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                             const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            const base = deltaStr ? `${link} <span style="color:#28a745;font-size:0.9em;">(${escapeHtml(deltaStr)})</span>` : link;
+                            const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
                             return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
                         }).join(', ') : '—';
                     }
@@ -4518,7 +4538,7 @@
                         upgrades.forEach(u => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${u.itemId}" target="_blank" data-item-id="${u.itemId}" data-item-name="${escapeHtml(u.itemName || '')}">${escapeHtml(u.itemName || `Item ${u.itemId}`)}</a>`;
                             const deltaStr = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
-                            const detail = deltaStr ? ` <span style="color: #28a745;">${escapeHtml(deltaStr)}</span>` : '';
+                            const detail = deltaStr ? ` ${deltaStr}` : '';
                             const scoreNote = ` <span style="color: #6c757d; font-size: 0.9em;">(score +${(u.delta || 0).toFixed(2)})</span>`;
                             let dkpNote = '';
                             if (dkpValEnabled) {
