@@ -502,6 +502,11 @@ jobs:
           exit 1
         fi
         echo "✓ spell_inventory.html ($(wc -c < spell_inventory.html) bytes)"
+        if [ ! -f "guild_characters.html" ]; then
+          echo "::error::guild_characters.html was not generated"
+          exit 1
+        fi
+        echo "✓ guild_characters.html ($(wc -c < guild_characters.html) bytes)"
         if [ -f "delta.html" ]; then
           echo "✓ delta.html ($(wc -c < delta.html) bytes)"
           if grep -q "No.*changes detected" delta.html; then
@@ -590,6 +595,12 @@ jobs:
         # Create a clean directory with the HTML files
         mkdir -p deploy
         cp spell_inventory.html deploy/index.html
+        if [ -f "guild_characters.html" ]; then
+          cp guild_characters.html deploy/guild_characters.html
+          echo "✓ Copied guild_characters.html to deploy directory"
+        else
+          echo "::warning::guild_characters.html was not generated"
+        fi
         # Copy delta page if it was generated
         if [ -f "delta.html" ]; then
           cp delta.html deploy/delta.html
@@ -905,7 +916,7 @@ jobs:
           EXPORT_DATE: ${{ needs.update-spell-inventory.outputs.normalized_date }}
         run: |
           echo "Pages URL: $PAGES_URL/"
-          for path in index.html delta.html char.html item.html mob.html; do
+          for path in index.html guild_characters.html delta.html char.html item.html mob.html; do
             if curl -sfL "$PAGES_URL/$path" -o /dev/null; then
               echo "✓ $path"
             else

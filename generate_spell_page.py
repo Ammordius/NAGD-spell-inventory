@@ -65,6 +65,33 @@ OFFICER_MULE_CHARACTERS = [
     "Overflowfour", "Overflowthree", "Overflowtwo", "Slushfund"
 ]
 
+# Walex / Manbearpig alts watched for equipped→naked alerts
+WALEX_CHARACTERS = [
+    "Walex", "Vaeinae", "Kakamar", "Palex", "Kansh", "Oogok", "Rukik", "Baeras",
+    "Aluolen", "Nilren", "Balaf", "Dedden", "Senelen", "Xelaw", "Nadin", "Tedin",
+    "Banrek", "Hatebuddy",
+]
+
+# Additional guild toons watched for equipped→naked alerts
+EXTRA_GUILD_WATCH = [
+    "Brechen", "Priester", "Nekromant", "Evakuieren",
+]
+
+
+def _dedupe_preserve_order(names):
+    seen = set()
+    out = []
+    for name in names:
+        if name not in seen:
+            seen.add(name)
+            out.append(name)
+    return out
+
+
+GUILD_STATUS_WATCHLIST = _dedupe_preserve_order(
+    list(MULE_CHARACTERS) + list(WALEX_CHARACTERS) + list(EXTRA_GUILD_WATCH)
+)
+
 def load_spell_exchange_data():
     """Load the spell exchange JSON data and extract all spell IDs."""
     # Try multiple possible locations
@@ -577,6 +604,7 @@ def generate_html(char_ids, inventories, spell_info, officer_char_ids=None, offi
         <h1>TAKP Mule PoK Spell Inventory</h1>
         <p>Generated from magelo dump (last updated: """ + magelo_update_date + """)</p>
         <p>This page shows spells that can be obtained from PoK turn-ins (Ethereal Parchment, Spectral Parchment, Glyphed Rune Word)</p>
+        <p><a href="guild_characters.html">Guild characters</a> — equipped / naked watchlist</p>
         
         <div class="search-inventory">
             <h2>Search mule inventory</h2>
@@ -1187,6 +1215,207 @@ def chars_corpse_loot_excluded(current_inv, previous_inv):
         if prev_equipped == 0 and curr_equipped >= 1:
             excluded.add(char_name)
     return excluded
+
+
+def chars_became_naked(current_inv, previous_inv, names=None):
+    """Characters who went from any equipped worn gear to 0 equipped (naked).
+
+    Inverse of chars_corpse_loot_excluded. If names is set, only those characters
+    are considered (watchlist); otherwise all names present in either inventory map.
+    """
+    became = set()
+    if names is None:
+        candidates = set(current_inv.keys()) | set(previous_inv.keys())
+    else:
+        candidates = set(names)
+    for char_name in candidates:
+        prev_equipped = count_equipped(previous_inv.get(char_name, []))
+        curr_equipped = count_equipped(current_inv.get(char_name, []))
+        if prev_equipped >= 1 and curr_equipped == 0:
+            became.add(char_name)
+    return became
+
+
+def generate_guild_status_html(
+    watchlist,
+    current_char_data,
+    previous_char_data,
+    current_inv,
+    previous_inv,
+    magelo_update_date='Unknown',
+    has_previous=True,
+):
+    """Generate guild watchlist equipped/naked status page (no delta.html links)."""
+    current_char_data = current_char_data or {}
+    previous_char_data = previous_char_data or {}
+    current_inv = current_inv or {}
+    previous_inv = previous_inv or {}
+
+    became_naked = (
+        chars_became_naked(current_inv, previous_inv, names=watchlist)
+        if has_previous
+        else set()
+    )
+
+    rows = []
+    currently_naked = []
+    for name in watchlist:
+        in_current = name in current_char_data
+        curr_eq = count_equipped(current_inv.get(name, [])) if in_current else None
+        prev_eq = (
+            count_equipped(previous_inv.get(name, []))
+            if has_previous and (name in previous_char_data or name in previous_inv)
+            else None
+        )
+        if not in_current:
+            status = 'missing'
+            status_label = 'Missing from Magelo'
+        elif curr_eq == 0:
+            status = 'naked'
+            status_label = 'Naked'
+            currently_naked.append(name)
+        else:
+            status = 'equipped'
+            status_label = 'Equipped'
+        became_today = name in became_naked
+        info = current_char_data.get(name) or {}
+        rows.append({
+            'name': name,
+            'status': status,
+            'status_label': status_label,
+            'curr_eq': curr_eq,
+            'prev_eq': prev_eq,
+            'became_today': became_today,
+            'level': info.get('level'),
+            'class': info.get('class') or '',
+            'guild': info.get('guild') or '',
+        })
+
+    alert_html = ''
+    if currently_naked:
+        names_html = ', '.join(
+            f'<strong>{escape(n)}</strong>' for n in currently_naked
+        )
+        became_note = ''
+        newly = [n for n in currently_naked if n in became_naked]
+        if newly:
+            became_note = (
+                '<br><span style="font-size:0.95em;">Became naked since previous dump: '
+                + ', '.join(f'<strong>{escape(n)}</strong>' for n in newly)
+                + '</span>'
+            )
+        alert_html = f'''
+        <div class="alert-banner" role="alert">
+            <strong>Alert:</strong> {len(currently_naked)} watchlist character(s) currently naked:
+            {names_html}.{became_note}
+        </div>
+'''
+
+    def _eq_cell(val):
+        if val is None:
+            return '—'
+        return str(val)
+
+    body_rows = []
+    for row in rows:
+        name = row['name']
+        magelo_url = (
+            'https://www.takproject.net/magelo/character.php?char='
+            + quote(name.lower())
+        )
+        name_cell = (
+            f'<a href="{escape(magelo_url)}" target="_blank" rel="noopener">'
+            f'{escape(name)}</a>'
+        )
+        guild = escape(row['guild']) if row['guild'] else ''
+        cls = escape(row['class']) if row['class'] else '—'
+        level = row['level'] if row['level'] is not None else '—'
+        extras = []
+        if row['became_today']:
+            extras.append('<span class="badge-became">Became naked today</span>')
+        extra_html = ' '.join(extras)
+        body_rows.append(
+            f'<tr class="status-{escape(row["status"])}">'
+            f'<td>{name_cell}</td>'
+            f'<td>{level}</td>'
+            f'<td>{cls}</td>'
+            f'<td>{guild}</td>'
+            f'<td class="num">{_eq_cell(row["prev_eq"])}</td>'
+            f'<td class="num">{_eq_cell(row["curr_eq"])}</td>'
+            f'<td>{escape(row["status_label"])} {extra_html}</td>'
+            f'</tr>'
+        )
+
+    rows_html = '\n'.join(body_rows)
+    prev_note = (
+        'Compared to previous Magelo dump for “became naked today”.'
+        if has_previous
+        else 'No previous Magelo dump available; only current equipped counts are shown.'
+    )
+
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guild Character Status — Equipped / Naked</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }}
+        .container {{ max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+        h1 {{ color: #333; border-bottom: 3px solid #2e7d32; padding-bottom: 10px; }}
+        .sub {{ color: #666; margin-bottom: 12px; }}
+        a {{ color: #1565c0; }}
+        .alert-banner {{
+            background: #ffebee; color: #b71c1c; border-left: 6px solid #c62828;
+            padding: 14px 16px; border-radius: 4px; margin: 16px 0; font-size: 1.05em;
+        }}
+        table {{ border-collapse: collapse; width: 100%; margin-top: 12px; }}
+        th, td {{ border: 1px solid #ddd; padding: 8px 10px; text-align: left; }}
+        th {{ background: #37474f; color: white; }}
+        td.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
+        tr.status-equipped {{ background: #e8f5e9; }}
+        tr.status-naked {{ background: #ffebee; }}
+        tr.status-missing {{ background: #f5f5f5; color: #757575; }}
+        .badge-became {{
+            display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 3px;
+            background: #c62828; color: white; font-size: 0.8em; font-weight: bold;
+        }}
+        .legend span {{ display: inline-block; padding: 4px 10px; margin-right: 8px; border-radius: 3px; font-size: 0.9em; }}
+        .legend .eq {{ background: #e8f5e9; }}
+        .legend .nk {{ background: #ffebee; }}
+        .legend .ms {{ background: #f5f5f5; color: #757575; }}
+    </style>
+{GOATCOUNTER_SCRIPT}
+</head>
+<body>
+<div class="container">
+    <h1>Guild Character Status</h1>
+    <p class="sub">Generated from magelo dump (last updated: {escape(magelo_update_date)})</p>
+    <p class="sub"><a href="index.html">← Spell Inventory</a></p>
+    <p class="sub">Worn equipped count uses slots 1–22 (same rule as delta corpse-loot detection). Green = equipped; red = naked (0 worn items). {escape(prev_note)}</p>
+    <p class="legend"><span class="eq">Equipped</span><span class="nk">Naked</span><span class="ms">Missing</span></p>
+{alert_html}
+    <table>
+        <thead>
+            <tr>
+                <th>Character</th>
+                <th>Level</th>
+                <th>Class</th>
+                <th>Guild</th>
+                <th>Prev worn</th>
+                <th>Curr worn</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+{rows_html}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
+'''
+    return html
 
 
 def load_no_rent_items():
@@ -8056,8 +8285,8 @@ def main():
     print(f"Writing HTML to {output_file}...")
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html)
-    
-    # Try to generate delta page if previous day's files exist
+
+    # Resolve previous Magelo dumps (shared by guild status page + delta).
     # Priority: 1) _previous from CI — yesterday's dump copied before today's file overwrites it.
     #            2) Yesterday's dated file (M_D_YY.txt) when using dated archives only.
     #            3) Prototype files for local testing.
@@ -8074,9 +8303,14 @@ def main():
     yesterday_char_file = find_yesterday_file(char_file, char_dir)
     yesterday_inv_file = find_yesterday_file(inv_file, inv_dir)
 
+    guild_previous_char_file = None
+    guild_previous_inv_file = None
+
     if os.path.exists(prev_ci_char) and os.path.exists(prev_ci_inv):
         previous_char_file = prev_ci_char
         previous_inv_file = prev_ci_inv
+        guild_previous_char_file = prev_ci_char
+        guild_previous_inv_file = prev_ci_inv
         print("[OK] Using workflow _previous files (yesterday Magelo vs current):")
         print(f"  Previous: {os.path.basename(previous_char_file)}")
         print(f"  Current: {os.path.basename(current_char_file)}")
@@ -8086,6 +8320,8 @@ def main():
         print(f"  Current: {os.path.basename(current_char_file)}")
         previous_char_file = yesterday_char_file
         previous_inv_file = yesterday_inv_file
+        guild_previous_char_file = yesterday_char_file
+        guild_previous_inv_file = yesterday_inv_file
     else:
         proto_prev_char = os.path.join(char_dir, "1_14_24.txt")
         proto_prev_inv = os.path.join(inv_dir, "1_14_24.txt")
@@ -8097,11 +8333,63 @@ def main():
             print("⚠ Prototype files found (1_14_24 and 1_17_24), generating serverwide delta page...")
             previous_char_file = proto_prev_char
             previous_inv_file = proto_prev_inv
+            guild_previous_char_file = proto_prev_char
+            guild_previous_inv_file = proto_prev_inv
             current_char_file = proto_curr_char
             current_inv_file = proto_curr_inv
         else:
             previous_char_file = None
             previous_inv_file = None
+
+    # Guild naked-watch page always uses current dump; previous when available
+    # (even if delta is later skipped for date-span).
+    magelo_update_date = (os.environ.get('MAGELO_UPDATE_DATE') or '').strip() or 'Unknown'
+    if magelo_update_date == 'Unknown':
+        ud_path = os.path.join(base_dir, '.magelo_update_date')
+        if os.path.isfile(ud_path):
+            with open(ud_path, 'r', encoding='utf-8') as uf:
+                magelo_update_date = uf.read().strip().split('\n')[0].strip() or 'Unknown'
+
+    guild_curr_char = parse_character_data(current_char_file, GUILD_STATUS_WATCHLIST)
+    guild_curr_ids = parse_character_file(current_char_file, GUILD_STATUS_WATCHLIST)
+    guild_curr_inv = (
+        parse_inventory_file(current_inv_file, guild_curr_ids) if guild_curr_ids else {}
+    )
+    guild_prev_char = {}
+    guild_prev_inv = {}
+    guild_has_previous = False
+    if (
+        guild_previous_char_file
+        and guild_previous_inv_file
+        and os.path.exists(guild_previous_char_file)
+        and os.path.exists(guild_previous_inv_file)
+    ):
+        guild_prev_char = parse_character_data(
+            guild_previous_char_file, GUILD_STATUS_WATCHLIST
+        )
+        guild_prev_ids = parse_character_file(
+            guild_previous_char_file, GUILD_STATUS_WATCHLIST
+        )
+        guild_prev_inv = (
+            parse_inventory_file(guild_previous_inv_file, guild_prev_ids)
+            if guild_prev_ids
+            else {}
+        )
+        guild_has_previous = True
+
+    guild_html = generate_guild_status_html(
+        GUILD_STATUS_WATCHLIST,
+        guild_curr_char,
+        guild_prev_char,
+        guild_curr_inv,
+        guild_prev_inv,
+        magelo_update_date=magelo_update_date,
+        has_previous=guild_has_previous,
+    )
+    guild_output = os.path.join(base_dir, "guild_characters.html")
+    print(f"Writing guild status HTML to {guild_output}...")
+    with open(guild_output, 'w', encoding='utf-8') as f:
+        f.write(guild_html)
     
     if previous_char_file and previous_inv_file:
         magelo_stamp = (os.environ.get('MAGELO_UPDATE_DATE') or '').strip()

@@ -23,6 +23,7 @@ __pycache__/
 
 # Generated pages (workflow generates each run and deploys; not committed to avoid repo bloat)
 spell_inventory.html
+guild_characters.html
 delta.html
 delta-history.html
 delta_range.html
