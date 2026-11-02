@@ -1348,9 +1348,9 @@ def generate_guild_status_html(
 
     rows_html = '\n'.join(body_rows)
     prev_note = (
-        'Compared to previous Magelo dump for “became naked today”.'
+        'Compares previous Magelo dump; if now unequipped, becomes naked.'
         if has_previous
-        else 'No previous Magelo dump available; only current equipped counts are shown.'
+        else 'No previous Magelo dump available; only current equipped status is shown.'
     )
 
     html = f'''<!DOCTYPE html>
@@ -1392,7 +1392,7 @@ def generate_guild_status_html(
     <h1>Guild Character Status</h1>
     <p class="sub">Generated from magelo dump (last updated: {escape(magelo_update_date)})</p>
     <p class="sub"><a href="index.html">← Spell Inventory</a></p>
-    <p class="sub">Worn equipped count uses slots 1–22 (same rule as delta corpse-loot detection). Green = equipped; red = naked (0 worn items). {escape(prev_note)}</p>
+    <p class="sub">Green = equipped; red = naked. {escape(prev_note)}</p>
     <p class="legend"><span class="eq">Equipped</span><span class="nk">Naked</span><span class="ms">Missing</span></p>
 {alert_html}
     <table>
