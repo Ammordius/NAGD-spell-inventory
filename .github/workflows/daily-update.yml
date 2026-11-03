@@ -422,6 +422,8 @@ jobs:
     - name: Run spell inventory generator
       env:
         MAGELO_UPDATE_DATE: ${{ steps.check-update.outputs.update_date }}
+        # Posts only when a watchlist toon is naked (guild_characters alert).
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       run: |
         # Verify the date is set
         echo "Using magelo update date from environment: $MAGELO_UPDATE_DATE"

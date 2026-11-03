@@ -1236,16 +1236,15 @@ def chars_became_naked(current_inv, previous_inv, names=None):
     return became
 
 
-def generate_guild_status_html(
+def collect_guild_status(
     watchlist,
     current_char_data,
     previous_char_data,
     current_inv,
     previous_inv,
-    magelo_update_date='Unknown',
     has_previous=True,
 ):
-    """Generate guild watchlist equipped/naked status page (no delta.html links)."""
+    """Build watchlist status rows plus currently-naked / became-naked name lists."""
     current_char_data = current_char_data or {}
     previous_char_data = previous_char_data or {}
     current_inv = current_inv or {}
@@ -1290,6 +1289,120 @@ def generate_guild_status_html(
             'class': info.get('class') or '',
             'guild': info.get('guild') or '',
         })
+    return {
+        'rows': rows,
+        'currently_naked': currently_naked,
+        'became_naked': became_naked,
+    }
+
+
+DEFAULT_GUILD_STATUS_PAGE_URL = (
+    'https://ammordius.github.io/NAGD-spell-inventory/guild_characters.html'
+)
+
+
+def format_discord_naked_alert(
+    currently_naked,
+    became_naked=None,
+    page_url=None,
+    magelo_update_date='Unknown',
+):
+    """Plain Discord message for naked watchlist toons. Empty string if none naked."""
+    if not currently_naked:
+        return ''
+    page_url = page_url or os.environ.get(
+        'GUILD_STATUS_PAGE_URL', DEFAULT_GUILD_STATUS_PAGE_URL
+    )
+    became_naked = set(became_naked or [])
+    lines = [
+        f'**Guild naked alert:** {len(currently_naked)} watchlist character(s) currently naked:',
+        ', '.join(currently_naked),
+    ]
+    newly = [n for n in currently_naked if n in became_naked]
+    if newly:
+        lines.append('Became naked since previous dump: ' + ', '.join(newly))
+    if magelo_update_date and magelo_update_date != 'Unknown':
+        lines.append(f'Magelo dump: {magelo_update_date}')
+    lines.append(page_url)
+    return '\n'.join(lines)
+
+
+def post_discord_webhook(webhook_url, content, timeout=15):
+    """POST content to a Discord webhook. Returns True on 2xx."""
+    import urllib.error
+    import urllib.request
+
+    webhook_url = (webhook_url or '').strip()
+    content = (content or '').strip()
+    if not webhook_url or not content:
+        return False
+    payload = json.dumps({'content': content}).encode('utf-8')
+    req = urllib.request.Request(
+        webhook_url,
+        data=payload,
+        headers={'Content-Type': 'application/json', 'User-Agent': 'NAGD-spell-inventory'},
+        method='POST',
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return 200 <= getattr(resp, 'status', 200) < 300
+    except urllib.error.HTTPError as e:
+        print(f'Warning: Discord webhook HTTP {e.code}: {e.reason}')
+        return False
+    except Exception as e:
+        print(f'Warning: Discord webhook failed: {e}')
+        return False
+
+
+def notify_discord_if_guild_naked(
+    currently_naked,
+    became_naked=None,
+    magelo_update_date='Unknown',
+    webhook_url=None,
+):
+    """Post to Discord when watchlist has naked toons. No-op if webhook unset or none naked."""
+    webhook_url = (webhook_url if webhook_url is not None else os.environ.get('DISCORD_WEBHOOK', '')).strip()
+    content = format_discord_naked_alert(
+        currently_naked,
+        became_naked=became_naked,
+        magelo_update_date=magelo_update_date,
+    )
+    if not content:
+        print('Guild naked Discord alert: none naked (skip)')
+        return False
+    if not webhook_url:
+        print('Guild naked Discord alert: DISCORD_WEBHOOK unset (skip)')
+        return False
+    ok = post_discord_webhook(webhook_url, content)
+    if ok:
+        print(f'Guild naked Discord alert: posted ({len(currently_naked)} naked)')
+    return ok
+
+
+def generate_guild_status_html(
+    watchlist,
+    current_char_data,
+    previous_char_data,
+    current_inv,
+    previous_inv,
+    magelo_update_date='Unknown',
+    has_previous=True,
+):
+    """Generate guild watchlist equipped/naked status page (no delta.html links).
+
+    Returns (html, status_dict) where status_dict has currently_naked / became_naked.
+    """
+    status = collect_guild_status(
+        watchlist,
+        current_char_data,
+        previous_char_data,
+        current_inv,
+        previous_inv,
+        has_previous=has_previous,
+    )
+    rows = status['rows']
+    currently_naked = status['currently_naked']
+    became_naked = status['became_naked']
 
     alert_html = ''
     if currently_naked:
@@ -1415,7 +1528,7 @@ def generate_guild_status_html(
 </body>
 </html>
 '''
-    return html
+    return html, status
 
 
 def load_no_rent_items():
@@ -8377,7 +8490,7 @@ def main():
         )
         guild_has_previous = True
 
-    guild_html = generate_guild_status_html(
+    guild_html, guild_status = generate_guild_status_html(
         GUILD_STATUS_WATCHLIST,
         guild_curr_char,
         guild_prev_char,
@@ -8390,6 +8503,11 @@ def main():
     print(f"Writing guild status HTML to {guild_output}...")
     with open(guild_output, 'w', encoding='utf-8') as f:
         f.write(guild_html)
+    notify_discord_if_guild_naked(
+        guild_status.get('currently_naked') or [],
+        became_naked=guild_status.get('became_naked') or set(),
+        magelo_update_date=magelo_update_date,
+    )
     
     if previous_char_file and previous_inv_file:
         magelo_stamp = (os.environ.get('MAGELO_UPDATE_DATE') or '').strip()

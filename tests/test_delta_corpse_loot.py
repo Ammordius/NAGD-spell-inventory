@@ -17,7 +17,9 @@ from generate_spell_page import (  # noqa: E402
     chars_corpse_loot_excluded,
     count_equipped,
     equipped_worn_by_char_from_inventories,
+    format_discord_naked_alert,
     generate_guild_status_html,
+    notify_discord_if_guild_naked,
 )
 
 
@@ -135,7 +137,7 @@ class TestGuildStatusWatchlist(unittest.TestCase):
             'Geared': [{'slot_id': '1', 'item_id': '10'}],
             'NakedNow': [{'slot_id': '1', 'item_id': '20'}],
         }
-        html = generate_guild_status_html(
+        html, status = generate_guild_status_html(
             watchlist,
             current_char,
             previous_char,
@@ -151,6 +153,27 @@ class TestGuildStatusWatchlist(unittest.TestCase):
         self.assertIn('Alert:', html)
         self.assertIn('NakedNow', html)
         self.assertNotIn('delta.html', html)
+        self.assertEqual(status['currently_naked'], ['NakedNow'])
+        self.assertIn('NakedNow', status['became_naked'])
+
+    def test_discord_alert_message_and_skip(self):
+        msg = format_discord_naked_alert(
+            ['NakedNow'],
+            became_naked={'NakedNow'},
+            page_url='https://example.test/guild_characters.html',
+            magelo_update_date='Sun Nov 1 16:30:26 UTC 2026',
+        )
+        self.assertIn('Guild naked alert', msg)
+        self.assertIn('NakedNow', msg)
+        self.assertIn('Became naked since previous dump', msg)
+        self.assertIn('https://example.test/guild_characters.html', msg)
+        self.assertEqual(format_discord_naked_alert([]), '')
+        self.assertFalse(
+            notify_discord_if_guild_naked(['NakedNow'], webhook_url='')
+        )
+        self.assertFalse(
+            notify_discord_if_guild_naked([], webhook_url='https://example.invalid/hook')
+        )
 
 
 if __name__ == '__main__':
