@@ -75,6 +75,7 @@ WALEX_CHARACTERS = [
 # Additional guild toons watched for equipped→naked alerts
 EXTRA_GUILD_WATCH = [
     "Brechen", "Priester", "Nekromant", "Evakuieren",
+    "Maya", "Xastia",
 ]
 
 
