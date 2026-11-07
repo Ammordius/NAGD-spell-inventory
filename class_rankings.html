@@ -455,6 +455,10 @@
                 <input type="text" id="toonListInput" placeholder="e.g. tandiyen, ammo*, iaminae, ezram (* = wildcard)" style="padding: 8px 12px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px; min-width: 200px;">
                 <button id="showToonUpgrades" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 8px;">Gear upgrades across toons</button>
             </div>
+            <div id="myGearPlansSection" class="control-group" style="display: flex;">
+                <button id="showMyToons" type="button" style="padding: 8px 16px; background: #495057; color: white; border: none; border-radius: 4px; cursor: pointer;">My Toons</button>
+                <button id="showMyGearTargets" type="button" style="padding: 8px 16px; background: #495057; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 8px;">My Gear Targets</button>
+            </div>
         </div>
 
         <div id="weightPanel" style="display: none; background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; border: 1px solid #dee2e6;">
@@ -564,6 +568,67 @@
         </div>
     </div>
 
+    <!-- My Toons: local claimed / recently viewed characters (browser-local only) -->
+    <div id="myToonsPanel" style="display: none; position: fixed; inset: 0; z-index: 920; background: #f8f9fa; overflow: auto;">
+        <div style="padding: 16px 20px; background: #343a40; color: white; display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="margin: 0; font-size: 1.25rem;">My Toons</h2>
+            <button id="closeMyToonsPanel" type="button" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.45); border-radius: 6px; cursor: pointer;">Close</button>
+        </div>
+        <div style="padding: 12px 20px; background: #e9ecef; border-bottom: 1px solid #dee2e6;">
+            <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 0.9em;">Claims are saved only in this browser. They are not verified guild or Magelo account ownership.</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="my-toons-tab my-toons-tab-active" data-my-toons-tab="claimed" style="padding: 8px 14px; border: 1px solid #adb5bd; border-radius: 6px; cursor: pointer; background: #fff;">Claimed</button>
+                <button type="button" class="my-toons-tab" data-my-toons-tab="recent" style="padding: 8px 14px; border: 1px solid #adb5bd; border-radius: 6px; cursor: pointer; background: #f1f3f5;">Recently Viewed</button>
+                <button type="button" id="openGearTargetsFromToons" style="padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; background: #495057; color: white; margin-left: auto;">My Gear Targets</button>
+            </div>
+        </div>
+        <div id="myToonsContent" style="padding: 16px 20px;"></div>
+    </div>
+
+    <!-- My Gear Targets: consolidated seeking list from local plans (public stats only) -->
+    <div id="myGearTargetsPanel" style="display: none; position: fixed; inset: 0; z-index: 925; background: #f8f9fa; overflow: auto;">
+        <div style="padding: 16px 20px; background: #343a40; color: white; display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="margin: 0; font-size: 1.25rem;">My Gear Targets</h2>
+            <button id="closeMyGearTargetsPanel" type="button" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.45); border-radius: 6px; cursor: pointer;">Close</button>
+        </div>
+        <div style="padding: 12px 20px; background: #e9ecef; border-bottom: 1px solid #dee2e6; display: flex; flex-wrap: wrap; gap: 12px; align-items: end;">
+            <div>
+                <label for="gearTargetsScope">Characters:</label>
+                <select id="gearTargetsScope" style="display: block; margin-top: 4px; padding: 6px 10px;">
+                    <option value="claimed" selected>Claimed only</option>
+                    <option value="all">All saved plans</option>
+                </select>
+            </div>
+            <div>
+                <label for="gearTargetsCharFilter">Character:</label>
+                <select id="gearTargetsCharFilter" style="display: block; margin-top: 4px; padding: 6px 10px; min-width: 160px;">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <div>
+                <label for="gearTargetsSlotFilter">Slot:</label>
+                <select id="gearTargetsSlotFilter" style="display: block; margin-top: 4px; padding: 6px 10px;">
+                    <option value="">All slots</option>
+                </select>
+            </div>
+            <div>
+                <label for="gearTargetsStatusFilter">Status:</label>
+                <select id="gearTargetsStatusFilter" style="display: block; margin-top: 4px; padding: 6px 10px;">
+                    <option value="">All</option>
+                    <option value="Seeking">Seeking</option>
+                    <option value="Acquired">Acquired</option>
+                    <option value="Needs Review">Needs Review</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" id="gearTargetsClearAcquired" style="padding: 8px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear completed</button>
+                <button type="button" id="gearTargetsOpenMyToons" style="padding: 8px 12px; background: #495057; color: white; border: none; border-radius: 4px; cursor: pointer;">My Toons</button>
+            </div>
+        </div>
+        <div id="myGearTargetsContent" style="padding: 16px 20px;"></div>
+    </div>
+
+    <script src="class_rankings_gear_plans.js"></script>
     <script src="mod2_rankings.js"></script>
     <script data-goatcounter="https://ammordius.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
@@ -2919,10 +2984,23 @@
         const itemComparisonContent = document.getElementById('itemComparisonContent');
         if (dkpValEnabled && toonListSection) toonListSection.style.display = 'flex';
         const toonListInput = document.getElementById('toonListInput');
-        (function initToonListFromUrl() {
+        (function initToonListPersistence() {
+            if (!toonListInput) return;
+            if (window.ClassRankingsGearPlans && typeof ClassRankingsGearPlans.loadToonList === 'function') {
+                const saved = ClassRankingsGearPlans.loadToonList();
+                if (saved) toonListInput.value = saved;
+            }
+            const persist = () => {
+                if (window.ClassRankingsGearPlans && typeof ClassRankingsGearPlans.saveToonList === 'function') {
+                    ClassRankingsGearPlans.saveToonList(toonListInput.value || '');
+                }
+            };
+            toonListInput.addEventListener('change', persist);
+            toonListInput.addEventListener('blur', persist);
             const p = new URLSearchParams(window.location.search);
             const charParam = p.get('char');
-            if (dkpValEnabled && charParam && toonListInput) toonListInput.value = charParam.trim();
+            // Existing behavior: ?char= overrides only when dkp_val=true.
+            if (dkpValEnabled && charParam) toonListInput.value = charParam.trim();
         })();
 
         function matchCharactersByToonList(listStr) {
@@ -3488,10 +3566,15 @@
             toonPanelItemSearch.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doItemLookup(); } });
         }
 
-        function showScoreBreakdown(char) {
+        function showScoreBreakdown(char, options) {
             const modal = document.getElementById('scoreModal');
             const modalContent = document.getElementById('modalContent');
             const scores = char.scores || {};
+            const openOpts = options || {};
+            // Recently Viewed only — never claims or creates a gear plan.
+            if (window.ClassRankingsGearPlans && typeof ClassRankingsGearPlans.recordView === 'function') {
+                ClassRankingsGearPlans.recordView(char);
+            }
             
             // Get the same weights used in recalculateScores (including custom weights)
             const charClass = char.class;
@@ -4107,20 +4190,23 @@
             const scoreBreakdownPanel = document.getElementById('scoreBreakdownPanel');
             const itemPickerPanel = document.getElementById('itemPickerPanel');
             const tabButtons = modalContent.querySelectorAll('.modal-tab');
-            tabButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const tab = btn.getAttribute('data-tab');
-                    tabButtons.forEach(b => b.classList.remove('modal-tab-active'));
-                    btn.classList.add('modal-tab-active');
-                    if (tab === 'breakdown') {
-                        if (scoreBreakdownPanel) scoreBreakdownPanel.style.display = '';
-                        if (itemPickerPanel) itemPickerPanel.style.display = 'none';
-                    } else {
-                        if (scoreBreakdownPanel) scoreBreakdownPanel.style.display = 'none';
-                        if (itemPickerPanel) itemPickerPanel.style.display = '';
-                    }
+            function activateModalTab(tab) {
+                tabButtons.forEach(b => {
+                    const isActive = b.getAttribute('data-tab') === tab;
+                    b.classList.toggle('modal-tab-active', isActive);
                 });
+                if (tab === 'breakdown') {
+                    if (scoreBreakdownPanel) scoreBreakdownPanel.style.display = '';
+                    if (itemPickerPanel) itemPickerPanel.style.display = 'none';
+                } else {
+                    if (scoreBreakdownPanel) scoreBreakdownPanel.style.display = 'none';
+                    if (itemPickerPanel) itemPickerPanel.style.display = '';
+                }
+            }
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => activateModalTab(btn.getAttribute('data-tab')));
             });
+            if (openOpts.tab === 'itempicker') activateModalTab('itempicker');
 
             // Fill upgrade list from full item_stats (browser-only, so stat priority changes apply)
             // When dkp_val=true we fetch at least 25 per slot so the min HP/DKP filter has a pool; otherwise use user's upgradesPerSlot (default 5).
@@ -4137,7 +4223,23 @@
                 let pickerData = computeUpgradesForCharacter(char, getMaxPerSlot(), true);
 
                 // Shared state for item picker so we can preserve selections when rebuilding (e.g. when "Upgrades per slot" changes).
+                // Restored from localStorage when present; init/restore must not mark edited or claim.
                 const itemPickerState = { virtualLoadout: {}, slotExtras: {} };
+                let pickerUserEdited = false;
+                const GP = window.ClassRankingsGearPlans;
+                const equippedBySlotForPlan = GP ? GP.equippedMapFromChar(char) : {};
+                const savedPlan = (GP && char.id != null) ? GP.getCharacterPlan(char.id) : null;
+                if (savedPlan && savedPlan.selectedSlots) {
+                    const optionIdsBySlot = {};
+                    (pickerData.bySlot || []).forEach(s => {
+                        const ids = new Set();
+                        if (s.currentItemId != null) ids.add(Number(s.currentItemId));
+                        (s.upgrades || []).forEach(u => { if (u.itemId != null) ids.add(Number(u.itemId)); });
+                        optionIdsBySlot[s.slotId] = ids;
+                    });
+                    itemPickerState.slotExtras = GP.buildSlotExtras(savedPlan.selectedSlots, optionIdsBySlot, itemStatsCache);
+                    itemPickerState.virtualLoadout = GP.applyPlanToLoadout(equippedBySlotForPlan, savedPlan.selectedSlots);
+                }
 
                 const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
 
@@ -4391,13 +4493,26 @@
                                 options.push({ id: e.id, name: e.name || `Item ${e.id}` });
                             }
                         });
-                        const prevRaw = itemPickerState.virtualLoadout[slotId];
+                        const hasPrevKey = Object.prototype.hasOwnProperty.call(itemPickerState.virtualLoadout, slotId);
+                        const prevRaw = hasPrevKey ? itemPickerState.virtualLoadout[slotId] : undefined;
                         const prevId = (prevRaw != null && prevRaw !== '') ? Number(prevRaw) : null;
-                        // When OH is empty (synthetic slot 14), don't carry over previous selection; show None.
-                        const forceNone = (slotId === 14 && currentItemId == null);
+                        const persistedEmpty = hasPrevKey && (prevRaw == null || prevRaw === '');
+                        // Synthetic empty OH: reset to None unless a saved plan explicitly selected this slot.
+                        const forceNone = (slotId === 14 && currentItemId == null && !hasPrevKey);
                         const stillValid = !forceNone && prevId != null && options.some(o => o.id === prevId || Number(o.id) === prevId);
                         const defaultId = options.length ? (options[0].id === '' ? null : options[0].id) : null;
-                        itemPickerState.virtualLoadout[slotId] = stillValid ? prevId : defaultId;
+                        if (forceNone) {
+                            itemPickerState.virtualLoadout[slotId] = null;
+                        } else if (persistedEmpty) {
+                            itemPickerState.virtualLoadout[slotId] = null;
+                        } else if (stillValid) {
+                            itemPickerState.virtualLoadout[slotId] = prevId;
+                        } else if (prevId != null) {
+                            // Keep saved id even if temporarily absent from options (slotExtras should have added it).
+                            itemPickerState.virtualLoadout[slotId] = prevId;
+                        } else {
+                            itemPickerState.virtualLoadout[slotId] = defaultId;
+                        }
                     }
                     let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
                     pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
@@ -4451,6 +4566,10 @@
                             const slotId = parseInt(sel.getAttribute('data-slot-id'), 10);
                             const val = sel.value;
                             itemPickerState.virtualLoadout[slotId] = val === '' ? null : Number(val);
+                            pickerUserEdited = true;
+                            if (GP && char.id != null) {
+                                GP.persistUserGearEdit(char, equippedBySlotForPlan, itemPickerState.virtualLoadout);
+                            }
                             const row = sel.closest('.item-picker-slot-row');
                             if (row) {
                                 const currentId = row.getAttribute('data-current-id');
@@ -5057,6 +5176,289 @@
             if (itemCardTimer) { clearTimeout(itemCardTimer); itemCardTimer = null; }
             itemCardHideTimer = setTimeout(hideItemCard, 150);
         });
+
+        // --- My Toons + My Gear Targets (public, browser-local; no DKP/Mod2 fields) ---
+        (function setupMyGearPlansUi() {
+            const GP = window.ClassRankingsGearPlans;
+            if (!GP) {
+                console.warn('ClassRankingsGearPlans module missing — My Toons / Gear Targets disabled');
+                return;
+            }
+            const myToonsPanel = document.getElementById('myToonsPanel');
+            const myToonsContent = document.getElementById('myToonsContent');
+            const myGearTargetsPanel = document.getElementById('myGearTargetsPanel');
+            const myGearTargetsContent = document.getElementById('myGearTargetsContent');
+            let myToonsActiveTab = 'claimed';
+
+            function findCharById(id) {
+                const key = GP.charKey(id);
+                if (!key) return null;
+                return (characters || []).find(c => GP.charKey(c.id) === key) || null;
+            }
+
+            function resolveMeta(id, fallback) {
+                const live = findCharById(id);
+                return {
+                    id: String(id),
+                    name: (live && live.name) || (fallback && fallback.name) || String(id),
+                    class: (live && live.class) || (fallback && fallback.class) || ''
+                };
+            }
+
+            function claimButtonHtml(id) {
+                const claimed = GP.isEffectivelyClaimed(id);
+                const label = claimed ? 'Unclaim' : 'Claim';
+                const pref = GP.getClaimPreference(id);
+                const title = pref === 'unclaimed'
+                    ? 'Explicitly unclaimed (local preference)'
+                    : (pref === 'claimed' ? 'Explicitly claimed (local preference)' : 'Claim status is local to this browser');
+                return `<button type="button" class="my-toons-claim-btn" data-char-id="${escapeHtml(String(id))}" data-claimed="${claimed ? '1' : '0'}" title="${escapeHtml(title)}" style="padding: 4px 10px; border-radius: 4px; border: 1px solid #adb5bd; cursor: pointer; background: ${claimed ? '#fff' : '#28a745'}; color: ${claimed ? '#212529' : '#fff'};">${label}</button>`;
+            }
+
+            function openCharacterSimulator(id) {
+                const live = findCharById(id);
+                if (!live) {
+                    alert('That character is not in the current rankings export.');
+                    return;
+                }
+                if (myToonsPanel) myToonsPanel.style.display = 'none';
+                if (myGearTargetsPanel) myGearTargetsPanel.style.display = 'none';
+                showScoreBreakdown(live, { tab: 'itempicker' });
+            }
+
+            function toggleClaim(id) {
+                const claimed = GP.isEffectivelyClaimed(id);
+                GP.setClaimPreference(id, claimed ? 'unclaimed' : 'claimed');
+            }
+
+            function renderMyToons() {
+                if (!myToonsContent) return;
+                const plans = GP.loadPlans();
+                const itemCache = (typeof itemStatsCache !== 'undefined') ? itemStatsCache : {};
+                if (myToonsActiveTab === 'recent') {
+                    const recent = GP.listRecent();
+                    if (!recent.length) {
+                        myToonsContent.innerHTML = '<p style="color:#6c757d;">No recently viewed characters yet. Open any character from the rankings table.</p>';
+                        return;
+                    }
+                    let html = '<table style="width:100%; border-collapse: collapse;"><thead><tr><th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Name</th><th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Class</th><th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Plan</th><th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Last viewed</th><th style="padding:8px; border-bottom:1px solid #dee2e6;"></th></tr></thead><tbody>';
+                    recent.forEach(row => {
+                        const meta = resolveMeta(row.id, row);
+                        const hasPlan = GP.hasSavedPlan(row.id, plans);
+                        html += `<tr>
+                            <td style="padding:8px; border-bottom:1px solid #eee;"><a href="#" class="my-toons-open" data-char-id="${escapeHtml(meta.id)}">${escapeHtml(meta.name)}</a></td>
+                            <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(meta.class)}</td>
+                            <td style="padding:8px; border-bottom:1px solid #eee;">${hasPlan ? '<span style="color:#856404; background:#fff3cd; padding:2px 6px; border-radius:4px; font-size:0.85em;">Saved plan</span>' : '—'}</td>
+                            <td style="padding:8px; border-bottom:1px solid #eee; color:#6c757d; font-size:0.9em;">${escapeHtml(row.lastViewedAt || '')}</td>
+                            <td style="padding:8px; border-bottom:1px solid #eee; white-space:nowrap;">${claimButtonHtml(meta.id)}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    myToonsContent.innerHTML = html;
+                } else {
+                    const claimedIds = GP.listClaimedIds(plans);
+                    if (!claimedIds.length) {
+                        myToonsContent.innerHTML = '<p style="color:#6c757d;">No claimed characters yet. Open a character and change gear in the stat simulator, or claim one from Recently Viewed.</p>';
+                        return;
+                    }
+                    let html = '<table style="width:100%; border-collapse: collapse;"><thead><tr><th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Name</th><th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Class</th><th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Outstanding targets</th><th style="padding:8px; border-bottom:1px solid #dee2e6;"></th></tr></thead><tbody>';
+                    claimedIds.forEach(id => {
+                        const plan = GP.getCharacterPlan(id, plans) || {};
+                        const meta = resolveMeta(id, plan);
+                        const outstanding = GP.countOutstandingTargets(id, characters, plans, itemCache);
+                        html += `<tr>
+                            <td style="padding:8px; border-bottom:1px solid #eee;"><a href="#" class="my-toons-open" data-char-id="${escapeHtml(meta.id)}">${escapeHtml(meta.name)}</a></td>
+                            <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(meta.class)}</td>
+                            <td style="padding:8px; border-bottom:1px solid #eee;">${outstanding}</td>
+                            <td style="padding:8px; border-bottom:1px solid #eee; white-space:nowrap;">${claimButtonHtml(meta.id)}</td>
+                        </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    myToonsContent.innerHTML = html;
+                }
+                myToonsContent.querySelectorAll('.my-toons-open').forEach(a => {
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openCharacterSimulator(a.getAttribute('data-char-id'));
+                    });
+                });
+                myToonsContent.querySelectorAll('.my-toons-claim-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        toggleClaim(btn.getAttribute('data-char-id'));
+                        renderMyToons();
+                    });
+                });
+            }
+
+            function populateGearTargetFilters(rows) {
+                const charSel = document.getElementById('gearTargetsCharFilter');
+                const slotSel = document.getElementById('gearTargetsSlotFilter');
+                if (charSel) {
+                    const prev = charSel.value;
+                    const names = {};
+                    rows.forEach(r => { names[r.characterId] = r.characterName; });
+                    charSel.innerHTML = '<option value="">All</option>' + Object.keys(names).sort((a, b) => (names[a] || '').localeCompare(names[b] || '')).map(id =>
+                        `<option value="${escapeHtml(id)}">${escapeHtml(names[id])}</option>`
+                    ).join('');
+                    if (prev && names[prev]) charSel.value = prev;
+                }
+                if (slotSel && slotSel.options.length <= 1) {
+                    const slotNames = SLOT_NAMES_FOR_UI || {};
+                    for (let sid = 1; sid <= 22; sid++) {
+                        const opt = document.createElement('option');
+                        opt.value = String(sid);
+                        opt.textContent = slotNames[sid] || ('Slot ' + sid);
+                        slotSel.appendChild(opt);
+                    }
+                }
+            }
+
+            function publicDeltaHtml(row) {
+                const cache = (typeof itemStatsCache !== 'undefined') ? itemStatsCache : {};
+                const equippedStats = row.equippedItemId != null ? cache[row.equippedItemId] : null;
+                const targetStats = row.targetItemId != null ? cache[row.targetItemId] : null;
+                if (typeof getItemStatDeltas !== 'function' || typeof formatUpgradeDeltas !== 'function') return '';
+                if (row.targetItemId == null && row.equippedItemId == null) return '';
+                try {
+                    const deltas = getItemStatDeltas(equippedStats, targetStats);
+                    return formatUpgradeDeltas(deltas, targetStats && targetStats.focusSpellName);
+                } catch (e) {
+                    return '';
+                }
+            }
+
+            function statusBadge(status) {
+                const colors = {
+                    Seeking: '#0c5460|#d1ecf1',
+                    Acquired: '#155724|#d4edda',
+                    'Needs Review': '#856404|#fff3cd'
+                };
+                const pair = (colors[status] || '#383d41|#e2e3e5').split('|');
+                return `<span style="color:${pair[0]}; background:${pair[1]}; padding:2px 8px; border-radius:4px; font-size:0.85em;">${escapeHtml(status)}</span>`;
+            }
+
+            function renderGearTargets() {
+                if (!myGearTargetsContent) return;
+                const scopeEl = document.getElementById('gearTargetsScope');
+                const charFilter = document.getElementById('gearTargetsCharFilter');
+                const slotFilter = document.getElementById('gearTargetsSlotFilter');
+                const statusFilter = document.getElementById('gearTargetsStatusFilter');
+                const scope = (scopeEl && scopeEl.value === 'all') ? 'all' : 'claimed';
+                const itemCache = (typeof itemStatsCache !== 'undefined') ? itemStatsCache : {};
+                let rows = GP.deriveTargets(characters, GP.loadPlans(), itemCache, { scope: scope });
+                populateGearTargetFilters(rows);
+                const charVal = charFilter ? charFilter.value : '';
+                const slotVal = slotFilter ? slotFilter.value : '';
+                const statusVal = statusFilter ? statusFilter.value : '';
+                if (charVal) rows = rows.filter(r => String(r.characterId) === String(charVal));
+                if (slotVal) rows = rows.filter(r => String(r.slotId) === String(slotVal));
+                if (statusVal) rows = rows.filter(r => r.status === statusVal);
+                if (!rows.length) {
+                    myGearTargetsContent.innerHTML = '<p style="color:#6c757d;">No gear targets match these filters. Select equipment in a character\'s stat simulator to create targets.</p>';
+                    return;
+                }
+                const slotNames = SLOT_NAMES_FOR_UI || {};
+                let html = '<table style="width:100%; border-collapse: collapse; font-size:0.95em;"><thead><tr>'
+                    + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Character</th>'
+                    + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Slot</th>'
+                    + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Current</th>'
+                    + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Target</th>'
+                    + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Stats</th>'
+                    + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Status</th>'
+                    + '<th style="padding:8px; border-bottom:1px solid #dee2e6;"></th>'
+                    + '</tr></thead><tbody>';
+                rows.forEach(row => {
+                    html += `<tr class="gear-target-row" data-char-id="${escapeHtml(String(row.characterId))}" style="cursor:pointer;">
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(row.characterName)} <span style="color:#6c757d;">(${escapeHtml(row.characterClass)})</span></td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(slotNames[row.slotId] || ('Slot ' + row.slotId))}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(row.equippedItemName)}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(row.targetItemName)}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee; font-size:0.85em;">${publicDeltaHtml(row)}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${statusBadge(row.status)}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee; white-space:nowrap;">
+                            <button type="button" class="gear-target-remove" data-char-id="${escapeHtml(String(row.characterId))}" data-slot-id="${row.slotId}" style="padding:4px 8px; font-size:0.85em; cursor:pointer;">Remove</button>
+                            <button type="button" class="gear-target-reset-char" data-char-id="${escapeHtml(String(row.characterId))}" style="padding:4px 8px; font-size:0.85em; cursor:pointer;">Reset plan</button>
+                        </td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+                myGearTargetsContent.innerHTML = html;
+                myGearTargetsContent.querySelectorAll('.gear-target-row').forEach(tr => {
+                    tr.addEventListener('click', (e) => {
+                        if (e.target.closest('button')) return;
+                        openCharacterSimulator(tr.getAttribute('data-char-id'));
+                    });
+                });
+                myGearTargetsContent.querySelectorAll('.gear-target-remove').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        GP.removeTarget(btn.getAttribute('data-char-id'), btn.getAttribute('data-slot-id'));
+                        renderGearTargets();
+                    });
+                });
+                myGearTargetsContent.querySelectorAll('.gear-target-reset-char').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = btn.getAttribute('data-char-id');
+                        if (confirm('Clear the saved gear plan for this character? Claim status and view history are kept.')) {
+                            GP.clearCharacterPlan(id);
+                            renderGearTargets();
+                        }
+                    });
+                });
+            }
+
+            function openMyToons() {
+                if (myGearTargetsPanel) myGearTargetsPanel.style.display = 'none';
+                if (myToonsPanel) myToonsPanel.style.display = 'block';
+                renderMyToons();
+            }
+
+            function openGearTargets() {
+                if (myToonsPanel) myToonsPanel.style.display = 'none';
+                if (myGearTargetsPanel) myGearTargetsPanel.style.display = 'block';
+                const ensure = (typeof loadItemStats === 'function') ? loadItemStats() : Promise.resolve();
+                ensure.then(() => renderGearTargets());
+            }
+
+            const showMyToonsBtn = document.getElementById('showMyToons');
+            const showTargetsBtn = document.getElementById('showMyGearTargets');
+            if (showMyToonsBtn) showMyToonsBtn.addEventListener('click', openMyToons);
+            if (showTargetsBtn) showTargetsBtn.addEventListener('click', openGearTargets);
+            const closeMyToons = document.getElementById('closeMyToonsPanel');
+            if (closeMyToons) closeMyToons.addEventListener('click', () => { if (myToonsPanel) myToonsPanel.style.display = 'none'; });
+            const closeTargets = document.getElementById('closeMyGearTargetsPanel');
+            if (closeTargets) closeTargets.addEventListener('click', () => { if (myGearTargetsPanel) myGearTargetsPanel.style.display = 'none'; });
+            document.querySelectorAll('.my-toons-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    myToonsActiveTab = btn.getAttribute('data-my-toons-tab') || 'claimed';
+                    document.querySelectorAll('.my-toons-tab').forEach(b => {
+                        const active = b === btn;
+                        b.classList.toggle('my-toons-tab-active', active);
+                        b.style.background = active ? '#fff' : '#f1f3f5';
+                    });
+                    renderMyToons();
+                });
+            });
+            const openTargetsFromToons = document.getElementById('openGearTargetsFromToons');
+            if (openTargetsFromToons) openTargetsFromToons.addEventListener('click', openGearTargets);
+            const openToonsFromTargets = document.getElementById('gearTargetsOpenMyToons');
+            if (openToonsFromTargets) openToonsFromTargets.addEventListener('click', openMyToons);
+            ['gearTargetsScope', 'gearTargetsCharFilter', 'gearTargetsSlotFilter', 'gearTargetsStatusFilter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', renderGearTargets);
+            });
+            const clearAcquiredBtn = document.getElementById('gearTargetsClearAcquired');
+            if (clearAcquiredBtn) {
+                clearAcquiredBtn.addEventListener('click', () => {
+                    const scopeEl = document.getElementById('gearTargetsScope');
+                    const scope = (scopeEl && scopeEl.value === 'all') ? 'all' : 'claimed';
+                    const itemCache = (typeof itemStatsCache !== 'undefined') ? itemStatsCache : {};
+                    GP.clearAcquired(characters, itemCache, { scope: scope });
+                    renderGearTargets();
+                });
+            }
+        })();
 
         const mod2Boot = (mod2Enabled && window.Mod2Scoring)
             ? Mod2Scoring.load().catch(function (err) { console.error('Mod2 data failed to load', err); })

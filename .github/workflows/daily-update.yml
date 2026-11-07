@@ -711,6 +711,13 @@ jobs:
         else
           echo "Optional: data/dkp_prices.json not found - ?dkp_val=true on class rankings will show no DKP data"
         fi
+        # Browser-local gear plans / My Toons helpers for class_rankings.html (public feature)
+        if [ -f "class_rankings_gear_plans.js" ]; then
+          cp class_rankings_gear_plans.js deploy/class_rankings_gear_plans.js
+          echo "✓ Copied class_rankings_gear_plans.js to deploy"
+        else
+          echo "::warning::class_rankings_gear_plans.js missing - My Toons / gear plan persistence will be unavailable"
+        fi
         # Copy Mod2 scorer and launch-item data for class_rankings.html?mod2=true
         if [ -f "mod2_rankings.js" ]; then
           cp mod2_rankings.js deploy/mod2_rankings.js
