@@ -1156,16 +1156,16 @@ def compare_character_data(current_data, previous_data, character_list=None):
     
     return deltas
 
-# Equipment slots (1-22 = worn slots; used to detect "no items -> any items" = corpse loot across day boundary)
+# Equipment slots (1-21 = worn slots; TAKP Mac EQUIPMENT_END = slotAmmo; used to detect "no items -> any items" = corpse loot across day boundary)
 
 
 def _parse_worn_slot_id(slot_id):
-    """Return int 1-22 if worn slot, else None. Accepts int or str from TSV."""
+    """Return int 1-21 if worn slot, else None. Accepts int or str from TSV."""
     if slot_id is None:
         return None
     try:
         s = int(str(slot_id).strip())
-        if 1 <= s <= 22:
+        if 1 <= s <= 21:
             return s
     except (ValueError, TypeError):
         pass
@@ -1186,7 +1186,7 @@ def _item_id_counts_as_worn_equipped(item_id):
 
 
 def count_equipped(items):
-    """Return number of real items in worn slots (1-22). Rows with empty/NULL/0 item_id are ignored."""
+    """Return number of real items in worn slots (1-21). Rows with empty/NULL/0 item_id are ignored."""
     if not items:
         return 0
     return sum(

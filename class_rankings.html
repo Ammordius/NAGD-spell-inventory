@@ -673,16 +673,16 @@
         const CLASS_TO_ABBREV = { 'Warrior': 'WAR', 'Cleric': 'CLR', 'Paladin': 'PAL', 'Ranger': 'RNG', 'Shadow Knight': 'SHD', 'Druid': 'DRU', 'Monk': 'MNK', 'Bard': 'BRD', 'Rogue': 'ROG', 'Shaman': 'SHM', 'Necromancer': 'NEC', 'Wizard': 'WIZ', 'Magician': 'MAG', 'Enchanter': 'ENC', 'Beastlord': 'BST' };
         const ABBREV_TO_CLASS = { 'WAR': 'Warrior', 'CLR': 'Cleric', 'PAL': 'Paladin', 'RNG': 'Ranger', 'SHD': 'Shadow Knight', 'DRU': 'Druid', 'MNK': 'Monk', 'BRD': 'Bard', 'ROG': 'Rogue', 'SHM': 'Shaman', 'NEC': 'Necromancer', 'WIZ': 'Wizard', 'MAG': 'Magician', 'ENC': 'Enchanter', 'BST': 'Beastlord' };
 
-        // Slot_id (1-22) -> EQ slot strings that can fill this slot (item_stats.slot may list multiple, e.g. "NECK WAIST")
+        // Slot_id (1-21) -> EQ slot strings that can fill this slot (item_stats.slot may list multiple, e.g. "NECK WAIST")
         // Matches magelo/generate_character_rankings: 13=Primary weapon, 14=Secondary (shield/offhand), 15=Ring 1, 16=Ring 2
         const SLOT_ID_TO_EQ_SLOTS = {
             1: ['EAR'], 2: ['HEAD'], 3: ['FACE'], 4: ['EAR'], 5: ['NECK'],
             6: ['SHOULDER', 'SHOULDERS'], 7: ['ARMS'], 8: ['BACK'], 9: ['WRIST'], 10: ['WRIST'],
             11: ['RANGE'], 12: ['HANDS'], 13: ['PRIMARY', 'MAIN'], 14: ['SECONDARY', 'OFF'],
             15: ['FINGER', 'FINGERS'], 16: ['FINGER', 'FINGERS'], 17: ['CHEST'], 18: ['LEGS'], 19: ['FEET'],
-            20: ['WAIST'], 21: ['POWER'], 22: ['AMMO']
+            20: ['WAIST'], 21: ['AMMO']
         };
-        const SLOT_NAMES_FOR_UI = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+        const SLOT_NAMES_FOR_UI = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Ammo' };
 
         /** Return numeric weight for a focus category (handles nested e.g. Spell Damage). */
         function getFocusWeight(cat, focusWeights) {
@@ -765,7 +765,7 @@
             });
         }
 
-        /** True if item_stats.slot (e.g. "HEAD" or "RANGE PRIMARY SECONDARY") can fill slotId (1-22). */
+        /** True if item_stats.slot (e.g. "HEAD" or "RANGE PRIMARY SECONDARY") can fill slotId (1-21). */
         function itemMatchesSlot(slotId, itemSlotString) {
             if (!itemSlotString || typeof itemSlotString !== 'string') return false;
             const eqSlots = SLOT_ID_TO_EQ_SLOTS[slotId];
@@ -1059,7 +1059,7 @@
 
         function mod2ScoresSection(char) {
             if (!mod2Enabled || !window.Mod2Scoring || !Mod2Scoring.isReady() || !Mod2Scoring.scoresTableHtml) return '';
-            const ids = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 22).map(item => item.item_id);
+            const ids = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 21).map(item => item.item_id);
             const corePoints = char.total_points != null ? char.total_points : ((Number(char.stat_points) || 0) + (Number(char.focus_points) || 0));
             return Mod2Scoring.scoresTableHtml(char.class, ids, corePoints);
         }
@@ -1070,7 +1070,7 @@
             const mainRaw = virtualLoadout[13];
             const mainId = (mainRaw != null && mainRaw !== '') ? Number(mainRaw) : null;
             const mainStats = mainId != null ? itemStatsCache[mainId] : null;
-            for (let slotId = 1; slotId <= 22; slotId++) {
+            for (let slotId = 1; slotId <= 21; slotId++) {
                 if (slotId === 14 && mainStats && isItemTwoHanded(mainStats)) continue;
                 const rawPicked = virtualLoadout[slotId];
                 const pickedId = (rawPicked != null && rawPicked !== '') ? Number(rawPicked) : null;
@@ -1081,7 +1081,7 @@
 
         /** Equipped item IDs (slots 1–22); offhand excluded when main is 2H. */
         function getEquippedWornItemIds(char) {
-            const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+            const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 21);
             const getOrig = (slotId) => {
                 const inv = equippedOnly.find(i => i.slot_id === slotId);
                 if (!inv || inv.item_id == null || inv.item_id === '') return null;
@@ -1091,7 +1091,7 @@
             const mainId = getOrig(13);
             const mainStats = mainId != null ? itemStatsCache[mainId] : null;
             const ids = [];
-            for (let slotId = 1; slotId <= 22; slotId++) {
+            for (let slotId = 1; slotId <= 21; slotId++) {
                 if (slotId === 14 && mainStats && isItemTwoHanded(mainStats)) continue;
                 const id = getOrig(slotId);
                 if (id != null) ids.push(id);
@@ -1541,8 +1541,8 @@
             const focusWeights = norm.focus || {};
             const focusValuesByItem = buildFocusValuesByItem();
 
-            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
-            const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Ammo' };
+            const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 21);
             const bySlot = [];
             let anyMissing = false;
 
@@ -3052,7 +3052,7 @@
         let toonUpgradesMatchedChars = [];
         let toonUpgradesSelectedIndex = 0;
         const toonPanelSlotEnabled = {};
-        (function initSlotEnabled() { for (let i = 1; i <= 22; i++) toonPanelSlotEnabled[i] = true; })();
+        (function initSlotEnabled() { for (let i = 1; i <= 21; i++) toonPanelSlotEnabled[i] = true; })();
 
         function buildToonUpgradesBySlot(char, mode, minHpPerDkp, enabledSlots) {
             const getMaxPerSlot = () => Math.max(upgradesPerSlot, 25);
@@ -3184,7 +3184,7 @@
 
         function ensureSlotToggles() {
             if (!toonPanelSlotToggles || toonPanelSlotToggles.children.length > 0) return;
-            for (let slotId = 1; slotId <= 22; slotId++) {
+            for (let slotId = 1; slotId <= 21; slotId++) {
                 const label = SLOT_NAMES_FOR_UI[slotId] || 'Slot ' + slotId;
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -3332,12 +3332,12 @@
             if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
 
-        /** Return slotIds (1-22) that this item can fill, from item_stats.slot. */
+        /** Return slotIds (1-21) that this item can fill, from item_stats.slot. */
         function getSlotIdsForItem(itemId) {
             const stats = itemStatsCache[Number(itemId)];
             if (!stats || typeof stats.slot !== 'string') return [];
             const slotIds = [];
-            for (let slotId = 1; slotId <= 22; slotId++) {
+            for (let slotId = 1; slotId <= 21; slotId++) {
                 if (itemMatchesSlot(slotId, stats.slot)) slotIds.push(slotId);
             }
             return slotIds;
@@ -3385,7 +3385,7 @@
 
         /** Open item comparison by item id/name (e.g. from typed search). Finds per-toon slot from upgrades or uses item's slot. */
         function openItemComparisonByItemId(itemId, itemName) {
-            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Ammo' };
             if (itemName && elementalSlotOptions && elementalSlotOptions.by_slot_id) {
                 const searchNorm = normalizeItemNameForLookup(itemName);
                 if (searchNorm) {
@@ -4053,7 +4053,7 @@
                 
                 // Focus breakdown: all focuses we're scored on, with bar and sources (uses same focusWeights as sliders, so updates when sliders change)
                 const focusSources = scores.focus_sources || {};
-                const slotNames = { 0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+                const slotNames = { 0: 'Charm', 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Ammo' };
                 const scoredFocusKeys = getScoredFocusKeysFromWeights(focusWeights);
                 if (scoredFocusKeys.length > 0) {
                     scoredFocusKeys.sort((a, b) => getWeightForFocusKey(b, focusWeights) - getWeightForFocusKey(a, focusWeights));
@@ -4151,8 +4151,8 @@
                 }
             }
             
-            // Gear display with item links (worn slots 1-22 only)
-            const equippedOnly = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 22);
+            // Gear display with item links (worn slots 1-21 only)
+            const equippedOnly = (char.inventory || []).filter(item => item.slot_id >= 1 && item.slot_id <= 21);
             if (equippedOnly.length > 0) {
                 html += `<h3>Equipped Gear</h3>`;
                 html += `<div style="display: flex; flex-wrap: wrap; gap: 10px;">`;
@@ -4161,7 +4161,7 @@
                     6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist',
                     11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand',
                     15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs',
-                    19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo'
+                    19: 'Feet', 20: 'Waist', 21: 'Ammo'
                 };
                 equippedOnly.forEach(item => {
                     const slotName = slotNames[item.slot_id] || `Slot ${item.slot_id}`;
@@ -4241,10 +4241,10 @@
                     itemPickerState.virtualLoadout = GP.applyPlanToLoadout(equippedBySlotForPlan, savedPlan.selectedSlots);
                 }
 
-                const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Power Source', 22: 'Ammo' };
+                const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Ammo' };
 
                 function recomputeVirtualStats() {
-                    const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+                    const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 21);
                     const virtualLoadout = itemPickerState.virtualLoadout;
                     const totalDelta = { hp: 0, mana: 0, ac: 0, svByType: { MR: 0, FR: 0, CR: 0, DR: 0, PR: 0 }, primByKey: emptyPrimByKey() };
                     const totalSpellDelta = { ft: 0, atk: 0, haste: 0 };
@@ -4254,7 +4254,7 @@
                         const id = Number(inv.item_id);
                         return isNaN(id) ? null : id;
                     };
-                    for (let slotId = 1; slotId <= 22; slotId++) {
+                    for (let slotId = 1; slotId <= 21; slotId++) {
                         const originalItemId = getOriginalItemId(slotId);
                         const rawPicked = virtualLoadout[slotId];
                         const pickedItemId = (rawPicked != null && rawPicked !== '') ? Number(rawPicked) : null;
@@ -4475,11 +4475,11 @@
                 function buildItemPickerPanel(upgradeData, char) {
                     const itemPickerPlaceholder = document.getElementById('itemPickerPlaceholder') || document.getElementById('itemPickerPanel')?.firstElementChild;
                     if (!itemPickerPlaceholder || !itemPickerPlaceholder.parentNode) return;
-                    const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 22);
+                    const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 21);
                     const bySlotMap = {};
                     (upgradeData.bySlot || []).forEach(s => { bySlotMap[s.slotId] = s; });
                     // Init virtualLoadout: preserve existing selection if still in new options; else use current equipped or first option.
-                    for (let slotId = 1; slotId <= 22; slotId++) {
+                    for (let slotId = 1; slotId <= 21; slotId++) {
                         const slotData = bySlotMap[slotId];
                         const currentItemId = slotData ? (slotData.currentItemId != null ? Number(slotData.currentItemId) : null) : null;
                         const currentItemName = slotData ? (slotData.currentItemName || '') : '';
@@ -4519,7 +4519,7 @@
                     pickerHtml += `<table style="margin-bottom: 8px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table><p id="itemPickerPrimNote" style="margin: 0 0 12px 0;"></p>`;
                     pickerHtml += `<div id="itemPickerGearExtras" style="margin-top: 12px; font-size: 0.92em;"></div>`;
                     pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
-                    for (let slotId = 1; slotId <= 22; slotId++) {
+                    for (let slotId = 1; slotId <= 21; slotId++) {
                         const slotName = slotNames[slotId] || `Slot ${slotId}`;
                         const slotData = bySlotMap[slotId];
                         const currentItemId = slotData ? (slotData.currentItemId != null ? Number(slotData.currentItemId) : null) : null;
@@ -5304,7 +5304,7 @@
                 }
                 if (slotSel && slotSel.options.length <= 1) {
                     const slotNames = SLOT_NAMES_FOR_UI || {};
-                    for (let sid = 1; sid <= 22; sid++) {
+                    for (let sid = 1; sid <= 21; sid++) {
                         const opt = document.createElement('option');
                         opt.value = String(sid);
                         opt.textContent = slotNames[sid] || ('Slot ' + sid);
