@@ -54,6 +54,19 @@ class TestClassRankingsGearPlansStatic(unittest.TestCase):
         self.assertIn("if (dkpValEnabled)", self.html)
         self.assertIn("if (mod2Enabled)", self.html)
 
+    def test_multislot_best_slot_across_toon_helper(self):
+        # dkp_val across-toon comparison picks highest-delta slot for multislot items.
+        self.assertIn("function evaluateItemUpgradeForCharacter(", self.html)
+        start_cmp = self.html.find("function openItemComparison(")
+        start_lookup = self.html.find("function openItemComparisonByItemId(")
+        self.assertGreater(start_cmp, 0)
+        self.assertGreater(start_lookup, start_cmp)
+        cmp_block = self.html[start_cmp:start_lookup]
+        lookup_block = self.html[start_lookup:start_lookup + 8000]
+        self.assertIn("evaluateItemUpgradeForCharacter", cmp_block)
+        self.assertIn("evaluateItemUpgradeForCharacter", lookup_block)
+        self.assertIn("best.isUpgrade", cmp_block)
+
     def test_public_targets_render_path_omits_dkp_mod2_helpers(self):
         # The My Gear Targets renderer must not call gated helpers.
         start = self.html.find("function renderGearTargets()")

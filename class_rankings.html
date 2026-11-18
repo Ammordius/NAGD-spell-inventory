@@ -1667,6 +1667,146 @@
             return { bySlot, anyMissing };
         }
 
+        /**
+         * Score one candidate item against every matching worn slot (1–21), including empty slots,
+         * and return the highest-delta placement. Used by dkp_val across-toon comparison so
+         * multislot items (rings/ears/wrists/PRIMARY SECONDARY/etc.) show with best slot first.
+         */
+        function evaluateItemUpgradeForCharacter(char, candidateItemId) {
+            const candNum = Number(candidateItemId);
+            if (candidateItemId == null || candidateItemId === '' || isNaN(candNum)) {
+                return { eligible: false, reason: 'bad_item_id' };
+            }
+            const candidateStats = itemStatsCache[candNum] || itemStatsCache[String(candNum)];
+            if (!candidateStats) {
+                return { eligible: false, reason: 'no_item_stats' };
+            }
+
+            const charClass = char.class;
+            const classAbbrev = CLASS_TO_ABBREV[charClass] || '';
+            if (!itemUsableByClass(candidateStats.classes, classAbbrev)) {
+                return { eligible: false, reason: 'class_mismatch' };
+            }
+
+            const customWeight = customWeights[charClass] || {};
+            let weights = JSON.parse(JSON.stringify(originalClassWeights[charClass] || classWeights[charClass] || {}));
+            Object.keys(customWeight).forEach(key => {
+                if (key !== '_meta' && key !== 'focus' && weights.hasOwnProperty(key)) weights[key] = customWeight[key];
+            });
+            if (customWeight.focus && weights.focus) {
+                Object.keys(customWeight.focus).forEach(fk => {
+                    if (weights.focus[fk] !== undefined) {
+                        if (typeof customWeight.focus[fk] === 'object' && customWeight.focus[fk] !== null) {
+                            if (!weights.focus[fk]) weights.focus[fk] = {};
+                            Object.keys(customWeight.focus[fk]).forEach(nk => {
+                                if (weights.focus[fk][nk] !== undefined) weights.focus[fk][nk] = customWeight.focus[fk][nk];
+                            });
+                        } else weights.focus[fk] = customWeight.focus[fk];
+                    }
+                });
+            }
+            const focusMultiplier = customWeight._meta?.focusMultiplier || 2.4;
+            const norm = normalizeWeights(weights, focusMultiplier, charClass);
+            const focusWeights = norm.focus || {};
+            const focusValuesByItem = buildFocusValuesByItem();
+
+            const equippedOnly = (char.inventory || []).filter(i => i.slot_id >= 1 && i.slot_id <= 21);
+            const getItemName = (itemIdNum) => {
+                if (itemIdNum == null || isNaN(itemIdNum)) return '';
+                const st = itemStatsCache[itemIdNum] || itemStatsCache[String(itemIdNum)];
+                return (st && st.name) || elementalDisplayNames[String(itemIdNum)] || ('Item ' + itemIdNum);
+            };
+
+            let best = null;
+            for (let slotId = 1; slotId <= 21; slotId++) {
+                if (!itemMatchesSlot(slotId, candidateStats.slot)) continue;
+                if (slotId === 14 && isItemTwoHanded(candidateStats)) continue;
+
+                const inv = equippedOnly.find(i => i.slot_id === slotId);
+                const currentItemId = (inv && inv.item_id != null && inv.item_id !== '') ? Number(inv.item_id) : null;
+                const currentStats = (currentItemId != null && !isNaN(currentItemId) && itemStatsCache[currentItemId])
+                    ? itemStatsCache[currentItemId] : null;
+                let currentScore = 0;
+                if (currentStats) {
+                    currentScore = scoreItemForUpgrade(currentStats, currentItemId, norm, focusWeights, focusValuesByItem);
+                }
+
+                let offhandStats = null;
+                let offhandScore = 0;
+                if (slotId === 13) {
+                    const offhandInv = equippedOnly.find(i => i.slot_id === 14);
+                    const offhandItemId = (offhandInv && offhandInv.item_id != null && offhandInv.item_id !== '') ? Number(offhandInv.item_id) : null;
+                    if (offhandItemId != null && !isNaN(offhandItemId) && itemStatsCache[offhandItemId]) {
+                        offhandStats = itemStatsCache[offhandItemId];
+                        offhandScore = scoreItemForUpgrade(offhandStats, offhandItemId, norm, focusWeights, focusValuesByItem);
+                    }
+                }
+
+                const otherEquippedIds = new Set(
+                    equippedOnly
+                        .filter(i => i.slot_id !== slotId)
+                        .map(i => (i.item_id != null && i.item_id !== '') ? Number(i.item_id) : null)
+                        .filter(n => n != null && !isNaN(n))
+                );
+                if (isItemLore(candidateStats) && otherEquippedIds.has(candNum)) continue;
+
+                const score = scoreItemForUpgrade(candidateStats, candNum, norm, focusWeights, focusValuesByItem);
+                const is2her = isItemTwoHanded(candidateStats);
+                let baselineScore = currentScore;
+                let deltas;
+                if (slotId === 13 && is2her) {
+                    baselineScore = currentScore + offhandScore;
+                    const currentRaw = mergeRawStats(getItemRawStats(currentStats), getItemRawStats(offhandStats));
+                    deltas = getItemStatDeltasFromRaw(currentRaw, candidateStats);
+                } else {
+                    deltas = getItemStatDeltas(currentStats, candidateStats);
+                }
+                const mod2Detail = (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady())
+                    ? Mod2Scoring.upgradeDetail(charClass, equippedOnly, slotId, currentItemId, candNum, is2her)
+                    : { item: 0, display: 0, note: '' };
+                const delta = score - baselineScore + mod2Detail.item;
+                if (mod2Detail.note) deltas.mod2Note = mod2Detail.note;
+
+                const focusSpellName = (candidateStats.focusSpellName != null && candidateStats.focusSpellName !== '')
+                    ? String(candidateStats.focusSpellName) : '';
+                const candidateName = candidateStats.name || elementalDisplayNames[String(candNum)] || ('Item ' + candNum);
+                const row = {
+                    slotId,
+                    slotName: SLOT_NAMES_FOR_UI[slotId] || ('Slot ' + slotId),
+                    delta,
+                    deltas,
+                    score,
+                    itemId: candNum,
+                    itemName: candidateName,
+                    focusSpellName,
+                    currentItemId,
+                    currentItemName: (inv && inv.item_name) || getItemName(currentItemId),
+                    candidateName
+                };
+                if (!best || row.delta > best.delta) best = row;
+            }
+
+            if (!best) {
+                return { eligible: false, reason: 'no_matching_slot' };
+            }
+            return {
+                eligible: true,
+                isUpgrade: best.delta > 0,
+                slotId: best.slotId,
+                slotName: best.slotName,
+                delta: best.delta,
+                scoreDelta: best.delta,
+                score: best.score,
+                deltas: best.deltas,
+                itemId: best.itemId,
+                itemName: best.itemName,
+                focusSpellName: best.focusSpellName,
+                currentItemId: best.currentItemId,
+                currentItemName: best.currentItemName,
+                candidateName: best.candidateName
+            };
+        }
+
         // Weight customization functions
         function loadCustomWeights() {
             const saved = localStorage.getItem('customWeights');
@@ -3229,10 +3369,9 @@
                     return `${escapeHtml(cls)} — <a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${mid}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
                 }).filter(Boolean).join(' · ');
                 html += `<p class="elemental-classes-block" style="margin: 10px 0; padding: 10px 12px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border-left: 4px solid #667eea;"><strong>From ${escapeHtml(elementalInfo.pattern_name)}.</strong> Only these classes can benefit: ${classLinks}</p>`;
-                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison to your toons' actual gear in this slot (only toons whose class can use this pattern). Close to return to upgrade list.</p>`;
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison to your toons' actual gear (best matching slot per toon; only toons whose class can use this pattern). Close to return to upgrade list.</p>`;
                 html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
-                const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
                 const benefitingAbbrevs = Object.keys(byClass);
                 let rows = [];
                 toonUpgradesMatchedChars.forEach(char => {
@@ -3243,24 +3382,26 @@
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
-                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
-                    const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
-                    if (slot && slot.upgrades) {
-                        const u = slot.upgrades.find(x => String(x.itemId) === String(elementalItemId));
-                        if (u) {
-                            const hpd = getHpPerDkpForUpgrade(u);
-                            const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
-                            benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
-                            if (statsFocus) benefit += ` · ${statsFocus}`;
-                            sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
+                    const best = evaluateItemUpgradeForCharacter(char, elementalItemId);
+                    if (best && best.eligible && best.isUpgrade) {
+                        const u = best;
+                        const hpd = getHpPerDkpForUpgrade(u);
+                        const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                        benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
+                        if (statsFocus) benefit += ` · ${statsFocus}`;
+                        if (u.slotName) benefit += ` · ${escapeHtml(u.slotName)}`;
+                        sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
+                        const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
+                        const slot = upgradeData.bySlot && upgradeData.bySlot.find(s => s.slotId === best.slotId);
+                        if (slot && slot.upgrades) {
+                            const others = slot.upgrades.filter(x => String(x.itemId) !== String(elementalItemId)).slice(0, upgradesPerSlot);
+                            otherOptionsHtml = others.length ? others.map(o => {
+                                const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
+                                const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
+                                const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
+                                return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
+                            }).join(', ') : '—';
                         }
-                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(elementalItemId)).slice(0, upgradesPerSlot);
-                        otherOptionsHtml = others.length ? others.map(o => {
-                            const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
-                            const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
-                            return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
-                        }).join(', ') : '—';
                     }
                     rows.push({ char, benefit, otherOptionsHtml, sortKey });
                 });
@@ -3285,33 +3426,34 @@
                 });
                 html += '</tbody></table>';
             } else {
-                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best first). Close to return to upgrade list.</p>`;
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best slot first). Close to return to upgrade list.</p>`;
                 html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
-                const sid = slotId !== '' && slotId != null ? parseInt(slotId, 10) : null;
                 let rows = [];
                 toonUpgradesMatchedChars.forEach(char => {
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
-                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
-                    const slot = upgradeData.bySlot && sid ? upgradeData.bySlot.find(s => s.slotId === sid) : null;
-                    if (slot && slot.upgrades) {
-                        const u = slot.upgrades.find(x => String(x.itemId) === String(itemId));
-                        if (u) {
-                            const hpd = getHpPerDkpForUpgrade(u);
-                            const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
-                            benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
-                            if (statsFocus) benefit += ` · ${statsFocus}`;
-                            sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
+                    const best = evaluateItemUpgradeForCharacter(char, itemId);
+                    if (best && best.eligible && best.isUpgrade) {
+                        const u = best;
+                        const hpd = getHpPerDkpForUpgrade(u);
+                        const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                        benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
+                        if (statsFocus) benefit += ` · ${statsFocus}`;
+                        if (u.slotName) benefit += ` · ${escapeHtml(u.slotName)}`;
+                        sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
+                        const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
+                        const slot = upgradeData.bySlot && upgradeData.bySlot.find(s => s.slotId === best.slotId);
+                        if (slot && slot.upgrades) {
+                            const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
+                            otherOptionsHtml = others.length ? others.map(o => {
+                                const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
+                                const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
+                                const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
+                                return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
+                            }).join(', ') : '—';
                         }
-                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
-                        otherOptionsHtml = others.length ? others.map(o => {
-                            const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
-                            const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                            const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
-                            return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
-                        }).join(', ') : '—';
                     }
                     rows.push({ char, benefit, otherOptionsHtml, sortKey });
                 });
@@ -3383,9 +3525,8 @@
             return null;
         }
 
-        /** Open item comparison by item id/name (e.g. from typed search). Finds per-toon slot from upgrades or uses item's slot. */
+        /** Open item comparison by item id/name (e.g. from typed search). Per toon, picks the best matching slot (highest score delta). */
         function openItemComparisonByItemId(itemId, itemName) {
-            const slotNames = { 1: 'Ear', 2: 'Head', 3: 'Face', 4: 'Ear', 5: 'Neck', 6: 'Shoulder', 7: 'Arms', 8: 'Back', 9: 'Wrist', 10: 'Wrist', 11: 'Range', 12: 'Hands', 13: 'Main Hand', 14: 'Off Hand', 15: 'Ring 1', 16: 'Ring 2', 17: 'Chest', 18: 'Legs', 19: 'Feet', 20: 'Waist', 21: 'Ammo' };
             if (itemName && elementalSlotOptions && elementalSlotOptions.by_slot_id) {
                 const searchNorm = normalizeItemNameForLookup(itemName);
                 if (searchNorm) {
@@ -3397,7 +3538,8 @@
                                 const firstKey = Object.keys(byClass).sort()[0];
                                 const firstId = firstKey ? (byClass[firstKey] || '').trim() : '';
                                 if (firstId) {
-                                    openItemComparison(firstId, opt.pattern_name, slotNames[slotId] || ('Slot ' + slotId), String(slotId), null, null);
+                                    // Pass null slotId so openItemComparison evaluates best matching slot per toon.
+                                    openItemComparison(firstId, opt.pattern_name, null, null, null, null);
                                     return;
                                 }
                             }
@@ -3405,76 +3547,40 @@
                     }
                 }
             }
-            const slotIds = getSlotIdsForItem(itemId);
             const elementalInfo = elementalMageloToPattern[String(itemId)];
-            if (elementalInfo && slotIds.length > 0) {
-                const sid = slotIds[0];
-                openItemComparison(itemId, elementalInfo.pattern_name, slotNames[sid] || ('Slot ' + sid), String(sid), null, null);
+            if (elementalInfo) {
+                openItemComparison(itemId, elementalInfo.pattern_name, null, null, null, null);
                 return;
             }
             const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
             let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
-            if (elementalInfo) {
-                const byClass = elementalInfo.by_class || {};
-                const classLinks = Object.keys(byClass).sort().map(cls => {
-                    const mid = (byClass[cls] || '').trim();
-                    if (!mid) return '';
-                    const stats = itemStatsCache[Number(mid)];
-                    const name = (stats && stats.name) ? stats.name : (elementalDisplayNames[mid] || 'Item ' + mid);
-                    return `${escapeHtml(cls)} — <a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${mid}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
-                }).filter(Boolean).join(' · ');
-                html += `<p class="elemental-classes-block" style="margin: 10px 0; padding: 10px 12px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border-left: 4px solid #667eea;"><strong>From ${escapeHtml(elementalInfo.pattern_name)}.</strong> Classes that can benefit from this upgrade: ${classLinks}</p>`;
-                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Class</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Item</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Stats</th></tr></thead><tbody>';
-                Object.keys(byClass).sort().forEach(cls => {
-                    const mid = (byClass[cls] || '').trim();
-                    if (!mid) return;
-                    const stats = itemStatsCache[Number(mid)];
-                    const name = (stats && stats.name) ? stats.name : (elementalDisplayNames[mid] || 'Item ' + mid);
-                    const fullClassName = ABBREV_TO_CLASS[cls] || cls;
-                    const statsStr = formatItemStatsAbsolute(stats);
-                    html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(fullClassName)}</td><td style="padding: 8px; border-bottom: 1px solid #eee;"><a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${mid}" target="_blank" rel="noopener">${escapeHtml(name)}</a></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(statsStr)}</td></tr>`;
-                });
-                html += '</tbody></table>';
-            } else {
-                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best first). Close to return to upgrade list.</p>`;
-                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best slot first). Close to return to upgrade list.</p>`;
+            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
 
-                const rows = [];
-                toonUpgradesMatchedChars.forEach(char => {
+            const rows = [];
+            toonUpgradesMatchedChars.forEach(char => {
                 let benefit = '—';
                 let otherOptionsHtml = '—';
                 let slotName = '—';
                 let sortKey = -Infinity;
-                const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
-                let slot = null;
-                if (upgradeData.bySlot) {
-                    for (const s of upgradeData.bySlot) {
-                        const u = (s.upgrades || []).find(x => String(x.itemId) === String(itemId));
-                        if (u) {
-                            slot = s;
-                            slotName = s.slotName || slotNames[s.slotId] || 'Slot ' + s.slotId;
-                            const hpd = getHpPerDkpForUpgrade(u);
-                            const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
-                            benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
-                            if (statsFocus) benefit += ` · ${statsFocus}`;
-                            sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
-                            const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
-                            otherOptionsHtml = others.length ? others.map(o => {
-                                const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
-                                const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
-                                const base = deltaStr ? `${link} <span style="font-size:0.9em;">(${deltaStr})</span>` : link;
-                                return base + (o.delta != null && o.delta <= 0 ? ' <span style="color:#6c757d;font-size:0.9em;">(downgrade)</span>' : '');
-                            }).join(', ') : '—';
-                            break;
-                        }
+                const best = evaluateItemUpgradeForCharacter(char, itemId);
+                if (best && best.eligible) {
+                    slotName = best.slotName || SLOT_NAMES_FOR_UI[best.slotId] || ('Slot ' + best.slotId);
+                    if (best.isUpgrade) {
+                        const u = best;
+                        const hpd = getHpPerDkpForUpgrade(u);
+                        const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
+                        benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
+                        if (statsFocus) benefit += ` · ${statsFocus}`;
+                        sortKey = (u.delta || 0) * 10000 + (hpd != null ? hpd : 0);
+                    } else {
+                        benefit = `Score ${(best.delta || 0).toFixed(2)}` + (best.delta != null && best.delta <= 0 ? ' (downgrade/current)' : '');
+                        sortKey = (best.delta || 0) * 10000;
                     }
-                }
-                if (!slot && slotIds.length > 0) {
-                    const sid = slotIds[0];
-                    slotName = slotNames[sid] || 'Slot ' + sid;
-                    slot = upgradeData.bySlot && upgradeData.bySlot.find(s => s.slotId === sid);
+                    const upgradeData = computeUpgradesForCharacter(char, Math.max(upgradesPerSlot, 25), true);
+                    const slot = upgradeData.bySlot && upgradeData.bySlot.find(s => s.slotId === best.slotId);
                     if (slot && slot.upgrades) {
-                        const others = slot.upgrades.slice(0, upgradesPerSlot);
+                        const others = slot.upgrades.filter(x => String(x.itemId) !== String(itemId)).slice(0, upgradesPerSlot);
                         otherOptionsHtml = others.length ? others.map(o => {
                             const link = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${o.itemId}" target="_blank" rel="noopener" data-item-id="${o.itemId}" data-item-name="${escapeHtml(o.itemName || '')}">${escapeHtml(o.itemName || 'Item ' + o.itemId)}</a>`;
                             const deltaStr = formatUpgradeDeltas(o.deltas || {}, o.focusSpellName);
@@ -3488,10 +3594,9 @@
             rows.sort((a, b) => b.sortKey - a.sortKey);
             rows.forEach(({ char, slotName, benefit, otherOptionsHtml }) => {
                 const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
-                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${slotName}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(slotName)}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
             });
             html += '</tbody></table>';
-            }
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
             itemComparisonContent.innerHTML = html;
             itemComparisonModal.style.display = 'block';
