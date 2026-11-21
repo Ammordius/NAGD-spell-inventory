@@ -246,4 +246,26 @@ for (seed = 1; seed <= 40; seed++) {
 }
 assert.ok(lateJitter > earlyJitter, 'jitter trails more than it lands early: ' + lateJitter + ' vs ' + earlyJitter);
 
+const unbuffed = Tank.applyCommonBuffs({ maxHp: 9000, spellAc: 10, agi: 200 }, {});
+eq(unbuffed.maxHp, 9000, 'no common buffs hp');
+eq(unbuffed.spellAc, 10, 'no common buffs spell ac');
+eq(unbuffed.agi, 200, 'no common buffs agi');
+
+const allBuffs = Tank.applyCommonBuffs({ maxHp: 9000, spellAc: 10, agi: 200 }, {
+    virtue: true, focus: true, brells: true
+});
+eq(allBuffs.maxHp, 9000 + 1405 + 420 + 350, 'virtue focus brells hp');
+eq(allBuffs.spellAc, 10 + 240, 'virtue spell ac');
+eq(allBuffs.agi, 200 + 69, 'virtue agi');
+eq(Tank.COMMON_BUFFS.virtue.id, 3467, 'virtue id');
+eq(Tank.COMMON_BUFFS.focus.id, 1432, 'focus id');
+eq(Tank.COMMON_BUFFS.brells.id, 3028, 'brells id');
+eq(Tank.COMMON_BUFFS.focus.hp, 420, 'focus level-65 hp');
+
+const custom = Tank.applyCommonBuffs({ maxHp: 9000, spellAc: 0, agi: 200 }, {
+    virtue: true, customHp: 100, customAc: 50
+});
+eq(custom.maxHp, 9000 + 1405 + 100, 'custom hp on top of virtue');
+eq(custom.spellAc, 240 + 50, 'custom ac on top of virtue');
+
 console.log(JSON.stringify({ ok: true, deaths: repeatA.deaths }));

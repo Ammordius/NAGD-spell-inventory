@@ -58,6 +58,42 @@
         note: 'Complete Heal cast time and amount were not loaded from a spell row. Four healers at 3 seconds between landings have a 12 second personal cycle, which covers a 10 second cast.'
     };
 
+    // Level-65 tank-relevant deltas from spells_en (hardcoded; no spell ingest).
+    var COMMON_BUFFS = {
+        // 3467 Virtue: MaxHP 1405, AC 240, All Stats 69
+        virtue: { id: 3467, name: 'Virtue', hp: 1405, spellAc: 240, agi: 69 },
+        // 1432 Focus of Spirit: MaxHP base 225 formula 104 → 225 + 65*3 = 420
+        focus: { id: 1432, name: 'Focus of Spirit', hp: 420, spellAc: 0, agi: 0 },
+        // 3028 Beta Brell's Stalwart: MaxHP 350
+        brells: { id: 3028, name: "Brells", hp: 350, spellAc: 0, agi: 0 }
+    };
+
+    /**
+     * Add selected common buffs and custom HP/AC onto an unbuffed Magelo base.
+     * flags: { virtue, focus, brells, customHp, customAc }
+     * base: { maxHp, spellAc, agi }
+     */
+    function applyCommonBuffs(base, flags) {
+        base = base || {};
+        flags = flags || {};
+        var maxHp = Number(base.maxHp) || 0;
+        var spellAc = Number(base.spellAc) || 0;
+        var agi = Number(base.agi) || 0;
+        var keys = ['virtue', 'focus', 'brells'];
+        var i;
+        for (i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (!flags[key]) continue;
+            var buff = COMMON_BUFFS[key];
+            maxHp += buff.hp;
+            spellAc += buff.spellAc;
+            agi += buff.agi;
+        }
+        maxHp += Number(flags.customHp) || 0;
+        spellAc += Number(flags.customAc) || 0;
+        return { maxHp: maxHp, spellAc: spellAc, agi: agi };
+    }
+
     function truncDiv(n, d) {
         return Math.trunc(n / d);
     }
@@ -1344,6 +1380,8 @@
         DEFAULT_HORIZON_MS: DEFAULT_HORIZON_MS,
         SKILL_CAPS: SKILL_CAPS,
         COMPLETE_HEAL_PRESET: COMPLETE_HEAL_PRESET,
+        COMMON_BUFFS: COMMON_BUFFS,
+        applyCommonBuffs: applyCommonBuffs,
         hasDied: hasDied,
         scriptedRng: scriptedRng,
         makeStreams: makeStreams,

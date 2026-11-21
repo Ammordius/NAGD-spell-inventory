@@ -86,12 +86,17 @@ svg { width: 100%; height: auto; background: #0001; }
 <div class="row three" id="buffs"></div>
 <label><input id="defensive" type="checkbox" style="width:auto" checked> Defensive, 30% less melee damage</label>
 <label><input id="di" type="checkbox" style="width:auto" checked> Divine Intervention clicky. 8000 heal when alive under 16% HP, then a 10 second recast</label>
+<p class="note">Magelo HP and AC are unbuffed. Virtue, Focus of Spirit, and Brells start on and add on top. Custom fields and Spell AC also add.</p>
+<div class="row three" id="commonBuffs"></div>
 <div class="row two">
+  <div><label for="customHp">Custom +HP</label><input id="customHp" type="number" value="0"></div>
+  <div><label for="customAc">Custom +AC</label><input id="customAc" type="number" value="0"></div>
   <div><label for="spellAc">Spell AC, separate from item AC</label><input id="spellAc" type="number" value="0"></div>
   <div><label for="spellMit">Spell mitigation effect. Negative reduces the interval. -50 is a user-entered defensive discipline.</label><input id="spellMit" type="number" value="0"></div>
   <div><label for="avoidPct">Avoidance percent on the miss check</label><input id="avoidPct" type="number" value="0"></div>
   <div><label for="facing">Facing</label><select id="facing"><option value="front">In front</option><option value="behind">Behind</option></select></div>
 </div>
+<p id="buffReadout" class="note"></p>
 
 <h2>Experimental Mod2s</h2>
 <label><input id="mod2" type="checkbox" style="width:auto"> Enable experimental Mod2s — off by default</label>
@@ -171,6 +176,11 @@ svg { width: 100%; height: auto; background: #0001; }
     ['combatAgility', 'Combat Agility, rank 3, +10% of avoidance'],
     ['lightningReflexes', 'Lightning Reflexes, rank 5, +15% of avoidance']
   ];
+  var commonBuffIds = [
+    ['virtue', 'Virtue +1405 HP, +240 AC, +69 AGI'],
+    ['focus', 'Focus of Spirit +420 HP'],
+    ['brells', 'Brells +350 HP']
+  ];
 
   function $(id) { return document.getElementById(id); }
   function num(id) { return Number($(id).value); }
@@ -186,6 +196,11 @@ svg { width: 100%; height: auto; background: #0001; }
     var wrap = document.createElement('label');
     wrap.innerHTML = '<input type="checkbox" id="' + pair[0] + '" style="width:auto" checked> ' + pair[1];
     $('buffs').appendChild(wrap);
+  });
+  commonBuffIds.forEach(function (pair) {
+    var wrap = document.createElement('label');
+    wrap.innerHTML = '<input type="checkbox" id="' + pair[0] + '" style="width:auto" checked> ' + pair[1];
+    $('commonBuffs').appendChild(wrap);
   });
 
   Promise.all([
@@ -350,7 +365,8 @@ svg { width: 100%; height: auto; background: #0001; }
     var mod = TankSim.sumMod2(mod2Table, worn(char).map(function (r) { return r.item_id; }));
     var bits = Object.keys(mod.totals).map(function (k) { return k + ' ' + mod.totals[k]; }).join(' · ');
     $('mod2Totals').textContent = 'Equipped Mod2 totals (informational): ' + bits;
-    if (!$('swapHp').value) $('swapHp').value = char.stats.hp || 0;
+    renderBuffReadout();
+    if (!$('swapHp').value) $('swapHp').value = buffedSheetStats().maxHp;
     if (!$('swapAc').value) $('swapAc').value = sheet.ac_item != null ? sheet.ac_item : ac.sum;
     if (!$('swapShield').value) $('swapShield').value = sheet.ac_shield != null ? sheet.ac_shield : (shield.ac || 0);
   }
@@ -548,24 +564,54 @@ svg { width: 100%; height: auto; background: #0001; }
     };
   }
 
+  function commonBuffFlags() {
+    return {
+      virtue: $('virtue').checked,
+      focus: $('focus').checked,
+      brells: $('brells').checked,
+      customHp: num('customHp'),
+      customAc: num('customAc')
+    };
+  }
+
+  function buffedSheetStats() {
+    var char = selectedChar();
+    return TankSim.applyCommonBuffs({
+      maxHp: char && char.stats ? char.stats.hp : 1,
+      spellAc: num('spellAc'),
+      agi: char && char.stats ? char.stats.AGI : 0
+    }, commonBuffFlags());
+  }
+
+  function renderBuffReadout() {
+    var buffed = buffedSheetStats();
+    var char = selectedChar();
+    var baseHp = char && char.stats ? char.stats.hp : 0;
+    var baseAgi = char && char.stats ? char.stats.AGI : 0;
+    $('buffReadout').textContent = 'Effective with selected buffs: HP ' + buffed.maxHp +
+      ' (sheet ' + baseHp + ') · spell AC ' + buffed.spellAc +
+      ' · AGI ' + buffed.agi + ' (sheet ' + baseAgi + ').';
+  }
+
   function baseScenario() {
     var char = selectedChar();
     var sheet = (char && char.sheet) || {};
     var ac = char ? itemAcSum(char) : { sum: 0 };
     var shield = char ? shieldAcOf(char) : { ac: 0 };
+    var buffed = buffedSheetStats();
     var scenario = {
       className: char ? char.class : 'Warrior',
       race: char ? char.race : '',
       level: 65,
-      maxHp: char && char.stats ? char.stats.hp : 1,
-      agi: char && char.stats ? char.stats.AGI : 0,
+      maxHp: buffed.maxHp,
+      agi: buffed.agi,
       itemAc: sheet.ac_item != null ? sheet.ac_item : ac.sum,
       shieldAc: sheet.ac_shield != null ? sheet.ac_shield : (shield.ac || 0),
       weight: sheet.weight || 0,
       inFront: $('facing').value !== 'behind',
       experimentalMod2: $('mod2').checked,
       mod2: char ? TankSim.sumMod2(mod2Table, worn(char).map(function (r) { return r.item_id; })).totals : {},
-      spellAc: num('spellAc'),
+      spellAc: buffed.spellAc,
       spellMitigationEffect: num('spellMit'),
       avoidancePct: num('avoidPct'),
       defensive: $('defensive').checked,
@@ -731,6 +777,17 @@ svg { width: 100%; height: auto; background: #0001; }
   buffIds.forEach(function (pair) {
     $(pair[0]).addEventListener('change', renderAvoid);
   });
+  function onCommonBuffChange() {
+    renderBuffReadout();
+    if (selectedChar()) renderCharacter();
+  }
+  commonBuffIds.forEach(function (pair) {
+    $(pair[0]).addEventListener('change', onCommonBuffChange);
+  });
+  ['customHp', 'customAc', 'spellAc'].forEach(function (id) {
+    $(id).addEventListener('input', onCommonBuffChange);
+  });
+  renderBuffReadout();
 
   $('run').addEventListener('click', function () {
     lastScenario = baseScenario();
