@@ -246,7 +246,7 @@ svg { width: 100%; height: auto; background: #0001; }
   }
 
   function selectedChar() {
-    return (rankings.characters || []).find(function (c) { return String(c.id) === selectedCharId; });
+    return ((rankings && rankings.characters) || []).find(function (c) { return String(c.id) === selectedCharId; });
   }
 
   function hideMatches() {
@@ -275,7 +275,7 @@ svg { width: 100%; height: auto; background: #0001; }
     var list = $('charMatches');
     matchIndex = -1;
     if (!q) { hideMatches(); return; }
-    var hits = (rankings.characters || []).filter(function (c) {
+    var hits = ((rankings && rankings.characters) || []).filter(function (c) {
       return String(c.name || '').toLowerCase().indexOf(q) >= 0;
     });
     hits.sort(function (a, b) {
@@ -750,7 +750,7 @@ svg { width: 100%; height: auto; background: #0001; }
       if (matchIndex >= 0 && buttons[matchIndex]) chooseCharacter(buttons[matchIndex].getAttribute('data-id'));
       else {
         var q = $('charSearch').value.trim().toLowerCase();
-        var exact = (rankings.characters || []).filter(function (c) { return String(c.name || '').toLowerCase() === q; });
+        var exact = ((rankings && rankings.characters) || []).filter(function (c) { return String(c.name || '').toLowerCase() === q; });
         if (exact.length === 1) chooseCharacter(exact[0].id);
       }
       return;
