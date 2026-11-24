@@ -6697,7 +6697,6 @@
                         ${bidCell}
                         <td style="padding:8px; border-bottom:1px solid #eee; white-space:nowrap;">
                             <button type="button" class="gear-target-remove" data-char-id="${escapeHtml(String(row.characterId))}" data-slot-id="${row.slotId}" data-item-id="${row.targetItemId == null ? '' : row.targetItemId}" style="padding:4px 8px; font-size:0.85em; cursor:pointer;">Remove</button>
-                            <button type="button" class="gear-target-reset-char" data-char-id="${escapeHtml(String(row.characterId))}" style="padding:4px 8px; font-size:0.85em; cursor:pointer;">Reset plan</button>
                         </td>
                     </tr>`;
                 });
@@ -6725,16 +6724,6 @@
                         const itemId = itemRaw === '' || itemRaw == null ? null : Number(itemRaw);
                         const bid = inp.value === '' ? null : Number(inp.value);
                         GP.setBid(inp.getAttribute('data-char-id'), inp.getAttribute('data-slot-id'), itemId, bid);
-                    });
-                });
-                myGearTargetsContent.querySelectorAll('.gear-target-reset-char').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const id = btn.getAttribute('data-char-id');
-                        if (confirm('Clear the saved gear plan for this character? Claim status and view history are kept.')) {
-                            GP.clearCharacterPlan(id);
-                            renderGearTargets();
-                        }
                     });
                 });
             }
