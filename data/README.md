@@ -33,3 +33,21 @@ python utils/update_focus_items_and_stats.py
 ```
 
 That script also updates `spell_focii_level65.json` with item IDs and classes from raid loot + item_stats.
+
+## Raid upgrade catalog (six-zone loot foundation)
+
+Offline, deterministic catalog for the Raid Upgrade Planner (`class_rankings.html?dkp_val=true` UI comes later). Allowlisted zones only: Plane of Time, Plane of Water, Plane of Fire, Vex Thal (incl. “Vex Thall”), Temple of Ssraeshza / Ssraeshza Temple / Ssra, Sanctus Seru / Seru.
+
+```bash
+# Prefer sibling NAGD-DKP datasets (default paths):
+python scripts/build_raid_upgrade_catalog.py
+python scripts/build_raid_upgrade_catalog.py --validate
+python -m unittest tests.test_raid_upgrade_catalog
+```
+
+Writes:
+
+- **`data/raid_upgrade_catalog.json`** – zones, targets, loot items, multi-source provenance, acquisition type (`direct_wearable` / `armor_pattern` / `unresolved`), purchase vs wearable ids, verified class armor maps from `dkp_elemental_to_magelo.json` (falls back to `elemental_slot_options.json`).
+- **`data/raid_upgrade_catalog_coverage.json`** – counts by zone/target, unresolved ids, missing stats, missing armor mappings, ambiguous empty/unknown zone assignments.
+
+Does **not** require Supabase or a live DB. Does **not** rewrite `raid_item_sources.json` or DKP datasets. CI validates and deploys the committed catalog.

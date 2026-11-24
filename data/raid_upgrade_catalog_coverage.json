@@ -1,0 +1,1234 @@
+{
+  "version": 1,
+  "counts_by_zone": {
+    "plane_of_fire": {
+      "items": 52,
+      "source_links": 56,
+      "targets": 12
+    },
+    "plane_of_time": {
+      "items": 184,
+      "source_links": 188,
+      "targets": 24
+    },
+    "plane_of_water": {
+      "items": 33,
+      "source_links": 33,
+      "targets": 6
+    },
+    "sanctus_seru": {
+      "items": 9,
+      "source_links": 9,
+      "targets": 1
+    },
+    "temple_of_ssraeshza": {
+      "items": 118,
+      "source_links": 118,
+      "targets": 10
+    },
+    "vex_thal": {
+      "items": 151,
+      "source_links": 201,
+      "targets": 13
+    }
+  },
+  "counts_by_target": {
+    "a_deadly_warboar|plane_of_time": 10,
+    "a_glyph_covered_serpent|temple_of_ssraeshza": 9,
+    "a_monsterous_mudwalker|plane_of_time": 4,
+    "a_mystical_arbitor_of_earth|plane_of_time": 3,
+    "a_perfected_warder_of_earth|plane_of_time": 4,
+    "anar_of_water|plane_of_time": 5,
+    "arch_lich_rhag'zadune|temple_of_ssraeshza": 15,
+    "arch_mage_yozanni|plane_of_fire": 5,
+    "aten_ha_ra|vex_thal": 27,
+    "avatar_of_earth|plane_of_time": 6,
+    "avatar_of_the_elements|plane_of_time": 7,
+    "azobian_the_darklord|plane_of_fire": 4,
+    "babnoxis_the_spider_queen|plane_of_fire": 4,
+    "bertoxxulous|plane_of_time": 12,
+    "blazzax_the_omnifiend|plane_of_fire": 4,
+    "blood_of_ssraeshza|temple_of_ssraeshza": 5,
+    "cazic_thule|plane_of_time": 25,
+    "chancellor_kirtra|plane_of_fire": 4,
+    "coirnav_the_avatar_of_water|plane_of_water": 11,
+    "criare_sunmane|plane_of_fire": 5,
+    "diabo_xi_va_temariel|vex_thal": 15,
+    "diabo_xi_va|vex_thal": 16,
+    "diabo_xi_xin_thall|vex_thal": 14,
+    "diabo_xi_xin|vex_thal": 14,
+    "earthen_overseer|plane_of_time": 4,
+    "emperor_ssraeshza_|temple_of_ssraeshza": 10,
+    "eom_centien|vex_thal": 4,
+    "eom_trash|vex_thal": 5,
+    "fennin_ro_the_tyrant_of_fire|plane_of_fire": 9,
+    "general_druav_flamesinger|plane_of_fire": 3,
+    "general_reparm|plane_of_fire": 5,
+    "grioihin_the_wise|plane_of_water": 3,
+    "gutripping_war_beast|plane_of_time": 3,
+    "high_priest_of_ssraeshza|temple_of_ssraeshza": 16,
+    "hydrotha|plane_of_water": 6,
+    "innoruuk|plane_of_time": 12,
+    "kaas_thox_xi_ans_dyek|vex_thal": 13,
+    "kaas_thox_xi_aten_ha_ra|vex_thal": 25,
+    "krziik_the_mighty|plane_of_water": 6,
+    "lord_inquisitor_seru|sanctus_seru": 9,
+    "magmaton|plane_of_fire": 4,
+    "ofossaa_the_enlightened|plane_of_water": 6,
+    "peregrin_rockskull|plane_of_time": 3,
+    "pyronis|plane_of_fire": 4,
+    "quarm|plane_of_time": 19,
+    "quavonis_firetail|plane_of_fire": 5,
+    "rallos_zek|plane_of_time": 12,
+    "ralthos_enrok|plane_of_time": 4,
+    "rhag'mozdezh|temple_of_ssraeshza": 9,
+    "rhag'zhezum|temple_of_ssraeshza": 11,
+    "rizlona|plane_of_time": 3,
+    "saryrn|plane_of_time": 10,
+    "tallon_zek|plane_of_time": 10,
+    "terris_thule|plane_of_time": 9,
+    "thall_va_kelun|vex_thal": 15,
+    "thall_va_xakra|vex_thal": 17,
+    "thall_xundraux_diabo|vex_thal": 16,
+    "the_protector_of_dresolik|plane_of_time": 5,
+    "tribal_leader_diseranon|plane_of_time": 2,
+    "triloun_egg_keeper|plane_of_water": 1,
+    "va_xi_aten_ha_ra|vex_thal": 20,
+    "vallon_zek|plane_of_time": 10,
+    "vyzh'dra_the_cursed|temple_of_ssraeshza": 15,
+    "vyzh'dra_the_exiled|temple_of_ssraeshza": 11,
+    "wave_1|plane_of_time": 6,
+    "xerkizh_the_creator|temple_of_ssraeshza": 17
+  },
+  "acquisition_counts": {
+    "armor_pattern": 28,
+    "direct_wearable": 499
+  },
+  "item_count": 527,
+  "target_count": 66,
+  "unresolved_ids": [],
+  "missing_stats": [],
+  "missing_armor_mappings": [],
+  "ambiguous_source_assignments": [
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "10949",
+      "name": "Crackling Ring of Lightning",
+      "mob": "Jeplak,_Lord_of_Srerendi",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "11621",
+      "name": "Cloak of Flames",
+      "mob": "Ixiblat_Fer",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "13653",
+      "name": "Drape of Wings",
+      "mob": "Zandal_Adan",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "16346",
+      "name": "Ornate Breastplate Mold",
+      "mob": "Rydda`Dar",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "17587",
+      "name": "Feather Lined Box",
+      "mob": "A_Possessed_Warmonger",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "21812",
+      "name": "Black Silken Bridle",
+      "mob": "Grieg_Veneficus",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "22877",
+      "name": "Earthen Fist",
+      "mob": "An_Ancient_Vekerchiki_Champion",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "22878",
+      "name": "Grandmasters Mace",
+      "mob": "Rydda`Dar",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "22980",
+      "name": "Whip of the Earthcrafter",
+      "mob": "A_Prismatic_Basilisk",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "24928",
+      "name": "Corroded Breastplate",
+      "mob": "Grondon_Zekkin",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "26604",
+      "name": "Koadic's Robe of Heightened Focus",
+      "mob": "Emperor_Ssraeshza_",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "26749",
+      "name": "Azaliil's Ring of Analogies",
+      "mob": "Emperor_Ssraeshza_",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "27267",
+      "name": "Ivory Etched Aegis",
+      "mob": "Rydda`Dar",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "27851",
+      "name": "Crystallized Acid Bracer",
+      "mob": "an_acidic_mass",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "27853",
+      "name": "Crystallized Acid Pauldrons",
+      "mob": "an_acidic_mass",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "27883",
+      "name": "Robe of Viscid Slime",
+      "mob": "an_acidic_mass",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "27888",
+      "name": "Viscid Slime Gloves",
+      "mob": "an_acidic_mass",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "27908",
+      "name": "Acid Pocked Mithril Blade",
+      "mob": "an_acidic_mass",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "32159",
+      "name": "Shaded cloak",
+      "mob": "A_chanting_shade",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "32166",
+      "name": "Shaded amice",
+      "mob": "A_chanting_shade",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "32176",
+      "name": "Temariel Vex",
+      "mob": "Altar_Priest",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "7363",
+      "name": "Robe of the Enslaved Soul",
+      "mob": "A_Possessed_Warlord",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "7389",
+      "name": "Seer's Orb of Power",
+      "mob": "A_Possessed_Underking",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "7977",
+      "name": "Gem Encrusted Choker",
+      "mob": "A_Possessed_Warmonger",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "8447",
+      "name": "Possessed Sacrificial Cleaver",
+      "mob": "a_grimling_high_commander",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "9442",
+      "name": "Precious Gemstone Adorned Mask",
+      "mob": "A_Prismatic_Basilisk",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "9490",
+      "name": "Primal Mask of the Earthcrafter",
+      "mob": "A_Pristine_Gem_Golem",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "ambiguous_zone",
+      "item_id": "9495",
+      "name": "Circlet of the Victor",
+      "mob": "Jeplak,_Lord_of_Srerendi",
+      "zone": "Other / Unknown",
+      "provenance": [
+        "dkp",
+        "dkp_mob_loot"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "10949",
+      "name": "Crackling Ring of Lightning",
+      "mob": "Jeplak,_Lord_of_Srerendi",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "11408",
+      "name": "Item 11408",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "11621",
+      "name": "Cloak of Flames",
+      "mob": "Ixiblat_Fer",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "13653",
+      "name": "Drape of Wings",
+      "mob": "Zandal_Adan",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "14733",
+      "name": "Item 14733",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "1557",
+      "name": "Item 1557",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "16255",
+      "name": "Item 16255",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "16257",
+      "name": "Signet of the Arcane",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "16346",
+      "name": "Ornate Breastplate Mold",
+      "mob": "Rydda`Dar",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "17587",
+      "name": "Feather Lined Box",
+      "mob": "A_Possessed_Warmonger",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "1867",
+      "name": "Circlet of the Falinkan",
+      "mob": "Quest: Ralgyn's Promise in Skyshrine",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "19726",
+      "name": "Item 19726",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "21812",
+      "name": "Black Silken Bridle",
+      "mob": "Grieg_Veneficus",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "22877",
+      "name": "Earthen Fist",
+      "mob": "An_Ancient_Vekerchiki_Champion",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "22878",
+      "name": "Grandmasters Mace",
+      "mob": "Rydda`Dar",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "22980",
+      "name": "Whip of the Earthcrafter",
+      "mob": "A_Prismatic_Basilisk",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "24928",
+      "name": "Corroded Breastplate",
+      "mob": "Grondon_Zekkin",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "25857",
+      "name": "Gauntlets of Dragon Slaying",
+      "mob": "Quest: Yelinak's Head in Skyshrine",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "25858",
+      "name": "Belt of Dwarf Slaying",
+      "mob": "Quest: Dain's Head in Icewell Keep",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "2611",
+      "name": "Item 2611",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "26604",
+      "name": "Koadic's Robe of Heightened Focus",
+      "mob": "Emperor_Ssraeshza_",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "26749",
+      "name": "Azaliil's Ring of Analogies",
+      "mob": "Emperor_Ssraeshza_",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "2698",
+      "name": "Essence Lens",
+      "mob": "Quest: Essence Lens in Sleeper's Tomb",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "2699",
+      "name": "Essence Mace",
+      "mob": "Quest: Essence Lens in Sleeper's Tomb",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "2700",
+      "name": "Essence Blade",
+      "mob": "Quest: Essence Lens in Sleeper's Tomb",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "27267",
+      "name": "Ivory Etched Aegis",
+      "mob": "Rydda`Dar",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "2748",
+      "name": "Essence Pearl",
+      "mob": "Quest: Essence Lens in Sleeper's Tomb",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "27851",
+      "name": "Crystallized Acid Bracer",
+      "mob": "an_acidic_mass",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "27853",
+      "name": "Crystallized Acid Pauldrons",
+      "mob": "an_acidic_mass",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "27883",
+      "name": "Robe of Viscid Slime",
+      "mob": "an_acidic_mass",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "27888",
+      "name": "Viscid Slime Gloves",
+      "mob": "an_acidic_mass",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "27908",
+      "name": "Acid Pocked Mithril Blade",
+      "mob": "an_acidic_mass",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "2842",
+      "name": "Essence Ring",
+      "mob": "Quest: Essence Lens in Sleeper's Tomb",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29044",
+      "name": "Steel Ring of Earthen Resilience",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29045",
+      "name": "Cloudy Ring of Pneumatic Force",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29046",
+      "name": "Valorium Ring of Gallantry",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29597",
+      "name": "Item 29597",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29645",
+      "name": "White Dragonscale Boots",
+      "mob": "Quest: Tormax's Head - Dragons in Kael Drakkel",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29647",
+      "name": "Clawed Griffin Sword",
+      "mob": "Quest: Tormax's Head - Dragons in Kael Drakkel",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29648",
+      "name": "White Dragon Helm",
+      "mob": "Quest: Tormax's Head - Dragons in Kael Drakkel",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "29686",
+      "name": "Bracer of Benevolence",
+      "mob": "Quest: Ralgyn's Promise in Skyshrine",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30164",
+      "name": "Item 30164",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30369",
+      "name": "Item 30369",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30385",
+      "name": "Item 30385",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30388",
+      "name": "Rluas's Chromatic Ring",
+      "mob": "Quest: Charayan's Ring in Skyshrine",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30393",
+      "name": "Chromatic Gauntlets of the Ages",
+      "mob": "Quest: Charayan's Guantlets in Skyshrine",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30465",
+      "name": "Item 30465",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30466",
+      "name": "Item 30466",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30467",
+      "name": "Item 30467",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30468",
+      "name": "Item 30468",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30469",
+      "name": "Item 30469",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30470",
+      "name": "Item 30470",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30921",
+      "name": "Item 30921",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30923",
+      "name": "Item 30923",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30924",
+      "name": "Item 30924",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30925",
+      "name": "Item 30925",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30926",
+      "name": "Item 30926",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30927",
+      "name": "Item 30927",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "30928",
+      "name": "Item 30928",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "31247",
+      "name": "Item 31247",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "31248",
+      "name": "Item 31248",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "31249",
+      "name": "Item 31249",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "31296",
+      "name": "Item 31296",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "31297",
+      "name": "Item 31297",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "31298",
+      "name": "Item 31298",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "31299",
+      "name": "Item 31299",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "32159",
+      "name": "Shaded cloak",
+      "mob": "A_shadow_reaver",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "32166",
+      "name": "Shaded amice",
+      "mob": "A_shadow_reaver",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "32176",
+      "name": "Temariel Vex",
+      "mob": "Shei_Vinitras_",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "5723",
+      "name": "Item 5723",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "6508",
+      "name": "Item 6508",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "7363",
+      "name": "Robe of the Enslaved Soul",
+      "mob": "A_Possessed_Warlord",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "7389",
+      "name": "Seer's Orb of Power",
+      "mob": "A_Possessed_Underking",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "7977",
+      "name": "Gem Encrusted Choker",
+      "mob": "A_Possessed_Warmonger",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "8447",
+      "name": "Possessed Sacrificial Cleaver",
+      "mob": "a_grimling_high_commander",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "9442",
+      "name": "Precious Gemstone Adorned Mask",
+      "mob": "A_Prismatic_Basilisk",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "9489",
+      "name": "Item 9489",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "9490",
+      "name": "Primal Mask of the Earthcrafter",
+      "mob": "A_Pristine_Gem_Golem",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "9495",
+      "name": "Circlet of the Victor",
+      "mob": "Jeplak,_Lord_of_Srerendi",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    },
+    {
+      "reason": "empty_zone",
+      "item_id": "9960",
+      "name": "Item 9960",
+      "mob": "",
+      "zone": "",
+      "provenance": [
+        "raid_item_sources"
+      ]
+    }
+  ],
+  "armor_mapping_coverage": {
+    "purchase_ids_in_elemental_table": 28,
+    "armor_pattern_items_in_catalog": 28,
+    "armor_patterns_with_class_maps": 28,
+    "armor_patterns_with_complete_wearable_stats": 28
+  },
+  "input_notes": [
+    "raid_sources=C:\\TAKP\\magelo\\raid_item_sources.json",
+    "item_stats=C:\\TAKP\\magelo\\data\\item_stats.json",
+    "dkp_loot=C:\\TAKP\\dkp\\data\\dkp_mob_loot.json",
+    "elemental=C:\\TAKP\\dkp\\dkp_elemental_to_magelo.json"
+  ]
+}

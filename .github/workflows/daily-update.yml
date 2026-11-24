@@ -577,6 +577,24 @@ jobs:
         python scripts/build_item_id_to_name.py --skip-db --inventory inventory/TAKP_character_inventory.txt
         echo "✓ item_id_to_name.json ready ($(python -c "import json; print(len(json.load(open('data/item_id_to_name.json'))))") entries)"
 
+    # Raid Upgrade Planner catalog: offline six-zone loot catalog (no DB/Supabase).
+    # Prefer sibling NAGD-DKP datasets when present; otherwise validate the committed catalog
+    # against Magelo-local fallbacks (raid_item_sources + optional root dkp_mob_loot.json).
+    - name: Validate raid upgrade catalog
+      run: |
+        if [ ! -f "data/raid_upgrade_catalog.json" ]; then
+          echo "::error::data/raid_upgrade_catalog.json missing - run scripts/build_raid_upgrade_catalog.py locally and commit"
+          exit 1
+        fi
+        python -m unittest tests.test_raid_upgrade_catalog -v
+        # Rebuild+compare when DKP inputs are available; otherwise schema/smoke tests above suffice.
+        if [ -f "../dkp/data/dkp_mob_loot.json" ] || [ -f "dkp_mob_loot.json" ]; then
+          python scripts/build_raid_upgrade_catalog.py --validate
+        else
+          echo "DKP loot not present in CI - skipped idempotent rebuild validate (committed catalog + unit tests OK)"
+          python -c "import json,sys; from pathlib import Path; sys.path.insert(0,'scripts'); import build_raid_upgrade_catalog as c; cat=json.loads(Path('data/raid_upgrade_catalog.json').read_text(encoding='utf-8')); err=c.validate_catalog_schema(cat); assert not err, err; print('✓ schema OK', len(cat['items']), 'items')"
+        fi
+
     - name: Restore delta.html when dump diff skipped
       if: steps.prepare-previous.outputs.skip_dump_delta == 'true'
       run: |
@@ -710,6 +728,17 @@ jobs:
           echo "✓ Copied data/dkp_prices.json to deploy (class rankings DKP values)"
         else
           echo "Optional: data/dkp_prices.json not found - ?dkp_val=true on class rankings will show no DKP data"
+        fi
+        # Raid Upgrade Planner compact catalog (six-zone loot + armor mappings)
+        if [ -f "data/raid_upgrade_catalog.json" ]; then
+          cp data/raid_upgrade_catalog.json deploy/data/raid_upgrade_catalog.json
+          echo "✓ Copied data/raid_upgrade_catalog.json to deploy (raid upgrade planner)"
+        else
+          echo "::warning::data/raid_upgrade_catalog.json missing - raid upgrade planner catalog will be unavailable"
+        fi
+        if [ -f "data/raid_upgrade_catalog_coverage.json" ]; then
+          cp data/raid_upgrade_catalog_coverage.json deploy/data/raid_upgrade_catalog_coverage.json
+          echo "✓ Copied data/raid_upgrade_catalog_coverage.json to deploy (coverage report)"
         fi
         # Browser-local gear plans / My Toons helpers for class_rankings.html (public feature)
         if [ -f "class_rankings_gear_plans.js" ]; then
