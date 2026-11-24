@@ -480,6 +480,14 @@ class TestElementalFallbackAndWorkflow(unittest.TestCase):
             "cp data/raid_upgrade_catalog.json deploy/data/raid_upgrade_catalog.json",
             text,
         )
+        # Idempotent --validate must require sibling DKP, not Magelo-root alone.
+        self.assertIn('../dkp/data/dkp_mob_loot.json', text)
+        self.assertIn("Sibling DKP loot not present in CI", text)
+        validate_idx = text.find("python scripts/build_raid_upgrade_catalog.py --validate")
+        self.assertGreater(validate_idx, 0)
+        guard = text[max(0, validate_idx - 200) : validate_idx]
+        self.assertIn('../dkp/data/dkp_mob_loot.json', guard)
+        self.assertNotIn('|| [ -f "dkp_mob_loot.json" ]', guard)
 
 
 class TestCommittedCatalogSmoke(unittest.TestCase):

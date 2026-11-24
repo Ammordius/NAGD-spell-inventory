@@ -587,11 +587,13 @@ jobs:
           exit 1
         fi
         python -m unittest tests.test_raid_upgrade_catalog tests.test_raid_upgrade_planner -v
-        # Rebuild+compare when DKP inputs are available; otherwise schema/smoke tests above suffice.
-        if [ -f "../dkp/data/dkp_mob_loot.json" ] || [ -f "dkp_mob_loot.json" ]; then
+        # Idempotent rebuild only against sibling NAGD-DKP (the committed catalog's build input).
+        # Magelo-root dkp_mob_loot.json has empty_zone rows / thinner multi-zone links and
+        # rebuilds a different target graph (e.g. 69 vs 66) even when item IDs still match.
+        if [ -f "../dkp/data/dkp_mob_loot.json" ]; then
           python scripts/build_raid_upgrade_catalog.py --validate
         else
-          echo "DKP loot not present in CI - skipped idempotent rebuild validate (committed catalog + unit tests OK)"
+          echo "Sibling DKP loot not present in CI - schema smoke only (committed catalog + unit tests OK)"
           python -c "import json,sys; from pathlib import Path; sys.path.insert(0,'scripts'); import build_raid_upgrade_catalog as c; cat=json.loads(Path('data/raid_upgrade_catalog.json').read_text(encoding='utf-8')); err=c.validate_catalog_schema(cat); assert not err, err; print('✓ schema OK', len(cat['items']), 'items')"
         fi
 
