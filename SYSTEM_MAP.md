@@ -22,7 +22,7 @@
 - **`data/item_name_to_id.json`** — normalized name → id (from `merge_dkp_loot_into_raid_sources.py --write-name-to-id`); backfills missing `item_id` in inventory and focus metadata.
 - **`data/weapon_ranking_presets.json`**, **`data/dps_config.json`**, **`data/weapon_procs.json`**, **`data/weapon_threat_server.json`** — consumed by `scripts/ranking_weapon_engine.py` for WeaponMetric (melee/hybrid weapon scoring).
 - **Optional:** `data/elemental_slot_options.json`, `data/dkp_prices.json`, `data/elemental_display_names.json`, DKP elemental mapping files for display and DKP overlays.
-- **Raid Upgrade Planner (client, `?dkp_val=true` only):** `data/raid_upgrade_catalog.json` + [`raid_upgrade_planner.js`](raid_upgrade_planner.js); UI in `class_rankings.html` reuses `evaluateItemUpgradeForCharacter` and the toon-list roster (claimed-toons opt-in without overwriting the saved list).
+- **Raid Upgrade Planner (client, `?dkp_val=true` only):** `data/raid_upgrade_catalog.json` + [`raid_upgrade_planner.js`](raid_upgrade_planner.js); UI in `class_rankings.html` reuses `evaluateItemUpgradeForCharacter` and the toon-list roster (claimed-toons opt-in without overwriting the saved list). Seeking interests and intended DKP bids (0 = rot) live in browser-local gear plans (`class_rankings_gear_plans.js`: multi-candidate slots, preferred = last selected) and surface in Raid Upgrades + My Gear Targets; bid editing is `dkp_val`-gated while multi-seeking works without it.
 
 ### 1.3 Two parallel consumers of the same dump
 

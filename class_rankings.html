@@ -626,6 +626,13 @@
                         <option value="hp_dkp">HP / DKP</option>
                     </select>
                 </label>
+                <label style="margin-left: 8px;">Seeking:
+                    <select id="rupSeekingFilter" style="margin-left: 6px; padding: 6px 10px;">
+                        <option value="all" selected>All upgrades</option>
+                        <option value="seeking">Seeking only</option>
+                        <option value="not_seeking">Not seeking</option>
+                    </select>
+                </label>
             </div>
             <div id="rupZoneControls" class="rup-toolbar">
                 <div id="rupZoneList" class="rup-zone-list" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
@@ -697,6 +704,13 @@
                     <option value="Seeking">Seeking</option>
                     <option value="Acquired">Acquired</option>
                     <option value="Needs Review">Needs Review</option>
+                </select>
+            </div>
+            <div>
+                <label for="gearTargetsPreferredFilter">Preferred:</label>
+                <select id="gearTargetsPreferredFilter" style="display: block; margin-top: 4px; padding: 6px 10px;">
+                    <option value="">All candidates</option>
+                    <option value="preferred">Preferred only</option>
                 </select>
             </div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -3435,6 +3449,111 @@
             });
         }
 
+        function comparisonSeekingState(charId, slotId, itemId) {
+            const GP = window.ClassRankingsGearPlans;
+            if (!GP || charId == null || slotId == null || itemId == null || itemId === '') {
+                return { seeking: false, preferred: false, bid: null };
+            }
+            const plan = GP.getCharacterPlan(charId);
+            if (!plan) return { seeking: false, preferred: false, bid: null };
+            const seeking = GP.isSeekingItem(plan, slotId, itemId);
+            const interest = seeking ? GP.getSlotInterest(plan, slotId) : null;
+            const preferred = !!(interest && GP.sameItemId(interest.preferredItemId, itemId));
+            const bid = seeking ? GP.getBid(plan, slotId, itemId) : null;
+            return { seeking: seeking, preferred: preferred, bid: bid };
+        }
+
+        function formatComparisonSeekControls(char, slotId, itemId) {
+            if (!char || char.id == null || slotId == null || itemId == null || itemId === '') {
+                return '<span style="color:#6c757d;">—</span>';
+            }
+            const state = comparisonSeekingState(char.id, slotId, itemId);
+            const attrs = `data-char-id="${escapeHtml(String(char.id))}" data-slot-id="${escapeHtml(String(slotId))}" data-item-id="${escapeHtml(String(itemId))}" data-char-name="${escapeHtml(char.name || '')}" data-char-class="${escapeHtml(char.class || '')}"`;
+            let html = `<span class="cmp-seeking-controls" style="display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;">`;
+            html += `<button type="button" class="cmp-seek-toggle" ${attrs} style="padding:4px 10px;font-size:0.85em;font-weight:600;border-radius:4px;border:1px solid #0c5460;background:${state.seeking ? '#0c5460' : '#fff'};color:${state.seeking ? '#fff' : '#0c5460'};cursor:pointer;">${state.seeking ? 'Unmark' : 'Seek'}</button>`;
+            if (state.seeking) {
+                html += `<span class="cmp-seek-badge" style="display:inline-block;padding:1px 6px;border-radius:4px;background:#d1ecf1;color:#0c5460;font-size:0.8em;">Seeking${state.preferred ? ' · preferred' : ''}${state.bid != null ? (Number(state.bid) === 0 ? ' · bid 0 (rot)' : ` · bid ${state.bid}`) : ''}</span>`;
+            }
+            if (dkpValEnabled) {
+                const bidVal = state.bid != null ? state.bid : '';
+                html += `<label style="font-size:0.8em;color:#17a2b8;display:inline-flex;align-items:center;gap:2px;">Bid <input type="number" class="cmp-seek-bid" min="0" step="1" placeholder="0=rot" value="${escapeHtml(String(bidVal))}" ${attrs} style="width:4.5em;padding:2px 4px;"></label>`;
+            }
+            html += `</span>`;
+            return html;
+        }
+
+        function refreshComparisonSeekControls(container) {
+            if (!container) return;
+            container.querySelectorAll('.cmp-seeking-controls').forEach(wrap => {
+                const btn = wrap.querySelector('.cmp-seek-toggle');
+                if (!btn) return;
+                const charId = btn.getAttribute('data-char-id');
+                const slotId = parseInt(btn.getAttribute('data-slot-id'), 10);
+                const itemId = Number(btn.getAttribute('data-item-id'));
+                const char = {
+                    id: charId,
+                    name: btn.getAttribute('data-char-name') || '',
+                    class: btn.getAttribute('data-char-class') || ''
+                };
+                const next = document.createElement('div');
+                next.innerHTML = formatComparisonSeekControls(char, slotId, itemId);
+                const replacement = next.firstElementChild;
+                if (replacement) wrap.replaceWith(replacement);
+            });
+            bindComparisonSeekingControls(container);
+        }
+
+        function bindComparisonSeekingControls(container) {
+            if (!container) return;
+            const GP = window.ClassRankingsGearPlans;
+            container.querySelectorAll('.cmp-seek-toggle').forEach(btn => {
+                if (btn._cmpSeekBound) return;
+                btn._cmpSeekBound = true;
+                btn.addEventListener('click', () => {
+                    if (!GP) return;
+                    const charId = btn.getAttribute('data-char-id');
+                    const slotId = parseInt(btn.getAttribute('data-slot-id'), 10);
+                    const itemId = Number(btn.getAttribute('data-item-id'));
+                    const meta = {
+                        name: btn.getAttribute('data-char-name') || '',
+                        class: btn.getAttribute('data-char-class') || ''
+                    };
+                    const plan = GP.getCharacterPlan(charId);
+                    const already = plan && GP.isSeekingItem(plan, slotId, itemId);
+                    if (already) GP.toggleSeeking(charId, slotId, itemId, meta);
+                    else GP.markSeeking(charId, slotId, itemId, { preferred: true }, meta);
+                    refreshComparisonSeekControls(container);
+                    if (raidUpgradesPanel && raidUpgradesPanel.style.display === 'block'
+                        && typeof renderRaidUpgradesView === 'function') {
+                        renderRaidUpgradesView();
+                    }
+                });
+            });
+            if (dkpValEnabled) {
+                container.querySelectorAll('.cmp-seek-bid').forEach(inp => {
+                    if (inp._cmpSeekBound) return;
+                    inp._cmpSeekBound = true;
+                    inp.addEventListener('change', () => {
+                        if (!GP) return;
+                        const charId = inp.getAttribute('data-char-id');
+                        const slotId = parseInt(inp.getAttribute('data-slot-id'), 10);
+                        const itemId = Number(inp.getAttribute('data-item-id'));
+                        const meta = {
+                            name: inp.getAttribute('data-char-name') || '',
+                            class: inp.getAttribute('data-char-class') || ''
+                        };
+                        const bid = inp.value === '' ? null : Number(inp.value);
+                        GP.markSeeking(charId, slotId, itemId, { preferred: true, bid: bid }, meta);
+                        refreshComparisonSeekControls(container);
+                        if (raidUpgradesPanel && raidUpgradesPanel.style.display === 'block'
+                            && typeof renderRaidUpgradesView === 'function') {
+                            renderRaidUpgradesView();
+                        }
+                    });
+                });
+            }
+        }
+
         function openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp, options) {
             const cmpOpts = options || {};
             const evaluateCmp = cmpOpts.guardMissingEquipped
@@ -3453,8 +3572,8 @@
                     return `${escapeHtml(cls)} — <a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${mid}" target="_blank" rel="noopener">${escapeHtml(name)}</a>`;
                 }).filter(Boolean).join(' · ');
                 html += `<p class="elemental-classes-block" style="margin: 10px 0; padding: 10px 12px; background: rgba(102, 126, 234, 0.1); border-radius: 8px; border-left: 4px solid #667eea;"><strong>From ${escapeHtml(elementalInfo.pattern_name)}.</strong> Only these classes can benefit: ${classLinks}</p>`;
-                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison to your toons' actual gear (best matching slot per toon; only toons whose class can use this pattern). Close to return to upgrade list.</p>`;
-                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison to your toons' actual gear (best matching slot per toon; only toons whose class can use this pattern). Use Seek to mark Seeking + Preferred for a toon. Close to return to upgrade list.</p>`;
+                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Actions</th></tr></thead><tbody>';
 
                 const benefitingAbbrevs = Object.keys(byClass);
                 let rows = [];
@@ -3466,9 +3585,12 @@
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
+                    let seekSlotId = null;
+                    let seekItemId = elementalItemId;
                     const best = evaluateCmp(char, elementalItemId);
                     if (best && best.eligible && best.isUpgrade) {
                         const u = best;
+                        seekSlotId = best.slotId;
                         const hpd = getHpPerDkpForUpgrade(u);
                         const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                         benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
@@ -3487,15 +3609,16 @@
                             }).join(', ') : '—';
                         }
                     }
-                    rows.push({ char, benefit, otherOptionsHtml, sortKey });
+                    rows.push({ char, benefit, otherOptionsHtml, sortKey, seekSlotId, seekItemId });
                 });
                 rows = rows.filter(r => r.sortKey > 0);
                 rows.sort((a, b) => b.sortKey - a.sortKey);
-                rows.forEach(({ char, benefit, otherOptionsHtml }) => {
+                rows.forEach(({ char, benefit, otherOptionsHtml, seekSlotId, seekItemId }) => {
                     const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
-                    html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
+                    const actions = formatComparisonSeekControls(char, seekSlotId, seekItemId);
+                    html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td><td style="padding: 8px; border-bottom: 1px solid #eee; white-space:nowrap;">${actions}</td></tr>`;
                 });
-                if (rows.length === 0) html += '<tr><td colspan="3" style="padding: 12px; color: #6c757d;">No toons in your list have this as an upgrade (current item or downgrade are hidden).</td></tr>';
+                if (rows.length === 0) html += '<tr><td colspan="4" style="padding: 12px; color: #6c757d;">No toons in your list have this as an upgrade (current item or downgrade are hidden).</td></tr>';
                 html += '</tbody></table>';
                 html += '<p style="margin-top: 12px; font-size: 0.9em; color: #6c757d;"><strong>Per-class item stats:</strong></p>';
                 html += '<table style="width: 100%; border-collapse: collapse; margin-top: 4px;"><thead><tr><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Class</th><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Item</th><th style="text-align: left; padding: 6px; border-bottom: 1px solid #ddd;">Stats</th></tr></thead><tbody>';
@@ -3510,17 +3633,20 @@
                 });
                 html += '</tbody></table>';
             } else {
-                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best slot first). Close to return to upgrade list.</p>`;
-                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+                html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best slot first). Use Seek to mark Seeking + Preferred for a toon. Close to return to upgrade list.</p>`;
+                html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Actions</th></tr></thead><tbody>';
 
                 let rows = [];
                 toonUpgradesMatchedChars.forEach(char => {
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
+                    let seekSlotId = null;
+                    const seekItemId = itemId;
                     const best = evaluateCmp(char, itemId);
                     if (best && best.eligible && best.isUpgrade) {
                         const u = best;
+                        seekSlotId = best.slotId;
                         const hpd = getHpPerDkpForUpgrade(u);
                         const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
                         benefit = `Score +${(u.delta || 0).toFixed(2)}` + (hpd != null ? ` · HP/DKP ${hpd.toFixed(2)}` : '');
@@ -3539,21 +3665,23 @@
                             }).join(', ') : '—';
                         }
                     }
-                    rows.push({ char, benefit, otherOptionsHtml, sortKey });
+                    rows.push({ char, benefit, otherOptionsHtml, sortKey, seekSlotId, seekItemId });
                 });
                 rows = rows.filter(r => r.sortKey > 0);
                 rows.sort((a, b) => b.sortKey - a.sortKey);
-                rows.forEach(({ char, benefit, otherOptionsHtml }) => {
+                rows.forEach(({ char, benefit, otherOptionsHtml, seekSlotId, seekItemId }) => {
                     const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
-                    html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
+                    const actions = formatComparisonSeekControls(char, seekSlotId, seekItemId);
+                    html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td><td style="padding: 8px; border-bottom: 1px solid #eee; white-space:nowrap;">${actions}</td></tr>`;
                 });
-                if (rows.length === 0) html += '<tr><td colspan="3" style="padding: 12px; color: #6c757d;">No toons in your list have this as an upgrade (current item or downgrade are hidden).</td></tr>';
+                if (rows.length === 0) html += '<tr><td colspan="4" style="padding: 12px; color: #6c757d;">No toons in your list have this as an upgrade (current item or downgrade are hidden).</td></tr>';
                 html += '</tbody></table>';
             }
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
             itemComparisonContent.innerHTML = html;
             itemComparisonModal.style.display = 'block';
             bindCharStatsLinks(itemComparisonContent);
+            bindComparisonSeekingControls(itemComparisonContent);
             const closeBtn = document.getElementById('closeItemComparisonBtn');
             if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
@@ -3664,8 +3792,8 @@
             }
             const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
             let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
-            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best slot first). Close to return to upgrade list.</p>`;
-            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th></tr></thead><tbody>';
+            html += `<p style="color: #6c757d; font-size: 0.9em;">Comparison across your toons (sorted by benefit, best slot first). Use Seek to mark Seeking + Preferred for a toon. Close to return to upgrade list.</p>`;
+            html += '<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Toon</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Slot</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Benefit (score · HP/DKP · stats · focus)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Other options (this slot)</th><th style="text-align: left; padding: 8px; border-bottom: 2px solid #667eea;">Actions</th></tr></thead><tbody>';
 
             const rows = [];
             toonUpgradesMatchedChars.forEach(char => {
@@ -3673,9 +3801,12 @@
                 let otherOptionsHtml = '—';
                 let slotName = '—';
                 let sortKey = -Infinity;
+                let seekSlotId = null;
+                const seekItemId = itemId;
                 const best = evaluateCmp(char, itemId);
                 if (best && best.eligible) {
                     slotName = best.slotName || SLOT_NAMES_FOR_UI[best.slotId] || ('Slot ' + best.slotId);
+                    seekSlotId = best.slotId;
                     if (best.missingEquippedStats) {
                         benefit = 'Unresolved: equipped item stats missing (not scored as upgrade)';
                         sortKey = -Infinity;
@@ -3702,18 +3833,22 @@
                         }).join(', ') : '—';
                     }
                 }
-                rows.push({ char, slotName, benefit, otherOptionsHtml, sortKey });
+                rows.push({ char, slotName, benefit, otherOptionsHtml, sortKey, seekSlotId, seekItemId });
             });
             rows.sort((a, b) => b.sortKey - a.sortKey);
-            rows.forEach(({ char, slotName, benefit, otherOptionsHtml }) => {
+            rows.forEach(({ char, slotName, benefit, otherOptionsHtml, seekSlotId, seekItemId }) => {
                 const nameLink = `<a href="#" class="char-stats-link" data-char-name="${escapeHtml(char.name)}" title="View score breakdown">${escapeHtml(char.name)}</a>`;
-                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(slotName)}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td></tr>`;
+                const actions = (seekSlotId != null)
+                    ? formatComparisonSeekControls(char, seekSlotId, seekItemId)
+                    : '<span style="color:#6c757d;">—</span>';
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid #eee;">${nameLink} (${escapeHtml(char.class)})</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(slotName)}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${benefit}</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${otherOptionsHtml}</td><td style="padding: 8px; border-bottom: 1px solid #eee; white-space:nowrap;">${actions}</td></tr>`;
             });
             html += '</tbody></table>';
             html += '<p style="margin-top: 12px;"><button id="closeItemComparisonBtn" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button></p>';
             itemComparisonContent.innerHTML = html;
             itemComparisonModal.style.display = 'block';
             bindCharStatsLinks(itemComparisonContent);
+            bindComparisonSeekingControls(itemComparisonContent);
             const closeBtn = document.getElementById('closeItemComparisonBtn');
             if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
@@ -3808,7 +3943,7 @@
             document.getElementById('closeItemComparison').onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
 
-        // ---- Raid Upgrade Planner (dkp_val only; read-only vs gear plans) ----
+        // ---- Raid Upgrade Planner (dkp_val only; integrates with local gear seeking/bids) ----
         const raidUpgradesPanel = document.getElementById('raidUpgradesPanel');
         const raidUpgradesContent = document.getElementById('raidUpgradesContent');
         let raidUpgradeCatalog = null;
@@ -3820,11 +3955,93 @@
         let raidPlannerZoneId = null;
         let raidPlannerCharId = 'all';
         let raidPlannerSort = 'score';
+        let raidPlannerSeekingFilter = 'all'; // all | seeking | not_seeking
         let raidPlannerRoster = [];
         let raidPlannerExpandedTargets = {}; // targetId -> bool (default expanded)
         let raidPlannerEnabledChars = {}; // charId -> bool (default true)
         let raidPlannerShowBeneficiaries = false;
         let raidPlannerComputing = false;
+
+        function getRaidSeekingIndex() {
+            const GP = window.ClassRankingsGearPlans;
+            if (!GP || typeof GP.buildSeekingIndex !== 'function') {
+                return { rows: [], lookup() { return null; }, byCharItem: {} };
+            }
+            const itemCache = (typeof itemStatsCache !== 'undefined') ? itemStatsCache : {};
+            return GP.buildSeekingIndex(characters, GP.loadPlans(), itemCache, { scope: 'claimed' });
+        }
+
+        function annotateRaidRowSeeking(row, seekingIndex) {
+            const idx = seekingIndex || getRaidSeekingIndex();
+            const wearId = row.wearableItemId != null ? row.wearableItemId : row.lootItemId;
+            const hit = idx.lookup(row.charId, wearId)
+                || idx.lookup(row.charId, row.lootItemId)
+                || idx.lookup(row.charId, row.purchaseItemId);
+            return Object.assign({}, row, {
+                isSeeking: !!hit,
+                seekingPreferred: !!(hit && hit.isPreferred),
+                intendedBid: hit && hit.bid != null ? hit.bid : null,
+                seekingSlotId: hit ? hit.slotId : (row.slotId != null ? row.slotId : null)
+            });
+        }
+
+        function filterAndPinSeekingRows(rows, seekingIndex) {
+            const idx = seekingIndex || getRaidSeekingIndex();
+            let list = (rows || []).map(r => annotateRaidRowSeeking(r, idx));
+            if (raidPlannerSeekingFilter === 'seeking') {
+                list = list.filter(r => r.isSeeking);
+            } else if (raidPlannerSeekingFilter === 'not_seeking') {
+                list = list.filter(r => !r.isSeeking);
+            }
+            // Pin seeking rows first, then apply score/DKP sort within groups
+            const RP = window.RaidUpgradePlanner;
+            const sorted = RP && typeof RP.sortRows === 'function'
+                ? RP.sortRows(list, raidPlannerSort)
+                : list.slice();
+            sorted.sort((a, b) => {
+                const as = a.isSeeking ? 1 : 0;
+                const bs = b.isSeeking ? 1 : 0;
+                if (as !== bs) return bs - as;
+                return 0; // keep prior sort order within group
+            });
+            return sorted;
+        }
+
+        function formatSeekingBadge(row) {
+            if (!row || !row.isSeeking) return '';
+            const pref = row.seekingPreferred ? ' · preferred' : '';
+            const bid = row.intendedBid != null
+                ? (Number(row.intendedBid) === 0 ? ' · bid 0 (rot)' : ` · bid ${row.intendedBid}`)
+                : '';
+            return `<span class="rup-seeking-badge" style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:4px;background:#d1ecf1;color:#0c5460;font-size:0.8em;">Seeking${pref}${bid}</span>`;
+        }
+
+        /**
+         * Toon-specific Seek/Unmark (+ Bid) controls for Raid Upgrades Actions column.
+         * opts.compact: inline flex for actions cell (default true).
+         */
+        function formatSeekingControls(row, opts) {
+            if (!row || row.charId == null) return '';
+            const options = opts || {};
+            const wearId = row.wearableItemId != null ? row.wearableItemId : row.lootItemId;
+            const slotId = row.slotId != null ? row.slotId : '';
+            const seeking = !!row.isSeeking;
+            const bidVal = row.intendedBid != null ? row.intendedBid : '';
+            const attrs = `data-char-id="${escapeHtml(String(row.charId))}" data-slot-id="${escapeHtml(String(slotId))}" data-item-id="${escapeHtml(String(wearId))}" data-char-name="${escapeHtml(row.charName || '')}" data-char-class="${escapeHtml(row.charClass || '')}"`;
+            let html = `<span class="rup-seeking-controls" style="display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center;${options.compact === false ? 'margin-top:4px;' : ''}">`;
+            html += `<button type="button" class="rup-seek-toggle" ${attrs} style="padding:4px 10px;font-size:0.85em;font-weight:600;border-radius:4px;border:1px solid #0c5460;background:${seeking ? '#0c5460' : '#fff'};color:${seeking ? '#fff' : '#0c5460'};cursor:pointer;">${seeking ? 'Unmark' : 'Seek'}</button>`;
+            if (dkpValEnabled) {
+                html += `<label style="font-size:0.8em;color:#17a2b8;display:inline-flex;align-items:center;gap:2px;">Bid <input type="number" class="rup-seek-bid" min="0" step="1" placeholder="0=rot" value="${escapeHtml(String(bidVal))}" ${attrs} style="width:4.5em;padding:2px 4px;"></label>`;
+            }
+            html += `</span>`;
+            return html;
+        }
+
+        function formatRaidToonActions(row, compareId, compareName) {
+            const seek = formatSeekingControls(row);
+            const compare = `<button type="button" data-rup-compare="${escapeHtml(String(compareId))}" data-rup-compare-name="${escapeHtml(compareName || '')}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button>`;
+            return `<td data-label="Actions" class="rup-actions" style="white-space:nowrap;">${seek}${seek ? ' ' : ''}${compare}</td>`;
+        }
 
         function syncRaidPlannerEnabledCharsFromRoster() {
             const next = {};
@@ -3942,6 +4159,42 @@
                     const countMatch = (btn.textContent || '').match(/^(\d+)/);
                     const n = countMatch ? countMatch[1] : String(rows.length);
                     btn.textContent = open ? (n + ' character(s) — Show characters') : (n + ' character(s) — Hide characters');
+                });
+            });
+            const GP = window.ClassRankingsGearPlans;
+            container.querySelectorAll('.rup-seek-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!GP) return;
+                    const charId = btn.getAttribute('data-char-id');
+                    const slotId = parseInt(btn.getAttribute('data-slot-id'), 10);
+                    const itemId = Number(btn.getAttribute('data-item-id'));
+                    const meta = {
+                        name: btn.getAttribute('data-char-name') || '',
+                        class: btn.getAttribute('data-char-class') || ''
+                    };
+                    const plan = GP.getCharacterPlan(charId);
+                    const already = plan && GP.isSeekingItem(plan, slotId, itemId);
+                    if (already) {
+                        GP.toggleSeeking(charId, slotId, itemId, meta);
+                    } else {
+                        GP.markSeeking(charId, slotId, itemId, { preferred: true }, meta);
+                    }
+                    renderRaidUpgradesView();
+                });
+            });
+            container.querySelectorAll('.rup-seek-bid').forEach(inp => {
+                inp.addEventListener('change', () => {
+                    if (!GP) return;
+                    const charId = inp.getAttribute('data-char-id');
+                    const slotId = parseInt(inp.getAttribute('data-slot-id'), 10);
+                    const itemId = Number(inp.getAttribute('data-item-id'));
+                    const meta = {
+                        name: inp.getAttribute('data-char-name') || '',
+                        class: inp.getAttribute('data-char-class') || ''
+                    };
+                    const bid = inp.value === '' ? null : Number(inp.value);
+                    GP.markSeeking(charId, slotId, itemId, { preferred: true, bid: bid }, meta);
+                    renderRaidUpgradesView();
                 });
             });
             bindCharStatsLinks(container);
@@ -4083,16 +4336,40 @@
 
         function renderRaidUpgradesZoneView(payload) {
             const RP = window.RaidUpgradePlanner;
-            const zoneRows = filterRowsByEnabledChars(RP.filterRowsForZone(payload.rows, raidPlannerZoneId));
-            const sortedBeneficiaries = RP.sortRows(zoneRows, raidPlannerSort);
-            const targets = RP.groupByZoneTarget(sortedBeneficiaries, raidUpgradeCatalog, raidPlannerZoneId);
+            const seekingIndex = getRaidSeekingIndex();
+            const zoneRows = filterAndPinSeekingRows(
+                filterRowsByEnabledChars(RP.filterRowsForZone(payload.rows, raidPlannerZoneId)),
+                seekingIndex
+            );
+            const targets = RP.groupByZoneTarget(zoneRows, raidUpgradeCatalog, raidPlannerZoneId);
+            // Re-pin seeking within each item's beneficiaries after grouping
+            targets.forEach(t => {
+                (t.items || []).forEach(it => {
+                    it.beneficiaries = filterAndPinSeekingRows(it.beneficiaries || [], seekingIndex);
+                });
+                t.items = (t.items || []).filter(it => (it.beneficiaries || []).length > 0);
+                const seekingCount = (t.items || []).reduce((n, it) => n + (it.beneficiaries || []).filter(b => b.isSeeking).length, 0);
+                t.seekingCount = seekingCount;
+            });
+            const filteredTargets = targets.filter(t => (t.items || []).length > 0);
             let byChar = typeof RP.groupZoneByCharacter === 'function'
                 ? RP.groupZoneByCharacter(zoneRows, raidUpgradeCatalog, raidPlannerZoneId, raidPlannerSort)
                 : [];
+            byChar.forEach(ch => {
+                (ch.targets || []).forEach(t => {
+                    t.rows = filterAndPinSeekingRows(t.rows || [], seekingIndex);
+                });
+                ch.targets = (ch.targets || []).filter(t => (t.rows || []).length > 0);
+                ch.seekingCount = (ch.targets || []).reduce((n, t) => n + (t.rows || []).filter(r => r.isSeeking).length, 0);
+            });
+            byChar = byChar.filter(ch => (ch.targets || []).length > 0);
             // Prefer toon-list / roster order for the bottom section
             if (byChar.length && raidPlannerRoster.length) {
                 const order = raidPlannerRoster.map(c => String(c.id));
                 byChar = byChar.slice().sort((a, b) => {
+                    const sa = a.seekingCount > 0 ? 1 : 0;
+                    const sb = b.seekingCount > 0 ? 1 : 0;
+                    if (sa !== sb) return sb - sa;
                     const ia = order.indexOf(String(a.charId));
                     const ib = order.indexOf(String(b.charId));
                     const aa = ia < 0 ? 9999 : ia;
@@ -4101,8 +4378,10 @@
                     return String(a.charName || '').localeCompare(String(b.charName || ''));
                 });
             }
-            if (!targets.length && !byChar.length) {
-                setRaidPlannerStatus('No positive upgrades for this zone with the current roster, character filters, and weights.');
+            if (!filteredTargets.length && !byChar.length) {
+                setRaidPlannerStatus(raidPlannerSeekingFilter === 'seeking'
+                    ? 'No Seeking upgrades for this zone with the current roster and filters.'
+                    : 'No positive upgrades for this zone with the current roster, character filters, and weights.');
                 return;
             }
             const showChars = !!raidPlannerShowBeneficiaries;
@@ -4111,21 +4390,27 @@
                 ? (n + ' character(s) — Hide characters')
                 : (n + ' character(s) — Show characters');
             let html = '';
-            targets.forEach((t) => {
+            const zoneSeekingTotal = zoneRows.filter(r => r.isSeeking).length;
+            if (zoneSeekingTotal > 0 || raidPlannerSeekingFilter === 'seeking') {
+                html += `<div class="rup-seeking-summary" style="margin:0 0 12px;padding:8px 12px;background:#d1ecf1;border-radius:6px;color:#0c5460;">Seeking in this zone: <strong>${zoneSeekingTotal}</strong> upgrade row(s)</div>`;
+            }
+            filteredTargets.forEach((t) => {
                 const expanded = raidPlannerExpandedTargets[t.targetId] !== false;
                 if (raidPlannerExpandedTargets[t.targetId] == null) raidPlannerExpandedTargets[t.targetId] = true;
+                const seekLabel = t.seekingCount ? ` · ${t.seekingCount} seeking` : '';
                 html += `<div class="rup-target${expanded ? '' : ' collapsed'}" data-target-id="${escapeHtml(t.targetId)}">`;
-                html += `<button type="button" class="rup-target-hdr" data-rup-toggle-target="${escapeHtml(t.targetId)}"><span>${escapeHtml(t.displayName)}</span><span class="rup-muted">${t.items.length} item(s)</span></button>`;
+                html += `<button type="button" class="rup-target-hdr" data-rup-toggle-target="${escapeHtml(t.targetId)}"><span>${escapeHtml(t.displayName)}</span><span class="rup-muted">${t.items.length} item(s)${seekLabel}</span></button>`;
                 html += `<div class="rup-target-body"><table class="rup-table"><thead><tr>
                     <th>Loot / purchase</th><th>Characters</th><th>Slot</th><th>Current</th><th>Score Δ</th><th>Stats / focus</th><th>DKP</th><th>Notes</th><th></th>
                 </tr></thead><tbody>`;
                 t.items.forEach((it) => {
-                    const bens = RP.sortRows(it.beneficiaries, raidPlannerSort);
+                    const bens = it.beneficiaries || [];
                     const best = bens[0];
                     const subKey = `${t.targetId}__${it.lootItemId}`;
                     const compareId = it.wearableItemId || it.purchaseItemId || it.lootItemId;
-                    html += `<tr data-rup-parent="${escapeHtml(subKey)}">
-                        <td data-label="Loot">${itemLinkHtml(it.lootItemId, it.lootName)}${it.acquisitionType === 'armor_pattern' && best ? `<div class="rup-muted">Wearable: ${itemLinkHtml(best.wearableItemId, best.wearableName)}</div>` : ''}</td>
+                    const seekOnLoot = bens.some(b => b.isSeeking);
+                    html += `<tr data-rup-parent="${escapeHtml(subKey)}"${seekOnLoot ? ' style="background:#eef9fb;"' : ''}>
+                        <td data-label="Loot">${itemLinkHtml(it.lootItemId, it.lootName)}${seekOnLoot ? formatSeekingBadge({ isSeeking: true, seekingPreferred: bens.some(b => b.seekingPreferred), intendedBid: null }) : ''}${it.acquisitionType === 'armor_pattern' && best ? `<div class="rup-muted">Wearable: ${itemLinkHtml(best.wearableItemId, best.wearableName)}</div>` : ''}</td>
                         <td data-label="Characters"><button type="button" class="rup-beneficiaries-toggle" data-rup-sub="${escapeHtml(subKey)}">${charToggleLabel(bens.length)}</button></td>
                         <td data-label="Slot">${escapeHtml(best ? best.slotName : '—')}</td>
                         <td data-label="Current">${best && best.currentItemId != null ? itemLinkHtml(best.currentItemId, best.currentItemName) : '<span class="rup-muted">—</span>'}</td>
@@ -4136,16 +4421,16 @@
                         <td data-label="" class="rup-actions"><button type="button" data-rup-compare="${escapeHtml(String(compareId))}" data-rup-compare-name="${escapeHtml(it.lootName)}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button></td>
                     </tr>`;
                     bens.forEach(b => {
-                        html += `<tr class="rup-subrows" data-rup-subrows="${escapeHtml(subKey)}" style="display:${subDisplay};">
+                        html += `<tr class="rup-subrows" data-rup-subrows="${escapeHtml(subKey)}" style="display:${subDisplay};${b.isSeeking ? 'background:#eef9fb;' : ''}">
                             <td data-label="Loot"></td>
-                            <td data-label="Character"><a href="#" class="char-stats-link" data-char-name="${escapeHtml(b.charName)}">${escapeHtml(b.charName)}</a> <span class="rup-muted">(${escapeHtml(b.charClass)})</span></td>
+                            <td data-label="Character"><a href="#" class="char-stats-link" data-char-name="${escapeHtml(b.charName)}">${escapeHtml(b.charName)}</a> <span class="rup-muted">(${escapeHtml(b.charClass)})</span>${formatSeekingBadge(b)}</td>
                             <td data-label="Slot">${escapeHtml(b.slotName || '')}</td>
                             <td data-label="Current">${b.currentItemId != null ? itemLinkHtml(b.currentItemId, b.currentItemName) : '—'}</td>
                             <td data-label="Score" class="rup-score">+${(b.scoreDelta || 0).toFixed(2)}</td>
                             <td data-label="Stats">${formatUpgradeDeltas(b.deltas, b.focusSpellName) || '—'}</td>
                             <td data-label="DKP">${formatRaidDkpCell(b)}</td>
-                            <td data-label="Notes">${b.acquisitionNote ? `<span class="rup-note">${escapeHtml(b.acquisitionNote)}</span>` : ''}</td>
-                            <td data-label="" class="rup-actions"><button type="button" data-rup-compare="${escapeHtml(String(b.wearableItemId || b.lootItemId))}" data-rup-compare-name="${escapeHtml(b.lootName)}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button></td>
+                            <td data-label="Notes">${b.acquisitionNote ? `<span class="rup-note">${escapeHtml(b.acquisitionNote)}</span>` : '<span class="rup-muted">—</span>'}</td>
+                            ${formatRaidToonActions(b, b.wearableItemId || b.lootItemId, b.lootName)}
                         </tr>`;
                     });
                 });
@@ -4160,8 +4445,9 @@
                     const charExpanded = raidPlannerExpandedTargets[charKey] !== false;
                     if (raidPlannerExpandedTargets[charKey] == null) raidPlannerExpandedTargets[charKey] = true;
                     const upgradeCount = ch.targets.reduce((n, t) => n + (t.rows ? t.rows.length : 0), 0);
+                    const seekLabel = ch.seekingCount ? ` · ${ch.seekingCount} seeking` : '';
                     html += `<div class="rup-target${charExpanded ? '' : ' collapsed'}" data-target-id="${escapeHtml(charKey)}">`;
-                    html += `<button type="button" class="rup-target-hdr" data-rup-toggle-target="${escapeHtml(charKey)}"><span>${escapeHtml(ch.charName || ch.charId)} <span class="rup-muted">(${escapeHtml(ch.charClass || '')})</span></span><span class="rup-muted">${upgradeCount} upgrade(s)</span></button>`;
+                    html += `<button type="button" class="rup-target-hdr" data-rup-toggle-target="${escapeHtml(charKey)}"><span>${escapeHtml(ch.charName || ch.charId)} <span class="rup-muted">(${escapeHtml(ch.charClass || '')})</span></span><span class="rup-muted">${upgradeCount} upgrade(s)${seekLabel}</span></button>`;
                     html += `<div class="rup-target-body">`;
                     ch.targets.forEach(t => {
                         html += `<div style="padding: 8px 12px 0; font-weight: 600; color: #495057;">${escapeHtml(t.displayName)}</div>`;
@@ -4170,15 +4456,15 @@
                         </tr></thead><tbody>`;
                         t.rows.forEach(b => {
                             const compareId = b.wearableItemId || b.purchaseItemId || b.lootItemId;
-                            html += `<tr>
-                                <td data-label="Loot">${itemLinkHtml(b.lootItemId, b.lootName)}${b.acquisitionType === 'armor_pattern' ? `<div class="rup-muted">Wearable: ${itemLinkHtml(b.wearableItemId, b.wearableName)}</div>` : ''}</td>
+                            html += `<tr${b.isSeeking ? ' style="background:#eef9fb;"' : ''}>
+                                <td data-label="Loot">${itemLinkHtml(b.lootItemId, b.lootName)}${formatSeekingBadge(b)}${b.acquisitionType === 'armor_pattern' ? `<div class="rup-muted">Wearable: ${itemLinkHtml(b.wearableItemId, b.wearableName)}</div>` : ''}</td>
                                 <td data-label="Slot">${escapeHtml(b.slotName || '')}</td>
                                 <td data-label="Current">${b.currentItemId != null ? itemLinkHtml(b.currentItemId, b.currentItemName) : '—'}</td>
                                 <td data-label="Score" class="rup-score">+${(b.scoreDelta || 0).toFixed(2)}</td>
                                 <td data-label="Stats">${formatUpgradeDeltas(b.deltas, b.focusSpellName) || '—'}</td>
                                 <td data-label="DKP">${formatRaidDkpCell(b)}</td>
                                 <td data-label="Notes">${b.acquisitionNote ? `<span class="rup-note">${escapeHtml(b.acquisitionNote)}</span>` : '<span class="rup-muted">—</span>'}</td>
-                                <td data-label="" class="rup-actions"><button type="button" data-rup-compare="${escapeHtml(String(compareId))}" data-rup-compare-name="${escapeHtml(b.lootName)}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button></td>
+                                ${formatRaidToonActions(b, compareId, b.lootName)}
                             </tr>`;
                         });
                         html += `</tbody></table>`;
@@ -4204,23 +4490,44 @@
 
         function renderRaidUpgradesCharView(payload) {
             const RP = window.RaidUpgradePlanner;
-            const grouped = RP.groupByCharacter(payload.rows, raidUpgradeCatalog, raidPlannerCharId, raidPlannerSort);
-            if (!grouped.rows.length) {
-                setRaidPlannerStatus('No positive upgrades for this character filter with the current roster and weights.');
+            const seekingIndex = getRaidSeekingIndex();
+            const filteredRows = filterAndPinSeekingRows(payload.rows || [], seekingIndex);
+            const grouped = RP.groupByCharacter(filteredRows, raidUpgradeCatalog, raidPlannerCharId, raidPlannerSort);
+            grouped.zones.forEach(z => {
+                (z.targets || []).forEach(t => {
+                    t.rows = filterAndPinSeekingRows(t.rows || [], seekingIndex);
+                });
+                z.targets = (z.targets || []).filter(t => (t.rows || []).length > 0);
+            });
+            grouped.zones = (grouped.zones || []).filter(z => (z.targets || []).length > 0);
+            const flatCount = grouped.zones.reduce((n, z) => n + z.targets.reduce((m, t) => m + t.rows.length, 0), 0);
+            if (!flatCount) {
+                setRaidPlannerStatus(raidPlannerSeekingFilter === 'seeking'
+                    ? 'No Seeking upgrades for this character filter.'
+                    : 'No positive upgrades for this character filter with the current roster and weights.');
                 return;
             }
+            const seekingTotal = filteredRows.filter(r => {
+                if (raidPlannerCharId && raidPlannerCharId !== 'all' && String(r.charId) !== String(raidPlannerCharId)) return false;
+                return r.isSeeking;
+            }).length;
             let html = '';
+            if (seekingTotal > 0 || raidPlannerSeekingFilter === 'seeking') {
+                html += `<div class="rup-seeking-summary" style="margin:0 0 12px;padding:8px 12px;background:#d1ecf1;border-radius:6px;color:#0c5460;">Seeking for this view: <strong>${seekingTotal}</strong> upgrade row(s)</div>`;
+            }
             grouped.zones.forEach(z => {
-                html += `<h3 style="margin: 16px 0 8px; color:#343a40;">${escapeHtml(z.displayName)}</h3>`;
+                const zoneSeek = z.targets.reduce((n, t) => n + t.rows.filter(r => r.isSeeking).length, 0);
+                html += `<h3 style="margin: 16px 0 8px; color:#343a40;">${escapeHtml(z.displayName)}${zoneSeek ? ` <span class="rup-muted" style="font-size:0.85em;">(${zoneSeek} seeking)</span>` : ''}</h3>`;
                 z.targets.forEach(t => {
-                    html += `<div class="rup-target"><div class="rup-target-hdr" style="cursor:default;"><span>${escapeHtml(t.displayName)}</span><span class="rup-muted">${t.rows.length} upgrade(s)</span></div>`;
+                    const seekN = t.rows.filter(r => r.isSeeking).length;
+                    html += `<div class="rup-target"><div class="rup-target-hdr" style="cursor:default;"><span>${escapeHtml(t.displayName)}</span><span class="rup-muted">${t.rows.length} upgrade(s)${seekN ? ` · ${seekN} seeking` : ''}</span></div>`;
                     html += `<div class="rup-target-body"><table class="rup-table"><thead><tr>
                         <th>Character</th><th>Loot / purchase</th><th>Slot</th><th>Current</th><th>Score Δ</th><th>Stats / focus</th><th>DKP</th><th>Notes</th><th></th>
                     </tr></thead><tbody>`;
                     t.rows.forEach(b => {
                         const compareId = b.wearableItemId || b.purchaseItemId || b.lootItemId;
-                        html += `<tr>
-                            <td data-label="Character"><a href="#" class="char-stats-link" data-char-name="${escapeHtml(b.charName)}">${escapeHtml(b.charName)}</a></td>
+                        html += `<tr${b.isSeeking ? ' style="background:#eef9fb;"' : ''}>
+                            <td data-label="Character"><a href="#" class="char-stats-link" data-char-name="${escapeHtml(b.charName)}">${escapeHtml(b.charName)}</a>${formatSeekingBadge(b)}</td>
                             <td data-label="Loot">${itemLinkHtml(b.lootItemId, b.lootName)}${b.acquisitionType === 'armor_pattern' ? `<div class="rup-muted">Wearable: ${itemLinkHtml(b.wearableItemId, b.wearableName)}</div>` : ''}</td>
                             <td data-label="Slot">${escapeHtml(b.slotName || '')}</td>
                             <td data-label="Current">${b.currentItemId != null ? itemLinkHtml(b.currentItemId, b.currentItemName) : '—'}</td>
@@ -4228,7 +4535,7 @@
                             <td data-label="Stats">${formatUpgradeDeltas(b.deltas, b.focusSpellName) || '—'}</td>
                             <td data-label="DKP">${formatRaidDkpCell(b)}</td>
                             <td data-label="Notes">${b.acquisitionNote ? `<span class="rup-note">${escapeHtml(b.acquisitionNote)}</span>` : '<span class="rup-muted">—</span>'}</td>
-                            <td data-label="" class="rup-actions"><button type="button" data-rup-compare="${escapeHtml(String(compareId))}" data-rup-compare-name="${escapeHtml(b.lootName)}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button></td>
+                            ${formatRaidToonActions(b, compareId, b.lootName)}
                         </tr>`;
                     });
                     html += `</tbody></table></div></div>`;
@@ -4276,6 +4583,8 @@
             });
             const sortSel = document.getElementById('rupSortSelect');
             if (sortSel) sortSel.value = raidPlannerSort;
+            const seekSel = document.getElementById('rupSeekingFilter');
+            if (seekSel) seekSel.value = raidPlannerSeekingFilter || 'all';
             if (raidPlannerView === 'zone') renderRaidZoneControls();
             else renderRaidCharControls();
         }
@@ -4354,6 +4663,13 @@
         if (rupSortSelect) {
             rupSortSelect.addEventListener('change', () => {
                 raidPlannerSort = rupSortSelect.value || 'score';
+                renderRaidUpgradesView();
+            });
+        }
+        const rupSeekingFilter = document.getElementById('rupSeekingFilter');
+        if (rupSeekingFilter) {
+            rupSeekingFilter.addEventListener('change', () => {
+                raidPlannerSeekingFilter = rupSeekingFilter.value || 'all';
                 renderRaidUpgradesView();
             });
         }
@@ -5355,11 +5671,50 @@
                             itemPickerState.virtualLoadout[slotId] = defaultId;
                         }
                     }
-                    let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}</style>`;
-                    pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick items per slot from the upgrade list; stats update from current equipped. Slots with your equipped item are highlighted green; changed selections are highlighted amber.</p>`;
+                    function getPlanForPicker() {
+                        return (GP && char.id != null) ? GP.getCharacterPlan(char.id) : null;
+                    }
+
+                    function seekingCandidatesForSlot(slotId) {
+                        const plan = getPlanForPicker();
+                        if (!plan || !GP) return [];
+                        return GP.listSlotCandidates(plan, slotId);
+                    }
+
+                    function renderSeekingListHtml(slotId, currentItemId, selectedId, nameById) {
+                        const cands = seekingCandidatesForSlot(slotId);
+                        if (!cands.length) {
+                            return `<div class="item-picker-seeking" data-slot-id="${slotId}" style="margin-top:4px;font-size:0.8em;color:#6c757d;"></div>`;
+                        }
+                        let html = `<div class="item-picker-seeking" data-slot-id="${slotId}" style="margin-top:4px;font-size:0.8em;">`;
+                        html += `<div style="color:#6c757d;margin-bottom:2px;">Seeking (${cands.length}):</div>`;
+                        cands.forEach(c => {
+                            const id = c.itemId;
+                            const name = id == null
+                                ? '— None —'
+                                : (nameById[id] || nameById[String(id)] || ('Item ' + id));
+                            const tags = [];
+                            if (id != null && Number(id) === Number(currentItemId)) tags.push('equipped');
+                            if ((id != null && Number(id) === Number(selectedId)) || (id == null && (selectedId === '' || selectedId == null))) tags.push('preferred');
+                            const tagStr = tags.length ? ` <span style="color:#0c5460;">(${tags.join(', ')})</span>` : '';
+                            html += `<div class="item-picker-seek-row" data-slot-id="${slotId}" data-item-id="${id == null ? '' : id}" style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:2px 0;">`;
+                            html += `<span style="flex:1;min-width:80px;">${escapeHtml(name)}${tagStr}</span>`;
+                            if (dkpValEnabled) {
+                                const bidVal = c.bid != null ? c.bid : '';
+                                html += `<label style="display:inline-flex;align-items:center;gap:2px;color:#17a2b8;">Bid <input type="number" class="item-picker-bid" min="0" step="1" placeholder="0=rot" value="${escapeHtml(String(bidVal))}" data-slot-id="${slotId}" data-item-id="${id == null ? '' : id}" style="width:4.5em;padding:2px 4px;"></label>`;
+                            }
+                            html += `<button type="button" class="item-picker-unseek" data-slot-id="${slotId}" data-item-id="${id == null ? '' : id}" title="Remove from seeking" style="padding:1px 6px;font-size:0.85em;cursor:pointer;">×</button>`;
+                            html += `</div>`;
+                        });
+                        html += `</div>`;
+                        return html;
+                    }
+
+                    let pickerHtml = `<style>.item-picker-slot-row{padding:6px;border-radius:6px;transition:background .15s ease;}.item-picker-slot-row.equipped{background:rgba(40,167,69,0.14);border-left:3px solid #28a745;}.item-picker-slot-row.changed{background:rgba(255,193,7,0.2);border-left:3px solid #ffc107;}.item-picker-slot-row.has-seeking{border-left-color:#0c5460;}</style>`;
+                    pickerHtml += `<h3 style="margin-top: 0;">Stat simulator</h3><p style="color: #6c757d; font-size: 0.9em;">Pick a preferred item per slot (stats use preferred). Selecting another item keeps prior picks as Seeking candidates. Last selected is preferred.${dkpValEnabled ? ' Set Bid (0 = rot) on seeking items when planning DKP.' : ''}</p>`;
                     pickerHtml += `<table style="margin-bottom: 8px;"><thead><tr><th>Stat</th><th>Current</th><th>Delta</th><th>New</th></tr></thead><tbody id="itemPickerStatTableBody"></tbody></table><p id="itemPickerPrimNote" style="margin: 0 0 12px 0;"></p>`;
                     pickerHtml += `<div id="itemPickerGearExtras" style="margin-top: 12px; font-size: 0.92em;"></div>`;
-                    pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px;">`;
+                    pickerHtml += `<h4 style="margin-top: 16px;">Slots</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px;">`;
                     for (let slotId = 1; slotId <= 21; slotId++) {
                         const slotName = slotNames[slotId] || `Slot ${slotId}`;
                         const slotData = bySlotMap[slotId];
@@ -5367,25 +5722,54 @@
                         const currentItemName = slotData ? (slotData.currentItemName || '') : '';
                         const upgrades = (slotData && slotData.upgrades) ? slotData.upgrades : [];
                         const options = [];
-                        if (currentItemId != null && currentItemName !== '') options.push({ id: currentItemId, name: currentItemName, delta: null });
-                        else if (slotId === 14) options.push({ id: '', name: '— None —', delta: null });
-                        upgrades.forEach(u => { if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) options.push({ id: u.itemId, name: u.itemName, delta: u.delta }); });
+                        const nameById = {};
+                        if (currentItemId != null && currentItemName !== '') {
+                            options.push({ id: currentItemId, name: currentItemName, delta: null });
+                            nameById[currentItemId] = currentItemName;
+                        } else if (slotId === 14) {
+                            options.push({ id: '', name: '— None —', delta: null });
+                        }
+                        upgrades.forEach(u => {
+                            if (u.itemId && u.itemName && !options.some(o => o.id === u.itemId)) {
+                                options.push({ id: u.itemId, name: u.itemName, delta: u.delta });
+                                nameById[u.itemId] = u.itemName;
+                            }
+                        });
                         (itemPickerState.slotExtras[slotId] || []).forEach(e => {
                             if (e && e.id != null && !options.some(o => Number(o.id) === Number(e.id))) {
                                 options.push({ id: e.id, name: e.name || `Item ${e.id}`, delta: null });
+                                nameById[e.id] = e.name || `Item ${e.id}`;
+                            }
+                        });
+                        seekingCandidatesForSlot(slotId).forEach(c => {
+                            if (c.itemId == null) return;
+                            if (!nameById[c.itemId]) {
+                                const stats = itemStatsCache[c.itemId] || itemStatsCache[String(c.itemId)];
+                                nameById[c.itemId] = (stats && stats.name) ? stats.name : ('Item ' + c.itemId);
+                            }
+                            if (!options.some(o => Number(o.id) === Number(c.itemId))) {
+                                options.push({ id: c.itemId, name: nameById[c.itemId], delta: null });
                             }
                         });
                         const selectedId = (itemPickerState.virtualLoadout[slotId] != null && itemPickerState.virtualLoadout[slotId] !== '') ? itemPickerState.virtualLoadout[slotId] : (options.length ? options[0].id : '');
                         const isEquipped = selectedId !== '' && selectedId !== null && Number(selectedId) === currentItemId;
-                        const rowClass = options.length === 0 ? '' : (isEquipped ? 'equipped' : 'changed');
+                        const seekCount = seekingCandidatesForSlot(slotId).length;
+                        const rowClass = options.length === 0 ? '' : (isEquipped ? 'equipped' : 'changed') + (seekCount > 1 || (seekCount === 1 && !isEquipped) ? ' has-seeking' : '');
                         pickerHtml += `<div class="item-picker-slot-row ${rowClass}" data-current-id="${currentItemId != null ? currentItemId : ''}"><label style="font-weight: 600; font-size: 0.9em;">${escapeHtml(slotName)}</label><select class="item-picker-slot" data-slot-id="${slotId}" style="width: 100%; margin-top: 2px; padding: 4px 6px;">`;
                         if (options.length === 0) pickerHtml += `<option value=""${selectedId === '' ? ' selected' : ''}>— None —</option>`;
                         else options.forEach(opt => {
-                            const suffix = (opt.id === currentItemId ? ' (equipped)' : (opt.delta != null && opt.delta <= 0 ? ' (downgrade)' : ''));
+                            const tags = [];
+                            if (opt.id !== '' && opt.id != null && Number(opt.id) === Number(currentItemId)) tags.push('equipped');
+                            if (opt.id !== '' && opt.id != null && Number(opt.id) === Number(selectedId)) tags.push('preferred');
+                            else if ((opt.id === '' || opt.id == null) && (selectedId === '' || selectedId == null)) tags.push('preferred');
+                            const plan = getPlanForPicker();
+                            if (plan && GP && opt.id !== '' && GP.isSeekingItem(plan, slotId, opt.id)) tags.push('seeking');
+                            if (opt.delta != null && opt.delta <= 0 && !tags.includes('equipped')) tags.push('downgrade');
                             const mod2Label = (mod2Enabled && window.Mod2Scoring && Mod2Scoring.isReady() && opt.id !== '' && opt.id != null)
                                 ? Mod2Scoring.itemModsLabel(opt.id) : '';
+                            const suffix = tags.length ? ' (' + tags.join(', ') + ')' : '';
                             const label = escapeHtml(opt.name) + suffix + (mod2Label ? ' · ' + escapeHtml(mod2Label) : '');
-                            pickerHtml += `<option value="${opt.id}"${selectedId === opt.id ? ' selected' : ''}>${label}</option>`;
+                            pickerHtml += `<option value="${opt.id}"${(selectedId === opt.id || Number(selectedId) === Number(opt.id)) ? ' selected' : ''}>${label}</option>`;
                         });
                         pickerHtml += `</select>`;
                         if (dkpValEnabled) {
@@ -5393,6 +5777,7 @@
                             const dkpLine = dkp.last3.length ? `Last 3 DKP: ${dkp.last3.join(', ')} (avg ${dkp.avg.toFixed(1)})` : '(no DKP)';
                             pickerHtml += `<div class="item-picker-dkp" data-slot-id="${slotId}" style="font-size: 0.85em; color: #17a2b8; margin-top: 2px;">${escapeHtml(dkpLine)}</div>`;
                         }
+                        pickerHtml += renderSeekingListHtml(slotId, currentItemId, selectedId, nameById);
                         pickerHtml += `</div>`;
                     }
                     pickerHtml += `</div>`;
@@ -5401,6 +5786,77 @@
                     }
                     itemPickerPlaceholder.innerHTML = pickerHtml;
                     if (!itemPickerPlaceholder.id) itemPickerPlaceholder.id = 'itemPickerPlaceholder';
+
+                    function refreshSeekingUiForSlot(slotId) {
+                        const row = itemPickerPlaceholder.querySelector(`.item-picker-slot-row select[data-slot-id="${slotId}"]`)?.closest('.item-picker-slot-row');
+                        if (!row) return;
+                        const sel = row.querySelector('.item-picker-slot');
+                        const currentItemId = row.getAttribute('data-current-id');
+                        const selectedId = sel ? sel.value : '';
+                        const nameById = {};
+                        Array.from(sel ? sel.options : []).forEach(opt => {
+                            if (opt.value === '') return;
+                            nameById[opt.value] = opt.textContent.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s*·.*$/, '').trim();
+                        });
+                        const oldList = row.querySelector('.item-picker-seeking');
+                        const html = renderSeekingListHtml(slotId, currentItemId === '' ? null : Number(currentItemId), selectedId === '' ? null : Number(selectedId), nameById);
+                        const tmp = document.createElement('div');
+                        tmp.innerHTML = html;
+                        const next = tmp.firstElementChild;
+                        if (oldList && next) oldList.replaceWith(next);
+                        else if (next) row.appendChild(next);
+                        bindSeekingControls(row);
+                    }
+
+                    function bindSeekingControls(scope) {
+                        const root = scope || itemPickerPlaceholder;
+                        root.querySelectorAll('.item-picker-unseek').forEach(btn => {
+                            if (btn._bound) return;
+                            btn._bound = true;
+                            btn.addEventListener('click', () => {
+                                const slotId = parseInt(btn.getAttribute('data-slot-id'), 10);
+                                const raw = btn.getAttribute('data-item-id');
+                                const itemId = raw === '' ? null : Number(raw);
+                                pickerUserEdited = true;
+                                if (GP && char.id != null) {
+                                    GP.toggleSeeking(char.id, slotId, itemId, { name: char.name, class: char.class });
+                                    const plan = GP.getCharacterPlan(char.id);
+                                    const interest = plan ? GP.getSlotInterest(plan, slotId) : null;
+                                    if (interest) {
+                                        itemPickerState.virtualLoadout[slotId] = interest.preferredItemId;
+                                        const sel = itemPickerPlaceholder.querySelector(`.item-picker-slot[data-slot-id="${slotId}"]`);
+                                        if (sel) {
+                                            const v = interest.preferredItemId == null ? '' : String(interest.preferredItemId);
+                                            if (Array.from(sel.options).some(o => o.value === v)) sel.value = v;
+                                        }
+                                    } else {
+                                        const eq = equippedBySlotForPlan[slotId];
+                                        itemPickerState.virtualLoadout[slotId] = eq != null ? eq : null;
+                                    }
+                                }
+                                refreshSeekingUiForSlot(slotId);
+                                const result = recomputeVirtualStats();
+                                updateItemPickerStatTable(result);
+                            });
+                        });
+                        if (dkpValEnabled) {
+                            root.querySelectorAll('.item-picker-bid').forEach(inp => {
+                                if (inp._bound) return;
+                                inp._bound = true;
+                                inp.addEventListener('change', () => {
+                                    const slotId = parseInt(inp.getAttribute('data-slot-id'), 10);
+                                    const raw = inp.getAttribute('data-item-id');
+                                    const itemId = raw === '' ? null : Number(raw);
+                                    const bid = inp.value === '' ? null : Number(inp.value);
+                                    pickerUserEdited = true;
+                                    if (GP && char.id != null) {
+                                        GP.setBid(char.id, slotId, itemId, bid, { name: char.name, class: char.class });
+                                    }
+                                });
+                            });
+                        }
+                    }
+
                     const selects = itemPickerPlaceholder.querySelectorAll('.item-picker-slot');
                     selects.forEach(sel => {
                         sel.addEventListener('change', () => {
@@ -5425,10 +5881,12 @@
                                     }
                                 }
                             }
+                            refreshSeekingUiForSlot(slotId);
                             const result = recomputeVirtualStats();
                             updateItemPickerStatTable(result);
                         });
                     });
+                    bindSeekingControls(itemPickerPlaceholder);
                     const result = recomputeVirtualStats();
                     updateItemPickerStatTable(result);
                 }
@@ -6184,6 +6642,7 @@
                 const charFilter = document.getElementById('gearTargetsCharFilter');
                 const slotFilter = document.getElementById('gearTargetsSlotFilter');
                 const statusFilter = document.getElementById('gearTargetsStatusFilter');
+                const preferredFilter = document.getElementById('gearTargetsPreferredFilter');
                 const scope = (scopeEl && scopeEl.value === 'all') ? 'all' : 'claimed';
                 const itemCache = (typeof itemStatsCache !== 'undefined') ? itemStatsCache : {};
                 let rows = GP.deriveTargets(characters, GP.loadPlans(), itemCache, { scope: scope });
@@ -6191,14 +6650,17 @@
                 const charVal = charFilter ? charFilter.value : '';
                 const slotVal = slotFilter ? slotFilter.value : '';
                 const statusVal = statusFilter ? statusFilter.value : '';
+                const prefVal = preferredFilter ? preferredFilter.value : '';
                 if (charVal) rows = rows.filter(r => String(r.characterId) === String(charVal));
                 if (slotVal) rows = rows.filter(r => String(r.slotId) === String(slotVal));
                 if (statusVal) rows = rows.filter(r => r.status === statusVal);
+                if (prefVal === 'preferred') rows = rows.filter(r => r.isPreferred);
                 if (!rows.length) {
                     myGearTargetsContent.innerHTML = '<p style="color:#6c757d;">No gear targets match these filters. Select equipment in a character\'s stat simulator to create targets.</p>';
                     return;
                 }
                 const slotNames = SLOT_NAMES_FOR_UI || {};
+                const showBid = !!dkpValEnabled;
                 let html = '<table style="width:100%; border-collapse: collapse; font-size:0.95em;"><thead><tr>'
                     + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Character</th>'
                     + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Slot</th>'
@@ -6206,18 +6668,35 @@
                     + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Target</th>'
                     + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Stats</th>'
                     + '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Status</th>'
+                    + (showBid ? '<th style="text-align:left; padding:8px; border-bottom:1px solid #dee2e6;">Bid</th>' : '')
                     + '<th style="padding:8px; border-bottom:1px solid #dee2e6;"></th>'
                     + '</tr></thead><tbody>';
                 rows.forEach(row => {
+                    const prefBadge = row.isPreferred
+                        ? ' <span style="color:#856404;background:#fff3cd;padding:1px 6px;border-radius:4px;font-size:0.8em;">Preferred</span>'
+                        : '';
+                    let bidCell = '';
+                    if (showBid) {
+                        const bidLabel = row.bid == null ? '—' : (Number(row.bid) === 0 ? '0 (rot)' : String(row.bid));
+                        bidCell = `<td style="padding:8px; border-bottom:1px solid #eee;">
+                            <input type="number" class="gear-target-bid" min="0" step="1" placeholder="0=rot"
+                                data-char-id="${escapeHtml(String(row.characterId))}" data-slot-id="${row.slotId}"
+                                data-item-id="${row.targetItemId == null ? '' : row.targetItemId}"
+                                value="${row.bid != null ? escapeHtml(String(row.bid)) : ''}"
+                                style="width:5em;padding:4px 6px;" title="Intended bid (0 = rot roll)">
+                            <span style="color:#6c757d;font-size:0.85em;margin-left:4px;">${escapeHtml(bidLabel === '—' ? '' : '')}</span>
+                        </td>`;
+                    }
                     html += `<tr class="gear-target-row" data-char-id="${escapeHtml(String(row.characterId))}" style="cursor:pointer;">
                         <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(row.characterName)} <span style="color:#6c757d;">(${escapeHtml(row.characterClass)})</span></td>
                         <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(slotNames[row.slotId] || ('Slot ' + row.slotId))}</td>
                         <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(row.equippedItemName)}</td>
-                        <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(row.targetItemName)}</td>
+                        <td style="padding:8px; border-bottom:1px solid #eee;">${escapeHtml(row.targetItemName)}${prefBadge}</td>
                         <td style="padding:8px; border-bottom:1px solid #eee; font-size:0.85em;">${publicDeltaHtml(row)}</td>
                         <td style="padding:8px; border-bottom:1px solid #eee;">${statusBadge(row.status)}</td>
+                        ${bidCell}
                         <td style="padding:8px; border-bottom:1px solid #eee; white-space:nowrap;">
-                            <button type="button" class="gear-target-remove" data-char-id="${escapeHtml(String(row.characterId))}" data-slot-id="${row.slotId}" style="padding:4px 8px; font-size:0.85em; cursor:pointer;">Remove</button>
+                            <button type="button" class="gear-target-remove" data-char-id="${escapeHtml(String(row.characterId))}" data-slot-id="${row.slotId}" data-item-id="${row.targetItemId == null ? '' : row.targetItemId}" style="padding:4px 8px; font-size:0.85em; cursor:pointer;">Remove</button>
                             <button type="button" class="gear-target-reset-char" data-char-id="${escapeHtml(String(row.characterId))}" style="padding:4px 8px; font-size:0.85em; cursor:pointer;">Reset plan</button>
                         </td>
                     </tr>`;
@@ -6226,15 +6705,26 @@
                 myGearTargetsContent.innerHTML = html;
                 myGearTargetsContent.querySelectorAll('.gear-target-row').forEach(tr => {
                     tr.addEventListener('click', (e) => {
-                        if (e.target.closest('button')) return;
+                        if (e.target.closest('button') || e.target.closest('input')) return;
                         openCharacterSimulator(tr.getAttribute('data-char-id'));
                     });
                 });
                 myGearTargetsContent.querySelectorAll('.gear-target-remove').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        GP.removeTarget(btn.getAttribute('data-char-id'), btn.getAttribute('data-slot-id'));
+                        const itemRaw = btn.getAttribute('data-item-id');
+                        const itemId = itemRaw === '' || itemRaw == null ? null : Number(itemRaw);
+                        GP.removeTarget(btn.getAttribute('data-char-id'), btn.getAttribute('data-slot-id'), itemId);
                         renderGearTargets();
+                    });
+                });
+                myGearTargetsContent.querySelectorAll('.gear-target-bid').forEach(inp => {
+                    inp.addEventListener('click', (e) => e.stopPropagation());
+                    inp.addEventListener('change', () => {
+                        const itemRaw = inp.getAttribute('data-item-id');
+                        const itemId = itemRaw === '' || itemRaw == null ? null : Number(itemRaw);
+                        const bid = inp.value === '' ? null : Number(inp.value);
+                        GP.setBid(inp.getAttribute('data-char-id'), inp.getAttribute('data-slot-id'), itemId, bid);
                     });
                 });
                 myGearTargetsContent.querySelectorAll('.gear-target-reset-char').forEach(btn => {
@@ -6285,7 +6775,7 @@
             if (openTargetsFromToons) openTargetsFromToons.addEventListener('click', openGearTargets);
             const openToonsFromTargets = document.getElementById('gearTargetsOpenMyToons');
             if (openToonsFromTargets) openToonsFromTargets.addEventListener('click', openMyToons);
-            ['gearTargetsScope', 'gearTargetsCharFilter', 'gearTargetsSlotFilter', 'gearTargetsStatusFilter'].forEach(id => {
+            ['gearTargetsScope', 'gearTargetsCharFilter', 'gearTargetsSlotFilter', 'gearTargetsStatusFilter', 'gearTargetsPreferredFilter'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('change', renderGearTargets);
             });

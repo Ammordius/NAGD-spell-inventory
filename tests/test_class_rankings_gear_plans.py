@@ -97,6 +97,33 @@ class TestClassRankingsGearPlansStatic(unittest.TestCase):
         self.assertIn("classRankings:charClaims:v1", self.js)
         self.assertIn("classRankings:toonList:v1", self.js)
 
+    def test_multi_seeking_schema_and_apis(self):
+        self.assertIn("PLAN_VERSION", self.js)
+        self.assertIn("preferredItemId", self.js)
+        self.assertIn("candidates", self.js)
+        self.assertIn("function setPreferred", self.js)
+        self.assertIn("function toggleSeeking", self.js)
+        self.assertIn("function setBid", self.js)
+        self.assertIn("function markSeeking", self.js)
+        self.assertIn("function buildSeekingIndex", self.js)
+        self.assertIn("normalizeSlotInterest", self.js)
+
+    def test_seeking_bid_ui_wiring(self):
+        self.assertIn('id="rupSeekingFilter"', self.html)
+        self.assertIn("formatSeekingControls", self.html)
+        self.assertIn("filterAndPinSeekingRows", self.html)
+        self.assertIn("item-picker-bid", self.html)
+        self.assertIn("gear-target-bid", self.html)
+        self.assertIn("markSeeking", self.html)
+        # Bid editing in gear targets / raid planner is gated by dkp_val
+        self.assertIn("const showBid = !!dkpValEnabled", self.html)
+        self.assertIn("rup-seek-bid", self.html)
+        # Raid toon Seek lives in Actions; Compare modal has per-toon Seek
+        self.assertIn("formatRaidToonActions", self.html)
+        self.assertIn("bindComparisonSeekingControls", self.html)
+        self.assertIn("cmp-seek-toggle", self.html)
+        self.assertIn("formatComparisonSeekControls", self.html)
+
 
 class TestClassRankingsGearPlansNode(unittest.TestCase):
     def test_node_unit_suite(self):

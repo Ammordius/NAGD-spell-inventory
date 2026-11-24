@@ -64,17 +64,22 @@ test('meaningful edit saves sparse plan, sets editedAt, effective claim under au
     GP.persistUserGearEdit(char, equipped, virtual);
     const plan = GP.getCharacterPlan('201');
     assert.ok(plan);
-    assert.equal(plan.selectedSlots['13'], 999);
+    assert.equal(plan.selectedSlots['13'].preferredItemId, 999);
+    assert.equal(plan.selectedSlots['13'].candidates.length, 1);
+    assert.equal(plan.selectedSlots['13'].candidates[0].itemId, 999);
     assert.equal(plan.selectedSlots['14'], undefined);
     assert.ok(plan.editedAt);
     assert.equal(GP.getClaimPreference('201'), 'auto');
     assert.equal(GP.isEffectivelyClaimed('201'), true);
 });
 
-test('explicit empty slot is stored as null and differs from unspecified', () => {
+test('explicit empty slot is stored as null preferred and differs from unspecified', () => {
     const selected = GP.diffSelectedSlots({ 14: 55 }, { 14: null });
-    assert.equal(selected['14'], null);
-    const loadout = GP.applyPlanToLoadout({ 13: 1, 14: 55 }, { '14': null });
+    assert.equal(selected['14'].preferredItemId, null);
+    assert.equal(selected['14'].candidates[0].itemId, null);
+    const loadout = GP.applyPlanToLoadout({ 13: 1, 14: 55 }, {
+        '14': { preferredItemId: null, candidates: [{ itemId: null }] }
+    });
     assert.equal(loadout[14], null);
     assert.equal(loadout[13], 1);
 });
@@ -118,7 +123,11 @@ test('explicit unclaim overrides auto and preserves gear + recent', () => {
     );
     assert.equal(GP.getClaimPreference('401'), 'unclaimed');
     assert.equal(GP.isEffectivelyClaimed('401'), false);
-    assert.equal(GP.getCharacterPlan('401').selectedSlots['5'], 100);
+    const slot5 = GP.getCharacterPlan('401').selectedSlots['5'];
+    assert.equal(slot5.preferredItemId, 100);
+    // Prior preferred stays as a seeking candidate
+    assert.ok(slot5.candidates.some(c => c.itemId === 99));
+    assert.ok(slot5.candidates.some(c => c.itemId === 100));
 });
 
 test('explicit claimed sticks without requiring edits', () => {
@@ -231,9 +240,96 @@ test('removeTarget and clearAcquired', () => {
     GP.clearAcquired(chars, cache, { scope: 'all' });
     const plan = GP.getCharacterPlan('701');
     assert.equal(plan.selectedSlots['15'], undefined);
-    assert.equal(plan.selectedSlots['16'], 60);
+    assert.equal(plan.selectedSlots['16'].preferredItemId, 60);
     GP.removeTarget('701', 16);
     assert.equal(GP.hasSavedPlan('701'), false);
+});
+
+test('migrates legacy scalar selectedSlots on load', () => {
+    storage.setItem(GP.KEYS.plans, JSON.stringify({
+        version: 1,
+        characters: {
+            '801': {
+                name: 'Legacy',
+                class: 'Monk',
+                selectedSlots: { '12': 4242, '14': null },
+                editedAt: '2026-01-01T00:00:00.000Z'
+            }
+        }
+    }));
+    const plans = GP.loadPlans();
+    assert.equal(plans.version, GP.PLAN_VERSION);
+    assert.equal(plans.characters['801'].selectedSlots['12'].preferredItemId, 4242);
+    assert.equal(plans.characters['801'].selectedSlots['14'].preferredItemId, null);
+    // Persisted migration
+    const raw = JSON.parse(storage.getItem(GP.KEYS.plans));
+    assert.equal(raw.version, GP.PLAN_VERSION);
+    assert.equal(raw.characters['801'].selectedSlots['12'].preferredItemId, 4242);
+});
+
+test('multi-seeking per slot with preferred last-selected and bids', () => {
+    GP.setPreferred('901', 17, 111, { name: 'Ivy', class: 'Magician' });
+    GP.toggleSeeking('901', 17, 222, { name: 'Ivy', class: 'Magician' });
+    GP.setBid('901', 17, 222, 0, { name: 'Ivy', class: 'Magician' });
+    GP.setBid('901', 17, 111, 50, { name: 'Ivy', class: 'Magician' });
+    GP.setPreferred('901', 17, 222, { name: 'Ivy', class: 'Magician' });
+
+    const plan = GP.getCharacterPlan('901');
+    const slot = plan.selectedSlots['17'];
+    assert.equal(slot.preferredItemId, 222);
+    assert.equal(slot.candidates.length, 2);
+    assert.equal(GP.getBid(plan, 17, 111), 50);
+    assert.equal(GP.getBid(plan, 17, 222), 0);
+    assert.equal(GP.isSeekingItem(plan, 17, 111), true);
+
+    const chars = [{
+        id: '901',
+        name: 'Ivy',
+        class: 'Magician',
+        inventory: [{ slot_id: 17, item_id: 10, item_name: 'Old Chest' }]
+    }];
+    const cache = {
+        10: { name: 'Old Chest' },
+        111: { name: 'Chest A' },
+        222: { name: 'Chest B' }
+    };
+    const rows = GP.deriveTargets(chars, GP.loadPlans(), cache, { scope: 'all' });
+    assert.equal(rows.length, 2);
+    const preferred = rows.find(r => r.isPreferred);
+    assert.equal(preferred.targetItemId, 222);
+    assert.equal(preferred.bid, 0);
+    const other = rows.find(r => r.targetItemId === 111);
+    assert.equal(other.isPreferred, false);
+    assert.equal(other.bid, 50);
+
+    const idx = GP.buildSeekingIndex(chars, GP.loadPlans(), cache, { scope: 'all' });
+    assert.ok(idx.lookup('901', 222));
+    assert.equal(idx.lookup('901', 222).bid, 0);
+
+    GP.removeTarget('901', 17, 111);
+    assert.equal(GP.getCharacterPlan('901').selectedSlots['17'].candidates.length, 1);
+});
+
+test('markSeeking sets preferred and bid for raid upgrades', () => {
+    GP.markSeeking('902', 13, 555, { preferred: true, bid: 25 }, { name: 'Jay', class: 'Warrior' });
+    const plan = GP.getCharacterPlan('902');
+    assert.equal(plan.selectedSlots['13'].preferredItemId, 555);
+    assert.equal(GP.getBid(plan, 13, 555), 25);
+    GP.markSeeking('902', 13, 555, { preferred: true, bid: 0 });
+    assert.equal(GP.getBid(GP.getCharacterPlan('902'), 13, 555), 0);
+});
+
+test('applyPlanToLoadout uses preferredItemId from multi-candidate slots', () => {
+    const loadout = GP.applyPlanToLoadout(
+        { 13: 1, 17: 2 },
+        {
+            '13': { preferredItemId: 99, candidates: [{ itemId: 88 }, { itemId: 99 }] },
+            '17': { preferredItemId: 77, candidates: [{ itemId: 66 }, { itemId: 77 }] }
+        }
+    );
+    assert.equal(loadout[13], 99);
+    assert.equal(loadout[17], 77);
+    assert.equal(loadout[14], null);
 });
 
 test('malformed JSON and missing storage are tolerated', () => {
