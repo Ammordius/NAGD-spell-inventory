@@ -529,6 +529,84 @@
         return { rows: filtered, zones: zones };
     }
 
+    /**
+     * Group positive rows for a single zone by character → target → rows.
+     * Omits characters with no upgrades in the zone.
+     * @returns {Array<{charId, charName, charClass, targets: Array<{targetId, displayName, rows}>}>}
+     */
+    function groupZoneByCharacter(rows, catalog, zoneId, sortMode) {
+        var zoneRows = filterRowsForZone(rows, zoneId);
+        zoneRows = sortRows(zoneRows, sortMode || SORT.SCORE);
+
+        var targetMeta = {};
+        ((catalog && catalog.targets) || []).forEach(function (t) {
+            targetMeta[t.target_id] = t;
+        });
+
+        var byChar = {};
+        var charOrder = [];
+        zoneRows.forEach(function (row) {
+            var cid = row.charId != null ? String(row.charId) : '';
+            if (!byChar[cid]) {
+                byChar[cid] = {
+                    charId: cid,
+                    charName: row.charName || '',
+                    charClass: row.charClass || '',
+                    targets: {}
+                };
+                charOrder.push(cid);
+            }
+            var sources = row.sources || [];
+            var seenTargets = {};
+            sources.forEach(function (s) {
+                if (zoneId && s.zone_id !== zoneId) return;
+                var tid = s.target_id || ('_unknown|' + (s.zone_id || zoneId || ''));
+                if (seenTargets[tid]) return;
+                seenTargets[tid] = true;
+                if (!byChar[cid].targets[tid]) {
+                    var meta = targetMeta[tid] || {};
+                    byChar[cid].targets[tid] = {
+                        targetId: tid,
+                        displayName: meta.display_name || s.mob || tid,
+                        rows: []
+                    };
+                }
+                byChar[cid].targets[tid].rows.push(row);
+            });
+            if (!Object.keys(seenTargets).length && !zoneId) {
+                var tid0 = '_none';
+                if (!byChar[cid].targets[tid0]) {
+                    byChar[cid].targets[tid0] = {
+                        targetId: tid0,
+                        displayName: 'Unassigned',
+                        rows: []
+                    };
+                }
+                byChar[cid].targets[tid0].rows.push(row);
+            }
+        });
+
+        return charOrder.map(function (cid) {
+            var c = byChar[cid];
+            var targets = Object.keys(c.targets).map(function (tid) {
+                var t = c.targets[tid];
+                t.rows = sortRows(t.rows, sortMode || SORT.SCORE);
+                return t;
+            });
+            targets.sort(function (a, b) {
+                return String(a.displayName || '').localeCompare(String(b.displayName || ''));
+            });
+            return {
+                charId: c.charId,
+                charName: c.charName,
+                charClass: c.charClass,
+                targets: targets
+            };
+        }).filter(function (c) {
+            return c.targets.some(function (t) { return t.rows && t.rows.length; });
+        });
+    }
+
     /** Format last-3 DKP for display; unknown → explicit unknown string. */
     function formatDkpLastThree(dkpCosts, dkpAverage, dkpUnknown) {
         if (dkpUnknown || !dkpCosts || !dkpCosts.length) return null;
@@ -589,6 +667,7 @@
         sortRows: sortRows,
         groupByZoneTarget: groupByZoneTarget,
         groupByCharacter: groupByCharacter,
+        groupZoneByCharacter: groupZoneByCharacter,
         formatDkpLastThree: formatDkpLastThree,
         createResultCache: createResultCache,
         filterRowsForZone: filterRowsForZone

@@ -101,6 +101,7 @@ class TestRaidUpgradePlannerStatic(unittest.TestCase):
         self.assertIn("computeAllUpgrades", self.js)
         self.assertIn("groupByZoneTarget", self.js)
         self.assertIn("groupByCharacter", self.js)
+        self.assertIn("groupZoneByCharacter", self.js)
         self.assertIn("armor_pattern", self.js)
 
 

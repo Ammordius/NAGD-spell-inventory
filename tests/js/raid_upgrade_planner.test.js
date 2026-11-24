@@ -241,6 +241,90 @@ test('zone and character grouping agree on positive row membership', () => {
     assert.ok(beneficiaries.includes('1:16363'));
 });
 
+test('groupZoneByCharacter scopes to zone and groups by character', () => {
+    const catalog = {
+        zones: [
+            { zone_id: 'plane_of_time', display_name: 'Plane of Time' },
+            { zone_id: 'plane_of_water', display_name: 'Plane of Water' }
+        ],
+        targets: [
+            { target_id: 'quarm|plane_of_time', zone_id: 'plane_of_time', display_name: 'Quarm', mob: 'Quarm' },
+            { target_id: 'hydrotha|plane_of_water', zone_id: 'plane_of_water', display_name: 'Hydrotha', mob: 'Hydrotha' }
+        ]
+    };
+    const rows = [
+        {
+            charId: '1',
+            charName: 'Alice',
+            charClass: 'Rogue',
+            lootItemId: '9488',
+            lootName: 'Mask',
+            scoreDelta: 10,
+            sources: DIRECT_ITEM.sources
+        },
+        {
+            charId: '2',
+            charName: 'Bob',
+            charClass: 'Ranger',
+            lootItemId: '16363',
+            lootName: 'Pattern',
+            scoreDelta: 20,
+            sources: PATTERN_ITEM.sources
+        },
+        {
+            charId: '1',
+            charName: 'Alice',
+            charClass: 'Rogue',
+            lootItemId: '16363',
+            lootName: 'Pattern',
+            scoreDelta: 8,
+            sources: PATTERN_ITEM.sources
+        },
+        {
+            charId: '3',
+            charName: 'Carol',
+            charClass: 'Warrior',
+            lootItemId: '9999',
+            lootName: 'Other Zone Only',
+            scoreDelta: 50,
+            sources: [{ zone_id: 'plane_of_water', target_id: 'hydrotha|plane_of_water', mob: 'Hydrotha' }]
+        }
+    ];
+
+    const timeByChar = RP.groupZoneByCharacter(rows, catalog, 'plane_of_time', 'score');
+    assert.equal(timeByChar.length, 2);
+    assert.deepEqual(timeByChar.map(c => c.charId), ['2', '1']); // score sort: Bob 20 before Alice 8
+    assert.ok(timeByChar.every(c => c.charId !== '3'));
+
+    const alice = timeByChar.find(c => c.charId === '1');
+    assert.ok(alice);
+    assert.equal(alice.charName, 'Alice');
+    assert.equal(alice.targets.length, 1);
+    assert.equal(alice.targets[0].targetId, 'quarm|plane_of_time');
+    assert.equal(alice.targets[0].rows.length, 1);
+    assert.equal(alice.targets[0].rows[0].lootItemId, '16363');
+
+    const waterByChar = RP.groupZoneByCharacter(rows, catalog, 'plane_of_water', 'score');
+    const waterCharIds = waterByChar.map(c => c.charId).sort();
+    assert.deepEqual(waterCharIds, ['1', '3']);
+
+    // Membership agrees with filterRowsForZone
+    const waterRows = RP.filterRowsForZone(rows, 'plane_of_water');
+    const waterPairs = new Set(waterRows.map(r => r.charId + ':' + r.lootItemId));
+    const groupedPairs = new Set();
+    waterByChar.forEach(c => c.targets.forEach(t => t.rows.forEach(r => groupedPairs.add(r.charId + ':' + r.lootItemId))));
+    assert.deepEqual([...groupedPairs].sort(), [...waterPairs].sort());
+
+    // Char with no upgrades in zone is omitted
+    const onlyCarolWater = RP.groupZoneByCharacter(
+        rows.filter(r => r.charId === '2'),
+        catalog,
+        'plane_of_water',
+        'score'
+    );
+    assert.equal(onlyCarolWater.length, 0);
+});
+
 test('sortRows defaults to score improvement; score/DKP optional', () => {
     const rows = [
         { lootName: 'A', scoreDelta: 5, scorePerDkp: 0.1, hpPerDkp: 2 },
