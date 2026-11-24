@@ -408,6 +408,39 @@
         .toon-upgrade-card-elemental { border-left: 3px solid #667eea; }
         .char-stats-link { color: #667eea; text-decoration: none; font-weight: 500; }
         .char-stats-link:hover { text-decoration: underline; }
+
+        /* Raid Upgrade Planner (dkp_val only) */
+        .rup-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .rup-view-tab { padding: 8px 14px; border: 1px solid #dee2e6; border-radius: 6px; background: #fff; cursor: pointer; font-weight: 500; }
+        .rup-view-tab.active { background: #0d6efd; color: #fff; border-color: #0d6efd; }
+        .rup-zone-btn { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 6px; background: #fff; cursor: pointer; text-align: left; }
+        .rup-zone-btn.active { background: #0d6efd; color: #fff; border-color: #0d6efd; }
+        .rup-zone-btn span { display: block; font-size: 0.8em; opacity: 0.85; margin-top: 2px; }
+        .rup-target { border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 10px; background: #fff; overflow: hidden; }
+        .rup-target-hdr { width: 100%; text-align: left; padding: 10px 12px; background: #e9ecef; border: none; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+        .rup-target-hdr:hover { background: #dee2e6; }
+        .rup-target-body { padding: 0; }
+        .rup-target.collapsed .rup-target-body { display: none; }
+        .rup-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+        .rup-table th, .rup-table td { padding: 8px 10px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+        .rup-table th { background: #f8f9fa; font-weight: 600; color: #495057; position: sticky; top: 0; }
+        .rup-subrows { background: #f8f9fa; }
+        .rup-subrows td { border-bottom: 1px solid #e9ecef; font-size: 0.88rem; }
+        .rup-muted { color: #6c757d; }
+        .rup-note { color: #856404; font-size: 0.85em; }
+        .rup-score { font-weight: 600; color: #198754; white-space: nowrap; }
+        .rup-actions button, .rup-actions a { margin-right: 6px; }
+        .rup-status { padding: 24px; color: #6c757d; }
+        .rup-status.error { color: #dc3545; }
+        .rup-beneficiaries-toggle { background: none; border: none; color: #0d6efd; cursor: pointer; padding: 0; font: inherit; text-decoration: underline; }
+        @media (max-width: 800px) {
+            .rup-table, .rup-table thead, .rup-table tbody, .rup-table th, .rup-table td, .rup-table tr { display: block; }
+            .rup-table thead { display: none; }
+            .rup-table tr { border: 1px solid #dee2e6; border-radius: 6px; margin-bottom: 8px; padding: 6px; background: #fff; }
+            .rup-table td { border: none; padding: 4px 6px; }
+            .rup-table td::before { content: attr(data-label); display: block; font-weight: 600; color: #6c757d; font-size: 0.75rem; }
+            .rup-zone-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        }
     </style>
 </head>
 <body>
@@ -454,6 +487,7 @@
                 <label>Toon list:</label>
                 <input type="text" id="toonListInput" placeholder="e.g. tandiyen, ammo*, iaminae, ezram (* = wildcard)" style="padding: 8px 12px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px; min-width: 200px;">
                 <button id="showToonUpgrades" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 8px;">Gear upgrades across toons</button>
+                <button id="showRaidUpgrades" type="button" style="padding: 8px 16px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 8px;">Raid Upgrades</button>
             </div>
             <div id="myGearPlansSection" class="control-group" style="display: flex;">
                 <button id="showMyToons" type="button" style="padding: 8px 16px; background: #495057; color: white; border: none; border-radius: 4px; cursor: pointer;">My Toons</button>
@@ -568,6 +602,43 @@
         </div>
     </div>
 
+    <!-- Raid Upgrade Planner (dkp_val only): zone/target and by-character views -->
+    <div id="raidUpgradesPanel" style="display: none; position: fixed; inset: 0; z-index: 910; background: #f8f9fa; overflow: auto;">
+        <div style="padding: 16px 20px; background: #0d6efd; color: white; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <h2 style="margin: 0; font-size: 1.25rem;">Raid Upgrade Planner</h2>
+            <button id="closeRaidUpgradesPanel" type="button" style="padding: 8px 16px; background: rgba(255,255,255,0.25); color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 6px; cursor: pointer;">Close</button>
+        </div>
+        <div style="padding: 12px 20px; background: #e9ecef; border-bottom: 1px solid #dee2e6;">
+            <div class="rup-toolbar">
+                <button type="button" class="rup-view-tab active" data-rup-view="zone" id="rupViewZone">By Zone / Raid Target</button>
+                <button type="button" class="rup-view-tab" data-rup-view="character" id="rupViewChar">By Character</button>
+                <label style="margin-left: 8px;">Sort:
+                    <select id="rupSortSelect" style="margin-left: 6px; padding: 6px 10px;">
+                        <option value="score" selected>Score improvement</option>
+                        <option value="score_dkp">Score / DKP</option>
+                        <option value="hp_dkp">HP / DKP</option>
+                    </select>
+                </label>
+            </div>
+            <div id="rupZoneControls" class="rup-toolbar">
+                <div id="rupZoneList" class="rup-zone-list" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                <button type="button" id="rupExpandAllTargets" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #adb5bd; background: #fff; cursor: pointer;">Expand all</button>
+                <button type="button" id="rupCollapseAllTargets" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #adb5bd; background: #fff; cursor: pointer;">Collapse all</button>
+            </div>
+            <div id="rupCharControls" class="rup-toolbar" style="display: none;">
+                <label>Character:
+                    <select id="rupCharSelect" style="margin-left: 6px; padding: 6px 10px; min-width: 160px;">
+                        <option value="all">All Toons</option>
+                    </select>
+                </label>
+            </div>
+            <div id="rupProgress" class="rup-muted" style="margin-top: 6px; display: none;"></div>
+        </div>
+        <div id="raidUpgradesContent" style="padding: 16px 20px; min-height: 200px;">
+            <p class="rup-status">Open Raid Upgrades to evaluate catalog loot against your toon list.</p>
+        </div>
+    </div>
+
     <!-- My Toons: local claimed / recently viewed characters (browser-local only) -->
     <div id="myToonsPanel" style="display: none; position: fixed; inset: 0; z-index: 920; background: #f8f9fa; overflow: auto;">
         <div style="padding: 16px 20px; background: #343a40; color: white; display: flex; align-items: center; justify-content: space-between;">
@@ -629,6 +700,7 @@
     </div>
 
     <script src="class_rankings_gear_plans.js"></script>
+    <script src="raid_upgrade_planner.js"></script>
     <script src="mod2_rankings.js"></script>
     <script data-goatcounter="https://ammordius.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
@@ -3355,7 +3427,11 @@
             });
         }
 
-        function openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp) {
+        function openItemComparison(itemId, itemName, slotName, slotId, delta, hpDkp, options) {
+            const cmpOpts = options || {};
+            const evaluateCmp = cmpOpts.guardMissingEquipped
+                ? evaluateItemUpgradeForCharacterGuarded
+                : evaluateItemUpgradeForCharacter;
             const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
             let html = `<h3 style="margin-top: 0;">${itemLink}</h3>`;
             const elementalInfo = elementalMageloToPattern[String(itemId)];
@@ -3382,7 +3458,7 @@
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
-                    const best = evaluateItemUpgradeForCharacter(char, elementalItemId);
+                    const best = evaluateCmp(char, elementalItemId);
                     if (best && best.eligible && best.isUpgrade) {
                         const u = best;
                         const hpd = getHpPerDkpForUpgrade(u);
@@ -3434,7 +3510,7 @@
                     let benefit = '—';
                     let otherOptionsHtml = '—';
                     let sortKey = -Infinity;
-                    const best = evaluateItemUpgradeForCharacter(char, itemId);
+                    const best = evaluateCmp(char, itemId);
                     if (best && best.eligible && best.isUpgrade) {
                         const u = best;
                         const hpd = getHpPerDkpForUpgrade(u);
@@ -3525,8 +3601,34 @@
             return null;
         }
 
+        /**
+         * Wrap evaluateItemUpgradeForCharacter so missing equipped-item stats cannot look like upgrades.
+         * Used by Raid Planner Compare (and optional callers) — evaluator itself stays unchanged for other UIs.
+         */
+        function evaluateItemUpgradeForCharacterGuarded(char, candidateItemId) {
+            const best = evaluateItemUpgradeForCharacter(char, candidateItemId);
+            if (!best || !best.eligible) return best;
+            if (window.RaidUpgradePlanner && typeof RaidUpgradePlanner.checkMissingEquippedStats === 'function') {
+                const missing = RaidUpgradePlanner.checkMissingEquippedStats(
+                    best, char, itemStatsCache, isItemTwoHanded
+                );
+                if (missing.unresolved) {
+                    return Object.assign({}, best, {
+                        isUpgrade: false,
+                        missingEquippedStats: true,
+                        reason: missing.reason
+                    });
+                }
+            }
+            return best;
+        }
+
         /** Open item comparison by item id/name (e.g. from typed search). Per toon, picks the best matching slot (highest score delta). */
-        function openItemComparisonByItemId(itemId, itemName) {
+        function openItemComparisonByItemId(itemId, itemName, options) {
+            const cmpOpts = options || {};
+            const evaluateCmp = cmpOpts.guardMissingEquipped
+                ? evaluateItemUpgradeForCharacterGuarded
+                : evaluateItemUpgradeForCharacter;
             if (itemName && elementalSlotOptions && elementalSlotOptions.by_slot_id) {
                 const searchNorm = normalizeItemNameForLookup(itemName);
                 if (searchNorm) {
@@ -3539,7 +3641,7 @@
                                 const firstId = firstKey ? (byClass[firstKey] || '').trim() : '';
                                 if (firstId) {
                                     // Pass null slotId so openItemComparison evaluates best matching slot per toon.
-                                    openItemComparison(firstId, opt.pattern_name, null, null, null, null);
+                                    openItemComparison(firstId, opt.pattern_name, null, null, null, null, cmpOpts);
                                     return;
                                 }
                             }
@@ -3549,7 +3651,7 @@
             }
             const elementalInfo = elementalMageloToPattern[String(itemId)];
             if (elementalInfo) {
-                openItemComparison(itemId, elementalInfo.pattern_name, null, null, null, null);
+                openItemComparison(itemId, elementalInfo.pattern_name, null, null, null, null, cmpOpts);
                 return;
             }
             const itemLink = `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(itemName || '')}">${escapeHtml(itemName || 'Item ' + itemId)}</a>`;
@@ -3563,10 +3665,13 @@
                 let otherOptionsHtml = '—';
                 let slotName = '—';
                 let sortKey = -Infinity;
-                const best = evaluateItemUpgradeForCharacter(char, itemId);
+                const best = evaluateCmp(char, itemId);
                 if (best && best.eligible) {
                     slotName = best.slotName || SLOT_NAMES_FOR_UI[best.slotId] || ('Slot ' + best.slotId);
-                    if (best.isUpgrade) {
+                    if (best.missingEquippedStats) {
+                        benefit = 'Unresolved: equipped item stats missing (not scored as upgrade)';
+                        sortKey = -Infinity;
+                    } else if (best.isUpgrade) {
                         const u = best;
                         const hpd = getHpPerDkpForUpgrade(u);
                         const statsFocus = formatUpgradeDeltas(u.deltas || {}, u.focusSpellName);
@@ -3605,38 +3710,77 @@
             if (closeBtn) closeBtn.onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
 
-        if (document.getElementById('showToonUpgrades')) {
-            document.getElementById('showToonUpgrades').addEventListener('click', () => {
-                const input = document.getElementById('toonListInput');
-                const listStr = (input && input.value) ? input.value.trim() : '';
-                const matched = matchCharactersByToonList(listStr);
-                if (matched.length === 0) {
-                    alert('Enter comma-separated character names that appear in the rankings (e.g. Mycleric, Mytank).');
-                    return;
-                }
+        /** Load item stats / DKP / focus data used by upgrade scoring (shared by across-toons + raid planner). */
+        function loadUpgradeScoringData() {
+            if (dkpValEnabled) {
+                return Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses(), loadSpellFocii()]);
+            }
+            return Promise.all([loadItemStats(), loadItemSpellBonuses(), loadSpellFocii()]);
+        }
+
+        /**
+         * Resolve roster from toon list (primary) or optional claimed-toons fallback.
+         * Does not write ClassRankingsGearPlans.saveToonList.
+         * Syncs toonUpgradesMatchedChars so openItemComparison* works without opening across-toons first.
+         */
+        function resolveToonRoster(options) {
+            const opts = options || {};
+            const input = document.getElementById('toonListInput');
+            const listStr = (input && input.value) ? input.value.trim() : '';
+            let matched = [];
+            let source = 'toon_list';
+            if (listStr) {
+                matched = matchCharactersByToonList(listStr);
+                source = 'toon_list';
+            } else if (opts.useClaimed) {
+                source = 'claimed';
+                const GP = window.ClassRankingsGearPlans;
+                const claimedIds = (GP && typeof GP.listClaimedIds === 'function') ? GP.listClaimedIds() : [];
+                const byId = new Map((characters || []).map(c => [String(c.id), c]));
+                matched = claimedIds.map(id => byId.get(String(id))).filter(Boolean);
+            }
+            if (opts.syncComparisonRoster !== false) {
                 toonUpgradesMatchedChars = matched;
                 toonUpgradesSelectedIndex = 0;
-                toonUpgradesPanel.style.display = 'block';
+            }
+            return { matched, listStr, source };
+        }
 
-                toonUpgradesTabs.innerHTML = '';
-                matched.forEach((char, i) => {
-                    const tab = document.createElement('button');
-                    tab.className = 'toon-upgrade-tab' + (i === 0 ? ' active' : '');
-                    tab.dataset.index = String(i);
-                    tab.textContent = char.name;
-                    tab.addEventListener('click', () => {
-                        toonUpgradesSelectedIndex = i;
-                        toonUpgradesTabs.querySelectorAll('.toon-upgrade-tab').forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-                        renderToonUpgradesStrip(matched[i]);
+        function ensureToonRosterAndUpgradeData(options) {
+            const opts = options || {};
+            const resolved = resolveToonRoster(opts);
+            if (opts.requireNonEmpty && (!resolved.matched || !resolved.matched.length)) {
+                if (opts.emptyAlert) alert(opts.emptyAlert);
+                return Promise.reject({ code: 'empty_roster', resolved });
+            }
+            return loadUpgradeScoringData().then(() => resolved);
+        }
+
+        if (document.getElementById('showToonUpgrades')) {
+            document.getElementById('showToonUpgrades').addEventListener('click', () => {
+                ensureToonRosterAndUpgradeData({
+                    requireNonEmpty: true,
+                    emptyAlert: 'Enter comma-separated character names that appear in the rankings (e.g. Mycleric, Mytank).'
+                }).then((resolved) => {
+                    const matched = resolved.matched;
+                    toonUpgradesPanel.style.display = 'block';
+                    toonUpgradesTabs.innerHTML = '';
+                    matched.forEach((char, i) => {
+                        const tab = document.createElement('button');
+                        tab.className = 'toon-upgrade-tab' + (i === 0 ? ' active' : '');
+                        tab.dataset.index = String(i);
+                        tab.textContent = char.name;
+                        tab.addEventListener('click', () => {
+                            toonUpgradesSelectedIndex = i;
+                            toonUpgradesTabs.querySelectorAll('.toon-upgrade-tab').forEach(t => t.classList.remove('active'));
+                            tab.classList.add('active');
+                            renderToonUpgradesStrip(matched[i]);
+                        });
+                        toonUpgradesTabs.appendChild(tab);
                     });
-                    toonUpgradesTabs.appendChild(tab);
-                });
-
-                const mode = (toonPanelSlotSort && toonPanelSlotSort.value) || dkpSlotSortMode;
-                (dkpValEnabled ? Promise.all([loadItemStats(), loadDkpPrices(), loadItemSpellBonuses(), loadSpellFocii()]) : Promise.all([loadItemStats(), loadItemSpellBonuses(), loadSpellFocii()])).then(() => {
                     renderToonUpgradesStrip(matched[0]);
-                }).catch(() => {
+                }).catch((err) => {
+                    if (err && err.code === 'empty_roster') return;
                     toonUpgradesContent.innerHTML = '<p style="color: #dc3545;">Failed to load item/DKP data.</p>';
                 });
             });
@@ -3655,6 +3799,441 @@
         if (document.getElementById('closeItemComparison')) {
             document.getElementById('closeItemComparison').onclick = () => { itemComparisonModal.style.display = 'none'; };
         }
+
+        // ---- Raid Upgrade Planner (dkp_val only; read-only vs gear plans) ----
+        const raidUpgradesPanel = document.getElementById('raidUpgradesPanel');
+        const raidUpgradesContent = document.getElementById('raidUpgradesContent');
+        let raidUpgradeCatalog = null;
+        let raidUpgradeCatalogPromise = null;
+        let raidUpgradeResultCache = (window.RaidUpgradePlanner && RaidUpgradePlanner.createResultCache)
+            ? RaidUpgradePlanner.createResultCache()
+            : { get() { return null; }, set() {}, clear() {}, currentKey() { return null; } };
+        let raidPlannerView = 'zone';
+        let raidPlannerZoneId = null;
+        let raidPlannerCharId = 'all';
+        let raidPlannerSort = 'score';
+        let raidPlannerRoster = [];
+        let raidPlannerExpandedTargets = {}; // targetId -> bool (default expanded)
+        let raidPlannerComputing = false;
+
+        function invalidateRaidUpgradeCache() {
+            if (raidUpgradeResultCache && typeof raidUpgradeResultCache.clear === 'function') {
+                raidUpgradeResultCache.clear();
+            }
+        }
+
+        function loadRaidUpgradeCatalog() {
+            if (!dkpValEnabled) return Promise.reject(new Error('dkp_val required'));
+            if (raidUpgradeCatalog) return Promise.resolve(raidUpgradeCatalog);
+            if (raidUpgradeCatalogPromise) return raidUpgradeCatalogPromise;
+            raidUpgradeCatalogPromise = fetch('data/raid_upgrade_catalog.json')
+                .then(r => {
+                    if (!r.ok) throw new Error('catalog HTTP ' + r.status);
+                    return r.json();
+                })
+                .then(cat => {
+                    raidUpgradeCatalog = cat;
+                    return cat;
+                })
+                .catch(err => {
+                    raidUpgradeCatalogPromise = null;
+                    throw err;
+                });
+            return raidUpgradeCatalogPromise;
+        }
+
+        function raidPlannerWeightsFingerprint() {
+            try { return JSON.stringify(customWeights || {}); } catch (e) { return ''; }
+        }
+
+        function setRaidPlannerStatus(html, isError) {
+            if (!raidUpgradesContent) return;
+            raidUpgradesContent.innerHTML = `<div class="rup-status${isError ? ' error' : ''}">${html}</div>`;
+        }
+
+        function itemLinkHtml(itemId, itemName) {
+            if (itemId == null || itemId === '') return escapeHtml(itemName || '—');
+            const name = itemName || ('Item ' + itemId);
+            return `<a class="item-link" href="https://www.takproject.net/allaclone/item.php?id=${itemId}" target="_blank" rel="noopener" data-item-id="${itemId}" data-item-name="${escapeHtml(name)}">${escapeHtml(name)}</a>`;
+        }
+
+        function formatRaidDkpCell(row) {
+            if (!window.RaidUpgradePlanner) return '<span class="rup-muted">—</span>';
+            const fmt = RaidUpgradePlanner.formatDkpLastThree(row.dkpCosts, row.dkpAverage, row.dkpUnknown);
+            if (!fmt) return '<span class="rup-muted">DKP unknown</span>';
+            let extra = '';
+            if (row.scorePerDkp != null) extra += ` · score/DKP ${row.scorePerDkp.toFixed(3)}`;
+            if (row.hpPerDkp != null) extra += ` · HP/DKP ${row.hpPerDkp.toFixed(2)}`;
+            return `<span>${escapeHtml(fmt.text)}</span>${extra ? `<div class="rup-muted">${escapeHtml(extra.trim().replace(/^·\s*/, ''))}</div>` : ''}`;
+        }
+
+        function bindRaidPlannerRowActions(container) {
+            if (!container) return;
+            container.querySelectorAll('[data-rup-compare]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-rup-compare');
+                    const name = btn.getAttribute('data-rup-compare-name') || '';
+                    if (id && typeof openItemComparisonByItemId === 'function') {
+                        // Planner Compare must not treat missing equipped stats as score-0 upgrades.
+                        openItemComparisonByItemId(id, name, { guardMissingEquipped: true });
+                    }
+                });
+            });
+            container.querySelectorAll('.rup-beneficiaries-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const key = btn.getAttribute('data-rup-sub');
+                    if (!key) return;
+                    const rows = Array.from(container.querySelectorAll('[data-rup-subrows]')).filter(
+                        el => el.getAttribute('data-rup-subrows') === key
+                    );
+                    if (!rows.length) return;
+                    const open = rows[0].style.display !== 'none';
+                    rows.forEach(el => { el.style.display = open ? 'none' : 'table-row'; });
+                    const countMatch = (btn.textContent || '').match(/^(\d+)/);
+                    const n = countMatch ? countMatch[1] : String(rows.length);
+                    btn.textContent = open ? (n + ' character(s) — Show characters') : (n + ' character(s) — Hide characters');
+                });
+            });
+            bindCharStatsLinks(container);
+        }
+
+        function ensureRaidPlannerComputed() {
+            const RP = window.RaidUpgradePlanner;
+            if (!RP || !raidUpgradeCatalog) {
+                return Promise.reject(new Error('planner unavailable'));
+            }
+            const cacheKey = RP.buildCacheKey({
+                rosterIds: raidPlannerRoster.map(c => c.id),
+                catalogVersion: raidUpgradeCatalog.version,
+                catalogItemCount: (raidUpgradeCatalog.items || []).length,
+                mod2Enabled: mod2Enabled,
+                weightsFingerprint: raidPlannerWeightsFingerprint(),
+                statsStamp: itemStatsCache && Object.keys(itemStatsCache).length ? 'stats' : '',
+                pricesStamp: dkpPricesCache && Object.keys(dkpPricesCache).length ? 'prices' : ''
+            });
+            const hit = raidUpgradeResultCache.get(cacheKey);
+            if (hit) return Promise.resolve(hit);
+
+            const progressEl = document.getElementById('rupProgress');
+            if (progressEl) {
+                progressEl.style.display = 'block';
+                progressEl.textContent = 'Computing upgrades…';
+            }
+            raidPlannerComputing = true;
+
+            return new Promise((resolve) => {
+                // Yield so the loading UI can paint before a large sync compute.
+                setTimeout(() => {
+                    const result = RP.computeAllUpgrades({
+                        catalog: raidUpgradeCatalog,
+                        roster: raidPlannerRoster,
+                        classToAbbrev: CLASS_TO_ABBREV,
+                        evaluateFn: evaluateItemUpgradeForCharacter,
+                        itemStatsCache: itemStatsCache,
+                        dkpPricesCache: dkpPricesCache,
+                        isTwoHandedFn: isItemTwoHanded,
+                        mod2Enabled: mod2Enabled,
+                        weightsFingerprint: raidPlannerWeightsFingerprint(),
+                        statsStamp: itemStatsCache && Object.keys(itemStatsCache).length ? 'stats' : '',
+                        pricesStamp: dkpPricesCache && Object.keys(dkpPricesCache).length ? 'prices' : '',
+                        onProgress: (p) => {
+                            if (progressEl) {
+                                progressEl.textContent = `Computing upgrades… ${p.charIndex + 1}/${p.charCount} ${p.charName || ''}`;
+                            }
+                        }
+                    });
+                    raidUpgradeResultCache.set(result.cacheKey, {
+                        rows: result.rows,
+                        unresolved: result.unresolved,
+                        catalog: raidUpgradeCatalog
+                    });
+                    raidPlannerComputing = false;
+                    if (progressEl) {
+                        progressEl.textContent = `${result.rows.length} positive upgrade(s)` +
+                            (result.unresolved.length ? ` · ${result.unresolved.length} unresolved (missing equipped stats)` : '');
+                    }
+                    resolve(raidUpgradeResultCache.get(result.cacheKey));
+                }, 0);
+            });
+        }
+
+        function renderRaidZoneControls() {
+            const list = document.getElementById('rupZoneList');
+            if (!list || !raidUpgradeCatalog) return;
+            const zones = raidUpgradeCatalog.zones || [];
+            if (!raidPlannerZoneId && zones.length) raidPlannerZoneId = zones[0].zone_id;
+            list.innerHTML = zones.map(z => {
+                const active = z.zone_id === raidPlannerZoneId ? ' active' : '';
+                const count = (raidUpgradeCatalog.targets || []).filter(t => t.zone_id === z.zone_id).length;
+                return `<button type="button" class="rup-zone-btn${active}" data-zone="${escapeHtml(z.zone_id)}"><strong>${escapeHtml(z.display_name)}</strong><span>${count} targets</span></button>`;
+            }).join('');
+            list.querySelectorAll('.rup-zone-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    raidPlannerZoneId = btn.getAttribute('data-zone');
+                    renderRaidZoneControls();
+                    renderRaidUpgradesView();
+                });
+            });
+        }
+
+        function renderRaidCharControls() {
+            const sel = document.getElementById('rupCharSelect');
+            if (!sel) return;
+            const opts = ['<option value="all">All Toons</option>'].concat(
+                raidPlannerRoster.map(c => `<option value="${escapeHtml(String(c.id))}">${escapeHtml(c.name || '')} (${escapeHtml(c.class || '')})</option>`)
+            );
+            sel.innerHTML = opts.join('');
+            sel.value = raidPlannerCharId || 'all';
+        }
+
+        function renderRaidUpgradesZoneView(payload) {
+            const RP = window.RaidUpgradePlanner;
+            const zoneRows = RP.filterRowsForZone(payload.rows, raidPlannerZoneId);
+            const sortedBeneficiaries = RP.sortRows(zoneRows, raidPlannerSort);
+            // Re-group using sorted order preference via groupByZoneTarget then re-sort beneficiaries
+            const targets = RP.groupByZoneTarget(sortedBeneficiaries, raidUpgradeCatalog, raidPlannerZoneId);
+            if (!targets.length) {
+                setRaidPlannerStatus('No positive upgrades for this zone with the current roster and weights.');
+                return;
+            }
+            let html = '';
+            targets.forEach((t, ti) => {
+                const expanded = raidPlannerExpandedTargets[t.targetId] !== false;
+                if (raidPlannerExpandedTargets[t.targetId] == null) raidPlannerExpandedTargets[t.targetId] = true;
+                html += `<div class="rup-target${expanded ? '' : ' collapsed'}" data-target-id="${escapeHtml(t.targetId)}">`;
+                html += `<button type="button" class="rup-target-hdr" data-rup-toggle-target="${escapeHtml(t.targetId)}"><span>${escapeHtml(t.displayName)}</span><span class="rup-muted">${t.items.length} item(s)</span></button>`;
+                html += `<div class="rup-target-body"><table class="rup-table"><thead><tr>
+                    <th>Loot / purchase</th><th>Characters</th><th>Slot</th><th>Current</th><th>Score Δ</th><th>Stats / focus</th><th>DKP</th><th>Notes</th><th></th>
+                </tr></thead><tbody>`;
+                t.items.forEach((it) => {
+                    const bens = RP.sortRows(it.beneficiaries, raidPlannerSort);
+                    const best = bens[0];
+                    const subKey = `${t.targetId}__${it.lootItemId}`;
+                    const compareId = it.wearableItemId || it.purchaseItemId || it.lootItemId;
+                    html += `<tr data-rup-parent="${escapeHtml(subKey)}">
+                        <td data-label="Loot">${itemLinkHtml(it.lootItemId, it.lootName)}${it.acquisitionType === 'armor_pattern' && best ? `<div class="rup-muted">Wearable: ${itemLinkHtml(best.wearableItemId, best.wearableName)}</div>` : ''}</td>
+                        <td data-label="Characters"><button type="button" class="rup-beneficiaries-toggle" data-rup-sub="${escapeHtml(subKey)}">${bens.length} character(s) — Show characters</button></td>
+                        <td data-label="Slot">${escapeHtml(best ? best.slotName : '—')}</td>
+                        <td data-label="Current">${best && best.currentItemId != null ? itemLinkHtml(best.currentItemId, best.currentItemName) : '<span class="rup-muted">—</span>'}</td>
+                        <td data-label="Score" class="rup-score">${best ? ('+' + (best.scoreDelta || 0).toFixed(2)) : '—'}</td>
+                        <td data-label="Stats">${best ? (formatUpgradeDeltas(best.deltas, best.focusSpellName) || '—') : '—'}</td>
+                        <td data-label="DKP">${best ? formatRaidDkpCell(best) : '—'}</td>
+                        <td data-label="Notes">${it.acquisitionNote ? `<span class="rup-note">${escapeHtml(it.acquisitionNote)}</span>` : '<span class="rup-muted">—</span>'}</td>
+                        <td data-label="" class="rup-actions"><button type="button" data-rup-compare="${escapeHtml(String(compareId))}" data-rup-compare-name="${escapeHtml(it.lootName)}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button></td>
+                    </tr>`;
+                    bens.forEach(b => {
+                        html += `<tr class="rup-subrows" data-rup-subrows="${escapeHtml(subKey)}" style="display:none;">
+                            <td data-label="Loot"></td>
+                            <td data-label="Character"><a href="#" class="char-stats-link" data-char-name="${escapeHtml(b.charName)}">${escapeHtml(b.charName)}</a> <span class="rup-muted">(${escapeHtml(b.charClass)})</span></td>
+                            <td data-label="Slot">${escapeHtml(b.slotName || '')}</td>
+                            <td data-label="Current">${b.currentItemId != null ? itemLinkHtml(b.currentItemId, b.currentItemName) : '—'}</td>
+                            <td data-label="Score" class="rup-score">+${(b.scoreDelta || 0).toFixed(2)}</td>
+                            <td data-label="Stats">${formatUpgradeDeltas(b.deltas, b.focusSpellName) || '—'}</td>
+                            <td data-label="DKP">${formatRaidDkpCell(b)}</td>
+                            <td data-label="Notes">${b.acquisitionNote ? `<span class="rup-note">${escapeHtml(b.acquisitionNote)}</span>` : ''}</td>
+                            <td data-label="" class="rup-actions"><button type="button" data-rup-compare="${escapeHtml(String(b.wearableItemId || b.lootItemId))}" data-rup-compare-name="${escapeHtml(b.lootName)}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button></td>
+                        </tr>`;
+                    });
+                });
+                html += `</tbody></table></div></div>`;
+            });
+            raidUpgradesContent.innerHTML = html;
+            raidUpgradesContent.querySelectorAll('[data-rup-toggle-target]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tid = btn.getAttribute('data-rup-toggle-target');
+                    raidPlannerExpandedTargets[tid] = !(raidPlannerExpandedTargets[tid] !== false);
+                    const box = Array.from(raidUpgradesContent.querySelectorAll('.rup-target')).find(
+                        el => el.getAttribute('data-target-id') === tid
+                    );
+                    if (box) box.classList.toggle('collapsed', raidPlannerExpandedTargets[tid] === false);
+                });
+            });
+            bindRaidPlannerRowActions(raidUpgradesContent);
+        }
+
+        function renderRaidUpgradesCharView(payload) {
+            const RP = window.RaidUpgradePlanner;
+            const grouped = RP.groupByCharacter(payload.rows, raidUpgradeCatalog, raidPlannerCharId, raidPlannerSort);
+            if (!grouped.rows.length) {
+                setRaidPlannerStatus('No positive upgrades for this character filter with the current roster and weights.');
+                return;
+            }
+            let html = '';
+            grouped.zones.forEach(z => {
+                html += `<h3 style="margin: 16px 0 8px; color:#343a40;">${escapeHtml(z.displayName)}</h3>`;
+                z.targets.forEach(t => {
+                    html += `<div class="rup-target"><div class="rup-target-hdr" style="cursor:default;"><span>${escapeHtml(t.displayName)}</span><span class="rup-muted">${t.rows.length} upgrade(s)</span></div>`;
+                    html += `<div class="rup-target-body"><table class="rup-table"><thead><tr>
+                        <th>Character</th><th>Loot / purchase</th><th>Slot</th><th>Current</th><th>Score Δ</th><th>Stats / focus</th><th>DKP</th><th>Notes</th><th></th>
+                    </tr></thead><tbody>`;
+                    t.rows.forEach(b => {
+                        const compareId = b.wearableItemId || b.purchaseItemId || b.lootItemId;
+                        html += `<tr>
+                            <td data-label="Character"><a href="#" class="char-stats-link" data-char-name="${escapeHtml(b.charName)}">${escapeHtml(b.charName)}</a></td>
+                            <td data-label="Loot">${itemLinkHtml(b.lootItemId, b.lootName)}${b.acquisitionType === 'armor_pattern' ? `<div class="rup-muted">Wearable: ${itemLinkHtml(b.wearableItemId, b.wearableName)}</div>` : ''}</td>
+                            <td data-label="Slot">${escapeHtml(b.slotName || '')}</td>
+                            <td data-label="Current">${b.currentItemId != null ? itemLinkHtml(b.currentItemId, b.currentItemName) : '—'}</td>
+                            <td data-label="Score" class="rup-score">+${(b.scoreDelta || 0).toFixed(2)}</td>
+                            <td data-label="Stats">${formatUpgradeDeltas(b.deltas, b.focusSpellName) || '—'}</td>
+                            <td data-label="DKP">${formatRaidDkpCell(b)}</td>
+                            <td data-label="Notes">${b.acquisitionNote ? `<span class="rup-note">${escapeHtml(b.acquisitionNote)}</span>` : '<span class="rup-muted">—</span>'}</td>
+                            <td data-label="" class="rup-actions"><button type="button" data-rup-compare="${escapeHtml(String(compareId))}" data-rup-compare-name="${escapeHtml(b.lootName)}" style="padding:4px 8px;border-radius:4px;border:1px solid #adb5bd;background:#fff;cursor:pointer;">Compare</button></td>
+                        </tr>`;
+                    });
+                    html += `</tbody></table></div></div>`;
+                });
+            });
+            raidUpgradesContent.innerHTML = html;
+            bindRaidPlannerRowActions(raidUpgradesContent);
+        }
+
+        function renderRaidUpgradesView() {
+            if (!raidPlannerRoster.length) {
+                setRaidPlannerStatus(
+                    'No characters in roster. Enter names in the toon list, or ' +
+                    '<button type="button" id="rupUseClaimed" style="padding:6px 12px;margin-left:6px;border-radius:4px;border:1px solid #0d6efd;background:#0d6efd;color:#fff;cursor:pointer;">Use claimed toons</button>' +
+                    '<div class="rup-muted" style="margin-top:8px;">Using claimed toons does not modify your saved toon list.</div>'
+                );
+                const btn = document.getElementById('rupUseClaimed');
+                if (btn) btn.addEventListener('click', () => openRaidUpgradesPlanner({ useClaimed: true }));
+                return;
+            }
+            setRaidPlannerStatus('Loading…');
+            ensureRaidPlannerComputed().then(payload => {
+                if (!payload || !payload.rows) {
+                    setRaidPlannerStatus('No upgrade data.', true);
+                    return;
+                }
+                if (!payload.rows.length) {
+                    setRaidPlannerStatus('No strictly positive upgrades found for this roster against the raid catalog.');
+                    return;
+                }
+                if (raidPlannerView === 'character') renderRaidUpgradesCharView(payload);
+                else renderRaidUpgradesZoneView(payload);
+            }).catch(err => {
+                setRaidPlannerStatus('Failed to compute upgrades: ' + escapeHtml(String(err && err.message || err)), true);
+            });
+        }
+
+        function syncRaidPlannerChrome() {
+            const zoneCtrl = document.getElementById('rupZoneControls');
+            const charCtrl = document.getElementById('rupCharControls');
+            if (zoneCtrl) zoneCtrl.style.display = raidPlannerView === 'zone' ? '' : 'none';
+            if (charCtrl) charCtrl.style.display = raidPlannerView === 'character' ? '' : 'none';
+            document.querySelectorAll('.rup-view-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.getAttribute('data-rup-view') === raidPlannerView);
+            });
+            const sortSel = document.getElementById('rupSortSelect');
+            if (sortSel) sortSel.value = raidPlannerSort;
+            if (raidPlannerView === 'zone') renderRaidZoneControls();
+            else renderRaidCharControls();
+        }
+
+        function openRaidUpgradesPlanner(options) {
+            if (!dkpValEnabled) return;
+            if (!window.RaidUpgradePlanner) {
+                alert('Raid Upgrade Planner script failed to load.');
+                return;
+            }
+            const opts = options || {};
+            if (raidUpgradesPanel) raidUpgradesPanel.style.display = 'block';
+            setRaidPlannerStatus('Loading catalog and item data…');
+
+            const rosterOpts = {
+                useClaimed: !!opts.useClaimed,
+                requireNonEmpty: false
+            };
+            Promise.all([
+                ensureToonRosterAndUpgradeData(rosterOpts),
+                loadRaidUpgradeCatalog()
+            ]).then(([resolved]) => {
+                raidPlannerRoster = resolved.matched || [];
+                // If toon list was non-empty but matched nothing, keep empty (do not auto-claim).
+                if (resolved.listStr && !raidPlannerRoster.length) {
+                    setRaidPlannerStatus(
+                        'No characters matched the toon list. Check names/wildcards against the rankings.'
+                    );
+                    syncRaidPlannerChrome();
+                    return;
+                }
+                invalidateRaidUpgradeCache();
+                syncRaidPlannerChrome();
+                renderRaidUpgradesView();
+            }).catch(err => {
+                if (err && err.code === 'empty_roster') {
+                    raidPlannerRoster = [];
+                    syncRaidPlannerChrome();
+                    renderRaidUpgradesView();
+                    return;
+                }
+                setRaidPlannerStatus('Failed to load planner data: ' + escapeHtml(String(err && err.message || err)), true);
+            });
+        }
+
+        if (dkpValEnabled && document.getElementById('showRaidUpgrades')) {
+            document.getElementById('showRaidUpgrades').addEventListener('click', () => openRaidUpgradesPlanner());
+        }
+        if (document.getElementById('closeRaidUpgradesPanel')) {
+            document.getElementById('closeRaidUpgradesPanel').addEventListener('click', () => {
+                if (raidUpgradesPanel) raidUpgradesPanel.style.display = 'none';
+            });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            if (itemComparisonModal && itemComparisonModal.style.display === 'block') {
+                itemComparisonModal.style.display = 'none';
+                e.preventDefault();
+                return;
+            }
+            if (raidUpgradesPanel && raidUpgradesPanel.style.display === 'block') {
+                raidUpgradesPanel.style.display = 'none';
+                e.preventDefault();
+            }
+        });
+        document.querySelectorAll('.rup-view-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                raidPlannerView = tab.getAttribute('data-rup-view') || 'zone';
+                syncRaidPlannerChrome();
+                renderRaidUpgradesView();
+            });
+        });
+        const rupSortSelect = document.getElementById('rupSortSelect');
+        if (rupSortSelect) {
+            rupSortSelect.addEventListener('change', () => {
+                raidPlannerSort = rupSortSelect.value || 'score';
+                renderRaidUpgradesView();
+            });
+        }
+        const rupCharSelect = document.getElementById('rupCharSelect');
+        if (rupCharSelect) {
+            rupCharSelect.addEventListener('change', () => {
+                raidPlannerCharId = rupCharSelect.value || 'all';
+                renderRaidUpgradesView();
+            });
+        }
+        if (document.getElementById('rupExpandAllTargets')) {
+            document.getElementById('rupExpandAllTargets').addEventListener('click', () => {
+                Object.keys(raidPlannerExpandedTargets).forEach(k => { raidPlannerExpandedTargets[k] = true; });
+                if (raidUpgradesContent) {
+                    raidUpgradesContent.querySelectorAll('.rup-target').forEach(el => el.classList.remove('collapsed'));
+                }
+            });
+        }
+        if (document.getElementById('rupCollapseAllTargets')) {
+            document.getElementById('rupCollapseAllTargets').addEventListener('click', () => {
+                Object.keys(raidPlannerExpandedTargets).forEach(k => { raidPlannerExpandedTargets[k] = false; });
+                if (raidUpgradesContent) {
+                    raidUpgradesContent.querySelectorAll('.rup-target').forEach(el => el.classList.add('collapsed'));
+                }
+            });
+        }
+
+        // Invalidate planner cache when weights are saved/applied
+        const _origSaveCustomWeights = saveCustomWeights;
+        saveCustomWeights = function () {
+            _origSaveCustomWeights();
+            invalidateRaidUpgradeCache();
+        };
 
         function doItemLookup() {
             const search = toonPanelItemSearch && toonPanelItemSearch.value ? toonPanelItemSearch.value.trim() : '';

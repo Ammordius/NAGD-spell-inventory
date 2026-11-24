@@ -36,13 +36,14 @@ That script also updates `spell_focii_level65.json` with item IDs and classes fr
 
 ## Raid upgrade catalog (six-zone loot foundation)
 
-Offline, deterministic catalog for the Raid Upgrade Planner (`class_rankings.html?dkp_val=true` UI comes later). Allowlisted zones only: Plane of Time, Plane of Water, Plane of Fire, Vex Thal (incl. “Vex Thall”), Temple of Ssraeshza / Ssraeshza Temple / Ssra, Sanctus Seru / Seru.
+Offline, deterministic catalog for the Raid Upgrade Planner (`class_rankings.html?dkp_val=true` → **Raid Upgrades**). Allowlisted zones only: Plane of Time, Plane of Water, Plane of Fire, Vex Thal (incl. “Vex Thall”), Temple of Ssraeshza / Ssraeshza Temple / Ssra, Sanctus Seru / Seru.
 
 ```bash
 # Prefer sibling NAGD-DKP datasets (default paths):
 python scripts/build_raid_upgrade_catalog.py
 python scripts/build_raid_upgrade_catalog.py --validate
-python -m unittest tests.test_raid_upgrade_catalog
+python -m unittest tests.test_raid_upgrade_catalog tests.test_raid_upgrade_planner -v
+node --test tests/js/raid_upgrade_planner.test.js
 ```
 
 Writes:

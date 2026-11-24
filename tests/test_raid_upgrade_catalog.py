@@ -12,6 +12,7 @@ import os
 import sys
 import tempfile
 import unittest
+from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -496,6 +497,131 @@ class TestCommittedCatalogSmoke(unittest.TestCase):
                 by_zone[src["zone_id"]] += 1
         for zid, n in by_zone.items():
             self.assertGreater(n, 0, msg=f"{zid} has no source links")
+
+
+class TestIndependentCatalogReconstruction(unittest.TestCase):
+    """
+    Reconstruct allowlisted loot from live raid + DKP sources and compare to the
+    committed catalog. Does not trust fixture-only builder tests.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog_path = ROOT / "data" / "raid_upgrade_catalog.json"
+        cls.coverage_path = ROOT / "data" / "raid_upgrade_catalog_coverage.json"
+        if not cls.catalog_path.is_file():
+            raise unittest.SkipTest("catalog not generated yet")
+        cls.cat = json.loads(cls.catalog_path.read_text(encoding="utf-8"))
+        cls.cov = (
+            json.loads(cls.coverage_path.read_text(encoding="utf-8"))
+            if cls.coverage_path.is_file()
+            else {}
+        )
+        dkp_path = catalog._first_existing(catalog.DEFAULT_DKP_LOOT_CANDIDATES)
+        if not dkp_path or not catalog.DEFAULT_RAID_SOURCES.is_file():
+            raise unittest.SkipTest("raid/DKP loot inputs unavailable for reconstruction")
+        cls.dkp_path = dkp_path
+        cls.raid = catalog.load_json(catalog.DEFAULT_RAID_SOURCES)
+        cls.dkp = catalog.load_json(dkp_path)
+        cls.items, cls.ambiguous, _ = catalog.collect_sources(cls.raid, cls.dkp)
+
+    def test_catalog_equals_allowlisted_union(self):
+        recon_ids = set(self.items.keys())
+        cat_ids = {str(it["item_id"]) for it in self.cat["items"]}
+        self.assertEqual(recon_ids, cat_ids)
+        self.assertEqual(len(cat_ids), 527)
+
+    def test_no_zone_leakage_or_within_target_duplicates(self):
+        allow = {z["zone_id"] for z in catalog.ZONE_DEFS}
+        for it in self.cat["items"]:
+            tids = []
+            for src in it.get("sources") or []:
+                self.assertIn(src["zone_id"], allow)
+                tids.append(src["target_id"])
+            self.assertEqual(len(tids), len(set(tids)), msg=f"dup targets for {it['item_id']}")
+
+    def test_per_zone_item_sets_match_reconstruction(self):
+        recon_by_zone = defaultdict(set)
+        for iid, it in self.items.items():
+            for src in (it.get("sources") or {}).values():
+                recon_by_zone[src["zone_id"]].add(iid)
+        cat_by_zone = defaultdict(set)
+        for it in self.cat["items"]:
+            for src in it.get("sources") or []:
+                cat_by_zone[src["zone_id"]].add(str(it["item_id"]))
+        for zid in {z["zone_id"] for z in catalog.ZONE_DEFS}:
+            self.assertEqual(
+                recon_by_zone[zid],
+                cat_by_zone[zid],
+                msg=f"zone mismatch: {zid}",
+            )
+
+    def test_important_raid_targets_present(self):
+        targets = {t["target_id"] for t in self.cat["targets"]}
+        required = [
+            "quarm|plane_of_time",
+            "coirnav_the_avatar_of_water|plane_of_water",
+            "fennin_ro_the_tyrant_of_fire|plane_of_fire",
+            "aten_ha_ra|vex_thal",
+            "emperor_ssraeshza_|temple_of_ssraeshza",
+            "lord_inquisitor_seru|sanctus_seru",
+        ]
+        for tid in required:
+            self.assertIn(tid, targets)
+
+    def test_ambiguous_omissions_reported_not_invented(self):
+        # Emperor empty/unknown-zone rows must stay out of the catalog.
+        cat_ids = {str(it["item_id"]) for it in self.cat["items"]}
+        emperor_amb = [
+            a
+            for a in self.ambiguous
+            if str(a.get("item_id")) in ("26604", "26749")
+            or "emperor" in str(a.get("mob") or "").lower()
+        ]
+        self.assertGreaterEqual(len(emperor_amb), 2)
+        for a in emperor_amb:
+            if a.get("item_id") in ("26604", "26749"):
+                # Only excluded when the assignment itself is ambiguous/empty —
+                # other in-zone Emperor loot may still be present via DKP.
+                self.assertIn(a.get("reason"), ("empty_zone", "ambiguous_zone"))
+        self.assertEqual(len(self.ambiguous), len(self.cov.get("ambiguous_source_assignments") or self.ambiguous))
+
+    def test_armor_patterns_fully_mapped(self):
+        patterns = [it for it in self.cat["items"] if it.get("acquisition_type") == "armor_pattern"]
+        self.assertEqual(len(patterns), 28)
+        stats_path = ROOT / "data" / "item_stats.json"
+        stats = json.loads(stats_path.read_text(encoding="utf-8")) if stats_path.is_file() else {}
+        for it in patterns:
+            cw = it.get("class_wearables") or {}
+            self.assertTrue(cw, msg=f"empty class_wearables for {it['item_id']}")
+            self.assertEqual(str(it.get("purchase_item_id")), str(it["item_id"]))
+            for _cls, wid in cw.items():
+                self.assertIn(str(wid), stats, msg=f"missing stats for wearable {wid}")
+        unresolved = [
+            it for it in self.cat["items"] if it.get("acquisition_type") == "unresolved"
+        ]
+        self.assertEqual(unresolved, [])
+        self.assertFalse(self.cov.get("missing_armor_mappings"))
+        self.assertFalse(self.cov.get("unresolved_ids"))
+
+    def test_armor_dkp_prices_key_off_wearables_not_patterns(self):
+        prices_path = ROOT / "data" / "dkp_prices.json"
+        if not prices_path.is_file():
+            self.skipTest("dkp_prices.json missing")
+        prices = json.loads(prices_path.read_text(encoding="utf-8"))
+        patterns = [
+            it for it in self.cat["items"] if it.get("acquisition_type") == "armor_pattern"
+        ]
+        for it in patterns:
+            pid = str(it.get("purchase_item_id") or it["item_id"])
+            # Pattern/mold purchase ids are not priced; finished Magelo wearables are.
+            self.assertNotIn(pid, prices, msg=f"unexpected pattern price for {pid}")
+            for cls, wid in (it.get("class_wearables") or {}).items():
+                self.assertIn(
+                    str(wid),
+                    prices,
+                    msg=f"missing wearable DKP price {wid} ({cls}) for pattern {pid}",
+                )
 
 
 if __name__ == "__main__":
