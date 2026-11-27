@@ -39,6 +39,9 @@ leaderboard_month_*.html
 delta_snapshots/delta_daily_*.json
 delta_snapshots/delta_daily_*.json.gz
 
+# Local Pages shrink / parity experiment trees (not for commit)
+_baseline_shrink_experiment/
+
 # IDE files
 .vscode/
 .idea/

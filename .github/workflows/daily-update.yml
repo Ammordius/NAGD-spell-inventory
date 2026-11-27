@@ -365,6 +365,21 @@ jobs:
           echo "No baseline_master_2026-02-09.json.gz; leaving baseline_master.json.gz unchanged"
         fi
 
+    # Drop orphan dated archives (e.g. May 12/13 rotation leftovers) restored from old caches.
+    # Repo keeps master + Feb 9 only; Pages deploys Feb 9 only (~19MB, not 4× duplicates).
+    - name: Prune non-canonical dated baseline archives
+      run: |
+        CANON="2026-02-09"
+        shopt -s nullglob
+        for f in delta_snapshots/baseline_master_*.json.gz; do
+          base=$(basename "$f")
+          if [ "$base" != "baseline_master_${CANON}.json.gz" ]; then
+            echo "Removing non-canonical baseline archive: $base"
+            rm -f "$f"
+          fi
+        done
+        ls -la delta_snapshots/baseline_master*.json.gz 2>/dev/null || echo "No baseline_master*.json.gz present"
+
     # Verify _previous from early yesterday backup (no second cache restore — same key
     # cannot be restored twice per job, and extra cache paths break version match).
     - name: Fail if yesterday Magelo cache missing for delta
@@ -525,7 +540,8 @@ jobs:
     
     # --- Persistence: gear event shards and baselines are committed; HTML is deploy-only.
     # - History: delta_snapshots/gear_events/ (append-only; committed below).
-    # - Baseline: baseline_master.json.gz (+ archived baseline_master_YYYY-MM-DD.json.gz) cached and deployed.
+    # - Baseline (repo/cache): baseline_master.json.gz + baseline_master_2026-02-09.json.gz only.
+    # - Baseline (Pages): single file baseline_master_2026-02-09.json.gz (no master duplicate, no May orphans).
     # - Pages (HTML): Generated each run; copied to deploy only (not committed).
     # - Legacy delta_daily_*.json.gz are not in repo (gear_events supersede them).
     - name: Commit gear event shards to repo
@@ -540,8 +556,11 @@ jobs:
         fi
         
         git add delta_snapshots/gear_events/ 2>/dev/null || true
-        git add delta_snapshots/baseline_master_*.json.gz 2>/dev/null || true
+        # Only canonical Feb 9 archive + working master (never re-add pruned May orphans).
+        git add delta_snapshots/baseline_master_2026-02-09.json.gz 2>/dev/null || true
         git add delta_snapshots/baseline_master.json.gz 2>/dev/null || true
+        # Stage deletions of any pruned non-canonical dated archives still tracked.
+        git add -u delta_snapshots/baseline_master_*.json.gz 2>/dev/null || true
         if git diff --staged --quiet; then
           echo "No new gear event files to commit"
         else
@@ -669,15 +688,25 @@ jobs:
               echo "⚠ No delta JSON files found to copy"
             fi
           fi
-          # Copy baseline files (needed for client-side date range comparisons across baseline resets).
-          # Only .gz baselines are deployed (uncompressed baseline_master.json is ~200MB+).
-          cp delta_snapshots/baseline_master*.json.gz deploy/delta_snapshots/ 2>/dev/null || echo "No compressed baseline files to copy"
-          BASELINE_COUNT=$(ls deploy/delta_snapshots/baseline_master*.json.gz 2>/dev/null | wc -l)
-          if [ "$BASELINE_COUNT" -gt 0 ]; then
-            echo "✓ Copied $BASELINE_COUNT baseline files to deploy/delta_snapshots/"
+          # Pages: deploy exactly one baseline (~19MB). Client loadBaseline prefers
+          # baseline_master_<era>.json.gz; gear_events era is 2026-02-09.
+          # Do NOT copy baseline_master.json.gz (byte-identical duplicate) or May orphans.
+          CANON_BASELINE="delta_snapshots/baseline_master_2026-02-09.json.gz"
+          if [ -f "$CANON_BASELINE" ]; then
+            cp "$CANON_BASELINE" deploy/delta_snapshots/
+            echo "✓ Deployed single baseline: baseline_master_2026-02-09.json.gz"
           else
-            echo "⚠ No baseline files found to copy (client-side date range comparisons may not work)"
+            echo "::error::Missing canonical baseline $CANON_BASELINE (required for Pages reconstruction)"
+            exit 1
           fi
+          BASELINE_COUNT=$(ls deploy/delta_snapshots/baseline_master*.json.gz 2>/dev/null | wc -l)
+          if [ "$BASELINE_COUNT" -ne 1 ]; then
+            echo "::error::Expected exactly 1 baseline_master*.json.gz on Pages, found $BASELINE_COUNT"
+            ls -la deploy/delta_snapshots/baseline_master*.json.gz || true
+            exit 1
+          fi
+          python -c "from pathlib import Path; import sys; root=Path('deploy'); names=sorted(p.name for p in (root/'delta_snapshots').glob('baseline_master*.json.gz'));
+assert names==['baseline_master_2026-02-09.json.gz'], names; print('OK pages single-baseline guard:', names[0])"
           # Calculate total size
           TOTAL_SIZE=$(du -sh deploy/delta_snapshots/ | cut -f1)
           echo "  Total size: $TOTAL_SIZE (compressed)"

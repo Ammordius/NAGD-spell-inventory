@@ -81,7 +81,7 @@
 
 ### 2.4 Permissions / infra notes
 
-- **Baseline cache (daily-update):** early restore and late “Cache baselines” both use `key: magelo-baseline-${{ normalized_date }}` with `restore-keys: magelo-baseline-`. Master is forced to the Feb 9 archive before generation; only `baseline_master_2026-02-09.json.gz` + `baseline_master.json.gz` are deployed long-term.
+- **Baseline cache (daily-update):** early restore and late “Cache baselines” both use `key: magelo-baseline-${{ normalized_date }}` with `restore-keys: magelo-baseline-`. Master is forced to the Feb 9 archive before generation; non-canonical dated archives (e.g. May 12/13 orphans) are pruned after restore. **Repo/cache** keeps `baseline_master.json.gz` + `baseline_master_2026-02-09.json.gz`. **Pages** deploys **only** `baseline_master_2026-02-09.json.gz` (single ~19MB absolute; no master duplicate on the artifact).
 
 - **`contents: write`** — bot commits gear event shards.
 - **`pages: write`** + **`id-token: write`** — OIDC for Pages deployment.
