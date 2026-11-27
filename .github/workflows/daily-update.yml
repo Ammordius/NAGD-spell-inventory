@@ -705,8 +705,7 @@ jobs:
             ls -la deploy/delta_snapshots/baseline_master*.json.gz || true
             exit 1
           fi
-          python -c "from pathlib import Path; import sys; root=Path('deploy'); names=sorted(p.name for p in (root/'delta_snapshots').glob('baseline_master*.json.gz'));
-assert names==['baseline_master_2026-02-09.json.gz'], names; print('OK pages single-baseline guard:', names[0])"
+          python -c "from pathlib import Path; names=sorted(p.name for p in Path('deploy/delta_snapshots').glob('baseline_master*.json.gz')); assert names==['baseline_master_2026-02-09.json.gz'], names; print('OK pages single-baseline guard:', names[0])"
           # Calculate total size
           TOTAL_SIZE=$(du -sh deploy/delta_snapshots/ | cut -f1)
           echo "  Total size: $TOTAL_SIZE (compressed)"
